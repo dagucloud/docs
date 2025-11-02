@@ -61,6 +61,7 @@ const fullSidebar = [
           { text: "Docker", link: "/features/executors/docker" },
           { text: "SSH", link: "/features/executors/ssh" },
           { text: "HTTP", link: "/features/executors/http" },
+          { text: "Archive", link: "/features/executors/archive" },
           { text: "Mail", link: "/features/executors/mail" },
           { text: "JQ", link: "/features/executors/jq" },
           {

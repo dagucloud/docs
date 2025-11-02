@@ -11,6 +11,7 @@
 - CLI: Added `--from-run-id` flag to `dagu start` for cloning historic runs with their saved parameters (#1378)
 - CLI: Added `dagu exec` command to run shell commands without writing YAML files, with full logging, history, environment control, and queue support (#1348)
 - UI: Added grouped view with preset and specific date range selectors on the DAG-runs page for faster historical exploration (#1377)
+- Executors: Added an archive executor (`type: archive`) with extract, create, and list operations
 
 ### Improved
 - UI: Persisted DAG/queue/search filters across navigation using a remote-aware search state provider so bookmarked URLs and session filters stay aligned (#1379)

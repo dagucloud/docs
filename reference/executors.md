@@ -8,6 +8,7 @@ Executors extend Dagu's capabilities beyond simple shell commands. Available exe
 - [Docker](/features/executors/docker) - Run commands in Docker containers
 - [SSH](/features/executors/ssh) - Execute commands on remote hosts
 - [HTTP](/features/executors/http) - Make HTTP requests
+- [Archive](/features/executors/archive) - Extract, create, and list archive files
 - [Mail](/features/executors/mail) - Send emails
 - [JQ](/features/executors/jq) - Process JSON data
 - [GitHub Actions (_experimental_)](/features/executors/github-actions) - Run marketplace actions locally with nektos/act
@@ -478,6 +479,56 @@ steps:
     
   - name: process-response
     command: echo "${API_RESPONSE}" | jq '.data[]'
+```
+
+## Archive Executor
+
+::: info
+For detailed Archive executor documentation, see [Archive Executor Guide](/features/executors/archive).
+:::
+
+Manipulate archives without shelling out to `tar`, `zip`, or other external tools.
+
+### Extract Archive
+
+```yaml
+steps:
+  - name: unpack
+    executor:
+      type: archive
+      config:
+        source: logs.tar.gz
+        destination: ./logs
+        verifyIntegrity: true
+    command: extract
+```
+
+### Create Archive
+
+```yaml
+steps:
+  - name: package
+    executor:
+      type: archive
+      config:
+        source: ./logs
+        destination: logs-backup.tar.gz
+        include:
+          - "**/*.log"
+    command: create
+```
+
+### List Contents
+
+```yaml
+steps:
+  - name: inspect
+    executor:
+      type: archive
+      config:
+        source: logs-backup.tar.gz
+    command: list
+    output: ARCHIVE_INDEX
 ```
 
 ## Mail Executor
