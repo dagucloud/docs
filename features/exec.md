@@ -19,11 +19,19 @@ Run them through Dagu instead and get:
 
 ## Basic Usage
 
+Run a command:
+
 ```bash
 dagu exec -- echo "Hello World!"
 ```
 
-That's it. The command runs, output is logged, and you can see the execution in the web UI at `http://localhost:8080`.
+Start the web UI and open `http://localhost:8080`:
+
+```bash
+dagu start-all
+```
+
+You'll see the execution log, status, and timing in the dashboard.
 
 For your actual scripts:
 
