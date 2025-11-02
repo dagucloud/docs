@@ -9,6 +9,7 @@
 - API: `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule` now accepts an optional `singleton` flag to block rescheduling when the DAG already has active or queued runs (#1347)
 - API: Added `POST /api/v2/dag-runs/enqueue` to enqueue DAG-runs directly from inline YAML specs without creating DAG files, including optional queue overrides (#1375)
 - CLI: Added `--from-run-id` flag to `dagu start` for cloning historic runs with their saved parameters (#1378)
+- CLI: Added `dagu exec` command to run shell commands without writing YAML files, with full logging, history, environment control, and queue support (#1348)
 - UI: Added grouped view with preset and specific date range selectors on the DAG-runs page for faster historical exploration (#1377)
 
 ### Improved

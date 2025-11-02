@@ -21,6 +21,43 @@ dagu [global options] command [command options] [arguments...]
 
 ## Commands
 
+### `exec`
+
+Run a command without writing a YAML file.
+
+```bash
+dagu exec [options] -- <command> [args...]
+```
+
+**Options:**
+- `--name, -N` - DAG name (default: `exec-<command>`)
+- `--run-id, -r` - Custom run ID
+- `--env KEY=VALUE` - Set environment variable (repeatable)
+- `--dotenv <path>` - Load dotenv file (repeatable)
+- `--workdir <path>` - Working directory
+- `--shell <path>` - Shell binary
+- `--base <file>` - Custom base config file (default: `~/.config/dagu/base.yaml`)
+- `--singleton` - Allow only one active run
+- `--queue <name>` - Enqueue for distributed execution
+- `--no-queue` - Force local execution
+- `--worker-label key=value` - Target specific workers (repeatable)
+
+```bash
+# Basic usage
+dagu exec -- python script.py
+
+# With environment variables
+dagu exec --env DB_HOST=localhost -- python etl.py
+
+# Singleton execution
+dagu exec --singleton --name backup -- rsync -av /src/ /dst/
+
+# Distributed execution
+dagu exec --queue gpu-jobs --worker-label gpu=true -- python train.py
+```
+
+See the [exec guide](/features/exec) for detailed documentation.
+
 ### `start`
 
 Run a DAG workflow.

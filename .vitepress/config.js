@@ -47,6 +47,7 @@ const fullSidebar = [
     text: "Features",
     items: [
       { text: "Overview", link: "/features/" },
+      { text: "Run Commands (exec)", link: "/features/exec" },
       {
         text: "Executors",
         collapsed: false,
