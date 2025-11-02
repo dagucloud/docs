@@ -20,10 +20,16 @@ Run them through Dagu instead and get:
 ## Basic Usage
 
 ```bash
-dagu exec -- python /home/user/backup.py
+dagu exec -- echo "Hello World!"
 ```
 
-That's it. Check the web UI at `http://localhost:8080` to see all runs.
+That's it. The command runs, output is logged, and you can see the execution in the web UI at `http://localhost:8080`.
+
+For your actual scripts:
+
+```bash
+dagu exec -- python /home/user/backup.py
+```
 
 ## Why Use This?
 
