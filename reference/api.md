@@ -1086,6 +1086,8 @@ Launches a fresh DAG run by reusing the captured parameters from a historic exec
 | dagRunId | string | Custom ID for the new run. If omitted a unique ID is generated. | No |
 | dagName | string | Override the DAG name used for the rescheduled run. Must pass DAG name validation. | No |
 
+Rescheduled runs always respect singleton mode. When the target DAG already has active or queued runs, the request is rejected.
+
 **Response (200)**:
 ```json
 {
@@ -1094,7 +1096,7 @@ Launches a fresh DAG run by reusing the captured parameters from a historic exec
 }
 ```
 
-**Error Response (409)** - When the DAG already has active or queued runs (reschedules always enforce singleton):
+**Error Response (409)** - When the DAG already has active or queued runs:
 ```json
 {
   "code": "max_run_reached",

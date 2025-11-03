@@ -6,7 +6,7 @@
 - API: Added optional `dagName` field to `/dags/{fileName}/start` and `/dags/{fileName}/enqueue` for overriding the DAG name used at runtime (#1365)
 - API: Added `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs` endpoint to retrieve timing and status information for all sub DAG runs, useful for tracking repeated executions of sub DAG steps (#1041)
 - UI: Enhanced sub DAG run display with execution timeline showing datetime, status indicators, and lazy loading of execution details (#1041)
-- API: `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule` now accepts an optional `singleton` flag to block rescheduling when the DAG already has active or queued runs (#1347)
+- API: Added `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule` endpoint for replaying runs while enforcing singleton mode to block reschedules when the DAG already has active or queued runs (#1347)
 - API: Added `POST /api/v2/dag-runs/enqueue` to enqueue DAG-runs directly from inline YAML specs without creating DAG files, including optional queue overrides (#1375)
 - CLI: Added `--from-run-id` flag to `dagu start` for cloning historic runs with their saved parameters (#1378)
 - CLI: Added `dagu exec` command to run shell commands without writing YAML files, with full logging, history, environment control, and queue support (#1348)
