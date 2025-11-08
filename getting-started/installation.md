@@ -9,9 +9,14 @@ Install Dagu on your system.
 ```bash
 # Install to ~/.local/bin (default, no sudo required)
 curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
+
+# Store temporary files outside /tmp (e.g., limited-size NAS)
+curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --working-dir /volume1/tmp
 ```
 
-This detects your OS/architecture and installs to `~/.local/bin` by default.
+This detects your OS/architecture and installs to `~/.local/bin` by default. Provide
+`--working-dir` if `/tmp` is constrained on your system (for example, on some NAS devices).
 
 ### Docker
 
@@ -66,6 +71,10 @@ curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.s
 # Combine options
 curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
   bash -s -- --version v1.17.0 --install-dir ~/bin
+
+# Use a custom working directory for temporary files
+curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --working-dir /volume1/tmp
 ```
 
 ### Docker Compose
