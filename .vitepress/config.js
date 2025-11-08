@@ -203,7 +203,7 @@ export default withMermaid(
     ],
 
     themeConfig: {
-      logo: "/logo-dark.webp",
+      logo: "/logo.webp",
       siteTitle: "Dagu",
       logoLink: "https://dagu.cloud/",
 
