@@ -5,6 +5,9 @@
 ### Added
 - Executors: Added a `raw` output option to the JQ executor for emitting unquoted strings and primitives (#1392)
 
+### Fixed
+- UI: Ensure repeat-policy sub DAG run lists refresh their timestamps and counts without needing a window refocus by polling `/sub-dag-runs` while expanded (#1389)
+
 ### Contributors
 
 Thanks to our contributors for this release:
@@ -12,6 +15,7 @@ Thanks to our contributors for this release:
 | Contribution                           | Contributor                              |
 | -------------------------------------- | ---------------------------------------- |
 | JQ executor raw output option (#1392) | [@kriyanshii](https://github.com/kriyanshii) |
+| Repeat execution timestamp refresh report (#1389) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 
 ## v1.24.0 (2025-11-03)
 
