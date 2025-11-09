@@ -10,6 +10,7 @@
 ### Fixed
 - UI: Ensure repeat-policy sub DAG run lists refresh their timestamps and counts without needing a window refocus by polling `/sub-dag-runs` while expanded (#1389)
 - Spec/UI: Stabilize default parameter ordering so Start DAG modal fields stay in place while editing (#1395)
+- OIDC: Automatically clear expired dashboard cookies and restart the auth flow so stale tokens no longer block the UI after restarts (#1394)
 
 ### Contributors
 
@@ -20,6 +21,7 @@ Thanks to our contributors for this release:
 | JQ executor raw output option (#1392) | [@kriyanshii](https://github.com/kriyanshii) |
 | Repeat execution timestamp refresh report (#1389) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 | Parameter field reorder report (#1395) | [@mitchplze](https://github.com/mitchplze) |
+| OIDC dashboard lock-out report (#1394) | [@mitchplze](https://github.com/mitchplze) |
 | Param schema resolution & skip validation option (#1371) | [@thefishhat](https://github.com/thefishhat) |
 | Installer working directory flag request (#1388) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 
