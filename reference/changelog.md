@@ -7,6 +7,8 @@
 
 ### Fixed
 - Docker executor: Preserve step-level container entrypoints so step commands can rely on the image's default binary (#1403)
+- Auth/API: Add configurable public paths so `/api/v*/health` bypasses authentication for uptime probes by default (#1404)
+- Auth/OIDC: Guard verifier initialization so unreachable issuers fail gracefully instead of crashing the server (#1407)
 
 ### Contributors
 
@@ -16,6 +18,8 @@ Thanks to our contributors for this release:
 | --- | --- |
 | Step-level Docker executor entrypoint fix (#1403) | [@vnghia](https://github.com/vnghia) |
 | Status label rename to `aborted` | [@ghansham](https://github.com/ghansham) |
+| Health endpoint access report (#1404) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
+| OIDC init panic report (#1407) | [@hamadayouta](https://github.com/hamadayouta) |
 
 ## v1.24.2
 
