@@ -19,7 +19,7 @@ Thanks to our contributors for this release:
 | Step-level Docker executor entrypoint fix (#1403) | [@vnghia](https://github.com/vnghia) |
 | Status label rename to `aborted` | [@ghansham](https://github.com/ghansham) |
 | Health endpoint access report (#1404) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
-| OIDC init panic report (#1407) | [@hamadayouta](https://github.com/hamadayouta) |
+| OIDC init panic report (#1407) | [@alangrafu](https://github.com/alangrafu) |
 
 ## v1.24.2
 
