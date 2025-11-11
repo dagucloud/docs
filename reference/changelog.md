@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.24.3 (UNRELEASED)
+
+### Fixed
+- Docker executor: Preserve step-level container entrypoints so step commands can rely on the image's default binary (#1403)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Step-level Docker executor entrypoint fix (#1403) | [@vnghia](https://github.com/vnghia) |
+
 ## v1.24.2
 
 ### Added
