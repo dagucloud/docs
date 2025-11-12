@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.24.6
+
+### Fixed
+- Auth/API: Exempt `/api/v2/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Metrics auth bypass report (#1409) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
+
 ## v1.24.5
 
 ### Changed
@@ -9,6 +22,7 @@
 - Docker executor: Preserve step-level container entrypoints so step commands can rely on the image's default binary (#1403)
 - Auth/API: Add configurable public paths so `/api/v*/health` bypasses authentication for uptime probes by default (#1404)
 - Auth/OIDC: Guard verifier initialization so unreachable issuers fail gracefully instead of crashing the server (#1407)
+- Auth/API: Exempt `/api/v2/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
 
 ### Contributors
 
@@ -20,6 +34,7 @@ Thanks to our contributors for this release:
 | Status label rename to `aborted` | [@ghansham](https://github.com/ghansham) |
 | Health endpoint access report (#1404) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 | OIDC init panic report (#1407) | [@alangrafu](https://github.com/alangrafu) |
+| Metrics auth bypass report (#1409) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 
 ## v1.24.2
 
