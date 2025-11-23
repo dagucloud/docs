@@ -308,11 +308,15 @@ dagu enqueue --name my_custom_name my-workflow.yaml
 Remove a DAG from the execution queue.
 
 ```bash
-dagu dequeue --dag-run=<dag-name>:<run-id>
+dagu dequeue <queue-name> --dag-run=<dag-name>:<run-id>  # remove specific run
+dagu dequeue <queue-name>                                # pop the oldest item
 ```
 
+Example:
+
 ```bash
-dagu dequeue --dag-run=my-workflow:batch-001
+dagu dequeue default --dag-run=my-workflow:batch-001
+dagu dequeue default
 ```
 
 ### `version`

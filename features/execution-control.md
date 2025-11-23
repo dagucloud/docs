@@ -129,7 +129,7 @@ Manual queue control:
 dagu enqueue workflow.yaml --run-id=custom-id
 
 # Remove from queue
-dagu dequeue --dag-run=workflow:custom-id
+dagu dequeue default --dag-run=workflow:custom-id
 ```
 
 ## Timeout Control

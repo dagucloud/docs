@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.25.0 (UNRELEASED)
+
+### Changed
+- CLI: `dequeue` now accepts a queue name positional argument and will pop the oldest item when `--dag-run` is omitted; provide `--dag-run` to target a specific run.
+
+
 ## v1.24.8 (2025-11-23)
 
 ### Fixed
@@ -653,7 +659,7 @@ Added enqueue functionality for both API and UI:
 dagu enqueue --run-id=custom-id my-dag.yaml
 
 # Dequeue
-dagu dequeue my-dag.yaml
+dagu dequeue default
 ```
 
 ####  Partial Success Status

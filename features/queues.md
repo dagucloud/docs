@@ -97,9 +97,9 @@ dagu enqueue --queue=high-priority workflow.yaml
 ### Remove from Queue
 
 ```bash
-# Remove by DAG name
-dagu dequeue workflow.yaml
+# Remove the next item in a queue
+dagu dequeue default
 
-# Remove specific run
-dagu dequeue --dag-run=workflow:batch-2024-01-15
+# Remove a specific run from a queue
+dagu dequeue default --dag-run=workflow:batch-2024-01-15
 ```

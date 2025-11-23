@@ -50,6 +50,9 @@ dagu start --name my_custom_name my-workflow.yaml
 
 # Queue for later
 dagu enqueue my-workflow.yaml
+
+# Remove a queued run (by queue name)
+dagu dequeue default
 ```
 
 #### Stop a Running Workflow
@@ -229,8 +232,11 @@ dagu enqueue --queue=high-priority my-workflow.yaml
 # Override DAG name
 dagu enqueue --name my_custom_name my-workflow.yaml
 
-# Remove from queue (requires DAG-name:run-id format)
-dagu dequeue --dag-run=my-workflow:custom-001
+# Remove next item from queue
+dagu dequeue default
+
+# Remove specific run from queue
+dagu dequeue default --dag-run=my-workflow:custom-001
 ```
 
 ### Working with Parameters
