@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.25.0 (UNRELEASED)
+## v1.24.8 (2025-11-23)
+
+### Fixed
+  - Core: ensure DAG working directory exists
+  - Core: fix bug in DAG-run data retrieval
+  - API: fix bug in the queue items API endpoint
+  - Core: fix bug in queue item processing
 
 ### Added
  - Spec/API/UI: Added `timeoutSec` step-level field to cap individual step execution time; when set it overrides any DAG-level timeout for that step (#1412)
@@ -12,6 +18,7 @@ Thanks to our contributors for this release:
 | Contribution | Contributor |
 | --- | --- |
 | Step-level `timeoutSec` field (#1412) | [@kriyanshii](https://github.com/kriyanshii) |
+| Queue issue report (#1417) | [@ghansham](https://github.com/ghansham) |
 
 ## v1.24.7
 
