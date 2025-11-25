@@ -120,7 +120,7 @@ Dagu follows the XDG Base Directory specification for file organization:
 
 ## Distributed Execution Architecture
 
-Dagu supports distributed execution through a coordinator-worker model. Workers require access to shared storage for DAG files and execution state.
+Dagu supports distributed execution through a coordinator-worker model. DAG definitions are transmitted to workers via gRPC, so workers only need shared storage for execution state and logs.
 
 ### Overview
 
@@ -238,7 +238,8 @@ dagu worker --worker.labels region=us-east-1 --worker.coordinator-host=coordinat
 
 ### Requirements
 
-- Workers need access to the same DAG files and data directories as the main Dagu instance
-  - Exception: When DAG definitions are embedded in the task (e.g., local DAGs defined within a parent DAG file)
-- Shared storage can be provided via NFS, cloud storage (EFS, GCS, Azure Files), or distributed filesystems
-- Workers execute DAGs using the same file-based storage system described above
+- **DAG Definitions**: Workers receive DAG definitions via gRPC when tasks are dispatched. Workers do **not** need access to the `dags/` directory.
+- **Execution State**: Workers need shared access to the `data/` directory (dag-runs, queue, proc) to write execution state that the main instance can read.
+- **Logs**: Workers need shared access to the `logs/` directory for the Web UI to display execution logs.
+- Shared storage can be provided via NFS, cloud storage (EFS, GCS, Azure Files), or distributed filesystems.
+- Workers execute DAGs using the same file-based storage system described above.

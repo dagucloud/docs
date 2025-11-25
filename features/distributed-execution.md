@@ -19,13 +19,13 @@ The distributed execution system consists of:
 2. **Coordinator Service**: gRPC server that distributes tasks to workers with automatic service registry
 3. **Worker Nodes**: Poll the coordinator for tasks and execute them with heartbeat monitoring
 4. **Service Registry**: File-based system for automatic worker registration and health tracking
-5. **Shared Storage**: Required for DAG files and execution state
+5. **Shared Storage**: Required for execution state and logs (DAG definitions are sent via gRPC)
 
 ```
 Main Instance (Scheduler + UI + Coordinator)
          │                    │
          │ Service Registry   │ gRPC + Heartbeat
-         │ (File-based)       │
+         │ (File-based)       │ (includes DAG definitions)
          │                    │
     ┌────┴──────────┬─────────┴─────────────┐
     │               │                       │
@@ -35,17 +35,17 @@ Worker 1        Worker 2                Worker 3
     └───────────────┴───────────────────────┘
                     │
             Shared Storage
-        (DAG files, logs, state)
+          (logs, execution state)
 
 ```
 
 ### Shared Storage
 
-For distributed execution to function correctly, all nodes must have access to the same DAG definitions and be able to share execution logs.
+For distributed execution to function correctly, nodes must share execution state and logs. **DAG definitions do not need to be shared** - they are transmitted to workers via gRPC when tasks are dispatched.
 
-**Requirement**: Mount the entire `DAGU_HOME` directory (or at minimum, the `data/` and `logs/` subdirectories) as a shared volume (e.g., NFS) across all nodes:
-- **Coordinator**: Needs access to read DAGs (from `data/` or `dags/`) and read worker logs for the UI.
-- **Workers**: Need access to read DAGs and write execution logs.
+**Requirement**: Mount the `data/` and `logs/` subdirectories (or the entire `DAGU_HOME` directory) as a shared volume (e.g., NFS) across all nodes:
+- **Main Instance**: Needs access to read DAGs (from `dags/`), write execution state, and read worker logs for the UI.
+- **Workers**: Need access to write execution state (dag-runs) and write execution logs. Workers receive DAG definitions via gRPC and do not need access to the `dags/` directory.
 
 > [!IMPORTANT]
 > **Log Visibility**: If the `logs/` directory is not shared, the main server UI will not be able to display logs for tasks executed on remote workers.
@@ -375,30 +375,30 @@ services:
       - "8080:8080"
       - "50055:50055"
     volumes:
-      - ./dags:/etc/dagu/dags
-      - ./data:/var/lib/dagu
-  
+      - ./dags:/etc/dagu/dags    # DAG definitions (only main instance needs this)
+      - ./data:/var/lib/dagu     # Shared: execution state, logs, service registry
+
   worker-gpu:
     image: dagu:latest
     command: >
       worker
       --worker.labels=gpu=true,cuda=11.8
     volumes:
-      - ./data:/var/lib/dagu  # Shared storage for service registry
+      - ./data:/var/lib/dagu  # Shared: execution state, logs, service registry (no dags needed)
     deploy:
       replicas: 2
       resources:
         reservations:
           devices:
             - capabilities: [gpu]
-  
+
   worker-cpu:
     image: dagu:latest
     command: >
       worker
       --worker.labels=cpu-only=true,region=us-east-1
     volumes:
-      - ./data:/var/lib/dagu  # Shared storage for service registry
+      - ./data:/var/lib/dagu  # Shared: execution state, logs, service registry (no dags needed)
     deploy:
       replicas: 5
 ```
