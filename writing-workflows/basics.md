@@ -91,6 +91,7 @@ steps:
 This is equivalent to:
 
 ```yaml
+type: graph
 steps:
   - name: step 1
     command: echo "Hello World"
@@ -154,18 +155,19 @@ steps:
 You can run steps in parallel using explicit dependencies:
 
 ```yaml
+type: graph
 steps:
   - name: setup
     command: echo "Setup"
-    
+
   - name: task1
     command: echo "Task 1"
     depends: setup
-    
+
   - name: task2
     command: echo "Task 2"
     depends: setup
-    
+
   - name: finish
     command: echo "All tasks complete"
     depends: [task1, task2]
@@ -193,22 +195,23 @@ In this syntax:
 This is equivalent to:
 
 ```yaml
+type: graph
 steps:
   - name: cmd_1
     command: echo "Step 1: Sequential"
-    
+
   - name: parallel_2_echo_1
     command: echo "Step 2a: Parallel"
     depends: cmd_1
-    
+
   - name: parallel_2_echo_2
     command: echo "Step 2b: Parallel"
     depends: cmd_1
-    
+
   - name: parallel_2_echo_3
     command: echo "Step 2c: Parallel"
     depends: cmd_1
-    
+
   - name: cmd_3
     command: echo "Step 3: Sequential"
     depends: [parallel_2_echo_1, parallel_2_echo_2, parallel_2_echo_3]

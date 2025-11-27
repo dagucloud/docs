@@ -231,21 +231,23 @@ Then the expanded value of `${SUB_RESULT.outputs.finalValue}` will be `succeeded
 You can assign short identifiers to steps and use them to reference step properties in subsequent steps. This is particularly useful when you have long step names or want cleaner variable references:
 
 ```yaml
+type: graph
 steps:
   - id: extract  # Short identifier
     command: python extract.py
     output: DATA
-  
+
   - id: validate
     command: python validate.py
     depends:
       - extract  # Can use ID in dependencies
-  
-  - |
+
+  - command: |
       # Reference step properties using IDs
       echo "Exit code: ${extract.exitCode}"
       echo "Stdout path: ${extract.stdout}"
       echo "Stderr path: ${extract.stderr}"
+    depends: validate
 ```
 
 Available step properties when using ID references:
@@ -293,14 +295,17 @@ Example output format:
 ### Through Output Variables
 
 ```yaml
+type: graph
 steps:
-  - command: |
+  - name: get config
+    command: |
       echo '{"env": "prod", "replicas": 3, "region": "us-east-1"}'
     output: CONFIG
-  
-  - command: vault read -format=json secret/app
+
+  - name: get secrets
+    command: vault read -format=json secret/app
     output: SECRETS
-  
+
   - command: |
       kubectl set env deployment/app \
         REGION=${CONFIG.region} \

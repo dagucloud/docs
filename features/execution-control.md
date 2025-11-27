@@ -85,6 +85,7 @@ Output structure:
 Control how many steps run concurrently:
 
 ```yaml
+type: graph
 maxActiveSteps: 2  # Run up to 2 steps in parallel
 
 steps:
@@ -215,18 +216,19 @@ steps:
 ### Parallel with Dependencies
 
 ```yaml
+type: graph
 steps:
   - name: setup
     command: echo "Setting up"
-  
+
   - name: task-a
     command: echo "Running task A"
     depends: setup
-  
+
   - name: task-b
     command: echo "Running task B"
     depends: setup
-  
+
   - command: echo "Finalizing"
     depends:
       - task-a

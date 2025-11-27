@@ -29,7 +29,8 @@ env:
   - VAR_NAME: value
   - PATH: ${PATH}:/custom/path
 
-# Workflow steps
+# Workflow steps (type: graph requires explicit depends)
+type: graph
 steps:
   - name: step-name        # Optional
     command: echo "Hello"
@@ -766,9 +767,10 @@ preconditions:
   - condition: "`date +%u`"
     expected: "re:[1-5]"  # Weekdays only
 
+type: graph
 steps:
   - ./scripts/validate.sh
-    
+
   - command: python extract.py --date=${DATE}
     depends: validate-environment
     output: RAW_DATA_PATH

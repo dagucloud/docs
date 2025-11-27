@@ -28,22 +28,23 @@ otel:
     service.version: "1.0.0"
     environment: "local"
 
+type: graph
 steps:
   - name: fetch-data
     command: echo "Fetching data..." && sleep 1
-  
+
   - name: process-data
     command: echo "Processing data..." && sleep 2
     depends: fetch-data
-  
+
   - name: analyze-batch-1
     command: echo "Analyzing batch 1..." && sleep 1
     depends: process-data
-  
+
   - name: analyze-batch-2
     command: echo "Analyzing batch 2..." && sleep 1
     depends: process-data
-  
+
   - name: aggregate-results
     command: echo "Aggregating results..."
     depends: [analyze-batch-1, analyze-batch-2]

@@ -24,6 +24,7 @@ steps:
 
 Or with explicit dependencies:
 ```yaml
+type: graph
 steps:
   - name: step 1
     command: echo "Hello, dagu!"

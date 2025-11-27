@@ -36,17 +36,19 @@ steps:
 By default, steps run sequentially. Use `depends` for parallel execution:
 
 ```yaml
+type: graph
 steps:
   - name: A
     command: echo "First"
-    
+
   - name: B
     command: echo "Second (after A)"
-    
+    depends: A
+
   - name: C
     command: echo "Parallel with B"
     depends: A  # Only depends on A, runs parallel to B
-    
+
   - name: D
     command: echo "After both B and C"
     depends: [B, C]

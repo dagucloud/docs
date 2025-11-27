@@ -38,15 +38,16 @@ steps:
 Each step can have one output variable:
 
 ```yaml
+type: graph
 steps:
   - name: count-users
     command: wc -l < users.txt
     output: USER_COUNT
-    
+
   - name: count-orders
-    command: wc -l < orders.txt  
+    command: wc -l < orders.txt
     output: ORDER_COUNT
-    
+
   - name: report
     command: |
       echo "Users: ${USER_COUNT}"

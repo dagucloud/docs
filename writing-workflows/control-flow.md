@@ -18,13 +18,14 @@ steps:
 ### Multiple Dependencies
 
 ```yaml
+type: graph
 steps:
   - name: download-a
     command: wget https://example.com/a.zip
-    
+
   - name: download-b
     command: wget https://example.com/b.zip
-    
+
   - command: echo "Merging a.zip and b.zip"
     depends:
       - download-a

@@ -119,20 +119,22 @@ Break complex workflows into reusable, maintainable sub-workflows:
 description: |
   data-pipeline: Extract, transform, and load data daily with retries and parallelism.
 schedule: "0 2 * * *"  # Daily at 2 AM
+type: graph
 
 steps:
   # Extract raw data
   - name: extract
     command: python extract.py --date=${DATE}
     output: RAW_DATA
-    
+
   # Transform in parallel for each data type
   - name: transform
     call: transform-data
     parallel:
       items: [customers, orders, products, inventory]
     params: "TYPE=${ITEM} INPUT=${RAW_DATA}"
-    
+    depends: extract
+
   # Load to warehouse with retry
   - name: load
     command: python load.py --batch=${RAW_DATA}

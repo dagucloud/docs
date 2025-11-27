@@ -744,6 +744,7 @@ steps:
 Alternatively, you can explicitly set empty dependencies for parallel steps:
 
 ```yaml
+type: graph
 steps:
   - name: task1
     command: echo "runs in parallel"
@@ -949,6 +950,7 @@ Parent workflows now receive structured output from sub-workflows:
 #### 🔗 Simplified Dependencies
 String format now supported:
 ```yaml
+type: graph
 steps:
   - name: first
     command: echo "First"

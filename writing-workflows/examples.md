@@ -993,6 +993,7 @@ steps:
 ### Step ID References
 
 ```yaml
+type: graph
 steps:
   - id: extract
     command: python extract.py
@@ -1795,6 +1796,7 @@ Enable OpenTelemetry tracing for observability.
 ### Execution Control
 
 ```yaml
+type: graph
 maxActiveSteps: 5         # Max 5 parallel steps
 maxActiveRuns: 2          # Max 2 concurrent DAG runs
 delaySec: 10              # 10 second initial delay

@@ -225,6 +225,7 @@ steps:
 Dependent steps see the actual status unless `markSuccess` is used:
 
 ```yaml
+type: graph
 steps:
   - name: step-a
     command: exit 1
