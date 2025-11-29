@@ -108,6 +108,7 @@ schedule:
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
 | `workingDir` | string | Working directory for the DAG | Directory of DAG file |
+| `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
 | `logDir` | string | Custom log directory | System default |
 | `histRetentionDays` | integer | History retention days | `30` |
 | `maxOutputSize` | integer | Max output size per step (bytes) | `1048576` |
@@ -422,7 +423,7 @@ In the nested array format:
 |-------|------|-------------|---------|
 | `dir` | string | Working directory | Current directory |
 | `workingDir` | string | Working directory (alternative to `dir`, inherits from DAG) | DAG's workingDir |
-| `shell` | string | Shell to use | System default |
+| `shell` | string/array | Shell program and args for this step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
 | `stdout` | string | Redirect stdout to file | - |
 | `stderr` | string | Redirect stderr to file | - |
 | `output` | string | Capture output to variable | - |
@@ -431,6 +432,8 @@ In the nested array format:
 | `params` | string/object | Parameters passed to sub DAGs (`run`) or executor-specific inputs (e.g., GitHub Actions `with:` map) | - |
 
 > ℹ️ The legacy `run` field is still accepted for backward compatibility until v1.24.0, but it will be removed in a future release. Prefer `call` for new workflows.
+
+`shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
 ### Parallel Execution
 

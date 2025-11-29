@@ -1134,9 +1134,11 @@ steps:
 ### Shell Selection
 
 ```yaml
+shell: ["/bin/bash", "-e"]   # Default shell for all steps
 steps:
   - command: echo hello world | xargs echo
-    shell: bash
+  - shell: /bin/zsh          # Override for a single step
+    command: echo "from zsh"
 ```
 
 <a href="/writing-workflows/basics#shell" class="learn-more">Learn more →</a>

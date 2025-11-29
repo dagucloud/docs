@@ -131,12 +131,14 @@ handlerOn:
 
 ### Shell (Default)
 
-Runs commands in the system shell:
+Runs commands in the system shell. Set it once per DAG or override per step:
 
 ```yaml
+shell: [bash, -e]  # Default shell + args for all steps
 steps:
-  - command: echo "Hello"
-    shell: bash  # or sh, zsh
+  - command: echo "Hello"   # Uses DAG shell
+  - shell: /usr/bin/zsh     # Per-step override
+    command: echo "Using zsh"
 ```
 
 See [Shell Executor](/features/executors/shell) for more details.

@@ -23,14 +23,16 @@ For detailed documentation on each executor, click the links above to visit the 
 For detailed Shell executor documentation, see [Shell Executor Guide](/features/executors/shell).
 :::
 
-The default executor runs commands in the system shell.
+The default executor runs commands in the system shell. Set a DAG-level `shell` to pick the program and flags once; steps inherit it unless you override them.
 
 ```yaml
+shell: ["/bin/bash", "-e"]  # Default shell for the workflow
 steps:
   - command: echo "Hello World"
     
-  - command: echo $BASH_VERSION
-    shell: bash  # Use specific shell
+  - command: echo $BASH_VERSION   # Uses DAG shell
+  - shell: /usr/bin/zsh           # Step-level override
+    command: echo "Uses zsh"
 ```
 
 ### Shell Selection
@@ -38,10 +40,10 @@ steps:
 ```yaml
 steps:
   - name: default-shell
-    command: echo "Uses $SHELL or /bin/sh"
+    command: echo "Uses DAG shell or system default"
     
   - name: bash-specific
-    shell: bash
+    shell: ["bash", "-e", "-u"]   # Array form for flags
     command: echo "Uses bash features"
     
   - name: custom-shell

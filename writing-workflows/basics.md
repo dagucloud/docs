@@ -120,14 +120,26 @@ If you omit `shell`, Dagu uses the interpreter declared in the script's shebang 
 
 ### Shell Selection
 
+Set a default shell for every step at the DAG level, and override it per step when needed:
+
 ```yaml
+shell: ["/bin/bash", "-e", "-u"]  # Default shell + args for the whole workflow
 steps:
   - name: bash-task
-    shell: bash
-    command: echo $BASH_VERSION
-    
-  - name: python-task
-    shell: python3
+    command: echo "Runs with bash -e -u"
+
+  - name: zsh-override
+    shell: /bin/zsh                # Step-level override
+    command: echo "Uses zsh instead"
+```
+
+The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Arrays avoid quoting issues when you need multiple flags.
+
+When you omit a step-level `shell`, Dagu runs through the DAG shell (or system default) and automatically adds `-e` on Unix-like shells so scripts stop on first error. If you explicitly set `shell` on a step, include `-e` yourself if you want the same errexit behavior.
+
+```yaml
+steps:
+  - shell: python3
     script: |
       import pandas as pd
       df = pd.read_csv('data.csv')

@@ -1,10 +1,12 @@
 # Changelog
 
-## v1.25.0 (UNRELEASED)
+## v1.24.9 (2025-11-30)
+
+### Added
+- DAG: Set a default shell once per workflow via a new root-level `shell` field; both DAG and step `shell` values accept strings or arrays so you can pass shell flags without quoting hassles.
 
 ### Changed
 - CLI: `dequeue` now accepts a queue name positional argument and will pop the oldest item when `--dag-run` is omitted; provide `--dag-run` to target a specific run.
-
 
 ## v1.24.8 (2025-11-23)
 

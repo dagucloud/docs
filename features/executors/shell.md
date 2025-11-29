@@ -5,17 +5,21 @@ The default executor for running system commands.
 ## Basic Usage
 
 ```yaml
+shell: ["/bin/bash", "-e"]   # Default shell for all steps
 steps:
-  - echo "Hello, World!"  # Shell executor is default
+  - echo "Hello, World!"     # Uses DAG shell
+  - shell: /usr/local/bin/zsh  # Override for one step
+    command: echo "Hello from zsh"
 ```
+
+When no step-level shell is provided, Dagu runs commands through the DAG shell (or system default) and automatically adds `-e` on Unix-like shells so scripts stop on first error. If you set `shell` on a step, include `-e` yourself if you want the same errexit behavior.
 
 ## Writing Scripts
 
 ```yaml
 steps:
-  - shell: bash  # Specify shell if needed
+  - shell: bash  # Specify shell (add -e yourself if you want errexit here)
     script: |
-      # No need for 'set -e' with default shell
       echo "Running script..."
       python process.py  # Run a Python script
 ```
@@ -26,14 +30,18 @@ When `shell` is omitted, Dagu executes the script with the interpreter defined b
 
 ```yaml
 steps:
-  - echo $0  # Uses $SHELL or sh
+  - echo $0  # Uses DAG shell or system default
     
-  - shell: bash
+  - shell: ["bash", "-e", "-u"]  # Array form to avoid quoting flags
     command: echo "Bash version: $BASH_VERSION"
-    
-  - shell: /usr/local/bin/fish
+
+  - shell: "/usr/local/bin/fish -C 'set -e'"  # String form also accepted
     command: echo "Using Fish shell"
 ```
+
+## Shell Arguments
+
+Both DAG- and step-level `shell` fields accept either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Arrays make it easy to pass multiple flags without worrying about quoting. DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime, so you can reference parameters, secrets, or outputs.
 
 ### Nix Shell
 
@@ -96,7 +104,7 @@ steps:
   # Script block
   - script: |
       #!/bin/bash
-      # errexit is enabled by default, no need for 'set -e'
+      # errexit is enabled by default when you omit a step shell
       find /data -name "*.csv" -exec process {} \;
       
   # Working directory
