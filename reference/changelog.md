@@ -3,10 +3,30 @@
 ## v1.24.9 (2025-11-30)
 
 ### Added
-- DAG: Set a default shell once per workflow via a new root-level `shell` field; both DAG and step `shell` values accept strings or arrays so you can pass shell flags without quoting hassles.
+- DAG: Set a default shell once per workflow via a new root-level `shell` field; both DAG and step `shell` values accept strings or arrays so you can pass shell flags without quoting hassles (#1426)
+- UI: Running and failed step names displayed on the DAG runs page for quick status overview without navigating to details (#1420, #1401)
+- Installer: Windows support with PowerShell and cmd.exe installation options (#1428)
 
 ### Changed
-- CLI: `dequeue` now accepts a queue name positional argument and will pop the oldest item when `--dag-run` is omitted; provide `--dag-run` to target a specific run.
+- CLI: `dequeue` now accepts a queue name positional argument and will pop the oldest item when `--dag-run` is omitted; provide `--dag-run` to target a specific run (#1421)
+- Core: Refactored logging code to use typed attributes for better observability (#1422)
+
+### Fixed
+- Scheduler: Fixed DAG entry reader not starting on startup, causing scheduled runs not to execute (#1427, #1423)
+- Executor: Handle Windows script extensions for proper command execution (#1425)
+- Config: Use correct config file path on Windows (#1424)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Running/failed steps list on DAG runs page (#1420) | [@kriyanshii](https://github.com/kriyanshii) |
+| Running/failed steps feature request (#1401) | [@ghansham](https://github.com/ghansham) |
+| Scheduled runs not executing bug report (#1423) | [@gyger](https://github.com/gyger) |
+| Scheduled runs issue confirmation (#1423) | [@SGRelic](https://github.com/SGRelic) [@jeremydelattre59](https://github.com/jeremydelattre59) |
+| Windows issues report (#1424, #1425) | O.YENA (Discord) |
 
 ## v1.24.8 (2025-11-23)
 
