@@ -4,7 +4,7 @@ Install Dagu on your system.
 
 ## Quick Install
 
-### Script Install
+### macOS/Linux
 
 ```bash
 # Install to ~/.local/bin (default, no sudo required)
@@ -17,6 +17,48 @@ curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.s
 
 This detects your OS/architecture and installs to `~/.local/bin` by default. Provide
 `--working-dir` if `/tmp` is constrained on your system (for example, on some NAS devices).
+
+### Windows
+
+::: code-group
+
+```powershell [PowerShell]
+# Install latest version to default location (%LOCALAPPDATA%\Programs\dagu)
+irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
+
+# Install specific version
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) v1.24.0
+
+# Install to custom directory
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) latest "C:\tools\dagu"
+```
+
+```cmd [CMD]
+REM Install latest version
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && installer.cmd && del installer.cmd
+
+REM Install specific version
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && installer.cmd v1.24.0 && del installer.cmd
+
+REM Install to custom directory
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && installer.cmd latest "C:\tools\dagu" && del installer.cmd
+```
+
+:::
+
+The installer downloads the appropriate binary and adds it to your PATH.
+
+::: tip Running as a Windows Service
+If you plan to run Dagu as a Windows service, you should install it to `Program Files` which requires administrator privileges. Download the installer script and run it as Administrator:
+
+```powershell
+# Download the installer
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1" -OutFile "installer.ps1"
+
+# Right-click PowerShell → "Run as Administrator", then:
+.\installer.ps1 latest "C:\Program Files\dagu"
+```
+:::
 
 ### Docker
 

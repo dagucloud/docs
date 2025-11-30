@@ -17,6 +17,14 @@ curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.s
 curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash -s -- --install-dir /usr/local/bin
 ```
 
+```powershell [Windows]
+# Install latest version to default location (%LOCALAPPDATA%\Programs\dagu)
+irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
+
+# Install specific version
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) v1.24.0
+```
+
 ```bash [Docker]
 docker pull ghcr.io/dagu-org/dagu:latest
 ```
