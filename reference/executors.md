@@ -855,4 +855,3 @@ steps:
 - [Mail Executor](/features/executors/mail) - Email notification guide
 - [JQ Executor](/features/executors/jq) - JSON processing guide
 - [Writing Workflows](/writing-workflows/) - Using executors in workflows
-- [Examples](https://github.com/dagu-org/dagu/tree/main/examples) - Real-world executor usage
