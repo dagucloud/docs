@@ -4,11 +4,11 @@ Dagu publishes multiple container images to GitHub Container Registry at `ghcr.i
 
 ## Image overview
 
-| Tag(s) | Base | What’s inside | Use when |
-| --- | --- | --- | --- |
-| `latest`, `<version>` | Ubuntu 24.04 | Core runtime + `sudo`, `tzdata`, `jq` | General deployments; closest to production defaults |
-| `alpine`, `<version>-alpine` | Alpine 3.22 | Musl-based image with `bash`, `sudo`, `jq`, `tzdata` | Minimal footprint, Alpine-only environments |
-| `dev`, `<version>-dev` | Ubuntu 24.04 | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) | Local development or workflows that need compilers/SDKs baked in |
+| Tag(s) | Base | Package Manager | What's inside | Use when |
+| --- | --- | --- | --- | --- |
+| `latest`, `<version>` | Ubuntu 24.04 | `apt` | Core runtime + `sudo`, `tzdata`, `jq` | General deployments; closest to production defaults |
+| `alpine`, `<version>-alpine` | Alpine 3.22 | `apk` | Musl-based image with `bash`, `sudo`, `jq`, `tzdata` | Minimal footprint, Alpine-only environments |
+| `dev`, `<version>-dev` | Ubuntu 24.04 | `apt` | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) | Local development or workflows that need compilers/SDKs baked in |
 
 > Prefer pinning to a specific version tag (`ghcr.io/dagu-org/dagu:<version>`) for reproducible deployments.
 
