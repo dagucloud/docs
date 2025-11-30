@@ -130,6 +130,7 @@ const fullSidebar = [
           { text: "Overview", link: "/configurations/deployment" },
           { text: "macOS Service", link: "/configurations/deployment/macos" },
           { text: "Linux Systemd", link: "/configurations/deployment/systemd" },
+          { text: "Docker Images", link: "/configurations/deployment/docker-images" },
           { text: "Docker", link: "/configurations/deployment/docker" },
           {
             text: "Docker Compose",

@@ -1,5 +1,7 @@
 # Docker
 
+See [Docker Images](./docker-images.md) to choose between the standard, alpine, and dev tags.
+
 ## Quick Start
 
 ```bash
