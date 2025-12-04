@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.25.0 (2025-12-04)
+
+### Added
+- UI: Display script details on steps list (#1435)
+- Config: Resolve path environment variables to absolute paths and sync for subprocesses (#1430)
+
+### Changed
+- Config: Log encoding now auto-detected from system locale (Unix) or Windows code page instead of defaulting to UTF-8 (#1439)
+
+### Fixed
+- Core: Resolve working directory relative paths correctly - DAG-level `workingDir` resolves against DAG file location, step-level `dir` resolves against DAG's `workingDir` (#1436)
+- Windows: Improved PowerShell and cmd.exe shell handling (#1439)
+  - Scripts in working directory now execute correctly (auto-prefixes `.\` when needed)
+  - PowerShell scripts now fail properly on non-zero exit codes from external commands
+  - Environment variable matching is now case-insensitive
+  - Added platform-specific base environment variables
+- UI: Fixed graph visualization crash when step names contain parentheses (#1440, #1434)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Graph crash with parentheses in step names fix (#1440) | [@Tagnard](https://github.com/Tagnard) |
+| Graph crash bug report (#1434) | [@DarkWiiPlayer](https://github.com/DarkWiiPlayer) |
+| Windows version testing and bug report | O.Yena on Discord |
+
 ## v1.24.9 (2025-11-30)
 
 ### Added
@@ -26,7 +54,7 @@ Thanks to our contributors for this release:
 | Running/failed steps feature request (#1401) | [@ghansham](https://github.com/ghansham) |
 | Scheduled runs not executing bug report (#1423) | [@gyger](https://github.com/gyger) |
 | Scheduled runs issue confirmation (#1423) | [@SGRelic](https://github.com/SGRelic) [@jeremydelattre59](https://github.com/jeremydelattre59) |
-| Windows issues report (#1424, #1425) | O.YENA (Discord) |
+| Windows issues report (#1424, #1425) | O.Yena on Discord |
 
 ## v1.24.8 (2025-11-23)
 
