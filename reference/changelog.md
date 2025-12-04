@@ -3,8 +3,8 @@
 ## v1.25.0 (2025-12-04)
 
 ### Added
-- UI: Display script details on steps list (#1435)
-- UI: System Paths dialog on System Status page
+- UI: Display script detail dialog on steps list (#1435)
+- UI: Added Paths display panel in System Status page, showing system filesystem locations (DAGs, logs, config files, etc.)
 - Config: Resolve path environment variables to absolute paths and sync for subprocesses (#1430)
 
 ### Changed
