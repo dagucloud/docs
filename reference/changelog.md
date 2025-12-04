@@ -4,6 +4,7 @@
 
 ### Added
 - UI: Display script details on steps list (#1435)
+- UI: System Paths dialog on System Status page
 - Config: Resolve path environment variables to absolute paths and sync for subprocesses (#1430)
 
 ### Changed
