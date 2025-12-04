@@ -8,6 +8,7 @@
 
 ### Changed
 - Config: Log encoding now auto-detected from system locale (Unix) or Windows code page instead of defaulting to UTF-8 (#1439)
+- API: DAG rename no longer renames run history to prevent data loss
 
 ### Fixed
 - Core: Resolve working directory relative paths correctly - DAG-level `workingDir` resolves against DAG file location, step-level `dir` resolves against DAG's `workingDir` (#1436)
