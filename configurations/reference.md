@@ -114,6 +114,11 @@ scheduler:
   lockStaleThreshold: "30s"  # Time after which a scheduler lock is considered stale
   lockRetryInterval: "5s"   # Interval between lock acquisition attempts
   zombieDetectionInterval: "45s"  # Interval for detecting zombie DAG runs (0 to disable)
+
+# Resource Monitoring
+monitoring:
+  retention: "24h"        # How long to keep resource history (default: 24h)
+  interval: "5s"          # How often to collect metrics (default: 5s)
 ```
 
 ## Environment Variables
@@ -194,6 +199,10 @@ All options support `DAGU_` prefix.
 - `DAGU_SCHEDULER_LOCK_STALE_THRESHOLD` - Time after which a scheduler lock is considered stale (default: `30s`)
 - `DAGU_SCHEDULER_LOCK_RETRY_INTERVAL` - Interval between lock acquisition attempts (default: `5s`)
 - `DAGU_SCHEDULER_ZOMBIE_DETECTION_INTERVAL` - Interval for detecting zombie DAG runs (default: `45s`, `0` to disable)
+
+### Resource Monitoring
+- `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)
+- `DAGU_MONITORING_INTERVAL` - How often to collect resource metrics (default: `5s`)
 
 ### Legacy Environment Variables (Deprecated)
 These variables are maintained for backward compatibility but should not be used in new deployments:

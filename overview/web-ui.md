@@ -173,6 +173,31 @@ The search functionality allows you to search for specific text across all DAGs 
 - Search across all DAGs
 - Find by name, tags, or content
 
+## System Status
+
+The System Status page provides real-time monitoring of system health and resource usage.
+
+### Service Status
+- **Scheduler Service**: Shows running scheduler instances with host, status, and uptime
+- **Coordinator Service**: Shows coordinator instances for distributed execution
+
+### Resource Monitoring
+Real-time charts display system resource usage:
+- **CPU Usage**: Overall CPU utilization percentage
+- **Memory Usage**: RAM utilization percentage
+- **Disk Usage**: Storage utilization for the data directory
+- **Load Average**: 1-minute system load average
+
+Charts auto-refresh every 5 seconds and display historical data based on the configured retention period (default: 24 hours).
+
+**Configuration:**
+```yaml
+# config.yaml
+monitoring:
+  retention: "24h"    # How long to keep history
+  interval: "5s"      # Collection frequency
+```
+
 ## Workers
 
 ![Workers](/workers.webp)

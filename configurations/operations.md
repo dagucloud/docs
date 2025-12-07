@@ -161,6 +161,42 @@ DAGU_AUTH_BASIC_USERNAME=admin
 DAGU_AUTH_BASIC_PASSWORD=secure-password
 ```
 
+### Resource Monitoring
+
+Dagu provides built-in resource monitoring that tracks CPU, memory, disk, and load average. The data is displayed in the System Status page of the web UI.
+
+**Configuration:**
+```yaml
+# config.yaml
+monitoring:
+  retention: "24h"    # How long to keep history (default: 24h)
+  interval: "5s"      # Collection frequency (default: 5s)
+```
+
+```bash
+# Or via environment variables
+export DAGU_MONITORING_RETENTION=12h
+export DAGU_MONITORING_INTERVAL=10s
+```
+
+**Metrics collected:**
+- **CPU Usage** - Overall CPU utilization percentage
+- **Memory Usage** - RAM utilization percentage
+- **Disk Usage** - Disk space utilization for the data directory
+- **Load Average** - 1-minute system load average
+
+**API Endpoint:**
+```bash
+# Get resource history (last hour by default)
+curl http://localhost:8080/api/v2/services/resources/history
+
+# Get last 30 minutes
+curl http://localhost:8080/api/v2/services/resources/history?duration=30m
+```
+
+**Memory Usage:**
+Resource history is stored in memory. With default settings (5s interval, 24h retention), memory usage is approximately 1.1MB for all 4 metrics.
+
 ### Prometheus Metrics
 
 Metrics available at `/api/v2/metrics`:
