@@ -51,6 +51,34 @@ steps:
 
 > **Note**: Sub-DAGs do not inherit `handlerOn` from the base configuration. Each nested workflow should define its own lifecycle handlers if needed. See [Sub-DAG Handler Isolation](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
 
+**Working Directory Inheritance:**
+
+When calling sub-DAGs locally, the child inherits the parent's `workingDir` if it doesn't define its own:
+
+```yaml
+workingDir: /app/project
+
+steps:
+  - call: child-task    # Child runs in /app/project
+
+---
+name: child-task
+# No workingDir defined - inherits /app/project from parent
+steps:
+  - pwd                 # Outputs: /app/project
+```
+
+To override the inherited working directory, define an explicit `workingDir` in the child DAG:
+
+```yaml
+name: child-with-custom-dir
+workingDir: /custom/path    # Overrides inherited workingDir
+steps:
+  - pwd                     # Outputs: /custom/path
+```
+
+> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `workerSelector`), sub-DAGs use their own context on the worker node.
+
 ### Multiple DAGs in One File
 
 Define multiple DAGs separated by `---` and call by name.

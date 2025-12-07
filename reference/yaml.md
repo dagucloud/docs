@@ -107,7 +107,7 @@ schedule:
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
-| `workingDir` | string | Working directory for the DAG | Directory of DAG file |
+| `workingDir` | string | Working directory for the DAG. Sub-DAGs inherit parent's workingDir if not set. | Directory of DAG file (or inherited from parent for sub-DAGs) |
 | `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
 | `logDir` | string | Custom log directory | System default |
 | `histRetentionDays` | integer | History retention days | `30` |
@@ -245,6 +245,7 @@ steps:
 - Steps inherit `workingDir` from the DAG if not explicitly set
 - Step-level `workingDir` overrides DAG-level `workingDir`
 - Both `dir` and `workingDir` set the working directory (use one or the other)
+- **Sub-DAGs (via `call`)** inherit the parent's `workingDir` when executed locally, unless they define their own explicit `workingDir`
 
 ```yaml
 # Example of workingDir inheritance
@@ -255,6 +256,33 @@ steps:
   - workingDir: /custom   # Override DAG workingDir
     command: pwd          # Outputs: /custom
 ```
+
+**Sub-DAG Working Directory Inheritance:**
+
+When a parent DAG calls a child DAG using `call:`, the child inherits the parent's working directory for local execution:
+
+```yaml
+# Parent DAG with workingDir
+workingDir: /app/project
+
+steps:
+  - call: child-workflow    # Child inherits /app/project as workingDir
+
+---
+# Child DAG without explicit workingDir
+name: child-workflow
+steps:
+  - pwd                     # Outputs: /app/project (inherited from parent)
+
+---
+# Child DAG with explicit workingDir (overrides inheritance)
+name: child-with-custom-wd
+workingDir: /custom/path
+steps:
+  - pwd                     # Outputs: /custom/path
+```
+
+> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `workerSelector`), sub-DAGs use their own context on the worker node.
 
 ### Queue Configuration
 
