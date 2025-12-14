@@ -1,5 +1,38 @@
 # Changelog
 
+## v1.26.3 (2025-12-14)
+
+### Added
+- API: Added optional `singleton` flag to `POST /dags/{fileName}/enqueue` endpoint to prevent duplicate runs when a DAG is already executing or queued; returns HTTP 409 Conflict when enabled and active/queued runs exist (#1483, #1460)
+
+### Changed
+- Deps: Upgraded gopsutil from v3 to v4 (#1470)
+  - Note: On Linux, `UsedPercent` for memory now derives from `MemAvailable` rather than the previous method, which may alter reported values by 6-10%
+- Release: Removed NetBSD from release targets
+
+### Fixed
+- Scheduler: Queue processor now respects `maxConcurrency` configuration in global config for DAG-based queues (#1482)
+- Runtime: Fixed dequeue command missing queue name parameter, causing API-based dequeue operations to fail (#1481)
+- Auth: API token authentication now works alongside builtin authentication mode; unified middleware supports JWT Bearer tokens, API tokens, Basic auth, and OIDC simultaneously (#1480, #1478, #1475)
+- UI: User Management menu now only displays for admin users when authentication mode is "builtin"; reset password functionality restricted to admin users (#1484)
+- Runtime: Special environment variables (`DAG_RUN_ID`, `DAG_NAME`, etc.) now work correctly in `handlerOn.exit` and other handler contexts (#1474)
+- Security: Escaped config path strings injected into HTML templates to prevent potential JavaScript injection vulnerabilities on Windows (#1472)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Dequeue command queue name fix (#1481) | [@kriyanshii](https://github.com/kriyanshii) |
+| Singleton flag feature request (#1460) | [@kriyanshii](https://github.com/kriyanshii) |
+| User creation error with builtin auth bug report (#1478) | [@Kaiden0001](https://github.com/Kaiden0001) |
+| DAG_RUN_ID in handlers bug report (#1474) | [@Kaiden0001](https://github.com/Kaiden0001) |
+| Remote node selection with builtin auth bug report (#1475) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
+| Singleton enqueue feedback | [@ghansham](https://github.com/ghansham) |
+
+**Full Changelog**: [v1.26.2...v1.26.3](https://github.com/dagu-org/dagu/compare/v1.26.2...v1.26.3)
+
 ## v1.26.2 (2025-12-10)
 
 ### Added
