@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.26.3 (2025-12-14)
+## v1.26.4 (2025-12-14)
 
 ### Added
 - API: Added optional `singleton` flag to `POST /dags/{fileName}/enqueue` endpoint to prevent duplicate runs when a DAG is already executing or queued; returns HTTP 409 Conflict when enabled and active/queued runs exist (#1483, #1460)
