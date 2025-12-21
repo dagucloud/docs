@@ -95,9 +95,7 @@ The `--` separator is optional. Everything after flags is treated as the command
 
 **Execution Control:**
 - `--singleton` - Allow only one active run (sets `maxActiveRuns: 1`)
-- `--queue <name>` - Enqueue for distributed execution
-- `--no-queue` - Force local execution even if queues are enabled
-- `--worker-label key=value` - Target specific workers (repeatable, requires queues)
+- `--worker-label key=value` - Set worker selector labels for distributed execution (repeatable)
 
 ## Examples
 
@@ -129,17 +127,16 @@ dagu exec --singleton --name nightly-sync -- rsync -av /source/ /dest/
 
 If another `nightly-sync` is already running, this either blocks until the previous run finishes or enqueues the run if queues are enabled.
 
-### Distributed Execution
+### With Worker Labels
 
 ```bash
 dagu exec \
-  --queue gpu-jobs \
   --worker-label gpu=true \
   --worker-label memory=32G \
   -- python train_model.py
 ```
 
-This enqueues the command for a worker with matching labels. The command does not run locally.
+This sets worker selector labels on the generated DAG. To run this on a distributed worker, use `dagu enqueue` instead of `dagu exec`.
 
 ## Behavior Details
 
@@ -171,23 +168,16 @@ exec-python/
 
 The Web UI displays these runs under the DAG name. The generated YAML is stored so you can see exactly what was executed.
 
-### Queue Behavior
+The command runs locally and the CLI waits for completion and shows progress.
 
-With `--queue` or `--worker-label`:
-- The command is enqueued and the CLI exits immediately
-- A worker with matching labels picks up the task
-- Use `dagu status <name>` to track progress
-
-Without `--queue`:
-- The command runs locally
-- CLI waits for completion and shows progress
+For distributed execution, use `dagu enqueue` instead:
+```bash
+dagu enqueue my-workflow.yaml
+```
 
 ### Concurrency Limits
 
-When `--singleton` is set:
-- If another run with the same name is active:
-  - **Queues disabled:** Command fails with error
-  - **Queues enabled:** Run is enqueued automatically
+When `--singleton` is set and another run with the same name is active, the command fails with an error.
 
 Without `--singleton`, multiple runs with the same name can execute concurrently.
 
@@ -297,5 +287,4 @@ See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) for complete doc
 - Logs are stored in the same location as file-based DAGs
 - Run history appears in the Web UI
 - Base configuration (`~/.config/dagu/base.yaml`) is automatically applied
-- Queue and worker coordination works identically
 - All lifecycle handlers, secrets, and environment variables are inherited

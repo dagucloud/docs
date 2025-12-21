@@ -13,6 +13,11 @@ Thanks to our contributors for this release:
 | --- | --- |
 | Cleanup feature ideation (#1481) | [@kriyanshii](https://github.com/kriyanshii), [@ghansham](https://github.com/ghansham), [@jonathonc](https://github.com/jonathonc) |
 
+## v1.26.6 (2025-12-21)
+
+## Fixed
+- Runtime, API: Fix issues that a DAG run often fails due to max active run check
+
 ## v1.26.5 (2025-12-20)
 
 ### Added

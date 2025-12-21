@@ -38,9 +38,7 @@ dagu exec [options] -- <command> [args...]
 - `--shell <path>` - Shell binary
 - `--base <file>` - Custom base config file (default: `~/.config/dagu/base.yaml`)
 - `--singleton` - Allow only one active run
-- `--queue <name>` - Enqueue for distributed execution
-- `--no-queue` - Force local execution
-- `--worker-label key=value` - Target specific workers (repeatable)
+- `--worker-label key=value` - Target specific workers (repeatable, requires queues)
 
 ```bash
 # Basic usage
@@ -51,9 +49,6 @@ dagu exec --env DB_HOST=localhost -- python etl.py
 
 # Singleton execution
 dagu exec --singleton --name backup -- rsync -av /src/ /dst/
-
-# Distributed execution
-dagu exec --queue gpu-jobs --worker-label gpu=true -- python train.py
 ```
 
 See the [exec guide](/features/exec) for detailed documentation.
@@ -76,7 +71,6 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--run-id, -r` - Custom run ID
 - `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
-- `--no-queue, -n` - Execute immediately
 
 > **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
 
