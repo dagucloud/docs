@@ -372,6 +372,45 @@ flowchart TD
 
 <div class="example-card">
 
+### Negated Preconditions
+
+```yaml
+steps:
+  # Run only when NOT in production
+  - command: echo "Running dev task"
+    preconditions:
+      - condition: "${ENVIRONMENT}"
+        expected: "production"
+        negate: true
+
+  # Run only on weekends
+  - command: echo "Weekend maintenance"
+    preconditions:
+      - condition: "`date +%u`"
+        expected: "re:[1-5]"  # Weekdays
+        negate: true          # Invert: run on weekends
+```
+
+```mermaid
+flowchart TD
+  A[Start] --> B{Production?}
+  B --> |Yes| C[Skip]
+  B --> |No| D[Run dev task]
+  C --> E[End]
+  D --> E
+  style A stroke:lightblue,stroke-width:1.6px,color:#333
+  style B stroke:lightblue,stroke-width:1.6px,color:#333
+  style C stroke:gray,stroke-width:1.6px,color:#333
+  style D stroke:green,stroke-width:1.6px,color:#333
+  style E stroke:lightblue,stroke-width:1.6px,color:#333
+```
+
+<a href="/writing-workflows/control-flow#negated-conditions" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Continue On: Exit Codes and Output
 
 ```yaml

@@ -501,6 +501,14 @@ steps:
 | `output` | array | List of stdout patterns that allow continuation (supports regex with `re:` prefix) | `[]` |
 | `markSuccess` | boolean | Mark step as successful when continue conditions are met | `false` |
 
+#### Precondition Fields
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `condition` | string | Command or expression to evaluate | - |
+| `expected` | string | Expected value or regex pattern (prefix with `re:`) | - |
+| `negate` | boolean | Invert the condition logic (run when condition does NOT match) | `false` |
+
 ```yaml
 steps:
   - command: echo "Deploying"
@@ -509,7 +517,14 @@ steps:
         expected: "production"
       - condition: "`git branch --show-current`"
         expected: "main"
-    
+
+  # With negate: run only when NOT in production
+  - command: echo "Running dev task"
+    preconditions:
+      - condition: "${ENVIRONMENT}"
+        expected: "production"
+        negate: true  # Runs when condition does NOT match
+
   - command: echo "Running optional task"
     continueOn:
       failure: true

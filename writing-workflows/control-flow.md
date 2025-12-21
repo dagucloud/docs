@@ -205,6 +205,43 @@ steps:
         expected: "re:0[8-9]|1[0-7]"  # 8 AM - 5 PM
 ```
 
+### Negated Conditions
+
+Use `negate: true` to invert condition logic. The step runs when the condition does **not** match:
+
+```yaml
+steps:
+  # Skip deployment in production environment
+  - command: echo "Running experimental feature"
+    preconditions:
+      - condition: "${ENVIRONMENT}"
+        expected: "production"
+        negate: true  # Runs only when NOT in production
+```
+
+With command-based conditions, `negate` inverts the exit code check:
+
+```yaml
+steps:
+  # Run only if service is NOT running
+  - command: echo "Starting service"
+    preconditions:
+      - condition: "pgrep -f my-service"
+        negate: true  # Runs when command fails (service not found)
+```
+
+Combine `negate` with regex patterns for exclusion logic:
+
+```yaml
+steps:
+  # Skip on weekends
+  - command: echo "Running weekday job"
+    preconditions:
+      - condition: "`date +%u`"
+        expected: "re:[67]"  # 6=Saturday, 7=Sunday
+        negate: true         # Runs when NOT weekend
+```
+
 ### File/Directory Checks
 
 ```yaml
@@ -433,6 +470,32 @@ preconditions:
 
 steps:
   - echo "Running daily job"
+```
+
+### Negated DAG Preconditions
+
+Use `negate: true` at the DAG level to skip the entire workflow when conditions match:
+
+```yaml
+# Skip this DAG in production
+preconditions:
+  - condition: "${ENVIRONMENT}"
+    expected: "production"
+    negate: true  # DAG runs only when NOT in production
+
+steps:
+  - echo "Running development task"
+```
+
+```yaml
+# Run maintenance only outside business hours
+preconditions:
+  - condition: "`date +%H`"
+    expected: "re:0[9]|1[0-7]"  # 9 AM - 5 PM
+    negate: true                # Runs when NOT during business hours
+
+steps:
+  - echo "Running maintenance"
 ```
 
 ### Skip If Already Successful
