@@ -94,8 +94,7 @@ The `--` separator is optional. Everything after flags is treated as the command
 - `--base <file>` - Custom base config file (default: `~/.config/dagu/base.yaml`)
 
 **Execution Control:**
-- `--singleton` - Allow only one active run (sets `maxActiveRuns: 1`)
-- `--worker-label key=value` - Set worker selector labels for distributed execution (repeatable)
+- `--worker-label key=value` - Set worker selector labels (repeatable)
 
 ## Examples
 
@@ -118,14 +117,6 @@ dagu exec \
 ```
 
 Loads environment from `/opt/app/.env.production` before execution.
-
-### Singleton Execution
-
-```bash
-dagu exec --singleton --name nightly-sync -- rsync -av /source/ /dest/
-```
-
-If another `nightly-sync` is already running, this either blocks until the previous run finishes or enqueues the run if queues are enabled.
 
 ### With Worker Labels
 
@@ -175,12 +166,6 @@ For distributed execution, use `dagu enqueue` instead:
 dagu enqueue my-workflow.yaml
 ```
 
-### Concurrency Limits
-
-When `--singleton` is set and another run with the same name is active, the command fails with an error.
-
-Without `--singleton`, multiple runs with the same name can execute concurrently.
-
 ## Generated YAML Format
 
 For `dagu exec -- python script.py --arg=value`:
@@ -199,7 +184,6 @@ With flags:
 ```bash
 dagu exec \
   --env FOO=bar \
-  --singleton \
   -- python script.py
 ```
 
@@ -209,7 +193,6 @@ Generates:
 name: exec-python
 type: chain
 workingDir: /current/directory
-maxActiveRuns: 1
 env:
   - FOO=bar
 steps:

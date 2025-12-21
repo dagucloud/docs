@@ -37,8 +37,7 @@ dagu exec [options] -- <command> [args...]
 - `--workdir <path>` - Working directory
 - `--shell <path>` - Shell binary
 - `--base <file>` - Custom base config file (default: `~/.config/dagu/base.yaml`)
-- `--singleton` - Allow only one active run
-- `--worker-label key=value` - Target specific workers (repeatable, requires queues)
+- `--worker-label key=value` - Set worker selector labels (repeatable)
 
 ```bash
 # Basic usage
@@ -46,9 +45,6 @@ dagu exec -- python script.py
 
 # With environment variables
 dagu exec --env DB_HOST=localhost -- python etl.py
-
-# Singleton execution
-dagu exec --singleton --name backup -- rsync -av /src/ /dst/
 ```
 
 See the [exec guide](/features/exec) for detailed documentation.
