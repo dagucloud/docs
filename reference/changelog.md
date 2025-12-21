@@ -4,7 +4,11 @@
 
 ### Added
 - CLI: Added `cleanup` command for removing old DAG-run data for specified DAG-name
+
+### Fixed
 - Runtime, API: Fix issues that a DAG run often fails due to max active run check
+
+### Changed
 - UI: Updated frontend design color schema and removed dark mode UI
 
 ## v1.26.7 (2025-12-20)
