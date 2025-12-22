@@ -9,8 +9,8 @@ container:
   image: python:3.11
 
 steps:
-  - pip install pandas numpy  # Install dependencies
-  - python process.py          # Process data
+  - command: pip install pandas numpy  # Install dependencies
+  - command: python process.py          # Process data
 ```
 
 All steps run in the same container instance, sharing the filesystem and installed packages.
@@ -26,9 +26,9 @@ container:
   workingDir: /app
 
 steps:
-  - npm install    # Install dependencies
-  - npm run build  # Build the application
-  - npm test       # Run tests
+  - command: npm install    # Install dependencies
+  - command: npm run build  # Build the application
+  - command: npm test       # Run tests
 ```
 
 ## With Environment Variables
@@ -45,7 +45,7 @@ steps:
     retryPolicy:
       limit: 10
       
-  - psql -U postgres myapp -f schema.sql
+  - command: psql -U postgres myapp -f schema.sql
 ```
 
 ## Private Registry Authentication
@@ -61,7 +61,7 @@ container:
   image: ghcr.io/myorg/private-app:latest
 
 steps:
-  - ./app
+  - command: ./app
 ```
 
 Or use `DOCKER_AUTH_CONFIG` environment variable (same format as `~/.docker/config.json`).
@@ -173,9 +173,9 @@ container:
 steps:
   # This will NOT pass through the image ENTRYPOINT automatically.
   # Explicitly call the entrypoint script or the underlying command.
-  - my-entrypoint sendConfirmationEmails
+  - command: my-entrypoint sendConfirmationEmails
   # Or call the underlying command directly, if appropriate
-  - npm run sendConfirmationEmails
+  - command: npm run sendConfirmationEmails
 ```
 
 If your step needs a shell to interpret operators (like `&&`, redirects,
@@ -183,7 +183,7 @@ or environment expansion), wrap it explicitly:
 
 ```yaml
 steps:
-  - sh -c "npm run prep && npm run sendConfirmationEmails"
+  - command: sh -c "npm run prep && npm run sendConfirmationEmails"
 ```
 
 ### When to use step-level Docker instead

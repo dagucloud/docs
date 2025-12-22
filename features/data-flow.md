@@ -23,7 +23,7 @@ steps:
   - command: cat VERSION
     output: VERSION
     
-  - docker build -t myapp:${VERSION} .
+  - command: docker build -t myapp:${VERSION} .
 ```
 
 ### How It Works
@@ -53,8 +53,8 @@ steps:
       echo "Users: ${USER_COUNT}"
       echo "Orders: ${ORDER_COUNT}"
     depends:
-      - count-users
-      - count-orders
+      - command: count-users
+      - command: count-orders
 ```
 
 ## JSON Path References
@@ -63,7 +63,7 @@ Access nested values in JSON output using dot notation:
 
 ```yaml
 steps:
-  - |
+  - command: |
       echo '{
         "database": {
           "host": "localhost",
@@ -75,7 +75,7 @@ steps:
       }'
     output: CONFIG
     
-  - |
+  - command: |
       psql -h ${CONFIG.database.host} \
            -p ${CONFIG.database.port} \
            -U ${CONFIG.database.credentials.username}
@@ -94,7 +94,7 @@ steps:
       ]'
     output: SERVERS
     
-  - ping -c 1 ${SERVERS[0].ip}
+  - command: ping -c 1 ${SERVERS[0].ip}
 ```
 
 ## Environment Variables
@@ -110,7 +110,7 @@ env:
   - API_URL: https://api.example.com
 
 steps:
-  - python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
+  - command: python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
 ```
 
 ### Variable Expansion
@@ -136,7 +136,7 @@ env:
   - HOSTNAME: "`hostname -f`"
 
 steps:
-  - tar -czf backup-${TODAY}-${GIT_COMMIT}.tar.gz data/
+  - command: tar -czf backup-${TODAY}-${GIT_COMMIT}.tar.gz data/
 ```
 
 ## Parameters
@@ -152,7 +152,7 @@ params:
   - DRY_RUN: false
 
 steps:
-  - |
+  - command: |
       echo "Processing data" \
         --env=${ENVIRONMENT} \
         --batch=${BATCH_SIZE} \
@@ -215,7 +215,7 @@ steps:
     params: "DATE=${TODAY}"
     output: ETL_RESULT
     
-  - |
+  - command: |
       echo "Status: ${ETL_RESULT.status}"
       echo "Records: ${ETL_RESULT.outputs.record_count}"
       echo "Duration: ${ETL_RESULT.outputs.duration}"
@@ -245,7 +245,7 @@ steps:
   - call: main-pipeline
     output: PIPELINE
     
-  - |
+  - command: |
       # Access nested outputs
       echo "ETL Status: ${PIPELINE.outputs.ETL_OUTPUT.status}"
       echo "ML Score: ${PIPELINE.outputs.ML_OUTPUT.outputs.accuracy}"
@@ -262,7 +262,7 @@ steps:
       items: ["us-east", "us-west", "eu-central"]
     output: RESULTS
     
-  - |
+  - command: |
       echo "Total regions: ${RESULTS.summary.total}"
       echo "Succeeded: ${RESULTS.summary.succeeded}"
       echo "Failed: ${RESULTS.summary.failed}"
@@ -310,18 +310,18 @@ steps:
   - command: python generate_report.py
     stdout: /tmp/report.txt
     
-  - mail -s "Report" user@example.com < /tmp/report.txt
+  - command: mail -s "Report" user@example.com < /tmp/report.txt
 ```
 
 ### Working with Files
 
 ```yaml
 steps:
-  - |
+  - command: |
       tar -xzf data.tar.gz -C /tmp/
       ls /tmp/data/ > /tmp/filelist.txt
     
-  - |
+  - command: |
       while read file; do
         process.sh "/tmp/data/$file"
       done < /tmp/filelist.txt
@@ -334,7 +334,7 @@ Dagu automatically injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_STEP_NAME
 Example usage:
 ```yaml
 steps:
-  - |
+  - command: |
       echo "Backing up logs for ${DAG_NAME} run ${DAG_RUN_ID}"
       cp ${DAG_RUN_LOG_FILE} /backup/
 ```

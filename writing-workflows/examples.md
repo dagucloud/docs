@@ -12,8 +12,8 @@ Quick reference for all Dagu features. Each example is minimal and copy-paste re
 
 ```yaml
 steps:
-  - echo "Step 1"
-  - echo "Step 2"
+  - command: echo "Step 1"
+  - command: echo "Step 2"
 ```
 
 ```mermaid
@@ -33,12 +33,12 @@ graph LR
 
 ```yaml
 steps:
-  - echo "Setup"
+  - command: echo "Setup"
   - 
-    - echo "Task A"
-    - echo "Task B"
-    - echo "Task C"
-  - echo "Cleanup"
+    - command: echo "Task A"
+    - command: echo "Task B"
+    - command: echo "Task C"
+  - command: echo "Cleanup"
 ```
 
 ```mermaid
@@ -75,7 +75,7 @@ steps:
 ---
 name: processor
 steps:
-  - echo "Processing ${ITEM}"
+  - command: echo "Processing ${ITEM}"
 ```
 
 ```mermaid
@@ -105,8 +105,8 @@ graph TD
 # Default (chain): steps run in order
 type: chain
 steps:
-  - echo "step 1"
-  - echo "step 2"  # Automatically depends on previous
+  - command: echo "step 1"
+  - command: echo "step 2"  # Automatically depends on previous
 
 # Graph mode: only explicit dependencies
 ---
@@ -185,8 +185,8 @@ steps:
   - name: conditional-task
     command: echo "Processing task"
     preconditions:
-      - test -f /data/input.csv
-      - test -s /data/input.csv  # File exists and is not empty
+      - command: test -f /data/input.csv
+      - command: test -s /data/input.csv  # File exists and is not empty
       - condition: "${ENVIRONMENT}"
         expected: "production"
       - condition: "`date '+%d'`"
@@ -349,7 +349,7 @@ preconditions:
     expected: "re:[1-5]"  # Weekdays only
 
 steps:
-  - echo "Run on business days"
+  - command: echo "Run on business days"
 ```
 
 ```mermaid
@@ -419,10 +419,10 @@ steps:
     continueOn:
       exitCode: [0, 3]        # Treat 0 and 3 as non-fatal
       output:
-        - "WARNING"
-        - "re:^INFO:.*"       # Regex match
+        - command: "WARNING"
+        - command: "re:^INFO:.*"       # Regex match
       markSuccess: true       # Mark as success when matched
-  - echo "Continue regardless"
+  - command: echo "Continue regardless"
 ```
 
 ```mermaid
@@ -501,8 +501,8 @@ name: data-processor
 params:
   - TYPE: "batch"
 steps:
-  - echo "Extracting ${TYPE} data"
-  - echo "Transforming data"
+  - command: echo "Extracting ${TYPE} data"
+  - command: echo "Transforming data"
 ```
 
 ```mermaid
@@ -528,7 +528,7 @@ graph TD
 
 ```yaml
 steps:
-  - python prepare_dataset.py
+  - command: python prepare_dataset.py
   - call: train-model
   - call: evaluate-model
 
@@ -539,14 +539,14 @@ workerSelector:
   cuda: "11.8"
   memory: "64G"
 steps:
-  - python train.py --gpu
+  - command: python train.py --gpu
 
 ---
 name: evaluate-model
 workerSelector:
   gpu: "true"
 steps:
-  - python evaluate.py
+  - command: python evaluate.py
 ```
 
 ```mermaid
@@ -573,13 +573,13 @@ flowchart LR
 ```yaml
 steps:
   # Runs on any available worker (local or remote)
-  - wget https://data.example.com/dataset.tar.gz
+  - command: wget https://data.example.com/dataset.tar.gz
     
   # Must run on specific worker type
   - call: process-on-gpu
     
   # Runs locally (no selector)
-  - echo "Processing complete"
+  - command: echo "Processing complete"
 
 ---
 name: process-on-gpu
@@ -587,7 +587,7 @@ workerSelector:
   gpu: "true"
   gpu-model: "nvidia-a100"
 steps:
-  - python gpu_process.py
+  - command: python gpu_process.py
 ```
 
 <a href="/features/distributed-execution#task-routing" class="learn-more">Learn more →</a>
@@ -607,7 +607,7 @@ steps:
       items: ${CHUNKS}
       maxConcurrent: 5
     params: "CHUNK=${ITEM}"
-  - python merge_results.py
+  - command: python merge_results.py
 
 ---
 name: chunk-processor
@@ -617,7 +617,7 @@ workerSelector:
 params:
   - CHUNK: ""
 steps:
-  - python process_chunk.py ${CHUNK}
+  - command: python process_chunk.py ${CHUNK}
 ```
 
 ```mermaid
@@ -654,7 +654,7 @@ steps:
     continueOn:
       failure: true
   # This step always runs
-  - echo "This must succeed"
+  - command: echo "This must succeed"
 ```
 
 <a href="/writing-workflows/error-handling#continue" class="learn-more">Learn more →</a>
@@ -675,7 +675,7 @@ steps:
     continueOn:
       skipped: true
   # This step always runs
-  - echo "Processing main task"
+  - command: echo "Processing main task"
 ```
 
 <a href="/writing-workflows/control-flow#continue-on-skipped" class="learn-more">Learn more →</a>
@@ -761,7 +761,7 @@ steps:
 
 ```yaml
 steps:
-  - echo "Processing main task"
+  - command: echo "Processing main task"
 handlerOn:
   success:
     echo "SUCCESS - Workflow completed"
@@ -837,7 +837,7 @@ dotenv:
   - configs/.env.prod
 
 steps:
-  - echo "Database: ${DATABASE_URL}"
+  - command: echo "Database: ${DATABASE_URL}"
 ```
 
 <a href="/writing-workflows/data-variables#dotenv" class="learn-more">Learn more →</a>
@@ -875,7 +875,7 @@ steps:
 ```yaml
 params: param1 param2  # Default values for $1 and $2
 steps:
-  - python main.py $1 $2
+  - command: python main.py $1 $2
 ```
 
 <a href="/writing-workflows/data-variables#params" class="learn-more">Learn more →</a>
@@ -892,7 +892,7 @@ params:
   - BAR: "`echo 2`"  # Command substitution in defaults
   - ENVIRONMENT: dev
 steps:
-  - python main.py ${FOO} ${BAR} --env=${ENVIRONMENT}
+  - command: python main.py ${FOO} ${BAR} --env=${ENVIRONMENT}
 ```
 
 <a href="/writing-workflows/data-variables#named-params" class="learn-more">Learn more →</a>
@@ -907,7 +907,7 @@ steps:
 steps:
   - command: echo `date +%Y%m%d`
     output: TODAY
-  - echo "Today's date is ${TODAY}"
+  - command: echo "Today's date is ${TODAY}"
 ```
 
 <a href="/writing-workflows/data-variables#output" class="learn-more">Learn more →</a>
@@ -926,7 +926,7 @@ steps:
     params: "REGION=${ITEM}"
     output: RESULTS
 
-  - |
+  - command: |
       echo "Total: ${RESULTS.summary.total}"
       echo "First region: ${RESULTS.results[0].params}"
       echo "First output: ${RESULTS.outputs[0].value}"
@@ -965,7 +965,7 @@ graph TD
 
 ```yaml
 steps:
-  - |
+  - command: |
       echo "DAG: ${DAG_NAME}"
       echo "Run: ${DAG_RUN_ID}"
       echo "Step: ${DAG_RUN_STEP_NAME}"
@@ -1020,7 +1020,7 @@ steps:
 steps:
   - call: sub_workflow
     output: SUB_RESULT
-  - echo "Result: ${SUB_RESULT.outputs.finalValue}"
+  - command: echo "Result: ${SUB_RESULT.outputs.finalValue}"
 ```
 
 <a href="/writing-workflows/data-variables#json-paths" class="learn-more">Learn more →</a>
@@ -1055,7 +1055,7 @@ steps:
 env:
   TODAY: "`date '+%Y%m%d'`"
 steps:
-  - echo hello, today is ${TODAY}
+  - command: echo hello, today is ${TODAY}
 ```
 
 <a href="/writing-workflows/data-variables#command-substitution" class="learn-more">Learn more →</a>
@@ -1158,8 +1158,8 @@ steps:
 ```yaml
 workingDir: /tmp
 steps:
-  - pwd               # Outputs: /tmp
-  - mkdir -p data
+  - command: pwd               # Outputs: /tmp
+  - command: mkdir -p data
   - workingDir: /tmp/data
     command: pwd      # Outputs: /tmp/data
 ```
@@ -1224,9 +1224,9 @@ container:
     - ./src:/app
 
 steps:
-  - pip install -r requirements.txt
-  - pytest tests/
-  - python setup.py build
+  - command: pip install -r requirements.txt
+  - command: pytest tests/
+  - command: python setup.py build
 ```
 
 <a href="/reference/yaml#container-configuration" class="learn-more">Learn more →</a>
@@ -1248,7 +1248,7 @@ container:
     - "5432:5432"
 
 steps:
-  - postgres -D /var/lib/postgresql/data
+  - command: postgres -D /var/lib/postgresql/data
   - command: pg_isready -U postgres -h localhost
     retryPolicy:
       limit: 10
@@ -1313,8 +1313,8 @@ ssh:
   key: ~/.ssh/deploy_key
 
 steps:
-  - curl -f localhost:8080/health
-  - systemctl restart myapp
+  - command: curl -f localhost:8080/health
+  - command: systemctl restart myapp
 ```
 
 <a href="/features/executors/ssh" class="learn-more">Learn more →</a>
@@ -1333,7 +1333,7 @@ container:
     - ./data:/data        # Resolves to /app/project/data:/data
     - .:/workspace        # Resolves to /app/project:/workspace
 steps:
-  - python process.py
+  - command: python process.py
 ```
 
 <a href="/reference/yaml#working-directory-and-volume-resolution" class="learn-more">Learn more →</a>
@@ -1419,7 +1419,7 @@ container:
   restartPolicy: unless-stopped
 
 steps:
-  - echo "Service is ready"
+  - command: echo "Service is ready"
 ```
 
 ```mermaid
@@ -1453,7 +1453,7 @@ container:
   image: ghcr.io/myorg/private-app:latest
 
 steps:
-  - ./app
+  - command: ./app
 ```
 
 <a href="/features/executors/docker#registry-authentication" class="learn-more">Learn more →</a>
@@ -1503,7 +1503,7 @@ ssh:
   knownHostFile: ~/.ssh/known_hosts
 
 steps:
-  - systemctl status myapp
+  - command: systemctl status myapp
 ```
 
 <a href="/reference/yaml#ssh-configuration" class="learn-more">Learn more →</a>
@@ -1530,7 +1530,7 @@ steps:
         subject: "Weekly Report"
         message: "Attached."
         attachments:
-          - report.txt
+          - command: report.txt
 ```
 
 ```mermaid
@@ -1557,7 +1557,7 @@ flowchart LR
 ```yaml
 schedule: "5 4 * * *"  # Run at 04:05 daily
 steps:
-  - echo "Running scheduled job"
+  - command: echo "Running scheduled job"
 ```
 
 <a href="/features/scheduling" class="learn-more">Learn more →</a>
@@ -1572,9 +1572,9 @@ steps:
 schedule: "0 */4 * * *"    # Every 4 hours
 skipIfSuccessful: true     # Skip if already succeeded
 steps:
-  - echo "Extracting data"
-  - echo "Transforming data"
-  - echo "Loading data"
+  - command: echo "Extracting data"
+  - command: echo "Transforming data"
+  - command: echo "Loading data"
 ```
 
 <a href="/features/scheduling#skip-redundant" class="learn-more">Learn more →</a>
@@ -1589,7 +1589,7 @@ steps:
 queue: "batch"        # Assign to named queue
 maxActiveRuns: 2      # Max concurrent runs
 steps:
-  - echo "Processing data"
+  - command: echo "Processing data"
 ```
 
 <a href="/features/queues" class="learn-more">Learn more →</a>
@@ -1605,7 +1605,7 @@ schedule:
   - "0 9 * * MON-FRI"   # Weekdays 9 AM
   - "0 14 * * SAT,SUN"  # Weekends 2 PM
 steps:
-  - echo "Run on multiple times"
+  - command: echo "Run on multiple times"
 ```
 
 <a href="/features/scheduling#multiple-schedules" class="learn-more">Learn more →</a>
@@ -1619,7 +1619,7 @@ steps:
 ```yaml
 schedule: "CRON_TZ=America/New_York 0 9 * * *"
 steps:
-  - echo "9AM New York"
+  - command: echo "9AM New York"
 ```
 
 <a href="/features/scheduling#timezone-support" class="learn-more">Learn more →</a>
@@ -1637,7 +1637,7 @@ schedule:
   stop: "0 18 * * *"     # Stop 6 PM
 restartWaitSec: 60
 steps:
-  - echo "Long-running service"
+  - command: echo "Long-running service"
 ```
 
 <a href="/features/scheduling#restart-schedule" class="learn-more">Learn more →</a>
@@ -1662,7 +1662,7 @@ queues:
 queue: "critical"
 maxActiveRuns: 3
 steps:
-  - echo "Processing critical task"
+  - command: echo "Processing critical task"
 ```
 
 Configure queues globally and per-DAG.
@@ -1707,8 +1707,8 @@ steps:
 histRetentionDays: 30    # Keep 30 days of history
 schedule: "0 0 * * *"     # Daily at midnight
 steps:
-  - echo "Archiving old data"
-  - rm -rf /tmp/archive/*
+  - command: echo "Archiving old data"
+  - command: rm -rf /tmp/archive/*
 ```
 
 Control how long execution history is retained.
@@ -1726,7 +1726,7 @@ maxOutputSize: 10485760   # 10MB max output per step
 steps:
   - command: echo "Analyzing logs"
     stdout: /logs/analysis.out
-  - tail -n 1000 /logs/analysis.out
+  - command: tail -n 1000 /logs/analysis.out
 ```
 
 <a href="/reference/yaml#data-fields" class="learn-more">Learn more →</a>
@@ -1821,8 +1821,8 @@ otel:
     service.name: "dagu-${DAG_NAME}"
     deployment.environment: "${ENV}"
 steps:
-  - echo "Fetching data"
-  - python process.py
+  - command: echo "Fetching data"
+  - command: python process.py
   - call: pipelines/transform
 ```
 
@@ -1867,9 +1867,9 @@ steps:
 ```yaml
 queue: compute-queue      # Assign to specific queue
 steps:
-  - echo "Preparing data"
-  - echo "Running intensive computation"
-  - echo "Storing results"
+  - command: echo "Preparing data"
+  - command: echo "Running intensive computation"
+  - command: echo "Storing results"
 ```
 
 <a href="/features/queues" class="learn-more">Learn more →</a>
@@ -1883,7 +1883,7 @@ steps:
 ```yaml
 histRetentionDays: 60     # Keep 60 days history
 steps:
-  - echo "Running periodic maintenance"
+  - command: echo "Running periodic maintenance"
 ```
 
 <a href="/features/queues" class="learn-more">Learn more →</a>

@@ -19,8 +19,8 @@ ssh:
 
 steps:
   # All SSH steps inherit DAG-level configuration
-  - curl -f http://localhost:8080/health
-  - systemctl restart myapp
+  - command: curl -f http://localhost:8080/health
+  - command: systemctl restart myapp
 ```
 
 ## Step-Level Configuration

@@ -23,7 +23,7 @@ params:
     DEBUG: false
 
 steps:
-  - echo $1 --env=${ENVIRONMENT} --port=${PORT}
+  - command: echo $1 --env=${ENVIRONMENT} --port=${PORT}
 ```
 
 ## JSON Schema Validation
@@ -130,7 +130,7 @@ params:
   - ARTIFACT: backup-${PREFIX}-${DATE}.tar.gz
 
 steps:
-  - backup-${DATE}-${GIT_COMMIT}.tar.gz
+  - command: backup-${DATE}-${GIT_COMMIT}.tar.gz
 ```
 
 ## Using Parameters
@@ -143,7 +143,7 @@ params:
 
 steps:
   # In commands
-  - python processor.py --input ${INPUT} --threads ${THREADS}
+  - command: python processor.py --input ${INPUT} --threads ${THREADS}
     
   # In conditions
   - command: npm test
@@ -172,7 +172,7 @@ params:
   - SAFETY_MODE: enabled
 
 steps:
-  - echo "Deploying to ${ENVIRONMENT} with DB ${DB_HOST}"
+  - command: echo "Deploying to ${ENVIRONMENT} with DB ${DB_HOST}"
 ```
 
 ## Enforcing Run ID Format
@@ -185,5 +185,5 @@ runConfig:
   disableRunIdEdit: true   # Must use auto-generated run IDs
 
 steps:
-  - echo "Auditing run ${DAG_RUN_ID}"
+  - command: echo "Auditing run ${DAG_RUN_ID}"
 ```

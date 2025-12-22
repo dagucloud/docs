@@ -68,7 +68,7 @@ steps:
       - STEP_ONLY: step_only_value
     # Output: step_value
   
-  - echo $SHARED_VAR $DAG_ONLY
+  - command: echo $SHARED_VAR $DAG_ONLY
     # Output: dag_value dag_only_value
 ```
 
@@ -149,7 +149,7 @@ Define default positional parameters that can be overridden:
 ```yaml
 params: param1 param2     # Default values for $1 and $2
 steps:
-  - python main.py $1 $2  # Will use command-line args or defaults
+  - command: python main.py $1 $2  # Will use command-line args or defaults
 ```
 
 ### Named Parameters
@@ -161,7 +161,7 @@ params:
   - FOO: 1           # Default value for ${FOO}
   - BAR: "`echo 2`"  # Default value for ${BAR}, using command substitution
 steps:
-  - python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
+  - command: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
 ```
 
 ## Output Handling
@@ -211,7 +211,7 @@ Examples:
 steps:
   - call: sub_workflow
     output: SUB_RESULT
-  - echo "The result is ${SUB_RESULT.outputs.finalValue}"
+  - command: echo "The result is ${SUB_RESULT.outputs.finalValue}"
 ```
 
 If `SUB_RESULT` contains:
@@ -240,7 +240,7 @@ steps:
   - id: validate
     command: python validate.py
     depends:
-      - extract  # Can use ID in dependencies
+      - command: extract  # Can use ID in dependencies
 
   - command: |
       # Reference step properties using IDs
@@ -263,7 +263,7 @@ Use command output in configurations:
 env:
   TODAY: "`date '+%Y%m%d'`"
 steps:
-  - "echo hello, today is ${TODAY}"
+  - command: "echo hello, today is ${TODAY}"
 ```
 
 ## Sub-workflow Data
@@ -275,7 +275,7 @@ steps:
   - call: sub_workflow
     params: "FOO=BAR"
     output: SUB_RESULT
-  - echo $SUB_RESULT
+  - command: echo $SUB_RESULT
 ```
 
 Example output format:
@@ -321,7 +321,7 @@ steps:
   - command: python generate.py
     stdout: /tmp/data.json
   
-  - python process.py < /tmp/data.json
+  - command: python process.py < /tmp/data.json
 ```
 
 ## Global Configuration

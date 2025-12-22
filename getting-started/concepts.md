@@ -27,8 +27,8 @@ The basic unit of execution. Each step runs a command:
 
 ```yaml
 steps:
-  - curl -O https://example.com/data.csv  # Download data
-  - python analyze.py data.csv           # Process data
+  - command: curl -O https://example.com/data.csv  # Download data
+  - command: python analyze.py data.csv           # Process data
 ```
 
 ### Dependencies
@@ -62,7 +62,7 @@ params:
   - REGION: us-east-1
 
 steps:
-  - echo "Deploying to ${ENV} in ${REGION}"
+  - command: echo "Deploying to ${ENV} in ${REGION}"
 ```
 
 Override at runtime:
@@ -78,7 +78,7 @@ Pass data between steps using `output`:
 steps:
   - command: date +%Y%m%d
     output: TODAY
-  - tar -czf backup_${TODAY}.tar.gz /data
+  - command: tar -czf backup_${TODAY}.tar.gz /data
 ```
 
 ## Status Management
@@ -154,7 +154,7 @@ container:
   volumes:
     - /app/data:/data
 steps:
-  - python script.py
+  - command: python script.py
 ```
 
 See [Docker Executor](/features/executors/docker) for more details.
@@ -170,7 +170,7 @@ ssh:
   key: ~/.ssh/id_rsa
 
 steps:
-  - echo "Running remote script"
+  - command: echo "Running remote script"
 ```
 
 See [SSH Executor](/features/executors/ssh) for more details.

@@ -9,8 +9,8 @@ maxActiveRuns: 1        # Only one instance of this DAG
 maxActiveSteps: 1       # Max 1 steps running concurrently
 
 steps:
-  - sh -c "echo Starting heavy computation; sleep 3; echo Completed"
-  - echo "Processing large dataset"
+  - command: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
+  - command: echo "Processing large dataset"
   - parallel:
       items: ${FILE_LIST}
       maxConcurrent: 3  # Limit parallel I/O
@@ -51,8 +51,8 @@ queue: heavy-jobs       # Assign to specific queue
 maxActiveRuns: 2        # Queue allows 2 concurrent
 
 steps:
-  - sh -c "echo Starting intensive task; sleep 10; echo Done"
-  - echo "Quick task"
+  - command: sh -c "echo Starting intensive task; sleep 10; echo Done"
+  - command: echo "Quick task"
 ```
 
 You can define queues in the global configuration to set concurrency limits.

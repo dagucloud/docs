@@ -8,7 +8,7 @@ Create `hello.yaml`:
 
 ```yaml
 steps:
-  - echo "Hello from Dagu!"
+  - command: echo "Hello from Dagu!"
 ```
 
 Run it:
@@ -52,7 +52,7 @@ Step names are optional. When omitted, Dagu automatically generates names based 
 
 ```yaml
 steps:
-  - echo "First step"              # Auto-named: cmd_1
+  - command: echo "First step"              # Auto-named: cmd_1
   - script: |                      # Auto-named: script_2
       echo "Multi-line"
       echo "Script"
@@ -83,9 +83,9 @@ For simple commands, you can use an even more concise syntax:
 
 ```yaml
 steps:
-  - echo "Hello World"
-  - ls -la
-  - python script.py
+  - command: echo "Hello World"
+  - command: ls -la
+  - command: python script.py
 ```
 
 This is equivalent to:
@@ -191,12 +191,12 @@ For simpler cases, you can use nested arrays to define parallel steps with autom
 
 ```yaml
 steps:
-  - echo "Step 1: Sequential"
+  - command: echo "Step 1: Sequential"
   - 
-    - echo "Step 2a: Parallel"
-    - echo "Step 2b: Parallel"
-    - echo "Step 2c: Parallel"
-  - echo "Step 3: Sequential"
+    - command: echo "Step 2a: Parallel"
+    - command: echo "Step 2b: Parallel"
+    - command: echo "Step 2c: Parallel"
+  - command: echo "Step 3: Sequential"
 ```
 
 In this syntax:
@@ -233,16 +233,16 @@ You can have multiple parallel groups:
 
 ```yaml
 steps:
-  - echo "Start"
+  - command: echo "Start"
   - 
-    - echo "First parallel group - task 1"
-    - echo "First parallel group - task 2"
-  - echo "Middle sequential step"
+    - command: echo "First parallel group - task 1"
+    - command: echo "First parallel group - task 2"
+  - command: echo "Middle sequential step"
   -
-    - echo "Second parallel group - task 1"
-    - echo "Second parallel group - task 2"
-    - echo "Second parallel group - task 3"
-  - echo "End"
+    - command: echo "Second parallel group - task 1"
+    - command: echo "Second parallel group - task 2"
+    - command: echo "Second parallel group - task 3"
+  - command: echo "End"
 ```
 
 You can also mix shorthand and standard syntax:
@@ -252,7 +252,7 @@ steps:
   - name: setup
     command: ./setup.sh
   - 
-    - echo "Parallel task 1"
+    - command: echo "Parallel task 1"
     - name: test
       command: npm test
       env:

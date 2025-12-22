@@ -59,7 +59,7 @@ name: train
 workerSelector:
   gpu: "true"
 steps:
-  - python train.py
+  - command: python train.py
 
 ```
 
@@ -90,7 +90,7 @@ name: gpu-task
 workerSelector:
   gpu-task: "true"
 steps:
-  - python gpu-task.py
+  - command: python gpu-task.py
 
 ---
 # Run on a worker with faster cpu
@@ -98,5 +98,5 @@ name: cpu-task
 workerSelector:
   cpu-task: "true"
 steps:
-  - python cpu-task.py
+  - command: python cpu-task.py
 ```

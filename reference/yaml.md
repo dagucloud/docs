@@ -205,8 +205,8 @@ ssh:
 
 steps:
   # These steps inherit the DAG-level SSH configuration
-  - systemctl status myapp
-  - systemctl restart myapp
+  - command: systemctl status myapp
+  - command: systemctl restart myapp
   
   # Step-level config overrides DAG-level
   - executor:
@@ -239,7 +239,7 @@ container:
     - /abs/path:/other   # Absolute paths are unchanged
 
 steps:
-  - python process.py
+  - command: python process.py
 ```
 
 **Working Directory Inheritance:**
@@ -253,7 +253,7 @@ steps:
 workingDir: /project          # DAG-level working directory
 
 steps:
-  - pwd                   # Outputs: /project
+  - command: pwd                   # Outputs: /project
   - workingDir: /custom   # Override DAG workingDir
     command: pwd          # Outputs: /custom
 ```
@@ -273,14 +273,14 @@ steps:
 # Child DAG without explicit workingDir
 name: child-workflow
 steps:
-  - pwd                     # Outputs: /app/project (inherited from parent)
+  - command: pwd                     # Outputs: /app/project (inherited from parent)
 
 ---
 # Child DAG with explicit workingDir (overrides inheritance)
 name: child-with-custom-wd
 workingDir: /custom/path
 steps:
-  - pwd                     # Outputs: /custom/path
+  - command: pwd                     # Outputs: /custom/path
 ```
 
 > **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `workerSelector`), sub-DAGs use their own context on the worker node.
@@ -424,24 +424,24 @@ Steps can be defined in multiple formats:
 #### Standard Format
 ```yaml
 steps:
-  - echo "Hello"
+  - command: echo "Hello"
 ```
 
 #### Shorthand String Format
 ```yaml
 steps:
-  - echo "Hello"     # Equivalent to: {command: echo "Hello"}
-  - ls -la          # Equivalent to: {command: ls -la}
+  - command: echo "Hello"     # Equivalent to: {command: echo "Hello"}
+  - command: ls -la          # Equivalent to: {command: ls -la}
 ```
 
 #### Nested Array Format (Parallel Steps)
 ```yaml
 steps:
-  - echo "Sequential step 1"
+  - command: echo "Sequential step 1"
   - 
-    - echo "Parallel step 2a"
-    - echo "Parallel step 2b"
-  - echo "Sequential step 3"
+    - command: echo "Parallel step 2a"
+    - command: echo "Parallel step 2b"
+  - command: echo "Sequential step 3"
 ```
 
 In the nested array format:
@@ -625,9 +625,9 @@ steps:
       config:
         image: python:3.11
         volumes:
-          - /data:/data:ro
+          - command: /data:/data:ro
         env:
-          - API_KEY=${API_KEY}
+          - command: API_KEY=${API_KEY}
     command: python process.py
 
   - executor:
@@ -656,7 +656,7 @@ workerSelector:
   gpu: "true"
   memory: "64G"
 steps:
-  - python train_model.py
+  - command: python train_model.py
 ```
 
 **Worker Selection Rules:**
@@ -677,7 +677,7 @@ params:
   - DOMAIN: example.com
 
 steps:
-  - echo "Hello ${USER} from ${DOMAIN}"
+  - command: echo "Hello ${USER} from ${DOMAIN}"
 ```
 
 ### Environment Variables
@@ -688,7 +688,7 @@ env:
   - API_KEY: ${SECRET_API_KEY}  # From system env
 
 steps:
-  - curl -H "X-API-Key: ${API_KEY}" ${API_URL}
+  - command: curl -H "X-API-Key: ${API_KEY}" ${API_URL}
 ```
 
 ### Loading Environment from .env Files
@@ -732,15 +732,15 @@ workingDir: /app
 dotenv: .env          # Optional, this is the default
 
 steps:
-  - psql ${DATABASE_URL}
-  - echo "Debug is ${DEBUG}"
+  - command: psql ${DATABASE_URL}
+  - command: echo "Debug is ${DEBUG}"
 ```
 
 ### Command Substitution
 
 ```yaml
 steps:
-  - echo "Today is `date +%Y-%m-%d`"
+  - command: echo "Today is `date +%Y-%m-%d`"
     
   - command: deploy.sh
     preconditions:
@@ -820,7 +820,7 @@ preconditions:
 
 type: graph
 steps:
-  - ./scripts/validate.sh
+  - command: ./scripts/validate.sh
 
   - command: python extract.py --date=${DATE}
     depends: validate-environment
@@ -843,7 +843,7 @@ steps:
       config:
         image: postgres:16
         env:
-          - PGPASSWORD=${DB_PASSWORD}
+          - command: PGPASSWORD=${DB_PASSWORD}
     command: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
     
   - command: python validate_results.py --date=${DATE}

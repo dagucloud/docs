@@ -83,7 +83,7 @@ Define default positional parameters:
 params: first second third
 
 steps:
-  - echo "Args: $1 $2 $3"
+  - command: echo "Args: $1 $2 $3"
 ```
 
 Run with custom values:
@@ -102,7 +102,7 @@ params:
   - DEBUG: false
 
 steps:
-  - ./server --env=${ENVIRONMENT} --port=${PORT} --debug=${DEBUG}
+  - command: ./server --env=${ENVIRONMENT} --port=${PORT} --debug=${DEBUG}
 ```
 
 Override at runtime:
@@ -120,7 +120,7 @@ params:
   - VERSION: latest
 
 steps:
-  - echo "Deploying $1 to ${ENVIRONMENT} version ${VERSION}"
+  - command: echo "Deploying $1 to ${ENVIRONMENT} version ${VERSION}"
 ```
 
 Run with:
@@ -143,7 +143,7 @@ params:
   - USER_COUNT: "`wc -l < users.txt`"
 
 steps:
-  - echo "Deploy on ${TODAY} from ${HOSTNAME}"
+  - command: echo "Deploy on ${TODAY} from ${HOSTNAME}"
 ```
 
 ## Output Variables
@@ -156,7 +156,7 @@ Capture command output to use in later steps:
 steps:
   - command: cat VERSION
     output: VERSION
-  - docker build -t myapp:${VERSION} .
+  - command: docker build -t myapp:${VERSION} .
 ```
 
 ### Output Size Limits
@@ -193,7 +193,7 @@ steps:
       echo '{"db": {"host": "localhost", "port": 5432}}'
     output: CONFIG
     
-  - psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
+  - command: psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
 ```
 
 ### Sub-workflow Output
@@ -206,7 +206,7 @@ steps:
     params: "DATE=${TODAY}"
     output: ETL_RESULT
     
-  - |
+  - command: |
       echo "Records processed: ${ETL_RESULT.outputs.record_count}"
       echo "Status: ${ETL_RESULT.outputs.status}"
 ```
@@ -221,7 +221,7 @@ steps:
     command: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
     continueOn: failed
 
-  - |
+  - command: |
       if [ "${risky.exitCode}" = "0" ]; then
         echo "Success! Output was:"
         cat ${risky.stdout}

@@ -58,9 +58,9 @@ steps:
       type: mail
       config:
         to:
-          - team@example.com
-          - manager@example.com
-          - stakeholders@example.com
+          - command: team@example.com
+          - command: manager@example.com
+          - command: stakeholders@example.com
         from: noreply@example.com
         subject: "Daily Report Ready"
         message: "The daily report has been generated."
@@ -123,7 +123,7 @@ handlerOn:
           Check logs: ${DAG_RUN_LOG_FILE}
 
 steps:
-  - echo "Run your main tasks here"
+  - command: echo "Run your main tasks here"
 ```
 
 ### Error Alerts
@@ -144,7 +144,7 @@ steps:
 
 ```yaml
 steps:
-  - echo "Generating report..." > report.txt
+  - command: echo "Generating report..." > report.txt
 
   - executor:
       type: mail
@@ -154,7 +154,7 @@ steps:
         subject: "Weekly Report"
         message: "Please find the weekly report attached."
         attachments:
-          - report.txt
+          - command: report.txt
 ```
 
 ### With Retry

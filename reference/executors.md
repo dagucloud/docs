@@ -144,9 +144,9 @@ steps:
         autoRemove: true
         host:
           binds:
-            - /host/data:/container/data:ro      # Read-only
-            - /host/output:/container/output:rw  # Read-write
-            - ./config:/app/config               # Relative path
+            - command: /host/data:/container/data:ro      # Read-only
+            - command: /host/output:/container/output:rw  # Read-write
+            - command: ./config:/app/config               # Relative path
     command: python process.py /container/data
 ```
 
@@ -196,9 +196,9 @@ steps:
         autoRemove: true
         container:
           env:
-            - NODE_ENV=production
-            - API_KEY=${API_KEY}  # Pass from DAG env
-            - DB_HOST=postgres
+            - command: NODE_ENV=production
+            - command: API_KEY=${API_KEY}  # Pass from DAG env
+            - command: DB_HOST=postgres
     command: npm start
 ```
 
@@ -216,8 +216,8 @@ steps:
           EndpointsConfig:
             my-network:
               Aliases:
-                - my-service
-                - my-alias
+                - command: my-service
+                - command: my-alias
     command: ping other-service
 ```
 
@@ -248,10 +248,10 @@ steps:
         container:
           workingDir: /app
           env:
-            - PYTHONPATH=/app
+            - command: PYTHONPATH=/app
         host:
           binds:
-            - ./src:/app
+            - command: ./src:/app
     command: python main.py
 ```
 
@@ -268,7 +268,7 @@ steps:
           user: root
           workingDir: /app
           env:
-            - DEBUG=true
+            - command: DEBUG=true
     command: echo "Debug mode"
 ```
 
@@ -295,9 +295,9 @@ steps:
         autoRemove: false
         container:
           env:
-            - POSTGRES_USER=test
-            - POSTGRES_PASSWORD=test
-            - POSTGRES_DB=testdb
+            - command: POSTGRES_USER=test
+            - command: POSTGRES_PASSWORD=test
+            - command: POSTGRES_DB=testdb
           exposedPorts:
             5432/tcp: {}
         host:
@@ -311,7 +311,7 @@ steps:
           EndpointsConfig:
             bridge:
               Aliases:
-                - postgres-test
+                - command: postgres-test
     command: postgres
 ```
 
@@ -516,7 +516,7 @@ steps:
         source: ./logs
         destination: logs-backup.tar.gz
         include:
-          - "**/*.log"
+          - command: "**/*.log"
     command: create
 ```
 
@@ -577,8 +577,8 @@ steps:
           
           Generated at: ${TIMESTAMP}
         attachments:
-          - /tmp/daily-report.pdf
-          - /tmp/summary.csv
+          - command: /tmp/daily-report.pdf
+          - command: /tmp/summary.csv
 ```
 
 ### Multiple Recipients
@@ -590,9 +590,9 @@ steps:
       type: mail
       config:
         to: 
-          - ops@company.com
-          - alerts@company.com
-          - oncall@company.com
+          - command: ops@company.com
+          - command: alerts@company.com
+          - command: oncall@company.com
         from: dagu@company.com
         subject: "[ALERT] Process Failed"
         message: |

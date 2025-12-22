@@ -74,7 +74,7 @@ otel:
   endpoint: "http://localhost:4318/v1/traces"
   insecure: true
 steps:
-  - echo "Testing HTTP endpoint"
+  - command: echo "Testing HTTP endpoint"
 ```
 
 ### With Authentication
@@ -89,7 +89,7 @@ otel:
   headers:
     Authorization: "Bearer ${OTEL_TOKEN}"
 steps:
-  - echo "Testing with auth"
+  - command: echo "Testing with auth"
 ```
 
 ### Custom Resource Attributes
@@ -107,7 +107,7 @@ otel:
     team: "platform"
     region: "us-east-1"
 steps:
-  - echo "Testing resource attributes"
+  - command: echo "Testing resource attributes"
 ```
 
 ## Testing Nested DAGs
@@ -122,12 +122,12 @@ otel:
   insecure: true
 
 steps:
-  - echo "Starting parent workflow"
+  - command: echo "Starting parent workflow"
   - call: child-etl.yaml
     params: "SOURCE=production DATE=2024-01-01"
   - call: child-analytics.yaml
     params: "INPUT=${run-etl.output}"
-  - echo "Parent workflow complete"
+  - command: echo "Parent workflow complete"
     
 ```
 
@@ -147,7 +147,7 @@ otel:
 steps:
   - command: echo "Extracting from ${SOURCE}"
     output: EXTRACTED_DATA
-  - echo "Transforming data" && echo "/tmp/data.csv"
+  - command: echo "Transforming data" && echo "/tmp/data.csv"
 ```
 
 ```yaml
@@ -161,7 +161,7 @@ otel:
   insecure: true
 
 steps:
-  - echo "Analyzing ${INPUT}"
+  - command: echo "Analyzing ${INPUT}"
 ```
 
 ### 3. Run and Verify
@@ -371,7 +371,7 @@ otel:
     service.version: "${APP_VERSION}"
     deployment.environment: "${ENVIRONMENT}"
 steps:
-  - echo "Testing production setup"
+  - command: echo "Testing production setup"
 ```
 
 Run with environment variables:

@@ -20,7 +20,7 @@ otel:
   enabled: true
   endpoint: "localhost:4317"  # OTLP gRPC endpoint
 steps:
-  - python process.py
+  - command: python process.py
 ```
 
 ### Full Configuration
@@ -137,7 +137,7 @@ otel:
   resource:
     service.name: "dagu-${DAG_NAME}"  # Override specific attributes
 steps:
-  - echo "Processing with telemetry"
+  - command: echo "Processing with telemetry"
 ```
 
 ## Integration Examples

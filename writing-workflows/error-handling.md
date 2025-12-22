@@ -79,10 +79,10 @@ steps:
   - command: validate.sh
     continueOn:
       output:
-        - "WARNING"
-        - "SKIP"
-        - "re:^INFO:.*"      # Regex pattern
-        - "re:WARN-[0-9]+"   # Another regex
+        - command: "WARNING"
+        - command: "SKIP"
+        - command: "re:^INFO:.*"      # Regex pattern
+        - command: "re:WARN-[0-9]+"   # Another regex
 
   # Mark as success when continuing
   - command: optimize.sh
@@ -99,8 +99,8 @@ steps:
   - command: echo "Running migration"
     continueOn:
       output:
-        - "re:WARNING:.*already exists"
-        - "re:NOTICE:.*will be created"
+        - command: "re:WARNING:.*already exists"
+        - command: "re:NOTICE:.*will be created"
       exitCode: [0, 1]
       
   # Service health check with fallback
@@ -119,8 +119,8 @@ steps:
     continueOn:
       exitCode: [0, 4, 8]  # 0=clean, 4=warnings, 8=info
       output:
-        - "re:LOW SEVERITY:"
-        - "re:INFORMATIONAL:"
+        - command: "re:LOW SEVERITY:"
+        - command: "re:INFORMATIONAL:"
 ```
 
 See the [Continue On Reference](/reference/continue-on) for complete documentation.
@@ -188,7 +188,7 @@ steps:
         subject: "Report Ready"
         message: "See attached"
         attachments:
-          - /tmp/report.pdf
+          - command: /tmp/report.pdf
 ```
 
 ## Timeouts and Cleanup
@@ -209,5 +209,5 @@ steps:
   - command: analyze.sh
     continueOn: failed
 
-  - cleanup.sh  # Runs even if process fails
+  - command: cleanup.sh  # Runs even if process fails
 ```

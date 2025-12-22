@@ -172,7 +172,7 @@ workerSelector:
   gpu: "true"
   memory: "64G"
 steps:
-  - python train.py
+  - command: python train.py
 ```
 
 ### Communication Protocol

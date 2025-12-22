@@ -10,9 +10,9 @@ Define execution order with step dependencies.
 
 ```yaml
 steps:
-  - wget https://example.com/data.zip  # Download archive
-  - unzip data.zip                     # Extract files
-  - python process.py                  # Process data
+  - command: wget https://example.com/data.zip  # Download archive
+  - command: unzip data.zip                     # Extract files
+  - command: python process.py                  # Process data
 ```
 
 ### Multiple Dependencies
@@ -28,8 +28,8 @@ steps:
 
   - command: echo "Merging a.zip and b.zip"
     depends:
-      - download-a
-      - download-b
+      - command: download-a
+      - command: download-b
 ```
 
 ## Modular Workflows and Iteration Patterns
@@ -65,7 +65,7 @@ steps:
 name: child-task
 # No workingDir defined - inherits /app/project from parent
 steps:
-  - pwd                 # Outputs: /app/project
+  - command: pwd                 # Outputs: /app/project
 ```
 
 To override the inherited working directory, define an explicit `workingDir` in the child DAG:
@@ -74,7 +74,7 @@ To override the inherited working directory, define an explicit `workingDir` in 
 name: child-with-custom-dir
 workingDir: /custom/path    # Overrides inherited workingDir
 steps:
-  - pwd                     # Outputs: /custom/path
+  - command: pwd                     # Outputs: /custom/path
 ```
 
 > **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `workerSelector`), sub-DAGs use their own context on the worker node.
@@ -94,8 +94,8 @@ name: data-processor
 params:
   - TYPE: "batch"
 steps:
-  - echo "Extracting ${TYPE} data"
-  - echo "Transforming data"
+  - command: echo "Extracting ${TYPE} data"
+  - command: echo "Transforming data"
 ```
 
 ### Dynamic Iteration
@@ -118,7 +118,7 @@ name: worker
 params:
   - FILE: ""
 steps:
-  - echo "Processing ${FILE}"
+  - command: echo "Processing ${FILE}"
 
 ```
 
@@ -138,7 +138,7 @@ steps:
     params: "CHUNK=${ITEM}"
     output: MAP_RESULTS
 
-  - |
+  - command: |
       echo "Reducing results from ${MAP_RESULTS.outputs}"
 ---
 name: worker
@@ -373,7 +373,7 @@ steps:
 steps:
   - command: echo "Cleaning up"
     continueOn: failed  # Shorthand syntax
-  - echo "Processing"
+  - command: echo "Processing"
 ```
 
 ### Continue on Specific Exit Codes
@@ -383,7 +383,7 @@ steps:
   - command: echo "Checking status"
     continueOn:
       exitCode: [0, 1, 2]  # Continue on these codes
-  - echo "Processing"
+  - command: echo "Processing"
 ```
 
 ### Continue on Output Match
@@ -393,11 +393,11 @@ steps:
   - command: echo "Validating"
     continueOn:
       output:
-        - "WARNING"
-        - "SKIP"
-        - "re:^\[WARN\]"        # Regex: lines starting with [WARN]
-        - "re:error.*ignored"   # Regex: error...ignored pattern
-  - echo "Processing"
+        - command: "WARNING"
+        - command: "SKIP"
+        - command: "re:^\[WARN\]"        # Regex: lines starting with [WARN]
+        - command: "re:error.*ignored"   # Regex: error...ignored pattern
+  - command: echo "Processing"
 ```
 
 ### Continue on Skipped
@@ -409,7 +409,7 @@ steps:
       - condition: "${FEATURE_FLAG}"
         expected: "enabled"
     continueOn: skipped  # Shorthand syntax
-  - echo "Processing"  # Runs regardless of optional feature
+  - command: echo "Processing"  # Runs regardless of optional feature
 ```
 
 ### Mark as Success
@@ -433,8 +433,8 @@ steps:
     continueOn:
       exitCode: [0, 3, 4, 5]  # Various non-error states
       output:
-        - "Analysis complete with warnings"
-        - "re:Found [0-9]+ minor issues"
+        - command: "Analysis complete with warnings"
+        - command: "re:Found [0-9]+ minor issues"
       markSuccess: true
       
   # Graceful degradation pattern
@@ -469,7 +469,7 @@ preconditions:
     expected: "re:[1-5]"  # Weekdays only
 
 steps:
-  - echo "Running daily job"
+  - command: echo "Running daily job"
 ```
 
 ### Negated DAG Preconditions
@@ -484,7 +484,7 @@ preconditions:
     negate: true  # DAG runs only when NOT in production
 
 steps:
-  - echo "Running development task"
+  - command: echo "Running development task"
 ```
 
 ```yaml
@@ -495,7 +495,7 @@ preconditions:
     negate: true                # Runs when NOT during business hours
 
 steps:
-  - echo "Running maintenance"
+  - command: echo "Running maintenance"
 ```
 
 ### Skip If Already Successful
@@ -505,5 +505,5 @@ schedule: "0 * * * *"  # Every hour
 skipIfSuccessful: true  # Skip if already ran successfully today (e.g., run manually)
 
 steps:
-  - echo "Syncing data"
+  - command: echo "Syncing data"
 ```

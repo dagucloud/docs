@@ -142,7 +142,7 @@ command: python train_model.py
 workerSelector:
   gpu: "true"
 steps:
-  - python train_model.py
+  - command: python train_model.py
 ```
 
 ## Worker Labels

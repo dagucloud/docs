@@ -13,9 +13,9 @@ steps:
   - call: file-processor
     parallel:
       items:
-        - "file1.csv"
-        - "file2.csv"
-        - "file3.csv"
+        - command: "file1.csv"
+        - command: "file2.csv"
+        - command: "file3.csv"
     params: "FILE=${ITEM}"
 
 ---
@@ -23,7 +23,7 @@ name: file-processor
 params:
   - FILE: ""
 steps:
-  - python process.py --file ${FILE}
+  - command: python process.py --file ${FILE}
 ```
 
 ### With Concurrency Control
@@ -58,7 +58,7 @@ steps:
       items: [1, 2, 3]
     output: RESULTS
   
-  - |
+  - command: |
       echo "Total: ${RESULTS.summary.total}"
       echo "Succeeded: ${RESULTS.summary.succeeded}"
       echo "Failed: ${RESULTS.summary.failed}"
@@ -143,7 +143,7 @@ Set execution time limits:
 timeoutSec: 3600  # 1 hour timeout
 
 steps:
-  - echo "Processing"
+  - command: echo "Processing"
 ```
 
 ### Step Timeout (timeoutSec)
@@ -199,7 +199,7 @@ Delay workflow start:
 delaySec: 60  # Wait 60 seconds before starting
 
 steps:
-  - echo "Running task"
+  - command: echo "Running task"
 ```
 
 ## Execution Order
@@ -208,9 +208,9 @@ steps:
 
 ```yaml
 steps:
-  - echo "1"
-  - echo "2"  # Runs after step 1
-  - echo "3"  # Runs after step 2
+  - command: echo "1"
+  - command: echo "2"  # Runs after step 1
+  - command: echo "3"  # Runs after step 2
 ```
 
 ### Parallel with Dependencies
@@ -231,8 +231,8 @@ steps:
 
   - command: echo "Finalizing"
     depends:
-      - task-a
-      - task-b
+      - command: task-a
+      - command: task-b
 ```
 
 ## Retry and Repeat Control

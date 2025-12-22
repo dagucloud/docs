@@ -64,7 +64,7 @@ Schedule workflows with cron expressions:
 ```yaml
 schedule: "0 2 * * *"  # Daily at 2 AM
 steps:
-  - echo "Processing scheduled task"
+  - command: echo "Processing scheduled task"
 ```
 
 ## Multiple Schedules
@@ -76,7 +76,7 @@ schedule:
   - "0 9 * * MON-FRI"   # Weekdays at 9 AM
   - "0 14 * * SAT,SUN"  # Weekends at 2 PM
 steps:
-  - echo "Running job"
+  - command: echo "Running job"
 ```
 
 ## Timezone Support
@@ -98,7 +98,7 @@ schedule:
   start: "0 8 * * *"   # Start at 8 AM
   stop: "0 18 * * *"   # Stop at 6 PM
 steps:
-  - echo "Running service"
+  - command: echo "Running service"
 ```
 
 Multiple start/stop times:
@@ -135,7 +135,7 @@ schedule: "*/5 * * * *"  # Every 5 minutes
 skipIfSuccessful: true   # Skip if last run succeeded
 
 steps:
-  - echo "Checking status"
+  - command: echo "Checking status"
 ```
 
 ## Queue Management
@@ -148,7 +148,7 @@ queue: batch-jobs # Named queue (defaults to DAG name)
 
 schedule: "*/10 * * * *"
 steps:
-  - echo "Running batch process"
+  - command: echo "Running batch process"
 ```
 
 Disable queue processing:

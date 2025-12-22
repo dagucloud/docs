@@ -16,8 +16,8 @@ container:
     - PYTHONPATH=/app
 
 steps:
-  - pip install -r requirements.txt
-  - python process.py /data/input.csv
+  - command: pip install -r requirements.txt
+  - command: python process.py /data/input.csv
 ```
 
 ## Step-Level Container Configuration
@@ -135,7 +135,7 @@ container:
   name: my-worker
 
 steps:
-  - python process.py
+  - command: python process.py
 ```
 
 The `name` field sets a custom container name instead of a random one. The name must be unique—if a container with the same name already exists (running or stopped), the DAG fails.
@@ -160,7 +160,7 @@ container:
 
 steps:
   # Runs inside the already-running container via `docker exec`
-  - my-entrypoint sendConfirmationEmails
+  - command: my-entrypoint sendConfirmationEmails
 ```
 
 If you prefer each step to honor the image’s `ENTRYPOINT`/`CMD` as with a
@@ -186,7 +186,7 @@ container:
   image: ghcr.io/myorg/private-app:latest
 
 steps:
-  - python process.py
+  - command: python process.py
 ```
 
 ### Authentication Methods

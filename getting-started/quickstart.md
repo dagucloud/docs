@@ -156,8 +156,8 @@ A workflow is a YAML file that defines steps and their dependencies:
 
 ```yaml
 steps:
-  - echo "First step"
-  - echo "Second step"  # Runs after first step automatically
+  - command: echo "First step"
+  - command: echo "Second step"  # Runs after first step automatically
 ```
 
 Key concepts:
@@ -174,8 +174,8 @@ By default, DAGs execute in the directory where the YAML file is located. You ca
 workingDir: /app/project
 dotenv: .env          # Loads /app/project/.env
 steps:
-  - ls -la            # Lists files in /app/project
-  - cat ./config.yml  # Reads /app/project/config.yml
+  - command: ls -la            # Lists files in /app/project
+  - command: cat ./config.yml  # Reads /app/project/config.yml
 ```
 
 ## Parameters
@@ -191,9 +191,9 @@ params:
 
 steps:
   # Backup files
-  - tar -czf ${DEST}/backup_${TS}.tar.gz ${SOURCE}
+  - command: tar -czf ${DEST}/backup_${TS}.tar.gz ${SOURCE}
   # Clean old backups
-  - find ${DEST} -name "backup_*.tar.gz" -mtime +7 -delete
+  - command: find ${DEST} -name "backup_*.tar.gz" -mtime +7 -delete
 ```
 
 Run with parameters:
@@ -235,9 +235,9 @@ container:
     - ./data:/data
 steps:
   # write data to a file
-  - python -c "with open('/data/output.txt', 'w') as f: f.write('Hello from Dagu!')"
+  - command: python -c "with open('/data/output.txt', 'w') as f: f.write('Hello from Dagu!')"
   # read data from the file
-  - python -c "with open('/data/output.txt') as f: print(f.read())"
+  - command: python -c "with open('/data/output.txt') as f: print(f.read())"
 ```
 
 ## Scheduling
@@ -247,7 +247,7 @@ Run workflows automatically:
 ```yaml
 schedule: "0 2 * * *"  # 2 AM daily
 steps:
-  - echo "Running nightly process"
+  - command: echo "Running nightly process"
 ```
 
 The workflow will execute every day at 2 AM.

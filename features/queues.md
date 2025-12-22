@@ -32,7 +32,7 @@ maxActiveRuns: 2            # Allow 2 concurrent runs
 schedule: "*/10 * * * *"    # Every 10 minutes
 
 steps:
-  - echo "Processing batch"
+  - command: echo "Processing batch"
 ```
 
 ### Disable Queueing
@@ -44,7 +44,7 @@ For critical workflows that should always run:
 maxActiveRuns: -1           # Never queue - always run
 
 steps:
-  - echo "Checking alerts"
+  - command: echo "Checking alerts"
 ```
 
 ## Global Queue Configuration

@@ -93,23 +93,23 @@ steps:
       type: mail
       config:
         to: 
-          - reports@example.com
-          - archive@example.com
+          - command: reports@example.com
+          - command: archive@example.com
         from: noreply@example.com
         subject: "Daily Report - ${TODAY}"
         message: |
           Daily processing report for ${TODAY}
           
           Summary:
-          - Records processed: ${RECORD_COUNT}
-          - Success rate: ${SUCCESS_RATE}%
-          - Processing time: ${DURATION}
+          - command: Records processed: ${RECORD_COUNT}
+          - command: Success rate: ${SUCCESS_RATE}%
+          - command: Processing time: ${DURATION}
           
           See attached files for details.
         attachments:
-          - /reports/daily-${TODAY}.pdf
-          - /reports/summary-${TODAY}.csv
-          - ${DAG_RUN_LOG_FILE}
+          - command: /reports/daily-${TODAY}.pdf
+          - command: /reports/summary-${TODAY}.csv
+          - command: ${DAG_RUN_LOG_FILE}
 ```
 
 ## Email Templates
@@ -138,7 +138,7 @@ steps:
           
           Report available at: ${REPORT_PATH}
         attachments:
-          - ${REPORT_PATH}
+          - command: ${REPORT_PATH}
 ```
 
 ### Error Notification

@@ -14,7 +14,7 @@ env:                       # Environment variables
   - DATA_DIR: /tmp/data
 
 steps:                     # Workflow steps
-  - echo "Processing for date ${DATE}"
+  - command: echo "Processing for date ${DATE}"
 ```
 
 ## Base Configuration
@@ -54,7 +54,7 @@ env:
   - CUSTOM_VAR: value # Addition
 
 steps:
-  - echo "Processing"
+  - command: echo "Processing"
 ```
 
 Configuration precedence: System defaults → Base config → DAG config
@@ -95,7 +95,7 @@ steps:
     command: python process.py --type=$ITEM --date=${DATE}
     output: RESULT_${ITEM}
 
-  - python report.py --date=${DATE}
+  - command: python report.py --date=${DATE}
 
 handlerOn:
   failure:
@@ -107,9 +107,9 @@ handlerOn:
 ### Sequential Pipeline
 ```yaml
 steps:
-  - echo "Extracting data"
-  - echo "Transforming data"
-  - echo "Loading data"
+  - command: echo "Extracting data"
+  - command: echo "Transforming data"
+  - command: echo "Loading data"
 ```
 
 ### Parallel Processing
@@ -124,5 +124,5 @@ steps:
 # This can be in a same file separated by `---` or in a separate file
 name: process-file
 steps:
-  - echo "Processing" --file ${FILE}
+  - command: echo "Processing" --file ${FILE}
 ```
