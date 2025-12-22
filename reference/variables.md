@@ -238,36 +238,58 @@ Available properties:
 
 ## Variable Precedence
 
-Variables are resolved in this order (highest to lowest):
+Dagu resolves variables in two places: when interpolating `${VAR}` in DAG fields,
+and when constructing the step process environment.
 
-1. **Command-line parameters**
-   ```bash
-   dagu start workflow.yaml -- VAR=override
-   ```
+### Interpolation precedence (highest to lowest)
 
-2. **Step-level environment**
+1. **Step-level environment**
    ```yaml
    steps:
      - env:
          - VAR: step-value
    ```
 
-3. **DAG-level parameters**
+2. **Output variables from earlier steps**
+   ```yaml
+   steps:
+     - command: echo 42
+       output: VAR
+   ```
+
+3. **Secrets**
+   ```yaml
+   secrets:
+     - name: VAR
+       provider: env
+       key: VAR
+   ```
+
+4. **DAG-level environment (including dotenv)**
+   ```yaml
+   env:
+     - VAR: env-value
+   dotenv: .env
+   ```
+
+5. **Parameters (defaults + CLI overrides)**
    ```yaml
    params:
      - VAR: dag-default
    ```
 
-4. **DAG-level environment**
-   ```yaml
-   env:
-     - VAR: env-value
-   ```
+6. **Process environment fallback**
+   System environment variables are used only if the key is not set by any of
+   the sources above, and are still subject to filtering at execution time.
 
-5. **Dotenv files**
-   ```yaml
-   dotenv: .env
-   ```
+### Step process environment precedence (lowest to highest)
+
+1. **Filtered system environment**
+2. **DAG runtime environment (params + `env` + `.env` + run metadata)**
+   If a key appears in both `params` and `env`, the `env` value wins.
+3. **Secrets**
+4. **Step-level environment**
+5. **Output variables from earlier steps**
 
 ## See Also
 
