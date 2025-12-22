@@ -4,7 +4,9 @@
   <img src="/logo.webp" alt="Dagu mascot - a squirrel pilot" style="max-width: 280px; height: auto;" />
 </div>
 
-Dagu is a lightweight workflow engine built in a single binary with modern Web UI. Define any workflow in a simple, declarative YAML format and execute arbitrary workflows on schedule. Natively support shell commands, remote execution via SSH, and docker image. Dagu is a lightweight alternative to Cron, Airflow, Rundeck, etc.
+**Workflow engine built for developers who want powerful workflow orchestration without the operational overhead.**
+
+Define workflows in simple YAML, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers. All without requiring databases, message brokers, or code changes to your existing scripts. Dagu is a lightweight alternative to Cron, Airflow, Rundeck, etc.
 
 ### How it Works
 Dagu executes your workflows, which are defined as a series of steps in a YAML file. These steps form a Directed Acyclic Graph (DAG), ensuring a clear and predictable flow of execution.

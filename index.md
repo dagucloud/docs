@@ -5,7 +5,7 @@ layout: doc
 <img src="/dagu-logo.webp" alt="dagu Logo" style="display: block; margin: 0 auto; max-width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>A batteries-included workflow engine that doesn't get in your way.</h2>
+  <h2>Workflow engine built for developers who want powerful workflow orchestration without the operational overhead.</h2>
   <p>Define workflows in simple YAML, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers. Do all this without requiring databases, message brokers, or code changes to your existing scripts.</p>
 </div>
 
@@ -22,11 +22,19 @@ layout: doc
 
 Define workflows in simple YAML, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers. All without requiring databases, message brokers, or code changes to your existing scripts.
 
-### Web UI Preview
-![Demo Web UI](./assets/images/demo-web-ui.webp)
+## Demo
 
-### CLI Preview
-![Demo CLI](./assets/images/demo-cli.webp)
+**CLI Demo**: Create a simple DAG workflow and execute it using the command line interface.
+
+![Demo CLI](/demo-cli.webp)
+
+**Web UI Demo**: Create and manage workflows using the web interface, including real-time monitoring and control.
+
+[Docs on CLI](/overview/cli)
+
+![Demo Web UI](/demo-web-ui.webp)
+
+[Docs on Web UI](/overview/web-ui)
 
 ## Why Dagu?
 
