@@ -18,8 +18,7 @@ layout: doc
 
 ## What is Dagu?
 
-**Workflow engine built for developers who want powerful workflow orchestration without the operational overhead.**
-
+Dagu is a lightweight, single-binary workflow engine with a modern Web UI.
 Define workflows in simple YAML, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers. All without requiring databases, message brokers, or code changes to your existing scripts.
 
 ## Demo
