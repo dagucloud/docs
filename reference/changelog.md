@@ -1,8 +1,37 @@
 # Changelog
 
-## v1.28.0 (2025-12-21)
+## v1.28.0 (2025-12-24)
 
 ### Added
+- **Step-Level Container Field**: Added `container` field for individual steps, providing the same configuration options as DAG-level container but for per-step container execution. This is the recommended way to run steps in containers, replacing the verbose `executor: docker` syntax.
+
+```yaml
+steps:
+  - name: build
+    container:
+      image: node:24
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command: npm run build
+
+  - name: test
+    container:
+      image: python:3.11
+      env:
+        - PYTHONPATH=/app
+    command: pytest
+```
+
+### Changed
+- **Documentation**: Updated all documentation to use the new step-level `container` syntax instead of `executor: docker`
+- **JSON Schema**: Updated DAG schema to include step-level `container` field with proper validation
+- **Spec Refactor (internal)**: Restructured spec types and build logic for improved maintainability (#1499)
+- **UI**: Removed link to Discord and Github from the frontend
+
+### Validation
+- Added validation to prevent using `container` field together with `executor` field (conflicting execution methods)
+- Added validation to prevent using `container` field together with `script` field (scripts not supported in containers)
 
 
 ## v1.27.0 (2025-12-21)
