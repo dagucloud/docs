@@ -612,6 +612,34 @@ steps:
       limit: 60
 ```
 
+### Step-Level Container
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `container` | object | Container configuration for this step | - |
+
+Use the `container` field to run a step in its own container:
+
+```yaml
+steps:
+  - name: run-in-container
+    container:
+      image: python:3.11
+      volumes:
+        - /data:/data:ro
+      env:
+        - API_KEY=${API_KEY}
+    command: python process.py
+```
+
+::: tip
+The step-level `container` field uses the same format as DAG-level container configuration.
+:::
+
+::: warning
+When using `container`, you cannot use `executor` or `script` fields on the same step.
+:::
+
 ### Executor Configuration
 
 | Field | Type | Description | Default |
@@ -620,16 +648,6 @@ steps:
 
 ```yaml
 steps:
-  - executor:
-      type: docker
-      config:
-        image: python:3.11
-        volumes:
-          - command: /data:/data:ro
-        env:
-          - command: API_KEY=${API_KEY}
-    command: python process.py
-
   - executor:
       type: archive
       config:
@@ -837,13 +855,12 @@ steps:
     continueOn:
       failure: false
 
- # Use different executor for this step   
-  - executor:
-      type: docker
-      config:
-        image: postgres:16
-        env:
-          - command: PGPASSWORD=${DB_PASSWORD}
+ # Use different container for this step
+  - name: load-data
+    container:
+      image: postgres:16
+      env:
+        - PGPASSWORD=${DB_PASSWORD}
     command: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
     
   - command: python validate_results.py --date=${DATE}

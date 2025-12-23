@@ -59,21 +59,20 @@ For detailed Docker executor documentation, see [Docker Executor Guide](/feature
 
 Run commands in Docker containers for isolation and reproducibility.
 
-### Create and Run Container
+### Step-Level Container (Recommended)
+
+Use the `container` field to run a step in its own container:
 
 ```yaml
 steps:
   - name: run-in-container
-    executor:
-      type: docker
-      config:
-        image: alpine:latest
-        autoRemove: true
+    container:
+      image: alpine:latest
     command: echo "Hello from container"
 ```
 
 ::: tip
-If `command` is omitted for a step that creates a new container (`config.image`), Docker uses the image’s default `ENTRYPOINT`/`CMD`.
+The container is automatically removed after execution. Set `keepContainer: true` to preserve it.
 :::
 
 ### Image Pull Options
@@ -81,30 +80,21 @@ If `command` is omitted for a step that creates a new container (`config.image`)
 ```yaml
 steps:
   - name: pull-always
-    executor:
-      type: docker
-      config:
-        image: myapp:latest
-        pull: always      # Always pull from registry
-        autoRemove: true
+    container:
+      image: myapp:latest
+      pullPolicy: always      # Always pull from registry
     command: ./app
-    
+
   - name: pull-if-missing
-    executor:
-      type: docker
-      config:
-        image: myapp:latest
-        pull: missing     # Default - pull only if not local
-        autoRemove: true
+    container:
+      image: myapp:latest
+      pullPolicy: missing     # Default - pull only if not local
     command: ./app
-    
+
   - name: never-pull
-    executor:
-      type: docker
-      config:
-        image: local-image:dev
-        pull: never       # Use local image only
-        autoRemove: true
+    container:
+      image: local-image:dev
+      pullPolicy: never       # Use local image only
     command: ./test
 ```
 
@@ -122,11 +112,8 @@ registryAuths:
 
 steps:
   - name: use-private-image
-    executor:
-      type: docker
-      config:
-        image: ghcr.io/myorg/private-app:latest
-        autoRemove: true
+    container:
+      image: ghcr.io/myorg/private-app:latest
     command: echo "Running"
 ```
 
@@ -137,16 +124,12 @@ Authentication can also be configured via `DOCKER_AUTH_CONFIG` environment varia
 ```yaml
 steps:
   - name: with-volumes
-    executor:
-      type: docker
-      config:
-        image: python:3.13
-        autoRemove: true
-        host:
-          binds:
-            - command: /host/data:/container/data:ro      # Read-only
-            - command: /host/output:/container/output:rw  # Read-write
-            - command: ./config:/app/config               # Relative path
+    container:
+      image: python:3.13
+      volumes:
+        - /host/data:/container/data:ro      # Read-only
+        - /host/output:/container/output:rw  # Read-write
+        - ./config:/app/config               # Relative path
     command: python process.py /container/data
 ```
 
@@ -189,16 +172,12 @@ env:
 
 steps:
   - name: with-env
-    executor:
-      type: docker
-      config:
-        image: node:22
-        autoRemove: true
-        container:
-          env:
-            - command: NODE_ENV=production
-            - command: API_KEY=${API_KEY}  # Pass from DAG env
-            - command: DB_HOST=postgres
+    container:
+      image: node:22
+      env:
+        - NODE_ENV=production
+        - API_KEY=${API_KEY}  # Pass from DAG env
+        - DB_HOST=postgres
     command: npm start
 ```
 
@@ -207,17 +186,9 @@ steps:
 ```yaml
 steps:
   - name: custom-network
-    executor:
-      type: docker
-      config:
-        image: alpine
-        autoRemove: true
-        network:
-          EndpointsConfig:
-            my-network:
-              Aliases:
-                - command: my-service
-                - command: my-alias
+    container:
+      image: alpine
+      network: my-network
     command: ping other-service
 ```
 
@@ -226,12 +197,9 @@ steps:
 ```yaml
 steps:
   - name: specific-platform
-    executor:
-      type: docker
-      config:
-        image: myapp:latest
-        platform: linux/amd64  # Force platform
-        autoRemove: true
+    container:
+      image: myapp:latest
+      platform: linux/amd64  # Force platform
     command: ./app
 ```
 
@@ -240,78 +208,36 @@ steps:
 ```yaml
 steps:
   - name: custom-workdir
-    executor:
-      type: docker
-      config:
-        image: python:3.13
-        autoRemove: true
-        container:
-          workingDir: /app
-          env:
-            - command: PYTHONPATH=/app
-        host:
-          binds:
-            - command: ./src:/app
+    container:
+      image: python:3.13
+      workingDir: /app
+      env:
+        - PYTHONPATH=/app
+      volumes:
+        - ./src:/app
     command: python main.py
 ```
-
-### Execute in Existing Container
-
-```yaml
-steps:
-  - name: exec-in-running
-    executor:
-      type: docker
-      config:
-        containerName: my-app-container
-        exec:
-          user: root
-          workingDir: /app
-          env:
-            - command: DEBUG=true
-    command: echo "Debug mode"
-```
-
-::: info
-Validation: Set at least `config.image` or `config.containerName`. If both are omitted, the step fails validation. Supplying only `containerName` requires the container to already be running. When both are set, Dagu first tries to exec into the named container; if it is missing or stopped, Dagu creates it using the provided image (applying any `container`/`host`/`network` settings) before running the command.
-:::
-
-::: warning
-When a DAG‑level `container:` is configured, Docker‑executor steps run inside that shared container via `docker exec`. In this case, the step’s Docker `config` (including `image`, `container/host/network`, and `exec`) is ignored; only the step’s `command` and `args` are used.
-:::
 
 ### Complete Docker Example
 
 ```yaml
 steps:
-  - name: complex-docker
-    executor:
-      type: docker
-      config:
-        image: postgres:17
-        containerName: test-db
-        pull: missing
-        platform: linux/amd64
-        autoRemove: false
-        container:
-          env:
-            - command: POSTGRES_USER=test
-            - command: POSTGRES_PASSWORD=test
-            - command: POSTGRES_DB=testdb
-          exposedPorts:
-            5432/tcp: {}
-        host:
-          binds:
-            - postgres-data:/var/lib/postgresql/data
-          portBindings:
-            5432/tcp:
-              - hostIP: "127.0.0.1"
-                hostPort: "5432"
-        network:
-          EndpointsConfig:
-            bridge:
-              Aliases:
-                - command: postgres-test
+  - name: run-postgres
+    container:
+      name: test-db
+      image: postgres:17
+      pullPolicy: missing
+      platform: linux/amd64
+      keepContainer: true
+      env:
+        - POSTGRES_USER=test
+        - POSTGRES_PASSWORD=test
+        - POSTGRES_DB=testdb
+      volumes:
+        - postgres-data:/var/lib/postgresql/data
+      ports:
+        - "127.0.0.1:5432:5432"
+      network: bridge
     command: postgres
 ```
 

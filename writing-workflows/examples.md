@@ -1261,14 +1261,16 @@ steps:
 
 <div class="example-card">
 
-### Per-Step Docker Executor
+### Step-Level Container
 
 ```yaml
 steps:
-  - executor:
-      type: docker
-      config:
-        image: node:18
+  - name: build
+    container:
+      image: node:18
+      volumes:
+        - ./src:/app
+      workingDir: /app
     command: npm run build
 ```
 
@@ -1462,30 +1464,44 @@ steps:
 
 <div class="example-card">
 
-### Exec in Existing Container
+### Multi-Container Workflow
 
 ```yaml
 steps:
-  - executor:
-      type: docker
-      config:
-        containerName: my-running-container
-        exec:
-          user: root
-          workingDir: /work
-    command: echo "inside existing container"
+  - name: build
+    container:
+      image: node:24
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command: npm run build
+
+  - name: test
+    container:
+      image: node:24
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command: npm test
+
+  - name: deploy
+    container:
+      image: python:3.11
+      env:
+        - AWS_DEFAULT_REGION=us-east-1
+    command: python deploy.py
 ```
 
 ```mermaid
 flowchart LR
-  S[Step] --> X[docker exec my-running-container]
-  X --> R[Command runs]
-  style S stroke:lightblue,stroke-width:1.6px,color:#333
-  style X stroke:lime,stroke-width:1.6px,color:#333
-  style R stroke:green,stroke-width:1.6px,color:#333
+  B[build: node:24] --> T[test: node:24]
+  T --> D[deploy: python:3.11]
+  style B stroke:lightblue,stroke-width:1.6px,color:#333
+  style T stroke:lime,stroke-width:1.6px,color:#333
+  style D stroke:green,stroke-width:1.6px,color:#333
 ```
 
-<a href="/reference/executors#execute-in-existing-container" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/container#step-level-container" class="learn-more">Learn more →</a>
 
 </div>
 

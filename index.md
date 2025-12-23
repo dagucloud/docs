@@ -253,23 +253,22 @@ handlerOn:
 
 ### [Builtin Executors](/reference/executors)
 
-Execute task in different ways.
+Execute tasks in different ways.
 
 ```yaml
 steps:
   # Shell command
   - name: local-script
     command: ./deploy.sh
-    
-  # Docker container
+
+  # Step-level container (recommended)
   - name: data-processing
-    executor:
-      type: docker
-      config:
-        image: python:3.11
-        autoRemove: true
+    container:
+      image: python:3.11
+      volumes:
+        - ./data:/data
     command: python process.py
-    
+
   # Remote SSH
   - name: remote-deploy
     executor:
@@ -278,7 +277,7 @@ steps:
         user: ubuntu
         host: prod-server.internal
     command: sudo systemctl restart app
-    
+
   # HTTP API call
   - name: trigger-webhook
     executor:
@@ -286,7 +285,7 @@ steps:
       config:
         method: POST
         url: https://hooks.slack.com/services/xxx
-        
+
   # JSON processing
   - name: parse-config
     executor:

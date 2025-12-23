@@ -186,26 +186,53 @@ steps:
   - command: sh -c "npm run prep && npm run sendConfirmationEmails"
 ```
 
-### When to use step-level Docker instead
+### Step-Level Container
 
-If you want each step to run via the image’s `ENTRYPOINT`/`CMD` (as with a
-fresh `docker run` per step), prefer the step‑level Docker executor instead of
-the DAG‑level `container`:
+If you want each step to run in its own container (as with a fresh `docker run`
+per step), use the step-level `container` field:
 
 ```yaml
 steps:
   - name: send-confirmation-emails
-    executor:
-      type: docker
-      config:
-        image: myorg/myimage:latest
-        autoRemove: true
-    # Here, Docker will honor ENTRYPOINT/CMD by default
-    # (or you can override using executor config options)
+    container:
+      image: myorg/myimage:latest
+    # The container is automatically created and removed after execution
     command: sendConfirmationEmails
 ```
 
-Note: When a DAG‑level `container:` is set, any step using the Docker executor runs inside that shared container via `docker exec`. In that case, the step‑level Docker `config` (such as `image`, `container/host/network`, and `exec`) is ignored, and only the step’s `command` and `args` are used. To apply step‑specific container settings, remove the DAG‑level `container` and use the step‑level Docker executor exclusively.
+You can also use different containers for different steps:
+
+```yaml
+steps:
+  - name: build
+    container:
+      image: node:24
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command: npm run build
+
+  - name: test
+    container:
+      image: node:24
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command: npm test
+
+  - name: deploy
+    container:
+      image: python:3.11
+      env:
+        - AWS_DEFAULT_REGION=us-east-1
+    command: python deploy.py
+```
+
+::: warning
+When using step-level `container`, you cannot use `executor` or `script` fields on the same step.
+:::
+
+Note: When a DAG‑level `container:` is set, step-level `container` fields are ignored. The step runs inside the shared DAG container via `docker exec`. To use step-specific container settings, remove the DAG‑level `container`.
 
 ## See Also
 
