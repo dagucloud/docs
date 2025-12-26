@@ -146,6 +146,26 @@ When using step-level `container`, each step creates its own container:
 - The container is automatically removed after the step completes
 - The image's `ENTRYPOINT`/`CMD` behavior depends on your command
 
+### Multiple Commands in Containers
+
+Multiple commands share the same step configuration, including the container config:
+
+```yaml
+steps:
+  - name: build-and-test
+    container:
+      image: node:20
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command:
+      - npm install
+      - npm run build
+      - npm test
+```
+
+Instead of duplicating the `container`, `env`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
+
 ## Registry Authentication
 
 Access private container registries with authentication configured at the DAG level:

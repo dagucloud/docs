@@ -103,6 +103,26 @@ container:
 - `waitFor` must be `running` (default) or `healthy`; if `healthy` is chosen but no healthcheck exists, Dagu falls back to `running` with a warning.
 - `logPattern` must be a valid regex; readiness waits up to 120s (including `logPattern`), then errors with the last known state.
 
+## Multiple Commands
+
+Multiple commands share the same step configuration, including the container config:
+
+```yaml
+steps:
+  - name: build-and-test
+    container:
+      image: node:24
+      volumes:
+        - ./src:/app
+      workingDir: /app
+    command:
+      - npm install
+      - npm run build
+      - npm test
+```
+
+Instead of duplicating the `container`, `env`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
+
 ## Key Benefits
 
 - **Shared Environment**: All steps share the same filesystem and installed dependencies

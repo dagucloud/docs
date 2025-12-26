@@ -103,6 +103,34 @@ steps:
     depends: step 2
 ```
 
+### Multiple Commands
+
+Multiple commands share the same step configuration:
+
+```yaml
+steps:
+  - name: build-and-test
+    command:
+      - npm install
+      - npm run build
+      - npm test
+    env:
+      - NODE_ENV: production
+    workingDir: /app
+    retryPolicy:
+      limit: 3
+```
+
+Instead of duplicating `env`, `workingDir`, `retryPolicy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
+
+Commands run in order and stop on first failure. Retries restart from the first command.
+
+**Trade-off:** You lose the ability to retry or resume from the middle of the command list. If you need granular control over individual command retries, use separate steps.
+
+**Supported executors:** shell, command, docker, container, ssh
+
+**Not supported:** jq, http, archive, mail, github_action, dag (these only accept single commands)
+
 ### Multi-line Scripts
 
 ```yaml
@@ -110,7 +138,7 @@ steps:
   - script: |
       #!/bin/bash
       set -e
-      
+
       echo "Processing..."
       python analyze.py data.csv
       echo "Complete"

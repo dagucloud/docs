@@ -99,6 +99,28 @@ graph TD
 
 <div class="example-card">
 
+### Multiple Commands per Step
+
+```yaml
+steps:
+  - name: build-and-test
+    command:
+      - npm install
+      - npm run build
+      - npm test
+    env:
+      - NODE_ENV: production
+    workingDir: /app
+```
+
+Share step config (`env`, `workingDir`, `retryPolicy`, etc.) across commands instead of duplicating across steps.
+
+<a href="/writing-workflows/basics#multiple-commands" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Execution Mode: Chain vs Graph
 
 ```yaml

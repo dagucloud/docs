@@ -30,6 +30,19 @@ Run system commands and scripts with the default executor.
         echo "Multi-line command block"
         echo "Runs as a script (not split into args)"
   ```
+- **Multiple commands** share the same step configuration:
+  ```yaml
+  steps:
+    - command:
+        - echo "step 1"
+        - echo "step 2"
+        - echo "step 3"
+      env:
+        - MY_VAR: value
+      workingDir: /app
+      stdout: /tmp/output.log
+  ```
+  Instead of duplicating `env`, `workingDir`, `stdout`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step.
 - **Command + args array** when you want unambiguous arguments and no shell parsing:
   ```yaml
   steps:

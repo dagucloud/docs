@@ -72,6 +72,35 @@ If no key is specified, Dagu automatically tries these default SSH keys in order
 3. `~/.ssh/id_ed25519`
 4. `~/.ssh/id_dsa`
 
+## Multiple Commands
+
+Multiple commands share the same step configuration:
+
+```yaml
+steps:
+  - name: remote-checks
+    executor:
+      type: ssh
+      config:
+        user: deploy
+        host: production.example.com
+        key: ~/.ssh/deploy_key
+    command:
+      - systemctl status nginx
+      - systemctl status myapp
+      - df -h /var/log
+    preconditions:
+      - condition: "${ENV}"
+        expected: "production"
+```
+
+Instead of duplicating the SSH executor config, `preconditions`, `retryPolicy`, `env`, etc. across multiple steps, combine commands into one step.
+
+**Important:** Each command runs in a **new SSH session**, so:
+- Working directory resets to the user's home directory for each command
+- Environment variables set in one command don't persist to the next
+- Use absolute paths or combine commands with `&&` if you need shared context
+
 ## Security Best Practices
 
 1. **Host Key Verification**: Always enabled by default (`strictHostKey: true`)

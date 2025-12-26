@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.29.0 (UNRELEASED)
+
+### Added
+- **Multiple Commands per Step**: Steps can now execute multiple commands sequentially using an array syntax. This allows sharing step configuration (`env`, `workingDir`, `retryPolicy`, `preconditions`, `container`, etc.) across multiple commands instead of duplicating it across separate steps.
+
+```yaml
+steps:
+  - name: build-and-test
+    command:
+      - npm install
+      - npm run build
+      - npm test
+    env:
+      - NODE_ENV: production
+    workingDir: /app
+```
+
+Commands run in order and stop on first failure. Retries restart from the first command (no checkpoint/resume from middle).
+
+Supported executors: shell, command, docker, container, ssh. Executors that do not support multiple commands (jq, http, archive, mail, github_action, dag) will reject the configuration at parse time.
+
+### Changed
+
+
 ## v1.28.0 (2025-12-24)
 
 ### Added

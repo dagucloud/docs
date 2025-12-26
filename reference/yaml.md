@@ -412,10 +412,36 @@ Each step in the `steps` array can have these fields:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `name` | string | Step name (optional - auto-generated if not provided) | Auto-generated |
-| `command` | string | Command to execute. Multi-line strings run as inline scripts (honors shebang) | - |
+| `command` | string/array | Command to execute. Can be a string (single command), array of strings (multiple commands executed sequentially), or multi-line string (runs as inline script). | - |
 | `script` | string | Inline script (alternative to command). Honors shebang when no shell is set. | - |
 | `run` (legacy) | string | Deprecated alias for `call` | - |
 | `depends` | string/array | Step dependencies | - |
+
+#### Multiple Commands
+
+The `command` field accepts an array of strings. Multiple commands share the same step configuration:
+
+```yaml
+steps:
+  - name: build-and-test
+    command:
+      - npm install
+      - npm run build
+      - npm test
+    env:
+      - NODE_ENV: production
+    workingDir: /app
+```
+
+Instead of duplicating `env`, `workingDir`, `retryPolicy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
+
+Commands run in order and stop on first failure. Retries restart from the first command.
+
+**Trade-off:** You lose the ability to retry or resume from the middle of the command list.
+
+**Supported executors:** shell, command, docker, container, ssh
+
+**Not supported:** jq, http, archive, mail, github_action, dag (configuration rejected at parse time)
 
 ### Step Definition Formats
 

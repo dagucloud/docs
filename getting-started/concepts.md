@@ -31,6 +31,19 @@ steps:
   - command: python analyze.py data.csv           # Process data
 ```
 
+Steps can execute multiple commands that share the same configuration:
+
+```yaml
+steps:
+  - name: build-and-test
+    command:
+      - npm install
+      - npm run build
+      - npm test
+    env:
+      - NODE_ENV: production
+```
+
 ### Dependencies
 
 By default, steps run sequentially. Use `depends` for parallel execution:
