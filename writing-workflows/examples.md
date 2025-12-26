@@ -29,39 +29,6 @@ graph LR
 
 <div class="example-card">
 
-### Parallel Execution (Array Syntax)
-
-```yaml
-steps:
-  - command: echo "Setup"
-  - 
-    - command: echo "Task A"
-    - command: echo "Task B"
-    - command: echo "Task C"
-  - command: echo "Cleanup"
-```
-
-```mermaid
-graph TD
-    A[Setup] --> B[Task A]
-    A --> C[Task B]
-    A --> D[Task C]
-    B --> E[Cleanup]
-    C --> E
-    D --> E
-    style A stroke:lightblue,stroke-width:1.6px,color:#333
-    style B stroke:lime,stroke-width:1.6px,color:#333
-    style C stroke:lime,stroke-width:1.6px,color:#333
-    style D stroke:lime,stroke-width:1.6px,color:#333
-    style E stroke:green,stroke-width:1.6px,color:#333
-```
-
-<a href="/writing-workflows/basics#shorthand-parallel-syntax" class="learn-more">Learn more →</a>
-
-</div>
-
-<div class="example-card">
-
 ### Parallel Execution (Iterator)
 
 ```yaml

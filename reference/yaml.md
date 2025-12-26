@@ -460,22 +460,6 @@ steps:
   - command: ls -la          # Equivalent to: {command: ls -la}
 ```
 
-#### Nested Array Format (Parallel Steps)
-```yaml
-steps:
-  - command: echo "Sequential step 1"
-  - 
-    - command: echo "Parallel step 2a"
-    - command: echo "Parallel step 2b"
-  - command: echo "Sequential step 3"
-```
-
-In the nested array format:
-- Steps within a nested array run in parallel
-- They automatically depend on the previous sequential step
-- The next sequential step automatically depends on all parallel steps in the group
-- Auto-generated names follow the pattern: `parallel_{group}_{command}_{index}`
-
 ### Execution Fields
 
 | Field | Type | Description | Default |
