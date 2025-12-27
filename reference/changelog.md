@@ -74,8 +74,6 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 Supported executors: shell, command, docker, container, ssh. Executors that do not support multiple commands (jq, http, archive, mail, github_action, dag) will reject the configuration at parse time.
 
-### Changed
-
 
 ## v1.28.0 (2025-12-24)
 
