@@ -30,13 +30,15 @@ steps:
     output: RECORD_COUNT
 ```
 
-The command should output in `KEY=VALUE` format for structured capture:
+The command's stdout (trimmed) becomes the output value in `outputs.json`:
 
-```yaml
-steps:
-  - name: process-data
-    command: echo "RESULT=success"
-    output: RESULT
+```json
+{
+  "outputs": {
+    "version": "1.2.3",
+    "recordCount": "42"
+  }
+}
 ```
 
 ### Object Form
@@ -47,14 +49,14 @@ For more control, use the object form with additional options:
 steps:
   # Custom key name in outputs.json
   - name: get-count
-    command: echo "TOTAL_COUNT=42"
+    command: echo "42"
     output:
       name: TOTAL_COUNT
       key: totalItems  # Uses "totalItems" instead of default "totalCount"
 
   # Exclude from outputs.json (still usable within the DAG)
   - name: internal-step
-    command: echo "TEMP=processing"
+    command: echo "processing"
     output:
       name: TEMP
       omit: true  # Available as ${TEMP} but not saved to outputs.json
@@ -103,16 +105,16 @@ When multiple steps output to the same key, the **last value wins** based on exe
 ```yaml
 steps:
   - name: step1
-    command: echo "RESULT=first"
+    command: echo "first"
     output: RESULT
 
   - name: step2
-    command: echo "RESULT=second"
+    command: echo "second"
     output: RESULT
     depends: [step1]
 ```
 
-The final output will be `"result": "RESULT=second"`.
+The final output will be `"result": "second"`.
 
 ## Accessing Outputs
 
@@ -154,9 +156,9 @@ curl http://localhost:8080/api/v2/dag-runs/my-workflow/abc123/outputs
     "params": "{\"env\":\"prod\"}"
   },
   "outputs": {
-    "version": "VERSION=1.2.3",
-    "recordCount": "RECORD_COUNT=1000",
-    "resultFile": "RESULT_FILE=/data/results.json"
+    "version": "1.2.3",
+    "recordCount": "1000",
+    "resultFile": "/data/results.json"
   }
 }
 ```
@@ -222,9 +224,7 @@ secrets:
 
 steps:
   - name: call-api
-    command: |
-      response=$(curl -H "Authorization: ${API_KEY}" https://api.example.com)
-      echo "RESPONSE=$response"
+    command: curl -H "Authorization: ${API_KEY}" https://api.example.com
     output: RESPONSE
 ```
 
@@ -233,7 +233,7 @@ If the API response contains the secret value, it will be masked in `outputs.jso
 ```json
 {
   "outputs": {
-    "response": "RESPONSE=Token ******* authenticated successfully"
+    "response": "Token ******* authenticated successfully"
   }
 }
 ```
@@ -271,21 +271,16 @@ steps:
 ```yaml
 steps:
   - name: build
-    command: |
-      version=$(cat VERSION)
-      echo "BUILD_VERSION=$version"
+    command: cat VERSION
     output: BUILD_VERSION
 
   - name: test
-    command: |
-      count=$(pytest --collect-only -q | tail -1)
-      echo "TEST_COUNT=$count"
+    command: pytest --collect-only -q | tail -1
     output: TEST_COUNT
     depends: [build]
 
   - name: deploy
-    command: |
-      echo "DEPLOY_STATUS=success"
+    command: echo "success"
     output: DEPLOY_STATUS
     depends: [test]
 ```
@@ -295,9 +290,9 @@ steps:
 ```json
 {
   "outputs": {
-    "buildVersion": "BUILD_VERSION=1.2.3",
-    "testCount": "TEST_COUNT=42 tests",
-    "deployStatus": "DEPLOY_STATUS=success"
+    "buildVersion": "1.2.3",
+    "testCount": "42 tests",
+    "deployStatus": "success"
   }
 }
 ```
@@ -307,13 +302,13 @@ steps:
 ```yaml
 steps:
   - name: count-users
-    command: echo "USER_COUNT=1500"
+    command: wc -l < users.txt
     output:
       name: USER_COUNT
       key: activeUsers
 
   - name: count-orders
-    command: echo "ORDER_COUNT=3200"
+    command: wc -l < orders.txt
     output:
       name: ORDER_COUNT
       key: totalOrders
@@ -324,8 +319,8 @@ steps:
 ```json
 {
   "outputs": {
-    "activeUsers": "USER_COUNT=1500",
-    "totalOrders": "ORDER_COUNT=3200"
+    "activeUsers": "1500",
+    "totalOrders": "3200"
   }
 }
 ```
@@ -343,7 +338,7 @@ steps:
   - name: run-migration
     command: |
       PGPASSWORD=${DB_PASSWORD} psql -c "SELECT version()"
-      echo "MIGRATION_STATUS=complete"
+      echo "complete"
     output: MIGRATION_STATUS
     depends: [fetch-credentials]
 ```
@@ -355,22 +350,16 @@ Only `migrationStatus` appears in `outputs.json`.
 ```yaml
 steps:
   - name: extract
-    command: |
-      count=$(python extract.py --source s3://bucket/data)
-      echo "EXTRACTED_COUNT=$count"
+    command: python extract.py --source s3://bucket/data
     output: EXTRACTED_COUNT
 
   - name: transform
-    command: |
-      result=$(python transform.py --input /tmp/extracted --count ${EXTRACTED_COUNT})
-      echo "TRANSFORM_RESULT=$result"
+    command: python transform.py --input /tmp/extracted --count ${EXTRACTED_COUNT}
     output: TRANSFORM_RESULT
     depends: [extract]
 
   - name: load
-    command: |
-      rows=$(python load.py --data /tmp/transformed)
-      echo "LOADED_ROWS=$rows"
+    command: python load.py --data /tmp/transformed
     output: LOADED_ROWS
     depends: [transform]
 ```
