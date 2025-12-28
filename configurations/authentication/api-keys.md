@@ -246,22 +246,3 @@ The key prefix (first 8 characters) is stored and displayed in the UI for identi
 | Expiration | No | Yes (TTL) | No | No |
 | Management UI | Yes | N/A | No | No |
 | Best For | Automation | Interactive | Simple setups | Legacy scripts |
-
-## Troubleshooting
-
-### API Key Not Working
-
-1. **Check prefix**: Ensure the key starts with `dagu_`
-2. **Verify key copied correctly**: Keys are long; ensure no truncation
-3. **Check role permissions**: The key's role may not have permission for the operation
-4. **Verify builtin auth is enabled**: API keys require `auth.mode: builtin`
-
-### Cannot Create API Keys
-
-1. **Admin role required**: Only admin users can manage API keys
-2. **Builtin auth required**: Ensure `auth.mode: builtin` is configured
-3. **Check for name conflicts**: API key names must be unique
-
-### Key Prefix Shown as Different
-
-The `keyPrefix` stored in the database shows the first 8 characters of the key for identification. This helps you identify which key is which without exposing the full secret.
