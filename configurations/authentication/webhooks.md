@@ -12,7 +12,13 @@ Webhooks provide a way for external systems to trigger DAG executions via HTTP. 
 
 ## Requirements
 
-Webhooks require [Builtin Authentication](builtin) to be enabled.
+Webhooks require [Builtin Authentication](builtin) to be enabled (`auth.mode: builtin`).
+
+::: warning
+When authentication is disabled (`auth.mode: none`), all webhook endpoints return errors:
+- Management endpoints return `401 Unauthorized`
+- Trigger endpoint returns `404 Not Found`
+:::
 
 ## Creating Webhooks
 
