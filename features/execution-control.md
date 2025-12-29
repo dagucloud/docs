@@ -237,6 +237,8 @@ steps:
 
 ## Retry and Repeat Control
 
+For iterating over a list of items, use [`parallel`](/writing-workflows/control-flow#dynamic-iteration) instead.
+
 ### Exponential Backoff
 
 Control retry and repeat intervals with exponential backoff to avoid overwhelming systems:

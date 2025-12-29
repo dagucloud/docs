@@ -572,6 +572,8 @@ See the [Continue On Reference](/reference/continue-on) for detailed documentati
 
 #### Repeat Policy Fields
 
+For iterating over a list of items, use [`parallel`](#parallel-execution) instead.
+
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `repeat` | string | Repeat mode: `"while"` or `"until"` | - |

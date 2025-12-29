@@ -213,6 +213,8 @@ flowchart TD
 
 ### Repeat Until Condition
 
+> Looking for iteration over a list? See [Parallel Execution](#parallel-execution-iterator).
+
 ```yaml
 steps:
   - command: curl -f http://service/health
@@ -726,6 +728,8 @@ steps:
 <div class="example-card">
 
 ### Repeat with Backoff
+
+> Looking for iteration over a list? See [Parallel Execution](#parallel-execution-iterator).
 
 ```yaml
 steps:

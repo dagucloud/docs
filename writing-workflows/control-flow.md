@@ -256,6 +256,8 @@ steps:
 
 Repeat steps with explicit 'while' or 'until' modes for clear control flow.
 
+For iterating over a list of items, use [`parallel`](#dynamic-iteration) instead.
+
 ### Repeat While Mode
 
 The 'while' mode repeats a step while a condition is true.
