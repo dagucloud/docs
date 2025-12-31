@@ -83,13 +83,24 @@ Dagu exposes internal cache statistics for memory monitoring and debugging:
 |--------|------|--------|-------------|
 | `dagu_cache_entries_total` | Gauge | `cache` | Number of entries in each cache |
 
-**Cache names and limits:**
-| Cache | Description | Max Entries | TTL |
-|-------|-------------|-------------|-----|
-| `dag_definition` | Parsed DAG definitions | 1,000 | 12h |
-| `dag_run_status` | DAG run status data | 1,000 | 12h |
-| `api_key` | API key validation cache | 500 | 15m |
-| `webhook` | Webhook validation cache | 500 | 15m |
+**Cache names:** `dag_definition`, `dag_run_status`, `api_key`, `webhook`
+
+Cache limits are configurable via the `cache` setting:
+
+```yaml
+cache: normal   # options: low, normal, high (default: normal)
+```
+
+Or via environment variable: `DAGU_CACHE=low`
+
+**Preset values:**
+| Preset | DAG | DAGRun | APIKey | Webhook |
+|--------|-----|--------|--------|---------|
+| low    | 500 | 5,000  | 100    | 100     |
+| normal | 1,000 | 10,000 | 500  | 500     |
+| high   | 5,000 | 50,000 | 1,000 | 1,000  |
+
+TTL: DAG/DAGRun=12h, APIKey/Webhook=15m
 
 These metrics help identify memory growth issues by tracking cache sizes over time.
 

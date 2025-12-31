@@ -46,6 +46,22 @@
   - Distributed execution displays the worker ID (format: `{hostname}@{pid}`)
   - Worker ID is shown in the DAG runs table and run details panel
 
+- **Configurable Cache Limits**: Added `cache` configuration option with presets to control memory usage for in-memory caches. (#1411)
+
+  ```yaml
+  cache: normal   # options: low, normal, high (default: normal)
+  ```
+
+  Or via environment variable: `DAGU_CACHE=low`
+
+  | Preset | DAG | DAGRun | APIKey | Webhook |
+  |--------|-----|--------|--------|---------|
+  | `low`  | 500 | 5,000  | 100    | 100     |
+  | `normal` | 1,000 | 10,000 | 500 | 500   |
+  | `high` | 5,000 | 50,000 | 1,000 | 1,000 |
+
+  See [Server Configuration](/configurations/server#cache-configuration) for details.
+
 ### Changed
 
 - **Metrics Endpoint Access Control**: The `/api/v2/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
@@ -71,6 +87,8 @@
     - .env.local       # Overrides earlier files
     - .env.production  # Overrides all earlier files
   ```
+
+- **Cache item counting**: Fixed cache `Store` method incorrectly incrementing item counter when updating existing keys, and `Invalidate` method decrementing counter for non-existent keys. (#1411)
 
 ## v1.29.0 (2025-12-28)
 

@@ -451,9 +451,46 @@ scrape_configs:
     metrics_path: '/api/v2/metrics'
 ```
 
+## Cache Configuration
+
+Dagu uses in-memory caches to improve performance. Cache limits can be configured via presets:
+
+```yaml
+cache: normal   # options: low, normal, high (default: normal)
+```
+
+Or via environment variable:
+```bash
+export DAGU_CACHE=low
+```
+
+### Presets
+
+| Preset | DAG Definitions | DAG Run Status | API Keys | Webhooks |
+|--------|-----------------|----------------|----------|----------|
+| `low`  | 500 | 5,000 | 100 | 100 |
+| `normal` | 1,000 | 10,000 | 500 | 500 |
+| `high` | 5,000 | 50,000 | 1,000 | 1,000 |
+
+- **low**: For memory-constrained environments
+- **normal**: Balanced for typical deployments (default)
+- **high**: For large-scale deployments with many DAGs
+
+TTL (time-to-live): DAG caches expire after 12 hours, API key/webhook caches after 15 minutes.
+
+### Monitoring Cache Usage
+
+Use Prometheus metrics to monitor cache sizes:
+```promql
+dagu_cache_entries_total
+```
+
+See [Prometheus Metrics](/features/prometheus-metrics#cache-metrics) for more details.
+
 ## See Also
 
 - [Set up authentication](#authentication) for secure access
 - [Configure remote nodes](#remote-nodes) for multi-environment management
 - [Customize the UI](#ui-customization) for your organization
 - [Enable HTTPS](#tlshttps-configuration) for encrypted connections
+- [Prometheus Metrics](/features/prometheus-metrics) for monitoring
