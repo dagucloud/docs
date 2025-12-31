@@ -32,6 +32,18 @@
 
   See [Container Field](/writing-workflows/container#exec-mode-use-existing-container) for full documentation.
 
+### Fixed
+
+- **Multiple dotenv files**: Fixed loading of multiple `.env` files. Previously, only the first file was processed. Now all files are loaded sequentially, with later files overriding values from earlier ones. Duplicate file paths are automatically deduplicated. (#1519)
+
+  ```yaml
+  # All files are now loaded, with later files overriding earlier ones
+  dotenv:
+    - .env.defaults    # Loaded first
+    - .env.local       # Overrides .env.defaults
+    - .env.production  # Overrides both
+  ```
+
 ## v1.29.0 (2025-12-28)
 
 ### Added
