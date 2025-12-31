@@ -32,6 +32,20 @@
 
   See [Container Field](/writing-workflows/container#exec-mode-use-existing-container) for full documentation.
 
+### Changed
+
+- **Metrics Endpoint Access Control**: The `/api/v2/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
+
+  ```yaml
+  # Require authentication (new default)
+  metrics: "private"
+
+  # Allow public access (previous behavior)
+  metrics: "public"
+  ```
+
+  See [Metrics Endpoint](/configurations/server#metrics-endpoint) for Prometheus configuration examples.
+
 ### Fixed
 
 - **Multiple dotenv files**: Fixed loading of multiple `.env` files. Previously, only the first file was processed. Now all files are loaded sequentially, with later files overriding values from earlier ones. Duplicate file paths are automatically deduplicated. Note: `.env` is always prepended to the list unless `dotenv: []` is specified. (#1519)

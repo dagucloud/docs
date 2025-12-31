@@ -34,6 +34,7 @@ tz: "Asia/Tokyo"          # Server timezone
 debug: false              # Debug mode
 logFormat: "text"         # Log format: "text" or "json"
 headless: false           # Run without Web UI
+metrics: "private"        # Metrics endpoint access: "private" (default) or "public"
 
 # Directory Paths (must be under "paths" key)
 paths:
@@ -137,6 +138,7 @@ All options support `DAGU_` prefix:
 - `DAGU_TZ` - Timezone
 - `DAGU_DEBUG` - Debug mode
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
+- `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 
 **Paths:**
 - `DAGU_HOME` - Set all paths
@@ -394,6 +396,59 @@ smtp:
 
 env:
   - ENVIRONMENT: production
+```
+
+## Metrics Endpoint
+
+Dagu exposes Prometheus metrics at `/api/v2/metrics`. By default, this endpoint requires authentication.
+
+### Configuration
+
+```yaml
+# Require authentication (default)
+metrics: "private"
+
+# Allow public access (no authentication required)
+metrics: "public"
+```
+
+Or via environment variable:
+```bash
+export DAGU_SERVER_METRICS=public
+```
+
+### Prometheus Scraping
+
+When metrics is set to `private` (default), configure Prometheus to authenticate:
+
+```yaml
+scrape_configs:
+  - job_name: 'dagu'
+    bearer_token: 'your-api-token'
+    static_configs:
+      - targets: ['dagu:8080']
+    metrics_path: '/api/v2/metrics'
+```
+
+Or with basic auth:
+```yaml
+scrape_configs:
+  - job_name: 'dagu'
+    basic_auth:
+      username: 'admin'
+      password: 'secret'
+    static_configs:
+      - targets: ['dagu:8080']
+    metrics_path: '/api/v2/metrics'
+```
+
+When metrics is set to `public`, no authentication is needed:
+```yaml
+scrape_configs:
+  - job_name: 'dagu'
+    static_configs:
+      - targets: ['dagu:8080']
+    metrics_path: '/api/v2/metrics'
 ```
 
 ## See Also
