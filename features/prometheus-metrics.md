@@ -75,6 +75,22 @@ These metrics provide granular visibility into individual DAG performance:
 - Buckets: 1s, 5s, 10s, 30s, 60s, 120s, 300s, 600s
 - Shorter timescales for queue latency monitoring
 
+### Cache Metrics
+
+Dagu exposes internal cache statistics for memory monitoring and debugging:
+
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `dagu_cache_entries_total` | Gauge | `cache` | Number of entries in each cache |
+
+**Cache names:**
+- `dag_definition` - Parsed DAG definitions
+- `dag_run_status` - DAG run status data
+- `api_key` - API key validation cache
+- `webhook` - Webhook validation cache
+
+These metrics help identify memory growth issues by tracking cache sizes over time.
+
 ### Go Runtime Metrics
 
 Standard Go runtime metrics are also exposed:
@@ -191,6 +207,18 @@ topk(10,
 )
 ```
 
+### Cache Size Monitoring
+
+```promql
+dagu_cache_entries_total
+```
+
+### Cache Growth Rate
+
+```promql
+rate(dagu_cache_entries_total[1h])
+```
+
 ## Grafana Dashboard
 
 You can create a Grafana dashboard with panels for:
@@ -285,6 +313,19 @@ groups:
           severity: critical
         annotations:
           summary: "Dagu scheduler is not running"
+```
+
+### Cache Size Growing
+
+```yaml
+      - alert: DaguCacheGrowing
+        expr: dagu_cache_entries_total > 10000
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cache size is large"
+          description: "Cache {{ $labels.cache }} has {{ $value }} entries"
 ```
 
 ## See Also
