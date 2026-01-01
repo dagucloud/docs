@@ -16,7 +16,7 @@ ssh:
   password: ${SSH_PASSWORD}  # Optional; prefer keys
   strictHostKey: true  # Default: true for security
   knownHostFile: ~/.ssh/known_hosts  # Default: ~/.ssh/known_hosts
-  shell: /bin/bash  # Optional: wrap commands in shell for variable expansion
+  shell: "/bin/bash -e"  # Optional: string or array syntax for shell + args
 
 steps:
   # All SSH steps inherit DAG-level configuration
@@ -34,7 +34,7 @@ steps:
         user: ubuntu
         ip: 192.168.1.100
         key: /home/user/.ssh/id_rsa
-        shell: /bin/bash  # Optional: wrap commands in shell
+        shell: ["/bin/bash", "-o", "pipefail"]  # Optional: string or array syntax
     command: echo "Hello from remote server"
 ```
 
@@ -51,7 +51,7 @@ steps:
 | `password` | No | - | Password (not recommended) |
 | `strictHostKey` | No | `true` | Enable host key verification |
 | `knownHostFile` | No | `~/.ssh/known_hosts` | Known hosts file path |
-| `shell` | No | - | Shell for remote command execution (e.g., `/bin/bash`) |
+| `shell` | No | - | Shell for remote command execution (string or array, e.g., `"/bin/bash -e"` or `["/bin/bash","-e"]`) |
 
 ### Step-Level Fields
 
@@ -64,7 +64,7 @@ steps:
 | `password` | No | - | Password (not recommended) |
 | `strictHostKey` | No | `true` | Enable host key verification |
 | `knownHostFile` | No | `~/.ssh/known_hosts` | Known hosts file path |
-| `shell` | No | - | Shell for remote command execution (e.g., `/bin/bash`) |
+| `shell` | No | - | Shell for remote command execution (string or array syntax) |
 
 Note: Password authentication is supported at both DAG and step level, but key-based authentication is strongly recommended.
 
@@ -76,7 +76,7 @@ When `shell` is specified, commands are wrapped and executed through the shell o
 ssh:
   user: deploy
   host: app.example.com
-  shell: /bin/bash  # Commands wrapped as: /bin/bash -c 'command'
+  shell: ["/bin/bash", "-e"]  # Commands wrapped as: /bin/bash -e -c 'command'
 
 steps:
   - command: echo $HOME && ls -la  # Shell features like pipes, variables work
@@ -92,6 +92,30 @@ Without `shell`, commands are executed directly without shell interpretation. Us
 1. Step-level SSH config `shell` (highest priority)
 2. DAG-level SSH config `shell`
 3. Step-level `shell` field (fallback for convenience)
+
+**Specifying Shell Arguments**
+
+You can provide shell flags either inline as a string or via array form:
+
+```yaml
+ssh:
+  user: deploy
+  host: app.example.com
+  # String with flags
+  shell: "/bin/bash -eo pipefail"
+
+# or the equivalent array form (avoids quoting issues)
+ssh:
+  user: deploy
+  host: app.example.com
+  shell:
+    - /bin/bash
+    - -e
+    - -o
+    - pipefail
+```
+
+Both forms are parsed into the shell executable plus its argument list, so remote commands run exactly as if you typed `/bin/bash -eo pipefail -c 'your command'`.
 
 ### SSH Key Auto-Detection
 

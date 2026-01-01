@@ -226,7 +226,7 @@ ssh:
   password: "${SSH_PASSWORD}" # Optional; prefer keys for security
   strictHostKey: true  # Optional, defaults to true for security
   knownHostFile: ~/.ssh/known_hosts  # Optional, defaults to ~/.ssh/known_hosts
-  shell: /bin/bash     # Optional: shell for remote command execution
+  shell: "/bin/bash -e"  # Optional: shell (string or array) for remote execution
 ```
 
 When configured at the DAG level, all steps using SSH executor will inherit these settings:
@@ -251,7 +251,9 @@ steps:
         user: backup      # Override user
         host: db.example.com  # Override host
         key: ~/.ssh/backup_key  # Override key
-        shell: /bin/sh    # Override shell
+        shell:
+          - /bin/sh        # Override shell with explicit flags
+          - -e
     command: mysqldump mydb > backup.sql
 ```
 
@@ -260,6 +262,7 @@ steps:
 - Step-level SSH configuration completely overrides DAG-level configuration (no partial overrides)
 - Password authentication is supported but not recommended; prefer key-based auth
 - Default SSH keys are tried if no key is specified: `~/.ssh/id_rsa`, `~/.ssh/id_ecdsa`, `~/.ssh/id_ed25519`, `~/.ssh/id_dsa`
+- `shell` accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
 
 ### Working Directory and Volume Resolution
 
