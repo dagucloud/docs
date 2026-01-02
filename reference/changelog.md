@@ -82,6 +82,29 @@
   - Includes the Schema Docs sidebar for easy reference while viewing specs
   - New API endpoint: `GET /dag-runs/{name}/{dagRunId}/spec`
 
+- **LLM Executor**: Added a new executor for integrating Large Language Models into workflows. Supports OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM).
+
+  ```yaml
+  steps:
+    - name: ask
+      llm:
+        provider: openai
+        model: gpt-4o
+        messages:
+          - role: user
+            content: "What is 2+2?"
+      output: ANSWER
+  ```
+
+  Key features:
+  - **Multi-turn conversations**: Steps inherit conversation history from dependencies when `history: true` (default)
+  - **Variable substitution**: Message content supports `${VAR}` syntax
+  - **Streaming**: Response tokens are streamed to stdout by default
+  - **Multiple providers**: `openai`, `anthropic`, `gemini`, `openrouter`, `local`
+  - **Automatic retry**: Retries on rate limits and transient errors with exponential backoff
+
+  See [LLM Executor](/features/executors/llm) for full documentation.
+
 ### Changed
 
 - **Metrics Endpoint Access Control**: The `/api/v2/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)

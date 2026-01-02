@@ -8,6 +8,7 @@ Executors extend Dagu's capabilities beyond simple shell commands. Available exe
 - [Docker](/features/executors/docker) - Run commands in Docker containers
 - [SSH](/features/executors/ssh) - Execute commands on remote hosts
 - [HTTP](/features/executors/http) - Make HTTP requests
+- [LLM](/features/executors/llm) - Execute LLM requests (OpenAI, Anthropic, Gemini, etc.)
 - [Archive](/features/executors/archive) - Extract, create, and list archive files
 - [Mail](/features/executors/mail) - Send emails
 - [JQ](/features/executors/jq) - Process JSON data
@@ -707,6 +708,95 @@ steps:
       ]
 ```
 
+## LLM Executor
+
+::: info
+For detailed LLM executor documentation, see [LLM Executor Guide](/features/executors/llm).
+:::
+
+Execute requests to Large Language Model providers.
+
+### Basic LLM Request
+
+```yaml
+steps:
+  - name: ask
+    llm:
+      provider: openai
+      model: gpt-4o
+      messages:
+        - role: user
+          content: "What is 2+2?"
+    output: ANSWER
+```
+
+### Supported Providers
+
+| Provider | Environment Variable |
+|----------|---------------------|
+| `openai` | `OPENAI_API_KEY` |
+| `anthropic` | `ANTHROPIC_API_KEY` |
+| `gemini` | `GOOGLE_API_KEY` |
+| `openrouter` | `OPENROUTER_API_KEY` |
+| `local` | (none) |
+
+### Multi-turn Conversation
+
+```yaml
+type: graph
+
+steps:
+  - name: setup
+    llm:
+      provider: openai
+      model: gpt-4o
+      messages:
+        - role: system
+          content: "You are a helpful assistant."
+        - role: user
+          content: "What is 2+2?"
+
+  - name: followup
+    depends: [setup]
+    llm:
+      provider: openai
+      model: gpt-4o
+      messages:
+        - role: user
+          content: "Now multiply that by 3."
+```
+
+Steps inherit conversation history from dependencies when `history: true` (default).
+
+### Variable Substitution
+
+```yaml
+params:
+  - TOPIC: "quantum computing"
+
+steps:
+  - name: explain
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+      messages:
+        - role: user
+          content: "Explain ${TOPIC} briefly."
+```
+
+### Local Models (Ollama)
+
+```yaml
+steps:
+  - name: local
+    llm:
+      provider: local
+      model: llama3
+      messages:
+        - role: user
+          content: "Hello!"
+```
+
 ## DAG Executor
 
 ::: info
@@ -802,6 +892,7 @@ steps:
 - [Docker Executor](/features/executors/docker) - Container execution guide
 - [SSH Executor](/features/executors/ssh) - Remote execution guide
 - [HTTP Executor](/features/executors/http) - API interaction guide
+- [LLM Executor](/features/executors/llm) - LLM integration guide
 - [Mail Executor](/features/executors/mail) - Email notification guide
 - [JQ Executor](/features/executors/jq) - JSON processing guide
 - [Writing Workflows](/writing-workflows/) - Using executors in workflows
