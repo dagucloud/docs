@@ -77,6 +77,10 @@
   See [Server Configuration](/configurations/server#cache-configuration) for details.
 
 - **`DAGU_PARAMS_JSON` availability**: Every step now receives the merged parameter payload as JSON via the `DAGU_PARAMS_JSON` environment variable, even when parameters are supplied through legacy CLI strings. If a run starts with raw JSON parameters, the original payload is preserved verbatim. This makes it easier for scripts to consume structured parameter data without re-parsing shell strings. (#1550)
+- **DAG Spec Tab in Status View**: Added a new "Spec" tab to the DAG status page and DAG run details modal/panel. This tab displays the DAG YAML specification in readonly mode with the Schema Documentation sidebar available for reference. The spec shown is the exact spec that was used at execution time, not the current spec. (#XXXX)
+  - Works for both regular DAGs and inline DAG runs (created via `ExecuteDAGRunFromSpec`)
+  - Includes the Schema Docs sidebar for easy reference while viewing specs
+  - New API endpoint: `GET /dag-runs/{name}/{dagRunId}/spec`
 
 ### Changed
 

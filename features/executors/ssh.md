@@ -16,7 +16,7 @@ ssh:
   password: ${SSH_PASSWORD}  # Optional; prefer keys
   strictHostKey: true  # Default: true for security
   knownHostFile: ~/.ssh/known_hosts  # Default: ~/.ssh/known_hosts
-  shell: "/bin/bash -e"  # Optional: string or array syntax for shell + args
+  shell: "/bin/bash -e"  # Optional: string or array syntax for shell + args (DAG-level only)
 
 steps:
   # All SSH steps inherit DAG-level configuration
@@ -34,7 +34,7 @@ steps:
         user: ubuntu
         ip: 192.168.1.100
         key: /home/user/.ssh/id_rsa
-        shell: ["/bin/bash", "-o", "pipefail"]  # Optional: string or array syntax
+        shell: "/bin/bash -o pipefail"  # Step-level executor config accepts string form
     command: echo "Hello from remote server"
 ```
 
@@ -64,7 +64,7 @@ steps:
 | `password` | No | - | Password (not recommended) |
 | `strictHostKey` | No | `true` | Enable host key verification |
 | `knownHostFile` | No | `~/.ssh/known_hosts` | Known hosts file path |
-| `shell` | No | - | Shell for remote command execution (string or array syntax) |
+| `shell` | No | - | Shell for remote command execution (string form only; e.g., `"/bin/bash -e"`) |
 
 Note: Password authentication is supported at both DAG and step level, but key-based authentication is strongly recommended.
 
@@ -76,7 +76,7 @@ When `shell` is specified, commands are wrapped and executed through the shell o
 ssh:
   user: deploy
   host: app.example.com
-  shell: ["/bin/bash", "-e"]  # Commands wrapped as: /bin/bash -e -c 'command'
+  shell: ["/bin/bash", "-e"]  # Commands wrapped as: /bin/bash -e -c 'command' (DAG-level example)
 
 steps:
   - command: echo $HOME && ls -la  # Shell features like pipes, variables work
@@ -89,33 +89,14 @@ Without `shell`, commands are executed directly without shell interpretation. Us
 - Glob patterns (`*.txt`)
 
 **Shell Priority:**
-1. Step-level SSH config `shell` (highest priority)
-2. DAG-level SSH config `shell`
-3. Step-level `shell` field (fallback for convenience)
+1. Step-level SSH executor config `shell` (string only)
+2. DAG-level SSH config `shell` (string or array)
+3. Step-level `shell` field on the step (string or array, acts as fallback for UX)
 
 **Specifying Shell Arguments**
 
-You can provide shell flags either inline as a string or via array form:
-
-```yaml
-ssh:
-  user: deploy
-  host: app.example.com
-  # String with flags
-  shell: "/bin/bash -eo pipefail"
-
-# or the equivalent array form (avoids quoting issues)
-ssh:
-  user: deploy
-  host: app.example.com
-  shell:
-    - /bin/bash
-    - -e
-    - -o
-    - pipefail
-```
-
-Both forms are parsed into the shell executable plus its argument list, so remote commands run exactly as if you typed `/bin/bash -eo pipefail -c 'your command'`.
+- DAG-level `ssh.shell` or the step-level `shell` field accept either string or array syntax, which is parsed into the executable plus argument list.
+- Step-level SSH executor configs (`executor.config.shell`) currently accept **string form only** because the configuration map is decoded into a string. Use quoted strings such as `"/bin/bash -eo pipefail"` there.
 
 ### SSH Key Auto-Detection
 

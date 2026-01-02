@@ -262,7 +262,8 @@ steps:
 - Step-level SSH configuration completely overrides DAG-level configuration (no partial overrides)
 - Password authentication is supported but not recommended; prefer key-based auth
 - Default SSH keys are tried if no key is specified: `~/.ssh/id_rsa`, `~/.ssh/id_ecdsa`, `~/.ssh/id_ed25519`, `~/.ssh/id_dsa`
-- `shell` accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
+- `ssh.shell` at the DAG level accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
+- For step-level SSH executor configs (`executor.config.shell`), use string form (e.g., `"/bin/bash -e"`). Array syntax is not supported when decoding the YAML map into the executor config.
 
 ### Working Directory and Volume Resolution
 
