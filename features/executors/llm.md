@@ -125,6 +125,7 @@ The `followup` step receives the full conversation history from `setup`, includi
 - **Transitive history**: Each step saves its complete conversation (inherited + own + response). When step C depends on B which depends on A, C receives all messages from A→B→C.
 - **Multiple dependencies**: Messages are merged in the order listed in `depends`. Example: `depends: [step1, step2]` merges step1's history first, then step2's.
 - **System message deduplication**: Only the **first** system message is kept. Later system messages from dependencies or the step itself are discarded.
+- **Retry persistence**: Messages are stored at the DAG run level (not per-attempt), so conversation history survives retries. If step A succeeds and step B fails, retrying will allow step B to access step A's messages.
 :::
 
 ### Disable History
