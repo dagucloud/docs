@@ -21,7 +21,33 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step or handler only | File path backing the step's captured stdout stream. | `/var/log/dagu/daily-backup/upload-artifacts.stdout.log` |
 | `DAG_RUN_STEP_STDERR_FILE` | Current step or handler only | File path backing the step's captured stderr stream. | `/var/log/dagu/daily-backup/upload-artifacts.stderr.log` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical completion status (`succeeded`, `partially_succeeded`, `failed`, `aborted`). | `failed` |
+| `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. If the run was started with JSON parameters, the original payload is preserved. | `{"ENVIRONMENT":"prod","batchSize":1000}` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
+
+## Parameter Payload (`DAGU_PARAMS_JSON`)
+
+Dagu always computes the effective parameter set before each run. The scheduler then serializes that map into the `DAGU_PARAMS_JSON` environment variable so steps can read the entire payload—without reconstructing it from `params` strings.
+
+- Defaults declared in the DAG plus CLI/API overrides are merged into a single JSON object.
+- When the run was started with raw JSON parameters (e.g., `dagu start dag.yaml -- '{"foo":"bar"}'`), the original JSON string is preserved verbatim.
+- The variable is empty only when the DAG defines no parameters and none were supplied at runtime.
+
+Example usage inside a shell step:
+
+```yaml
+steps:
+  - name: inspect params
+    command: echo "Full payload: ${DAGU_PARAMS_JSON}"
+  - name: read environment
+    executor:
+      type: jq
+      config:
+        raw: true
+    script: ${DAGU_PARAMS_JSON}
+    command: '"Environment: \(.ENVIRONMENT // "dev")"'
+```
+
+This is particularly useful when downstream scripts expect structured data. Treat the JSON as read-only metadata—mutating it inside a step will not affect subsequent steps.
 
 ## Webhook Payload
 

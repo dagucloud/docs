@@ -179,6 +179,25 @@ steps:
 
 ## Output Handling
 
+### Working with Parameters as JSON
+
+Every step automatically receives the merged parameter payload as JSON through the `DAGU_PARAMS_JSON` environment variable. This is especially helpful when parameters were provided as nested JSON via the CLI or API.
+
+```yaml
+steps:
+  - name: inspect params
+    command: echo "Full payload: ${DAGU_PARAMS_JSON}"
+  - name: region lookup
+    executor:
+      type: jq
+      config:
+        raw: true
+    script: ${DAGU_PARAMS_JSON}
+    command: '"Region: \(.region // "us-east-1")"'
+```
+
+If the run was started with JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides.
+
 ### Capture Output
 
 Store command output in variables:

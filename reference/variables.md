@@ -110,6 +110,25 @@ Override at runtime:
 dagu start workflow.yaml -- ENVIRONMENT=prod PORT=80 DEBUG=true
 ```
 
+### Accessing Parameters as JSON
+
+Every step receives the full parameter map encoded as JSON via the `DAGU_PARAMS_JSON` environment variable. This value reflects the merged defaults plus any runtime overrides, and when a run is started with JSON parameters, the original payload is preserved.
+
+```yaml
+steps:
+  - name: print params
+    command: echo "Raw payload: ${DAGU_PARAMS_JSON}"
+  - name: batch size
+    executor:
+      type: jq
+      config:
+        raw: true
+    script: ${DAGU_PARAMS_JSON}
+    command: '"Batch size: \(.batchSize // "n/a")"'
+```
+
+Use this when downstream scripts prefer structured data or when you need access to parameters that were provided as nested JSON.
+
 ### Mixed Parameters
 
 Combine positional and named parameters:

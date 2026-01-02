@@ -76,6 +76,8 @@
 
   See [Server Configuration](/configurations/server#cache-configuration) for details.
 
+- **`DAGU_PARAMS_JSON` availability**: Every step now receives the merged parameter payload as JSON via the `DAGU_PARAMS_JSON` environment variable, even when parameters are supplied through legacy CLI strings. If a run starts with raw JSON parameters, the original payload is preserved verbatim. This makes it easier for scripts to consume structured parameter data without re-parsing shell strings. (#1550)
+
 ### Changed
 
 - **Metrics Endpoint Access Control**: The `/api/v2/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
