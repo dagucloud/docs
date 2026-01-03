@@ -102,14 +102,14 @@
       llm:
         provider: openai
         model: gpt-4o
-        messages:
-          - role: user
-            content: "What is 2+2?"
+      messages:
+        - role: user
+          content: "What is 2+2?"
       output: ANSWER
   ```
 
   Key features:
-  - **Multi-turn conversations**: Steps inherit conversation history from dependencies when `history: true` (default)
+  - **Multi-turn conversations**: Steps inherit conversation history from dependencies
   - **Variable substitution**: Message content supports `${VAR}` syntax
   - **Streaming**: Response tokens are streamed to stdout by default
   - **Multiple providers**: `openai`, `anthropic`, `gemini`, `openrouter`, `local`

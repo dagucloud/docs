@@ -725,9 +725,9 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: user
-          content: "What is 2+2?"
+    messages:
+      - role: user
+        content: "What is 2+2?"
     output: ANSWER
 ```
 
@@ -754,11 +754,10 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: system
-          content: "You are a helpful assistant."
-        - role: user
-          content: "What is 2+2?"
+      system: "You are a helpful assistant."
+    messages:
+      - role: user
+        content: "What is 2+2?"
 
   - name: followup
     depends: [setup]
@@ -766,12 +765,12 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: user
-          content: "Now multiply that by 3."
+    messages:
+      - role: user
+        content: "Now multiply that by 3."
 ```
 
-Steps inherit conversation history from dependencies when `history: true` (default).
+Steps inherit conversation history from dependencies.
 
 ### Variable Substitution
 
@@ -785,9 +784,9 @@ steps:
     llm:
       provider: anthropic
       model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Explain ${TOPIC} briefly."
+    messages:
+      - role: user
+        content: "Explain ${TOPIC} briefly."
 ```
 
 ### Local Models (Ollama)
@@ -799,10 +798,40 @@ steps:
     llm:
       provider: local
       model: llama3
-      messages:
-        - role: user
-          content: "Hello!"
+    messages:
+      - role: user
+        content: "Hello!"
 ```
+
+### DAG-Level Configuration
+
+Define LLM defaults at the DAG level to share configuration across steps:
+
+```yaml
+llm:
+  provider: openai
+  model: gpt-4o
+  system: "You are a helpful assistant."
+  temperature: 0.7
+
+steps:
+  - name: ask1
+    type: chat
+    messages:
+      - role: user
+        content: "First question"
+
+  - name: ask2
+    type: chat
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+    messages:
+      - role: user
+        content: "Override with different provider"
+```
+
+When a step specifies `llm:`, it completely replaces DAG-level config (no field merging).
 
 ## DAG Executor
 

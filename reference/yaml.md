@@ -265,6 +265,31 @@ steps:
 - `ssh.shell` at the DAG level accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
 - For step-level SSH executor configs (`executor.config.shell`), use string form (e.g., `"/bin/bash -e"`). Array syntax is not supported when decoding the YAML map into the executor config.
 
+### LLM Configuration
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `llm` | object | Default LLM configuration for all chat steps | - |
+
+```yaml
+llm:
+  provider: openai
+  model: gpt-4o
+  system: "You are a helpful assistant."
+  temperature: 0.7
+
+steps:
+  - name: ask
+    type: chat
+    messages:
+      - role: user
+        content: "What is 2+2?"
+```
+
+When configured at the DAG level, all chat steps inherit the LLM configuration. Step-level `llm:` completely overrides DAG-level configuration (no field-level merging).
+
+See [Chat Executor](/features/executors/chat) for full documentation.
+
 ### Working Directory and Volume Resolution
 
 When using container volumes with relative paths, the paths are resolved relative to the DAG's `workingDir`:
@@ -731,6 +756,45 @@ steps:
         destination: ./assets
     command: extract
 ```
+
+### Chat Executor (LLM)
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `type` | string | Set to `chat` for LLM-based steps | - |
+| `llm` | object | LLM configuration (provider, model, system prompt) | - |
+| `messages` | array | Conversation messages for chat steps | - |
+
+```yaml
+steps:
+  - name: ask
+    type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+      system: "You are a helpful assistant."
+    messages:
+      - role: user
+        content: "What is 2+2?"
+    output: ANSWER
+```
+
+**LLM configuration fields:**
+- `provider`: LLM provider (`openai`, `anthropic`, `gemini`, `openrouter`, `local`)
+- `model`: Model identifier (e.g., `gpt-4o`, `claude-sonnet-4-20250514`)
+- `system`: Default system prompt (optional)
+- `temperature`: Randomness control 0.0-2.0 (optional)
+- `maxTokens`: Maximum tokens to generate (optional)
+- `topP`: Nucleus sampling 0.0-1.0 (optional)
+- `baseURL`: Custom API endpoint (optional)
+- `apiKey`: API key override (optional)
+- `stream`: Enable streaming output (default: true)
+
+**Message format:**
+- `role`: Message role (`system`, `user`, `assistant`)
+- `content`: Message content (supports `${VAR}` substitution)
+
+See [Chat Executor](/features/executors/chat) for full documentation.
 
 ### Distributed Execution
 

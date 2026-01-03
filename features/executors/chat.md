@@ -11,9 +11,9 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: user
-          content: "What is 2+2?"
+    messages:
+      - role: user
+        content: "What is 2+2?"
     output: ANSWER
 ```
 
@@ -33,11 +33,13 @@ The `local` provider works with any OpenAI-compatible API including Ollama, vLLM
 
 ## Configuration
 
+### LLM Configuration (`llm` field)
+
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `provider` | string | (required) | LLM provider to use |
 | `model` | string | (required) | Model identifier |
-| `messages` | array | `[]` | Messages to send |
+| `system` | string | (none) | Default system prompt |
 | `temperature` | float | (provider default) | Randomness (0.0-2.0) |
 | `maxTokens` | int | (provider default) | Maximum tokens to generate |
 | `topP` | float | (provider default) | Nucleus sampling (0.0-1.0) |
@@ -45,12 +47,63 @@ The `local` provider works with any OpenAI-compatible API including Ollama, vLLM
 | `apiKey` | string | (from env) | API key override |
 | `stream` | bool | `true` | Stream response tokens |
 
-### Message Format
+### Messages (`messages` field)
+
+The `messages` field is a step-level field (not inside `llm`) containing the conversation messages.
 
 | Field | Description |
 |-------|-------------|
 | `role` | `system`, `user`, or `assistant` |
 | `content` | Message text (supports `${VAR}` substitution) |
+
+## DAG-Level Configuration
+
+Define LLM defaults at the DAG level to share configuration across multiple chat steps:
+
+```yaml
+# DAG-level defaults
+llm:
+  provider: openai
+  model: gpt-4o
+  system: "You are a helpful assistant."
+  temperature: 0.7
+
+steps:
+  # This step inherits the DAG-level llm config
+  - name: ask1
+    type: chat
+    messages:
+      - role: user
+        content: "What is 2+2?"
+
+  # This step overrides DAG-level config
+  - name: ask2
+    type: chat
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+    messages:
+      - role: user
+        content: "Different provider and model"
+```
+
+::: warning Full Override Pattern
+When a step specifies `llm:`, it **completely replaces** the DAG-level configuration. There is no field-level merging - the step must provide all required fields (provider, model).
+:::
+
+### Inheritance with Base DAG
+
+DAG-level `llm` configuration also works with base DAG inheritance:
+
+```yaml
+# ~/.config/dagu/base.yaml
+llm:
+  provider: openai
+  model: gpt-4o
+  temperature: 0.5
+```
+
+All DAGs using this base config will inherit the LLM defaults.
 
 ## Examples
 
@@ -68,9 +121,9 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: user
-          content: "Explain quantum computing briefly."
+    messages:
+      - role: user
+        content: "Explain quantum computing briefly."
 ```
 
 ### Variable Substitution
@@ -88,9 +141,9 @@ steps:
     llm:
       provider: anthropic
       model: claude-sonnet-4-20250514
-      messages:
-        - role: user
-          content: "Explain ${TOPIC} in ${LANGUAGE}."
+    messages:
+      - role: user
+        content: "Explain ${TOPIC} in ${LANGUAGE}."
 ```
 
 ### Multi-turn Conversation
@@ -106,11 +159,10 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: system
-          content: "You are a math tutor."
-        - role: user
-          content: "What is 2+2?"
+      system: "You are a math tutor."
+    messages:
+      - role: user
+        content: "What is 2+2?"
 
   - name: followup
     depends: [setup]
@@ -118,9 +170,9 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: user
-          content: "Now multiply that by 3."
+    messages:
+      - role: user
+        content: "Now multiply that by 3."
 ```
 
 The `followup` step receives the full conversation history from `setup`, including the assistant's response.
@@ -141,9 +193,9 @@ steps:
     llm:
       provider: local
       model: llama3
-      messages:
-        - role: user
-          content: "Hello!"
+    messages:
+      - role: user
+        content: "Hello!"
 ```
 
 ### Custom Endpoint
@@ -157,9 +209,9 @@ steps:
       model: gpt-4o
       baseURL: "https://my-proxy.example.com/v1"
       apiKey: "${CUSTOM_API_KEY}"
-      messages:
-        - role: user
-          content: "Hello!"
+    messages:
+      - role: user
+        content: "Hello!"
 ```
 
 ### Disable Streaming
@@ -172,9 +224,9 @@ steps:
       provider: openai
       model: gpt-4o
       stream: false
-      messages:
-        - role: user
-          content: "Generate a haiku."
+    messages:
+      - role: user
+        content: "Generate a haiku."
 ```
 
 ### Capture Output
@@ -188,9 +240,9 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      messages:
-        - role: user
-          content: "Generate a JSON object with name and age fields."
+    messages:
+      - role: user
+        content: "Generate a JSON object with name and age fields."
     output: CHAT_RESPONSE
 
   - name: process
@@ -207,9 +259,9 @@ steps:
       provider: openai
       model: gpt-4o
       temperature: 1.5
-      messages:
-        - role: user
-          content: "Write a creative story opening."
+    messages:
+      - role: user
+        content: "Write a creative story opening."
 
   - name: precise
     type: chat
@@ -217,9 +269,9 @@ steps:
       provider: openai
       model: gpt-4o
       temperature: 0.1
-      messages:
-        - role: user
-          content: "What is the capital of France?"
+    messages:
+      - role: user
+        content: "What is the capital of France?"
 ```
 
 ## Error Handling
