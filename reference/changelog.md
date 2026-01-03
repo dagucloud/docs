@@ -78,9 +78,20 @@
 
 - **`DAGU_PARAMS_JSON` availability**: Every step now receives the merged parameter payload as JSON via the `DAGU_PARAMS_JSON` environment variable, even when parameters are supplied through legacy CLI strings. If a run starts with raw JSON parameters, the original payload is preserved verbatim. This makes it easier for scripts to consume structured parameter data without re-parsing shell strings. (#1550)
 - **DAG Spec Tab in Status View**: Added a new "Spec" tab to the DAG status page and DAG run details modal/panel. This tab displays the DAG YAML specification in readonly mode with the Schema Documentation sidebar available for reference. The spec shown is the exact spec that was used at execution time, not the current spec. (#XXXX)
-  - Works for both regular DAGs and inline DAG runs (created via `ExecuteDAGRunFromSpec`)
-  - Includes the Schema Docs sidebar for easy reference while viewing specs
-  - New API endpoint: `GET /dag-runs/{name}/{dagRunId}/spec`
+- **Wait Status Email Notifications**: Added `mailOn.wait` and `waitMail` configuration for sending email notifications when a DAG enters wait status (Human In The Loop). This enables teams to be notified when workflows require human approval.
+
+  ```yaml
+  mailOn:
+    wait: true
+
+  waitMail:
+    from: dagu@example.com
+    to: approvers@example.com
+    prefix: "[WAITING]"
+    attachLogs: false
+  ```
+
+  See [Email Notifications](/features/email-notifications#wait-status-notifications) for details.
 
 - **Chat Executor**: Added a new executor for integrating Large Language Models into workflows. Supports OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM).
 
