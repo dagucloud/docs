@@ -740,6 +740,8 @@ steps:
 | `openrouter` | `OPENROUTER_API_KEY` |
 | `local` | (none) |
 
+Aliases `ollama`, `vllm`, and `llama` map to `local`.
+
 ### Multi-turn Conversation
 
 ```yaml
