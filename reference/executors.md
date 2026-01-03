@@ -721,7 +721,8 @@ Execute requests to Large Language Model providers.
 ```yaml
 steps:
   - name: ask
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -749,7 +750,8 @@ type: graph
 
 steps:
   - name: setup
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -760,7 +762,8 @@ steps:
 
   - name: followup
     depends: [setup]
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -778,7 +781,8 @@ params:
 
 steps:
   - name: explain
-    chat:
+    type: chat
+    llm:
       provider: anthropic
       model: claude-sonnet-4-20250514
       messages:
@@ -791,7 +795,8 @@ steps:
 ```yaml
 steps:
   - name: local
-    chat:
+    type: chat
+    llm:
       provider: local
       model: llama3
       messages:

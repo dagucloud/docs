@@ -7,7 +7,8 @@ Execute Large Language Model (LLM) requests to AI providers like OpenAI, Anthrop
 ```yaml
 steps:
   - name: ask-question
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -63,7 +64,8 @@ secrets:
 
 steps:
   - name: generate
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -82,7 +84,8 @@ params:
 
 steps:
   - name: translate
-    chat:
+    type: chat
+    llm:
       provider: anthropic
       model: claude-sonnet-4-20250514
       messages:
@@ -99,7 +102,8 @@ type: graph
 
 steps:
   - name: setup
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -110,7 +114,8 @@ steps:
 
   - name: followup
     depends: [setup]
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -132,7 +137,8 @@ The `followup` step receives the full conversation history from `setup`, includi
 ```yaml
 steps:
   - name: local-inference
-    chat:
+    type: chat
+    llm:
       provider: local
       model: llama3
       messages:
@@ -145,7 +151,8 @@ steps:
 ```yaml
 steps:
   - name: custom-api
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       baseURL: "https://my-proxy.example.com/v1"
@@ -160,7 +167,8 @@ steps:
 ```yaml
 steps:
   - name: no-stream
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       stream: false
@@ -176,7 +184,8 @@ The response is written to stdout and can be captured with `output`:
 ```yaml
 steps:
   - name: generate
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       messages:
@@ -193,7 +202,8 @@ steps:
 ```yaml
 steps:
   - name: creative
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       temperature: 1.5
@@ -202,7 +212,8 @@ steps:
           content: "Write a creative story opening."
 
   - name: precise
-    chat:
+    type: chat
+    llm:
       provider: openai
       model: gpt-4o
       temperature: 0.1
@@ -251,8 +262,8 @@ Metadata is only attached to assistant responses and includes:
 
 ## Notes
 
-- The executor type is inferred from the `chat` field (no need for `type: chat`)
-- Configuration goes in the `chat` field, not in `executor.config`
+- Use `type: chat` explicitly with LLM configuration in the `llm` field
+- The `llm` field is designed to be reusable for future executor types like `agent`
 - API keys are read from environment variables by default
 - Response tokens are streamed to stdout by default
 - The full conversation (inherited + step messages + response) is saved after each step
