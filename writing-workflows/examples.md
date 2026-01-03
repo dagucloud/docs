@@ -1619,6 +1619,78 @@ flowchart LR
 
 </div>
 
+<div class="example-card">
+
+### Chat / LLM Request
+
+```yaml
+steps:
+  - type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+    messages:
+      - role: user
+        content: "What is 2+2?"
+    output: ANSWER
+```
+
+<a href="/features/executors/chat" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Chat with DAG-Level Config
+
+```yaml
+llm:
+  provider: openai
+  model: gpt-4o
+  system: "You are a helpful assistant."
+
+steps:
+  - type: chat
+    messages:
+      - role: user
+        content: "Explain ${TOPIC} briefly."
+```
+
+Steps inherit LLM config from DAG level.
+
+<a href="/features/executors/chat#dag-level-configuration" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Multi-turn Conversation
+
+```yaml
+steps:
+  - type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+    messages:
+      - role: user
+        content: "What is 2+2?"
+
+  - type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+    messages:
+      - role: user
+        content: "Now multiply that by 3."
+```
+
+Steps inherit conversation history from previous steps.
+
+<a href="/features/executors/chat#multi-turn-conversation" class="learn-more">Learn more →</a>
+
+</div>
+
 </div>
 
 ## Scheduling & Automation
