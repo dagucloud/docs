@@ -360,14 +360,16 @@ See [OpenTelemetry Tracing](../features/opentelemetry.md) for detailed configura
 |-------|------|-------------|---------|
 | `mailOn` | object | Email notification triggers | - |
 | `errorMail` | object | Error email configuration | - |
-| `infoMail` | object | Info email configuration | - |
+| `infoMail` | object | Success email configuration | - |
+| `waitMail` | object | Wait status email configuration | - |
 | `smtp` | object | SMTP server configuration | - |
 
 ```yaml
 mailOn:
   success: true
   failure: true
-  
+  wait: true      # Email when DAG is waiting for approval
+
 errorMail:
   from: alerts@example.com
   to: oncall@example.com  # Single recipient (string)
@@ -377,7 +379,7 @@ errorMail:
   #   - manager@example.com
   prefix: "[ALERT]"
   attachLogs: true
-  
+
 infoMail:
   from: notifications@example.com
   to: team@example.com  # Single recipient (string)
@@ -387,7 +389,13 @@ infoMail:
   #   - stakeholders@example.com
   prefix: "[INFO]"
   attachLogs: false
-  
+
+waitMail:
+  from: dagu@example.com
+  to: approvers@example.com
+  prefix: "[WAITING]"
+  attachLogs: false
+
 smtp:
   host: smtp.gmail.com
   port: "587"

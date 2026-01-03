@@ -61,16 +61,25 @@ errorMail:
 mailOn:
   success: true
   failure: true
+  wait: true
+
+waitMail:
+  from: dagu@company.com
+  to:
+    - approvers@company.com
+  prefix: "[WAITING]"
+  attachLogs: false
 ```
 
 ## Email Triggers
 
-### Success/Failure Emails
+### Success/Failure/Wait Emails
 
 ```yaml
 mailOn:
   success: true    # Email on successful completion
   failure: true    # Email on failure
+  wait: true       # Email when waiting for human approval
 ```
 
 ### Step-Level Errors
@@ -81,6 +90,24 @@ steps:
     command: process_critical_data.sh
     mailOnError: true  # Email if this step fails
 ```
+
+### Wait Status Notifications
+
+Send notifications when a DAG is waiting for human approval (HITL - Human In The Loop):
+
+```yaml
+mailOn:
+  wait: true
+
+waitMail:
+  from: dagu@company.com
+  to:
+    - approvers@company.com
+  prefix: "[APPROVAL REQUIRED]"
+  attachLogs: false
+```
+
+This is useful for workflows that require human approval before continuing execution. The email will include details about the DAG and which steps are waiting.
 
 ## Mail Executor
 
