@@ -5,7 +5,7 @@ Dagu injects a small set of read-only environment variables whenever it runs a w
 ## Availability
 
 - **Step execution** – Every step receives the run-level variables plus a step-specific name and log file paths while it executes.
-- **Lifecycle handlers** – `onExit`, `onSuccess`, `onFailure`, and `onCancel` handlers inherit the same variables. They additionally receive the final `DAG_RUN_STATUS` so that post-run automation can branch on success or failure.
+- **Lifecycle handlers** – `onExit`, `onSuccess`, `onFailure`, `onCancel`, and `onWait` handlers inherit the same variables. They additionally receive the final `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for approval.
 - **Nested contexts** – When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
 
 Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT_FILE`, and `DAG_RUN_STEP_STDERR_FILE` always point at whichever step (or handler) is currently running.
@@ -21,6 +21,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step or handler only | File path backing the step's captured stdout stream. | `/var/log/dagu/daily-backup/upload-artifacts.stdout.log` |
 | `DAG_RUN_STEP_STDERR_FILE` | Current step or handler only | File path backing the step's captured stderr stream. | `/var/log/dagu/daily-backup/upload-artifacts.stderr.log` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical completion status (`succeeded`, `partially_succeeded`, `failed`, `aborted`). | `failed` |
+| `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval (HITL). | `approval-step,review-step` |
 | `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. If the run was started with JSON parameters, the original payload is preserved. | `{"ENVIRONMENT":"prod","batchSize":1000}` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
 

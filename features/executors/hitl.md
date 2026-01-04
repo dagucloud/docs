@@ -168,7 +168,6 @@ See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) for more details
 ## Limitations
 
 - HITL steps cannot be used with `workerSelector` (distributed execution) because approval state is stored locally
-- Sub-DAG wait status does not propagate to parent DAG nodes (the sub-DAG will show as failed if it contains HITL steps)
 
 ## See Also
 
