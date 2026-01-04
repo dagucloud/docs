@@ -40,10 +40,9 @@ steps:
   - name: inspect params
     command: echo "Full payload: ${DAGU_PARAMS_JSON}"
   - name: read environment
-    executor:
-      type: jq
-      config:
-        raw: true
+    type: jq
+    config:
+      raw: true
     script: ${DAGU_PARAMS_JSON}
     command: '"Environment: \(.ENVIRONMENT // "dev")"'
 ```

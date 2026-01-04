@@ -116,27 +116,26 @@ Send custom emails as workflow steps:
 ```yaml
 steps:
   - name: send report
-    executor:
-      type: mail
-      config:
-        to: 
-          - command: reports@example.com
-          - command: archive@example.com
-        from: noreply@example.com
-        subject: "Daily Report - ${TODAY}"
-        message: |
-          Daily processing report for ${TODAY}
-          
-          Summary:
-          - command: Records processed: ${RECORD_COUNT}
-          - command: Success rate: ${SUCCESS_RATE}%
-          - command: Processing time: ${DURATION}
-          
-          See attached files for details.
-        attachments:
-          - command: /reports/daily-${TODAY}.pdf
-          - command: /reports/summary-${TODAY}.csv
-          - command: ${DAG_RUN_LOG_FILE}
+    type: mail
+    config:
+      to:
+        - command: reports@example.com
+        - command: archive@example.com
+      from: noreply@example.com
+      subject: "Daily Report - ${TODAY}"
+      message: |
+        Daily processing report for ${TODAY}
+
+        Summary:
+        - command: Records processed: ${RECORD_COUNT}
+        - command: Success rate: ${SUCCESS_RATE}%
+        - command: Processing time: ${DURATION}
+
+        See attached files for details.
+      attachments:
+        - command: /reports/daily-${TODAY}.pdf
+        - command: /reports/summary-${TODAY}.csv
+        - command: ${DAG_RUN_LOG_FILE}
 ```
 
 ## Email Templates
@@ -150,22 +149,21 @@ steps:
     output: REPORT_PATH
   
   - name: email report
-    executor:
-      type: mail
-      config:
-        to: stakeholders@example.com
-        subject: "Processing Report - ${DAG_NAME}"
-        message: |
-          Automated Report Generated
-          
-          DAG: ${DAG_NAME}
-          Run ID: ${DAG_RUN_ID}
-          Status: Completed
-          Time: $(date)
-          
-          Report available at: ${REPORT_PATH}
-        attachments:
-          - command: ${REPORT_PATH}
+    type: mail
+    config:
+      to: stakeholders@example.com
+      subject: "Processing Report - ${DAG_NAME}"
+      message: |
+        Automated Report Generated
+
+        DAG: ${DAG_NAME}
+        Run ID: ${DAG_RUN_ID}
+        Status: Completed
+        Time: $(date)
+
+        Report available at: ${REPORT_PATH}
+      attachments:
+        - command: ${REPORT_PATH}
 ```
 
 ### Error Notification
@@ -173,29 +171,28 @@ steps:
 ```yaml
 handlerOn:
   failure:
-    executor:
-      type: mail
-      config:
-        to: 
-          - oncall@example.com
-          - alerts@example.com
-        from: errors@example.com
-        subject: "⚠️ DAG Failed: ${DAG_NAME}"
-        message: |
-          DAG Execution Failed
-          
-          Details:
-          - DAG: ${DAG_NAME}
-          - Run ID: ${DAG_RUN_ID}
-          - Time: $(date)
-          - Host: $(hostname)
-          
-          Error Summary:
-          $(tail -20 ${DAG_RUN_LOG_FILE} | grep -i error)
-          
-          Full log attached.
-        attachments:
-          - ${DAG_RUN_LOG_FILE}
+    type: mail
+    config:
+      to:
+        - oncall@example.com
+        - alerts@example.com
+      from: errors@example.com
+      subject: "⚠️ DAG Failed: ${DAG_NAME}"
+      message: |
+        DAG Execution Failed
+
+        Details:
+        - DAG: ${DAG_NAME}
+        - Run ID: ${DAG_RUN_ID}
+        - Time: $(date)
+        - Host: $(hostname)
+
+        Error Summary:
+        $(tail -20 ${DAG_RUN_LOG_FILE} | grep -i error)
+
+        Full log attached.
+      attachments:
+        - ${DAG_RUN_LOG_FILE}
 ```
 
 ## SMTP Providers
@@ -261,17 +258,16 @@ steps:
     output: ENV
   
   - name: notify
-    executor:
-      type: mail
-      config:
-        to: |
-          `if [ "${ENV}" = "production" ]; then
-            echo "prod-alerts@example.com"
-          else
-            echo "dev-alerts@example.com"
-          fi`
-        subject: "Alert from ${ENV}"
-        message: "Environment-specific alert"
+    type: mail
+    config:
+      to: |
+        `if [ "${ENV}" = "production" ]; then
+          echo "prod-alerts@example.com"
+        else
+          echo "dev-alerts@example.com"
+        fi`
+      subject: "Alert from ${ENV}"
+      message: "Environment-specific alert"
 ```
 
 ### HTML Emails
@@ -279,27 +275,26 @@ steps:
 ```yaml
 steps:
   - name: send html email
-    executor:
-      type: mail
-      config:
-        to: reports@example.com
-        subject: "HTML Report"
-        message: |
-          <html>
-          <body>
-            <h1>Daily Report</h1>
-            <table border="1">
-              <tr>
-                <td>Status</td>
-                <td style="color: green;">Success</td>
-              </tr>
-              <tr>
-                <td>Records</td>
-                <td>${RECORD_COUNT}</td>
-              </tr>
-            </table>
-          </body>
-          </html>
-        headers:
-          Content-Type: text/html
+    type: mail
+    config:
+      to: reports@example.com
+      subject: "HTML Report"
+      message: |
+        <html>
+        <body>
+          <h1>Daily Report</h1>
+          <table border="1">
+            <tr>
+              <td>Status</td>
+              <td style="color: green;">Success</td>
+            </tr>
+            <tr>
+              <td>Records</td>
+              <td>${RECORD_COUNT}</td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      headers:
+        Content-Type: text/html
 ```

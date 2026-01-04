@@ -1350,8 +1350,7 @@ secrets:
 workingDir: /tmp/workspace
 steps:
   - command: actions/checkout@v4
-    executor:
-      type: gha
+    type: gha
     params:
       repository: dagu-org/dagu
       ref: main
@@ -1408,12 +1407,11 @@ steps:
 ```yaml
 steps:
   - command: POST https://api.example.com/webhook
-    executor:
-      type: http
-      config:
-        headers:
-          Content-Type: application/json
-        body: '{"status": "started"}'
+    type: http
+    config:
+      headers:
+        Content-Type: application/json
+      body: '{"status": "started"}'
     
 ```
 
@@ -1429,16 +1427,14 @@ steps:
 steps:
   # Fetch sample users from a public mock API
   - command: GET https://reqres.in/api/users
-    executor:
-      type: http
-      config:
-        silent: true
-    
+    type: http
+    config:
+      silent: true
     output: API_RESPONSE
-   
+
   # Extract user emails from the JSON response
   - command: '.data[] | .email'
-    executor: jq
+    type: jq
     script: ${API_RESPONSE}
 ```
 
@@ -1454,11 +1450,10 @@ steps:
 workingDir: /tmp/data
 
 steps:
-  - executor:
-      type: archive
-      config:
-        source: dataset.tar.zst
-        destination: ./dataset
+  - type: archive
+    config:
+      source: dataset.tar.zst
+      destination: ./dataset
     command: extract
 ```
 
@@ -1597,15 +1592,14 @@ smtp:
   password: "${SMTP_PASS}"
 
 steps:
-  - executor:
-      type: mail
-      config:
-        to: team@example.com
-        from: noreply@example.com
-        subject: "Weekly Report"
-        message: "Attached."
-        attachments:
-          - command: report.txt
+  - type: mail
+    config:
+      to: team@example.com
+      from: noreply@example.com
+      subject: "Weekly Report"
+      message: "Attached."
+      attachments:
+        - command: report.txt
 ```
 
 ```mermaid

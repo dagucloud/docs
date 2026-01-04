@@ -245,15 +245,14 @@ steps:
   - command: systemctl restart myapp
 
   # Step-level config overrides DAG-level
-  - executor:
-      type: ssh
-      config:
-        user: backup      # Override user
-        host: db.example.com  # Override host
-        key: ~/.ssh/backup_key  # Override key
-        shell:
-          - /bin/sh        # Override shell with explicit flags
-          - -e
+  - type: ssh
+    config:
+      user: backup      # Override user
+      host: db.example.com  # Override host
+      key: ~/.ssh/backup_key  # Override key
+      shell:
+        - /bin/sh        # Override shell with explicit flags
+        - -e
     command: mysqldump mydb > backup.sql
 ```
 
@@ -750,11 +749,10 @@ When using `container`, you cannot use `executor` or `script` fields on the same
 
 ```yaml
 steps:
-  - executor:
-      type: archive
-      config:
-        source: assets.tar.gz
-        destination: ./assets
+  - type: archive
+    config:
+      source: assets.tar.gz
+      destination: ./assets
     command: extract
 ```
 
@@ -1037,13 +1035,12 @@ handlerOn:
       echo "ETL completed successfully for ${DATE}"
       ./scripts/notify-success.sh
   failure:
-    executor:
-      type: mail
-      config:
-        to: data-team@example.com
-        subject: "ETL Failed - ${DATE}"
-        body: "Check logs at ${DAG_RUN_LOG_FILE}"
-        attachLogs: true
+    type: mail
+    config:
+      to: data-team@example.com
+      subject: "ETL Failed - ${DATE}"
+      body: "Check logs at ${DAG_RUN_LOG_FILE}"
+      attachLogs: true
   exit:
     command: ./scripts/cleanup.sh ${DATE}
 

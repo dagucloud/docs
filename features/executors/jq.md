@@ -7,7 +7,7 @@ Process and transform JSON data using jq.
 ```yaml
 steps:
   - name: extract-field
-    executor: jq
+    type: jq
     command: '.name'
     script: |
       {"name": "John Doe", "age": 30, "city": "New York"}
@@ -25,10 +25,9 @@ when you need jq's `-r` behavior (unquoted strings, numbers, booleans).
 ```yaml
 steps:
   - name: list-addresses
-    executor:
-      type: jq
-      config:
-        raw: true
+    type: jq
+    config:
+      raw: true
     command: '.users[].email'
     script: |
       {
@@ -52,7 +51,7 @@ bob@example.com
 ```yaml
 steps:
   - name: transform
-    executor: jq
+    type: jq
     command: '{id: .user_id, name: (.first + " " + .last)}'
     script: |
       {"user_id": 123, "first": "John", "last": "Doe"}
@@ -63,7 +62,7 @@ steps:
 ```yaml
 steps:
   - name: filter-active
-    executor: jq
+    type: jq
     command: '.users[] | select(.active) | .email'
     script: |
       {
@@ -80,15 +79,14 @@ steps:
 ```yaml
 steps:
   - name: fetch-data
-    executor:
-      type: http
-      config:
-        silent: true
+    type: http
+    config:
+      silent: true
     command: GET https://api.example.com/products
     output: API_RESPONSE
 
   - name: extract-in-stock
-    executor: jq
+    type: jq
     command: '.products | map(select(.inventory > 0) | {id, name, price})'
     script: ${API_RESPONSE}
     output: IN_STOCK
@@ -99,7 +97,7 @@ steps:
 ```yaml
 steps:
   - name: sales-by-category
-    executor: jq
+    type: jq
     command: |
       group_by(.category) |
       map({

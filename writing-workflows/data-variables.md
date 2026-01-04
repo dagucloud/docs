@@ -188,10 +188,9 @@ steps:
   - name: inspect params
     command: echo "Full payload: ${DAGU_PARAMS_JSON}"
   - name: region lookup
-    executor:
-      type: jq
-      config:
-        raw: true
+    type: jq
+    config:
+      raw: true
     script: ${DAGU_PARAMS_JSON}
     command: '"Region: \(.region // "us-east-1")"'
 ```

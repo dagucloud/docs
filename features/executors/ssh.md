@@ -28,13 +28,12 @@ steps:
 
 ```yaml
 steps:
-  - executor:
-      type: ssh
-      config:
-        user: ubuntu
-        ip: 192.168.1.100
-        key: /home/user/.ssh/id_rsa
-        shell: "/bin/bash -o pipefail"  # Step-level executor config accepts string form
+  - type: ssh
+    config:
+      user: ubuntu
+      ip: 192.168.1.100
+      key: /home/user/.ssh/id_rsa
+      shell: "/bin/bash -o pipefail"  # Step-level config accepts string form
     command: echo "Hello from remote server"
 ```
 
@@ -113,12 +112,11 @@ Multiple commands share the same step configuration:
 ```yaml
 steps:
   - name: remote-checks
-    executor:
-      type: ssh
-      config:
-        user: deploy
-        host: production.example.com
-        key: ~/.ssh/deploy_key
+    type: ssh
+    config:
+      user: deploy
+      host: production.example.com
+      key: ~/.ssh/deploy_key
     command:
       - systemctl status nginx
       - systemctl status myapp

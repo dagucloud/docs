@@ -58,10 +58,9 @@ steps:
       echo "Script"
   - name: explicit-name            # Explicit name
     command: echo "Third step"
-  - executor:                      # Auto-named: http_4
-      type: http
-      config:
-        url: https://api.example.com
+  - type: http                     # Auto-named: http_4
+    config:
+      url: https://api.example.com
   - call: child-workflow            # Auto-named: dag_5
 ```
 

@@ -12,13 +12,12 @@ smtp:
   password: "${SMTP_PASS}"
 
 steps:
-  - executor:
-      type: mail
-      config:
-        to: recipient@example.com
-        from: sender@example.com
-        subject: "Workflow Completed"
-        message: "The data processing workflow has completed successfully."
+  - type: mail
+    config:
+      to: recipient@example.com
+      from: sender@example.com
+      subject: "Workflow Completed"
+      message: "The data processing workflow has completed successfully."
 ```
 
 ## SMTP Configuration
@@ -54,24 +53,22 @@ smtp:
 
 ```yaml
 steps:
-  - executor:
-      type: mail
-      config:
-        to:
-          - command: team@example.com
-          - command: manager@example.com
-          - command: stakeholders@example.com
-        from: noreply@example.com
-        subject: "Daily Report Ready"
-        message: "The daily report has been generated."
-        
-  - executor:
-      type: mail
-      config:
-        to: admin@example.com  # Single recipient still works
-        from: system@example.com
-        subject: "System Update"
-        message: "System maintenance completed."
+  - type: mail
+    config:
+      to:
+        - command: team@example.com
+        - command: manager@example.com
+        - command: stakeholders@example.com
+      from: noreply@example.com
+      subject: "Daily Report Ready"
+      message: "The daily report has been generated."
+
+  - type: mail
+    config:
+      to: admin@example.com  # Single recipient still works
+      from: system@example.com
+      subject: "System Update"
+      message: "System maintenance completed."
 ```
 
 ### With Variables
@@ -81,17 +78,16 @@ params:
   - ENVIRONMENT: production
 
 steps:
-  - executor:
-      type: mail
-      config:
-        to: devops@company.com
-        from: deploy@company.com
-        subject: "Deployed to ${ENVIRONMENT}"
-        message: |
-          Deployment completed:
-          - Environment: ${ENVIRONMENT}
-          - Version: ${VERSION}
-          - Time: `date`
+  - type: mail
+    config:
+      to: devops@company.com
+      from: deploy@company.com
+      subject: "Deployed to ${ENVIRONMENT}"
+      message: |
+        Deployment completed:
+        - Environment: ${ENVIRONMENT}
+        - Version: ${VERSION}
+        - Time: `date`
 ```
 
 ### Success/Failure Notifications
@@ -99,28 +95,26 @@ steps:
 ```yaml
 handlerOn:
   success:
-    executor:
-      type: mail
-      config:
-        to: team@company.com
-        from: dagu@company.com
-        subject: "✅ Pipeline Success - ${DAG_NAME}"
-        message: |
-          Pipeline completed successfully.
-          Run ID: ${DAG_RUN_ID}
-          Logs: ${DAG_RUN_LOG_FILE}
-  
+    type: mail
+    config:
+      to: team@company.com
+      from: dagu@company.com
+      subject: "✅ Pipeline Success - ${DAG_NAME}"
+      message: |
+        Pipeline completed successfully.
+        Run ID: ${DAG_RUN_ID}
+        Logs: ${DAG_RUN_LOG_FILE}
+
   failure:
-    executor:
-      type: mail
-      config:
-        to: oncall@company.com
-        from: alerts@company.com
-        subject: "❌ Pipeline Failed - ${DAG_NAME}"
-        message: |
-          Pipeline failed.
-          Run ID: ${DAG_RUN_ID}
-          Check logs: ${DAG_RUN_LOG_FILE}
+    type: mail
+    config:
+      to: oncall@company.com
+      from: alerts@company.com
+      subject: "❌ Pipeline Failed - ${DAG_NAME}"
+      message: |
+        Pipeline failed.
+        Run ID: ${DAG_RUN_ID}
+        Check logs: ${DAG_RUN_LOG_FILE}
 
 steps:
   - command: echo "Run your main tasks here"
@@ -146,28 +140,26 @@ steps:
 steps:
   - command: echo "Generating report..." > report.txt
 
-  - executor:
-      type: mail
-      config:
-        to: management@company.com
-        from: reports@company.com
-        subject: "Weekly Report"
-        message: "Please find the weekly report attached."
-        attachments:
-          - command: report.txt
+  - type: mail
+    config:
+      to: management@company.com
+      from: reports@company.com
+      subject: "Weekly Report"
+      message: "Please find the weekly report attached."
+      attachments:
+        - command: report.txt
 ```
 
 ### With Retry
 
 ```yaml
 steps:
-  - executor:
-      type: mail
-      config:
-        to: oncall@company.com
-        from: alerts@company.com
-        subject: "Critical Alert"
-        message: "Immediate action required."
+  - type: mail
+    config:
+      to: oncall@company.com
+      from: alerts@company.com
+      subject: "Critical Alert"
+      message: "Immediate action required."
     retryPolicy:
       limit: 3
       intervalSec: 60

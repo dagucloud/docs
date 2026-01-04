@@ -303,41 +303,39 @@ steps:
 ```yaml
 handlerOn:
   failure:
-    executor:
-      type: http
-      config:
-        url: "${SLACK_WEBHOOK_URL}"
-        method: POST
-        body: |
-          {
-            "text": "Workflow Failed: ${DAG_NAME}",
-            "blocks": [{
-              "type": "section",
-              "text": {
-                "type": "mrkdwn",
-                "text": "*Run ID:* ${DAG_RUN_ID}"
-              }
-            }]
-          }
+    type: http
+    config:
+      url: "${SLACK_WEBHOOK_URL}"
+      method: POST
+      body: |
+        {
+          "text": "Workflow Failed: ${DAG_NAME}",
+          "blocks": [{
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*Run ID:* ${DAG_RUN_ID}"
+            }
+          }]
+        }
 ```
 
 **PagerDuty:**
 ```yaml
 handlerOn:
   failure:
-    executor:
-      type: http
-      config:
-        url: https://events.pagerduty.com/v2/enqueue
-        body: |
-          {
-            "routing_key": "${PAGERDUTY_KEY}",
-            "event_action": "trigger",
-            "payload": {
-              "summary": "Failed: ${DAG_NAME}",
-              "severity": "error"
-            }
+    type: http
+    config:
+      url: https://events.pagerduty.com/v2/enqueue
+      body: |
+        {
+          "routing_key": "${PAGERDUTY_KEY}",
+          "event_action": "trigger",
+          "payload": {
+            "summary": "Failed: ${DAG_NAME}",
+            "severity": "error"
           }
+        }
 ```
 
 ## Security

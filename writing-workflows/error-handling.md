@@ -145,13 +145,12 @@ handlerOn:
 # With email
 handlerOn:
   failure:
-    executor:
-      type: mail
-      config:
-        to: oncall@company.com
-        from: dagu@company.com
-        subject: "Failed: ${DAG_NAME}"
-        message: "Check logs: ${DAG_RUN_LOG_FILE}"
+    type: mail
+    config:
+      to: oncall@company.com
+      from: dagu@company.com
+      subject: "Failed: ${DAG_NAME}"
+      message: "Check logs: ${DAG_RUN_LOG_FILE}"
 ```
 
 ## Email Notifications
@@ -180,15 +179,14 @@ steps:
     mailOnError: true
     
   # Send custom email
-  - executor:
-      type: mail
-      config:
-        to: team@company.com
-        from: dagu@company.com
-        subject: "Report Ready"
-        message: "See attached"
-        attachments:
-          - command: /tmp/report.pdf
+  - type: mail
+    config:
+      to: team@company.com
+      from: dagu@company.com
+      subject: "Report Ready"
+      message: "See attached"
+      attachments:
+        - /tmp/report.pdf
 ```
 
 ## Timeouts and Cleanup

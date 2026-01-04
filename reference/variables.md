@@ -119,10 +119,9 @@ steps:
   - name: print params
     command: echo "Raw payload: ${DAGU_PARAMS_JSON}"
   - name: batch size
-    executor:
-      type: jq
-      config:
-        raw: true
+    type: jq
+    config:
+      raw: true
     script: ${DAGU_PARAMS_JSON}
     command: '"Batch size: \(.batchSize // "n/a")"'
 ```

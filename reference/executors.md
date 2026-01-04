@@ -176,10 +176,9 @@ secrets:
 steps:
   - name: checkout
     command: actions/checkout@v4
-    executor:
-      type: gha             # Aliases: github_action, github-action
-      config:
-        runner: node:24-bookworm
+    type: gha               # Aliases: github_action, github-action
+    config:
+      runner: node:24-bookworm
     params:
       repository: dagu-org/dagu
       ref: main
@@ -280,13 +279,12 @@ Execute commands on remote hosts over SSH.
 ```yaml
 steps:
   - name: remote-command
-    executor:
-      type: ssh
-      config:
-        user: deploy
-        host: server.example.com
-        port: 22
-        key: /home/user/.ssh/id_rsa
+    type: ssh
+    config:
+      user: deploy
+      host: server.example.com
+      port: 22
+      key: /home/user/.ssh/id_rsa
     command: ls -la /var/www
 ```
 
@@ -295,12 +293,11 @@ steps:
 ```yaml
 steps:
   - name: remote-with-env
-    executor:
-      type: ssh
-      config:
-        user: deploy
-        host: 192.168.1.100
-        key: ~/.ssh/deploy_key
+    type: ssh
+    config:
+      user: deploy
+      host: 192.168.1.100
+      key: ~/.ssh/deploy_key
     command: |
       export APP_ENV=production
       cd /opt/app
@@ -312,12 +309,11 @@ steps:
 ```yaml
 steps:
   - name: remote-script
-    executor:
-      type: ssh
-      config:
-        user: admin
-        host: backup.server.com
-        key: ${SSH_KEY_PATH}
+    type: ssh
+    config:
+      user: admin
+      host: backup.server.com
+      key: ${SSH_KEY_PATH}
     script: |
       #!/bin/bash
       set -e
@@ -344,10 +340,9 @@ Make HTTP requests to APIs and web services.
 ```yaml
 steps:
   - name: simple-get
-    executor:
-      type: http
-      config:
-        silent: true  # Output body only
+    type: http
+    config:
+      silent: true  # Output body only
     command: GET https://api.example.com/status
 ```
 
@@ -356,18 +351,17 @@ steps:
 ```yaml
 steps:
   - name: post-json
-    executor:
-      type: http
-      config:
-        headers:
-          Content-Type: application/json
-          Authorization: Bearer ${API_TOKEN}
-        body: |
-          {
-            "name": "test",
-            "value": 123
-          }
-        timeout: 30
+    type: http
+    config:
+      headers:
+        Content-Type: application/json
+        Authorization: Bearer ${API_TOKEN}
+      body: |
+        {
+          "name": "test",
+          "value": 123
+        }
+      timeout: 30
     command: POST https://api.example.com/data
 ```
 
@@ -376,14 +370,13 @@ steps:
 ```yaml
 steps:
   - name: search-api
-    executor:
-      type: http
-      config:
-        query:
-          q: "dagu workflow"
-          limit: "10"
-          offset: "0"
-        silent: true
+    type: http
+    config:
+      query:
+        q: "dagu workflow"
+        limit: "10"
+        offset: "0"
+      silent: true
     command: GET https://api.example.com/search
 ```
 
@@ -392,12 +385,11 @@ steps:
 ```yaml
 steps:
   - name: form-submit
-    executor:
-      type: http
-      config:
-        headers:
-          Content-Type: application/x-www-form-urlencoded
-        body: "username=user&password=pass&remember=true"
+    type: http
+    config:
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+      body: "username=user&password=pass&remember=true"
     command: POST https://example.com/login
 ```
 
@@ -406,12 +398,11 @@ steps:
 ```yaml
 steps:
   - name: internal-api
-    executor:
-      type: http
-      config:
-        skipTLSVerify: true  # Skip certificate verification
-        headers:
-          Authorization: Bearer ${INTERNAL_TOKEN}
+    type: http
+    config:
+      skipTLSVerify: true  # Skip certificate verification
+      headers:
+        Authorization: Bearer ${INTERNAL_TOKEN}
     command: GET https://internal-api.local/data
 ```
 
@@ -420,14 +411,13 @@ steps:
 ```yaml
 steps:
   - name: api-workflow
-    executor:
-      type: http
-      config:
-        headers:
-          Accept: application/json
-          X-API-Key: ${API_KEY}
-        timeout: 60
-        silent: false
+    type: http
+    config:
+      headers:
+        Accept: application/json
+        X-API-Key: ${API_KEY}
+      timeout: 60
+      silent: false
     command: GET https://api.example.com/data
     output: API_RESPONSE
     
@@ -448,12 +438,11 @@ Manipulate archives without shelling out to `tar`, `zip`, or other external tool
 ```yaml
 steps:
   - name: unpack
-    executor:
-      type: archive
-      config:
-        source: logs.tar.gz
-        destination: ./logs
-        verifyIntegrity: true
+    type: archive
+    config:
+      source: logs.tar.gz
+      destination: ./logs
+      verifyIntegrity: true
     command: extract
 ```
 
@@ -462,13 +451,12 @@ steps:
 ```yaml
 steps:
   - name: package
-    executor:
-      type: archive
-      config:
-        source: ./logs
-        destination: logs-backup.tar.gz
-        include:
-          - command: "**/*.log"
+    type: archive
+    config:
+      source: ./logs
+      destination: logs-backup.tar.gz
+      include:
+        - command: "**/*.log"
     command: create
 ```
 
@@ -477,10 +465,9 @@ steps:
 ```yaml
 steps:
   - name: inspect
-    executor:
-      type: archive
-      config:
-        source: logs-backup.tar.gz
+    type: archive
+    config:
+      source: logs-backup.tar.gz
     command: list
     output: ARCHIVE_INDEX
 ```
@@ -504,13 +491,12 @@ smtp:
 
 steps:
   - name: send-notification
-    executor:
-      type: mail
-      config:
-        to: recipient@example.com
-        from: sender@gmail.com
-        subject: "Workflow Completed"
-        message: "The data processing workflow has completed successfully."
+    type: mail
+    config:
+      to: recipient@example.com
+      from: sender@gmail.com
+      subject: "Workflow Completed"
+      message: "The data processing workflow has completed successfully."
 ```
 
 ### With Attachments
@@ -518,19 +504,18 @@ steps:
 ```yaml
 steps:
   - name: send-report
-    executor:
-      type: mail
-      config:
-        to: team@company.com
-        from: reports@company.com
-        subject: "Daily Report - ${TODAY}"
-        message: |
-          Please find attached the daily report.
-          
-          Generated at: ${TIMESTAMP}
-        attachments:
-          - command: /tmp/daily-report.pdf
-          - command: /tmp/summary.csv
+    type: mail
+    config:
+      to: team@company.com
+      from: reports@company.com
+      subject: "Daily Report - ${TODAY}"
+      message: |
+        Please find attached the daily report.
+
+        Generated at: ${TIMESTAMP}
+      attachments:
+        - command: /tmp/daily-report.pdf
+        - command: /tmp/summary.csv
 ```
 
 ### Multiple Recipients
@@ -538,20 +523,19 @@ steps:
 ```yaml
 steps:
   - name: alert-team
-    executor:
-      type: mail
-      config:
-        to: 
-          - command: ops@company.com
-          - command: alerts@company.com
-          - command: oncall@company.com
-        from: dagu@company.com
-        subject: "[ALERT] Process Failed"
-        message: |
-          The critical process has failed.
-          
-          Error: ${ERROR_MESSAGE}
-          Time: ${TIMESTAMP}
+    type: mail
+    config:
+      to:
+        - command: ops@company.com
+        - command: alerts@company.com
+        - command: oncall@company.com
+      from: dagu@company.com
+      subject: "[ALERT] Process Failed"
+      message: |
+        The critical process has failed.
+
+        Error: ${ERROR_MESSAGE}
+        Time: ${TIMESTAMP}
 ```
 
 ### HTML Email
@@ -559,14 +543,13 @@ steps:
 ```yaml
 steps:
   - name: send-html
-    executor:
-      type: mail
-      config:
-        to: marketing@company.com
-        from: notifications@company.com
-        subject: "Weekly Stats"
-        contentType: text/html
-        message: |
+    type: mail
+    config:
+      to: marketing@company.com
+      from: notifications@company.com
+      subject: "Weekly Stats"
+      contentType: text/html
+      message: |
           <html>
           <body>
             <h2>Weekly Statistics</h2>
@@ -591,10 +574,9 @@ Set `config.raw: true` to mirror jq's `-r` flag and emit unquoted primitives.
 ```yaml
 steps:
   - name: list-emails
-    executor:
-      type: jq
-      config:
-        raw: true
+    type: jq
+    config:
+      raw: true
     command: '.data.users[].email'
     script: |
       {
@@ -618,7 +600,7 @@ user2@example.com
 ```yaml
 steps:
   - name: pretty-print
-    executor: jq
+    type: jq
     script: |
       {"name":"test","values":[1,2,3],"nested":{"key":"value"}}
 ```
@@ -639,7 +621,7 @@ Output:
 ```yaml
 steps:
   - name: extract-value
-    executor: jq
+    type: jq
     command: '.data.users[] | select(.active == true) | .email'
     script: |
       {
@@ -664,7 +646,7 @@ Output:
 ```yaml
 steps:
   - name: transform-data
-    executor: jq
+    type: jq
     command: '{id: .id, name: .name, total: (.items | map(.price) | add)}'
     script: |
       {
@@ -692,7 +674,7 @@ Output:
 ```yaml
 steps:
   - name: analyze-logs
-    executor: jq
+    type: jq
     command: |
       group_by(.level) | 
       map({
@@ -889,7 +871,7 @@ Execute other workflows as steps, enabling workflow composition.
 ```yaml
 steps:
   - name: run-etl
-    executor: dag
+    type: dag
     command: workflows/etl-pipeline.yaml
     params: "DATE=${TODAY} ENV=production"
 ```
@@ -900,7 +882,7 @@ steps:
 name: main-workflow
 steps:
   - name: prepare-data
-    executor: dag
+    type: dag
     command: data-prep
     params: "SOURCE=/data/raw"
 
@@ -921,7 +903,7 @@ steps:
 ```yaml
 steps:
   - name: analyze
-    executor: dag
+    type: dag
     command: analyzer.yaml
     params: "FILE=${INPUT_FILE}"
     output: ANALYSIS
@@ -937,7 +919,7 @@ steps:
 ```yaml
 steps:
   - name: may-fail
-    executor: dag
+    type: dag
     command: risky-process.yaml
     continueOn:
       failure: true
@@ -960,7 +942,7 @@ steps:
     output: WORKFLOW_FILE
     
   - name: run-selected
-    executor: dag
+    type: dag
     command: ${WORKFLOW_FILE}
     params: "ENV=${ENVIRONMENT}"
 ```

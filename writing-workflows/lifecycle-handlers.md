@@ -89,15 +89,14 @@ This isolation ensures that each workflow in a hierarchy has predictable, self-c
 ```yaml
 handlerOn:
   failure:
-    executor:
-      type: mail
-      config:
-        to: oncall@company.com
-        from: dagu@company.com
-        subject: "${DAG_NAME} failed"
-        message: |
-          Run ID: ${DAG_RUN_ID}
-          Logs: ${DAG_RUN_LOG_FILE}
+    type: mail
+    config:
+      to: oncall@company.com
+      from: dagu@company.com
+      subject: "${DAG_NAME} failed"
+      message: |
+        Run ID: ${DAG_RUN_ID}
+        Logs: ${DAG_RUN_LOG_FILE}
 ```
 
 ### Run a Follow-up DAG

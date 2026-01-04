@@ -7,7 +7,7 @@ Execute HTTP requests to web services and APIs.
 ```yaml
 steps:
   - name: get-data
-    executor: http
+    type: http
     command: GET https://jsonplaceholder.typicode.com/todos/1
 ```
 
@@ -29,12 +29,11 @@ steps:
 ```yaml
 steps:
   - name: create-resource
-    executor:
-      type: http
-      config:
-        body: '{"name": "New Resource"}'
-        headers:
-          Content-Type: application/json
+    type: http
+    config:
+      body: '{"name": "New Resource"}'
+      headers:
+        Content-Type: application/json
     command: POST https://api.example.com/resources
 ```
 
@@ -43,11 +42,10 @@ steps:
 ```yaml
 steps:
   - name: bearer-auth
-    executor:
-      type: http
-      config:
-        headers:
-          Authorization: "Bearer ${API_TOKEN}"
+    type: http
+    config:
+      headers:
+        Authorization: "Bearer ${API_TOKEN}"
     command: GET https://api.example.com/protected
 ```
 
@@ -56,12 +54,11 @@ steps:
 ```yaml
 steps:
   - name: search
-    executor:
-      type: http
-      config:
-        query:
-          q: "search term"
-          limit: "10"
+    type: http
+    config:
+      query:
+        q: "search term"
+        limit: "10"
     command: GET https://api.example.com/search
 ```
 
@@ -70,10 +67,9 @@ steps:
 ```yaml
 steps:
   - name: get-user
-    executor:
-      type: http
-      config:
-        silent: true
+    type: http
+    config:
+      silent: true
     command: GET https://api.example.com/user
     output: USER_DATA
 
@@ -86,10 +82,9 @@ steps:
 ```yaml
 steps:
   - name: api-call
-    executor:
-      type: http
-      config:
-        timeout: 30
+    type: http
+    config:
+      timeout: 30
     command: GET https://api.example.com/data
     retryPolicy:
       limit: 3
@@ -103,12 +98,11 @@ steps:
 ```yaml
 handlerOn:
   success:
-    executor:
-      type: http
-      config:
-        body: '{"status": "completed", "dag": "${DAG_NAME}"}'
-        headers:
-          Content-Type: application/json
+    type: http
+    config:
+      body: '{"status": "completed", "dag": "${DAG_NAME}"}'
+      headers:
+        Content-Type: application/json
     command: POST https://hooks.example.com/workflow-complete
 ```
 
@@ -117,11 +111,10 @@ handlerOn:
 ```yaml
 steps:
   - name: internal-api
-    executor:
-      type: http
-      config:
-        skipTLSVerify: true  # Allow self-signed certificates
-        headers:
-          Authorization: "Bearer ${INTERNAL_TOKEN}"
+    type: http
+    config:
+      skipTLSVerify: true  # Allow self-signed certificates
+      headers:
+        Authorization: "Bearer ${INTERNAL_TOKEN}"
     command: GET https://internal-api.company.local/data
 ```

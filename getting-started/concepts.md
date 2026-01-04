@@ -194,13 +194,12 @@ Make API calls:
 
 ```yaml
 steps:
-  - executor:
-      type: http
-      config:
-        method: POST
-        url: https://api.example.com/trigger
-        headers:
-          Authorization: Bearer ${API_TOKEN}
+  - type: http
+    config:
+      method: POST
+      url: https://api.example.com/trigger
+      headers:
+        Authorization: Bearer ${API_TOKEN}
 ```
 
 See [HTTP Executor](/features/executors/http) for more details.

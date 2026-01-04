@@ -52,26 +52,23 @@ The executor automatically detects archive format from:
 ```yaml
 steps:
   - name: unpack
-    executor:
-      type: archive
-      config:
-        source: logs.tar.gz
-        destination: ./logs
+    type: archive
+    config:
+      source: logs.tar.gz
+      destination: ./logs
     command: extract
 
   - name: package
-    executor:
-      type: archive
-      config:
-        source: ./logs
-        destination: logs-backup.tar.gz
+    type: archive
+    config:
+      source: ./logs
+      destination: logs-backup.tar.gz
     command: create
 
   - name: inspect
-    executor:
-      type: archive
-      config:
-        source: logs-backup.tar.gz
+    type: archive
+    config:
+      source: logs-backup.tar.gz
     command: list
     output: ARCHIVE_INDEX
 ```
@@ -108,14 +105,13 @@ workingDir: /data/pipeline
 
 steps:
   - name: extract-csv
-    executor:
-      type: archive
-      config:
-        source: dataset.tar.zst
-        destination: ./data
-        include:
-          - command: "**/*.csv"
-        stripComponents: 1
+    type: archive
+    config:
+      source: dataset.tar.zst
+      destination: ./data
+      include:
+        - command: "**/*.csv"
+      stripComponents: 1
     command: extract
 ```
 
@@ -126,13 +122,12 @@ workingDir: /deploy/release
 
 steps:
   - name: bundle-artifacts
-    executor:
-      type: archive
-      config:
-        source: ./dist
-        destination: dist.tar.gz
-        format: tar.gz
-        verifyIntegrity: true
+    type: archive
+    config:
+      source: ./dist
+      destination: dist.tar.gz
+      format: tar.gz
+      verifyIntegrity: true
     command: create
 ```
 
@@ -148,15 +143,14 @@ secrets:
 
 steps:
   - name: unpack-secure
-    executor:
-      type: archive
-      config:
-        source: secure-data.7z
-        destination: ./decrypted
-        password: ${ARCHIVE_PASSWORD}
-        include:
-          - command: "**/*.csv"
-        overwrite: true
+    type: archive
+    config:
+      source: secure-data.7z
+      destination: ./decrypted
+      password: ${ARCHIVE_PASSWORD}
+      include:
+        - command: "**/*.csv"
+      overwrite: true
     command: extract
 ```
 

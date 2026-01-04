@@ -17,10 +17,9 @@ Run individual GitHub Actions inside Dagu by delegating execution to [nektos/act
    steps:
      - name: run-action
        command: actions/hello-world-javascript-action@main
-       executor:
-         type: github_action
-         config:
-           runner: node:24-bookworm   # optional; defaults to node:24-bookworm
+       type: github_action
+       config:
+         runner: node:24-bookworm   # optional; defaults to node:24-bookworm
        params:
          who-to-greet: "Morning"
        output: ACTION_OUTPUT          # capture action outputs for later steps
@@ -52,8 +51,7 @@ secrets:
 
 steps:
   - name: collect-pr-count
-    executor:
-      type: gha
+    type: gha
     command: actions/github-script@v7
     params:
       github-token: $GITHUB_TOKEN
@@ -85,7 +83,7 @@ workingDir: /tmp/gha-workspace
 steps:
   - name: checkout
     command: actions/checkout@v4          # Action to run
-    executor: gha                         # Aliases: github_action, github-action
+    type: gha                             # Aliases: github_action, github-action
     params:
       repository: dagu-org/dagu
       ref: main
@@ -121,7 +119,7 @@ workingDir: /tmp/workspace
 
 steps:
   - command: actions/checkout@v4
-    executor: gha
+    type: gha
     params:
       token: $GHA_TOKEN
       repository: myorg/myrepo

@@ -218,12 +218,11 @@ Production-grade retry policies and lifecycle hooks:
 ```yaml
 steps:
   - name: api-call
-    executor:
-      type: http
-      config:
-        method: POST
-        url: https://api.example.com/process
-        timeout: 30s
+    type: http
+    config:
+      method: POST
+      url: https://api.example.com/process
+      timeout: 30s
     retryPolicy:
       limit: 5
       intervalSec: 2
@@ -236,16 +235,15 @@ handlerOn:
     command: slack-notify.sh "✅ Pipeline succeeded"
     
   failure:
-    executor:
-      type: mail
-      config:
-        to: oncall@company.com
-        from: alerts@company.com
-        subject: "🚨 ALERT: Pipeline Failure - ${DAG_NAME}"
-        message: |
-          Pipeline failed.
-          Run ID: ${DAG_RUN_ID}
-          Check logs: ${DAG_RUN_LOG_FILE}
+    type: mail
+    config:
+      to: oncall@company.com
+      from: alerts@company.com
+      subject: "🚨 ALERT: Pipeline Failure - ${DAG_NAME}"
+      message: |
+        Pipeline failed.
+        Run ID: ${DAG_RUN_ID}
+        Check logs: ${DAG_RUN_LOG_FILE}
       
   exit:
     command: cleanup-temp-files.sh  # Always runs
@@ -271,27 +269,24 @@ steps:
 
   # Remote SSH
   - name: remote-deploy
-    executor:
-      type: ssh
-      config:
-        user: ubuntu
-        host: prod-server.internal
+    type: ssh
+    config:
+      user: ubuntu
+      host: prod-server.internal
     command: sudo systemctl restart app
 
   # HTTP API call
   - name: trigger-webhook
-    executor:
-      type: http
-      config:
-        method: POST
-        url: https://hooks.slack.com/services/xxx
+    type: http
+    config:
+      method: POST
+      url: https://hooks.slack.com/services/xxx
 
   # JSON processing
   - name: parse-config
-    executor:
-      type: jq
-      config:
-        query: '.environments[] | select(.name=="prod")'
+    type: jq
+    config:
+      query: '.environments[] | select(.name=="prod")'
     command: cat config.json
 ```
 
