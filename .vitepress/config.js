@@ -300,11 +300,11 @@ export default withMermaid(
       },
 
       search: {
-        provider: "local",
+        provider: "algolia",
         options: {
-          placeholder: "Search docs...",
-          disableDetailedView: false,
-          disableQueryPersistence: false,
+          appId: "LCN0T5A9XG",
+          apiKey: "5a4999c265d0c05512d852903a1174e1",
+          indexName: "docs.dagu.cloud",
         },
       },
 
