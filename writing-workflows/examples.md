@@ -1691,6 +1691,30 @@ Steps inherit conversation history from previous steps.
 
 </div>
 
+<div class="example-card">
+
+### Extended Thinking Mode
+
+```yaml
+steps:
+  - type: chat
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+      thinking:
+        enabled: true
+        effort: high
+    messages:
+      - role: user
+        content: "Analyze this complex problem..."
+```
+
+Enable deeper reasoning for complex tasks.
+
+<a href="/features/executors/chat#extended-thinking-mode" class="learn-more">Learn more →</a>
+
+</div>
+
 </div>
 
 ## Scheduling & Automation

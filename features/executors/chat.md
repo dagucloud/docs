@@ -66,7 +66,7 @@ Enable extended thinking/reasoning mode for more thorough, accurate responses on
 | OpenAI | `reasoning.effort` | o1, o3, GPT-5 models |
 | Gemini | `thinkingLevel` / `thinkingBudget` | Gemini 2.5+, Gemini 3 models |
 | OpenRouter | Unified `reasoning` | Auto-mapped to underlying provider |
-| Local | Pass-through | For OpenAI-compatible reasoning models |
+| Local | Not supported | Thinking APIs vary by model; configure natively |
 
 **Effort Level Mapping:**
 
@@ -75,7 +75,7 @@ Enable extended thinking/reasoning mode for more thorough, accurate responses on
 | `low` | 1,024 tokens | Quick reasoning |
 | `medium` | 4,096 tokens | Balanced (default) |
 | `high` | 16,384 tokens | Thorough analysis |
-| `xhigh` | 65,536 tokens | Maximum depth (OpenAI GPT-5.2+ only) |
+| `xhigh` | 32,768 tokens | Maximum depth (capped at 32K for Anthropic) |
 
 ::: warning
 When thinking is enabled for OpenAI reasoning models, `temperature` and `topP` are automatically disabled as these models don't support them.
