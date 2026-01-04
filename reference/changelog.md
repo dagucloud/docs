@@ -16,7 +16,31 @@
     - command: echo $HOME && ls -la  # Shell features now work
   ```
 
-  See [SSH Executor](/features/executors/ssh) for full documentation.
+  See [SSH](/features/executors/ssh) for full documentation.
+
+- **Chat Step Type**: Added a new step type for integrating Large Language Models into workflows. Execute LLM requests to OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM). (#1548)
+
+  ```yaml
+  steps:
+    - type: chat
+      llm:
+        provider: openai
+        model: gpt-4o
+      messages:
+        - role: user
+          content: "What is 2+2?"
+      output: ANSWER
+  ```
+
+  **Key Features:**
+  - **Multi-provider support**: OpenAI, Anthropic, Gemini, OpenRouter, and local OpenAI-compatible APIs
+  - **DAG-level configuration**: Define `llm:` at DAG level to share settings across multiple chat steps
+  - **Multi-turn conversations**: Steps inherit conversation history from dependencies via `depends`, enabling context-aware AI workflows
+  - **Extended thinking mode**: Enable deeper reasoning with `thinking.enabled` and effort levels (`low`, `medium`, `high`, `xhigh`)
+  - **Streaming output**: Response tokens stream to stdout by default (disable with `stream: false`)
+  - **Automatic retry**: Exponential backoff on transient errors (rate limits, server errors, timeouts)
+
+  See [Chat](/features/executors/chat) for full documentation.
 
 - **Per-DAG Prometheus Metrics**: Enhanced observability with granular per-DAG metrics and histograms. (#1411)
   - `dagu_dag_runs_currently_running_by_dag` - Running count per DAG
