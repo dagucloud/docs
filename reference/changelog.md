@@ -11,12 +11,38 @@
     user: deploy
     host: app.example.com
     shell: /bin/bash  # Commands wrapped as: /bin/bash -c 'command'
+    # Or array syntax: shell: ["/bin/bash", "-e"]
 
   steps:
     - command: echo $HOME && ls -la  # Shell features now work
   ```
 
   See [SSH](/features/executors/ssh) for full documentation.
+
+- **Simplified Executor Syntax**: Added `type` and `config` fields at step level as a cleaner alternative to the `executor` block. Both syntaxes are fully supported. (#1525)
+
+  ```yaml
+  # New shorthand syntax
+  steps:
+    - name: deploy
+      type: ssh
+      config:
+        host: prod.example.com
+        user: deploy
+      command: ./deploy.sh
+
+  # Equivalent verbose syntax (still works)
+  steps:
+    - name: deploy
+      executor:
+        type: ssh
+        config:
+          host: prod.example.com
+          user: deploy
+      command: ./deploy.sh
+  ```
+
+  Note: Cannot mix `type`/`config` with `executor` field in the same step.
 
 - **Chat Step Type**: Added a new step type for integrating Large Language Models into workflows. Execute LLM requests to OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM). (#1548)
 
@@ -33,7 +59,7 @@
   ```
 
   **Key Features:**
-  - **Multi-provider support**: OpenAI, Anthropic, Gemini, OpenRouter, and local OpenAI-compatible APIs
+  - **Multi-provider support**: OpenAI, Anthropic, Gemini, OpenRouter, and local OpenAI-compatible APIs (aliases: `ollama`, `vllm`, `llama` map to `local`)
   - **DAG-level configuration**: Define `llm:` at DAG level to share settings across multiple chat steps
   - **Multi-turn conversations**: Steps inherit conversation history from dependencies via `depends`, enabling context-aware AI workflows
   - **Extended thinking mode**: Enable deeper reasoning with `thinking.enabled` and effort levels (`low`, `medium`, `high`, `xhigh`)
@@ -133,7 +159,8 @@
   Key features:
   - Pause workflow execution for human review
   - Collect parameters from approvers as environment variables
-  - Approve via web UI or REST API
+  - Approve or reject via web UI or REST API
+  - New statuses: `waiting` (paused for approval) and `rejected` (approval denied)
 
   See [HITL](/features/executors/hitl) for full documentation.
 
