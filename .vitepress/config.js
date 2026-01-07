@@ -40,6 +40,10 @@ const fullSidebar = [
       { text: "Parameters", link: "/writing-workflows/parameters" },
       { text: "Control Flow", link: "/writing-workflows/control-flow" },
       { text: "Data & Variables", link: "/writing-workflows/data-variables" },
+      {
+        text: "Environment Variables",
+        link: "/writing-workflows/environment-variables",
+      },
       { text: "Secrets", link: "/writing-workflows/secrets" },
       { text: "Resource Limits", link: "/writing-workflows/resource-limits" },
       {

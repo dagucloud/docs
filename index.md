@@ -5,7 +5,7 @@ layout: doc
 <img src="/dagu-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; max-width: 400px">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Lightweight and powerful workflow engine for small teams</h2>
+  <h2>Lightweight and powerful workflow engine</h2>
   <p>Define workflows in YAML. Execute with a single binary. No database or message broker required. Ideal for VMs, containers, and bare metal.</p>
 </div>
 
