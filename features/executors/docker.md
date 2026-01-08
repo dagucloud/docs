@@ -212,6 +212,40 @@ steps:
     command: gcloud app deploy
 ```
 
+## Executor Config Syntax
+
+For advanced use cases, use `type: docker` with a `config` block. This provides access to Docker SDK options:
+
+```yaml
+steps:
+  - name: run-in-docker
+    type: docker
+    config:
+      image: alpine:3
+      autoRemove: true
+      workingDir: /app
+      volumes:
+        - /host:/container
+    command: pwd
+```
+
+### Advanced Docker SDK Options
+
+Pass Docker SDK configuration directly via `container`, `host`, and `network` fields:
+
+```yaml
+steps:
+  - name: with-resource-limits
+    type: docker
+    config:
+      image: alpine:3
+      autoRemove: true
+      host:
+        Memory: 536870912    # 512MB in bytes
+        CPUShares: 512
+    command: echo "limited resources"
+```
+
 ## Validation and Errors
 
 ### Common Rules
@@ -246,10 +280,38 @@ For DAG-level containers, additional startup options are available:
 - `logPattern`: regex pattern for readiness detection
 
 ```yaml
+# Startup: entrypoint - uses image's default entrypoint
 container:
   image: nginx:alpine
   startup: entrypoint
   waitFor: healthy
+
+steps:
+  - command: curl localhost
+```
+
+```yaml
+# Startup: command - run custom startup command
+container:
+  image: alpine:3
+  startup: command
+  command: ["sh", "-c", "while true; do sleep 3600; done"]
+
+steps:
+  - command: echo "container running with custom command"
+```
+
+```yaml
+# With logPattern - wait for specific log output
+container:
+  image: postgres:15
+  startup: entrypoint
+  logPattern: "ready to accept connections"
+  env:
+    - POSTGRES_PASSWORD=secret
+
+steps:
+  - command: psql -U postgres -c "SELECT 1"
 ```
 
 ## How Commands Execute
@@ -298,6 +360,45 @@ steps:
 ```
 
 Instead of duplicating the `container`, `env`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
+
+## Variable Expansion
+
+Use `${VAR}` syntax in container fields to expand DAG-level environment variables:
+
+```yaml
+env:
+  - IMAGE_TAG: "3.18"
+  - VOLUME_PATH: /data
+
+container:
+  image: alpine:${IMAGE_TAG}
+  volumes:
+    - ${VOLUME_PATH}:/mnt
+
+steps:
+  - command: cat /etc/alpine-release
+```
+
+## Output Handling
+
+Capture step output to variables or redirect to files:
+
+```yaml
+steps:
+  # Capture small output to variable
+  - name: get-version
+    container:
+      image: alpine:3
+    command: cat /etc/alpine-release
+    output: ALPINE_VERSION
+
+  # Redirect large output to file
+  - name: process-data
+    container:
+      image: alpine:3
+    command: tar -tvf /data/archive.tar
+    stdout: /tmp/archive-listing.txt
+```
 
 ## Registry Authentication
 
