@@ -307,6 +307,17 @@ This enables workers to perform retries without requiring:
 - Local `DAGRunStore` instance
 - Previous execution history on the worker
 
+### Temporary File Cleanup
+
+Workers automatically clean up temporary files after each execution:
+
+| File Type | Location | Cleaned After |
+|-----------|----------|---------------|
+| DAG files | `/tmp/dagu/worker-dags/` | Each execution |
+| Log directories | `/tmp/dagu/worker-logs/` | Each execution |
+
+Workers are safe to run on ephemeral nodes without risk of disk accumulation.
+
 ## Advantages
 
 - **No shared storage**: Works in any environment
