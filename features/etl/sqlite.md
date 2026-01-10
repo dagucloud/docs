@@ -43,8 +43,16 @@ config:
   dsn: ":memory:"
 ```
 
-::: warning
-In-memory databases are ephemeral and not shared between steps. Use file databases for persistent storage.
+::: tip In-Memory Database Sharing
+By default, `:memory:` databases are ephemeral and not shared between steps. To share an in-memory database across steps within the same DAG run, use `sharedMemory: true`:
+
+```yaml
+config:
+  dsn: ":memory:"
+  sharedMemory: true  # Enables shared cache mode
+```
+
+This converts the DSN to `file::memory:?cache=shared` internally. For persistent storage, use file databases.
 :::
 
 ## Configuration
@@ -58,6 +66,7 @@ steps:
       timeout: 30           # Query timeout in seconds
       maxOpenConns: 1       # SQLite works best with 1 connection
       maxIdleConns: 1
+      sharedMemory: false   # Set true for :memory: databases to share across steps
 ```
 
 ::: tip
@@ -175,7 +184,7 @@ steps:
         inputFile: /data/products.csv
         table: products
         format: csv
-        hasHeader: true  # Set explicitly - default is false
+        hasHeader: true
         batchSize: 500
 ```
 

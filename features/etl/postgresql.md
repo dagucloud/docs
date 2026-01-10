@@ -161,7 +161,7 @@ steps:
         inputFile: /data/users.csv
         table: users
         format: csv
-        hasHeader: true  # Set explicitly - default is false
+        hasHeader: true
         columns:
           - name
           - email
@@ -184,8 +184,19 @@ steps:
         onConflict: ignore
 ```
 
-::: warning PostgreSQL Conflict Handling
-For PostgreSQL, both `ignore` and `replace` use `ON CONFLICT DO NOTHING` - conflicting rows are skipped, not updated. To update existing rows, use an explicit `INSERT ... ON CONFLICT DO UPDATE` statement instead of the import feature.
+::: tip PostgreSQL UPSERT
+When using `onConflict: replace`, specify `conflictTarget` with the column(s) that have a unique constraint. This generates a proper `ON CONFLICT (column) DO UPDATE SET` statement. Without `conflictTarget`, `replace` falls back to `ON CONFLICT DO NOTHING`.
+
+```yaml
+import:
+  inputFile: /data/users.csv
+  table: users
+  onConflict: replace
+  conflictTarget: id          # Column with UNIQUE constraint
+  updateColumns:              # Optional: specific columns to update
+    - name
+    - email
+```
 :::
 
 ### Import with NULL Handling

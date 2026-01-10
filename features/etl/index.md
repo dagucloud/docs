@@ -82,7 +82,7 @@ steps:
         inputFile: /data/users.csv
         table: users
         format: csv
-        hasHeader: true  # Set explicitly - default is false
+        hasHeader: true
         batchSize: 1000
 ```
 
@@ -93,12 +93,14 @@ steps:
 | `inputFile` | string | required | Source file path |
 | `table` | string | required | Target table name |
 | `format` | string | auto-detect | `csv`, `tsv`, `jsonl` (detected from file extension) |
-| `hasHeader` | bool | false | First row is header |
+| `hasHeader` | bool | true | First row is header |
 | `delimiter` | string | `,` | Field delimiter |
 | `columns` | []string | - | Explicit column names |
 | `nullValues` | []string | `["", "NULL", "null", "\\N"]` | Values treated as NULL |
 | `batchSize` | int | 1000 | Rows per INSERT |
 | `onConflict` | string | error | `error`, `ignore`, `replace` |
+| `conflictTarget` | string | - | Column(s) for conflict detection (PostgreSQL UPSERT) |
+| `updateColumns` | []string | - | Columns to update on conflict |
 | `skipRows` | int | 0 | Skip N data rows |
 | `maxRows` | int | 0 | Limit rows (0 = unlimited) |
 | `dryRun` | bool | false | Validate without importing |
