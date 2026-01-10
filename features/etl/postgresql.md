@@ -266,6 +266,10 @@ steps:
     command: "SELECT * FROM orders LIMIT 100"
 ```
 
+::: warning Memory Usage
+The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead. Always use `LIMIT` or `maxRows` with `json` format.
+:::
+
 ### CSV
 
 ```yaml
@@ -291,7 +295,7 @@ steps:
       dsn: "${DATABASE_URL}"
       streaming: true
       outputFile: /data/orders-export.jsonl
-      outputFormat: jsonl
+      outputFormat: jsonl    # Use jsonl or csv for large results
     command: "SELECT * FROM orders"
 
   - name: process-export

@@ -257,8 +257,12 @@ steps:
     config:
       dsn: "file:./app.db"
       outputFormat: json
-    command: "SELECT * FROM products"
+    command: "SELECT * FROM products LIMIT 1000"
 ```
+
+::: warning Memory Usage
+The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead. Always use `LIMIT` or `maxRows` with `json` format.
+:::
 
 ### CSV
 
@@ -283,8 +287,15 @@ steps:
       dsn: "file:./logs.db"
       streaming: true
       outputFile: /data/logs-export.jsonl
+      outputFormat: jsonl    # Use jsonl or csv for large results
     command: "SELECT * FROM logs WHERE date >= date('now', '-7 days')"
 ```
+
+::: tip Best Practices for Large Results
+- Use `outputFormat: jsonl` or `csv` - these formats stream rows immediately
+- Avoid `outputFormat: json` - it buffers all rows in memory before writing
+- Set `maxRows` as a safety limit for unbounded queries
+:::
 
 ## Multiple Statements
 

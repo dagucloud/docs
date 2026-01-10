@@ -190,6 +190,10 @@ steps:
     command: "SELECT * FROM orders"
 ```
 
+::: warning Memory Usage
+The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead to stream rows one at a time. Using `json` with millions of rows can cause out-of-memory errors.
+:::
+
 ### CSV
 
 Tabular format with optional headers:
@@ -217,9 +221,16 @@ steps:
       dsn: "${DATABASE_URL}"
       streaming: true
       outputFile: /data/export.jsonl
-      outputFormat: jsonl
+      outputFormat: jsonl    # Use jsonl or csv for streaming
     command: "SELECT * FROM large_table"
 ```
+
+::: tip Best Practices for Large Results
+- Use `outputFormat: jsonl` or `csv` - these formats stream rows immediately
+- Avoid `outputFormat: json` - it buffers all rows in memory before writing
+- Set `maxRows` as a safety limit for unbounded queries
+- Use `streaming: true` with `outputFile` to write directly to disk
+:::
 
 ## Error Handling
 
