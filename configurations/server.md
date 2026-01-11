@@ -76,7 +76,7 @@ auth:
   token:
     value: "your-secret-token"
 
-  # OIDC auth
+  # OIDC auth (standalone or under builtin mode)
   oidc:
     clientId: "your-client-id"
     clientSecret: "your-client-secret"
@@ -84,6 +84,12 @@ auth:
     issuer: "https://accounts.google.com"
     scopes: ["openid", "profile", "email"]
     whitelist: ["admin@example.com"]
+    # Builtin-specific fields (only used when mode: builtin)
+    enabled: true                    # Enable OIDC under builtin auth
+    autoSignup: true                 # Auto-create users on first login
+    defaultRole: "viewer"            # Role for new users
+    allowedDomains: ["company.com"]  # Allowed email domains
+    buttonLabel: "Login with SSO"    # SSO button text
 
 # TLS/HTTPS Configuration
 tls:
@@ -169,6 +175,11 @@ All options support `DAGU_` prefix:
 - `DAGU_AUTH_OIDC_ISSUER` - OIDC issuer URL
 - `DAGU_AUTH_OIDC_SCOPES` - OIDC scopes (comma-separated)
 - `DAGU_AUTH_OIDC_WHITELIST` - OIDC email whitelist (comma-separated)
+- `DAGU_AUTH_OIDC_ENABLED` - Enable OIDC under builtin auth (default: `false`)
+- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first login (default: `false`)
+- `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
+- `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Allowed email domains (comma-separated)
+- `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text
 
 **UI:**
 - `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page sort field
@@ -268,17 +279,33 @@ curl -H "Authorization: Bearer your-token" \
 ```
 
 ### OIDC Authentication
+
+**Standalone OIDC** (all users get admin role):
 ```yaml
 auth:
+  mode: oidc
   oidc:
     clientId: "${OIDC_CLIENT_ID}"
     clientSecret: "${OIDC_CLIENT_SECRET}"
     clientUrl: "https://dagu.example.com"
     issuer: "https://accounts.google.com"
-    scopes:
-      - "email"
-    whitelist:
-      - "admin@dagu.example.com" # Optional: restrict to specific emails
+```
+
+**Builtin + OIDC** (recommended, with RBAC):
+```yaml
+auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "${AUTH_TOKEN_SECRET}"
+  oidc:
+    enabled: true
+    clientId: "${OIDC_CLIENT_ID}"
+    clientSecret: "${OIDC_CLIENT_SECRET}"
+    clientUrl: "https://dagu.example.com"
+    issuer: "https://accounts.google.com"
+    autoSignup: true
+    defaultRole: viewer
 ```
 
 See [OIDC Configuration](authentication/oidc) for detailed setup.

@@ -183,6 +183,26 @@ curl -X DELETE http://localhost:8080/api/v2/users/{user-id} \
   -H "Authorization: Bearer eyJhbG..."
 ```
 
+### Disable/Enable User
+
+Disabled users cannot log in or access the API, but their account is preserved:
+
+```bash
+# Disable a user
+curl -X PATCH http://localhost:8080/api/v2/users/{user-id} \
+  -H "Authorization: Bearer eyJhbG..." \
+  -H "Content-Type: application/json" \
+  -d '{"isDisabled": true}'
+
+# Enable a user
+curl -X PATCH http://localhost:8080/api/v2/users/{user-id} \
+  -H "Authorization: Bearer eyJhbG..." \
+  -H "Content-Type: application/json" \
+  -d '{"isDisabled": false}'
+```
+
+**Note:** You can also disable/enable users from the web UI via the user management page. This is useful for revoking access without deleting the user account.
+
 ## Docker Compose Example
 
 ```yaml
@@ -257,6 +277,8 @@ Builtin authentication supports OIDC/SSO login, allowing users to authenticate v
 
 ### Enabling OIDC
 
+OIDC is **automatically enabled** when all required fields (`clientId`, `clientSecret`, `clientUrl`, `issuer`) are configured. No explicit `enabled` flag is needed.
+
 ```yaml
 auth:
   mode: builtin
@@ -267,33 +289,33 @@ auth:
       secret: your-jwt-secret
       ttl: 24h
   oidc:
-    enabled: true
     clientId: your-client-id
     clientSecret: your-client-secret
     clientUrl: https://dagu.example.com
     issuer: https://accounts.google.com
     scopes: ["openid", "profile", "email"]
-    autoSignup: true
-    defaultRole: viewer
+    # autoSignup defaults to true - users are auto-created on first login
     allowedDomains: ["company.com"]
     whitelist: ["partner@external.com"]
     buttonLabel: "Login with SSO"
+    roleMapping:
+      defaultRole: viewer  # Role for new users when no mapping matches
 ```
 
 ### Environment Variables
 
 ```bash
-# Enable OIDC under builtin auth
-export DAGU_AUTH_OIDC_ENABLED=true
+# OIDC configuration (auto-enabled when all required fields are set)
 export DAGU_AUTH_OIDC_CLIENT_ID=your-client-id
 export DAGU_AUTH_OIDC_CLIENT_SECRET=your-client-secret
 export DAGU_AUTH_OIDC_CLIENT_URL=https://dagu.example.com
 export DAGU_AUTH_OIDC_ISSUER=https://accounts.google.com
 
-# Auto-signup and role settings
-export DAGU_AUTH_OIDC_AUTO_SIGNUP=true
-export DAGU_AUTH_OIDC_DEFAULT_ROLE=viewer
-export DAGU_AUTH_OIDC_ALLOWED_DOMAINS=company.com
+# Optional settings
+export DAGU_AUTH_OIDC_AUTO_SIGNUP=true                    # default: true
+export DAGU_AUTH_OIDC_DEFAULT_ROLE=viewer                 # default: viewer
+export DAGU_AUTH_OIDC_ALLOWED_DOMAINS=company.com,other.com  # comma-separated
+export DAGU_AUTH_OIDC_WHITELIST=user@example.com          # comma-separated
 export DAGU_AUTH_OIDC_BUTTON_LABEL="Login with SSO"
 ```
 
@@ -301,21 +323,22 @@ export DAGU_AUTH_OIDC_BUTTON_LABEL="Login with SSO"
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `enabled` | Enable OIDC login under builtin auth | `false` |
 | `clientId` | OAuth2 client ID from your OIDC provider | Required |
 | `clientSecret` | OAuth2 client secret | Required |
 | `clientUrl` | Base URL of your Dagu instance | Required |
 | `issuer` | OIDC provider URL | Required |
 | `scopes` | OAuth2 scopes to request | `["openid", "profile", "email"]` |
-| `autoSignup` | Auto-create users on first OIDC login | `false` |
-| `defaultRole` | Role assigned to new auto-created users | `viewer` |
+| `autoSignup` | Auto-create users on first OIDC login | `true` |
 | `allowedDomains` | Email domains allowed to authenticate | All domains |
-| `whitelist` | Specific email addresses always allowed (bypasses domain filter) | None |
+| `whitelist` | Specific email addresses always allowed | None |
 | `buttonLabel` | Text displayed on the SSO login button | `"Login with SSO"` |
+| `roleMapping.defaultRole` | Role assigned to new users when no mapping matches | `viewer` |
+
+**Note**: `allowedDomains`, `whitelist`, and `scopes` can be specified as either YAML lists or comma-separated strings. This is especially useful for environment variables.
 
 ### Auto-Signup
 
-When `autoSignup` is enabled, users authenticating via OIDC for the first time are automatically created in Dagu with the role specified by `defaultRole`. This eliminates the need to pre-create user accounts.
+When `autoSignup` is enabled (the default), users authenticating via OIDC for the first time are automatically created in Dagu with the role specified by `roleMapping.defaultRole`. This eliminates the need to pre-create user accounts.
 
 When `autoSignup` is disabled, users must exist in Dagu before they can log in via OIDC.
 
@@ -325,7 +348,6 @@ Use `allowedDomains` to restrict OIDC login to specific email domains:
 
 ```yaml
 oidc:
-  enabled: true
   allowedDomains: ["company.com", "subsidiary.com"]
 ```
 
@@ -333,16 +355,25 @@ Users with emails outside these domains will be denied access.
 
 ### Email Whitelist
 
-Use `whitelist` to allow specific email addresses regardless of domain restrictions:
+Use `whitelist` to allow specific email addresses:
 
 ```yaml
 oidc:
-  enabled: true
+  whitelist: ["allowed@example.com", "admin@example.com"]
+```
+
+**Access Control Logic:**
+- If `whitelist` is set: only emails in the whitelist are allowed
+- If `allowedDomains` is set: only emails from those domains are allowed
+- If both are set: email must match whitelist OR domain must match allowedDomains
+- If neither is set: all authenticated emails are allowed
+
+```yaml
+# Example: Allow company.com domain + specific external partners
+oidc:
   allowedDomains: ["company.com"]
   whitelist: ["partner@external.com", "contractor@other.com"]
 ```
-
-Whitelist takes precedence over `allowedDomains`. If an email is in the whitelist, it is always allowed even if its domain is not in `allowedDomains`.
 
 ### Role Mapping
 
@@ -350,9 +381,8 @@ Map IdP groups to Dagu roles for automatic role assignment:
 
 ```yaml
 oidc:
-  enabled: true
-  autoSignup: true
   roleMapping:
+    defaultRole: viewer           # Role when no mapping matches (default: viewer)
     groupsClaim: groups           # Claim containing user's groups
     groupMappings:
       admins: admin               # IdP group -> Dagu role
@@ -367,6 +397,7 @@ oidc:
 
 | Field | Description | Default |
 |-------|-------------|---------|
+| `defaultRole` | Role assigned when no mapping matches | `viewer` |
 | `groupsClaim` | JWT claim containing group membership | `groups` |
 | `groupMappings` | Map of IdP group names to Dagu roles | None |
 | `roleAttributePath` | jq expression for advanced role extraction | None |
@@ -377,6 +408,7 @@ oidc:
 
 ```yaml
 roleMapping:
+  defaultRole: viewer
   roleAttributePath: 'if (.groups | contains(["admins"])) then "admin" elif (.groups | contains(["devs"])) then "manager" else "viewer" end'
 ```
 

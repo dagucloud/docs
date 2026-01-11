@@ -10,7 +10,7 @@ For most use cases, we recommend using **builtin auth mode with OIDC enabled** i
 - Dagu's user management and RBAC
 - API key management
 - Role mapping from IdP groups
-- Auto-signup for new users
+- Auto-signup for new users (enabled by default)
 
 ```yaml
 auth:
@@ -19,13 +19,14 @@ auth:
     token:
       secret: your-jwt-secret
   oidc:
-    enabled: true
+    # OIDC is auto-enabled when all required fields are set
     clientId: your-client-id
     clientSecret: your-client-secret
     clientUrl: https://dagu.example.com
     issuer: https://accounts.google.com
-    autoSignup: true
-    defaultRole: viewer
+    # autoSignup defaults to true
+    roleMapping:
+      defaultRole: viewer
 ```
 
 See [Builtin Authentication - OIDC/SSO Login](/configurations/authentication/builtin#oidcsso-login) for full documentation.
@@ -133,7 +134,13 @@ auth:
       - "user1@company.com"
 ```
 
-If whitelist is empty or not specified, all authenticated users are allowed.
+Or use comma-separated format (useful for environment variables):
+
+```bash
+export DAGU_AUTH_OIDC_WHITELIST="admin@company.com,team@company.com"
+```
+
+**Important:** When whitelist is set, only emails in the whitelist are allowed. If whitelist is empty or not specified, all authenticated users are allowed.
 
 Note: Wildcard domains (e.g., `*@company.com`) are NOT supported. You must list each email address explicitly.
 

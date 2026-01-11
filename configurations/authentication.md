@@ -59,8 +59,29 @@ auth:
 
 ### OIDC Authentication
 
+**Recommended: Builtin + OIDC** (SSO with user management and RBAC):
+
 ```yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: your-jwt-secret
+  oidc:
+    enabled: true
+    clientId: "your-client-id"
+    clientSecret: "your-client-secret"
+    clientUrl: "http://localhost:8080"
+    issuer: "https://accounts.google.com"
+    autoSignup: true
+    defaultRole: viewer
+```
+
+**Standalone OIDC** (simple setup, all users get admin role):
+
+```yaml
+auth:
+  mode: oidc
   oidc:
     clientId: "your-client-id"
     clientSecret: "your-client-secret"
@@ -73,11 +94,12 @@ auth:
 | Method | Use Case |
 |--------|----------|
 | **Builtin** | Multiple users with different permission levels, self-hosted user management |
+| **Builtin + OIDC** | Enterprise SSO with RBAC, auto-signup, role mapping from IdP |
 | **API Keys** | CI/CD pipelines, automation with role-based access (requires Builtin Auth) |
 | **Webhooks** | External integrations (GitHub, Slack, CI/CD) to trigger specific DAGs (requires Builtin Auth) |
 | **Basic** | Single user, simple setup, no user management needed |
 | **Token** | Simple API-only access, legacy automation scripts |
-| **OIDC** | Enterprise SSO integration (Google, Auth0, Keycloak) |
+| **OIDC (standalone)** | Simple SSO without user management (all users get admin) |
 
 ## Environment Variables
 
