@@ -37,6 +37,22 @@
 
   See [Workers](/features/workers/) for deployment options and configuration.
 
+### Fixed
+
+- **Container Step Output Capture**: Fixed an issue where `container.command` was not executed when specified inside the container block without a top-level `command` field. Now `container.command` is properly used as the command to run, and output is correctly captured.
+
+  ```yaml
+  # This now works correctly
+  steps:
+    - name: step1
+      container:
+        image: alpine:3
+        command:
+          - echo
+          - '{"name": "Alice", "age": 30}'
+      output: RESULT  # Output is now captured
+  ```
+
 ## v1.30.0 (2026-01-04)
 
 ### Added
