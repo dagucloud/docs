@@ -109,6 +109,14 @@ ui:
 # Latest Status Configuration
 latestStatusToday: true         # Show only today's latest status
 
+# Terminal Configuration
+terminal:
+  enabled: false              # Enable web-based terminal (default: false)
+
+# Audit Logging
+audit:
+  enabled: true               # Enable audit logging (default: true)
+
 # Queue System
 queues:
   enabled: true                 # Enable queue system (default: true)
@@ -184,6 +192,12 @@ All options support `DAGU_` prefix:
 **UI:**
 - `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page sort field
 - `DAGU_UI_DAGS_SORT_ORDER` - Default DAGs page sort order
+
+**Terminal:**
+- `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
+
+**Audit Logging:**
+- `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
 
 ## Common Setups
 
@@ -514,10 +528,72 @@ dagu_cache_entries_total
 
 See [Prometheus Metrics](/features/prometheus-metrics#cache-metrics) for more details.
 
+## Terminal
+
+The web-based terminal allows executing shell commands directly from the Dagu UI. This feature is **disabled by default** for security reasons.
+
+### Configuration
+
+```yaml
+terminal:
+  enabled: true   # Enable web-based terminal (default: false)
+```
+
+Or via environment variable:
+```bash
+export DAGU_TERMINAL_ENABLED=true
+```
+
+### Security Notes
+
+- The terminal runs commands with the same permissions as the Dagu server process
+- Only enable in trusted environments where users should have shell access
+- Consider using authentication (`auth.mode: builtin`) when enabling terminal access
+- Terminal sessions are logged in the audit log (when audit logging is enabled)
+
+## Audit Logging
+
+Dagu maintains audit logs for security-sensitive operations. Audit logging is **enabled by default**.
+
+### Configuration
+
+```yaml
+audit:
+  enabled: true   # Enable audit logging (default: true)
+```
+
+Or via environment variable:
+```bash
+export DAGU_AUDIT_ENABLED=false
+```
+
+### Logged Events
+
+When enabled, the following events are recorded:
+- **Authentication**: Login attempts (success/failure), password changes
+- **User Management**: User creation, updates, deletion
+- **API Keys**: Key creation, updates, deletion
+- **Webhooks**: Webhook creation, deletion, token regeneration
+- **Terminal**: Shell command executions
+
+### Storage
+
+Audit logs are stored as daily JSONL files in `{dataDir}/audit/`:
+```
+~/.local/share/dagu/data/audit/
+├── 2025-01-10.jsonl
+├── 2025-01-11.jsonl
+└── ...
+```
+
+Logs can be viewed through the web UI at Settings > Audit Logs.
+
 ## See Also
 
 - [Set up authentication](#authentication) for secure access
 - [Configure remote nodes](#remote-nodes) for multi-environment management
 - [Customize the UI](#ui-customization) for your organization
 - [Enable HTTPS](#tlshttps-configuration) for encrypted connections
+- [Configure terminal access](#terminal) for shell access
+- [Configure audit logging](#audit-logging) for security monitoring
 - [Prometheus Metrics](/features/prometheus-metrics) for monitoring

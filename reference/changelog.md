@@ -57,6 +57,28 @@
 
   See [Workers](/features/workers/) for deployment options and configuration.
 
+- **Web Terminal**: Added optional web-based terminal for executing shell commands directly from the Dagu UI. Disabled by default for security.
+
+  ```yaml
+  terminal:
+    enabled: true   # default: false
+  ```
+
+  Or via environment variable: `DAGU_TERMINAL_ENABLED=true`
+
+  See [Terminal Configuration](/configurations/server#terminal) for details.
+
+- **Audit Logging Configuration**: Added configuration option to enable/disable audit logging. Enabled by default.
+
+  ```yaml
+  audit:
+    enabled: true   # default: true
+  ```
+
+  Or via environment variable: `DAGU_AUDIT_ENABLED=false`
+
+  See [Audit Logging](/configurations/server#audit-logging) for details.
+
 ### Fixed
 
 - **Container Step Output Capture**: Fixed an issue where `container.command` was not executed when specified inside the container block without a top-level `command` field. Now `container.command` is properly used as the command to run, and output is correctly captured.

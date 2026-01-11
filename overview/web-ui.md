@@ -11,6 +11,8 @@ Dagu includes a modern, responsive web UI that provides:
 - DAG execution history
 - DAG (YAML) editor with syntax highlighting and auto-completion
 - Interactive DAG management (start, stop, retry, etc.)
+- Web-based terminal (optional)
+- Audit logging for security events
 
 ::: tip Configuration
 For Web UI configuration options, see [Configuration Reference](/reference/config#ui-configuration).
@@ -235,6 +237,61 @@ Worker: gpu-worker-01
 Labels: [gpu=true] [cuda=11.8] [memory=64G] [region=us-east-1]
 ```
 
+## Terminal
+
+The web-based terminal allows executing shell commands directly from the Dagu UI.
+
+### Enabling Terminal
+
+Terminal is **disabled by default** for security reasons. Enable it in your configuration:
+
+```yaml
+# config.yaml
+terminal:
+  enabled: true
+```
+
+Or via environment variable:
+```bash
+export DAGU_TERMINAL_ENABLED=true
+```
+
+### Security Notes
+
+- Commands run with the same permissions as the Dagu server process
+- Only enable in trusted environments
+- Consider enabling authentication when using terminal
+- Terminal sessions are logged in the audit log
+
+## Audit Logs
+
+The Audit Logs page (under Settings) provides a searchable log of security-sensitive operations.
+
+### Logged Events
+
+- **Authentication**: Login attempts, password changes
+- **User Management**: User creation, updates, deletion
+- **API Keys**: Key creation, updates, deletion
+- **Webhooks**: Webhook management operations
+- **Terminal**: Shell command executions
+
+### Configuration
+
+Audit logging is **enabled by default**. To disable:
+
+```yaml
+# config.yaml
+audit:
+  enabled: false
+```
+
+Or via environment variable:
+```bash
+export DAGU_AUDIT_ENABLED=false
+```
+
+See [Audit Logging Configuration](/configurations/server#audit-logging) for more details.
+
 ## UI Customization
 
 ### Branding
@@ -295,4 +352,6 @@ cors:
 
 - [Learn the REST API](/overview/api) for automation
 - [Configure authentication](/configurations/server#authentication) for security
+- [Configure terminal access](/configurations/server#terminal) for shell access
+- [Configure audit logging](/configurations/server#audit-logging) for security monitoring
 - [Set up monitoring](/configurations/operations#monitoring) for production

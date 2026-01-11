@@ -243,6 +243,8 @@ volumes:
 - **Password Requirements**: Minimum 8 characters
 - **Token Expiry**: Tokens expire after the configured TTL (default: 24 hours)
 - **V1 API**: The V1 API is disabled when builtin auth is enabled (use V2 API)
+- **Terminal Access**: The web-based terminal is disabled by default. Enable with `terminal.enabled: true` only in trusted environments. See [Terminal Configuration](/configurations/server#terminal).
+- **Audit Logging**: Security events (logins, user changes, API key operations) are logged by default. See [Audit Logging](/configurations/server#audit-logging).
 
 ## API Key Management
 

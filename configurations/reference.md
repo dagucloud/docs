@@ -19,6 +19,14 @@ headless: false
 skipExamples: false       # Skip creating example DAGs
 metrics: "private"        # Metrics endpoint: "private" (default) or "public"
 
+# Terminal (web-based shell access)
+terminal:
+  enabled: false          # Enable web terminal (default: false)
+
+# Audit Logging
+audit:
+  enabled: true           # Enable audit logging (default: true)
+
 # Directories (must be under "paths" key)
 paths:
   dagsDir: "~/.config/dagu/dags"
@@ -168,6 +176,12 @@ All options support `DAGU_` prefix.
 - `DAGU_LATEST_STATUS_TODAY` - Show only today's status
 - `DAGU_SKIP_EXAMPLES` - Skip automatic creation of example DAGs (default: `false`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
+
+### Terminal
+- `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
+
+### Audit Logging
+- `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
 
 ### Directories
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
@@ -372,6 +386,7 @@ Dagu sets metadata like `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, and the active `DAG_RU
 ~/.local/share/dagu/
 ├── logs/              # All log files
 │   ├── admin/         # Admin/server logs
+│   │   └── audit/     # Audit logs (daily JSONL files)
 │   └── dags/          # DAG execution logs
 ├── data/              # Application data
 │   ├── dag-runs/      # DAG run history
@@ -387,6 +402,7 @@ $DAGU_HOME/
 ├── dags/              # DAG definitions
 ├── logs/              # All log files
 │   └── admin/         # Admin/server logs
+│       └── audit/     # Audit logs (daily JSONL files)
 ├── data/              # Application data
 │   ├── dag-runs/      # DAG run history
 │   ├── queue/         # Queue data
@@ -489,6 +505,8 @@ peer:
 - `host`: `127.0.0.1`
 - `port`: `8080`
 - `metrics`: `private`
+- `terminal.enabled`: `false`
+- `audit.enabled`: `true`
 
 ### Auto-generated Paths
 When not specified, these paths are automatically set based on `paths.dataDir`:
