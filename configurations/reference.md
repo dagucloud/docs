@@ -40,7 +40,7 @@ permissions:
 
 # Authentication
 auth:
-  mode: "builtin"          # "none", "builtin", or "oidc"
+  mode: "builtin"          # "none", "builtin" (recommended), or "oidc"
 
   # Builtin auth (user management with RBAC)
   builtin:
@@ -59,6 +59,20 @@ auth:
   # Token auth (API token)
   token:
     value: "your-token"
+
+  # OIDC auth (standalone or under builtin mode)
+  oidc:
+    clientId: "your-client-id"
+    clientSecret: "your-client-secret"
+    clientUrl: "https://dagu.example.com"
+    issuer: "https://accounts.google.com"
+    scopes: ["openid", "profile", "email"]
+    # Builtin-specific settings (only when mode=builtin)
+    enabled: false           # Enable OIDC under builtin auth
+    autoSignup: false        # Auto-create users on first login
+    defaultRole: "viewer"    # Role for new users
+    allowedDomains: []       # Restrict by email domain
+    buttonLabel: "Login with SSO"
 
 # TLS/HTTPS
 tls:
@@ -174,7 +188,7 @@ All options support `DAGU_` prefix.
 **Note:** The `--dagu-home` CLI flag takes precedence over the `DAGU_HOME` environment variable.
 
 ### Authentication
-- `DAGU_AUTH_MODE` - Authentication mode: `none`, `builtin`, or `oidc` (default: `none`)
+- `DAGU_AUTH_MODE` - Authentication mode: `none`, `builtin` (recommended), or `oidc` (default: `none`)
 
 #### Builtin Auth (RBAC)
 - `DAGU_AUTH_TOKEN_SECRET` - JWT signing secret (required for builtin auth)
@@ -189,6 +203,26 @@ All options support `DAGU_` prefix.
 
 #### Token Auth
 - `DAGU_AUTH_TOKEN` - API token for token authentication
+
+#### OIDC Auth
+Core OIDC settings (used by both standalone OIDC mode and builtin+OIDC):
+- `DAGU_AUTH_OIDC_CLIENT_ID` - OAuth2 client ID from your OIDC provider
+- `DAGU_AUTH_OIDC_CLIENT_SECRET` - OAuth2 client secret
+- `DAGU_AUTH_OIDC_CLIENT_URL` - Base URL of your Dagu instance (for callback)
+- `DAGU_AUTH_OIDC_ISSUER` - OIDC provider URL
+- `DAGU_AUTH_OIDC_SCOPES` - OAuth2 scopes (comma-separated, default: `openid,profile,email`)
+- `DAGU_AUTH_OIDC_WHITELIST` - Email addresses allowed to authenticate (comma-separated)
+
+Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
+- `DAGU_AUTH_OIDC_ENABLED` - Enable OIDC login under builtin auth (default: `false`)
+- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `false`)
+- `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
+- `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Email domains allowed to authenticate (comma-separated)
+- `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text (default: `Login with SSO`)
+- `DAGU_AUTH_OIDC_GROUPS_CLAIM` - JWT claim containing group membership (default: `groups`)
+- `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_PATH` - jq expression for role extraction
+- `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_STRICT` - Deny login when no valid role found (default: `false`)
+- `DAGU_AUTH_OIDC_SKIP_ORG_ROLE_SYNC` - Only assign role on first login (default: `false`)
 
 ### TLS/HTTPS
 - `DAGU_CERT_FILE` - SSL certificate

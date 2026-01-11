@@ -251,13 +251,147 @@ curl -H "Authorization: Bearer dagu_your-api-key-here" \
 
 For detailed documentation, see [API Keys](api-keys).
 
+## OIDC/SSO Login
+
+Builtin authentication supports OIDC/SSO login, allowing users to authenticate via enterprise identity providers (Google, Okta, Auth0, Keycloak, etc.) while maintaining Dagu's user management and RBAC system.
+
+### Enabling OIDC
+
+```yaml
+auth:
+  mode: builtin
+  builtin:
+    admin:
+      username: admin
+    token:
+      secret: your-jwt-secret
+      ttl: 24h
+  oidc:
+    enabled: true
+    clientId: your-client-id
+    clientSecret: your-client-secret
+    clientUrl: https://dagu.example.com
+    issuer: https://accounts.google.com
+    scopes: ["openid", "profile", "email"]
+    autoSignup: true
+    defaultRole: viewer
+    allowedDomains: ["company.com"]
+    buttonLabel: "Login with SSO"
+```
+
+### Environment Variables
+
+```bash
+# Enable OIDC under builtin auth
+export DAGU_AUTH_OIDC_ENABLED=true
+export DAGU_AUTH_OIDC_CLIENT_ID=your-client-id
+export DAGU_AUTH_OIDC_CLIENT_SECRET=your-client-secret
+export DAGU_AUTH_OIDC_CLIENT_URL=https://dagu.example.com
+export DAGU_AUTH_OIDC_ISSUER=https://accounts.google.com
+
+# Auto-signup and role settings
+export DAGU_AUTH_OIDC_AUTO_SIGNUP=true
+export DAGU_AUTH_OIDC_DEFAULT_ROLE=viewer
+export DAGU_AUTH_OIDC_ALLOWED_DOMAINS=company.com
+export DAGU_AUTH_OIDC_BUTTON_LABEL="Login with SSO"
+```
+
+### Configuration Fields
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `enabled` | Enable OIDC login under builtin auth | `false` |
+| `clientId` | OAuth2 client ID from your OIDC provider | Required |
+| `clientSecret` | OAuth2 client secret | Required |
+| `clientUrl` | Base URL of your Dagu instance | Required |
+| `issuer` | OIDC provider URL | Required |
+| `scopes` | OAuth2 scopes to request | `["openid", "profile", "email"]` |
+| `autoSignup` | Auto-create users on first OIDC login | `false` |
+| `defaultRole` | Role assigned to new auto-created users | `viewer` |
+| `allowedDomains` | Email domains allowed to authenticate | All domains |
+| `buttonLabel` | Text displayed on the SSO login button | `"Login with SSO"` |
+
+### Auto-Signup
+
+When `autoSignup` is enabled, users authenticating via OIDC for the first time are automatically created in Dagu with the role specified by `defaultRole`. This eliminates the need to pre-create user accounts.
+
+When `autoSignup` is disabled, users must exist in Dagu before they can log in via OIDC.
+
+### Domain Filtering
+
+Use `allowedDomains` to restrict OIDC login to specific email domains:
+
+```yaml
+oidc:
+  enabled: true
+  allowedDomains: ["company.com", "subsidiary.com"]
+```
+
+Users with emails outside these domains will be denied access.
+
+### Role Mapping
+
+Map IdP groups to Dagu roles for automatic role assignment:
+
+```yaml
+oidc:
+  enabled: true
+  autoSignup: true
+  roleMapping:
+    groupsClaim: groups           # Claim containing user's groups
+    groupMappings:
+      admins: admin               # IdP group -> Dagu role
+      developers: manager
+      ops: operator
+      everyone: viewer
+    roleAttributeStrict: false    # Deny login if no role matched
+    skipOrgRoleSync: false        # Sync roles on every login
+```
+
+**Role Mapping Options:**
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `groupsClaim` | JWT claim containing group membership | `groups` |
+| `groupMappings` | Map of IdP group names to Dagu roles | None |
+| `roleAttributePath` | jq expression for advanced role extraction | None |
+| `roleAttributeStrict` | Deny login when no valid role is found | `false` |
+| `skipOrgRoleSync` | Only assign role on first login | `false` |
+
+**Example with jq expression:**
+
+```yaml
+roleMapping:
+  roleAttributePath: 'if (.groups | contains(["admins"])) then "admin" elif (.groups | contains(["devs"])) then "manager" else "viewer" end'
+```
+
+### How It Works
+
+1. User clicks "Login with SSO" on the login page
+2. Redirected to OIDC provider for authentication
+3. After successful authentication, Dagu validates the token
+4. If `autoSignup` is enabled and user doesn't exist, a new user is created
+5. Role is determined by `roleMapping` (if configured) or `defaultRole`
+6. User receives a JWT token for the Dagu session
+
+### Notes
+
+- OIDC users are managed alongside local users in the same user database
+- OIDC users can also authenticate with their Dagu password if one is set
+- Admin users can manage all users (OIDC and local) from the web UI
+- The callback URL is `{clientUrl}/oidc-callback`
+
 ## Comparison with Other Auth Methods
 
-| Feature | Basic Auth | Token Auth | OIDC | Builtin |
-|---------|------------|------------|------|---------|
-| User Management | No | No | External | Yes |
-| Role-Based Access | No | No | External | Yes |
-| Password Change | No | No | External | Yes |
+| Feature | Basic Auth | Token Auth | OIDC (standalone) | Builtin (Recommended) |
+|---------|------------|------------|-------------------|----------------------|
+| User Management | No | No | No | Yes |
+| Role-Based Access | No | No | No | Yes |
+| Password Change | No | No | No | Yes |
 | Multiple Users | No | No | Yes | Yes |
 | API Key Management | No | No | No | Yes |
-| Self-Hosted | Yes | Yes | No | Yes |
+| SSO/OIDC Login | No | No | Yes | Yes |
+| Role Mapping from IdP | No | No | No | Yes |
+| Self-Hosted | Yes | Yes | Yes | Yes |
+
+**Recommendation**: Use `auth.mode: builtin` for production deployments. Enable OIDC under builtin mode for SSO while retaining full user management and RBAC capabilities.
