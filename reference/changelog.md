@@ -4,6 +4,26 @@
 
 ### Added
 
+- **OIDC Integration for Builtin Auth (Recommended)**: Added OIDC/SSO login capability under builtin authentication mode. This is now the recommended way to use OIDC with Dagu, as it combines SSO convenience with full user management and RBAC.
+
+  ```yaml
+  auth:
+    mode: builtin
+    builtin:
+      token:
+        secret: your-jwt-secret
+    oidc:
+      enabled: true
+      clientId: your-client-id
+      clientSecret: your-client-secret
+      clientUrl: https://dagu.example.com
+      issuer: https://accounts.google.com
+      autoSignup: true
+      defaultRole: viewer
+  ```
+
+  Key features: auto-signup on first login, role mapping from IdP groups, email domain filtering, customizable login button. See [Builtin Authentication](/configurations/authentication/builtin#oidcsso-login) for details.
+
 - **SQL Executor**: New step types for database operations with PostgreSQL and SQLite support. Execute queries, import data from CSV/TSV/JSONL, and export results in multiple formats.
 
   ```yaml

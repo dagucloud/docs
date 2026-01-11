@@ -2,6 +2,22 @@
 
 OpenID Connect (OIDC) authentication for Dagu using OAuth2.
 
+## Recommended: Builtin + OIDC Mode
+
+For most use cases, we recommend using **builtin auth mode with OIDC enabled** instead of standalone OIDC mode. This gives you:
+
+- SSO/OIDC login convenience
+- Dagu's user management and RBAC
+- API key management
+- Role mapping from IdP groups
+- Auto-signup for new users
+
+See [Builtin Authentication - OIDC/SSO Login](/configurations/authentication/builtin#oidcsso-login) for the recommended setup.
+
+## Standalone OIDC Mode (Legacy)
+
+Standalone OIDC mode (`auth.mode: oidc`) is available for simple setups where you don't need Dagu's user management features. All authenticated OIDC users have full access.
+
 ## Configuration
 
 ### YAML Configuration
@@ -9,6 +25,7 @@ OpenID Connect (OIDC) authentication for Dagu using OAuth2.
 ```yaml
 # ~/.config/dagu/config.yaml
 auth:
+  mode: oidc  # Standalone OIDC mode
   oidc:
     clientId: "your-client-id"
     clientSecret: "your-client-secret"
@@ -16,7 +33,7 @@ auth:
     issuer: "https://accounts.google.com"
     scopes:
       - "openid"
-      - "profile" 
+      - "profile"
       - "email"
     whitelist:
       - "admin@example.com"
@@ -26,6 +43,7 @@ auth:
 ### Environment Variables
 
 ```bash
+export DAGU_AUTH_MODE=oidc
 export DAGU_AUTH_OIDC_CLIENT_ID="your-client-id"
 export DAGU_AUTH_OIDC_CLIENT_SECRET="your-client-secret"
 export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
@@ -96,25 +114,24 @@ Note: Wildcard domains (e.g., `*@company.com`) are NOT supported. You must list 
 
 ## Multiple Authentication Methods
 
-OIDC can be used alongside other authentication methods:
+In standalone OIDC mode, you can combine OIDC with token auth for API access:
 
 ```yaml
 auth:
+  mode: oidc
   # OIDC for web UI
   oidc:
     clientId: "web-client"
     clientSecret: "secret"
+    clientUrl: "https://dagu.example.com"
     issuer: "https://auth.example.com"
-  
-  # Token for API access
+
+  # Token for API access (works alongside OIDC)
   token:
     value: "api-token"
-  
-  # Basic auth as fallback
-  basic:
-    username: "admin"
-    password: "password"
 ```
+
+For full user management with SSO, consider using [Builtin + OIDC mode](/configurations/authentication/builtin#oidcsso-login) instead.
 
 ## Session Management
 
