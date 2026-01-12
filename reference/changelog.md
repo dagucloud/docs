@@ -63,6 +63,8 @@
 
   See [ETL](/features/etl/) for full documentation.
 
+- **DAG Runs Tag Filter**: Filter DAG runs by tags in the UI and API. Select multiple tags to filter runs from DAGs that have ALL specified tags (AND logic). Available via the new `tags` query parameter on `/api/v2/dag-runs` endpoint (comma-separated).
+
 - **Shared-Nothing Worker Architecture**: Workers can now operate without shared filesystem access. Enables deployment in Kubernetes, multi-cloud, and containerized environments where NFS/shared volumes are not available.
 
   **Key Features:**
