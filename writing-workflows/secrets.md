@@ -71,5 +71,28 @@ The first existing file wins; if none are found the run fails with a clear error
 2. Right before execution, the runtime resolves each secret through the registered provider.
 3. Resolved values are appended to the environment after base/DAG variables.
 4. Secrets are scrubbed from all output (logs, stdout, captured output) automatically.
+5. For chat steps, secrets are masked before messages are sent to LLM providers.
 
 Secrets are never persisted to disk or stored in the database. Only the resolved processes receive them.
+
+## LLM Protection
+
+When using chat steps with the `secrets` block, secret values are automatically masked before being sent to external LLM providers. This prevents accidental exposure of sensitive data to AI APIs:
+
+```yaml
+secrets:
+  - name: DB_PASSWORD
+    provider: env
+    key: PROD_DB_PASSWORD
+
+steps:
+  - type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+    messages:
+      - role: user
+        content: "Analyze this connection string: postgres://user:${DB_PASSWORD}@db/prod"
+```
+
+In this example, `${DB_PASSWORD}` is substituted in the message for your reference, but the actual secret value is replaced with `*******` before being sent to OpenAI. The saved conversation history (messages.json) retains the original content for debugging purposes.

@@ -381,6 +381,30 @@ Metadata is only attached to assistant responses and includes:
 - `model`: The model identifier
 - `promptTokens`, `completionTokens`, `totalTokens`: Token usage statistics
 
+## Security
+
+### Secret Masking
+
+Secrets defined in the `secrets` block are automatically masked before messages are sent to LLM providers. This prevents accidental exposure of sensitive values to external AI APIs:
+
+```yaml
+secrets:
+  - name: API_TOKEN
+    provider: env
+    key: PROD_API_TOKEN
+
+steps:
+  - type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+    messages:
+      - role: user
+        content: "Check if this token is valid: ${API_TOKEN}"
+```
+
+The `${API_TOKEN}` value is substituted in the message content, but the actual secret is replaced with `*******` before being sent to the LLM provider. The saved conversation history retains the original content for debugging.
+
 ## Notes
 
 - Use `type: chat` explicitly with LLM configuration in the `llm` field
@@ -388,3 +412,4 @@ Metadata is only attached to assistant responses and includes:
 - API keys are read from environment variables by default
 - Response tokens are streamed to stdout by default
 - The full conversation (inherited + step messages + response) is saved after each step
+- Secrets are automatically masked before sending to LLM providers

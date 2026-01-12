@@ -4,6 +4,8 @@
 
 ### Added
 
+- **LLM Secret Masking**: Secrets defined in the `secrets` block are now automatically masked before being sent to LLM providers in chat steps. This prevents accidental exposure of sensitive values to external AI APIs while still allowing secrets to be used in message content via `${VAR}` substitution.
+
 - **System Status Page**: New admin-only page consolidating system health monitoring in one place.
 
   **Features:**
