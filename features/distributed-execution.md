@@ -236,6 +236,64 @@ export DAGU_PEER_CLIENT_CA_FILE=/path/to/ca.pem
 export DAGU_PEER_SKIP_TLS_VERIFY=false
 ```
 
+## PostgreSQL Connection Pool Management
+
+Workers in shared-nothing mode use global PostgreSQL connection pooling to prevent connection exhaustion when running multiple concurrent DAGs.
+
+### Overview
+
+When multiple DAGs run concurrently in a single worker process, each PostgreSQL step could potentially create its own connections. Without global pool management, this can quickly exhaust the PostgreSQL server's connection limits.
+
+The global connection pool:
+- **Limits total connections** across all PostgreSQL databases and DAG executions
+- **Shares connections** between concurrent DAG runs
+- **Automatically enabled** in shared-nothing mode (when `worker.coordinators` is configured)
+- **Applies only to PostgreSQL** - SQLite is not affected
+
+### Configuration
+
+Configure the pool via `worker.postgresPool`:
+
+```yaml
+worker:
+  postgresPool:
+    maxOpenConns: 25       # Total connections across ALL PostgreSQL DSNs
+    maxIdleConns: 5        # Idle connections per DSN
+    connMaxLifetime: 300   # Connection lifetime in seconds
+    connMaxIdleTime: 60    # Idle connection timeout in seconds
+```
+
+Or via environment variables:
+
+```bash
+export DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
+export DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
+```
+
+### Best Practices
+
+**Calculate `maxOpenConns` based on your setup:**
+
+```
+maxOpenConns = PostgreSQL max_connections / number_of_workers / 2
+```
+
+Example: PostgreSQL with `max_connections: 100` and 4 workers:
+- Per-worker limit: `100 / 4 / 2 = 12` (with headroom)
+
+**Monitor connection usage:**
+
+```sql
+-- Check active connections from workers
+SELECT count(*) FROM pg_stat_activity WHERE application_name LIKE 'dagu%';
+```
+
+Expected: `≤ maxOpenConns × number_of_workers`
+
+For detailed configuration guidance, see [Shared Nothing Mode - PostgreSQL Connection Pool Management](/features/workers/shared-nothing#postgresql-connection-pool-management).
+
 ## Monitoring Workers
 
 ### Web UI Workers Page

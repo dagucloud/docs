@@ -53,10 +53,43 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       timeout: 30           # Query timeout in seconds
-      maxOpenConns: 10      # Connection pool size
-      maxIdleConns: 5       # Idle connections to keep
-      connMaxLifetime: 300  # Connection lifetime in seconds
 ```
+
+## Connection Pooling
+
+PostgreSQL connection pooling is **not configurable per-step**. The behavior depends on the execution mode:
+
+### Non-Worker Mode
+
+When executing DAGs directly (not via distributed workers), each PostgreSQL step uses fixed connection defaults:
+- Maximum open connections: **1**
+- Maximum idle connections: **1**
+- Connection max lifetime: **5 minutes**
+
+This is optimal for isolated step execution where each step gets its own dedicated connection.
+
+### Worker Mode (Shared-Nothing)
+
+When running distributed workers in shared-nothing mode (with `worker.coordinators` configured), PostgreSQL steps use a **global connection pool** managed at the worker level.
+
+This prevents connection exhaustion when multiple DAGs run concurrently in the same worker process. All PostgreSQL connections across all DAG executions share the pool.
+
+**Configuration** is done via [`worker.postgresPool`](/features/workers/shared-nothing#postgresql-connection-pool-management):
+
+```yaml
+worker:
+  postgresPool:
+    maxOpenConns: 25       # Total connections across ALL PostgreSQL DSNs
+    maxIdleConns: 5        # Idle connections per DSN
+    connMaxLifetime: 300   # Connection lifetime in seconds
+    connMaxIdleTime: 60    # Idle connection timeout in seconds
+```
+
+::: warning Connection Limits in Worker Mode
+With many concurrent DAGs, configure `worker.postgresPool.maxOpenConns` based on your PostgreSQL server's `max_connections` setting. Consider the total: `number of workers × maxOpenConns`.
+
+Example: 5 workers with `maxOpenConns: 25` = up to 125 connections to your PostgreSQL server.
+:::
 
 ## Parameterized Queries
 

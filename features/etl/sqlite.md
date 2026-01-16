@@ -69,13 +69,11 @@ steps:
     config:
       dsn: "file:./app.db"
       timeout: 30           # Query timeout in seconds
-      maxOpenConns: 1       # SQLite works best with 1 connection
-      maxIdleConns: 1
       sharedMemory: false   # Set true for :memory: databases to share across steps
 ```
 
-::: tip
-SQLite handles concurrency at the database level. For best performance, use `maxOpenConns: 1` to avoid lock contention.
+::: tip Connection Pooling
+SQLite connection pooling is **not configurable**. Each step always uses **1 connection** (optimal for SQLite's locking model). Global pool management does not apply to SQLite, even in distributed worker mode.
 :::
 
 ## Default Pragmas

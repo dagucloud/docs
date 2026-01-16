@@ -136,6 +136,11 @@ worker:
     gpu: "false"
     memory: "16G"
     region: "us-east-1"
+  postgresPool:           # PostgreSQL connection pool (shared-nothing mode only)
+    maxOpenConns: 25      # Total connections across ALL PostgreSQL DSNs (default: 25)
+    maxIdleConns: 5       # Idle connections per DSN (default: 5)
+    connMaxLifetime: 300  # Connection lifetime in seconds (default: 300)
+    connMaxIdleTime: 60   # Idle connection timeout in seconds (default: 60)
 
 # Peer TLS configuration (for distributed execution)
 peer:
@@ -262,6 +267,10 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_WORKER_ID` - Worker instance ID (default: `hostname@PID`)
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
+- `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
+- `DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS` - PostgreSQL max idle connections per DSN (default: `5`)
+- `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME` - PostgreSQL connection max lifetime in seconds (default: `300`)
+- `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME` - PostgreSQL connection max idle time in seconds (default: `60`)
 
 ### Peer (for distributed TLS)
 - `DAGU_PEER_INSECURE` - Use insecure connection (default: `true`)

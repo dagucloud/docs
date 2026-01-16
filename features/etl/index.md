@@ -50,9 +50,14 @@ Secrets are automatically masked in logs. Use `provider: file` for Kubernetes/Do
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `dsn` | string | required | Database connection string |
-| `maxOpenConns` | int | 5 | Maximum open connections |
-| `maxIdleConns` | int | 2 | Maximum idle connections |
-| `connMaxLifetime` | int | 300 | Connection lifetime in seconds |
+
+::: info Connection Pooling
+Connection pooling is **not configurable per-step**:
+- **Non-worker mode**: Uses fixed defaults (1 connection per step)
+- **Worker mode** (shared-nothing): Managed by global pool configuration at the worker level
+
+For distributed workers running multiple concurrent DAGs, configure PostgreSQL connection pooling via [`worker.postgresPool`](/features/workers/shared-nothing#postgresql-connection-pool-management) to prevent connection exhaustion.
+:::
 
 ### Execution
 

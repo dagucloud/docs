@@ -92,12 +92,42 @@ worker:
     memory: "64G"
 ```
 
+### PostgreSQL Connection Pool
+
+In shared-nothing mode (when `worker.coordinators` is configured), workers use a global PostgreSQL connection pool to prevent connection exhaustion when running multiple concurrent DAGs.
+
+```yaml
+# config.yaml
+worker:
+  id: "worker-gpu-01"
+  maxActiveRuns: 100
+  postgresPool:
+    maxOpenConns: 25       # Total connections across ALL PostgreSQL DSNs
+    maxIdleConns: 5        # Idle connections per DSN
+    connMaxLifetime: 300   # Connection lifetime in seconds
+    connMaxIdleTime: 60    # Idle connection timeout in seconds
+```
+
+**Key Points:**
+- **Applies only in shared-nothing mode** (when `worker.coordinators` is configured)
+- **Prevents connection exhaustion** when multiple DAGs run concurrently in a single worker
+- **Shared across all PostgreSQL databases** accessed by the worker
+- **Does not apply to SQLite** - SQLite always uses 1 connection per step
+
+See [Shared Nothing Mode - PostgreSQL Connection Pool Management](/features/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
+
 ### Environment Variables
 
 ```bash
 export DAGU_WORKER_ID=worker-01
 export DAGU_WORKER_LABELS="gpu=true,region=us-east-1"
 export DAGU_WORKER_MAX_ACTIVE_RUNS=50
+
+# PostgreSQL connection pool (shared-nothing mode only)
+export DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
+export DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
 ```
 
 ## Technical Details

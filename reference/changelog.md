@@ -73,9 +73,28 @@
   - Data import from CSV, TSV, JSONL files
   - Output formats: JSONL, JSON, CSV
   - Advisory locks (PostgreSQL) and file locks (SQLite)
-  - Connection pooling and timeout configuration
+  - Global connection pooling for workers (prevents connection exhaustion)
 
   See [ETL](/features/etl/) for full documentation.
+
+- **PostgreSQL Connection Pool Management for Workers**: Added global PostgreSQL connection pool configuration at the worker level to prevent connection exhaustion when multiple DAGs run concurrently in shared-nothing mode.
+
+  ```yaml
+  worker:
+    postgresPool:
+      maxOpenConns: 25       # Total connections across ALL PostgreSQL DSNs
+      maxIdleConns: 5        # Idle connections per DSN
+      connMaxLifetime: 300   # Connection lifetime in seconds
+      connMaxIdleTime: 60    # Idle connection timeout in seconds
+  ```
+
+  **Key Features:**
+  - Automatically enabled in shared-nothing mode (when `worker.coordinators` is configured)
+  - Shared across all PostgreSQL databases accessed by the worker
+  - Prevents connection exhaustion with many concurrent DAGs
+  - Only applies to PostgreSQL (SQLite unaffected)
+
+  See [Shared Nothing Mode - PostgreSQL Connection Pool Management](/features/workers/shared-nothing#postgresql-connection-pool-management) for details.
 
 - **DAG Runs Tag Filter**: Filter DAG runs by tags in the UI and API. Select multiple tags to filter runs from DAGs that have ALL specified tags (AND logic). Available via the new `tags` query parameter on `/api/v2/dag-runs` endpoint (comma-separated).
 

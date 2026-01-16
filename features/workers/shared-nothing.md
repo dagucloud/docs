@@ -126,6 +126,11 @@ worker:
   labels:
     gpu: "true"
     region: "us-east-1"
+  postgresPool:
+    maxOpenConns: 25       # Total connections across ALL PostgreSQL DSNs
+    maxIdleConns: 5        # Per-DSN idle connections
+    connMaxLifetime: 300   # Seconds
+    connMaxIdleTime: 60    # Seconds
 ```
 
 ### Environment Variables
@@ -135,7 +140,94 @@ worker:
 export DAGU_WORKER_COORDINATORS="coordinator-1:50055,coordinator-2:50055"
 export DAGU_WORKER_ID=worker-01
 export DAGU_WORKER_LABELS="gpu=true,region=us-east-1"
+
+# PostgreSQL connection pool (optional, defaults shown)
+export DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
+export DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
 ```
+
+## PostgreSQL Connection Pool Management
+
+In shared-nothing mode, multiple DAGs run concurrently within a single worker process. Without global connection pool management, each DAG's PostgreSQL steps could create unlimited connections, leading to connection exhaustion.
+
+### How It Works
+
+The global PostgreSQL connection pool:
+
+1. **Limits total connections** across ALL databases and DAG executions
+2. **Shares connections** between concurrent DAG runs
+3. **Reuses connections** across sequential DAG executions
+4. **Manages per-DSN pools** while enforcing a global limit
+
+### Configuration
+
+```yaml
+worker:
+  postgresPool:
+    maxOpenConns: 25       # Hard limit across ALL PostgreSQL DSNs
+    maxIdleConns: 5        # Per-DSN idle connection limit
+    connMaxLifetime: 300   # Max connection age (seconds)
+    connMaxIdleTime: 60    # Max idle time before closure (seconds)
+```
+
+### Example Scenario
+
+Consider a worker with `maxOpenConns: 25` running 10 concurrent DAGs:
+
+- **Same DSN**: If all 10 DAGs connect to the same PostgreSQL server, they share the 25-connection pool
+- **Different DSNs**: If DAGs connect to 3 different PostgreSQL servers, connections are distributed among them, but the total across all servers is still limited to 25
+- **Connection reuse**: When a step completes, its connection returns to the pool for reuse by other steps
+
+### Best Practices
+
+**1. Size based on PostgreSQL limits**
+
+Set `maxOpenConns` based on your PostgreSQL server's `max_connections`:
+
+```
+worker.postgresPool.maxOpenConns = PostgreSQL max_connections / number_of_workers / 2
+```
+
+Example: PostgreSQL with `max_connections: 100`, 4 workers:
+- Per-worker limit: `100 / 4 / 2 = 12` (leaving headroom)
+
+**2. Consider concurrent DAGs**
+
+Calculate maximum concurrent DAG executions:
+
+```
+max_concurrent_dags = worker.maxActiveRuns (default: 100)
+```
+
+If many DAGs use PostgreSQL simultaneously, ensure `maxOpenConns` is sufficient.
+
+**3. Idle connection management**
+
+- `maxIdleConns: 5` balances connection reuse vs resource usage
+- `connMaxIdleTime: 60` ensures idle connections don't persist indefinitely
+- `connMaxLifetime: 300` prevents stale connections
+
+**4. Monitor connection usage**
+
+Check PostgreSQL connection counts:
+
+```sql
+SELECT count(*) FROM pg_stat_activity WHERE application_name LIKE 'dagu%';
+```
+
+Expected: `≤ maxOpenConns × number_of_workers`
+
+### Important Notes
+
+::: warning Applies Only to PostgreSQL
+Global pool management applies **only to PostgreSQL**. SQLite steps always use 1 connection per step, regardless of worker mode.
+:::
+
+::: tip Non-Worker Mode
+When running DAGs directly (not via workers), PostgreSQL steps use fixed defaults: 1 max connection, 1 idle connection. The global pool is **not** used.
+:::
 
 ## Kubernetes Deployment
 
