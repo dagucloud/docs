@@ -66,6 +66,7 @@ const fullSidebar = [
           { text: "Shell (Windows)", link: "/features/executors/shell-windows" },
           { text: "Docker", link: "/features/executors/docker" },
           { text: "SSH", link: "/features/executors/ssh" },
+          { text: "S3", link: "/features/executors/s3" },
           { text: "HTTP", link: "/features/executors/http" },
           { text: "Chat", link: "/features/executors/chat" },
           { text: "Archive", link: "/features/executors/archive" },

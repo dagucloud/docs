@@ -7,6 +7,7 @@ Step types extend Dagu's capabilities beyond simple shell commands. Available st
 - [Shell](/features/executors/shell) (default) - Execute shell commands
 - [Docker](/features/executors/docker) - Run commands in Docker containers
 - [SSH](/features/executors/ssh) - Execute commands on remote hosts
+- [S3](/features/executors/s3) - S3 operations (upload, download, list, delete)
 - [HTTP](/features/executors/http) - Make HTTP requests
 - [Chat](/features/executors/chat) - Execute LLM requests (OpenAI, Anthropic, Gemini, etc.)
 - [Archive](/features/executors/archive) - Extract, create, and list archive files
@@ -326,6 +327,115 @@ steps:
       find /backup -name "app-*.tar.gz" -mtime +7 -delete
       
       echo "Backup complete"
+```
+
+## S3
+
+::: info
+For detailed S3 step type documentation, see [S3 Guide](/features/executors/s3).
+:::
+
+Execute S3 operations including upload, download, list, and delete. Supports AWS S3 and S3-compatible services (MinIO, GCS, DigitalOcean Spaces).
+
+### DAG-Level Configuration
+
+```yaml
+s3:
+  region: us-east-1
+  accessKeyId: ${AWS_ACCESS_KEY_ID}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  bucket: my-bucket
+
+steps:
+  - name: upload-file
+    type: s3
+    config:
+      key: data/file.txt
+      source: /tmp/file.txt
+    command: upload
+```
+
+### Upload
+
+```yaml
+steps:
+  - name: upload-report
+    type: s3
+    config:
+      bucket: my-bucket
+      key: reports/daily.csv
+      source: /tmp/report.csv
+      contentType: text/csv
+      storageClass: STANDARD_IA
+    command: upload
+```
+
+### Download
+
+```yaml
+steps:
+  - name: download-config
+    type: s3
+    config:
+      bucket: my-bucket
+      key: config/settings.json
+      destination: /tmp/settings.json
+    command: download
+```
+
+### List Objects
+
+```yaml
+steps:
+  - name: list-logs
+    type: s3
+    config:
+      bucket: my-bucket
+      prefix: logs/2024/
+      maxKeys: 100
+      recursive: true
+    command: list
+    output: OBJECTS
+```
+
+### Delete
+
+```yaml
+steps:
+  # Single object
+  - name: delete-file
+    type: s3
+    config:
+      bucket: my-bucket
+      key: temp/old-file.txt
+    command: delete
+
+  # Batch delete by prefix
+  - name: cleanup
+    type: s3
+    config:
+      bucket: my-bucket
+      prefix: logs/2023/
+    command: delete
+```
+
+### S3-Compatible Services
+
+```yaml
+# MinIO
+s3:
+  endpoint: http://localhost:9000
+  accessKeyId: minioadmin
+  secretAccessKey: minioadmin
+  bucket: my-bucket
+  forcePathStyle: true
+
+# Google Cloud Storage
+s3:
+  endpoint: https://storage.googleapis.com
+  accessKeyId: ${GCS_HMAC_KEY}
+  secretAccessKey: ${GCS_HMAC_SECRET}
+  bucket: my-gcs-bucket
 ```
 
 ## HTTP
@@ -1080,6 +1190,7 @@ steps:
 - [Shell](/features/executors/shell) - Shell command execution details
 - [Docker](/features/executors/docker) - Container execution guide
 - [SSH](/features/executors/ssh) - Remote execution guide
+- [S3](/features/executors/s3) - S3 operations guide
 - [HTTP](/features/executors/http) - API interaction guide
 - [Chat](/features/executors/chat) - LLM integration guide
 - [Mail](/features/executors/mail) - Email notification guide

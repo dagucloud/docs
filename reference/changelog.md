@@ -56,6 +56,35 @@
 
   See [REST API Reference](/reference/api#start-dag-synchronous) for full documentation.
 
+- **S3 Executor**: New step type for S3 operations with support for AWS S3 and S3-compatible services (MinIO, Google Cloud Storage, DigitalOcean Spaces, Backblaze B2).
+
+  ```yaml
+  s3:
+    region: us-east-1
+    accessKeyId: ${AWS_ACCESS_KEY_ID}
+    secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+    bucket: my-bucket
+
+  steps:
+    - name: upload-report
+      type: s3
+      config:
+        key: reports/daily.csv
+        source: /tmp/report.csv
+      command: upload
+  ```
+
+  **Key Features:**
+  - Operations: upload, download, list, delete
+  - DAG-level connection defaults (steps inherit settings)
+  - S3-compatible services via custom endpoint
+  - Automatic multipart uploads for large files
+  - Storage class selection
+  - Object tagging and metadata
+  - Streaming list output (JSONL format)
+
+  See [S3](/features/executors/s3) for full documentation.
+
 - **SQL Executor**: New step types for database operations with PostgreSQL and SQLite support. Execute queries, import data from CSV/TSV/JSONL, and export results in multiple formats.
 
   ```yaml
