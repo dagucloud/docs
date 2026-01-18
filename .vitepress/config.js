@@ -68,7 +68,6 @@ const fullSidebar = [
           { text: "SSH", link: "/features/executors/ssh" },
           { text: "S3", link: "/features/executors/s3" },
           { text: "HTTP", link: "/features/executors/http" },
-          { text: "Chat", link: "/features/executors/chat" },
           { text: "Archive", link: "/features/executors/archive" },
           { text: "Mail", link: "/features/executors/mail" },
           { text: "JQ", link: "/features/executors/jq" },
@@ -87,6 +86,15 @@ const fullSidebar = [
           { text: "Overview", link: "/features/etl/" },
           { text: "PostgreSQL", link: "/features/etl/postgresql" },
           { text: "SQLite", link: "/features/etl/sqlite" },
+        ],
+      },
+      {
+        text: "Chat & AI Agents",
+        collapsed: false,
+        items: [
+          { text: "Overview", link: "/features/chat/" },
+          { text: "Basic Chat", link: "/features/chat/basics" },
+          { text: "Tool Calling", link: "/features/chat/tool-calling" },
         ],
       },
       { text: "Scheduling", link: "/features/scheduling" },

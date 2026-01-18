@@ -8,6 +8,54 @@
 
 - **LLM Secret Masking**: Secrets defined in the `secrets` block are now automatically masked before being sent to LLM providers in chat steps. This prevents accidental exposure of sensitive values to external AI APIs while still allowing secrets to be used in message content via `${VAR}` substitution.
 
+- **LLM Tool Calling**: Chat executor now supports function calling / tool use, enabling AI agents to execute workflows as tools during conversations. Tools are defined as DAGs with automatic parameter discovery from `defaultParams`.
+
+  ```yaml
+  # Main DAG that uses the tool
+  steps:
+    - type: chat
+      llm:
+        provider: anthropic
+        model: claude-sonnet-4-20250514
+        tools:
+          - search_tool
+        maxToolIterations: 10
+      messages:
+        - role: user
+          content: "What's the latest news about AI?"
+
+  ---
+  # Define tool DAG
+  name: search_tool
+  description: "Search the web for information"
+  defaultParams: "query max_results=10"
+
+  steps:
+    - command: echo "Searching for: $1"
+    - command: curl "https://api.example.com/search?q=$1&limit=$2"
+      output: SEARCH_RESULT
+  ```
+
+  **Key Features:**
+  - **DAG-as-Tool**: Any DAG can be a tool - parameters auto-discovered from `defaultParams`
+  - **Multi-turn Execution**: Automatic loop: LLM → Tool Calls → Execute DAGs → Results → LLM (up to `maxToolIterations`)
+  - **Local Tool Discovery**: Tools searched in local DAGs (using `---` separator) first, then database
+  - **UI Drill-down**: Tool executions tracked as sub-DAG runs with full execution details
+  - **Tool Definitions Display**: UI shows available tools and their parameters
+  - **Provider Support**: Anthropic, OpenAI, and Gemini with provider-specific API mappings
+  - **Parameter Passing**: Tool arguments converted to DAG parameters (KEY=value format)
+  - **Output Handling**: Tool results from DAG outputs passed back to LLM as tool results
+  - **Error Handling**: Tool execution failures passed to LLM as error messages
+
+  **Configuration:**
+  - `llm.tools`: Array of DAG names to make available as tools
+  - `llm.maxToolIterations`: Max tool calling loops (default: 10)
+  - Tool DAG `name`: Used as function name for LLM
+  - Tool DAG `description`: Shown to LLM in tool definition
+  - Tool DAG `defaultParams`: Parsed to generate JSON Schema for parameters
+
+  See [Chat - Tool Calling](/features/chat/tool-calling) for full documentation.
+
 - **System Status Page**: New admin-only page consolidating system health monitoring in one place.
 
   **Features:**

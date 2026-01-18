@@ -1,4 +1,4 @@
-# Chat
+# Basic Chat
 
 Execute Large Language Model (LLM) requests to AI providers like OpenAI, Anthropic, Google Gemini, OpenRouter, and local models.
 
@@ -413,3 +413,4 @@ The `${API_TOKEN}` value is substituted in the message content, but the actual s
 - Response tokens are streamed to stdout by default
 - The full conversation (inherited + step messages + response) is saved after each step
 - Secrets are automatically masked before sending to LLM providers
+- For AI agents with tool calling capabilities, see [Tool Calling](/features/chat/tool-calling)
