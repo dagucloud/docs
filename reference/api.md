@@ -544,13 +544,16 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 }
 ```
 
-**Response (408)** - Timeout waiting for completion:
+**Response (408)** - Timeout waiting for completion (DAG continues in background):
 ```json
 {
   "code": "timeout",
-  "message": "timeout waiting for DAG my-dag to complete after 300 seconds"
+  "message": "timeout waiting for DAG my-dag to complete after 300 seconds; DAG run continues in background",
+  "dagRunId": "20240101_120000_abc123"
 }
 ```
+
+> **Note:** When a timeout occurs, the DAG run continues executing in the background. The response includes the `dagRunId` so you can monitor or cancel the run using other API endpoints.
 
 **Response (409)** - When `singleton: true` and DAG is already running:
 ```json
@@ -560,7 +563,7 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 }
 ```
 
-> **Note:** If the DAG reaches a "waiting" status (e.g., a human-in-the-loop step requires approval), the endpoint returns immediately with the current status instead of waiting for the timeout.
+> **Note:** If the DAG reaches a "waiting" status (e.g., a human-in-the-loop step requires approval), the endpoint returns immediately with 200 and the current status instead of blocking until timeout.
 
 ### Enqueue DAG
 
