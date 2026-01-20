@@ -337,7 +337,7 @@
   - **Streaming output**: Response tokens stream to stdout by default (disable with `stream: false`)
   - **Automatic retry**: Exponential backoff on transient errors (rate limits, server errors, timeouts)
 
-  See [Chat](/features/executors/chat) for full documentation.
+  See [Chat](/features/chat/) for full documentation.
 
 - **Per-DAG Prometheus Metrics**: Enhanced observability with granular per-DAG metrics and histograms. (#1411)
   - `dagu_dag_runs_currently_running_by_dag` - Running count per DAG
@@ -469,7 +469,7 @@
   - **Multiple providers**: `openai`, `anthropic`, `gemini`, `openrouter`, `local`
   - **Automatic retry**: Retries on rate limits and transient errors with exponential backoff
 
-  See [Chat Executor](/features/executors/chat) for full documentation.
+  See [Chat Executor](/features/chat/) for full documentation.
 
 ### Changed
 

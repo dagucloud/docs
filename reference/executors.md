@@ -9,7 +9,7 @@ Step types extend Dagu's capabilities beyond simple shell commands. Available st
 - [SSH](/features/executors/ssh) - Execute commands on remote hosts
 - [S3](/features/executors/s3) - S3 operations (upload, download, list, delete)
 - [HTTP](/features/executors/http) - Make HTTP requests
-- [Chat](/features/executors/chat) - Execute LLM requests (OpenAI, Anthropic, Gemini, etc.)
+- [Chat](/features/chat/) - Execute LLM requests (OpenAI, Anthropic, Gemini, etc.)
 - [Archive](/features/executors/archive) - Extract, create, and list archive files
 - [Mail](/features/executors/mail) - Send emails
 - [JQ](/features/executors/jq) - Process JSON data
@@ -932,7 +932,7 @@ redis:
 ## Chat
 
 ::: info
-For detailed Chat step type documentation, see [Chat Guide](/features/executors/chat).
+For detailed Chat step type documentation, see [Chat Guide](/features/chat/).
 :::
 
 Execute requests to Large Language Model providers.
@@ -1192,7 +1192,7 @@ steps:
 - [SSH](/features/executors/ssh) - Remote execution guide
 - [S3](/features/executors/s3) - S3 operations guide
 - [HTTP](/features/executors/http) - API interaction guide
-- [Chat](/features/executors/chat) - LLM integration guide
+- [Chat](/features/chat/) - LLM integration guide
 - [Mail](/features/executors/mail) - Email notification guide
 - [JQ](/features/executors/jq) - JSON processing guide
 - [Redis](/features/executors/redis) - Redis operations guide

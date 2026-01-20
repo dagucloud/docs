@@ -1629,7 +1629,7 @@ steps:
     output: ANSWER
 ```
 
-<a href="/features/executors/chat" class="learn-more">Learn more →</a>
+<a href="/features/chat/" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -1652,7 +1652,7 @@ steps:
 
 Steps inherit LLM config from DAG level.
 
-<a href="/features/executors/chat#dag-level-configuration" class="learn-more">Learn more →</a>
+<a href="/features/chat/#dag-level-configuration" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -1681,7 +1681,7 @@ steps:
 
 Steps inherit conversation history from previous steps.
 
-<a href="/features/executors/chat#multi-turn-conversation" class="learn-more">Learn more →</a>
+<a href="/features/chat/#multi-turn-conversation" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -1705,7 +1705,7 @@ steps:
 
 Enable deeper reasoning for complex tasks.
 
-<a href="/features/executors/chat#extended-thinking-mode" class="learn-more">Learn more →</a>
+<a href="/features/chat/basics#extended-thinking-mode" class="learn-more">Learn more →</a>
 
 </div>
 

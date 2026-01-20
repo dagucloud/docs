@@ -288,7 +288,7 @@ steps:
 
 When configured at the DAG level, all chat steps inherit the LLM configuration. Step-level `llm:` completely overrides DAG-level configuration (no field-level merging).
 
-See [Chat Executor](/features/executors/chat) for full documentation.
+See [Chat Executor](/features/chat/) for full documentation.
 
 ### Redis Configuration
 
@@ -834,7 +834,7 @@ steps:
 - `role`: Message role (`system`, `user`, `assistant`)
 - `content`: Message content (supports `${VAR}` substitution)
 
-See [Chat Executor](/features/executors/chat) for full documentation.
+See [Chat Executor](/features/chat/) for full documentation.
 
 ### HITL (Human in the Loop)
 
