@@ -214,7 +214,7 @@ Outputs are stored at:
 | `dagName` | Name of the DAG |
 | `dagRunId` | Unique identifier for the run |
 | `attemptId` | Attempt identifier (for retries) |
-| `status` | Final status: `succeeded`, `failed`, `aborted` |
+| `status` | Final status: `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted` |
 | `completedAt` | ISO 8601 timestamp of completion |
 | `params` | JSON-serialized parameters passed to the DAG |
 

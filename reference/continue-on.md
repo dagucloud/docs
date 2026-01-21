@@ -250,17 +250,17 @@ steps:
 
 ### With Lifecycle Handlers
 
-Steps that continue on failure still trigger `onFailure` handlers:
+When a step with `continueOn` fails but the DAG continues, the final status is `partially_succeeded`, which triggers the `onSuccess` handler (not `onFailure`):
 
 ```yaml
 handlerOn:
-  failure:
-    command: echo "Logging failure"
+  success:
+    command: echo "DAG completed (status: ${DAG_RUN_STATUS})"  # partially_succeeded
 
 steps:
   - name: optional-step
-    command: echo "Running optional task"
-    continueOn: failed  # Continues, but failure handler still runs
+    command: exit 1
+    continueOn: failed  # Continues, DAG ends as partially_succeeded
 ```
 
 ### With Dependencies

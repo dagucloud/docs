@@ -1315,7 +1315,7 @@ Retrieves the collected outputs from a completed DAG run. Outputs are collected 
   - `dagName`: Name of the executed DAG
   - `dagRunId`: Unique identifier for the DAG run
   - `attemptId`: Identifier for the specific execution attempt
-  - `status`: Final status of the DAG run ("succeeded", "failed", "aborted")
+  - `status`: Final status of the DAG run ("succeeded", "partially_succeeded", "failed", "rejected", "aborted")
   - `completedAt`: RFC3339 timestamp when execution completed
   - `params`: JSON-serialized parameters passed to the DAG
 - `outputs`: Key-value pairs of collected outputs

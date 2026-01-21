@@ -8,7 +8,7 @@ Lifecycle handlers let you run extra steps after the main DAG completes. Use the
 |---------|---------|-------------------|
 | `init` | Runs before any workflow steps (after DAG-level preconditions pass) | Setup tasks, acquire locks, validate environment |
 | `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` | Deliver success notifications, enqueue downstream jobs |
-| `failure` | The DAG ended with a canonical `failed` status | Page on-call, collect diagnostics |
+| `failure` | The DAG ended with `failed` or `rejected` status (precondition failure) | Page on-call, collect diagnostics |
 | `abort` | A stop request interrupted the run (manual stop, queue eviction, timeout cancellation) | Roll back partial work, release locks |
 | `wait` | The DAG has paused waiting for human approval (HITL) | Notify approvers, send Slack messages |
 | `exit` | Always runs after the status-specific handler finishes (including when it fails or is skipped) | File system clean-up, archival tasks |
@@ -49,7 +49,7 @@ Each handler is a normal step definition. You can use `command`, `script`, `call
 - Handlers are executed sequentially and synchronously. The DAG is still considered running until they finish.
 - If a handler exits with a non-zero status, the overall DAG run ends in `failed`, even if every main step succeeded.
 - Handler logs appear alongside other steps in the run history and respect the same log retention policy.
-- Each handler receives the `DAG_RUN_STATUS` environment variable so scripts can branch on `succeeded`, `partially_succeeded`, `failed`, or `aborted`.
+- Each handler receives the `DAG_RUN_STATUS` environment variable. The value depends on when the handler runs: `running` (init), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler).
 
 ## Sub-DAG Handler Isolation
 
