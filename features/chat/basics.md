@@ -36,8 +36,8 @@ The `local` provider works with any OpenAI-compatible API including Ollama, vLLM
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `provider` | string | (required) | LLM provider to use |
-| `model` | string | (required) | Model identifier |
+| `provider` | string | (required*) | LLM provider to use |
+| `model` | string or array | (required*) | Model identifier or array of models for fallback |
 | `system` | string | (none) | Default system prompt |
 | `temperature` | float | (provider default) | Randomness (0.0-2.0) |
 | `maxTokens` | int | (provider default) | Maximum tokens to generate |
@@ -46,6 +46,8 @@ The `local` provider works with any OpenAI-compatible API including Ollama, vLLM
 | `apiKeyName` | string | (from provider) | Environment variable name for API key |
 | `stream` | bool | `true` | Stream response tokens |
 | `thinking` | object | (none) | Extended thinking/reasoning configuration |
+
+\* When using model array, `provider` is specified per model entry instead of at the top level. See [Model Fallback](#model-fallback) for details.
 
 ### Thinking Configuration (`thinking` field)
 
@@ -354,6 +356,101 @@ The chat executor automatically retries on transient errors:
 - **Backoff multiplier**: 2.0
 
 Retryable errors include rate limits (429), server errors (5xx), and network timeouts.
+
+## Model Fallback
+
+Use an array of model objects instead of a single model string:
+
+```yaml
+llm:
+  temperature: 0.7
+  maxTokens: 4096
+  model:
+    - provider: openai
+      name: gpt-4o
+    - provider: anthropic
+      name: claude-sonnet-4-20250514
+    - provider: local
+      name: llama3.1:8b
+      baseURL: http://localhost:11434/v1
+
+steps:
+  - type: chat
+    messages:
+      - role: user
+        content: "What is the capital of France?"
+```
+
+First model is primary, rest are fallbacks tried in order on any error. Shared config (`temperature`, `maxTokens`, `topP`) applies to all models.
+
+### Per-Model Overrides
+
+Shared `llm` config applies to all models. Override per model when needed (e.g., different token limits):
+
+```yaml
+llm:
+  temperature: 0.7
+  maxTokens: 4096
+  model:
+    - provider: openai
+      name: gpt-4o
+      maxTokens: 8192  # GPT-4o supports larger context
+    - provider: anthropic
+      name: claude-sonnet-4-20250514
+      # Uses shared maxTokens=4096
+    - provider: local
+      name: llama3.1:8b
+      maxTokens: 2048  # Local model has smaller context window
+      temperature: 0.5
+      baseURL: http://localhost:11434/v1
+```
+
+### Model Entry Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provider` | string | Required. LLM provider (openai, anthropic, gemini, etc.) |
+| `name` | string | Required. Model name (e.g., gpt-4o, claude-sonnet-4-20250514) |
+| `temperature` | float | Override temperature for this model |
+| `maxTokens` | int | Override maxTokens for this model |
+| `topP` | float | Override topP for this model |
+| `baseURL` | string | Custom API endpoint for this model |
+| `apiKeyName` | string | Environment variable for API key |
+
+### How Fallback Works
+
+```
+Request Flow:
+┌─────────────────────────────────────────────────────────┐
+│ Model[0]: gpt-4o                                        │
+│  └─ HTTP Client: 3 retries with exponential backoff     │
+│      └─ All retries failed? Try next model              │
+└─────────────────────────────────────────────────────────┘
+                         │
+                         ▼ (on error)
+┌─────────────────────────────────────────────────────────┐
+│ Model[1]: claude-sonnet                                 │
+│  └─ HTTP Client: 3 retries with exponential backoff     │
+│      └─ All retries failed? Try next model              │
+└─────────────────────────────────────────────────────────┘
+                         │
+                         ▼ (on error)
+┌─────────────────────────────────────────────────────────┐
+│ Model[2]: llama3.1:8b (local)                           │
+│  └─ HTTP Client: 3 retries with exponential backoff     │
+│      └─ All retries failed? Step fails                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Backward Compatibility
+
+Single model strings still work as before:
+
+```yaml
+llm:
+  provider: openai
+  model: gpt-4o  # String format still supported
+```
 
 ## Saved Message Format
 
