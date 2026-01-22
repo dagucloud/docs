@@ -1751,8 +1751,7 @@ steps:
 ### Queue Management
 
 ```yaml
-queue: "batch"        # Assign to named queue
-maxActiveRuns: 2      # Max concurrent runs
+queue: "batch"        # Assign to global queue for concurrency control
 steps:
   - command: echo "Processing data"
 ```
@@ -1824,13 +1823,12 @@ queues:
       maxConcurrency: 1
 
 # DAG file
-queue: "critical"
-maxActiveRuns: 3
+queue: "critical"  # Assign to queue for concurrency control
 steps:
   - command: echo "Processing critical task"
 ```
 
-Configure queues globally and per-DAG.
+Configure queues globally and assign DAGs using the `queue` field.
 
 <a href="/features/queues#advanced" class="learn-more">Learn more →</a>
 
@@ -1945,7 +1943,6 @@ handlerOn:
 ```yaml
 histRetentionDays: 365    # Keep 1 year for compliance
 maxOutputSize: 5242880    # 5MB output limit
-maxActiveRuns: 1          # No overlapping runs
 mailOn:
   failure: true
 errorMail:
@@ -2004,7 +2001,7 @@ Enable OpenTelemetry tracing for observability.
 ```yaml
 type: graph
 maxActiveSteps: 5         # Max 5 parallel steps
-maxActiveRuns: 2          # Max 2 concurrent DAG runs
+queue: "compute-queue"    # Assign to queue for concurrency control
 delaySec: 10              # 10 second initial delay
 skipIfSuccessful: true    # Skip if already succeeded
 steps:
@@ -2083,8 +2080,7 @@ schedule: "0 2 * * *"
 skipIfSuccessful: true
 group: DataPipelines
 tags: daily,critical
-queue: etl-queue
-maxActiveRuns: 1
+queue: etl-queue          # Assign to global queue for concurrency control
 maxOutputSize: 5242880  # 5MB
 histRetentionDays: 90   # Keep history for 90 days
 env:

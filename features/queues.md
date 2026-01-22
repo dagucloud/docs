@@ -10,42 +10,25 @@ Dagu's queue system helps you:
 - Prioritize critical workflows
 - Prevent system overload
 
-**Additional Note: Queue-level `maxConcurrency` vs DAG-level `maxActiveRuns`:**
+**How Queues Work:**
 
-At the queue level, `maxConcurrency` is enforced by the scheduler process.  
-- If a queue has a defined `maxConcurrency`, any DAG assigned to that queue can run in parallel up to the queue’s limit, regardless of its own DAG-level `maxActiveRuns`.  
-- If a DAG is not assigned to a queue (i.e., no `queue: <string>` is set), it follows its own `maxActiveRuns` setting (default: `1`).  
-
-When starting a DAG run (via API or CLI) that belongs to a queue and has `maxActiveRuns > 0`, the system checks the sum of:  
-1. The DAG’s queued runs within that queue, plus  
-2. Its currently running instances.  
-
-If the new run would push this total beyond the DAG-level `maxActiveRuns` and the DAG is assigned to a queue, the request is rejected with an error. This enforces DAG-level `maxActiveRuns` will not be exceeded effectively.
+- **Global queues** (defined in `config.yaml`) control concurrency via `maxConcurrency`
+- **Local queues** (per-DAG, used when no `queue` field is set) always process FIFO with concurrency of 1
+- To control concurrent execution, define global queues and assign DAGs using the `queue` field
 
 ## Basic Queue Configuration
 
 ### Assign to Queue
 
 ```yaml
-queue: "batch"              # Assign to batch queue
-maxActiveRuns: 2            # Allow 2 concurrent runs
+queue: "batch"              # Assign to global queue for concurrency control
 schedule: "*/10 * * * *"    # Every 10 minutes
 
 steps:
   - command: echo "Processing batch"
 ```
 
-### Disable Queueing
-
-For critical workflows that should always run:
-
-```yaml
-# critical-alert
-maxActiveRuns: -1           # Never queue - always run
-
-steps:
-  - command: echo "Checking alerts"
-```
+The queue's `maxConcurrency` (defined in `config.yaml`) controls how many DAGs assigned to this queue can run concurrently.
 
 ## Global Queue Configuration
 
@@ -66,14 +49,14 @@ queues:
 
 ## Default Queue via Base Config
 
-Set default queue for all workflows:
+Set a default queue for all workflows in your base config:
 
 ```yaml
 # ~/.config/dagu/base.yaml
 queue: "default"
-maxActiveRuns: 2
 
-# All DAGs inherit these settings
+# All DAGs inherit this queue assignment
+# Define the "default" queue in config.yaml with desired maxConcurrency
 ```
 
 ## Manual Queue Management

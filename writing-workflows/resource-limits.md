@@ -5,8 +5,7 @@ Manage workflow execution with concurrency limits.
 ## Concurrency Control
 
 ```yaml
-maxActiveRuns: 1        # Only one instance of this DAG
-maxActiveSteps: 1       # Max 1 steps running concurrently
+maxActiveSteps: 1       # Max 1 step running concurrently within the DAG
 
 steps:
   - command: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
@@ -16,6 +15,8 @@ steps:
       maxConcurrent: 3  # Limit parallel I/O
     command: echo "Processing file ${ITEM}"
 ```
+
+For controlling concurrent DAG instances, use global queues (see below).
 
 ## Timeouts
 
@@ -46,24 +47,28 @@ Tip: Combine `timeoutSec` with retries (repeat policy) so transient network dela
 
 ## Limit by Queue
 
+Control concurrent DAG instances using global queues:
+
 ```yaml
-queue: heavy-jobs       # Assign to specific queue
-maxActiveRuns: 2        # Queue allows 2 concurrent
+# ~/.config/dagu/config.yaml
+queues:
+  enabled: true
+  config:
+    - name: heavy-jobs
+      maxConcurrency: 2
+    - name: light-jobs
+      maxConcurrency: 10
+```
+
+```yaml
+# In your DAG file
+queue: heavy-jobs       # Assign to queue for concurrency control
 
 steps:
   - command: sh -c "echo Starting intensive task; sleep 10; echo Done"
   - command: echo "Quick task"
 ```
 
-You can define queues in the global configuration to set concurrency limits.
-
-```yaml
-queues:
-  enable: true
-  heavy-jobs:
-    maxConcurrency: 2
-  light-jobs:
-    maxConcurrency: 10 
-```
+When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).
 
 See [Queue System](/features/queues) for details.

@@ -475,7 +475,7 @@ Creates and starts a DAG run with optional parameters.
 | dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 
-> **Tip:** Overriding the DAG name changes the identifier used for scheduler concurrency checks (`maxActiveRuns`) and queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
+> **Tip:** Overriding the DAG name changes the identifier used for queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
 **Response (200)**:
 ```json
 {
@@ -916,7 +916,7 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
 }
 ```
 
-**Error Response (409)** - Singleton guard/maxActiveRuns blocking execution:
+**Error Response (409)** - Singleton guard or queue concurrency limit blocking execution:
 ```json
 {
   "code": "max_run_reached",
@@ -939,7 +939,7 @@ curl -X POST "http://localhost:8080/api/v2/dag-runs?remoteNode=local" \
 
 **Endpoint**: `POST /api/v2/dag-runs/enqueue`
 
-Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run follows queue semantics (`maxActiveRuns`, queue overrides) and is started by the scheduler.
+Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run follows queue semantics (global queue concurrency limits, queue overrides) and is started by the scheduler.
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |
@@ -973,11 +973,11 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
 }
 ```
 
-**Error Response (409)** - DAG already queued or `maxActiveRuns` reached:
+**Error Response (409)** - DAG already queued or queue concurrency limit reached:
 ```json
 {
   "code": "max_run_reached",
-  "message": "DAG queued-sleeper is already in the queue (maxActiveRuns=1), cannot enqueue"
+  "message": "DAG queued-sleeper is already in the queue, cannot enqueue"
 }
 ```
 

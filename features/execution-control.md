@@ -100,29 +100,26 @@ steps:
   # All start in parallel, limited by maxActiveSteps
 ```
 
-## Maximum Active Runs
+## Queue Management
 
-Control concurrent workflow instances:
+Control concurrent workflow instances using global queues:
 
 ```yaml
-maxActiveRuns: 1  # Only one instance at a time
+# ~/.config/dagu/config.yaml
+queues:
+  enabled: true
+  config:
+    - name: "batch"
+      maxConcurrency: 2  # Allow 2 concurrent instances
+```
 
+```yaml
+# In your DAG file
+queue: "batch"
 schedule: "*/5 * * * *"  # Every 5 minutes
 ```
 
-Options:
-- `1`: Only one instance (default)
-- `N`: Allow N concurrent instances
-- `-1`: Unlimited instances
-
-## Queue Management
-
-Assign workflows to queues:
-
-```yaml
-queue: "batch"
-maxActiveRuns: 2
-```
+When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).
 
 Manual queue control:
 ```bash

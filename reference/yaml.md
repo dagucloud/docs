@@ -15,7 +15,6 @@ tags: [production, etl]    # Optional: for organization
 schedule: "0 * * * *"      # Optional: cron expression
 
 # Execution control
-maxActiveRuns: 1           # Max concurrent runs
 maxActiveSteps: 10         # Max parallel steps
 timeoutSec: 3600           # Workflow timeout (seconds)
 
@@ -91,7 +90,7 @@ schedule:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `maxActiveRuns` | integer | Max concurrent workflow runs (-1 = unlimited) | `1` |
+| `maxActiveRuns` | integer | **DEPRECATED**: Use global queues with `queue` field instead. Local queues now use FIFO (concurrency 1). | `1` |
 | `maxActiveSteps` | integer | Max parallel steps | `1` |
 | `timeoutSec` | integer | Workflow timeout in seconds | `0` (no timeout) |
 | `delaySec` | integer | Initial delay before start (seconds) | `0` |
@@ -394,7 +393,9 @@ steps:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `queue` | string | Queue name | - |
+| `queue` | string | Assign to a global queue defined in `config.yaml` for concurrency control. See [Queues](/features/queues). | DAG name (local queue) |
+
+> **Note**: For concurrency control, define global queues in `~/.config/dagu/config.yaml` and reference them with the `queue` field. Local (DAG-based) queues always use FIFO processing with concurrency of 1.
 
 ### OpenTelemetry Configuration
 
@@ -1010,7 +1011,6 @@ description: Daily ETL pipeline for production data
 tags: [production, etl, critical]
 schedule: "0 2 * * *"
 
-maxActiveRuns: 1
 maxActiveSteps: 5
 timeoutSec: 7200
 histRetentionDays: 90

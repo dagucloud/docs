@@ -314,8 +314,7 @@ params:
   - DEFAULT_TIMEOUT: 3600
   - RETRY_LIMIT: 3
 
-queue: "default"
-maxActiveRuns: 1
+queue: "default"          # Default queue for all DAGs (define in config.yaml)
 histRetentionDays: 30
 
 # Email

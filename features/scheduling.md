@@ -140,16 +140,27 @@ steps:
 
 ## Queue Management
 
-Control concurrent executions:
+Control concurrent executions using global queues:
 
 ```yaml
-maxActiveRuns: 1  # Only one instance at a time
-queue: batch-jobs # Named queue (defaults to DAG name)
+# ~/.config/dagu/config.yaml
+queues:
+  enabled: true
+  config:
+    - name: batch-jobs
+      maxConcurrency: 2  # Allow 2 concurrent instances
+```
+
+```yaml
+# In your DAG file
+queue: batch-jobs  # Assign to queue for concurrency control
 
 schedule: "*/10 * * * *"
 steps:
   - command: echo "Running batch process"
 ```
+
+When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).
 
 Disable queue processing:
 

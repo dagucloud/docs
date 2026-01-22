@@ -261,6 +261,29 @@
 
 - **Git Sync**: Synchronize DAG definitions with a Git repository. See [Git Sync](/features/git-sync).
 
+### Deprecated
+
+- **DAG-level `maxActiveRuns` field**: The `maxActiveRuns` field in DAG files is now deprecated for local (DAG-based) queues. Local queues now always use FIFO processing with concurrency of 1.
+
+  **Migration**: For concurrency control, define global queues in `~/.config/dagu/config.yaml` and assign DAGs using the `queue` field:
+
+  ```yaml
+  # ~/.config/dagu/config.yaml
+  queues:
+    enabled: true
+    config:
+      - name: my-queue
+        maxConcurrency: 3
+
+  # In your DAG file
+  name: my-dag
+  queue: my-queue  # Use global queue for concurrency control
+  ```
+
+  The field is still accepted for backward compatibility but emits a build warning and is ignored for local queues.
+
+- **`maxActiveRuns: -1` (queue bypass)**: Setting `maxActiveRuns` to `-1` to bypass queueing is deprecated. All DAGs now go through the queue system with local queues defaulting to FIFO (concurrency 1).
+
 ### Fixed
 
 - **Sub-DAG Spec View**: Fixed "file not found" error when viewing the spec tab for sub-DAG runs in the UI. Added dedicated API endpoint `/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/spec` that properly retrieves specs from the parent-child storage hierarchy.

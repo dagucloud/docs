@@ -5,7 +5,7 @@
 ```yaml
 description: "Process daily data"
 schedule: "0 2 * * *"      # Optional: cron schedule
-maxActiveRuns: 1           # Optional: concurrency limit
+queue: "daily-jobs"        # Optional: assign to global queue for concurrency control
 
 params:                    # Runtime parameters
   - DATE: "`date +%Y-%m-%d`"
@@ -39,7 +39,7 @@ errorMail:
   attachLogs: true
 
 histRetentionDays: 30 # Dagu deletes workflow history and logs older than this
-maxActiveRuns: 5
+queue: "default"      # Default queue for all DAGs (define in config.yaml)
 ```
 
 DAGs automatically inherit these settings:
