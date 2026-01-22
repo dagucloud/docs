@@ -2,6 +2,10 @@
 
 ## v1.31.0 (UNRELEASED)
 
+### Removed
+
+- **API v1**: The legacy v1 API (`/api/v1/*`) has been completely removed from the codebase. All clients should migrate to the v2 API (`/api/v2/*`). The v1 API was previously disabled when authentication was enabled (v1.26.2), and is now fully removed.
+
 ### Added
 
 - **LLM Model Fallback**: `model` field accepts array of model objects. First is primary, rest are fallbacks tried in order on any error. Per-model overrides for `temperature`, `maxTokens`, `topP`, `baseURL`, `apiKeyName`. See [Model Fallback](/features/chat/basics#model-fallback).
