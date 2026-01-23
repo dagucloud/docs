@@ -59,6 +59,8 @@ steps:
 
 Configuration precedence: System defaults → Base config → DAG config
 
+See [Base Configuration](/configurations/base-config) for complete documentation on all available fields.
+
 ## Guide Sections
 
 1. **[Basics](/writing-workflows/basics)** - Steps, commands, dependencies

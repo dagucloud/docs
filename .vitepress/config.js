@@ -130,6 +130,7 @@ const fullSidebar = [
     items: [
       { text: "Overview", link: "/configurations/" },
       { text: "Server Configuration", link: "/configurations/server" },
+      { text: "Base Configuration", link: "/configurations/base-config" },
       {
         text: "Authentication",
         collapsed: false,

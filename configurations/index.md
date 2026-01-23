@@ -62,6 +62,11 @@ docker run -d \
 - TLS/HTTPS setup
 - UI customization
 
+**[Base Configuration](/configurations/base-config)**
+- Shared DAG defaults
+- Lifecycle handlers
+- Email notifications
+
 **[Operations](/configurations/operations)**
 - Running as a service
 - Monitoring and metrics
@@ -139,6 +144,7 @@ dagu start-all
 ## See Also
 
 - [Set up authentication](/configurations/server#authentication) for production
+- [Configure base defaults](/configurations/base-config) for shared DAG settings
 - [Configure monitoring](/configurations/operations#monitoring) for visibility
 - [Set up distributed execution](/features/distributed-execution) for scaling
 - [Review all options](/configurations/reference) for fine-tuning

@@ -310,17 +310,12 @@ env:
   - LOG_LEVEL: info
 
 # Defaults
-params:
-  - DEFAULT_TIMEOUT: 3600
-  - RETRY_LIMIT: 3
-
-queue: "default"          # Default queue for all DAGs (define in config.yaml)
+queue: "default"
 histRetentionDays: 30
 
-# Email
+# Email notifications
 mailOn:
   failure: true
-  success: false
 
 smtp:
   host: "smtp.gmail.com"
@@ -334,6 +329,8 @@ errorMail:
   prefix: "[ERROR]"
   attachLogs: true
 ```
+
+For complete documentation on all available fields, inheritance behavior, and common patterns, see [Base Configuration](/configurations/base-config).
 
 ## Command-Line Flags
 

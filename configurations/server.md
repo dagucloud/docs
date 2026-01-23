@@ -423,7 +423,7 @@ queues:
 
 ## Base Configuration
 
-`~/.config/dagu/base.yaml` - Shared DAG settings:
+`~/.config/dagu/base.yaml` provides shared defaults for all DAGs:
 
 ```yaml
 mailOn:
@@ -438,6 +438,8 @@ smtp:
 env:
   - ENVIRONMENT: production
 ```
+
+See [Base Configuration](/configurations/base-config) for complete documentation on all available fields and inheritance behavior.
 
 ## Metrics Endpoint
 
