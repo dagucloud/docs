@@ -349,7 +349,6 @@ steps:
 **Working Directory Inheritance:**
 - Steps inherit `workingDir` from the DAG if not explicitly set
 - Step-level `workingDir` overrides DAG-level `workingDir`
-- Both `dir` and `workingDir` set the working directory (use one or the other)
 - **Sub-DAGs (via `call`)** inherit the parent's `workingDir` when executed locally, unless they define their own explicit `workingDir`
 
 ```yaml
@@ -530,7 +529,6 @@ Each step in the `steps` array can have these fields:
 | `name` | string | Step name (optional - auto-generated if not provided) | Auto-generated |
 | `command` | string/array | Command to execute. Can be a string (single command), array of strings (multiple commands executed sequentially), or multi-line string (runs as inline script). | - |
 | `script` | string | Inline script (alternative to command). Honors shebang when no shell is set. | - |
-| `run` (legacy) | string | Deprecated alias for `call` | - |
 | `depends` | string/array | Step dependencies | - |
 
 #### Multiple Commands
@@ -580,8 +578,7 @@ steps:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `dir` | string | Working directory | Current directory |
-| `workingDir` | string | Working directory (alternative to `dir`, inherits from DAG) | DAG's workingDir |
+| `workingDir` | string | Working directory (inherits from DAG-level workingDir) | DAG's workingDir |
 | `shell` | string/array | Shell program and args for this step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
 | `stdout` | string | Redirect stdout to file | - |
 | `stderr` | string | Redirect stderr to file | - |
@@ -589,9 +586,7 @@ steps:
 | `output` | string | Capture output to variable | - |
 | `env` | array/object | Step-specific environment variables (overrides DAG-level) | - |
 | `call` | string | Name of a DAG to execute as a sub DAG-run | - |
-| `params` | string/object | Parameters passed to sub DAGs (`run`) or executor-specific inputs (e.g., GitHub Actions `with:` map) | - |
-
-> ℹ️ The legacy `run` field is deprecated. Use `call` for new workflows.
+| `params` | string/object | Parameters passed to sub DAGs or executor-specific inputs (e.g., GitHub Actions `with:` map) | - |
 
 `shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 

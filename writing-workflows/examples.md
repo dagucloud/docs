@@ -542,10 +542,10 @@ steps:
 
 ```mermaid
 flowchart LR
-  P[prepare_dataset.py] --> TR[run: train-model]
+  P[prepare_dataset.py] --> TR[call: train-model]
   TR --> |workerSelector gpu=true,cuda=11.8,memory=64G| GW[(GPU Worker)]
   GW --> TE[python train.py --gpu]
-  TE --> EV[run: evaluate-model]
+  TE --> EV[call: evaluate-model]
   EV --> |gpu=true| GW2[(GPU Worker)]
   GW2 --> EE[python evaluate.py]
   style P,TR,EV stroke:lightblue,stroke-width:1.6px,color:#333
@@ -613,7 +613,7 @@ steps:
 
 ```mermaid
 graph TD
-  S[split_data -> CHUNKS] --> P{{"run: chunk-processor - parallel"}}
+  S[split_data -> CHUNKS] --> P{{"call: chunk-processor - parallel"}}
   P --> C1[process CHUNK 1]
   P --> C2[process CHUNK 2]
   P --> Cn[process CHUNK N]

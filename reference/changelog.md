@@ -6,6 +6,16 @@
 
 - **API v1**: The legacy v1 API (`/api/v1/*`) has been completely removed from the codebase. All clients should migrate to the v2 API (`/api/v2/*`). The v1 API was previously disabled when authentication was enabled (v1.26.2), and is now fully removed.
 
+- **Deprecated YAML Fields**: The following deprecated fields have been removed from the YAML spec. Migrate to the replacement fields:
+
+  | Removed Field | Replacement | Context |
+  |---------------|-------------|---------|
+  | `run` | `call` | Step field for sub-DAG execution |
+  | `dir` | `workingDir` | Step field for working directory |
+  | `executor` | `type` + `config` | Step field for executor configuration |
+  | `precondition` (singular) | `preconditions` (array) | Both DAG-level and step-level |
+  | `container.workDir` | `container.workingDir` | Container working directory |
+
 ### Added
 
 - **LLM Model Fallback**: `model` field accepts array of model objects. First is primary, rest are fallbacks tried in order on any error. Per-model overrides for `temperature`, `maxTokens`, `topP`, `baseURL`, `apiKeyName`. See [Model Fallback](/features/chat/basics#model-fallback).
@@ -333,7 +343,7 @@
         user: deploy
       command: ./deploy.sh
 
-  # Equivalent verbose syntax (still works)
+  # Legacy syntax (removed in v1.31.0)
   steps:
     - name: deploy
       executor:
@@ -343,8 +353,6 @@
           user: deploy
       command: ./deploy.sh
   ```
-
-  Note: Cannot mix `type`/`config` with `executor` field in the same step.
 
 - **Chat Step Type**: Added a new step type for integrating Large Language Models into workflows. Execute LLM requests to OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM). (#1548)
 
