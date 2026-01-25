@@ -6,6 +6,19 @@ Categorize and filter DAGs and DAG runs using tags.
 
 Tags support key-value pairs (`env=prod`) and simple labels (`critical`). Values are normalized to lowercase.
 
+## Tag Format
+
+Tags are validated at DAG load time. Invalid tags cause load errors.
+
+| Component | Rules |
+|-----------|-------|
+| **Key** | 1-63 characters. Alphanumeric, `-`, `_`, `.`. Must start with letter or number. |
+| **Value** | 0-255 characters. Alphanumeric, `-`, `_`, `.`, `/`. |
+
+Valid: `env`, `my-tag`, `app.version`, `path=foo/bar`
+
+Invalid: `-starts-with-dash`, `has space`, `has@special`
+
 ## YAML Formats
 
 All formats below are equivalent:
@@ -51,8 +64,29 @@ Filter DAGs and DAG runs using the `tags` query parameter.
 | `key` | Match any item with this key (any value) |
 | `key=value` | Match exact key-value pair |
 | `!key` | Match items WITHOUT this key |
+| `key*` | Wildcard: match keys starting with `key` |
+| `key=value*` | Wildcard: match values starting with `value` |
+| `te?m` | Wildcard: `?` matches single character |
 
 Multiple filters use AND logic.
+
+### Wildcard Patterns
+
+Use `*` (any characters) and `?` (single character) for pattern matching:
+
+```bash
+# Match env=prod, env=production, env=prod-us
+GET /api/v2/dags?tags=env=prod*
+
+# Match any value for team key
+GET /api/v2/dags?tags=team=*
+
+# Match keys starting with "env"
+GET /api/v2/dags?tags=env*
+
+# Match team or teem (single char wildcard)
+GET /api/v2/dags?tags=te?m
+```
 
 ### DAG Filtering
 

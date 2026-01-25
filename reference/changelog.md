@@ -288,12 +288,15 @@
   tags: "env=prod team=platform"
   ```
 
-  Tag filtering supports three modes:
+  Tag filtering supports four modes:
   - `env` - matches any tag with key `env` (regardless of value)
   - `env=prod` - matches exact key-value pair
   - `!env` - matches if key `env` does NOT exist
+  - `env=prod*`, `team=*`, `te?m` - wildcard patterns (`*` any chars, `?` single char)
 
   Values are normalized to lowercase. See [Tags](/features/tags) for details.
+
+- **Tag Validation**: Tags are validated at YAML load time. Keys must be 1-63 characters (alphanumeric, `-`, `_`, `.`), values 0-255 characters (alphanumeric, `-`, `_`, `.`, `/`). Invalid tags cause DAG load errors with descriptive messages.
 
 - **Shared-Nothing Worker Architecture**: Workers can now operate without shared filesystem access. Enables deployment in Kubernetes, multi-cloud, and containerized environments where NFS/shared volumes are not available.
 

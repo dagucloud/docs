@@ -68,7 +68,7 @@ Retrieves DAG definitions with optional filtering by name and tags.
 | page | integer | Page number (1-based) | 1 |
 | perPage | integer | Items per page (max 1000) | 50 |
 | name | string | Filter DAGs by name | - |
-| tags | string | Filter by tags. Comma-separated. Syntax: `key` (any value), `key=value` (exact), `!key` (negation). AND logic. | - |
+| tags | string | Filter by tags. Comma-separated. Syntax: `key`, `key=value`, `!key`, `key*`, `key=value*`. Supports `*` and `?` wildcards. AND logic. | - |
 | remoteNode | string | Remote node name | "local" |
 
 **Response (200)**:
@@ -804,7 +804,7 @@ Retrieves all DAG runs with optional filtering.
 | fromDate | integer | Unix timestamp start | - |
 | toDate | integer | Unix timestamp end | - |
 | dagRunId | string | Filter by run ID | - |
-| tags | string | Filter by DAG tags. Comma-separated. Same syntax as DAG filtering: `key` (any value), `key=value` (exact), `!key` (negation). AND logic. | - |
+| tags | string | Filter by DAG tags. Comma-separated. Same syntax as DAG filtering. Supports `*` and `?` wildcards. AND logic. | - |
 | remoteNode | string | Remote node name | "local" |
 
 **Note**: This endpoint does not support pagination. All matching results are returned.
