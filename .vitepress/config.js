@@ -180,6 +180,7 @@ const fullSidebar = [
       },
       { text: "Operations", link: "/configurations/operations" },
       { text: "Remote Nodes", link: "/configurations/remote-nodes" },
+      { text: "Tunnel (Tailscale)", link: "/configurations/tunnel" },
       { text: "Reference", link: "/configurations/reference" },
     ],
   },

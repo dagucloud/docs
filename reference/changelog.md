@@ -86,6 +86,19 @@
 
   See [Chat - Tool Calling](/features/chat/tool-calling) for full documentation.
 
+- **Tailscale Tunnel**: Built-in remote access via embedded Tailscale node. Access Dagu from anywhere without port forwarding or VPN setup.
+
+  ```bash
+  dagu server --tunnel
+  ```
+
+  **Modes:**
+  - `--tunnel` - HTTP on tailnet (WireGuard encrypted, no setup)
+  - `--tunnel --tunnel-https` - HTTPS on tailnet (requires HTTPS enabled in Tailscale admin)
+  - `--tunnel --tunnel-funnel` - Public internet access (requires Funnel enabled in Tailscale admin)
+
+  First run shows login URL. Subsequent runs auto-connect using saved state. See [Tunnel Configuration](/configurations/tunnel).
+
 - **System Status Page**: New admin-only page consolidating system health monitoring in one place.
 
   **Features:**

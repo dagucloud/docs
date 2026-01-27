@@ -76,6 +76,10 @@ docker run -d \
 - Configure remote instances
 - Multi-node setup
 
+**[Tunnel (Tailscale)](/configurations/tunnel)**
+- Remote access without port forwarding
+- Tailscale integration
+
 **[Distributed Execution](/features/distributed-execution)**
 - Coordinator and worker setup
 - Service registry configuration
