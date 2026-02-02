@@ -145,6 +145,9 @@ dagu history hello --limit 50
 
 # Export to JSON
 dagu history hello --format json
+
+# Export to CSV
+dagu history hello --format csv
 ```
 
 ```bash [Docker]

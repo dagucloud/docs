@@ -122,6 +122,9 @@ dagu history my-workflow --status failed --last 7d
 # Export to JSON for analysis
 dagu history --format json --limit 500 > history.json
 
+# Export to CSV for spreadsheets
+dagu history --format csv > history.csv
+
 # Filter by tags (AND logic)
 dagu history --tags "prod,critical"
 ```
@@ -130,7 +133,7 @@ dagu history --tags "prod,critical"
 - Default: last 30 days, 100 results
 - Date filters: absolute (`--from`/`--to`) or relative (`--last 7d`)
 - Status filters: `succeeded`, `failed`, `running`, etc. (with aliases)
-- Output: table (default) or JSON
+- Output: table (default), JSON, or CSV
 - Run IDs never truncated
 
 See [`history` reference](/reference/cli#history) for all options.

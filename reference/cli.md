@@ -180,7 +180,7 @@ dagu history [flags] [DAG_NAME]
   - Aliases: `success` (succeeded), `failure` (failed), `canceled`/`cancelled`/`cancel` (aborted)
 - `--run-id` - Filter by run ID (partial match supported)
 - `--tags` - Filter by tags, comma-separated with AND logic (e.g., `prod,critical`)
-- `--format`, `-f` - Output format: `table` (default) or `json`
+- `--format`, `-f` - Output format: `table` (default), `json`, or `csv`
 - `--limit`, `-l` - Max results (default: `100`, max: `1000`)
 
 **Default Behavior:**
@@ -207,6 +207,9 @@ dagu history --from 2026-01-01 --to 2026-01-31
 
 # JSON export for analysis
 dagu history --format json --limit 500 > history.json
+
+# CSV export for spreadsheets
+dagu history --format csv --limit 500 > history.csv
 
 # Tag filtering (AND logic)
 dagu history --tags "prod,critical"
@@ -239,6 +242,15 @@ my-workflow   019c1ca3-f123-4567-89ab-cdef01234567  Failed     2026-02-01 14:22:
   }
 ]
 ```
+
+**Output (CSV):**
+```csv
+DAG NAME,RUN ID,STATUS,STARTED (UTC),DURATION,PARAMS
+my-workflow,019c1ca4-ba96-7599-80c9-773862801abc,Succeeded,2026-02-02 04:38:03,2m30s,-
+my-workflow,019c1ca3-f123-4567-89ab-cdef01234567,Failed,2026-02-01 14:22:15,45s,env=prod
+```
+
+**Note:** CSV output follows RFC 4180. Fields containing commas, quotes, or newlines are automatically quoted and escaped.
 
 **Error Examples:**
 ```bash

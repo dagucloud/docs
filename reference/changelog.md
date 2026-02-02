@@ -22,7 +22,7 @@
 
 - **Trigger Type Visibility**: DAG runs now display how they were initiated (scheduler, manual, webhook, subdag, retry). The trigger type is shown in the DAG runs list and detail views with distinct icons and labels. Available via the `triggerType` field in the API response.
 
-- **CLI History Command**: New `dagu history` command displays execution history for DAG runs with comprehensive filtering (by date, status, tags, run ID), pagination (limit support up to 1000 results), and multiple output formats (table, JSON). Essential for debugging patterns, monitoring workflows, and exporting run data. Features:
+- **CLI History Command**: New `dagu history` command displays execution history for DAG runs with comprehensive filtering (by date, status, tags, run ID), pagination (limit support up to 1000 results), and multiple output formats (table, JSON, CSV). Essential for debugging patterns, monitoring workflows, and exporting run data. Features:
   - Date filtering: absolute (`--from`/`--to`) or relative (`--last 7d`, `24h`, `1w`)
   - Status filtering: all execution states with aliases (e.g., `success` → `succeeded`)
   - Tag filtering: comma-separated with AND logic
