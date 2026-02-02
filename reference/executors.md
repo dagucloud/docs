@@ -1194,9 +1194,14 @@ For detailed Router step type documentation, see [Router Guide](/features/execut
 
 Route execution to different steps based on pattern matching against a value.
 
+::: warning
+Router steps require `type: graph` at the DAG level.
+:::
+
 ### Basic Usage
 
 ```yaml
+type: graph
 env:
   - INPUT: exact_value
 steps:
@@ -1219,6 +1224,7 @@ steps:
 Prefix patterns with `re:` for regex matching:
 
 ```yaml
+type: graph
 steps:
   - name: router
     type: router
@@ -1234,6 +1240,7 @@ steps:
 Route to multiple steps from a single pattern:
 
 ```yaml
+type: graph
 steps:
   - name: router
     type: router

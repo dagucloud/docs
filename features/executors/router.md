@@ -2,11 +2,16 @@
 
 Route execution to different steps based on pattern matching against a value. This enables conditional branching in workflows where different code paths execute depending on runtime values.
 
+::: warning Important
+Router steps require `type: graph` at the DAG level. Routers are inherently about branching, which is a graph concept. Using `type: chain` (the default) with router steps will result in a validation error.
+:::
+
 ## Basic Usage
 
 Use the `router` step type to evaluate a value and route execution to matching target steps:
 
 ```yaml
+type: graph
 env:
   - INPUT: exact_value
 steps:
@@ -35,6 +40,7 @@ When `INPUT=exact_value`, only `route_a` executes. The `route_b` step is skipped
 Match literal string values:
 
 ```yaml
+type: graph
 env:
   - STATUS: production
 steps:
@@ -59,6 +65,7 @@ steps:
 Prefix patterns with `re:` to use Go regular expression syntax:
 
 ```yaml
+type: graph
 env:
   - INPUT: apple_pie
 steps:
@@ -85,6 +92,7 @@ When `INPUT=apple_pie`, the regex `^apple.*` matches, so `route_a` executes.
 When multiple patterns match the same value, **all matching routes execute**:
 
 ```yaml
+type: graph
 env:
   - INPUT: success_code
 steps:
@@ -116,6 +124,7 @@ With `INPUT=success_code`, all three patterns match, so all three handlers execu
 Use `re:.*` to create a default route that matches any value:
 
 ```yaml
+type: graph
 env:
   - INPUT: unknown_value
 steps:
@@ -287,6 +296,7 @@ This creates a diamond pattern: `setup` → `router` → (`branch_a`, `branch_b`
 
 ## Behavior Notes
 
+- **Requires type: graph**: Router steps require `type: graph` at the DAG level. Routers are inherently about branching, which is a graph concept. Using `type: chain` (the default) with router steps will result in a validation error.
 - **Router always succeeds**: The router step itself always completes successfully. Routing is implemented via precondition injection into target steps.
 - **Automatic dependency injection**: Target steps automatically depend on their router. You don't need to explicitly add `depends: [router]` to target steps—the router is injected as a dependency during DAG loading. This ensures target steps wait for the router to complete before evaluating their routing conditions.
 - **Skipped steps**: When no pattern matches a target step, that step receives status `Skipped`.
@@ -294,6 +304,7 @@ This creates a diamond pattern: `setup` → `router` → (`branch_a`, `branch_b`
 
 ```yaml
 # INVALID - process_a is targeted by multiple routes
+type: graph
 steps:
   - name: router
     type: router

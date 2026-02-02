@@ -361,6 +361,7 @@ flowchart TD
 ### Routing Based on Value
 
 ```yaml
+type: graph
 env:
   - STATUS: production
 steps:
