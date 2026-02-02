@@ -288,6 +288,7 @@ This creates a diamond pattern: `setup` → `router` → (`branch_a`, `branch_b`
 ## Behavior Notes
 
 - **Router always succeeds**: The router step itself always completes successfully. Routing is implemented via precondition injection into target steps.
+- **Automatic dependency injection**: Target steps automatically depend on their router. You don't need to explicitly add `depends: [router]` to target steps—the router is injected as a dependency during DAG loading. This ensures target steps wait for the router to complete before evaluating their routing conditions.
 - **Skipped steps**: When no pattern matches a target step, that step receives status `Skipped`.
 - **Unique targets**: Each step can only be targeted by ONE route. Targeting the same step from multiple routes causes a validation error:
 
