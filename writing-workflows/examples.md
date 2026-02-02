@@ -167,50 +167,6 @@ flowchart TD
 
 <div class="example-card">
 
-### Complex Preconditions
-
-```yaml
-steps:
-  - name: conditional-task
-    command: echo "Processing task"
-    preconditions:
-      - command: test -f /data/input.csv
-      - command: test -s /data/input.csv  # File exists and is not empty
-      - condition: "${ENVIRONMENT}"
-        expected: "production"
-      - condition: "`date '+%d'`"
-        expected: "re:0[1-9]"  # First 9 days of month
-      - condition: "`df -h /data | awk 'NR==2 {print $5}' | sed 's/%//'`"
-        expected: "re:^[0-7][0-9]$"  # Less than 80% disk usage
-```
-
-```mermaid
-flowchart TD
-  S[Start] --> C1{input.csv exists?}
-  C1 --> |No| SK[Skip]
-  C1 --> |Yes| C2{input.csv not empty?}
-  C2 --> |No| SK
-  C2 --> |Yes| C3{ENVIRONMENT==production?}
-  C3 --> |No| SK
-  C3 --> |Yes| C4{Day 01-09?}
-  C4 --> |No| SK
-  C4 --> |Yes| C5{Disk < 80%?}
-  C5 --> |No| SK
-  C5 --> |Yes| R[Processing task]
-  R --> E[End]
-  SK --> E
-  style S stroke:lightblue,stroke-width:1.6px,color:#333
-  style R stroke:green,stroke-width:1.6px,color:#333
-  style SK stroke:gray,stroke-width:1.6px,color:#333
-  style E stroke:lightblue,stroke-width:1.6px,color:#333
-```
-
-<a href="/writing-workflows/control-flow#preconditions" class="learn-more">Learn more →</a>
-
-</div>
-
-<div class="example-card">
-
 ### Repeat Until Condition
 
 > Looking for iteration over a list? See [Parallel Execution](#parallel-execution-iterator).
@@ -397,6 +353,90 @@ flowchart TD
 ```
 
 <a href="/writing-workflows/control-flow#negated-conditions" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Routing Based on Value
+
+```yaml
+env:
+  - STATUS: production
+steps:
+  - name: router
+    type: router
+    value: ${STATUS}
+    routes:
+      "production": [prod_handler]
+      "staging": [staging_handler]
+
+  - name: prod_handler
+    command: echo "Production"
+
+  - name: staging_handler
+    command: echo "Staging"
+```
+
+```mermaid
+flowchart TD
+    A[Start] --> R{router: STATUS?}
+    R --> |production| P[prod_handler]
+    R --> |staging| S[staging_handler]
+    P --> E[End]
+    S --> E
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:lightblue,stroke-width:1.6px,color:#333
+    style P stroke:green,stroke-width:1.6px,color:#333
+    style S stroke:gray,stroke-width:1.6px,color:#333
+    style E stroke:lightblue,stroke-width:1.6px,color:#333
+```
+
+<a href="/features/executors/router" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Routing Based on Step Output
+
+```yaml
+type: graph
+steps:
+  - name: check_status
+    command: echo "success"
+    output: STATUS
+
+  - name: router
+    type: router
+    value: ${STATUS}
+    routes:
+      "success": [success_handler]
+      "failure": [failure_handler]
+    depends: [check_status]
+
+  - name: success_handler
+    command: echo "Handling success"
+
+  - name: failure_handler
+    command: echo "Handling failure"
+```
+
+```mermaid
+flowchart TD
+    C[check_status] --> R{router: STATUS?}
+    R --> |success| S[success_handler]
+    R --> |failure| F[failure_handler]
+    S --> E[End]
+    F --> E
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:lightblue,stroke-width:1.6px,color:#333
+    style S stroke:green,stroke-width:1.6px,color:#333
+    style F stroke:gray,stroke-width:1.6px,color:#333
+    style E stroke:lightblue,stroke-width:1.6px,color:#333
+```
+
+<a href="/features/executors/router#routing-based-on-step-output" class="learn-more">Learn more →</a>
 
 </div>
 

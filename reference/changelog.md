@@ -23,6 +23,7 @@
 ### Added
 
 - **Self-Upgrade Command**: New `dagu upgrade` command for in-place binary updates with SHA256 verification, backup support, and cross-platform compatibility. See [Self-Upgrade](/features/upgrade) for details.
+- **Router Examples in Documentation**: Added two router examples to the [Examples](/writing-workflows/examples/) page under "Control Flow & Conditions": routing based on environment variable values and routing based on step output. Removed the "Complex Preconditions" example to streamline the page.
 
 - **Agent (Tsumugi)**: AI assistant integrated into the Web UI for workflow management. Tsumugi helps create, review, debug, and manage DAG workflows through an interactive chat interface. Supports multiple LLM providers (Anthropic, OpenAI, Google, OpenRouter, local models). Features include shell command execution with approval for dangerous operations, file reading/editing, DAG schema lookup, UI navigation, and web search. See [Agent](/features/agent/) for details.
 

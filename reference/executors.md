@@ -15,6 +15,7 @@ Step types extend Dagu's capabilities beyond simple shell commands. Available st
 - [JQ](/features/executors/jq) - Process JSON data
 - [Redis](/features/executors/redis) - Execute Redis commands and operations
 - [HITL](/features/executors/hitl) - Human-in-the-loop approval gates
+- [Router](/features/executors/router) - Route execution to different steps based on pattern matching
 - [GitHub Actions (_experimental_)](/features/executors/github-actions) - Run marketplace actions locally with nektos/act
 
 ::: tip
@@ -1183,6 +1184,62 @@ steps:
     type: dag
     command: ${WORKFLOW_FILE}
     params: "ENV=${ENVIRONMENT}"
+```
+
+## Router
+
+::: info
+For detailed Router step type documentation, see [Router Guide](/features/executors/router).
+:::
+
+Route execution to different steps based on pattern matching against a value.
+
+### Basic Usage
+
+```yaml
+env:
+  - INPUT: exact_value
+steps:
+  - name: router
+    type: router
+    value: ${INPUT}
+    routes:
+      "exact_value": [route_a]
+      "other": [route_b]
+
+  - name: route_a
+    command: echo "Route A executed"
+
+  - name: route_b
+    command: echo "Route B executed"
+```
+
+### Regex Patterns
+
+Prefix patterns with `re:` for regex matching:
+
+```yaml
+steps:
+  - name: router
+    type: router
+    value: ${INPUT}
+    routes:
+      "re:^apple.*": [apple_handler]
+      "re:^banana.*": [banana_handler]
+      "re:.*": [default_handler]
+```
+
+### Multiple Targets
+
+Route to multiple steps from a single pattern:
+
+```yaml
+steps:
+  - name: router
+    type: router
+    value: ${TRIGGER}
+    routes:
+      "all": [step_a, step_b, step_c]
 ```
 
 ## See Also
