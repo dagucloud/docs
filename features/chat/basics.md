@@ -345,6 +345,67 @@ steps:
         content: "Prove this mathematical theorem..."
 ```
 
+### Conditional Routing
+
+Use a chat step to classify input, then route based on the response:
+
+```yaml
+type: graph
+
+steps:
+  - name: classify
+    type: chat
+    llm:
+      provider: openai
+      model: gpt-4o
+      system: "Classify the request. Reply with exactly: bug, feature, or question"
+    messages:
+      - role: user
+        content: "${USER_REQUEST}"
+    output: TYPE
+
+  - name: route
+    type: router
+    depends: [classify]
+    value: ${TYPE}
+    routes:
+      "bug": [handle_bug]
+      "feature": [handle_feature]
+      "question": [handle_question]
+
+  - name: handle_bug
+    type: chat
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+      system: "You are a debugging expert."
+    messages:
+      - role: user
+        content: "${USER_REQUEST}"
+
+  - name: handle_feature
+    type: chat
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+      system: "You are a product designer."
+    messages:
+      - role: user
+        content: "${USER_REQUEST}"
+
+  - name: handle_question
+    type: chat
+    llm:
+      provider: anthropic
+      model: claude-sonnet-4-20250514
+      system: "You are a helpful assistant."
+    messages:
+      - role: user
+        content: "${USER_REQUEST}"
+```
+
+The `classify` step analyzes the request and outputs a category. The router then executes only the matching handler.
+
 ## Error Handling
 
 The chat executor automatically retries on transient errors:
