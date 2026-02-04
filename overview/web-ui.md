@@ -354,10 +354,10 @@ Monitor multiple Dagu instances:
 ```yaml
 remoteNodes:
   - name: staging
-    apiBaseURL: https://staging.example.com/api/v2
+    apiBaseURL: https://staging.example.com/api/v1
     
   - name: production
-    apiBaseURL: https://prod.example.com/api/v2
+    apiBaseURL: https://prod.example.com/api/v1
     authToken: ${PROD_TOKEN}
 ```
 

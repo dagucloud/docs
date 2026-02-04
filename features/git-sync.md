@@ -174,26 +174,26 @@ dagu sync publish my-dag -m "Merged changes"
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v2/sync/status` | Overall sync status |
-| POST | `/api/v2/sync/pull` | Pull from remote |
-| POST | `/api/v2/sync/publish-all` | Publish all modified DAGs |
-| POST | `/api/v2/sync/test-connection` | Test remote connection |
-| GET | `/api/v2/sync/config` | Get configuration |
-| PUT | `/api/v2/sync/config` | Update configuration |
-| POST | `/api/v2/dags/{name}/sync/publish` | Publish single DAG |
-| POST | `/api/v2/dags/{name}/sync/discard` | Discard single DAG changes |
+| GET | `/api/v1/sync/status` | Overall sync status |
+| POST | `/api/v1/sync/pull` | Pull from remote |
+| POST | `/api/v1/sync/publish-all` | Publish all modified DAGs |
+| POST | `/api/v1/sync/test-connection` | Test remote connection |
+| GET | `/api/v1/sync/config` | Get configuration |
+| PUT | `/api/v1/sync/config` | Update configuration |
+| POST | `/api/v1/dags/{name}/sync/publish` | Publish single DAG |
+| POST | `/api/v1/dags/{name}/sync/discard` | Discard single DAG changes |
 
 ### Examples
 
 ```bash
 # Get status
-curl http://localhost:8080/api/v2/sync/status
+curl http://localhost:8080/api/v1/sync/status
 
 # Pull
-curl -X POST http://localhost:8080/api/v2/sync/pull
+curl -X POST http://localhost:8080/api/v1/sync/pull
 
 # Publish DAG
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/sync/publish \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/sync/publish \
   -H "Content-Type: application/json" \
   -d '{"message": "Updated schedule", "force": false}'
 ```

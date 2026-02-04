@@ -8,7 +8,7 @@
 
 ### Removed
 
-- **API v1**: The legacy v1 API (`/api/v1/*`) has been completely removed from the codebase. All clients should migrate to the v2 API (`/api/v2/*`). The v1 API was previously disabled when authentication was enabled (v1.26.2), and is now fully removed.
+- **API v1**: The legacy v1 API (`/api/v1/*`) has been completely removed from the codebase. All clients should migrate to the v2 API (`/api/v1/*`). The v1 API was previously disabled when authentication was enabled (v1.26.2), and is now fully removed.
 
 - **Deprecated YAML Fields**: The following deprecated fields have been removed from the YAML spec. Migrate to the replacement fields:
 
@@ -150,10 +150,10 @@
   ```
 
   Key features: auto-signup on first login, role mapping from IdP groups, email domain filtering, email whitelist, customizable login button. See [Builtin Authentication](/configurations/authentication/builtin#oidcsso-login) for details.
-- **Synchronous Execution API**: New endpoint `POST /api/v2/dags/{fileName}/start-sync` that executes a DAG and waits for completion before returning. Returns full execution details including all node statuses. Useful for automation scripts, CI/CD pipelines, and any scenario where you need to wait for a DAG to finish.
+- **Synchronous Execution API**: New endpoint `POST /api/v1/dags/{fileName}/start-sync` that executes a DAG and waits for completion before returning. Returns full execution details including all node statuses. Useful for automation scripts, CI/CD pipelines, and any scenario where you need to wait for a DAG to finish.
 
   ```bash
-  curl -X POST "http://localhost:8080/api/v2/dags/my-dag/start-sync" \
+  curl -X POST "http://localhost:8080/api/v1/dags/my-dag/start-sync" \
     -H "Content-Type: application/json" \
     -d '{"timeout": 300, "params": "{}"}'
   ```
@@ -302,7 +302,7 @@
 
   See [Shared Nothing Mode - PostgreSQL Connection Pool Management](/features/workers/shared-nothing#postgresql-connection-pool-management) for details.
 
-- **DAG Runs Tag Filter**: Filter DAG runs by tags in the UI and API. Select multiple tags to filter runs from DAGs that have ALL specified tags (AND logic). Available via the new `tags` query parameter on `/api/v2/dag-runs` endpoint (comma-separated).
+- **DAG Runs Tag Filter**: Filter DAG runs by tags in the UI and API. Select multiple tags to filter runs from DAGs that have ALL specified tags (AND logic). Available via the new `tags` query parameter on `/api/v1/dag-runs` endpoint (comma-separated).
 
 - **Key-Value Tags**: Tags now support key-value pairs in addition to simple tags. Multiple YAML formats supported:
 
@@ -606,7 +606,7 @@
 
 ### Changed
 
-- **Metrics Endpoint Access Control**: The `/api/v2/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
+- **Metrics Endpoint Access Control**: The `/api/v1/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
 
   ```yaml
   # Require authentication (new default)
@@ -665,7 +665,7 @@ steps:
       omit: true  # Exclude from outputs.json but still usable in DAG
 ```
 
-  - API endpoint: `GET /api/v2/dag-runs/{name}/{dagRunId}/outputs`
+  - API endpoint: `GET /api/v1/dag-runs/{name}/{dagRunId}/outputs`
   - See [DAG Run Outputs](/features/outputs) for full documentation
 - UI: Added wrap/unwrap toggle button in log viewer for better readability of long lines
 - **API Key Management**: Added comprehensive API key management for programmatic access with role-based permissions. API keys provide a secure alternative to static tokens with fine-grained access control.
@@ -675,18 +675,18 @@ steps:
   - Secure key generation with bcrypt hashing
   - Keys use `dagu_` prefix for easy identification
   - Web UI management at Settings > API Keys (admin only)
-  - Full REST API at `/api/v2/api-keys` endpoints
+  - Full REST API at `/api/v1/api-keys` endpoints
 
 ```bash
 # Create an API key
-curl -X POST http://localhost:8080/api/v2/api-keys \
+curl -X POST http://localhost:8080/api/v1/api-keys \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "ci-pipeline", "role": "operator"}'
 
 # Use the API key
 curl -H "Authorization: Bearer dagu_your-key-here" \
-  http://localhost:8080/api/v2/dags
+  http://localhost:8080/api/v1/dags
 ```
 
 Requires builtin authentication mode (`auth.mode: builtin`). See [API Keys documentation](/configurations/authentication/api-keys) for details.
@@ -698,15 +698,15 @@ Requires builtin authentication mode (`auth.mode: builtin`). See [API Keys docum
   - Idempotent execution support with custom `dagRunId`
   - Usage tracking with `lastUsedAt` timestamp
   - Secure token storage with bcrypt hashing
-  - Full REST API at `/api/v2/webhooks` and `/api/v2/dags/{fileName}/webhook` endpoints
+  - Full REST API at `/api/v1/webhooks` and `/api/v1/dags/{fileName}/webhook` endpoints
 
 ```bash
 # Create a webhook for a DAG
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook \
   -H "Authorization: Bearer $JWT_TOKEN"
 
 # Trigger DAG via webhook with payload
-curl -X POST http://localhost:8080/api/v2/webhooks/my-dag \
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
   -H "Authorization: Bearer dagu_wh_your-webhook-token" \
   -H "Content-Type: application/json" \
   -d '{"payload": {"branch": "main", "commit": "abc123"}}'
@@ -953,7 +953,7 @@ Thanks to our contributors for this release:
 ## v1.24.7
 
 ### Fixed
-- Auth/API: Exempt `/api/v2/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
+- Auth/API: Exempt `/api/v1/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
 
 ### Contributors
 
@@ -967,7 +967,7 @@ Thanks to our contributors for this release:
 ## v1.24.6
 
 ### Fixed
-- Auth/API: Exempt `/api/v2/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
+- Auth/API: Exempt `/api/v1/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
 
 ### Contributors
 
@@ -986,7 +986,7 @@ Thanks to our contributors for this release:
 - Docker executor: Preserve step-level container entrypoints so step commands can rely on the image's default binary (#1403)
 - Auth/API: Add configurable public paths so `/api/v*/health` bypasses authentication for uptime probes by default (#1404)
 - Auth/OIDC: Guard verifier initialization so unreachable issuers fail gracefully instead of crashing the server (#1407)
-- Auth/API: Exempt `/api/v2/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
+- Auth/API: Exempt `/api/v1/metrics` from authentication so Prometheus scrapes succeed out of the box (#1409)
 
 ### Contributors
 
@@ -1029,10 +1029,10 @@ Thanks to our contributors for this release:
 
 ### Added
 - API: Added optional `dagName` field to `/dags/{fileName}/start` and `/dags/{fileName}/enqueue` for overriding the DAG name used at runtime (#1365)
-- API: Added `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs` endpoint to retrieve timing and status information for all sub DAG runs, useful for tracking repeated executions of sub DAG steps (#1041)
+- API: Added `GET /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs` endpoint to retrieve timing and status information for all sub DAG runs, useful for tracking repeated executions of sub DAG steps (#1041)
 - UI: Enhanced sub DAG run display with execution timeline showing datetime, status indicators, and lazy loading of execution details (#1041)
-- API: Added `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule` endpoint for replaying runs while enforcing singleton mode to block reschedules when the DAG already has active or queued runs (#1347)
-- API: Added `POST /api/v2/dag-runs/enqueue` to enqueue DAG-runs directly from inline YAML specs without creating DAG files, including optional queue overrides (#1375)
+- API: Added `POST /api/v1/dag-runs/{name}/{dagRunId}/reschedule` endpoint for replaying runs while enforcing singleton mode to block reschedules when the DAG already has active or queued runs (#1347)
+- API: Added `POST /api/v1/dag-runs/enqueue` to enqueue DAG-runs directly from inline YAML specs without creating DAG files, including optional queue overrides (#1375)
 - CLI: Added `--from-run-id` flag to `dagu start` for cloning historic runs with their saved parameters (#1378)
 - CLI: Added `dagu exec` command to run shell commands without writing YAML files, with full logging, history, environment control, and queue support (#1348)
 - UI: Added grouped view with preset and specific date range selectors on the DAG-runs page for faster historical exploration (#1377)
@@ -1132,10 +1132,10 @@ No external contributors for this release - documentation update only.
 ### Added
 - CLI: Added `--dagu-home` global flag to override the application home directory on a per-command basis. Useful for testing, running multiple instances with isolated data, and CI/CD scenarios.
 - CLI: Added `dagu validate` command to validate DAG specifications without executing them. Prints human‑readable errors and exits with code 1 on failure.
-- API: Added `POST /api/v2/dags/validate` to validate DAG YAML. Returns `{ valid: boolean, errors: string[], dag?: DAGDetails }`.
-- API: `POST /api/v2/dags` now accepts optional `spec` to initialize a DAG. The spec is validated before creation and returns 400 on invalid input.
-- API: Added `POST /api/v2/dag-runs` to create and start a DAG-run directly from an inline YAML `spec` without persisting a DAG file. Supports optional `name`, `params`, `dagRunId`, and `singleton`.
-- API: Added `nextRun` sort option to `GET /api/v2/dags` to sort DAGs by their next scheduled run time. DAGs with earlier next runs appear first in ascending order, and DAGs without schedules appear last.
+- API: Added `POST /api/v1/dags/validate` to validate DAG YAML. Returns `{ valid: boolean, errors: string[], dag?: DAGDetails }`.
+- API: `POST /api/v1/dags` now accepts optional `spec` to initialize a DAG. The spec is validated before creation and returns 400 on invalid input.
+- API: Added `POST /api/v1/dag-runs` to create and start a DAG-run directly from an inline YAML `spec` without persisting a DAG file. Supports optional `name`, `params`, `dagRunId`, and `singleton`.
+- API: Added `nextRun` sort option to `GET /api/v1/dags` to sort DAGs by their next scheduled run time. DAGs with earlier next runs appear first in ascending order, and DAGs without schedules appear last.
 - Steps: Add support for shebang detection in `script`.
 - Steps: Multi-line `command` strings now execute as inline scripts, including support for shebang.
 - DAG: Introduced a `secrets` block that references external providers (built-in `env` and `file`) and resolves values at runtime with automatic log/output masking.
@@ -1590,10 +1590,10 @@ dagu dequeue default
 New "partial success" status for workflows where some steps succeed and others fail, providing better visibility into complex workflow states.
 
 ####  API v2
-- New `/api/v2` endpoints with refactored schema
+- New `/api/v1` endpoints with refactored schema
 - Better abstractions and cleaner interfaces
 - Improved error handling and response formats
-- See [OpenAPI spec](https://github.com/dagu-org/dagu/blob/main/api/v2/api.yaml) for details
+- See [OpenAPI spec](https://github.com/dagu-org/dagu/blob/main/api/v1/api.yaml) for details
 
 ### Docker Improvements
 

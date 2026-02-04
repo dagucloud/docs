@@ -8,7 +8,7 @@ For the complete API documentation with all endpoints, see [REST API Reference](
 
 ## Base Configuration
 
-- **Base URL**: `http://localhost:8080/api/v2`
+- **Base URL**: `http://localhost:8080/api/v1`
 - **Content-Type**: `application/json`
 - **Required Headers**: `Accept: application/json`
 
@@ -27,7 +27,7 @@ The REST API supports three authentication methods:
 Check server health and status:
 
 ```bash
-curl http://localhost:8080/api/v2/health
+curl http://localhost:8080/api/v1/health
 ```
 
 Response includes server status, version, uptime, and timestamp.
@@ -37,13 +37,13 @@ Response includes server status, version, uptime, and timestamp.
 #### List DAGs
 ```bash
 # Get all DAGs
-curl http://localhost:8080/api/v2/dags
+curl http://localhost:8080/api/v1/dags
 
 # With filtering and pagination
-curl "http://localhost:8080/api/v2/dags?page=1&perPage=10&name=example&tag=prod"
+curl "http://localhost:8080/api/v1/dags?page=1&perPage=10&name=example&tag=prod"
 
 # With sorting (only 'name' field is supported)
-curl "http://localhost:8080/api/v2/dags?sort=name&order=desc"
+curl "http://localhost:8080/api/v1/dags?sort=name&order=desc"
 ```
 
 ::: info Sorting Limitations
@@ -52,18 +52,18 @@ The API only supports server-side sorting by the `name` field. While the API acc
 
 #### Get DAG Details
 ```bash
-curl http://localhost:8080/api/v2/dags/my-dag.yaml
+curl http://localhost:8080/api/v1/dags/my-dag.yaml
 ```
 
 #### Create New DAG
 ```bash
 # Create with default template
-curl -X POST http://localhost:8080/api/v2/dags \
+curl -X POST http://localhost:8080/api/v1/dags \
   -H "Content-Type: application/json" \
   -d '{"name": "my-new-dag"}'
 
 # Create with custom specification (validated before creation)
-curl -X POST http://localhost:8080/api/v2/dags \
+curl -X POST http://localhost:8080/api/v1/dags \
   -H "Content-Type: application/json" \
   -d '{
     "name": "my-new-dag",
@@ -73,7 +73,7 @@ curl -X POST http://localhost:8080/api/v2/dags \
 
 #### Validate DAG Specification
 ```bash
-curl -X POST http://localhost:8080/api/v2/dags/validate \
+curl -X POST http://localhost:8080/api/v1/dags/validate \
   -H "Content-Type: application/json" \
   -d '{
     "spec": "steps:\n  - command: echo hello",
@@ -109,7 +109,7 @@ Example response (invalid):
 
 #### Start DAG
 ```bash
-curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/start \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/start \
   -H "Content-Type: application/json" \
   -d '{
     "params": "{\"env\": \"production\"}",
@@ -120,7 +120,7 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/start \
 
 #### Enqueue DAG
 ```bash
-curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/enqueue \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/enqueue \
   -H "Content-Type: application/json" \
   -d '{
     "params": "{\"env\": \"production\"}",
@@ -132,12 +132,12 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/enqueue \
 #### Suspend/Resume DAG
 ```bash
 # Suspend
-curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/suspend \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/suspend \
   -H "Content-Type: application/json" \
   -d '{"suspend": true}'
 
 # Resume
-curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/suspend \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/suspend \
   -H "Content-Type: application/json" \
   -d '{"suspend": false}'
 ```
@@ -147,7 +147,7 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/suspend \
 #### List Queues
 ```bash
 # Get all queues with running and queued DAG runs
-curl http://localhost:8080/api/v2/queues
+curl http://localhost:8080/api/v1/queues
 ```
 
 Shows all execution queues organized by queue name, including both custom queues and DAG-based queues. Returns queue summaries with running and queued DAG run counts.
@@ -157,17 +157,17 @@ Shows all execution queues organized by queue name, including both custom queues
 #### List DAG Runs
 ```bash
 # Get all DAG runs
-curl http://localhost:8080/api/v2/dag-runs
+curl http://localhost:8080/api/v1/dag-runs
 
 # Filter by name and status
-curl "http://localhost:8080/api/v2/dag-runs?name=my-dag&status=2"
+curl "http://localhost:8080/api/v1/dag-runs?name=my-dag&status=2"
 ```
 
 #### Run From Inline Spec
 Create and start a DAG-run directly from a YAML spec without persisting a DAG file.
 
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dag-runs?remoteNode=local" \
+curl -X POST "http://localhost:8080/api/v1/dag-runs?remoteNode=local" \
   -H "Content-Type: application/json" \
   -d '{
     "spec": "steps:\n  - name: hello\n    command: echo hello",
@@ -189,12 +189,12 @@ Notes:
 
 #### Stop DAG Run
 ```bash
-curl -X POST http://localhost:8080/api/v2/dag-runs/my-dag/20240101_120000/stop
+curl -X POST http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/stop
 ```
 
 #### Retry DAG Run
 ```bash
-curl -X POST http://localhost:8080/api/v2/dag-runs/my-dag/20240101_120000/retry \
+curl -X POST http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/retry \
   -H "Content-Type: application/json" \
   -d '{"dagRunId": "new-run-id"}'
 ```
@@ -204,12 +204,12 @@ curl -X POST http://localhost:8080/api/v2/dag-runs/my-dag/20240101_120000/retry 
 #### Update Step Status
 ```bash
 # Mark step as successful
-curl -X PATCH http://localhost:8080/api/v2/dag-runs/my-dag/20240101_120000/steps/step1/status \
+curl -X PATCH http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/steps/step1/status \
   -H "Content-Type: application/json" \
   -d '{"status": 4}'  # 4 = Success
 
 # Mark step as failed
-curl -X PATCH http://localhost:8080/api/v2/dag-runs/my-dag/20240101_120000/steps/step1/status \
+curl -X PATCH http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/steps/step1/status \
   -H "Content-Type: application/json" \
   -d '{"status": 2}'  # 2 = Failed
 ```
@@ -219,7 +219,7 @@ curl -X PATCH http://localhost:8080/api/v2/dag-runs/my-dag/20240101_120000/steps
 Search across DAG definitions:
 
 ```bash
-curl "http://localhost:8080/api/v2/dags/search?q=database"
+curl "http://localhost:8080/api/v1/dags/search?q=database"
 ```
 
 ## Monitoring and Metrics
@@ -229,7 +229,7 @@ curl "http://localhost:8080/api/v2/dags/search?q=database"
 Dagu exposes Prometheus-compatible metrics for comprehensive monitoring:
 
 ```bash
-curl http://localhost:8080/api/v2/metrics
+curl http://localhost:8080/api/v1/metrics
 ```
 
 Available metrics include:

@@ -230,7 +230,7 @@ dagu server --tunnel
 ## API Endpoint
 
 ```
-GET /api/v2/services/tunnel
+GET /api/v1/services/tunnel
 ```
 
 **Response:**

@@ -10,18 +10,18 @@ Configure authentication for connecting to remote Dagu instances.
 # ~/.config/dagu/config.yaml
 remoteNodes:
   - name: production
-    apiBaseURL: https://prod.example.com/api/v2
+    apiBaseURL: https://prod.example.com/api/v1
     isBasicAuth: true
     basicAuthUsername: admin
     basicAuthPassword: prod-password
 
   - name: staging
-    apiBaseURL: https://staging.example.com/api/v2
+    apiBaseURL: https://staging.example.com/api/v1
     isAuthToken: true
     authToken: staging-api-token
 
   - name: development
-    apiBaseURL: http://dev.example.com:8080/api/v2
+    apiBaseURL: http://dev.example.com:8080/api/v1
     # No auth configured - anonymous access
 ```
 
@@ -32,7 +32,7 @@ remoteNodes:
 ```yaml
 remoteNodes:
   - name: remote1
-    apiBaseURL: https://remote1.example.com/api/v2
+    apiBaseURL: https://remote1.example.com/api/v1
     isBasicAuth: true
     basicAuthUsername: admin
     basicAuthPassword: secure-password
@@ -45,7 +45,7 @@ Use for static tokens or [API Keys](api-keys).
 ```yaml
 remoteNodes:
   - name: remote2
-    apiBaseURL: https://remote2.example.com/api/v2
+    apiBaseURL: https://remote2.example.com/api/v1
     isAuthToken: true
     authToken: api-token-for-remote2
 ```
@@ -57,7 +57,7 @@ When the remote node uses [Builtin Authentication](builtin) with [API Keys](api-
 ```yaml
 remoteNodes:
   - name: production
-    apiBaseURL: https://prod.example.com/api/v2
+    apiBaseURL: https://prod.example.com/api/v1
     isAuthToken: true
     authToken: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
@@ -70,7 +70,7 @@ Use environment variables to avoid storing API keys in configuration files:
 ```yaml
 remoteNodes:
   - name: production
-    apiBaseURL: https://prod.example.com/api/v2
+    apiBaseURL: https://prod.example.com/api/v1
     isAuthToken: true
     authToken: ${PROD_API_KEY}
 ```
@@ -81,7 +81,7 @@ remoteNodes:
 ```yaml
 remoteNodes:
   - name: local-dev
-    apiBaseURL: http://localhost:8081/api/v2
+    apiBaseURL: http://localhost:8081/api/v1
     # No auth fields - anonymous access
 ```
 
@@ -100,11 +100,11 @@ Log into Server B and create an API key with the desired role:
 
 ```bash
 # On Server B: Create an API key for remote access
-TOKEN=$(curl -s -X POST http://server-b:8080/api/v2/auth/login \
+TOKEN=$(curl -s -X POST http://server-b:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin-password"}' | jq -r '.token')
 
-curl -X POST http://server-b:8080/api/v2/api-keys \
+curl -X POST http://server-b:8080/api/v1/api-keys \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -127,7 +127,7 @@ auth:
 
 remoteNodes:
   - name: server-b
-    apiBaseURL: http://server-b:8080/api/v2
+    apiBaseURL: http://server-b:8080/api/v1
     isAuthToken: true
     authToken: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
@@ -152,7 +152,7 @@ remoteNodes:
 ```yaml
 remoteNodes:
   - name: self-signed
-    apiBaseURL: https://internal.example.com/api/v2
+    apiBaseURL: https://internal.example.com/api/v1
     skipTLSVerify: true
     isAuthToken: true
     authToken: token

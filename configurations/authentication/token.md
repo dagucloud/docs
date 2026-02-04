@@ -39,11 +39,11 @@ export DAGU_AUTHTOKEN=your-api-token
 ```bash
 # Bearer token in Authorization header
 curl -H "Authorization: Bearer your-api-token" \
-     http://localhost:8080/api/v2/dags
+     http://localhost:8080/api/v1/dags
 
 # Works with any HTTP client
 wget --header="Authorization: Bearer your-api-token" \
-     http://localhost:8080/api/v2/dags
+     http://localhost:8080/api/v1/dags
 ```
 
 ## CI/CD Integration

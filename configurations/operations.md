@@ -94,7 +94,7 @@ services:
     
     # Health check
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v2/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -188,10 +188,10 @@ export DAGU_MONITORING_INTERVAL=10s
 **API Endpoint:**
 ```bash
 # Get resource history (last hour by default)
-curl http://localhost:8080/api/v2/services/resources/history
+curl http://localhost:8080/api/v1/services/resources/history
 
 # Get last 30 minutes
-curl http://localhost:8080/api/v2/services/resources/history?duration=30m
+curl http://localhost:8080/api/v1/services/resources/history?duration=30m
 ```
 
 **Memory Usage:**
@@ -199,7 +199,7 @@ Resource history is stored in memory. With default settings (5s interval, 24h re
 
 ### Prometheus Metrics
 
-Metrics available at `/api/v2/metrics`:
+Metrics available at `/api/v1/metrics`:
 
 **System:**
 - `dagu_info` - Build information

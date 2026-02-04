@@ -2,7 +2,7 @@
 
 ## Base Configuration
 
-- **Base URL**: `http://localhost:8080/api/v2`
+- **Base URL**: `http://localhost:8080/api/v1`
 - **Content-Type**: `application/json`
 - **OpenAPI Version**: 3.0.0
 
@@ -23,7 +23,7 @@ API keys are recommended for general programmatic access as they support role-ba
 
 ### Health Check
 
-**Endpoint**: `GET /api/v2/health`
+**Endpoint**: `GET /api/v1/health`
 
 Checks the health status of the Dagu server.
 
@@ -58,7 +58,7 @@ Checks the health status of the Dagu server.
 
 ### List DAGs
 
-**Endpoint**: `GET /api/v2/dags`
+**Endpoint**: `GET /api/v1/dags`
 
 Retrieves DAG definitions with optional filtering by name and tags.
 
@@ -112,7 +112,7 @@ Retrieves DAG definitions with optional filtering by name and tags.
 
 ### Create DAG
 
-**Endpoint**: `POST /api/v2/dags`
+**Endpoint**: `POST /api/v1/dags`
 
 Creates a new DAG file with the specified name. Optionally initializes it with a provided YAML specification.
 
@@ -154,7 +154,7 @@ Creates a new DAG file with the specified name. Optionally initializes it with a
 
 ### Get DAG Details
 
-**Endpoint**: `GET /api/v2/dags/{fileName}`
+**Endpoint**: `GET /api/v1/dags/{fileName}`
 
 Fetches detailed information about a specific DAG.
 
@@ -289,7 +289,7 @@ Fetches detailed information about a specific DAG.
 
 ### Delete DAG
 
-**Endpoint**: `DELETE /api/v2/dags/{fileName}`
+**Endpoint**: `DELETE /api/v1/dags/{fileName}`
 
 Permanently removes a DAG definition from the system.
 
@@ -313,7 +313,7 @@ Permanently removes a DAG definition from the system.
 
 ### Get DAG Specification
 
-**Endpoint**: `GET /api/v2/dags/{fileName}/spec`
+**Endpoint**: `GET /api/v1/dags/{fileName}/spec`
 
 Fetches the YAML specification of a DAG.
 
@@ -330,7 +330,7 @@ Fetches the YAML specification of a DAG.
 
 ### Update DAG Specification
 
-**Endpoint**: `PUT /api/v2/dags/{fileName}/spec`
+**Endpoint**: `PUT /api/v1/dags/{fileName}/spec`
 
 Updates the YAML specification of a DAG.
 
@@ -368,7 +368,7 @@ Updates the YAML specification of a DAG.
 
 ### Validate DAG Specification
 
-**Endpoint**: `POST /api/v2/dags/validate`
+**Endpoint**: `POST /api/v1/dags/validate`
 
 Validates a DAG YAML specification without persisting any changes. Returns a list of validation errors. When the spec can be partially parsed, the response may include parsed DAG details built with error-tolerant loading.
 
@@ -420,7 +420,7 @@ Validates a DAG YAML specification without persisting any changes. Returns a lis
 
 ### Rename DAG
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/rename`
+**Endpoint**: `POST /api/v1/dags/{fileName}/rename`
 
 Changes the file ID of the DAG definition.
 
@@ -453,7 +453,7 @@ Changes the file ID of the DAG definition.
 
 ### Start DAG
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/start`
+**Endpoint**: `POST /api/v1/dags/{fileName}/start`
 
 Creates and starts a DAG run with optional parameters.
 
@@ -493,7 +493,7 @@ Creates and starts a DAG run with optional parameters.
 
 ### Start DAG (Synchronous)
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/start-sync`
+**Endpoint**: `POST /api/v1/dags/{fileName}/start-sync`
 
 Creates and starts a DAG run, waits for it to complete (or timeout), and returns the full execution details. This is useful for automation scripts and CI/CD pipelines that need to wait for a DAG to finish before proceeding.
 
@@ -567,7 +567,7 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 
 ### Enqueue DAG
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/enqueue`
+**Endpoint**: `POST /api/v1/dags/{fileName}/enqueue`
 
 Adds a DAG run to the queue for later execution.
 
@@ -600,7 +600,7 @@ Adds a DAG run to the queue for later execution.
 
 ### Toggle DAG Suspension
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/suspend`
+**Endpoint**: `POST /api/v1/dags/{fileName}/suspend`
 
 Controls whether the scheduler creates runs from this DAG.
 
@@ -625,7 +625,7 @@ Controls whether the scheduler creates runs from this DAG.
 
 ### Get DAG Run History
 
-**Endpoint**: `GET /api/v2/dags/{fileName}/dag-runs`
+**Endpoint**: `GET /api/v1/dags/{fileName}/dag-runs`
 
 Fetches execution history of a DAG.
 
@@ -698,7 +698,7 @@ Fetches execution history of a DAG.
 
 ### Get Specific DAG Run
 
-**Endpoint**: `GET /api/v2/dags/{fileName}/dag-runs/{dagRunId}`
+**Endpoint**: `GET /api/v1/dags/{fileName}/dag-runs/{dagRunId}`
 
 Gets detailed status of a specific DAG run.
 
@@ -792,7 +792,7 @@ Gets detailed status of a specific DAG run.
 
 ### List All DAG Runs
 
-**Endpoint**: `GET /api/v2/dag-runs`
+**Endpoint**: `GET /api/v1/dag-runs`
 
 Retrieves all DAG runs with optional filtering.
 
@@ -873,7 +873,7 @@ Retrieves all DAG runs with optional filtering.
 
 ### Execute DAG Run from Inline Spec
 
-**Endpoint**: `POST /api/v2/dag-runs`
+**Endpoint**: `POST /api/v1/dag-runs`
 
 Creates and starts a DAG-run directly from an inline YAML specification without writing a DAG file to disk.
 
@@ -927,7 +927,7 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
 
 **Example**:
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dag-runs?remoteNode=local" \
+curl -X POST "http://localhost:8080/api/v1/dag-runs?remoteNode=local" \
   -H "Content-Type: application/json" \
   -d '{
         "spec": "steps:\n  - name: echo\n    command: echo \"hello\"",
@@ -938,7 +938,7 @@ curl -X POST "http://localhost:8080/api/v2/dag-runs?remoteNode=local" \
 
 ### Enqueue DAG Run from Inline Spec
 
-**Endpoint**: `POST /api/v2/dag-runs/enqueue`
+**Endpoint**: `POST /api/v1/dag-runs/enqueue`
 
 Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run follows queue semantics (global queue concurrency limits, queue overrides) and is started by the scheduler.
 
@@ -984,7 +984,7 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
 
 **Example**:
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dag-runs/enqueue" \
+curl -X POST "http://localhost:8080/api/v1/dag-runs/enqueue" \
   -H "Content-Type: application/json" \
   -d '{
         "spec": "steps:\n  - name: notify\n    command: ./notify.sh",
@@ -995,13 +995,13 @@ curl -X POST "http://localhost:8080/api/v2/dag-runs/enqueue" \
 
 ### Get DAG Run Details
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}`
 
 Fetches detailed status of a specific DAG run. You can use the special value "latest" as the dagRunId to retrieve the most recent DAG run for the specified DAG.
 
 **Examples**:
-- `GET /api/v2/dag-runs/data-pipeline/20240211_120000` - Get a specific run
-- `GET /api/v2/dag-runs/data-pipeline/latest` - Get the latest run
+- `GET /api/v1/dag-runs/data-pipeline/20240211_120000` - Get a specific run
+- `GET /api/v1/dag-runs/data-pipeline/latest` - Get the latest run
 
 **Path Parameters**:
 | Parameter | Type | Description |
@@ -1072,7 +1072,7 @@ Fetches detailed status of a specific DAG run. You can use the special value "la
 
 ### Stop DAG Run
 
-**Endpoint**: `POST /api/v2/dag-runs/{name}/{dagRunId}/stop`
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/stop`
 
 Forcefully stops a running DAG run.
 
@@ -1096,7 +1096,7 @@ Forcefully stops a running DAG run.
 
 ### Stop All DAG Runs
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/stop-all`
+**Endpoint**: `POST /api/v1/dags/{fileName}/stop-all`
 
 Forcefully stops all currently running instances of a DAG. This is useful when multiple instances of the same DAG are running simultaneously.
 
@@ -1117,7 +1117,7 @@ Forcefully stops all currently running instances of a DAG. This is useful when m
 
 ### Retry DAG Run
 
-**Endpoint**: `POST /api/v2/dag-runs/{name}/{dagRunId}/retry`
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/retry`
 
 Creates a new DAG run based on a previous execution.
 
@@ -1148,7 +1148,7 @@ Creates a new DAG run based on a previous execution.
 
 ### Reschedule DAG Run
 
-**Endpoint**: `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule`
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/reschedule`
 
 Launches a fresh DAG run by reusing the captured parameters from a historic execution. Useful for re-running successful or failed runs while keeping the original parameter set.
 
@@ -1194,7 +1194,7 @@ Rescheduled runs always respect singleton mode. When the target DAG already has 
 
 ### Dequeue DAG Run
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/dequeue`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/dequeue`
 
 Removes a queued DAG run from the queue.
 
@@ -1212,7 +1212,7 @@ Removes a queued DAG run from the queue.
 
 ### Get DAG Run Log
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/log`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/log`
 
 Fetches the execution log for a DAG run.
 
@@ -1238,7 +1238,7 @@ Fetches the execution log for a DAG run.
 
 ### Get Step Log
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/steps/{stepName}/log`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/log`
 
 Fetches the log for a specific step.
 
@@ -1277,7 +1277,7 @@ Fetches the log for a specific step.
 
 ### Get DAG Run Outputs
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/outputs`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/outputs`
 
 Retrieves the collected outputs from a completed DAG run. Outputs are collected from steps that have an `output` field defined.
 
@@ -1353,11 +1353,11 @@ Retrieves the collected outputs from a completed DAG run. Outputs are collected 
 **Example**:
 ```bash
 # Get outputs from a specific DAG run
-curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/outputs" \
+curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_140000_abc123/outputs" \
      -H "Authorization: Bearer your-token"
 
 # Get outputs from the latest DAG run
-curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/latest/outputs" \
+curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/latest/outputs" \
      -H "Authorization: Bearer your-token"
 ```
 
@@ -1365,7 +1365,7 @@ curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/latest/outp
 
 ### Update Step Status
 
-**Endpoint**: `PATCH /api/v2/dag-runs/{name}/{dagRunId}/steps/{stepName}/status`
+**Endpoint**: `PATCH /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/status`
 
 Manually updates a step's execution status.
 
@@ -1406,7 +1406,7 @@ Manually updates a step's execution status.
 
 ### Search DAGs
 
-**Endpoint**: `GET /api/v2/dags/search`
+**Endpoint**: `GET /api/v1/dags/search`
 
 Performs full-text search across DAG definitions.
 
@@ -1473,7 +1473,7 @@ Performs full-text search across DAG definitions.
 
 ### Get All Tags
 
-**Endpoint**: `GET /api/v2/dags/tags`
+**Endpoint**: `GET /api/v1/dags/tags`
 
 Retrieves all unique tags used across DAGs.
 
@@ -1527,7 +1527,7 @@ Retrieves all unique tags used across DAGs.
 
 ### Prometheus Metrics
 
-**Endpoint**: `GET /api/v2/metrics`
+**Endpoint**: `GET /api/v1/metrics`
 
 Returns Prometheus-compatible metrics.
 
@@ -1596,7 +1596,7 @@ All endpoints return structured error responses:
 
 ### Get Sub DAG Runs with Timing Information
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs`
 
 Retrieves timing and status information for all sub DAG runs within a specific DAG run. This is useful for tracking repeated executions of sub DAG steps and understanding the timeline of sub workflows.
 
@@ -1674,7 +1674,7 @@ This endpoint is particularly useful for nodes with `repeatPolicy` that execute 
 
 ### Get Sub DAG Run Details
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}`
 
 Fetches detailed status of a sub DAG run.
 
@@ -1745,7 +1745,7 @@ Fetches detailed status of a sub DAG run.
 
 ### Get Sub DAG Run Log
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/log`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/log`
 
 Fetches the log for a sub DAG run.
 
@@ -1762,7 +1762,7 @@ Fetches the log for a sub DAG run.
 
 ### Get Child Step Log
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/log`
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/log`
 
 Fetches the log for a step in a sub DAG run.
 
@@ -1779,7 +1779,7 @@ Fetches the log for a step in a sub DAG run.
 
 ### Update Child Step Status
 
-**Endpoint**: `PATCH /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/status`
+**Endpoint**: `PATCH /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/status`
 
 Updates the status of a step in a sub DAG run.
 
@@ -1804,7 +1804,7 @@ Updates the status of a step in a sub DAG run.
 
 ### List All Queues
 
-**Endpoint**: `GET /api/v2/queues`
+**Endpoint**: `GET /api/v1/queues`
 
 Retrieves all execution queues with their running and queued DAG runs. Queues are organized by queue name, with two types: "custom" (explicitly defined queues) and "dag-based" (DAG name used as queue name).
 
@@ -1903,7 +1903,7 @@ Retrieves all execution queues with their running and queued DAG runs. Queues ar
 
 ### List DAG Runs by Name
 
-**Endpoint**: `GET /api/v2/dag-runs/{name}`
+**Endpoint**: `GET /api/v1/dag-runs/{name}`
 
 Lists all DAG runs for a specific DAG name.
 
@@ -1963,7 +1963,7 @@ Lists all DAG runs for a specific DAG name.
 
 ### Start a DAG with Parameters
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dags/data-processing-pipeline/start" \
+curl -X POST "http://localhost:8080/api/v1/dags/data-processing-pipeline/start" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{
@@ -1981,7 +1981,7 @@ curl -X POST "http://localhost:8080/api/v2/dags/data-processing-pipeline/start" 
 
 ### Start a DAG with Singleton Mode
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dags/critical-job/start" \
+curl -X POST "http://localhost:8080/api/v1/dags/critical-job/start" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{
@@ -2007,7 +2007,7 @@ curl -X POST "http://localhost:8080/api/v2/dags/critical-job/start" \
 
 ### Check DAG Run Status
 ```bash
-curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/latest" \
+curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/latest" \
      -H "Authorization: Bearer your-token"
 ```
 
@@ -2072,7 +2072,7 @@ curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/latest" \
 
 ### Search for DAGs
 ```bash
-curl "http://localhost:8080/api/v2/dags/search?q=database" \
+curl "http://localhost:8080/api/v1/dags/search?q=database" \
      -H "Authorization: Bearer your-token"
 ```
 
@@ -2106,19 +2106,19 @@ curl "http://localhost:8080/api/v2/dags/search?q=database" \
 
 ### Get Metrics for Monitoring
 ```bash
-curl "http://localhost:8080/api/v2/metrics" | grep dagu_dag_runs_currently_running
+curl "http://localhost:8080/api/v1/metrics" | grep dagu_dag_runs_currently_running
 ```
 
 ### Stop a Running DAG
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dag-runs/data-pipeline/20240211_120000/stop" \
+curl -X POST "http://localhost:8080/api/v1/dag-runs/data-pipeline/20240211_120000/stop" \
      -H "Authorization: Bearer your-token"
 ```
 
 ### Update Step Status Manually
 ```bash
 # Mark a failed step as successful
-curl -X PATCH "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_020000_def456/steps/transform_data/status" \
+curl -X PATCH "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_020000_def456/steps/transform_data/status" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{"status": 4}'
@@ -2128,7 +2128,7 @@ curl -X PATCH "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20
 
 ### Enqueue a DAG Run
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dags/ml-training-pipeline/enqueue" \
+curl -X POST "http://localhost:8080/api/v1/dags/ml-training-pipeline/enqueue" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{
@@ -2149,31 +2149,31 @@ curl -X POST "http://localhost:8080/api/v2/dags/ml-training-pipeline/enqueue" \
 ### Get Logs with Pagination
 ```bash
 # Get last 100 lines of a DAG run log
-curl "http://localhost:8080/api/v2/dag-runs/etl-pipeline/20240211_120000/log?tail=100"
+curl "http://localhost:8080/api/v1/dag-runs/etl-pipeline/20240211_120000/log?tail=100"
 
 # Get specific step's stderr output
-curl "http://localhost:8080/api/v2/dag-runs/etl-pipeline/20240211_120000/steps/transform/log?stream=stderr"
+curl "http://localhost:8080/api/v1/dag-runs/etl-pipeline/20240211_120000/steps/transform/log?stream=stderr"
 
 # Get logs with offset and limit
-curl "http://localhost:8080/api/v2/dag-runs/etl-pipeline/20240211_120000/log?offset=1000&limit=500"
+curl "http://localhost:8080/api/v1/dag-runs/etl-pipeline/20240211_120000/log?offset=1000&limit=500"
 ```
 
 ### Working with Sub DAGs
 ```bash
 # Get all sub DAG runs with timing information
-curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs" \
+curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs" \
      -H "Authorization: Bearer your-token"
 
 # Get sub DAG run details
-curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456" \
+curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456" \
      -H "Authorization: Bearer your-token"
 
 # Get sub DAG step log
-curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456/steps/load_data/log" \
+curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456/steps/load_data/log" \
      -H "Authorization: Bearer your-token"
 
 # Update sub DAG step status
-curl -X PATCH "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456/steps/load_data/status" \
+curl -X PATCH "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456/steps/load_data/status" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{"status": 4}'
@@ -2181,7 +2181,7 @@ curl -X PATCH "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20
 
 ### Rename a DAG
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dags/old-pipeline-name/rename" \
+curl -X POST "http://localhost:8080/api/v1/dags/old-pipeline-name/rename" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{"newFileName": "new-pipeline-name"}'
@@ -2191,7 +2191,7 @@ curl -X POST "http://localhost:8080/api/v2/dags/old-pipeline-name/rename" \
 
 ### Delete a DAG
 ```bash
-curl -X DELETE "http://localhost:8080/api/v2/dags/deprecated-pipeline" \
+curl -X DELETE "http://localhost:8080/api/v1/dags/deprecated-pipeline" \
      -H "Authorization: Bearer your-token"
 ```
 
@@ -2199,7 +2199,7 @@ curl -X DELETE "http://localhost:8080/api/v2/dags/deprecated-pipeline" \
 
 ### Get DAG Specification YAML
 ```bash
-curl "http://localhost:8080/api/v2/dags/data-processing-pipeline/spec" \
+curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
      -H "Authorization: Bearer your-token"
 ```
 
@@ -2218,40 +2218,40 @@ curl "http://localhost:8080/api/v2/dags/data-processing-pipeline/spec" \
 ### Complex Filtering Examples
 ```bash
 # Get all failed DAG runs in the last 24 hours
-curl "http://localhost:8080/api/v2/dag-runs?status=2&fromDate=$(date -d '24 hours ago' +%s)" \
+curl "http://localhost:8080/api/v1/dag-runs?status=2&fromDate=$(date -d '24 hours ago' +%s)" \
      -H "Authorization: Bearer your-token"
 
 # Get DAG runs for a specific DAG with pagination
-curl "http://localhost:8080/api/v2/dag-runs?name=data-processing-pipeline&page=2&perPage=20" \
+curl "http://localhost:8080/api/v1/dag-runs?name=data-processing-pipeline&page=2&perPage=20" \
      -H "Authorization: Bearer your-token"
 
 # Search for DAGs with specific tags
-curl "http://localhost:8080/api/v2/dags?tags=production&page=1&perPage=50" \
+curl "http://localhost:8080/api/v1/dags?tags=production&page=1&perPage=50" \
      -H "Authorization: Bearer your-token"
 
 # Get running DAG runs
-curl "http://localhost:8080/api/v2/dag-runs?status=1" \
+curl "http://localhost:8080/api/v1/dag-runs?status=1" \
      -H "Authorization: Bearer your-token"
 
 # Get queued DAG runs
-curl "http://localhost:8080/api/v2/dag-runs?status=5" \
+curl "http://localhost:8080/api/v1/dag-runs?status=5" \
      -H "Authorization: Bearer your-token"
 
 # View all execution queues with running and queued DAG runs
-curl "http://localhost:8080/api/v2/queues" \
+curl "http://localhost:8080/api/v1/queues" \
      -H "Authorization: Bearer your-token"
 ```
 
 ### Suspend/Resume DAG Scheduling
 ```bash
 # Suspend a DAG
-curl -X POST "http://localhost:8080/api/v2/dags/data-processing-pipeline/suspend" \
+curl -X POST "http://localhost:8080/api/v1/dags/data-processing-pipeline/suspend" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{"suspend": true}'
 
 # Resume a DAG
-curl -X POST "http://localhost:8080/api/v2/dags/data-processing-pipeline/suspend" \
+curl -X POST "http://localhost:8080/api/v1/dags/data-processing-pipeline/suspend" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your-token" \
      -d '{"suspend": false}'
@@ -2280,7 +2280,7 @@ API key management endpoints require Builtin Authentication mode and admin role.
 
 ### List API Keys
 
-**Endpoint**: `GET /api/v2/api-keys`
+**Endpoint**: `GET /api/v1/api-keys`
 
 Retrieves all API keys. Requires admin role.
 
@@ -2305,7 +2305,7 @@ Retrieves all API keys. Requires admin role.
 
 ### Create API Key
 
-**Endpoint**: `POST /api/v2/api-keys`
+**Endpoint**: `POST /api/v1/api-keys`
 
 Creates a new API key. Requires admin role.
 
@@ -2356,7 +2356,7 @@ The `key` field contains the full API key secret and is **only returned once** a
 
 ### Get API Key
 
-**Endpoint**: `GET /api/v2/api-keys/{keyId}`
+**Endpoint**: `GET /api/v1/api-keys/{keyId}`
 
 Retrieves a specific API key by ID. Requires admin role.
 
@@ -2387,7 +2387,7 @@ Retrieves a specific API key by ID. Requires admin role.
 
 ### Update API Key
 
-**Endpoint**: `PATCH /api/v2/api-keys/{keyId}`
+**Endpoint**: `PATCH /api/v1/api-keys/{keyId}`
 
 Updates an API key's metadata. Requires admin role.
 
@@ -2429,7 +2429,7 @@ All fields are optional. Only provided fields are updated.
 
 ### Delete API Key
 
-**Endpoint**: `DELETE /api/v2/api-keys/{keyId}`
+**Endpoint**: `DELETE /api/v1/api-keys/{keyId}`
 
 Deletes (revokes) an API key. Requires admin role.
 
@@ -2447,12 +2447,12 @@ Deletes (revokes) an API key. Requires admin role.
 
 ```bash
 # 1. Login as admin to get JWT token
-TOKEN=$(curl -s -X POST http://localhost:8080/api/v2/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin-password"}' | jq -r '.token')
 
 # 2. Create an API key
-API_KEY=$(curl -s -X POST http://localhost:8080/api/v2/api-keys \
+API_KEY=$(curl -s -X POST http://localhost:8080/api/v1/api-keys \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "automation", "role": "operator"}' | jq -r '.key')
@@ -2461,10 +2461,10 @@ echo "Created API key: $API_KEY"
 
 # 3. Use the API key for subsequent requests
 curl -H "Authorization: Bearer $API_KEY" \
-  http://localhost:8080/api/v2/dags
+  http://localhost:8080/api/v1/dags
 
 # 4. Start a DAG with the API key
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/start \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/start \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"params": "{\"env\": \"production\"}"}'
@@ -2478,7 +2478,7 @@ Webhook management endpoints require Builtin Authentication mode and admin role.
 
 ### Trigger DAG via Webhook
 
-**Endpoint**: `POST /api/v2/webhooks/{fileName}`
+**Endpoint**: `POST /api/v1/webhooks/{fileName}`
 
 Triggers a DAG execution using a webhook token. This endpoint uses webhook token authentication instead of regular API authentication.
 
@@ -2548,7 +2548,7 @@ Triggers a DAG execution using a webhook token. This endpoint uses webhook token
 
 ### List All Webhooks
 
-**Endpoint**: `GET /api/v2/webhooks`
+**Endpoint**: `GET /api/v1/webhooks`
 
 Retrieves all webhooks. Requires admin role.
 
@@ -2572,7 +2572,7 @@ Retrieves all webhooks. Requires admin role.
 
 ### Get DAG Webhook
 
-**Endpoint**: `GET /api/v2/dags/{fileName}/webhook`
+**Endpoint**: `GET /api/v1/dags/{fileName}/webhook`
 
 Retrieves the webhook for a specific DAG. Requires admin role.
 
@@ -2600,7 +2600,7 @@ Retrieves the webhook for a specific DAG. Requires admin role.
 
 ### Create DAG Webhook
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/webhook`
+**Endpoint**: `POST /api/v1/dags/{fileName}/webhook`
 
 Creates a webhook for a DAG. Requires admin role. Each DAG can only have one webhook.
 
@@ -2642,7 +2642,7 @@ The `token` field contains the full webhook token and is **only returned once** 
 
 ### Delete DAG Webhook
 
-**Endpoint**: `DELETE /api/v2/dags/{fileName}/webhook`
+**Endpoint**: `DELETE /api/v1/dags/{fileName}/webhook`
 
 Deletes the webhook for a DAG. Requires admin role.
 
@@ -2658,7 +2658,7 @@ Deletes the webhook for a DAG. Requires admin role.
 
 ### Regenerate Webhook Token
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/webhook/regenerate`
+**Endpoint**: `POST /api/v1/dags/{fileName}/webhook/regenerate`
 
 Regenerates the token for a webhook. The old token is immediately invalidated. Requires admin role.
 
@@ -2688,7 +2688,7 @@ Regenerates the token for a webhook. The old token is immediately invalidated. R
 
 ### Toggle Webhook
 
-**Endpoint**: `POST /api/v2/dags/{fileName}/webhook/toggle`
+**Endpoint**: `POST /api/v1/dags/{fileName}/webhook/toggle`
 
 Enables or disables a webhook without regenerating the token. Requires admin role.
 
@@ -2725,29 +2725,29 @@ Enables or disables a webhook without regenerating the token. Requires admin rol
 
 ```bash
 # 1. Login as admin to get JWT token
-TOKEN=$(curl -s -X POST http://localhost:8080/api/v2/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin-password"}' | jq -r '.token')
 
 # 2. Create a webhook for a DAG
-WEBHOOK=$(curl -s -X POST http://localhost:8080/api/v2/dags/my-dag/webhook \
+WEBHOOK=$(curl -s -X POST http://localhost:8080/api/v1/dags/my-dag/webhook \
   -H "Authorization: Bearer $TOKEN")
 
 WEBHOOK_TOKEN=$(echo $WEBHOOK | jq -r '.token')
 echo "Webhook token: $WEBHOOK_TOKEN"
 
 # 3. Trigger the DAG using the webhook
-curl -X POST http://localhost:8080/api/v2/webhooks/my-dag \
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
   -H "Authorization: Bearer $WEBHOOK_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"payload": {"branch": "main", "commit": "abc123"}}'
 
 # 4. Regenerate token if compromised
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook/regenerate \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/regenerate \
   -H "Authorization: Bearer $TOKEN"
 
 # 5. Disable webhook temporarily
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook/toggle \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/toggle \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"enabled": false}'
@@ -2757,7 +2757,7 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook/toggle \
 
 ### List Workers
 
-**Endpoint**: `GET /api/v2/workers`
+**Endpoint**: `GET /api/v1/workers`
 
 Retrieves information about connected workers in the distributed execution system.
 
@@ -2853,7 +2853,7 @@ Retrieves information about connected workers in the distributed execution syste
 
 - Current version: v2
 - Legacy v1 endpoints are deprecated but still available
-- Version is included in the URL path: `/api/v2/`
+- Version is included in the URL path: `/api/v1/`
 - Breaking changes will result in a new API version
 
 ## Remote Node Support
@@ -2862,7 +2862,7 @@ Most endpoints support the `remoteNode` query parameter for multi-environment se
 
 ```bash
 # Query a remote node
-curl "http://localhost:8080/api/v2/dags?remoteNode=production" \
+curl "http://localhost:8080/api/v1/dags?remoteNode=production" \
      -H "Authorization: Bearer your-token"
 ```
 

@@ -111,7 +111,7 @@ When rejecting, you can optionally provide a reason that will be recorded with t
 #### Approve a Step
 
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dag-runs/{name}/{dagRunId}/steps/{stepName}/approve" \
+curl -X POST "http://localhost:8080/api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/approve" \
   -H "Content-Type: application/json" \
   -d '{
     "inputs": {
@@ -124,7 +124,7 @@ curl -X POST "http://localhost:8080/api/v2/dag-runs/{name}/{dagRunId}/steps/{ste
 #### Reject a Step
 
 ```bash
-curl -X POST "http://localhost:8080/api/v2/dag-runs/{name}/{dagRunId}/steps/{stepName}/reject" \
+curl -X POST "http://localhost:8080/api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/reject" \
   -H "Content-Type: application/json" \
   -d '{
     "reason": "Deployment blocked due to pending security review"

@@ -28,12 +28,12 @@ API keys require [Builtin Authentication](builtin) to be enabled.
 
 ```bash
 # First, authenticate to get a JWT token
-TOKEN=$(curl -s -X POST http://localhost:8080/api/v2/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "your-password"}' | jq -r '.token')
 
 # Create an API key
-curl -X POST http://localhost:8080/api/v2/api-keys \
+curl -X POST http://localhost:8080/api/v1/api-keys \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -70,7 +70,7 @@ API keys are used as Bearer tokens in the `Authorization` header:
 
 ```bash
 curl -H "Authorization: Bearer dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B" \
-  http://localhost:8080/api/v2/dags
+  http://localhost:8080/api/v1/dags
 ```
 
 ### CLI Usage
@@ -102,7 +102,7 @@ jobs:
         env:
           DAGU_API_KEY: ${{ secrets.DAGU_API_KEY }}
         run: |
-          curl -X POST "https://dagu.example.com/api/v2/dags/deploy-pipeline/start" \
+          curl -X POST "https://dagu.example.com/api/v1/dags/deploy-pipeline/start" \
             -H "Authorization: Bearer $DAGU_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{"params": "{\"version\": \"${{ github.sha }}\"}"}'
@@ -115,7 +115,7 @@ deploy:
   stage: deploy
   script:
     - |
-      curl -X POST "https://dagu.example.com/api/v2/dags/deploy-pipeline/start" \
+      curl -X POST "https://dagu.example.com/api/v1/dags/deploy-pipeline/start" \
         -H "Authorization: Bearer $DAGU_API_KEY" \
         -H "Content-Type: application/json" \
         -d "{\"params\": \"{\\\"version\\\": \\\"$CI_COMMIT_SHA\\\"}\"}"
@@ -131,7 +131,7 @@ API keys can authenticate requests from other Dagu servers configured as [remote
 # On the main server, configure a remote node using an API key
 remoteNodes:
   - name: production
-    apiBaseURL: https://prod.example.com/api/v2
+    apiBaseURL: https://prod.example.com/api/v1
     isAuthToken: true
     authToken: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
@@ -155,7 +155,7 @@ API keys inherit the same role-based permissions as users:
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/api/v2/api-keys
+  http://localhost:8080/api/v1/api-keys
 ```
 
 **Response**:
@@ -181,13 +181,13 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/api/v2/api-keys/{key-id}
+  http://localhost:8080/api/v1/api-keys/{key-id}
 ```
 
 ### Update API Key
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v2/api-keys/{key-id} \
+curl -X PATCH http://localhost:8080/api/v1/api-keys/{key-id} \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -200,7 +200,7 @@ curl -X PATCH http://localhost:8080/api/v2/api-keys/{key-id} \
 ### Delete API Key
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v2/api-keys/{key-id} \
+curl -X DELETE http://localhost:8080/api/v1/api-keys/{key-id} \
   -H "Authorization: Bearer $TOKEN"
 ```
 

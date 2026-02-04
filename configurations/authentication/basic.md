@@ -42,11 +42,11 @@ export DAGU_BASICAUTH_PASSWORD=secure-password
 
 ```bash
 # Basic auth header
-curl -u admin:secure-password http://localhost:8080/api/v2/dags
+curl -u admin:secure-password http://localhost:8080/api/v1/dags
 
 # Or with Authorization header
 curl -H "Authorization: Basic $(echo -n admin:secure-password | base64)" \
-     http://localhost:8080/api/v2/dags
+     http://localhost:8080/api/v1/dags
 ```
 
 ## Notes

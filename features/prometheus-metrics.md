@@ -7,7 +7,7 @@ Dagu exposes Prometheus metrics for monitoring workflow execution, system health
 Metrics are available at:
 
 ```
-GET /api/v2/metrics
+GET /api/v1/metrics
 ```
 
 ## Access Control
@@ -125,7 +125,7 @@ scrape_configs:
     bearer_token: 'your-api-token'
     static_configs:
       - targets: ['dagu:8080']
-    metrics_path: '/api/v2/metrics'
+    metrics_path: '/api/v1/metrics'
 ```
 
 **Using Basic Auth:**
@@ -137,7 +137,7 @@ scrape_configs:
       password: 'secret'
     static_configs:
       - targets: ['dagu:8080']
-    metrics_path: '/api/v2/metrics'
+    metrics_path: '/api/v1/metrics'
 ```
 
 ### Public Mode
@@ -149,7 +149,7 @@ scrape_configs:
   - job_name: 'dagu'
     static_configs:
       - targets: ['dagu:8080']
-    metrics_path: '/api/v2/metrics'
+    metrics_path: '/api/v1/metrics'
 ```
 
 ## Example Queries

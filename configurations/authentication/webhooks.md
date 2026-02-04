@@ -34,12 +34,12 @@ When authentication is disabled (`auth.mode: none`), all webhook endpoints retur
 
 ```bash
 # First, authenticate to get a JWT token
-TOKEN=$(curl -s -X POST http://localhost:8080/api/v2/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "your-password"}' | jq -r '.token')
 
 # Create a webhook for a DAG
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -68,7 +68,7 @@ The `token` field contains the full webhook token and is **only returned once** 
 ### Basic Request
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/webhooks/my-dag \
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
   -H "Authorization: Bearer dagu_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 ```
 
@@ -85,7 +85,7 @@ curl -X POST http://localhost:8080/api/v2/webhooks/my-dag \
 You can pass data to your DAG via the request body. The payload is made available as the `WEBHOOK_PAYLOAD` environment variable:
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/webhooks/my-dag \
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
   -H "Authorization: Bearer dagu_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B" \
   -H "Content-Type: application/json" \
   -d '{"branch": "main", "commit": "abc123"}'
@@ -118,7 +118,7 @@ Dagu automatically parses the JSON payload and allows direct field access using 
 To prevent duplicate executions, you can specify a custom `dagRunId`:
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/webhooks/my-dag \
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
   -H "Authorization: Bearer $WEBHOOK_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"dagRunId": "deploy-abc123"}'
@@ -132,7 +132,7 @@ If a DAG run with the same ID already exists, the request will return a `409 Con
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/api/v2/webhooks
+  http://localhost:8080/api/v1/webhooks
 ```
 
 **Response**:
@@ -157,7 +157,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/api/v2/dags/my-dag/webhook
+  http://localhost:8080/api/v1/dags/my-dag/webhook
 ```
 
 ### Regenerate Token
@@ -165,7 +165,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 If a token is compromised or needs rotation:
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook/regenerate \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/regenerate \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -176,7 +176,7 @@ This returns a new token. The old token is immediately invalidated.
 Temporarily disable a webhook without deleting it:
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook/toggle \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/toggle \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"enabled": false}'
@@ -185,7 +185,7 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag/webhook/toggle \
 ### Delete Webhook
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v2/dags/my-dag/webhook \
+curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -243,7 +243,7 @@ jobs:
 
       - name: Trigger Dagu DAG
         run: |
-          curl -X POST "${{ secrets.DAGU_URL }}/api/v2/webhooks/deploy-pipeline" \
+          curl -X POST "${{ secrets.DAGU_URL }}/api/v1/webhooks/deploy-pipeline" \
             -H "Authorization: Bearer ${{ secrets.DAGU_WEBHOOK_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
@@ -260,7 +260,7 @@ deploy:
   stage: deploy
   script:
     - |
-      curl -X POST "$DAGU_URL/api/v2/webhooks/deploy-pipeline" \
+      curl -X POST "$DAGU_URL/api/v1/webhooks/deploy-pipeline" \
         -H "Authorization: Bearer $DAGU_WEBHOOK_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{
@@ -276,7 +276,7 @@ Configure GitHub to send repository events to Dagu:
 
 1. In your GitHub repository, go to **Settings** > **Webhooks**
 2. Add a new webhook with:
-   - **Payload URL**: `https://dagu.example.com/api/v2/webhooks/github-events`
+   - **Payload URL**: `https://dagu.example.com/api/v1/webhooks/github-events`
    - **Content type**: `application/json`
    - **Secret**: (not used, authentication via Bearer token)
 
@@ -284,7 +284,7 @@ Note: For GitHub webhooks, you'll need to configure a reverse proxy to add the A
 
 **Nginx example:**
 ```nginx
-location /api/v2/webhooks/github-events {
+location /api/v1/webhooks/github-events {
     proxy_pass http://localhost:8080;
     proxy_set_header Authorization "Bearer YOUR_API_TOKEN";
     proxy_set_header Host $host;
@@ -316,7 +316,7 @@ import requests
 
 def trigger_dagu_dag(dag_name: str, payload: dict):
     response = requests.post(
-        f"https://dagu.example.com/api/v2/webhooks/{dag_name}",
+        f"https://dagu.example.com/api/v1/webhooks/{dag_name}",
         headers={
             "Authorization": f"Bearer {WEBHOOK_TOKEN}",
             "Content-Type": "application/json"

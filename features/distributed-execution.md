@@ -316,7 +316,7 @@ Access the Workers page in the Web UI to monitor:
 ```bash
 # Get worker status via API
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/api/v2/workers
+  http://localhost:8080/api/v1/workers
 
 # Response
 {

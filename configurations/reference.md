@@ -11,7 +11,7 @@ Default: `~/.config/dagu/config.yaml`
 host: "127.0.0.1"
 port: 8080
 basePath: ""              # For reverse proxy (e.g., "/dagu")
-apiBasePath: "/api/v2"    # API endpoint base path
+apiBasePath: "/api/v1"    # API endpoint base path
 tz: "America/New_York"
 debug: false
 logFormat: "text"         # "text" or "json"
@@ -113,12 +113,12 @@ queues:
 # Remote Nodes
 remoteNodes:
   - name: "staging"
-    apiBaseURL: "https://staging.example.com/api/v2"
+    apiBaseURL: "https://staging.example.com/api/v1"
     isBasicAuth: true
     basicAuthUsername: "admin"
     basicAuthPassword: "password"
   - name: "production"
-    apiBaseURL: "https://prod.example.com/api/v2"
+    apiBaseURL: "https://prod.example.com/api/v1"
     isAuthToken: true
     authToken: "prod-token"
     skipTLSVerify: false
@@ -457,12 +457,12 @@ ui:
 ```yaml
 remoteNodes:
   - name: staging
-    apiBaseURL: https://staging.example.com/api/v2
+    apiBaseURL: https://staging.example.com/api/v1
     isAuthToken: true
     authToken: ${STAGING_TOKEN}
     
   - name: production
-    apiBaseURL: https://prod.example.com/api/v2
+    apiBaseURL: https://prod.example.com/api/v1
     isAuthToken: true
     authToken: ${PROD_TOKEN}
 ```
@@ -498,7 +498,7 @@ peer:
 ## Default Values
 
 ### Key Defaults
-- `apiBasePath`: `/api/v2`
+- `apiBasePath`: `/api/v1`
 - `queues.enabled`: `true`
 - `permissions.writeDAGs`: `true`
 - `permissions.runDAGs`: `true`

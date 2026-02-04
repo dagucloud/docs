@@ -142,13 +142,13 @@ The Outputs tab displays:
 Retrieve outputs programmatically:
 
 ```bash
-GET /api/v2/dag-runs/{name}/{dagRunId}/outputs
+GET /api/v1/dag-runs/{name}/{dagRunId}/outputs
 ```
 
 **Example request:**
 
 ```bash
-curl http://localhost:8080/api/v2/dag-runs/my-workflow/abc123/outputs
+curl http://localhost:8080/api/v1/dag-runs/my-workflow/abc123/outputs
 ```
 
 **Example response:**
@@ -174,7 +174,7 @@ curl http://localhost:8080/api/v2/dag-runs/my-workflow/abc123/outputs
 Use `latest` as the run ID to get the most recent run's outputs:
 
 ```bash
-GET /api/v2/dag-runs/my-workflow/latest/outputs
+GET /api/v1/dag-runs/my-workflow/latest/outputs
 ```
 
 ### File Location
@@ -376,13 +376,13 @@ steps:
 
 ```bash
 # Get outputs from a specific run
-curl -s http://localhost:8080/api/v2/dag-runs/etl-pipeline/abc123/outputs | jq '.outputs'
+curl -s http://localhost:8080/api/v1/dag-runs/etl-pipeline/abc123/outputs | jq '.outputs'
 
 # Get outputs from the latest run
-curl -s http://localhost:8080/api/v2/dag-runs/etl-pipeline/latest/outputs | jq '.outputs.loadedRows'
+curl -s http://localhost:8080/api/v1/dag-runs/etl-pipeline/latest/outputs | jq '.outputs.loadedRows'
 
 # Check if run succeeded before using outputs
-status=$(curl -s http://localhost:8080/api/v2/dag-runs/etl-pipeline/latest/outputs | jq -r '.metadata.status')
+status=$(curl -s http://localhost:8080/api/v1/dag-runs/etl-pipeline/latest/outputs | jq -r '.metadata.status')
 if [ "$status" = "succeeded" ]; then
   echo "Pipeline completed successfully"
 fi

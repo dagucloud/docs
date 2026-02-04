@@ -52,10 +52,10 @@ openssl req -new -key server.key -out server.csr \
 
 ```bash
 # With self-signed certificate
-curl -k https://localhost:8080/api/v2/dags
+curl -k https://localhost:8080/api/v1/dags
 
 # With CA-signed certificate
-curl https://dagu.example.com/api/v2/dags
+curl https://dagu.example.com/api/v1/dags
 ```
 
 ## Multi-Environment Setup

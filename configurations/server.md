@@ -29,7 +29,7 @@ Location: `~/.config/dagu/config.yaml`
 host: "127.0.0.1"         # Web UI binding host
 port: 8080                # Web UI binding port
 basePath: ""              # Base path for reverse proxy (e.g., "/dagu")
-apiBasePath: "/api/v2"    # API endpoint base path
+apiBasePath: "/api/v1"    # API endpoint base path
 tz: "Asia/Tokyo"          # Server timezone
 debug: false              # Debug mode
 logFormat: "text"         # Log format: "text" or "json"
@@ -131,12 +131,12 @@ queues:
 # Remote Nodes
 remoteNodes:
   - name: "staging"
-    apiBaseURL: "https://staging.example.com/api/v2"
+    apiBaseURL: "https://staging.example.com/api/v1"
     isBasicAuth: true
     basicAuthUsername: "admin"
     basicAuthPassword: "password"
   - name: "production"
-    apiBaseURL: "https://prod.example.com/api/v2"
+    apiBaseURL: "https://prod.example.com/api/v1"
     isAuthToken: true
     authToken: "prod-token"
     skipTLSVerify: false
@@ -289,7 +289,7 @@ auth:
 
 ```bash
 curl -H "Authorization: Bearer your-token" \
-  http://localhost:8080/api/v2/dags
+  http://localhost:8080/api/v1/dags
 ```
 
 ### OIDC Authentication
@@ -396,13 +396,13 @@ export DAGU_UI_LOG_ENCODING_CHARSET="shift_jis"
 ```yaml
 remoteNodes:
   - name: "production"
-    apiBaseURL: "https://prod.example.com/api/v2"
+    apiBaseURL: "https://prod.example.com/api/v1"
     isBasicAuth: true
     basicAuthUsername: "admin"
     basicAuthPassword: "${PROD_PASSWORD}"
     
   - name: "staging"
-    apiBaseURL: "https://staging.example.com/api/v2"
+    apiBaseURL: "https://staging.example.com/api/v1"
     isAuthToken: true
     authToken: "${STAGING_TOKEN}"
 ```
@@ -443,7 +443,7 @@ See [Base Configuration](/configurations/base-config) for complete documentation
 
 ## Metrics Endpoint
 
-Dagu exposes Prometheus metrics at `/api/v2/metrics`. By default, this endpoint requires authentication.
+Dagu exposes Prometheus metrics at `/api/v1/metrics`. By default, this endpoint requires authentication.
 
 ### Configuration
 
@@ -470,7 +470,7 @@ scrape_configs:
     bearer_token: 'your-api-token'
     static_configs:
       - targets: ['dagu:8080']
-    metrics_path: '/api/v2/metrics'
+    metrics_path: '/api/v1/metrics'
 ```
 
 Or with basic auth:
@@ -482,7 +482,7 @@ scrape_configs:
       password: 'secret'
     static_configs:
       - targets: ['dagu:8080']
-    metrics_path: '/api/v2/metrics'
+    metrics_path: '/api/v1/metrics'
 ```
 
 When metrics is set to `public`, no authentication is needed:
@@ -491,7 +491,7 @@ scrape_configs:
   - job_name: 'dagu'
     static_configs:
       - targets: ['dagu:8080']
-    metrics_path: '/api/v2/metrics'
+    metrics_path: '/api/v1/metrics'
 ```
 
 ## Cache Configuration

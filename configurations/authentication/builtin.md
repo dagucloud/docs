@@ -108,7 +108,7 @@ On first startup with builtin auth enabled:
 
 ```bash
 # Get JWT token
-curl -X POST http://localhost:8080/api/v2/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "your-password"}'
 
@@ -121,20 +121,20 @@ curl -X POST http://localhost:8080/api/v2/auth/login \
 ```bash
 # Include token in Authorization header
 curl -H "Authorization: Bearer eyJhbG..." \
-  http://localhost:8080/api/v2/dags
+  http://localhost:8080/api/v1/dags
 ```
 
 ### Get Current User
 
 ```bash
 curl -H "Authorization: Bearer eyJhbG..." \
-  http://localhost:8080/api/v2/auth/me
+  http://localhost:8080/api/v1/auth/me
 ```
 
 ### Change Password (Self)
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/auth/change-password \
+curl -X POST http://localhost:8080/api/v1/auth/change-password \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"currentPassword": "old-pass", "newPassword": "new-pass"}'
@@ -146,13 +146,13 @@ curl -X POST http://localhost:8080/api/v2/auth/change-password \
 
 ```bash
 curl -H "Authorization: Bearer eyJhbG..." \
-  http://localhost:8080/api/v2/users
+  http://localhost:8080/api/v1/users
 ```
 
 ### Create User
 
 ```bash
-curl -X POST http://localhost:8080/api/v2/users \
+curl -X POST http://localhost:8080/api/v1/users \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"username": "newuser", "password": "secure-pass", "role": "operator"}'
@@ -161,7 +161,7 @@ curl -X POST http://localhost:8080/api/v2/users \
 ### Update User
 
 ```bash
-curl -X PUT http://localhost:8080/api/v2/users/{user-id} \
+curl -X PUT http://localhost:8080/api/v1/users/{user-id} \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"role": "manager"}'
@@ -170,7 +170,7 @@ curl -X PUT http://localhost:8080/api/v2/users/{user-id} \
 ### Reset User Password (Admin)
 
 ```bash
-curl -X PUT http://localhost:8080/api/v2/users/{user-id}/password \
+curl -X PUT http://localhost:8080/api/v1/users/{user-id}/password \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"newPassword": "new-secure-pass"}'
@@ -179,7 +179,7 @@ curl -X PUT http://localhost:8080/api/v2/users/{user-id}/password \
 ### Delete User
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v2/users/{user-id} \
+curl -X DELETE http://localhost:8080/api/v1/users/{user-id} \
   -H "Authorization: Bearer eyJhbG..."
 ```
 
@@ -189,13 +189,13 @@ Disabled users cannot log in or access the API, but their account is preserved:
 
 ```bash
 # Disable a user
-curl -X PATCH http://localhost:8080/api/v2/users/{user-id} \
+curl -X PATCH http://localhost:8080/api/v1/users/{user-id} \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"isDisabled": true}'
 
 # Enable a user
-curl -X PATCH http://localhost:8080/api/v2/users/{user-id} \
+curl -X PATCH http://localhost:8080/api/v1/users/{user-id} \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"isDisabled": false}'
@@ -254,14 +254,14 @@ Builtin authentication includes full API key management capabilities. API keys p
 
 ```bash
 # Create an API key via the API (requires admin JWT token)
-curl -X POST http://localhost:8080/api/v2/api-keys \
+curl -X POST http://localhost:8080/api/v1/api-keys \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "ci-pipeline", "role": "operator"}'
 
 # Use the API key
 curl -H "Authorization: Bearer dagu_your-api-key-here" \
-  http://localhost:8080/api/v2/dags
+  http://localhost:8080/api/v1/dags
 ```
 
 ### Key Features
