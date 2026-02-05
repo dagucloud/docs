@@ -78,6 +78,21 @@ steps:
 
 In this example, `$HOME` is not defined in the DAG scope, so it passes through unchanged to the remote shell. `${DEPLOY_BRANCH}` is defined in the DAG `env:`, so Dagu expands it before sending.
 
+### Literal Dollar Signs
+
+In non-shell contexts (docker, http, ssh, jq, mail, etc.), you can emit a literal `$` by escaping it with a backslash:
+
+```yaml
+env:
+  - PRICE: '\$9.99'   # Becomes $9.99 at runtime
+```
+
+Notes:
+- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and config fields).
+- Shell-executed commands keep native shell semantics. Use shell escaping there.
+- To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
+- In YAML, single quotes preserve backslashes; with double quotes, escape the backslash (e.g., `"\\$9.99"`).
+
 ### Loading from .env Files
 
 Load variables from dotenv files:

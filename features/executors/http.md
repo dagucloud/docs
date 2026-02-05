@@ -39,6 +39,19 @@ steps:
     command: POST https://api.example.com/resources
 ```
 
+If your body needs a literal `$`, use `\$` (non-shell contexts only):
+
+```yaml
+steps:
+  - name: price-example
+    type: http
+    config:
+      body: '{"price":"\$9.99"}'  # Becomes {"price":"$9.99"}
+      headers:
+        Content-Type: application/json
+    command: POST https://api.example.com/prices
+```
+
 ### Authentication
 
 ```yaml

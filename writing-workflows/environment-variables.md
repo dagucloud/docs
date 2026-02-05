@@ -207,6 +207,12 @@ These patterns work in all contexts:
 | `${VAR}` | Braced substitution | `${HOME}` → `/home/user` |
 | `$VAR` | Simple substitution | `$HOME` → `/home/user` |
 | `'$VAR'` | Single-quoted (no expansion) | `'$VAR'` → `'$VAR'` |
+| `\$` | Literal dollar (non-shell only) | `\$9.99` → `$9.99` |
+
+**Notes:**
+- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and config fields).
+- Shell-executed commands keep native shell semantics. Use shell escaping there.
+- To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 
 ### Unknown Variable Handling
 
