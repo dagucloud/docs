@@ -148,6 +148,18 @@ steps:
     command: echo "Local home was ${LOCAL_HOME}, remote home is $HOME"
 ```
 
+The same rule applies to SSH **config fields** (`user`, `host`, `key`, `password`, etc.). A reference like `key: $HOME/.ssh/deploy_key` will not expand `$HOME` because it is not DAG-scoped. Import it first:
+
+```yaml
+env:
+  - HOME_DIR: ${HOME}
+
+ssh:
+  user: deploy
+  host: app.example.com
+  key: ${HOME_DIR}/.ssh/deploy_key  # Expanded — HOME_DIR is DAG-scoped
+```
+
 The `shell` field controls whether POSIX shell expansion features (default values, parameter substitution like `${VAR:-default}`) are available — it does not affect whether OS variables are expanded.
 
 ### SSH Key Auto-Detection

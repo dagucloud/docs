@@ -49,6 +49,22 @@ smtp:
   password: "${AWS_SES_SMTP_PASSWORD}"
 ```
 
+### Variable Expansion
+
+`${VAR}` references in `smtp` fields expand only DAG-scoped variables (`env:`, `params:`, `secrets:`, step outputs). OS environment variables are **not** expanded. If your SMTP credentials come from the OS environment, import them in the `env:` block:
+
+```yaml
+env:
+  - SMTP_USER: ${SMTP_USER}  # Import from OS environment
+  - SMTP_PASS: ${SMTP_PASS}
+
+smtp:
+  host: "smtp.gmail.com"
+  port: "587"
+  username: "${SMTP_USER}"  # Expanded — DAG-scoped
+  password: "${SMTP_PASS}"
+```
+
 ## Examples
 
 ### Multiple Recipients

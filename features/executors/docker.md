@@ -413,7 +413,9 @@ steps:
 
 ## Registry Authentication
 
-Access private container registries with authentication configured at the DAG level:
+Access private container registries with authentication configured at the DAG level.
+
+`${VAR}` references in `registryAuths` fields expand only DAG-scoped variables (`env:`, `params:`, `secrets:`, step outputs). OS environment variables are **not** expanded — define them in the `env:` block first.
 
 ```yaml
 registryAuths:
