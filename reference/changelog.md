@@ -392,6 +392,8 @@
 
 ### Fixed
 
+- **Sub-DAG Loading with Long Names**: Fixed a bug where sub-DAG execution failed for DAG names near the 40-character limit. Temp file naming now truncates the DAG name prefix so the generated filename (without extension) never exceeds the `DAGNameMaxLen` validation limit.
+
 - **Sub-DAG Spec View**: Fixed "file not found" error when viewing the spec tab for sub-DAG runs in the UI. Added dedicated API endpoint `/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/spec` that properly retrieves specs from the parent-child storage hierarchy.
 
 - **Container Step Output Capture**: Fixed an issue where `container.command` was not executed when specified inside the container block without a top-level `command` field. Now `container.command` is properly used as the command to run, and output is correctly captured.
@@ -407,6 +409,8 @@
           - '{"name": "Alice", "age": 30}'
       output: RESULT  # Output is now captured
   ```
+
+- **Sub-DAG Error Masking in Parallel Execution**: Fixed an issue where sub-DAG failures produced the cryptic error "no results available for node status determination" instead of the actual cause. When a child subprocess fails before writing status data, the error is now properly propagated with process exit details and captured stderr. Affected `node.go`, `dag_runner.go`, `parallel.go`, and `dag.go`.
 
 ## v1.30.0 (2026-01-04)
 
