@@ -194,7 +194,6 @@ All options support `DAGU_` prefix.
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
 - `DAGU_DAGS_DIR` - DAG definitions
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
-- `DAGU_WORK_DIR` - Default working directory
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
 - `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags
