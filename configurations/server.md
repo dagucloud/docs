@@ -576,7 +576,7 @@ export DAGU_AUDIT_RETENTION_DAYS=30
 
 Audit log files are automatically cleaned up based on the `retentionDays` setting:
 
-- **Default**: 7 days
+- **Default**: 7 days (keeps today plus the 7 previous days)
 - **Disable cleanup**: Set to `0` to keep logs forever
 - Cleanup runs on startup, then every 24 hours
 - Dates are evaluated in UTC
