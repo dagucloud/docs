@@ -186,6 +186,10 @@ const fullSidebar = [
             text: "Docker Compose",
             link: "/configurations/deployment/docker-compose",
           },
+          {
+            text: "Kubernetes (Helm)",
+            link: "/configurations/deployment/kubernetes",
+          },
         ],
       },
       { text: "Operations", link: "/configurations/operations" },

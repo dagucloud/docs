@@ -7,3 +7,4 @@ Choose your deployment method:
 - [Docker Images](./docker-images.md) - Choose the right container tag
 - [Docker](./docker.md) - Run with Docker
 - [Docker Compose](./docker-compose.md) - Deploy with Docker Compose
+- [Kubernetes (Helm)](./kubernetes.md) - Deploy to Kubernetes with the Helm chart

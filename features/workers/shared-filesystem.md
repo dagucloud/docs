@@ -1,6 +1,6 @@
 # Shared Filesystem Mode
 
-In shared filesystem mode, workers share storage access with the coordinator. This is the traditional deployment model where all nodes have access to the same filesystem.
+In shared filesystem mode, workers share storage access with the coordinator. All nodes must have access to the same filesystem (NFS, EFS, Azure Files, etc.). For environments without shared storage, see [Shared Nothing Mode](./shared-nothing).
 
 ## Overview
 
@@ -31,9 +31,11 @@ In shared filesystem mode, workers share storage access with the coordinator. Th
 
 ## How It Works
 
-### Service Discovery
+### Service Registry
 
-Workers automatically register themselves in a file-based service registry:
+Workers automatically register themselves in a file-based service registry. Workers discover coordinators by scanning the registry directory — no manual coordinator address configuration is required.
+
+#### Registry Directory Structure
 
 ```
 {data}/service-registry/
@@ -44,7 +46,26 @@ Workers automatically register themselves in a file-based service registry:
     └── worker-cpu-02-host3-5678.json
 ```
 
-Workers discover coordinators by scanning the registry directory. No manual coordinator address configuration is required.
+#### Registration Process
+
+1. **Worker starts**: creates a registry file containing its ID, host, port, PID, and timestamp.
+2. **Heartbeat updates**: workers update their registry files every 10 seconds with the current timestamp, health status, and active task count.
+3. **Coordinator monitoring**: the coordinator continuously scans registry files to track available workers, detect unhealthy workers, and remove stale entries (no heartbeat for 30+ seconds).
+4. **Cleanup**: registry files are removed when a worker shuts down gracefully or when the heartbeat timeout is exceeded.
+
+#### Configuring the Registry Directory
+
+The registry directory must be accessible by all nodes:
+
+```yaml
+# config.yaml
+paths:
+  serviceRegistryDir: "/nfs/shared/dagu/service-registry"
+```
+
+```bash
+export DAGU_PATHS_SERVICE_REGISTRY_DIR=/nfs/shared/dagu/service-registry
+```
 
 ### Status Persistence
 
@@ -75,12 +96,12 @@ Workers write execution logs directly to the shared log directory:
 
 ## Requirements
 
-**Shared storage must be mounted at the same path on all nodes**, or configured via `DAGU_HOME` to point to the shared location.
+Shared storage must be mounted at the same path on all nodes, or configured via `DAGU_HOME` to point to the shared location.
 
 Required shared directories:
-- `{data}/service-registry/` - Worker registration and discovery
-- `{data}/dag-runs/` - Execution status
-- `{logs}/` - Execution logs (required for Web UI log display)
+- `{data}/service-registry/` — worker registration and discovery
+- `{data}/dag-runs/` — execution status
+- `{logs}/` — execution logs (required for Web UI log display)
 
 > [!NOTE]
 > DAG definitions (`dags/`) do **not** need to be shared. Workers receive DAG definitions via gRPC when tasks are dispatched.
@@ -226,23 +247,4 @@ spec:
             claimName: dagu-shared
 ```
 
-## Advantages
-
-- **Simple setup**: No additional configuration for status/log synchronization
-- **Real-time visibility**: Web UI immediately sees status and logs
-- **Service discovery**: Workers automatically find coordinators
-
-## Limitations
-
-- **Requires shared storage**: NFS, EFS, Azure Files, or similar
-- **Network dependency**: Shared storage must be reliably accessible
-- **Single failure domain**: Storage issues affect all nodes
-
-## When to Use
-
-Use shared filesystem mode when:
-
-- Running Docker Compose locally or on a single host
-- Kubernetes cluster with available `ReadWriteMany` storage
-- Infrastructure already has NFS or equivalent shared filesystem
-- Simplicity is preferred over storage independence
+For Helm-based Kubernetes deployment, see [Kubernetes (Helm)](/configurations/deployment/kubernetes).

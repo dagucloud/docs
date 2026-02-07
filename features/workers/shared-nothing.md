@@ -1,6 +1,6 @@
 # Shared Nothing Mode
 
-In shared nothing mode, workers operate without any shared filesystem access. All status updates and logs are transmitted to the coordinator via gRPC.
+In shared nothing mode, workers operate without any shared filesystem access. All status updates and logs are transmitted to the coordinator via gRPC. No shared storage is required, but status and logs depend on network connectivity to the coordinator.
 
 ## Overview
 
@@ -57,14 +57,11 @@ Workers stream stdout/stderr to the coordinator via the `StreamLogs` gRPC call:
 3. Coordinator writes to local log files, flushing every 64KB
 4. Worker sends final marker when execution completes
 
-Log streaming supports:
-- Separate stdout and stderr streams
-- Sequence numbers for ordering
-- Automatic reconnection on network failures
+Log streaming is best-effort: failures don't fail the step execution. Some logs may be lost if network issues occur during streaming.
 
 ### Zombie Detection
 
-The coordinator monitors worker heartbeats and automatically marks tasks as failed when workers become unresponsive:
+The coordinator monitors worker heartbeats and marks tasks as failed when workers become unresponsive:
 
 | Parameter | Value |
 |-----------|-------|
@@ -172,62 +169,15 @@ worker:
     connMaxIdleTime: 60    # Max idle time before closure (seconds)
 ```
 
-### Example Scenario
-
-Consider a worker with `maxOpenConns: 25` running 10 concurrent DAGs:
-
-- **Same DSN**: If all 10 DAGs connect to the same PostgreSQL server, they share the 25-connection pool
-- **Different DSNs**: If DAGs connect to 3 different PostgreSQL servers, connections are distributed among them, but the total across all servers is still limited to 25
-- **Connection reuse**: When a step completes, its connection returns to the pool for reuse by other steps
-
-### Best Practices
-
-**1. Size based on PostgreSQL limits**
-
-Set `maxOpenConns` based on your PostgreSQL server's `max_connections`:
+Size `maxOpenConns` based on your PostgreSQL server's `max_connections`:
 
 ```
 worker.postgresPool.maxOpenConns = PostgreSQL max_connections / number_of_workers / 2
 ```
 
-Example: PostgreSQL with `max_connections: 100`, 4 workers:
-- Per-worker limit: `100 / 4 / 2 = 12` (leaving headroom)
+Example: PostgreSQL with `max_connections: 100`, 4 workers → per-worker limit: `100 / 4 / 2 = 12` (leaving headroom).
 
-**2. Consider concurrent DAGs**
-
-Calculate maximum concurrent DAG executions:
-
-```
-max_concurrent_dags = worker.maxActiveRuns (default: 100)
-```
-
-If many DAGs use PostgreSQL simultaneously, ensure `maxOpenConns` is sufficient.
-
-**3. Idle connection management**
-
-- `maxIdleConns: 5` balances connection reuse vs resource usage
-- `connMaxIdleTime: 60` ensures idle connections don't persist indefinitely
-- `connMaxLifetime: 300` prevents stale connections
-
-**4. Monitor connection usage**
-
-Check PostgreSQL connection counts:
-
-```sql
-SELECT count(*) FROM pg_stat_activity WHERE application_name LIKE 'dagu%';
-```
-
-Expected: `≤ maxOpenConns × number_of_workers`
-
-### Important Notes
-
-::: warning Applies Only to PostgreSQL
-Global pool management applies **only to PostgreSQL**. SQLite steps always use 1 connection per step, regardless of worker mode.
-:::
-
-::: tip Non-Worker Mode
-When running DAGs directly (not via workers), PostgreSQL steps use fixed defaults: 1 max connection, 1 idle connection. The global pool is **not** used.
-:::
+Global pool management applies only to PostgreSQL. SQLite steps always use 1 connection per step. When running DAGs directly (not via workers), PostgreSQL steps use fixed defaults: 1 max connection, 1 idle connection.
 
 ## Kubernetes Deployment
 
@@ -295,6 +245,8 @@ spec:
             - "--worker.labels=region=us-east-1"
           # No volume mounts needed - all state via gRPC
 ```
+
+For Helm-based Kubernetes deployment, see [Kubernetes (Helm)](/configurations/deployment/kubernetes).
 
 ## Multi-Cluster Deployment
 
@@ -394,11 +346,6 @@ When the scheduler dispatches queued DAGs to workers:
 3. Worker receives status with the task (no local store access needed)
 4. Worker uses `previous_status` for retry operations
 
-This enables workers to perform retries without requiring:
-- Access to shared filesystem
-- Local `DAGRunStore` instance
-- Previous execution history on the worker
-
 ### Temporary File Cleanup
 
 Workers automatically clean up temporary files after each execution:
@@ -409,42 +356,3 @@ Workers automatically clean up temporary files after each execution:
 | Log directories | `/tmp/dagu/worker-logs/` | Each execution |
 
 Workers are safe to run on ephemeral nodes without risk of disk accumulation.
-
-## Advantages
-
-- **No shared storage**: Works in any environment
-- **Multi-cloud ready**: Workers can run anywhere with network access
-- **Simple infrastructure**: No NFS, EFS, or shared volumes needed
-- **Fault isolation**: Worker failures don't affect storage
-
-## Limitations
-
-### Network Dependency
-- Status updates and logs require network connectivity to the coordinator
-- If the coordinator is unreachable, status updates are lost (not queued)
-- Log streaming failures are non-fatal: steps succeed even if logs cannot be streamed
-
-### Cancellation Latency
-- Cancellation signals are delivered via heartbeat responses
-- Worst-case latency: 1 second (worker heartbeat interval)
-- Workers check for cancelled runs in each heartbeat response from coordinator
-
-### Log Streaming Behavior
-- Log streaming is **best-effort**: failures don't fail the step execution
-- Some logs may be lost if network issues occur during streaming
-- From `output.go`: *"Log streaming failures are non-fatal - they shouldn't fail an otherwise successful step execution. Lost logs are unfortunate but acceptable."*
-
-### Coordinator Availability
-- Single point for status persistence
-- If coordinator is down, workers continue executing but cannot report status
-- Zombie detection requires coordinator to be running
-
-## When to Use
-
-Use shared nothing mode when:
-
-- Kubernetes without `ReadWriteMany` storage
-- Multi-cloud or multi-cluster deployments
-- Containerized workloads in dynamic environments
-- Infrastructure without shared filesystem capability
-- Workers need to run on ephemeral nodes

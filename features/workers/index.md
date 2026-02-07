@@ -42,17 +42,6 @@ Workers are identified by a unique ID that defaults to `hostname@PID`. This can 
 dagu worker --worker.id=gpu-worker-01
 ```
 
-## Health Monitoring
-
-The coordinator tracks worker health based on heartbeat recency:
-
-| Status | Condition |
-|--------|-----------|
-| Healthy | Last heartbeat < 5 seconds ago |
-| Warning | Last heartbeat 5-15 seconds ago |
-| Unhealthy | Last heartbeat > 15 seconds ago |
-| Offline | No heartbeat for > 30 seconds |
-
 ## Deployment Modes
 
 Workers support two deployment modes based on your infrastructure:
@@ -68,15 +57,65 @@ Workers support two deployment modes based on your infrastructure:
 
 ### [Shared Filesystem Mode](./shared-filesystem)
 
-Traditional deployment where workers share filesystem access with the coordinator. Workers write status and logs directly to shared storage.
-
-**Best for**: Docker Compose deployments, single Kubernetes clusters with shared volumes (NFS, EFS, Azure Files).
+Workers share filesystem access with the coordinator. Workers write status and logs directly to shared storage.
 
 ### [Shared Nothing Mode](./shared-nothing)
 
 Workers operate without any shared storage. All communication happens via gRPC to the coordinator.
 
-**Best for**: Kubernetes deployments across multiple clusters, multi-cloud environments, containerized workloads without shared volumes.
+## Monitoring
+
+### Web UI Workers Page
+
+The Workers page in the Web UI shows:
+- Connected workers and their labels
+- Worker health status
+- Currently running tasks on each worker
+- Task hierarchy (root/parent/sub DAGs)
+
+### Health Status
+
+The coordinator tracks worker health based on heartbeat recency:
+
+| Status | Condition |
+|--------|-----------|
+| Healthy | Last heartbeat < 5 seconds ago |
+| Warning | Last heartbeat 5-15 seconds ago |
+| Unhealthy | Last heartbeat > 15 seconds ago |
+| Offline | No heartbeat for > 30 seconds |
+
+When a worker's heartbeat becomes stale (>30 seconds), the coordinator's zombie detector marks all running tasks from that worker as failed.
+
+### API Endpoint
+
+```bash
+# Get worker status via API
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/v1/workers
+```
+
+Response:
+
+```json
+{
+  "workers": [
+    {
+      "id": "worker-gpu-01",
+      "labels": {"gpu": "true", "memory": "64G"},
+      "health_status": "HEALTHY",
+      "last_heartbeat": "2024-02-11T12:00:00Z",
+      "running_tasks": [
+        {
+          "dag_name": "ml-pipeline",
+          "dag_run_id": "20240211_120000",
+          "root_dag_run_name": "ml-pipeline",
+          "started_at": "2024-02-11T12:00:00Z"
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Configuration Reference
 
@@ -108,13 +147,9 @@ worker:
     connMaxIdleTime: 60    # Idle connection timeout in seconds
 ```
 
-**Key Points:**
-- **Applies only in shared-nothing mode** (when `worker.coordinators` is configured)
-- **Prevents connection exhaustion** when multiple DAGs run concurrently in a single worker
-- **Shared across all PostgreSQL databases** accessed by the worker
-- **Does not apply to SQLite** - SQLite always uses 1 connection per step
+This applies only in shared-nothing mode and only to PostgreSQL. SQLite always uses 1 connection per step.
 
-See [Shared Nothing Mode - PostgreSQL Connection Pool Management](/features/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
+See [Shared Nothing Mode — PostgreSQL Connection Pool Management](/features/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
 
 ### Environment Variables
 

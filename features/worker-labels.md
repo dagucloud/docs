@@ -1,31 +1,18 @@
 # Worker Labels
 
-Worker labels allow you to tag workers with specific capabilities and route tasks to appropriate workers based on their requirements.
+Worker labels are key-value pairs that describe worker capabilities. The coordinator uses labels to match tasks to workers via the `workerSelector` field in DAG definitions.
 
-::: tip
-Worker labels are a key component of Dagu's [Distributed Execution](/features/distributed-execution) feature. Make sure to understand the distributed execution architecture before implementing worker labels.
-:::
+## Setting Labels
 
-## Configuring Worker Labels
-
-### Command Line
-
-Specify labels when starting a worker using the `--worker-labels` flag:
+### CLI Flag
 
 ```bash
-# GPU-enabled worker
 dagu worker --worker.labels gpu=true,memory=64G,region=us-east-1
-
-# CPU-optimized worker  
-dagu worker --worker.labels cpu-arch=amd64,cpu-cores=16,instance-type=m5.large
-
-# Region-specific worker
-dagu worker --worker.labels region=eu-west-1,compliance=gdpr
 ```
 
-### Configuration File
+Labels are comma-separated `key=value` pairs. Keys and values are trimmed of whitespace.
 
-Set labels in the configuration file:
+### Configuration File
 
 ```yaml
 # config.yaml
@@ -38,66 +25,112 @@ worker:
 
 ### Environment Variable
 
-Set labels via environment variable:
-
 ```bash
-export DAGU_WORKER_LABELS="gpu=true,memory=64G"
+export DAGU_WORKER_LABELS="gpu=true,memory=64G,region=us-east-1"
 dagu worker
 ```
 
-## Using Worker Selectors in DAGs
+## Matching Algorithm
 
-Specify `workerSelector` on any step to route it to workers with matching labels:
+The coordinator's `matchesSelector()` function evaluates whether a worker is eligible for a task:
+
+1. **Empty selector matches any worker** — a task without `workerSelector` (or with an empty map) can run on any available worker.
+2. **All selector key-value pairs must match exactly** — every key in the selector must exist in the worker's labels with an identical value. Matching is case-sensitive.
+3. **Workers can have extra labels** — a worker with `gpu=true,memory=64G,region=us-east-1` matches a selector of `gpu: "true"` because the worker satisfies all required keys. The extra `memory` and `region` labels are ignored.
+
+## DAG-Level `workerSelector`
+
+Set `workerSelector` at the top of a DAG file to route the entire DAG to a matching worker:
+
+```yaml
+workerSelector:
+  gpu: "true"
+
+steps:
+  - command: python train.py
+```
+
+When the coordinator dispatches this DAG, it selects a worker whose labels include `gpu=true`.
+
+## Step-Level `workerSelector`
+
+Set `workerSelector` on a step to dispatch that step's sub-DAG to a different worker than the parent:
 
 ```yaml
 steps:
-  # This task will only run on workers with gpu=true label
-  - call: train
+  - call: train-model
+    workerSelector:
+      gpu: "true"
+
+  - call: generate-report
+    workerSelector:
+      region: "us-east-1"
+```
+
+Step-level `workerSelector` is only valid on executor types that launch sub-DAGs:
+
+| Executor Type | Supports `workerSelector` |
+|---------------|--------------------------|
+| `dag` | Yes |
+| `subworkflow` | Yes |
+| `parallel` | Yes |
+| All others (`shell`, `http`, `docker`, etc.) | No — validation error |
+
+Setting `workerSelector` on an unsupported step type produces a validation error: `executor type "shell" does not support workerSelector field`.
+
+## `workerSelector: local`
+
+Setting `workerSelector` to the string `"local"` (case-insensitive) forces the DAG to run on the main instance, regardless of the `defaultExecutionMode` setting. This sets `ForceLocal=true` in the dispatch decision.
+
+```yaml
+workerSelector: local
+
+steps:
+  - command: curl -f http://localhost:8080/health
+```
+
+The string `"local"` is the only allowed string value for `workerSelector`. Any other string value produces a validation error.
+
+## Example: GPU/CPU Routing
+
+Workers:
+
+```bash
+# GPU worker
+dagu worker --worker.labels gpu=true,cuda=12.0
+
+# CPU worker
+dagu worker --worker.labels cpu-optimized=true,cores=64
+```
+
+DAG with both DAG-level and step-level selectors:
+
+```yaml
+# Parent DAG — runs on any worker (or locally)
+steps:
+  # Dispatched to a GPU worker
+  - call: train-model
+    workerSelector:
+      gpu: "true"
+
+  # Dispatched to a CPU worker
+  - call: aggregate-results
+    workerSelector:
+      cpu-optimized: "true"
 
 ---
-name: train
+name: train-model
 workerSelector:
   gpu: "true"
 steps:
   - command: python train.py
 
+---
+name: aggregate-results
+workerSelector:
+  cpu-optimized: "true"
+steps:
+  - command: python aggregate.py
 ```
 
-## Label Matching Rules
-
-1. **All labels must match**: A worker must have ALL labels specified in the `workerSelector` to be eligible
-2. **Empty selector**: Tasks without `workerSelector` can run on any worker
-3. **Exact match**: Label values must match exactly (case-sensitive)
-4. **Force local**: Setting `workerSelector: local` bypasses all label matching and forces the DAG to run locally on the main instance, even when `defaultExecutionMode` is `distributed`
-
-## Example Use Cases
-
-### GPU/CPU Task Routing
-```yaml
-# GPU worker
-dagu worker --worker.labels gpu=true
-
-# CPU worker  
-dagu worker --worker.labels cpu=true
-
-# DAG
-steps:
-  - call: gpu-task
-  - call: cpu-task
-
----
-# Run on a worker with gpu
-name: gpu-task
-workerSelector:
-  gpu: "true"
-steps:
-  - command: python gpu-task.py
-
----
-# Run on a worker with faster cpu
-name: cpu-task
-workerSelector:
-  cpu: "true"
-steps:
-  - command: python cpu-task.py
-```
+The parent DAG's dispatch decision and each child's dispatch decision are evaluated independently. See [Distributed Execution — Sub-DAG Dispatch](/features/distributed-execution#sub-dag-dispatch) for details.

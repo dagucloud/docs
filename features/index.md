@@ -60,4 +60,5 @@ Dagu provides a comprehensive set of features for building and managing workflow
 - [Worker Labels](/features/worker-labels)
 - [Shared Filesystem Mode](/features/workers/shared-filesystem)
 - [Shared Nothing Mode](/features/workers/shared-nothing)
+- [Kubernetes (Helm) Deployment](/configurations/deployment/kubernetes)
 - [Queue](/features/queues)
