@@ -68,6 +68,7 @@ steps:
 1. **All labels must match**: A worker must have ALL labels specified in the `workerSelector` to be eligible
 2. **Empty selector**: Tasks without `workerSelector` can run on any worker
 3. **Exact match**: Label values must match exactly (case-sensitive)
+4. **Force local**: Setting `workerSelector: local` bypasses all label matching and forces the DAG to run locally on the main instance, even when `defaultExecutionMode` is `distributed`
 
 ## Example Use Cases
 
@@ -88,7 +89,7 @@ steps:
 # Run on a worker with gpu
 name: gpu-task
 workerSelector:
-  gpu-task: "true"
+  gpu: "true"
 steps:
   - command: python gpu-task.py
 
@@ -96,7 +97,7 @@ steps:
 # Run on a worker with faster cpu
 name: cpu-task
 workerSelector:
-  cpu-task: "true"
+  cpu: "true"
 steps:
   - command: python cpu-task.py
 ```

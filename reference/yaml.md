@@ -890,7 +890,7 @@ See [HITL](/features/executors/hitl) for full documentation.
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `workerSelector` | object | Worker label requirements for distributed execution | - |
+| `workerSelector` | object \| `"local"` | Worker label requirements for distributed execution, or `"local"` to force local execution | - |
 
 When using distributed execution, specify `workerSelector` to route tasks to workers with matching labels:
 
@@ -907,11 +907,21 @@ steps:
   - command: python train_model.py
 ```
 
+To force a DAG to run locally even when `defaultExecutionMode` is `distributed`, use the string `"local"`:
+
+```yaml
+# Always runs on the main instance
+workerSelector: local
+steps:
+  - command: curl -f http://localhost:8080/health
+```
+
 **Worker Selection Rules:**
 - All labels in `workerSelector` must match exactly on the worker
 - Label values are case-sensitive strings
 - Steps without `workerSelector` can run on any available worker
 - If no workers match the selector, the task waits until a matching worker is available
+- `workerSelector: local` overrides `defaultExecutionMode` and forces local execution
 
 See [Distributed Execution](/features/distributed-execution) for complete documentation.
 

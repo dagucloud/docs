@@ -165,7 +165,7 @@ Dagu supports distributed execution through a coordinator-worker model. DAG defi
 
 #### 3. Task Routing
 
-Tasks are routed to workers based on `workerSelector` in DAG definitions:
+Tasks are routed to workers based on `workerSelector` in DAG definitions and the server-level `defaultExecutionMode` setting. When `defaultExecutionMode` is set to `distributed`, all DAGs are dispatched to workers even without an explicit `workerSelector`. DAGs that must remain on the main instance can use `workerSelector: local` to override this behavior.
 
 ```yaml
 workerSelector:

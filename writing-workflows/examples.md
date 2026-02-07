@@ -628,6 +628,26 @@ steps:
 
 <div class="example-card">
 
+### Force Local Execution
+
+```yaml
+# When defaultExecutionMode is "distributed", use workerSelector: local
+# to keep specific DAGs on the main instance
+workerSelector: local
+
+steps:
+  - command: curl -f http://localhost:8080/health
+  - command: echo "Ran locally"
+```
+
+Use `workerSelector: local` as an escape hatch in distributed deployments for lightweight DAGs that should never leave the main instance.
+
+<a href="/features/distributed-execution#force-local-execution" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Parallel Distributed Tasks
 
 ```yaml

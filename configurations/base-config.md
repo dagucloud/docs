@@ -353,6 +353,15 @@ workerSelector:
   capability: gpu
 ```
 
+To force local execution for a specific DAG (overriding `defaultExecutionMode: distributed`):
+
+```yaml
+# my-local-dag.yaml
+workerSelector: local
+steps:
+  - command: echo "Always runs locally"
+```
+
 ### Preconditions
 
 Set global preconditions that all DAGs must satisfy:

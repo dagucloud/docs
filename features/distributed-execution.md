@@ -171,6 +171,39 @@ Worker labels are key-value pairs that describe worker capabilities:
 - **Exact value matching**: Label values must match exactly (case-sensitive)
 - **No selector = any worker**: Tasks without `workerSelector` can run on any worker
 
+## Default Execution Mode
+
+By default, DAGs without a `workerSelector` run locally on the main instance. You can change this behavior with the `defaultExecutionMode` server setting so that all DAGs are dispatched to workers automatically.
+
+### Server Configuration
+
+```yaml
+# config.yaml
+defaultExecutionMode: distributed  # "local" (default) or "distributed"
+```
+
+Or via environment variable:
+
+```bash
+export DAGU_DEFAULT_EXECUTION_MODE=distributed
+```
+
+When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `workerSelector`. DAGs with a `workerSelector` are always dispatched to a matching worker regardless of this setting.
+
+### Force Local Execution
+
+If `defaultExecutionMode` is `distributed` but you need a specific DAG to always run locally (e.g., a lightweight health-check), use the `workerSelector: local` escape hatch:
+
+```yaml
+# This DAG always runs locally, even when defaultExecutionMode is "distributed"
+workerSelector: local
+
+steps:
+  - command: curl -f http://localhost:8080/health
+```
+
+Setting `workerSelector` to the string `"local"` overrides both the server default and any label-based routing, forcing the DAG to execute on the main instance.
+
 ## Configuration
 
 ### Coordinator Configuration
