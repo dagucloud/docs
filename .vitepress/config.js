@@ -286,7 +286,7 @@ export default withMermaid(
     themeConfig: {
       logo: "/logo.webp",
       siteTitle: "Dagu",
-      logoLink: "https://dagu.cloud/",
+      logoLink: "https://docs.daguit.dev/",
 
       appearance: {
         defaultTheme: "dark",
