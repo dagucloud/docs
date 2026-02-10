@@ -138,6 +138,66 @@ steps:
   - command: echo "Checking status"
 ```
 
+## Catchup (Missed Run Replay)
+
+When the scheduler restarts after downtime, it can replay missed cron runs. Set `catchupWindow` to enable this.
+
+```yaml
+schedule: "0 * * * *"
+catchupWindow: "6h"
+
+steps:
+  - command: ./hourly-job.sh
+```
+
+If the scheduler was down from 10:00 to 14:00 and restarts at 14:00, it replays the 10:00, 11:00, 12:00, 13:00, and 14:00 runs in chronological order, one per scheduler tick (one tick per minute).
+
+### How the replay start time is computed
+
+The scheduler replays from the **latest** of these three values:
+- `now - catchupWindow`
+- The last global tick (when the scheduler last processed any tick)
+- The last time this specific DAG was scheduled (per-DAG watermark)
+
+Source: `ComputeReplayFrom()` in `internal/service/scheduler/catchup.go`.
+
+### Duration syntax
+
+`catchupWindow` accepts Go `time.ParseDuration` syntax plus `d` for days:
+
+| Example | Duration |
+|---------|----------|
+| `"30m"` | 30 minutes |
+| `"6h"` | 6 hours |
+| `"2d12h"` | 2 days 12 hours |
+| `"1d"` | 24 hours |
+
+The value must be positive. An empty or zero value disables catchup.
+
+### Overlap during catchup
+
+`overlapPolicy` controls what happens when a catchup run is ready but the DAG is still running from a previous catchup run:
+
+```yaml
+schedule: "0 * * * *"
+catchupWindow: "6h"
+overlapPolicy: "skip"
+
+steps:
+  - command: ./slow-job.sh
+```
+
+| Value | Behavior |
+|-------|----------|
+| `"skip"` (default) | Drop the catchup run and advance to the next one in the buffer |
+| `"all"` | Keep the run in the buffer, retry on the next scheduler tick |
+
+`overlapPolicy` only affects catchup runs. Live scheduled runs use different guards (isRunning check, alreadyFinished check, `skipIfSuccessful`).
+
+### Catchup buffer limit
+
+At most 1000 missed runs are buffered per DAG. If more than 1000 runs were missed, only the 1000 most recent are replayed.
+
 ## Queue Management
 
 Control concurrent executions using global queues:
