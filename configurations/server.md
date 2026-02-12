@@ -524,7 +524,7 @@ TTL (time-to-live): DAG caches expire after 12 hours, API key/webhook caches aft
 ### Monitoring Cache Usage
 
 Use Prometheus metrics to monitor cache sizes:
-```promql
+```txt
 dagu_cache_entries_total
 ```
 

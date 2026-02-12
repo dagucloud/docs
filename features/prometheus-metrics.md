@@ -156,35 +156,35 @@ scrape_configs:
 
 ### DAG Success Rate (Today)
 
-```promql
+```txt
 sum(dagu_dag_runs_total{status="succeeded"}) /
 sum(dagu_dag_runs_total) * 100
 ```
 
 ### Per-DAG Success Rate
 
-```promql
+```txt
 sum by (dag) (dagu_dag_runs_total_by_dag{status="succeeded"}) /
 sum by (dag) (dagu_dag_runs_total_by_dag) * 100
 ```
 
 ### Average DAG Duration (Per DAG)
 
-```promql
+```txt
 sum by (dag) (rate(dagu_dag_run_duration_seconds_sum[1h])) /
 sum by (dag) (rate(dagu_dag_run_duration_seconds_count[1h]))
 ```
 
 ### Average DAG Duration (Overall)
 
-```promql
+```txt
 sum(rate(dagu_dag_run_duration_seconds_sum[1h])) /
 sum(rate(dagu_dag_run_duration_seconds_count[1h]))
 ```
 
 ### 95th Percentile Duration (Per DAG)
 
-```promql
+```txt
 histogram_quantile(0.95,
   sum by (dag, le) (rate(dagu_dag_run_duration_seconds_bucket[1h]))
 )
@@ -192,7 +192,7 @@ histogram_quantile(0.95,
 
 ### 95th Percentile Duration (Overall)
 
-```promql
+```txt
 histogram_quantile(0.95,
   sum by (le) (rate(dagu_dag_run_duration_seconds_bucket[1h]))
 )
@@ -200,19 +200,19 @@ histogram_quantile(0.95,
 
 ### Queue Depth Over Time
 
-```promql
+```txt
 dagu_dag_runs_queued_total
 ```
 
 ### Currently Running DAGs
 
-```promql
+```txt
 dagu_dag_runs_currently_running
 ```
 
 ### Slowest DAGs (P95 Duration)
 
-```promql
+```txt
 topk(10,
   histogram_quantile(0.95,
     sum by (dag, le) (rate(dagu_dag_run_duration_seconds_bucket[24h]))
@@ -222,13 +222,13 @@ topk(10,
 
 ### Cache Size Monitoring
 
-```promql
+```txt
 dagu_cache_entries_total
 ```
 
 ### Cache Growth Rate
 
-```promql
+```txt
 rate(dagu_cache_entries_total[1h])
 ```
 
