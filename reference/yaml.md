@@ -92,7 +92,7 @@ steps:
 | `skipIfSuccessful` | boolean | Skip if already succeeded today | `false` |
 | `restartWaitSec` | integer | Wait seconds before restart | `0` |
 | `catchupWindow` | string | Lookback horizon for replaying missed cron runs on scheduler restart. Duration string (e.g. `"6h"`, `"2d12h"`). If omitted, missed runs are not replayed. | - |
-| `overlapPolicy` | string | Catchup overlap behavior when DAG is already running: `"skip"` drops the run, `"all"` retries next tick. | `"skip"` |
+| `overlapPolicy` | string | Catchup overlap behavior when DAG is already running: `"skip"` drops the run, `"all"` retries next tick, `"latest"` keeps only the newest missed interval. | `"skip"` |
 
 #### Schedule Formats
 

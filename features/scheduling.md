@@ -191,6 +191,7 @@ steps:
 |-------|----------|
 | `"skip"` (default) | Drop the catchup run and advance to the next one in the buffer |
 | `"all"` | Keep the run in the buffer, retry on the next scheduler tick |
+| `"latest"` | Discard all but the most recent missed interval, dispatch only the newest |
 
 `overlapPolicy` only affects catchup runs. Live scheduled runs use different guards (isRunning check, alreadyFinished check, `skipIfSuccessful`).
 

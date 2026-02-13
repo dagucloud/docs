@@ -382,7 +382,7 @@
 
 - **Git Sync**: Synchronize DAG definitions with a Git repository. See [Git Sync](/features/git-sync).
 
-- **Catchup (Missed Run Replay)**: New `catchupWindow` field enables automatic replay of missed cron runs when the scheduler restarts after downtime. The scheduler tracks per-DAG watermarks and replays missed intervals in chronological order, one per scheduler tick. The `overlapPolicy` field (`"skip"` or `"all"`) controls behavior when the DAG is still running during catchup. See [Scheduling — Catchup](/features/scheduling#catchup-missed-run-replay).
+- **Catchup (Missed Run Replay)**: New `catchupWindow` field enables automatic replay of missed cron runs when the scheduler restarts after downtime. The scheduler tracks per-DAG watermarks and replays missed intervals in chronological order, one per scheduler tick. The `overlapPolicy` field (`"skip"`, `"all"`, or `"latest"`) controls behavior when the DAG is still running during catchup. See [Scheduling — Catchup](/features/scheduling#catchup-missed-run-replay).
 
 - **Unified Stop/Restart Scheduling**: Stop and restart schedules are now evaluated by the same TickPlanner module that handles start schedules. Stop schedules fire only when the DAG's latest status is `running`. Restart schedules fire unconditionally. Watermarks track only start-schedule runs to prevent stop/restart times from corrupting catchup computation.
 
