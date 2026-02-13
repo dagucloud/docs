@@ -129,6 +129,7 @@ remoteNodes:
 
 # Coordinator (for distributed execution)
 coordinator:
+  enabled: true           # Enable coordinator (default: true)
   host: "127.0.0.1"       # Bind address
   port: 50055             # gRPC port
 
@@ -266,6 +267,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `workerSelector`. Use `workerSelector: local` in a DAG to override.
 
 ### Coordinator
+- `DAGU_COORDINATOR_ENABLED` - Enable coordinator service (default: `true`)
 - `DAGU_COORDINATOR_HOST` - Coordinator bind address (default: `127.0.0.1`)
 - `DAGU_COORDINATOR_ADVERTISE` - Address to advertise in service registry (default: auto-detected hostname)
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
@@ -520,6 +522,7 @@ peer:
 - `port`: `8080`
 - `metrics`: `private`
 - `defaultExecutionMode`: `local`
+- `coordinator.enabled`: `true`
 - `terminal.enabled`: `false`
 - `audit.enabled`: `true`
 

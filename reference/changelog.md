@@ -36,6 +36,7 @@
 
 ### Added
 
+- **Coordinator Enabled Config**: New `coordinator.enabled` config option (default: `true`) and `DAGU_COORDINATOR_ENABLED` environment variable to explicitly enable or disable the coordinator service. When disabled, `start-all` skips the coordinator and DAGs are never dispatched to workers. Accepts `true`/`false`/`1`/`0`.
 - **Self-Upgrade Command**: New `dagu upgrade` command for in-place binary updates with SHA256 verification, backup support, and cross-platform compatibility. See [Self-Upgrade](/features/upgrade) for details.
 - **Literal Dollar Escape for Non-Shell Executors**: Use `\$` to emit a literal `$` in non-shell contexts (docker, http, ssh, jq, mail, etc.) and config fields. Shell-executed commands preserve native semantics. To emit a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 - **Router Examples in Documentation**: Added two router examples to the [Examples](/writing-workflows/examples) page under "Control Flow & Conditions": routing based on environment variable values and routing based on step output. Removed the "Complex Preconditions" example to streamline the page.
