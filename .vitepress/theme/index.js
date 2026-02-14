@@ -1,29 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
-import { onMounted, watch, nextTick, onUnmounted } from 'vue'
+import { onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vitepress'
 import './style.css'
-
-// Track Algolia search queries in PostHog
-function setupSearchTracking() {
-  let debounceTimer
-  const observer = new MutationObserver(() => {
-    const searchInput = document.querySelector('.DocSearch-Input')
-    if (searchInput && !searchInput.dataset.tracked) {
-      searchInput.dataset.tracked = 'true'
-      searchInput.addEventListener('input', (e) => {
-        const query = e.target.value
-        if (query && window.posthog) {
-          clearTimeout(debounceTimer)
-          debounceTimer = setTimeout(() => {
-            window.posthog.capture('docs_search', { query })
-          }, 500)
-        }
-      })
-    }
-  })
-  observer.observe(document.body, { childList: true, subtree: true })
-  return observer
-}
 
 // Detect user's OS and select appropriate tab in code groups
 function selectOSTab() {
@@ -52,17 +30,8 @@ export default {
   },
   setup() {
     const route = useRoute()
-    let searchObserver
-
     onMounted(() => {
       selectOSTab()
-      searchObserver = setupSearchTracking()
-    })
-
-    onUnmounted(() => {
-      if (searchObserver) {
-        searchObserver.disconnect()
-      }
     })
 
     // Re-run when navigating to a new page

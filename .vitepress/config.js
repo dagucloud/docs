@@ -346,12 +346,7 @@ export default withMermaid(
       },
 
       search: {
-        provider: "algolia",
-        options: {
-          appId: "LCN0T5A9XG",
-          apiKey: "5a4999c265d0c05512d852903a1174e1",
-          indexName: "docs.daguit.dev",
-        },
+        provider: "local",
       },
 
       editLink: {
