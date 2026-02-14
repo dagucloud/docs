@@ -60,7 +60,7 @@ The registry directory must be accessible by all nodes:
 ```yaml
 # config.yaml
 paths:
-  serviceRegistryDir: "/nfs/shared/dagu/service-registry"
+  service_registry_dir: "/nfs/shared/dagu/service-registry"
 ```
 
 ```bash
@@ -132,7 +132,7 @@ dagu worker --worker.labels gpu=true,memory=64G
 paths:
   data_dir: "/shared/dagu/data"        # Must be shared
   log_dir: "/shared/dagu/logs"         # Must be shared
-  serviceRegistryDir: "/shared/dagu/service-registry"  # Must be shared
+  service_registry_dir: "/shared/dagu/service-registry"  # Must be shared
 
 worker:
   id: "worker-gpu-01"

@@ -36,10 +36,10 @@ paths:
   suspend_flags_dir: "~/.local/share/dagu/suspend"
   admin_logs_dir: "~/.local/share/dagu/logs/admin"
   base_config: "~/.config/dagu/base.yaml"
-  dagRunsDir: ""            # Auto: {data_dir}/dag-runs
-  queueDir: ""              # Auto: {data_dir}/queue
-  procDir: ""               # Auto: {data_dir}/proc
-  serviceRegistryDir: ""    # Auto: {data_dir}/service-registry
+  dag_runs_dir: ""            # Auto: {data_dir}/dag-runs
+  queue_dir: ""              # Auto: {data_dir}/queue
+  proc_dir: ""               # Auto: {data_dir}/proc
+  service_registry_dir: ""    # Auto: {data_dir}/service-registry
   executable: ""            # Auto: current executable path
 
 # Permissions
@@ -527,9 +527,9 @@ peer:
 
 ### Auto-generated Paths
 When not specified, these paths are automatically set based on `paths.data_dir`:
-- `paths.dagRunsDir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
-- `paths.queueDir`: `{paths.data_dir}/queue` - Stores queue data
-- `paths.procDir`: `{paths.data_dir}/proc` - Stores process data
+- `paths.dag_runs_dir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
+- `paths.queue_dir`: `{paths.data_dir}/queue` - Stores queue data
+- `paths.proc_dir`: `{paths.data_dir}/proc` - Stores process data
 - `paths.executable`: Current executable path - Auto-detected from running process
 
 ## Supported Log Encodings

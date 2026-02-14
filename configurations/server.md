@@ -44,9 +44,9 @@ paths:
   suspend_flags_dir: "~/.local/share/dagu/suspend"    # Suspend flags
   admin_logs_dir: "~/.local/share/dagu/logs/admin"    # Admin logs
   base_config: "~/.config/dagu/base.yaml"            # Base configuration
-  dagRunsDir: ""                                    # Auto: {data_dir}/dag-runs
-  queueDir: ""                                      # Auto: {data_dir}/queue
-  procDir: ""                                       # Auto: {data_dir}/proc
+  dag_runs_dir: ""                                    # Auto: {data_dir}/dag-runs
+  queue_dir: ""                                      # Auto: {data_dir}/queue
+  proc_dir: ""                                       # Auto: {data_dir}/proc
   executable: ""                                    # Auto: current executable
 
 # Permissions
