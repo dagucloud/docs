@@ -29,7 +29,7 @@ steps:
 
 ### How It Works
 
-1. Command stdout is captured (up to `maxOutputSize` limit)
+1. Command stdout is captured (up to `max_output_size` limit)
 2. Stored in the variable name specified by `output`
 3. Available to all downstream steps via `${VARIABLE_NAME}`
 4. Trailing newlines are automatically trimmed
@@ -216,22 +216,22 @@ Reference step properties using the `id` field:
 steps:
   - id: risky
     command: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
-    continueOn:
+    continue_on:
       failure: true
 
   - command: |
-      if [ "${risky.exitCode}" = "0" ]; then
+      if [ "${risky.exit_code}" = "0" ]; then
         echo "Success! Checking output..."
         cat ${risky.stdout}  # Read content from the file
       else
-        echo "Failed with code ${risky.exitCode}"
+        echo "Failed with code ${risky.exit_code}"
         echo "Error log:"
         cat ${risky.stderr}  # Read content from the file
       fi
 ```
 
 Available properties:
-- `${id.exitCode}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
+- `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file
 
@@ -380,7 +380,7 @@ Control maximum output size to prevent memory issues:
 
 ```yaml
 # Set 5MB limit for all steps
-maxOutputSize: 5242880
+max_output_size: 5242880
 
 steps:
   - command: cat large-file.json

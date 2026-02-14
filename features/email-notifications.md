@@ -16,11 +16,11 @@ smtp:
   username: alerts@example.com
   password: app-specific-password
   
-errorMail:
+error_mail:
   from: alerts@example.com
   to: team@example.com  # Single recipient (string format)
   prefix: "[Dagu Alert]"
-  attachLogs: true
+  attach_logs: true
 ```
 
 ### Environment Variables
@@ -50,25 +50,25 @@ smtp:
   username: ${SMTP_USER}
   password: ${SMTP_PASS}
 
-errorMail:
+error_mail:
   from: dagu@company.com
   to: 
     - oncall@company.com
     - manager@company.com
   prefix: "[CRITICAL]"
-  attachLogs: true
+  attach_logs: true
 
-mailOn:
+mail_on:
   success: true
   failure: true
   wait: true
 
-waitMail:
+wait_mail:
   from: dagu@company.com
   to:
     - approvers@company.com
   prefix: "[WAITING]"
-  attachLogs: false
+  attach_logs: false
 ```
 
 ## Email Triggers
@@ -76,7 +76,7 @@ waitMail:
 ### Success/Failure/Wait Emails
 
 ```yaml
-mailOn:
+mail_on:
   success: true    # Email on successful completion
   failure: true    # Email on failure
   wait: true       # Email when waiting for human approval
@@ -88,7 +88,7 @@ mailOn:
 steps:
   - name: critical-step
     command: process_critical_data.sh
-    mailOnError: true  # Email if this step fails
+    mail_on_error: true  # Email if this step fails
 ```
 
 ### Wait Status Notifications
@@ -96,15 +96,15 @@ steps:
 Send notifications when a DAG is waiting for human approval (HITL - Human In The Loop):
 
 ```yaml
-mailOn:
+mail_on:
   wait: true
 
-waitMail:
+wait_mail:
   from: dagu@company.com
   to:
     - approvers@company.com
   prefix: "[APPROVAL REQUIRED]"
-  attachLogs: false
+  attach_logs: false
 ```
 
 This is useful for workflows that require human approval before continuing execution. The email will include details about the DAG and which steps are waiting.
@@ -169,7 +169,7 @@ steps:
 ### Error Notification
 
 ```yaml
-handlerOn:
+handler_on:
   failure:
     type: mail
     config:
@@ -242,7 +242,7 @@ smtp:
 ### Multiple Recipients
 
 ```yaml
-errorMail:
+error_mail:
   to:
     - primary@example.com
     - secondary@example.com

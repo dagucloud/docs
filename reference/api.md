@@ -177,8 +177,8 @@ Fetches detailed information about a specific DAG.
       "DATA_SOURCE=postgres://prod-db:5432/analytics",
       "WAREHOUSE_URL=${WAREHOUSE_URL}"
     ],
-    "logDir": "/var/log/dagu/pipelines",
-    "handlerOn": {
+    "log_dir": "/var/log/dagu/pipelines",
+    "handler_on": {
       "success": {
         "name": "notify_success",
         "command": "notify.sh 'Pipeline completed successfully'"
@@ -217,11 +217,11 @@ Fetches detailed information about a specific DAG.
         "command": "python transform.py --input=${EXTRACTED_FILE}",
         "depends": ["extract_data"],
         "output": "TRANSFORMED_FILE",
-        "repeatPolicy": {
+        "repeat_policy": {
           "repeat": false,
           "interval": 0
         },
-        "mailOnError": true
+        "mail_on_error": true
       },
       {
         "name": "load_to_warehouse",
@@ -232,7 +232,7 @@ Fetches detailed information about a specific DAG.
       }
     ],
     "delay": 30,
-    "histRetentionDays": 30,
+    "hist_retention_days": 30,
     "preconditions": [
       {
         "condition": "`date +%u`",
@@ -240,8 +240,8 @@ Fetches detailed information about a specific DAG.
         "error": "Pipeline only runs on weekdays"
       }
     ],
-    "maxActiveRuns": 1,
-    "maxActiveSteps": 5,
+    "max_active_runs": 1,
+    "max_active_steps": 5,
     "params": ["date", "env", "batch_size"],
     "defaultParams": "{\"batch_size\": 1000, \"env\": \"dev\"}",
     "tags": ["production", "etl", "daily"]
@@ -1669,7 +1669,7 @@ Retrieves timing and status information for all sub DAG runs within a specific D
 ```
 
 **Use Case**:
-This endpoint is particularly useful for nodes with `repeatPolicy` that execute sub DAGs multiple times. It allows the UI to display a timeline of all executions with their respective start times, end times, and statuses, making it easier to track and debug repeated sub workflow executions.
+This endpoint is particularly useful for nodes with `repeat_policy` that execute sub DAGs multiple times. It allows the UI to display a timeline of all executions with their respective start times, end times, and statuses, making it easier to track and debug repeated sub workflow executions.
 
 ### Get Sub DAG Run Details
 
@@ -2209,7 +2209,7 @@ curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
     "name": "data_processing_pipeline",
     "group": "ETL"
   },
-  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlogDir: /var/log/dagu/pipelines\nhistRetentionDays: 30\nmaxActiveRuns: 1\nmaxActiveSteps: 5\nparams:\n  - date\n  - env\n  - batch_size\ndefaultParams: |\n  batch_size: 1000\n  env: dev\ntags:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mailOnError: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandlerOn:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
+  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\ntags:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
   "errors": []
 }
 ```

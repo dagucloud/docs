@@ -48,7 +48,7 @@ env:
   - SOME_DIR: ${HOME}/batch
   - SOME_FILE: ${SOME_DIR}/some_file
 steps:
-  - workingDir: ${SOME_DIR}
+  - working_dir: ${SOME_DIR}
     command: python main.py ${SOME_FILE}
 ```
 
@@ -158,7 +158,7 @@ secrets:
     key: PROD_API_TOKEN    # Read from process environment
   - name: DB_PASSWORD
     provider: file
-    key: secrets/db-pass   # Relative to workingDir, then the DAG file directory
+    key: secrets/db-pass   # Relative to working_dir, then the DAG file directory
 
 steps:
   - name: migrate
@@ -170,7 +170,7 @@ steps:
 ### Built-in providers
 
 - `env` reads from existing environment variables. Use it when CI/CD or your process manager injects secrets into the runtime environment.
-- `file` reads from files. Relative paths first try the DAG’s `workingDir`, then fall back to the directory containing the DAG file, which makes this provider ideal for Secret Store CSI or Docker secrets mounted beside the DAG.
+- `file` reads from files. Relative paths first try the DAG’s `working_dir`, then fall back to the directory containing the DAG file, which makes this provider ideal for Secret Store CSI or Docker secrets mounted beside the DAG.
 
 Providers can expose additional configuration through the optional `options` map. Values must be strings so they can be forwarded to provider-specific clients.
 
@@ -240,7 +240,7 @@ You can configure the maximum output size at the DAG level:
 
 ```yaml
 # Set maximum output size to 5MB for all steps in this DAG
-maxOutputSize: 5242880  # 5MB in bytes
+max_output_size: 5242880  # 5MB in bytes
 
 steps:
   - command: "cat large-file.txt"
@@ -302,7 +302,7 @@ steps:
 
   - command: |
       # Reference step properties using IDs
-      echo "Exit code: ${extract.exitCode}"
+      echo "Exit code: ${extract.exit_code}"
       echo "Stdout file: ${extract.stdout}"
       cat ${extract.stdout}  # Read content from the file
     depends: validate
@@ -311,7 +311,7 @@ steps:
 Available step properties when using ID references:
 - `${id.stdout}`: Path to stdout file
 - `${id.stderr}`: Path to stderr file
-- `${id.exitCode}`: Exit code of the step (as a string)
+- `${id.exit_code}`: Exit code of the step (as a string)
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. To capture output content directly into a variable, use the `output:` field instead.
 
@@ -389,7 +389,7 @@ steps:
 Common settings can be shared using `$HOME/.config/dagu/base.yaml`. This is useful for setting default values for:
 - `env` - Shared environment variables
 - `params` - Default parameters
-- `logDir` - Default log directory
+- `log_dir` - Default log directory
 - Other organizational defaults
 
 Example base configuration:
@@ -401,7 +401,7 @@ env:
   - API_ENDPOINT: https://api.example.com
 params:
   - DEFAULT_BATCH_SIZE: 100
-logDir: /var/log/dagu
+log_dir: /var/log/dagu
 ```
 
 Individual DAGs inherit these settings and can override them as needed.

@@ -20,7 +20,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default (JSONL format). Use `output: VAR_NAME` to capture results into an environment variable. For large results, use `streaming: true` with `outputFile`.
+Query results are written to **stdout** by default (JSONL format). Use `output: VAR_NAME` to capture results into an environment variable. For large results, use `streaming: true` with `output_file`.
 :::
 
 ## Connection String
@@ -154,7 +154,7 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       transaction: true
-      isolationLevel: serializable
+      isolation_level: serializable
     command: |
       SELECT balance FROM accounts WHERE id = 1 FOR UPDATE;
       UPDATE accounts SET balance = balance - 100 WHERE id = 1;
@@ -201,15 +201,15 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       import:
-        inputFile: /data/users.csv
+        input_file: /data/users.csv
         table: users
         format: csv
-        hasHeader: true
+        has_header: true
         columns:
           - name
           - email
           - department
-        batchSize: 1000
+        batch_size: 1000
 ```
 
 ### JSONL Import
@@ -221,22 +221,22 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       import:
-        inputFile: /data/events.jsonl
+        input_file: /data/events.jsonl
         table: events
         format: jsonl
-        onConflict: ignore
+        on_conflict: ignore
 ```
 
 ::: tip PostgreSQL UPSERT
-When using `onConflict: replace`, specify `conflictTarget` with the column(s) that have a unique constraint. This generates a proper `ON CONFLICT (column) DO UPDATE SET` statement. Without `conflictTarget`, `replace` falls back to `ON CONFLICT DO NOTHING`.
+When using `on_conflict: replace`, specify `conflict_target` with the column(s) that have a unique constraint. This generates a proper `ON CONFLICT (column) DO UPDATE SET` statement. Without `conflict_target`, `replace` falls back to `ON CONFLICT DO NOTHING`.
 
 ```yaml
 import:
-  inputFile: /data/users.csv
+  input_file: /data/users.csv
   table: users
-  onConflict: replace
-  conflictTarget: id          # Column with UNIQUE constraint
-  updateColumns:              # Optional: specific columns to update
+  on_conflict: replace
+  conflict_target: id          # Column with UNIQUE constraint
+  update_columns:              # Optional: specific columns to update
     - name
     - email
 ```
@@ -251,9 +251,9 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       import:
-        inputFile: /data/records.csv
+        input_file: /data/records.csv
         table: records
-        nullValues:
+        null_values:
           - ""
           - "NULL"
           - "N/A"
@@ -271,9 +271,9 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       import:
-        inputFile: /data/users.csv
+        input_file: /data/users.csv
         table: users
-        dryRun: true
+        dry_run: true
 ```
 
 ## Output Formats
@@ -286,7 +286,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      outputFormat: jsonl
+      output_format: jsonl
     command: "SELECT * FROM orders"
     output: ORDERS
 ```
@@ -305,12 +305,12 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      outputFormat: json
+      output_format: json
     command: "SELECT * FROM orders LIMIT 100"
 ```
 
 ::: warning Memory Usage
-The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead. Always use `LIMIT` or `maxRows` with `json` format.
+The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead. Always use `LIMIT` or `max_rows` with `json` format.
 :::
 
 ### CSV
@@ -321,7 +321,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      outputFormat: csv
+      output_format: csv
       headers: true
     command: "SELECT id, name, email FROM users"
 ```
@@ -337,8 +337,8 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       streaming: true
-      outputFile: /data/orders-export.jsonl
-      outputFormat: jsonl    # Use jsonl or csv for large results
+      output_file: /data/orders-export.jsonl
+      output_format: jsonl    # Use jsonl or csv for large results
     command: "SELECT * FROM orders"
 
   - name: process-export
@@ -357,7 +357,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      advisoryLock: "daily-aggregation"
+      advisory_lock: "daily-aggregation"
     command: |
       DELETE FROM daily_stats WHERE date = CURRENT_DATE;
       INSERT INTO daily_stats (date, total_orders, revenue)
@@ -379,7 +379,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      advisoryLock: "etl-${REGION}"
+      advisory_lock: "etl-${REGION}"
       transaction: true
     command: |
       -- Only one worker per region can run this
@@ -398,10 +398,10 @@ steps:
       dsn: "${DATABASE_URL}"
       timeout: 60
     command: "SELECT * FROM large_table"
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 10
-    continueOn:
+      interval_sec: 10
+    continue_on:
       failure: true
 ```
 
@@ -417,7 +417,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      advisoryLock: "daily-etl"
+      advisory_lock: "daily-etl"
       transaction: true
     command: |
       -- Clear staging table
@@ -428,10 +428,10 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       import:
-        inputFile: /data/orders-${TODAY}.csv
+        input_file: /data/orders-${TODAY}.csv
         table: staging_orders
-        hasHeader: true
-        batchSize: 5000
+        has_header: true
+        batch_size: 5000
     depends:
       - acquire-lock
 
@@ -440,7 +440,7 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       transaction: true
-      isolationLevel: repeatable_read
+      isolation_level: repeatable_read
     command: |
       INSERT INTO orders (id, customer_id, total, created_at)
       SELECT id, customer_id, total, created_at
@@ -456,8 +456,8 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       streaming: true
-      outputFile: /reports/daily-summary.json
-      outputFormat: json
+      output_file: /reports/daily-summary.json
+      output_format: json
     command: |
       SELECT
         DATE(created_at) as date,

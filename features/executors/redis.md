@@ -60,19 +60,19 @@ Steps inherit connection settings from the DAG level. Step-level config override
 | Field | Description | Default |
 |-------|-------------|---------|
 | `tls` | Enable TLS connection | `false` |
-| `tlsCert` | Client certificate path | - |
-| `tlsKey` | Client key path | - |
-| `tlsCA` | CA certificate path | - |
-| `tlsSkipVerify` | Skip certificate verification | `false` |
+| `tls_cert` | Client certificate path | - |
+| `tls_key` | Client key path | - |
+| `tls_ca` | CA certificate path | - |
+| `tls_skip_verify` | Skip certificate verification | `false` |
 
 ### High Availability
 
 | Field | Description | Default |
 |-------|-------------|---------|
 | `mode` | Connection mode: `standalone`, `sentinel`, `cluster` | `standalone` |
-| `sentinelMaster` | Sentinel master name | - |
-| `sentinelAddrs` | Sentinel addresses | - |
-| `clusterAddrs` | Cluster node addresses | - |
+| `sentinel_master` | Sentinel master name | - |
+| `sentinel_addrs` | Sentinel addresses | - |
+| `cluster_addrs` | Cluster node addresses | - |
 
 ### Command Execution
 
@@ -87,7 +87,7 @@ Steps inherit connection settings from the DAG level. Step-level config override
 | `fields` | Multiple hash fields (map) | - |
 | `ttl` | Expiration in seconds (for SET, EXPIRE) | - |
 | `timeout` | Command timeout in seconds | `30` |
-| `maxRetries` | Maximum retry attempts | `3` |
+| `max_retries` | Maximum retry attempts | `3` |
 
 ### Additional Options
 
@@ -98,7 +98,7 @@ Steps inherit connection settings from the DAG level. Step-level config override
 | `start` | Range start (for LRANGE, ZRANGE) |
 | `stop` | Range stop (for LRANGE, ZRANGE) |
 | `score` | Score for sorted set operations |
-| `withScores` | Include scores in sorted set output |
+| `with_scores` | Include scores in sorted set output |
 | `match` | Pattern for SCAN/KEYS |
 | `count` | Count for SCAN, LPOP, etc. |
 
@@ -106,9 +106,9 @@ Steps inherit connection settings from the DAG level. Step-level config override
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `outputFormat` | Output format: `json`, `jsonl`, `raw`, `csv` | `json` |
-| `nullValue` | String representation for nil values | `null` |
-| `maxResultSize` | Maximum result size in bytes | `10MB` |
+| `output_format` | Output format: `json`, `jsonl`, `raw`, `csv` | `json` |
+| `null_value` | String representation for nil values | `null` |
+| `max_result_size` | Maximum result size in bytes | `10MB` |
 
 ## Examples
 
@@ -272,7 +272,7 @@ steps:
       key: leaderboard
       start: 0
       stop: 9
-      withScores: true
+      with_scores: true
     output: TOP_PLAYERS
 ```
 
@@ -336,9 +336,9 @@ steps:
           return 0
         end
         return 1
-      scriptKeys:
+      script_keys:
         - "ratelimit:${USER_ID}"
-      scriptArgs:
+      script_args:
         - "100"   # limit
         - "60"    # window in seconds
     output: ALLOWED
@@ -351,10 +351,10 @@ steps:
   - name: complex-operation
     type: redis
     config:
-      scriptFile: ./scripts/process.lua
-      scriptKeys:
+      script_file: ./scripts/process.lua
+      script_keys:
         - "input:data"
-      scriptArgs:
+      script_args:
         - "${PARAM}"
 ```
 
@@ -368,9 +368,9 @@ steps:
     type: redis
     config:
       lock: "locks:resource:${RESOURCE_ID}"
-      lockTimeout: 30      # Lock expires after 30 seconds
-      lockRetry: 10        # Retry 10 times to acquire lock
-      lockWait: 100        # Wait 100ms between retries
+      lock_timeout: 30      # Lock expires after 30 seconds
+      lock_retry: 10        # Retry 10 times to acquire lock
+      lock_wait: 100        # Wait 100ms between retries
       command: SET
       key: resource:${RESOURCE_ID}
       value: '{"status": "processing"}'
@@ -412,8 +412,8 @@ For high availability with automatic failover:
 ```yaml
 redis:
   mode: sentinel
-  sentinelMaster: mymaster
-  sentinelAddrs:
+  sentinel_master: mymaster
+  sentinel_addrs:
     - sentinel1:26379
     - sentinel2:26379
     - sentinel3:26379
@@ -427,7 +427,7 @@ For distributed Redis cluster:
 ```yaml
 redis:
   mode: cluster
-  clusterAddrs:
+  cluster_addrs:
     - node1:6379
     - node2:6379
     - node3:6379
@@ -439,7 +439,7 @@ redis:
 ### Non-Worker Mode
 
 When executing DAGs directly, each step creates its own connection with defaults:
-- Max retries: 3 (configurable via `maxRetries`)
+- Max retries: 3 (configurable via `max_retries`)
 - Command timeout: 30 seconds (configurable via `timeout`)
 
 ### Worker Mode (Shared-Nothing)
@@ -498,12 +498,12 @@ steps:
     config:
       command: GET
       key: critical-data
-      maxRetries: 5
+      max_retries: 5
       timeout: 10
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 2
-    continueOn:
+      interval_sec: 2
+    continue_on:
       failure: true
 ```
 
@@ -514,9 +514,9 @@ redis:
   host: secure-redis.example.com
   port: 6380
   tls: true
-  tlsCert: /path/to/client.crt
-  tlsKey: /path/to/client.key
-  tlsCA: /path/to/ca.crt
+  tls_cert: /path/to/client.crt
+  tls_key: /path/to/client.key
+  tls_ca: /path/to/ca.crt
 ```
 
 For self-signed certificates in development:
@@ -526,7 +526,7 @@ redis:
   host: localhost
   port: 6379
   tls: true
-  tlsSkipVerify: true
+  tls_skip_verify: true
 ```
 
 ## Cloud Redis Services

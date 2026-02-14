@@ -82,16 +82,16 @@ steps:
 | `source` | Input archive or directory | string | *required* | Path to archive file (extract/list) or source directory (create) |
 | `destination` | Output directory or archive path | string | `.` (extract) | Target directory (extract) or output archive path (create); optional for `list` |
 | `format` | Archive format override | string | auto-detect | Explicit format: `zip`, `tar`, `tar.gz`, `tar.bz2`, `tar.xz`, `tar.zst`, `7z`, `rar`, etc. |
-| `compressionLevel` | Compression level | int | `-1` | `-1` = default, `0` = none, `1-9` = level; applies to gzip and bzip2 only |
+| `compression_level` | Compression level | int | `-1` | `-1` = default, `0` = none, `1-9` = level; applies to gzip and bzip2 only |
 | `overwrite` | Replace existing files | bool | `false` | When `false`, extraction fails if destination file exists |
-| `stripComponents` | Strip leading path segments | int | `0` | Remove N leading directories from paths (like `tar --strip-components=N`) |
-| `preservePaths` | Preserve full paths | bool | `true` | When `false`, only extracts the basename of each file |
+| `strip_components` | Strip leading path segments | int | `0` | Remove N leading directories from paths (like `tar --strip-components=N`) |
+| `preserve_paths` | Preserve full paths | bool | `true` | When `false`, only extracts the basename of each file |
 | `include` | Include glob patterns | []string | all files | Only process files matching these patterns (e.g., `**/*.csv`) |
 | `exclude` | Exclude glob patterns | []string | none | Skip files matching these patterns (applied after include) |
-| `followSymlinks` | Follow symlinks when creating | bool | `false` | When `true`, dereferences symlinks; when `false`, preserves them |
-| `verifyIntegrity` | Verify archive after operation | bool | `false` | Performs full read pass to validate archive integrity |
-| `continueOnError` | Continue on individual file errors | bool | `false` | Logs errors but continues processing remaining files |
-| `dryRun` | Simulate operation | bool | `false` | Calculate metrics without writing files to disk |
+| `follow_symlinks` | Follow symlinks when creating | bool | `false` | When `true`, dereferences symlinks; when `false`, preserves them |
+| `verify_integrity` | Verify archive after operation | bool | `false` | Performs full read pass to validate archive integrity |
+| `continue_on_error` | Continue on individual file errors | bool | `false` | Logs errors but continues processing remaining files |
+| `dry_run` | Simulate operation | bool | `false` | Calculate metrics without writing files to disk |
 | `password` | Archive password | string | none | **Extraction only** for password-protected `7z` and `rar` archives |
 
 All fields support environment interpolation (`${VAR}`) and outputs from previous steps.
@@ -101,7 +101,7 @@ All fields support environment interpolation (`${VAR}`) and outputs from previou
 ### Selective Extraction
 
 ```yaml
-workingDir: /data/pipeline
+working_dir: /data/pipeline
 
 steps:
   - name: extract-csv
@@ -111,14 +111,14 @@ steps:
       destination: ./data
       include:
         - "**/*.csv"
-      stripComponents: 1
+      strip_components: 1
     command: extract
 ```
 
 ### Create Archive With Verification
 
 ```yaml
-workingDir: /deploy/release
+working_dir: /deploy/release
 
 steps:
   - name: bundle-artifacts
@@ -127,14 +127,14 @@ steps:
       source: ./dist
       destination: dist.tar.gz
       format: tar.gz
-      verifyIntegrity: true
+      verify_integrity: true
     command: create
 ```
 
 ### Extract Password-Protected 7z (Read-Only)
 
 ```yaml
-workingDir: /data/decrypted
+working_dir: /data/decrypted
 
 secrets:
   - name: ARCHIVE_PASSWORD

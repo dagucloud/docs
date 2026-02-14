@@ -33,12 +33,12 @@ smtp:
   username: ${SMTP_USER}
   password: ${SMTP_PASS}
 
-errorMail:
+error_mail:
   from: alerts@company.com
   to: oncall@company.com
-  attachLogs: true
+  attach_logs: true
 
-histRetentionDays: 30 # Dagu deletes workflow history and logs older than this
+hist_retention_days: 30 # Dagu deletes workflow history and logs older than this
 queue: "default"      # Default queue for all DAGs (define in config.yaml)
 ```
 
@@ -85,12 +85,12 @@ env:
 
 steps:
   - command: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 60
+      interval_sec: 60
 
   - command: python validate.py ${DATA_DIR}/${DATE}.csv
-    continueOn:
+    continue_on:
       failure: false
 
   - parallel: [users, orders, products]
@@ -99,7 +99,7 @@ steps:
 
   - command: python report.py --date=${DATE}
 
-handlerOn:
+handler_on:
   failure:
     command: echo "Notifying failure for ${DATE}"
 ```

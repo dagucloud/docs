@@ -37,7 +37,7 @@ steps:
     command: python process.py ${DATE}
 
 # Handlers
-handlerOn:
+handler_on:
   failure:
     command: notify-error.sh
 ```
@@ -115,12 +115,12 @@ steps:
       - npm test
     env:
       - NODE_ENV: production
-    workingDir: /app
-    retryPolicy:
+    working_dir: /app
+    retry_policy:
       limit: 3
 ```
 
-Instead of duplicating `env`, `workingDir`, `retryPolicy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
+Instead of duplicating `env`, `working_dir`, `retry_policy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
 
 Commands run in order and stop on first failure. Retries restart from the first command.
 
@@ -219,11 +219,11 @@ Set where commands execute:
 ```yaml
 steps:
   - name: in-project
-    workingDir: /home/user/project
+    working_dir: /home/user/project
     command: python main.py
     
   - name: in-data
-    workingDir: /data/input
+    working_dir: /data/input
     command: ls -la
 ```
 
@@ -269,7 +269,7 @@ steps:
 steps:
   - name: optional-step
     command: maybe-fails.sh
-    continueOn:
+    continue_on:
       failure: true
       
   - name: always-runs
@@ -282,7 +282,7 @@ steps:
 steps:
   - name: flaky-api
     command: curl https://unstable-api.com
-    retryPolicy:
+    retry_policy:
       limit: 3
 ```
 
@@ -294,7 +294,7 @@ Prevent steps from running forever:
 steps:
   - name: long-task
     command: echo "Processing data"
-    timeoutSec: 300  # 5 minutes
+    timeout_sec: 300  # 5 minutes
 ```
 
 ## Step Descriptions

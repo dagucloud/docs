@@ -22,7 +22,7 @@ steps:
 | `silent` | Return body only (suppress status/headers on success) | `true` |
 | `debug` | Enable debug mode (logs request/response details) | `true` |
 | `json` | Format output as structured JSON | `true` |
-| `skipTLSVerify` | Skip TLS certificate verification | `true` |
+| `tls_skip_verify` | Skip TLS certificate verification | `true` |
 
 ## Examples
 
@@ -135,17 +135,17 @@ steps:
     config:
       timeout: 30
     command: GET https://api.example.com/data
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 5
-    continueOn:
-      exitCode: [1]  # Non-2xx status codes
+      interval_sec: 5
+    continue_on:
+      exit_code: [1]  # Non-2xx status codes
 ```
 
 ### Webhook Notification
 
 ```yaml
-handlerOn:
+handler_on:
   success:
     type: http
     config:
@@ -162,7 +162,7 @@ steps:
   - name: internal-api
     type: http
     config:
-      skipTLSVerify: true  # Allow self-signed certificates
+      tls_skip_verify: true  # Allow self-signed certificates
       headers:
         Authorization: "Bearer ${INTERNAL_TOKEN}"
     command: GET https://internal-api.company.local/data

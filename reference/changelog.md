@@ -4,7 +4,7 @@
 
 ### Changed
 
-- **OS Environment Variable Expansion**: OS environment variables (e.g., `$HOME`, `$PATH`) are no longer expanded by Dagu for non-shell executor types (docker, http, ssh, jq, mail, s3, redis, etc.) **and DAG-level configuration fields** (`ssh`, `smtp`, `s3`, `registryAuths`). Only variables explicitly defined in the DAG scope (`env:`, `params:`, `secrets:`, step outputs) are expanded. OS variables pass through unchanged, letting the target environment (container, remote shell, etc.) resolve them. Shell command execution is unaffected. See [RFC 007](https://github.com/dagu-org/dagu/blob/main/rfcs/007-os-env-expansion-rules.md).
+- **OS Environment Variable Expansion**: OS environment variables (e.g., `$HOME`, `$PATH`) are no longer expanded by Dagu for non-shell executor types (docker, http, ssh, jq, mail, s3, redis, etc.) **and DAG-level configuration fields** (`ssh`, `smtp`, `s3`, `registry_auths`). Only variables explicitly defined in the DAG scope (`env:`, `params:`, `secrets:`, step outputs) are expanded. OS variables pass through unchanged, letting the target environment (container, remote shell, etc.) resolve them. Shell command execution is unaffected. See [RFC 007](https://github.com/dagu-org/dagu/blob/main/rfcs/007-os-env-expansion-rules.md).
 
   To use a local OS variable in a config field, explicitly import it via the `env:` block:
 
@@ -31,10 +31,10 @@
   | Removed Field | Replacement | Context |
   |---------------|-------------|---------|
   | `run` | `call` | Step field for sub-DAG execution |
-  | `dir` | `workingDir` | Step field for working directory |
+  | `dir` | `working_dir` | Step field for working directory |
   | `executor` | `type` + `config` | Step field for executor configuration |
   | `precondition` (singular) | `preconditions` (array) | Both DAG-level and step-level |
-  | `container.workDir` | `container.workingDir` | Container working directory |
+  | `container.workDir` | `container.working_dir` | Container working directory |
 
 ### Added
 
@@ -42,7 +42,7 @@
 - **Self-Upgrade Command**: New `dagu upgrade` command for in-place binary updates with SHA256 verification, backup support, and cross-platform compatibility. See [Self-Upgrade](/features/upgrade) for details.
 - **Literal Dollar Escape for Non-Shell Executors**: Use `\$` to emit a literal `$` in non-shell contexts (docker, http, ssh, jq, mail, etc.) and config fields. Shell-executed commands preserve native semantics. To emit a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 - **Router Examples in Documentation**: Added two router examples to the [Examples](/writing-workflows/examples) page under "Control Flow & Conditions": routing based on environment variable values and routing based on step output. Removed the "Complex Preconditions" example to streamline the page.
-- **Unified Execution Dispatch (`defaultExecutionMode`)**: New server-level `defaultExecutionMode` setting controls whether DAGs run locally or are dispatched to workers. When set to `distributed`, all DAGs are automatically dispatched to the coordinator for worker execution, even without an explicit `workerSelector`. A centralized `ShouldDispatchToCoordinator` function ensures consistent dispatch logic across all execution paths (API, CLI, scheduler, sub-DAG). DAGs that must remain on the main instance can use `workerSelector: local` to override this behavior. See [Distributed Execution](/features/distributed-execution) and [Worker Labels](/features/worker-labels) for details.
+- **Unified Execution Dispatch (`defaultExecutionMode`)**: New server-level `defaultExecutionMode` setting controls whether DAGs run locally or are dispatched to workers. When set to `distributed`, all DAGs are automatically dispatched to the coordinator for worker execution, even without an explicit `worker_selector`. A centralized `ShouldDispatchToCoordinator` function ensures consistent dispatch logic across all execution paths (API, CLI, scheduler, sub-DAG). DAGs that must remain on the main instance can use `worker_selector: local` to override this behavior. See [Distributed Execution](/features/distributed-execution) and [Worker Labels](/features/worker-labels) for details.
 
 - **Agent (Tsumugi)**: AI assistant integrated into the Web UI for workflow management. Tsumugi helps create, review, debug, and manage DAG workflows through an interactive chat interface. Supports multiple LLM providers (Anthropic, OpenAI, Google, OpenRouter, local models). Features include shell command execution with approval for dangerous operations, file reading/editing, DAG schema lookup, UI navigation, and web search. See [Agent](/features/agent/) for details.
 
@@ -57,7 +57,7 @@
   - **Run IDs never truncated** for reliable copy-paste
   - See [CLI Reference](/reference/cli#history) for full documentation.
 
-- **LLM Model Fallback**: `model` field accepts array of model objects. First is primary, rest are fallbacks tried in order on any error. Per-model overrides for `temperature`, `maxTokens`, `topP`, `baseURL`, `apiKeyName`. See [Model Fallback](/features/chat/basics#model-fallback).
+- **LLM Model Fallback**: `model` field accepts array of model objects. First is primary, rest are fallbacks tried in order on any error. Per-model overrides for `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`. See [Model Fallback](/features/chat/basics#model-fallback).
 
 - **Container Shell Wrapper**: New `shell` field wraps step commands with a shell interpreter, enabling pipes, redirects, and command chaining without manual wrapping. Available in both image and exec modes.
 
@@ -88,7 +88,7 @@
         model: claude-sonnet-4-20250514
         tools:
           - search_tool
-        maxToolIterations: 10
+        max_tool_iterations: 10
       messages:
         - role: user
           content: "What's the latest news about AI?"
@@ -107,7 +107,7 @@
 
   **Key Features:**
   - **DAG-as-Tool**: Any DAG can be a tool - parameters auto-discovered from `defaultParams`
-  - **Multi-turn Execution**: Automatic loop: LLM → Tool Calls → Execute DAGs → Results → LLM (up to `maxToolIterations`)
+  - **Multi-turn Execution**: Automatic loop: LLM → Tool Calls → Execute DAGs → Results → LLM (up to `max_tool_iterations`)
   - **Local Tool Discovery**: Tools searched in local DAGs (using `---` separator) first, then database
   - **UI Drill-down**: Tool executions tracked as sub-DAG runs with full execution details
   - **Tool Definitions Display**: UI shows available tools and their parameters
@@ -118,7 +118,7 @@
 
   **Configuration:**
   - `llm.tools`: Array of DAG names to make available as tools
-  - `llm.maxToolIterations`: Max tool calling loops (default: 10)
+  - `llm.max_tool_iterations`: Max tool calling loops (default: 10)
   - Tool DAG `name`: Used as function name for LLM
   - Tool DAG `description`: Shown to LLM in tool definition
   - Tool DAG `defaultParams`: Parsed to generate JSON Schema for parameters
@@ -225,8 +225,8 @@
   ```yaml
   s3:
     region: us-east-1
-    accessKeyId: ${AWS_ACCESS_KEY_ID}
-    secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
     bucket: my-bucket
 
   steps:
@@ -384,13 +384,13 @@
 
 - **Git Sync**: Synchronize DAG definitions with a Git repository. See [Git Sync](/features/git-sync).
 
-- **Catchup (Missed Run Replay)**: New `catchupWindow` field enables automatic replay of missed cron runs when the scheduler restarts after downtime. The scheduler tracks per-DAG watermarks and replays missed intervals in chronological order, one per scheduler tick. The `overlapPolicy` field (`"skip"`, `"all"`, or `"latest"`) controls behavior when the DAG is still running during catchup. See [Scheduling — Catchup](/features/scheduling#catchup-missed-run-replay).
+- **Catchup (Missed Run Replay)**: New `catchup_window` field enables automatic replay of missed cron runs when the scheduler restarts after downtime. The scheduler tracks per-DAG watermarks and replays missed intervals in chronological order, one per scheduler tick. The `overlap_policy` field (`"skip"`, `"all"`, or `"latest"`) controls behavior when the DAG is still running during catchup. See [Scheduling — Catchup](/features/scheduling#catchup-missed-run-replay).
 
 - **Unified Stop/Restart Scheduling**: Stop and restart schedules are now evaluated by the same TickPlanner module that handles start schedules. Stop schedules fire only when the DAG's latest status is `running`. Restart schedules fire unconditionally. Watermarks track only start-schedule runs to prevent stop/restart times from corrupting catchup computation.
 
 ### Deprecated
 
-- **DAG-level `maxActiveRuns` field**: The `maxActiveRuns` field in DAG files is now deprecated for local (DAG-based) queues. Local queues now always use FIFO processing with concurrency of 1.
+- **DAG-level `max_active_runs` field**: The `max_active_runs` field in DAG files is now deprecated for local (DAG-based) queues. Local queues now always use FIFO processing with concurrency of 1.
 
   **Migration**: For concurrency control, define global queues in `~/.config/dagu/config.yaml` and assign DAGs using the `queue` field:
 
@@ -409,7 +409,7 @@
 
   The field is still accepted for backward compatibility but emits a build warning and is ignored for local queues.
 
-- **`maxActiveRuns: -1` (queue bypass)**: Setting `maxActiveRuns` to `-1` to bypass queueing is deprecated. All DAGs now go through the queue system with local queues defaulting to FIFO (concurrency 1).
+- **`max_active_runs: -1` (queue bypass)**: Setting `max_active_runs` to `-1` to bypass queueing is deprecated. All DAGs now go through the queue system with local queues defaulting to FIFO (concurrency 1).
 
 ### Fixed
 
@@ -433,7 +433,7 @@
 
 - **Sub-DAG Error Masking in Parallel Execution**: Fixed an issue where sub-DAG failures produced the cryptic error "no results available for node status determination" instead of the actual cause. When a child subprocess fails before writing status data, the error is now properly propagated with process exit details and captured stderr. Affected `node.go`, `dag_runner.go`, `parallel.go`, and `dag.go`.
 
-- **Windows Process Timeout and Subprocess Termination**: Fixed `timeoutSec` not being enforced on Windows. The command executor's `Run()` method blocked on `cmd.Wait()` without responding to context cancellation, causing processes to run past their timeout. Refactored to run `cmd.Wait()` asynchronously with a `select` on context cancellation, and updated `KillProcessGroup()` on Windows to use `killProcessTree()` for complete subprocess tree termination. Returns exit code 124 on timeout. (#1635)
+- **Windows Process Timeout and Subprocess Termination**: Fixed `timeout_sec` not being enforced on Windows. The command executor's `Run()` method blocked on `cmd.Wait()` without responding to context cancellation, causing processes to run past their timeout. Refactored to run `cmd.Wait()` asynchronously with a `select` on context cancellation, and updated `KillProcessGroup()` on Windows to use `killProcessTree()` for complete subprocess tree termination. Returns exit code 124 on timeout. (#1635)
 
 ### Contributors
 
@@ -445,10 +445,10 @@ Thanks to our contributors for this release:
 | Production-ready Helm chart for Kubernetes deployment (#1613), tag-wise search for DAG runs feature request (#1494) | [@kriyanshii](https://github.com/kriyanshii) |
 | Queue count display fix (#1602), queue count bug report (#1601) | [@sahalisro-blip](https://github.com/sahalisro-blip) |
 | Dollar sign escape feature request (#1628) | [@sbartczak-aleno](https://github.com/sbartczak-aleno) |
-| `maxActiveSteps` bug report (#1619), false cyclic plan detection bug report (#1618) | [@waterworthd-cim](https://github.com/waterworthd-cim) |
+| `max_active_steps` bug report (#1619), false cyclic plan detection bug report (#1618) | [@waterworthd-cim](https://github.com/waterworthd-cim) |
 | Step name character limit in parallel execution bug report (#1631) | [@dev-epices](https://github.com/dev-epices) |
 | Trigger type visibility feature request (#1610) | [@kevinsimper](https://github.com/kevinsimper) |
-| SSH `workingDir` bug report (#1596), merged log output feature request (#1505) | [@Kirandeep-Singh-Khehra](https://github.com/Kirandeep-Singh-Khehra) |
+| SSH `working_dir` bug report (#1596), merged log output feature request (#1505) | [@Kirandeep-Singh-Khehra](https://github.com/Kirandeep-Singh-Khehra) |
 | Container shell wrapper feature request (#1589) | [@bagemt](https://github.com/bagemt) |
 | LLM chat content-type bug report (#1574) | [@insanity54](https://github.com/insanity54) |
 | Mail settings environment variable bug report (#1557) | [@abylon-io](https://github.com/abylon-io) |
@@ -544,12 +544,12 @@ Thanks to our contributors for this release:
     - command: php artisan cache:clear
   ```
 
-  **Object form** - with user, workingDir, and env overrides:
+  **Object form** - with user, working_dir, and env overrides:
   ```yaml
   container:
     exec: my-running-container
     user: root
-    workingDir: /var/www
+    working_dir: /var/www
     env:
       - APP_DEBUG=true
 
@@ -584,17 +584,17 @@ Thanks to our contributors for this release:
 
 - **`DAGU_PARAMS_JSON` availability**: Every step now receives the merged parameter payload as JSON via the `DAGU_PARAMS_JSON` environment variable, even when parameters are supplied through legacy CLI strings. If a run starts with raw JSON parameters, the original payload is preserved verbatim. This makes it easier for scripts to consume structured parameter data without re-parsing shell strings. (#1550)
 - **DAG Spec Tab in Status View**: Added a new "Spec" tab to the DAG status page and DAG run details modal/panel. This tab displays the DAG YAML specification in readonly mode with the Schema Documentation sidebar available for reference. The spec shown is the exact spec that was used at execution time, not the current spec. (#XXXX)
-- **Wait Status Email Notifications**: Added `mailOn.wait` and `waitMail` configuration for sending email notifications when a DAG enters wait status (Human In The Loop). This enables teams to be notified when workflows require human approval.
+- **Wait Status Email Notifications**: Added `mail_on.wait` and `wait_mail` configuration for sending email notifications when a DAG enters wait status (Human In The Loop). This enables teams to be notified when workflows require human approval.
 
   ```yaml
-  mailOn:
+  mail_on:
     wait: true
 
-  waitMail:
+  wait_mail:
     from: dagu@example.com
     to: approvers@example.com
     prefix: "[WAITING]"
-    attachLogs: false
+    attach_logs: false
   ```
 
   See [Email Notifications](/features/email-notifications#wait-status-notifications) for details.
@@ -620,10 +620,10 @@ Thanks to our contributors for this release:
 
   See [HITL](/features/executors/hitl) for full documentation.
 
-- **Wait Handler**: Added `handlerOn.wait` lifecycle handler that executes when a workflow enters wait status.
+- **Wait Handler**: Added `handler_on.wait` lifecycle handler that executes when a workflow enters wait status.
 
   ```yaml
-  handlerOn:
+  handler_on:
     wait:
       command: notify-slack.sh "${DAG_WAITING_STEPS}"
 
@@ -689,7 +689,7 @@ Thanks to our contributors for this release:
 ## v1.29.0 (2025-12-28)
 
 ### Added
-- Spec: Added `logOutput` field at DAG and step levels to control stdout/stderr logging behavior - `separate` (default) writes to separate `.out`/`.err` files, `merged` writes both to a single `.log` file with interleaved output (#1505)
+- Spec: Added `log_output` field at DAG and step levels to control stdout/stderr logging behavior - `separate` (default) writes to separate `.out`/`.err` files, `merged` writes both to a single `.log` file with interleaved output (#1505)
 - **DAG Run Outputs Collection**: Collect step outputs into a structured `outputs.json` file per DAG run. View collected outputs in the Web UI via the new Outputs tab. (#1466)
   - Outputs are automatically collected from steps with `output` field
   - Secret values are automatically masked in outputs
@@ -766,7 +766,7 @@ curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
 
 Requires builtin authentication mode (`auth.mode: builtin`). See [Webhooks documentation](/configurations/authentication/webhooks) for details.
 
-- **Multiple Commands per Step**: Steps can now execute multiple commands sequentially using an array syntax. This allows sharing step configuration (`env`, `workingDir`, `retryPolicy`, `preconditions`, `container`, etc.) across multiple commands instead of duplicating it across separate steps.
+- **Multiple Commands per Step**: Steps can now execute multiple commands sequentially using an array syntax. This allows sharing step configuration (`env`, `working_dir`, `retry_policy`, `preconditions`, `container`, etc.) across multiple commands instead of duplicating it across separate steps.
 
 ```yaml
 steps:
@@ -777,7 +777,7 @@ steps:
       - npm test
     env:
       - NODE_ENV: production
-    workingDir: /app
+    working_dir: /app
 ```
 
 Commands run in order and stop on first failure. Retries restart from the first command (no checkpoint/resume from middle).
@@ -785,7 +785,7 @@ Commands run in order and stop on first failure. Retries restart from the first 
 Supported executors: shell, command, docker, container, ssh. Executors that do not support multiple commands (jq, http, archive, mail, github_action, dag) will reject the configuration at parse time.
 
 ### Fixed
-- Config: Fixed `errorMail` and `infoMail` partial field overrides not working when only specifying `prefix` or `attachLogs` without `from`/`to` fields. Previously, single-field overrides were silently ignored. (#1512)
+- Config: Fixed `error_mail` and `info_mail` partial field overrides not working when only specifying `prefix` or `attach_logs` without `from`/`to` fields. Previously, single-field overrides were silently ignored. (#1512)
 - Config: Fixed `smtp` partial field overrides not working when only specifying `username` or `password` without `host`/`port` fields.
 
 
@@ -801,7 +801,7 @@ steps:
       image: node:24
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command: npm run build
 
   - name: test
@@ -855,7 +855,7 @@ steps:
 - Runtime: Fixed dequeue command missing queue name parameter, causing API-based dequeue operations to fail (#1481)
 - Auth: API token authentication now works alongside builtin authentication mode; unified middleware supports JWT Bearer tokens, API tokens, Basic auth, and OIDC simultaneously (#1480, #1478, #1475)
 - UI: User Management menu now only displays for admin users when authentication mode is "builtin"; reset password functionality restricted to admin users (#1484)
-- Runtime: Special environment variables (`DAG_RUN_ID`, `DAG_NAME`, etc.) now work correctly in `handlerOn.exit` and other handler contexts (#1474)
+- Runtime: Special environment variables (`DAG_RUN_ID`, `DAG_NAME`, etc.) now work correctly in `handler_on.exit` and other handler contexts (#1474)
 - Security: Escaped config path strings injected into HTML templates to prevent potential JavaScript injection vulnerabilities on Windows (#1472)
 
 ### Contributors
@@ -880,7 +880,7 @@ Thanks to our contributors for this release:
 - Spec: Added `init` handler field that executes after preconditions but before workflow steps - if it fails, subsequent steps are prevented from executing (#1455)
 - Spec: Added `abort` handler as canonical replacement for the deprecated `cancel` handler (#1455)
 - Spec: Added `skipBaseHandlers` option to prevent sub-DAGs from inheriting parent handler configurations (#1455)
-- Spec: Added `continueOn` shorthand syntax - users can now specify `continueOn: "skipped"` or `continueOn: "failed"` instead of verbose object definitions (#1454)
+- Spec: Added `continue_on` shorthand syntax - users can now specify `continue_on: "skipped"` or `continue_on: "failed"` instead of verbose object definitions (#1454)
 - CLI: Added `--default-working-dir` flag to `start` and `enqueue` commands to specify a fallback working directory for DAG executions; automatically propagates to sub-DAGs (#1459)
 - Feature: Added comprehensive resource monitoring for CPU, memory, disk, and system load with in-memory retention store and API endpoint (`GET /services/resources/history`) (#1461)
 - UI: Added resource usage visualization charts on System Status page (#1461)
@@ -936,7 +936,7 @@ Thanks to our contributors for this release:
 - API: DAG rename no longer renames run history to prevent data loss
 
 ### Fixed
-- Core: Resolve working directory relative paths correctly - DAG-level `workingDir` resolves against DAG file location, step-level `dir` resolves against DAG's `workingDir` (#1436)
+- Core: Resolve working directory relative paths correctly - DAG-level `working_dir` resolves against DAG file location, step-level `dir` resolves against DAG's `working_dir` (#1436)
 - Windows: Improved PowerShell and cmd.exe shell handling (#1439)
   - Scripts in working directory now execute correctly (auto-prefixes `.\` when needed)
   - PowerShell scripts now fail properly on non-zero exit codes from external commands
@@ -991,7 +991,7 @@ Thanks to our contributors for this release:
   - Core: fix bug in queue item processing
 
 ### Added
- - Spec/API/UI: Added `timeoutSec` step-level field to cap individual step execution time; when set it overrides any DAG-level timeout for that step (#1412)
+ - Spec/API/UI: Added `timeout_sec` step-level field to cap individual step execution time; when set it overrides any DAG-level timeout for that step (#1412)
 
 ### Contributors
 
@@ -999,7 +999,7 @@ Thanks to our contributors for this release:
 
 | Contribution | Contributor |
 | --- | --- |
-| Step-level `timeoutSec` field (#1412) | [@kriyanshii](https://github.com/kriyanshii) |
+| Step-level `timeout_sec` field (#1412) | [@kriyanshii](https://github.com/kriyanshii) |
 | Queue issue report (#1417) | [@ghansham](https://github.com/ghansham) |
 
 ## v1.24.7
@@ -1057,7 +1057,7 @@ Thanks to our contributors for this release:
 ### Added
 - Executors: Added a `raw` output option to the JQ executor for emitting unquoted strings and primitives (#1392)
 - Installer: Added a `--working-dir` flag to place temporary files outside `/tmp`, useful on constrained systems (#1388)
-- Spec: Resolve parameter schema references relative to the process cwd, declared `workingDir`, or the DAG file location so JSON Schema files can be co-located with DAGs (#1371)
+- Spec: Resolve parameter schema references relative to the process cwd, declared `working_dir`, or the DAG file location so JSON Schema files can be co-located with DAGs (#1371)
 
 ### Fixed
 - UI: Ensure repeat-policy sub DAG run lists refresh their timestamps and counts without needing a window refocus by polling `/sub-dag-runs` while expanded (#1389)
@@ -1198,7 +1198,7 @@ No external contributors for this release - documentation update only.
 
 ### Fixed
 - DAG name validation is centralized and enforced consistently: names must be `<= 40` chars and match `[A-Za-z0-9_.-]+`. Endpoints that accept `name` now return `400 bad_request` for invalid names.
-- Docker: Fixed container initialization bug with `registryAuths` field (#1330)
+- Docker: Fixed container initialization bug with `registry_auths` field (#1330)
 - Windows: Fixed process cancellation not terminating subprocesses by recursively killing all child processes (#1342)
 - UI: Fixed duration display update bug in DAG run details
 - Other small issues and improvements
@@ -1209,7 +1209,7 @@ Thanks to our contributors for this release:
 
 | Contribution                           | Contributor                              |
 | -------------------------------------- | ---------------------------------------- |
-| Docker-in-Docker container execution issues (#1228, #1231, #1235) and registryAuths bug report (#1327) | [@bellackn](https://github.com/bellackn) |
+| Docker-in-Docker container execution issues (#1228, #1231, #1235) and registry_auths bug report (#1327) | [@bellackn](https://github.com/bellackn) |
 | Container name support (#1237), bash requirement (#1239), command field (#1261), log buttons (#1301), and scroll issues (#1324) | [@Pangolin2097](https://github.com/Pangolin2097) |
 | Accordion-style log expansion feature request (#1313) | [@borestad](https://github.com/borestad) |
 | SSH environment variables feature request (#1238) | [@n3storm](https://github.com/n3storm) |
@@ -1249,14 +1249,14 @@ Thanks to our contributors for this release:
 - **Load Environment Support**: Enhanced environment variable loading capabilities with improved dotenv support
 - **Queue Dashboard UI**: Complete queue management interface with visual feedback and improved user experience (#1217)
 - **DAG Name Input Modal**: Improved UI for DAG name input and management with better validation (#1218)
-- **Max Active Runs Enforcement**: DAG-level `maxActiveRuns` configuration enforcement in API and CLI when starting DAG-runs (#1214) - Thanks to [@ghansham](https://github.com/ghansham) for feedback
-- **Queue Configuration Rename**: Renamed `queue.maxActiveRuns` to `queue.maxConcurrency` for clarity and consistency (#1215)
+- **Max Active Runs Enforcement**: DAG-level `max_active_runs` configuration enforcement in API and CLI when starting DAG-runs (#1214) - Thanks to [@ghansham](https://github.com/ghansham) for feedback
+- **Queue Configuration Rename**: Renamed `queue.max_active_runs` to `queue.maxConcurrency` for clarity and consistency (#1215)
 
 ### Improvements
 - **Directory Lock Management**: Improved directory lock and active process management for better reliability and reduced race conditions (#1202)
 - **Empty Directory Cleanup**: Automatic removal of empty directories for proc and queue management to keep storage clean (#1208)
 - **Default Start Command**: Made 'start' the default command, removing single flag requirement for better CLI usability
-- **Max Active Runs Logic**: Enhanced check logic for `maxActiveRuns` configuration with improved validation (#1216)
+- **Max Active Runs Logic**: Enhanced check logic for `max_active_runs` configuration with improved validation (#1216)
 - **Queue UI Enhancements**: Applied user feedback to improve queue UI usability and functionality (#1221, #1222)
 
 ### Bug Fixes
@@ -1674,19 +1674,19 @@ Thanks to @thefishhat:
 steps:
   - name: wait for service
     command: check_service.sh
-    repeatPolicy:
+    repeat_policy:
       repeat: until        # NEW: Explicit mode (while/until)
       condition: "${STATUS}"
       expected: "ready"    # Repeat UNTIL status is ready
-      intervalSec: 30
+      interval_sec: 30
       limit: 60           # Maximum attempts
       
   - name: monitor process
     command: pgrep myapp
-    repeatPolicy:
+    repeat_policy:
       repeat: while       # Repeat WHILE process exists
-      exitCode: [0]       # Exit code 0 means found
-      intervalSec: 10
+      exit_code: [0]       # Exit code 0 means found
+      interval_sec: 10
 ```
 
 ### Bug Fixes & Improvements
@@ -1859,8 +1859,8 @@ dagu start my_dag -- param1 param2 --param3 value3
 steps:
   - name: some_step
     command: some_command
-    continueOn:
-      exitCode: [1, 2]  # Continue if exit code is 1 or 2
+    continue_on:
+      exit_code: [1, 2]  # Continue if exit code is 1 or 2
 ```
 
 **Mark as Success**:
@@ -1868,9 +1868,9 @@ steps:
 steps:
   - name: some_step
     command: some_command
-    continueOn:
-      exitCode: 1
-      markSuccess: true  # Mark successful even if failed
+    continue_on:
+      exit_code: 1
+      mark_success: true  # Mark successful even if failed
 ```
 
 **Output Matching**:
@@ -1878,13 +1878,13 @@ steps:
 steps:
   - name: some_step
     command: some_command
-    continueOn:
+    continue_on:
       output: "WARNING"  # Continue if output contains "WARNING"
       
   # With regex
   - name: another_step
     command: another_command
-    continueOn:
+    continue_on:
       output: "re:^ERROR: [0-9]+"  # Regex pattern matching
 ```
 

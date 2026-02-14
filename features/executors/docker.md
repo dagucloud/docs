@@ -44,7 +44,7 @@ steps:
 container:
   exec: my-app-container
   user: root
-  workingDir: /var/www
+  working_dir: /var/www
   env:
     - APP_DEBUG=true
 
@@ -69,7 +69,7 @@ steps:
   - name: build
     container:
       image: golang:1.22
-      workingDir: /app
+      working_dir: /app
       volumes:
         - ./src:/app
     command: go build -o /app/bin/myapp
@@ -77,7 +77,7 @@ steps:
   - name: test
     container:
       image: golang:1.22
-      workingDir: /app
+      working_dir: /app
       volumes:
         - ./src:/app
     command: go test ./...
@@ -145,8 +145,8 @@ container: my-running-container  # Exec into existing container
 container:
   image: alpine:latest        # Required: container image
   name: my-container          # Optional: custom container name
-  pullPolicy: missing         # always | missing | never
-  workingDir: /app            # Working directory inside the container
+  pull_policy: missing         # always | missing | never
+  working_dir: /app            # Working directory inside the container
   user: "1000:1000"           # User and group
   platform: linux/amd64       # Target platform
   env:
@@ -158,7 +158,7 @@ container:
   ports:
     - "8080:8080"
   network: bridge
-  keepContainer: true         # Keep container after workflow (DAG-level only)
+  keep_container: true         # Keep container after workflow (DAG-level only)
 ```
 
 #### Object Form - Exec Mode
@@ -167,7 +167,7 @@ container:
 container:
   exec: my-running-container  # Required: name of existing container
   user: root                  # Optional: override user
-  workingDir: /app            # Optional: override working directory
+  working_dir: /app            # Optional: override working directory
   env:                        # Optional: additional environment variables
     - DEBUG=true
 ```
@@ -179,15 +179,15 @@ container:
 | `exec` | **Required** | Not allowed |
 | `image` | Not allowed | **Required** |
 | `user` | Optional | Optional |
-| `workingDir` | Optional | Optional |
+| `working_dir` | Optional | Optional |
 | `env` | Optional | Optional |
 | `name` | Not allowed | Optional |
-| `pullPolicy` | Not allowed | Optional |
+| `pull_policy` | Not allowed | Optional |
 | `volumes` | Not allowed | Optional |
 | `ports` | Not allowed | Optional |
 | `network` | Not allowed | Optional |
 | `platform` | Not allowed | Optional |
-| `keepContainer` | Not allowed | Optional |
+| `keep_container` | Not allowed | Optional |
 
 ### Step Container Overrides DAG Container
 
@@ -197,7 +197,7 @@ When a step has its own `container` field, it runs in that container instead of 
 # DAG-level container for most steps
 container:
   image: node:20
-  workingDir: /app
+  working_dir: /app
 
 steps:
   - name: install
@@ -222,8 +222,8 @@ steps:
     type: docker
     config:
       image: alpine:3
-      autoRemove: true
-      workingDir: /app
+      auto_remove: true
+      working_dir: /app
       volumes:
         - /host:/container
     command: pwd
@@ -239,7 +239,7 @@ steps:
     type: docker
     config:
       image: alpine:3
-      autoRemove: true
+      auto_remove: true
       host:
         Memory: 536870912    # 512MB in bytes
         CPUShares: 512
@@ -258,7 +258,7 @@ steps:
 - **Required fields**: `container.image` is required.
 - **Container name**: Must be unique. If a container with the same name already exists (running or stopped), the DAG fails.
 - **Volume format**: `source:target[:ro|rw]`
-  - `source` may be absolute, relative to DAG workingDir (`.` or `./...`), or `~`-expanded; otherwise it is treated as a named volume.
+  - `source` may be absolute, relative to DAG working_dir (`.` or `./...`), or `~`-expanded; otherwise it is treated as a named volume.
   - Only `ro` or `rw` are valid modes.
 - **Port format**: `"80"`, `"8080:80"`, `"127.0.0.1:8080:80"`, optional protocol: `80/tcp|udp|sctp` (default tcp).
 - **Network**: Accepts `bridge`, `host`, `none`, `container:<name|id>`, or a custom network name.
@@ -268,23 +268,23 @@ steps:
 ### Exec Mode
 
 - **Container must exist**: The specified container must exist and be running. Dagu waits up to 120 seconds for the container to be in running state.
-- **Invalid fields**: Fields like `volumes`, `ports`, `network`, `pullPolicy`, `name`, etc. cannot be used with `exec` and will cause validation errors.
-- **Allowed overrides**: Only `user`, `workingDir`, and `env` can be specified to override the container's defaults.
+- **Invalid fields**: Fields like `volumes`, `ports`, `network`, `pull_policy`, `name`, etc. cannot be used with `exec` and will cause validation errors.
+- **Allowed overrides**: Only `user`, `working_dir`, and `env` can be specified to override the container's defaults.
 
 ### DAG-Level Startup Options
 
 For DAG-level containers, additional startup options are available:
 
 - `startup`: `keepalive` (default), `entrypoint`, `command`
-- `waitFor`: `running` (default) or `healthy`
-- `logPattern`: regex pattern for readiness detection
+- `wait_for`: `running` (default) or `healthy`
+- `log_pattern`: regex pattern for readiness detection
 
 ```yaml
 # Startup: entrypoint - uses image's default entrypoint
 container:
   image: nginx:alpine
   startup: entrypoint
-  waitFor: healthy
+  wait_for: healthy
 
 steps:
   - command: curl localhost
@@ -302,11 +302,11 @@ steps:
 ```
 
 ```yaml
-# With logPattern - wait for specific log output
+# With log_pattern - wait for specific log output
 container:
   image: postgres:15
   startup: entrypoint
-  logPattern: "ready to accept connections"
+  log_pattern: "ready to accept connections"
   env:
     - POSTGRES_PASSWORD=secret
 
@@ -352,14 +352,14 @@ steps:
       image: node:20
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command:
       - npm install
       - npm run build
       - npm test
 ```
 
-Instead of duplicating the `container`, `env`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
+Instead of duplicating the `container`, `env`, `retry_policy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
 
 ## Variable Expansion
 
@@ -420,10 +420,10 @@ steps:
 
 Access private container registries with authentication configured at the DAG level.
 
-`${VAR}` references in `registryAuths` fields expand only DAG-scoped variables (`env:`, `params:`, `secrets:`, step outputs). OS environment variables are **not** expanded — define them in the `env:` block first.
+`${VAR}` references in `registry_auths` fields expand only DAG-scoped variables (`env:`, `params:`, `secrets:`, step outputs). OS environment variables are **not** expanded — define them in the `env:` block first.
 
 ```yaml
-registryAuths:
+registry_auths:
   docker.io:
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
@@ -443,7 +443,7 @@ steps:
 **Structured format:**
 
 ```yaml
-registryAuths:
+registry_auths:
   docker.io:
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
@@ -452,7 +452,7 @@ registryAuths:
 **Pre-encoded authentication:**
 
 ```yaml
-registryAuths:
+registry_auths:
   gcr.io:
     auth: ${GCR_AUTH_BASE64}  # base64(username:password)
 ```
@@ -460,21 +460,21 @@ registryAuths:
 **Environment variable:**
 
 ```yaml
-registryAuths: ${DOCKER_AUTH_CONFIG}
+registry_auths: ${DOCKER_AUTH_CONFIG}
 ```
 
 The `DOCKER_AUTH_CONFIG` format is compatible with Docker's `~/.docker/config.json`.
 
 ### Authentication Priority
 
-1. **DAG-level `registryAuths`** - Configured in your DAG file
+1. **DAG-level `registry_auths`** - Configured in your DAG file
 2. **`DOCKER_AUTH_CONFIG` environment variable** - Standard Docker authentication
 3. **No authentication** - For public registries
 
 ### Example: Multi-Registry Workflow
 
 ```yaml
-registryAuths:
+registry_auths:
   docker.io:
     username: ${DOCKERHUB_USER}
     password: ${DOCKERHUB_TOKEN}
@@ -514,12 +514,12 @@ services:
 
 ## Container Lifecycle Management
 
-The `keepContainer` option (DAG-level only) prevents the container from being removed after the workflow completes:
+The `keep_container` option (DAG-level only) prevents the container from being removed after the workflow completes:
 
 ```yaml
 container:
   image: postgres:16
-  keepContainer: true
+  keep_container: true
   env:
     - POSTGRES_PASSWORD=secret
   ports:

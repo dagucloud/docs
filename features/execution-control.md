@@ -33,7 +33,7 @@ steps:
   - call: file-processor
     parallel:
       items: ${FILE_LIST}
-      maxConcurrent: 2  # Process max 2 files at a time
+      max_concurrent: 2  # Process max 2 files at a time
     params: "FILE=${ITEM}"
 ```
 
@@ -86,7 +86,7 @@ Control how many steps run concurrently:
 
 ```yaml
 type: graph
-maxActiveSteps: 2  # Run up to 2 steps in parallel
+max_active_steps: 2  # Run up to 2 steps in parallel
 
 steps:
   - command: echo "Running task 1"
@@ -97,7 +97,7 @@ steps:
     depends: []
   - command: echo "Running task 4"
     depends: []
-  # All start in parallel, limited by maxActiveSteps
+  # All start in parallel, limited by max_active_steps
 ```
 
 ## Queue Management
@@ -137,54 +137,54 @@ Set execution time limits:
 ### Workflow Timeout
 
 ```yaml
-timeoutSec: 3600  # 1 hour timeout
+timeout_sec: 3600  # 1 hour timeout
 
 steps:
   - command: echo "Processing"
 ```
 
-### Step Timeout (timeoutSec)
+### Step Timeout (timeout_sec)
 
 Apply a per‑step cap that overrides the workflow timeout for that specific step:
 
 ```yaml
-timeoutSec: 1800  # Overall DAG timeout (30m)
+timeout_sec: 1800  # Overall DAG timeout (30m)
 
 steps:
   - name: fast-check
     command: curl -sf https://example.com/health
-    timeoutSec: 20    # This step fails if still running after 20s
+    timeout_sec: 20    # This step fails if still running after 20s
 
   - name: bulk-import
     command: python import.py   # Inherits 30m DAG timeout
 
   - name: guarded-external
     command: bash -c 'long_unstable_call'
-    timeoutSec: 300   # Give 5m max even though DAG allows 30m
+    timeout_sec: 300   # Give 5m max even though DAG allows 30m
 ```
 
 Behavior:
-- If a step defines `timeoutSec > 0`, a dedicated context deadline is used; it overrides the DAG-level `timeoutSec` only for that step.
+- If a step defines `timeout_sec > 0`, a dedicated context deadline is used; it overrides the DAG-level `timeout_sec` only for that step.
 - On step timeout the process tree is terminated and the step is marked `failed` with exit code `124` (standard timeout code).
-- Dependent steps are skipped unless `continueOn` allows the timed-out step to be treated as non-blocking.
-- Omit or set `timeoutSec: 0` on a step to rely solely on the DAG timeout.
+- Dependent steps are skipped unless `continue_on` allows the timed-out step to be treated as non-blocking.
+- Omit or set `timeout_sec: 0` on a step to rely solely on the DAG timeout.
 - Use step timeouts for external calls (network, APIs, third‑party CLIs) to fail fast while letting other steps proceed.
 
 Validation:
-- `timeoutSec` must be `>= 0`; negative values are rejected during spec validation.
+- `timeout_sec` must be `>= 0`; negative values are rejected during spec validation.
 
 Tips:
-- Pair with `retryPolicy` or `repeatPolicy` so transient slowdowns get another attempt instead of burning the entire DAG time budget.
+- Pair with `retry_policy` or `repeat_policy` so transient slowdowns get another attempt instead of burning the entire DAG time budget.
 - Log messages and UI will surface both the step-level and DAG-level timeout sources when they trigger.
 
 ### Cleanup Timeout
 
-By default DAGs wait 5 seconds for cleanup before forcefully terminating steps. Increase `maxCleanUpTimeSec` if your handlers need longer.
+By default DAGs wait 5 seconds for cleanup before forcefully terminating steps. Increase `max_clean_up_time_sec` if your handlers need longer.
 
 ```yaml
-maxCleanUpTimeSec: 300  # allow 5 minutes for cleanup (default timeout: 5s)
+max_clean_up_time_sec: 300  # allow 5 minutes for cleanup (default timeout: 5s)
 
-handlerOn:
+handler_on:
   exit:
     command: echo "Cleaning up"  # Must finish within 5 minutes
 ```
@@ -194,7 +194,7 @@ handlerOn:
 Delay workflow start:
 
 ```yaml
-delaySec: 60  # Wait 60 seconds before starting
+delay_sec: 60  # Wait 60 seconds before starting
 
 steps:
   - command: echo "Running task"
@@ -247,12 +247,12 @@ Control retry and repeat intervals with exponential backoff to avoid overwhelmin
 steps:
   # API call with exponential backoff
   - command: curl https://api.example.com/data
-    retryPolicy:
+    retry_policy:
       limit: 6
-      intervalSec: 1
+      interval_sec: 1
       backoff: 2.0         # Double interval each time
-      maxIntervalSec: 60   # Cap at 60 seconds
-      exitCode: [429, 503] # Rate limit or service unavailable
+      max_interval_sec: 60   # Cap at 60 seconds
+      exit_code: [429, 503] # Rate limit or service unavailable
       # Intervals: 1s, 2s, 4s, 8s, 16s, 32s → 60s
 ```
 
@@ -263,13 +263,13 @@ steps:
   # Service health check with backoff
   - command: echo "Health check OK"
     output: STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: until
       condition: "${STATUS}"
       expected: "healthy"
-      intervalSec: 2
+      interval_sec: 2
       backoff: 1.5         # Gentler backoff (1.5x)
-      maxIntervalSec: 120  # Cap at 2 minutes
+      max_interval_sec: 120  # Cap at 2 minutes
       limit: 50
       # Intervals: 2s, 3s, 4.5s, 6.75s, 10.125s...
 ```

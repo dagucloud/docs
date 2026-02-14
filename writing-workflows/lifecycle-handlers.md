@@ -1,13 +1,13 @@
 # Lifecycle Handlers
 
-Lifecycle handlers let you run extra steps after the main DAG completes. Use the `handlerOn` block to trigger notifications, clean up resources, or kick off follow-up jobs without duplicating logic inside individual steps. Every handler runs with the canonical `DAG_RUN_STATUS` environment variable so you can branch on the final outcome inside a single script.
+Lifecycle handlers let you run extra steps after the main DAG completes. Use the `handler_on` block to trigger notifications, clean up resources, or kick off follow-up jobs without duplicating logic inside individual steps. Every handler runs with the canonical `DAG_RUN_STATUS` environment variable so you can branch on the final outcome inside a single script.
 
 ## Supported Triggers
 
 | Handler | Trigger | Typical use cases |
 |---------|---------|-------------------|
 | `init` | Runs before any workflow steps (after DAG-level preconditions pass) | Setup tasks, acquire locks, validate environment |
-| `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continueOn`) | Deliver success notifications, enqueue downstream jobs |
+| `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continue_on`) | Deliver success notifications, enqueue downstream jobs |
 | `failure` | The DAG ended with `failed` or `rejected` status (precondition failure) | Page on-call, collect diagnostics |
 | `abort` | A stop request interrupted the run (manual stop, queue eviction, timeout cancellation) | Roll back partial work, release locks |
 | `wait` | The DAG has paused waiting for human approval (HITL) | Notify approvers, send Slack messages |
@@ -19,7 +19,7 @@ Only the handlers you define are executed. The `init` handler runs first (before
 
 ```yaml
 # dag.yaml
-handlerOn:
+handler_on:
   init:
     command: acquire-lock.sh ${LOCK_NAME}   # runs before any steps
   success:
@@ -53,7 +53,7 @@ Each handler is a normal step definition. You can use `command`, `script`, `call
 
 ## Sub-DAG Handler Isolation
 
-**Important**: Sub-DAGs (workflows invoked via `call`) do **not** inherit `handlerOn` configuration from the base DAG configuration. This design prevents unintended behavior such as:
+**Important**: Sub-DAGs (workflows invoked via `call`) do **not** inherit `handler_on` configuration from the base DAG configuration. This design prevents unintended behavior such as:
 
 - **Double notifications**: If a parent DAG has a failure handler that sends alerts, sub-DAGs would also trigger alerts, causing duplicate notifications.
 - **Unintended cleanup**: Init, exit, or abort handlers meant for the root workflow would also run for every nested sub-DAG.
@@ -62,7 +62,7 @@ Each sub-DAG should define its own handlers explicitly if lifecycle handling is 
 
 ```yaml
 # parent.yaml
-handlerOn:
+handler_on:
   failure:
     command: notify.sh "Parent DAG failed"  # Only runs for parent
 
@@ -72,7 +72,7 @@ steps:
 ---
 # child-workflow (in same file or separate file)
 name: child-workflow
-handlerOn:
+handler_on:
   failure:
     command: notify.sh "Child DAG failed"  # Define explicitly if needed
 
@@ -87,7 +87,7 @@ This isolation ensures that each workflow in a hierarchy has predictable, self-c
 ### Send Email with the Mail Step Type
 
 ```yaml
-handlerOn:
+handler_on:
   failure:
     type: mail
     config:
@@ -102,7 +102,7 @@ handlerOn:
 ### Run a Follow-up DAG
 
 ```yaml
-handlerOn:
+handler_on:
   success:
     call: sync-reporting
     params: |
@@ -112,7 +112,7 @@ handlerOn:
 ### Guaranteed Cleanup
 
 ```yaml
-handlerOn:
+handler_on:
   exit:
     command: |
       find /tmp/${DAG_RUN_ID} -maxdepth 1 -type f -delete
@@ -123,7 +123,7 @@ handlerOn:
 When using [HITL steps](/features/executors/hitl) for human-in-the-loop approval, notify stakeholders:
 
 ```yaml
-handlerOn:
+handler_on:
   wait:
     command: notify-slack.sh "Approval needed: ${DAG_WAITING_STEPS}"
 

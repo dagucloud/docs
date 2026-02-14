@@ -55,7 +55,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
       script: |
         Write-Host "Inline ps1 body"
   ```
-- **Working directory and env**: Use `workingDir`/`dir` and `env` on the step (or DAG defaults) to control context.
+- **Working directory and env**: Use `working_dir`/`dir` and `env` on the step (or DAG defaults) to control context.
 
 ## Script Behavior (Windows)
 

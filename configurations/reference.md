@@ -31,7 +31,7 @@ audit:
 # Directories (must be under "paths" key)
 paths:
   dagsDir: "~/.config/dagu/dags"
-  logDir: "~/.local/share/dagu/logs"
+  log_dir: "~/.local/share/dagu/logs"
   dataDir: "~/.local/share/dagu/data"
   suspendFlagsDir: "~/.local/share/dagu/suspend"
   adminLogsDir: "~/.local/share/dagu/logs/admin"
@@ -136,7 +136,7 @@ coordinator:
 # Worker (for distributed execution)
 worker:
   id: ""                  # Worker ID (default: hostname@PID)
-  maxActiveRuns: 100      # Max parallel task executions
+  max_active_runs: 100      # Max parallel task executions
   labels:                 # Worker capabilities
     gpu: "false"
     memory: "16G"
@@ -264,7 +264,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_QUEUE_ENABLED` - Enable queue system (default: true)
 
 ### Execution
-- `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `workerSelector`. Use `workerSelector: local` in a DAG to override.
+- `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
 
 ### Coordinator
 - `DAGU_COORDINATOR_ENABLED` - Enable coordinator service (default: `true`)
@@ -320,10 +320,10 @@ env:
 
 # Defaults
 queue: "default"
-histRetentionDays: 30
+hist_retention_days: 30
 
 # Email notifications
-mailOn:
+mail_on:
   failure: true
 
 smtp:
@@ -332,11 +332,11 @@ smtp:
   username: "notifications@company.com"
   password: "${SMTP_PASSWORD}"
 
-errorMail:
+error_mail:
   from: "dagu@company.com"
   to: "ops-team@company.com"
   prefix: "[ERROR]"
-  attachLogs: true
+  attach_logs: true
 ```
 
 For complete documentation on all available fields, inheritance behavior, and common patterns, see [Base Configuration](/configurations/base-config).
@@ -491,7 +491,7 @@ defaultExecutionMode: distributed  # Dispatch all DAGs to workers
 # Worker configuration
 worker:
   id: gpu-worker-01
-  maxActiveRuns: 10
+  max_active_runs: 10
   labels:
     gpu: "true"
     cuda: "11.8"

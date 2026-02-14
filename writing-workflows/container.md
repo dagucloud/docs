@@ -45,7 +45,7 @@ Or with overrides for user, working directory, and environment:
 container:
   exec: my-running-container
   user: root
-  workingDir: /app
+  working_dir: /app
   env:
     - DEBUG=true
 
@@ -66,7 +66,7 @@ container:
   volumes:
     - ./src:/app
     - ./data:/data
-  workingDir: /app
+  working_dir: /app
 
 steps:
   - command: npm install    # Install dependencies
@@ -85,7 +85,7 @@ container:
 
 steps:
   - command: pg_isready -U postgres
-    retryPolicy:
+    retry_policy:
       limit: 10
       
   - command: psql -U postgres myapp -f schema.sql
@@ -95,7 +95,7 @@ steps:
 
 ```yaml
 # For private images
-registryAuths:
+registry_auths:
   ghcr.io:
     username: ${GITHUB_USER}
     password: ${GITHUB_TOKEN}
@@ -264,12 +264,12 @@ container: my-running-container  # Exec into existing container with defaults
 container:
   name: my-workflow-container # Custom container name (optional)
   image: ubuntu:22.04        # Required for image mode
-  pullPolicy: missing        # always | missing | never
+  pull_policy: missing        # always | missing | never
   volumes:                   # Volume mounts
     - /host:/container
   env:                       # Environment variables
     - KEY=value
-  workingDir: /app           # Working directory
+  working_dir: /app           # Working directory
   user: "1000:1000"          # User/group
   platform: linux/amd64      # Platform
   ports:                     # Port mappings
@@ -277,10 +277,10 @@ container:
   network: host              # Network mode
   startup: keepalive         # keepalive | entrypoint | command
   command: ["sh", "-c", "my-daemon"] # when startup: command
-  waitFor: running           # running | healthy
-  logPattern: "Ready"        # optional regex; wait for log pattern
-  restartPolicy: unless-stopped  # optional Docker restart policy (no|always|unless-stopped)
-  keepContainer: true        # Keep after workflow
+  wait_for: running           # running | healthy
+  log_pattern: "Ready"        # optional regex; wait for log pattern
+  restart_policy: unless-stopped  # optional Docker restart policy (no|always|unless-stopped)
+  keep_container: true        # Keep after workflow
   shell: ["/bin/bash", "-c"] # Shell wrapper for step commands
 ```
 
@@ -289,7 +289,7 @@ container:
 container:
   exec: my-running-container  # Required for exec mode
   user: root                  # Optional: override user
-  workingDir: /app            # Optional: override working directory
+  working_dir: /app            # Optional: override working directory
   env:                        # Optional: additional environment variables
     - DEBUG=true
   shell: ["/bin/sh", "-c"]    # Shell wrapper for step commands
@@ -302,21 +302,21 @@ container:
 | `exec` | N/A (implicit) | **Required** | Not allowed |
 | `image` | Not allowed | Not allowed | **Required** |
 | `user` | N/A | Optional | Optional |
-| `workingDir` | N/A | Optional | Optional |
+| `working_dir` | N/A | Optional | Optional |
 | `env` | N/A | Optional | Optional |
 | `shell` | N/A | Optional | Optional |
 | `name` | N/A | Not allowed | Optional |
-| `pullPolicy` | N/A | Not allowed | Optional |
+| `pull_policy` | N/A | Not allowed | Optional |
 | `volumes` | N/A | Not allowed | Optional |
 | `ports` | N/A | Not allowed | Optional |
 | `network` | N/A | Not allowed | Optional |
 | `platform` | N/A | Not allowed | Optional |
 | `startup` | N/A | Not allowed | Optional |
 | `command` | N/A | Not allowed | Optional |
-| `waitFor` | N/A | Not allowed | Optional |
-| `logPattern` | N/A | Not allowed | Optional |
-| `restartPolicy` | N/A | Not allowed | Optional |
-| `keepContainer` | N/A | Not allowed | Optional |
+| `wait_for` | N/A | Not allowed | Optional |
+| `log_pattern` | N/A | Not allowed | Optional |
+| `restart_policy` | N/A | Not allowed | Optional |
+| `keep_container` | N/A | Not allowed | Optional |
 
 ### Validation and Errors
 
@@ -327,18 +327,18 @@ container:
 **Image mode:**
 - `image` is required.
 - `name` is optional; if specified, must be unique. If a container with the same name already exists (running or stopped), the workflow fails.
-- `volumes` must use `source:target[:ro|rw]` format; relative paths are resolved from the DAG `workingDir`; invalid formats fail.
+- `volumes` must use `source:target[:ro|rw]` format; relative paths are resolved from the DAG `working_dir`; invalid formats fail.
 - `ports` accept `"80"`, `"8080:80"`, `"127.0.0.1:8080:80"`; container port may have `/tcp|udp|sctp` (default tcp); invalid formats fail.
 - `network` accepts `bridge`, `host`, `none`, `container:<name|id>`, or a custom network name.
-- `restartPolicy` supports `no`, `always`, or `unless-stopped`; other values fail.
+- `restart_policy` supports `no`, `always`, or `unless-stopped`; other values fail.
 - `startup` must be one of `keepalive` (default), `entrypoint`, `command`; invalid values fail.
-- `waitFor` must be `running` (default) or `healthy`; if `healthy` is chosen but no healthcheck exists, Dagu falls back to `running` with a warning.
-- `logPattern` must be a valid regex; readiness waits up to 120s (including `logPattern`), then errors with the last known state.
+- `wait_for` must be `running` (default) or `healthy`; if `healthy` is chosen but no healthcheck exists, Dagu falls back to `running` with a warning.
+- `log_pattern` must be a valid regex; readiness waits up to 120s (including `log_pattern`), then errors with the last known state.
 
 **Exec mode:**
 - The container must exist and be running; Dagu waits up to 120 seconds for the container to be running.
-- Fields like `volumes`, `ports`, `network`, `pullPolicy`, etc. cannot be used with `exec` (they're only valid when creating a new container).
-- Only `user`, `workingDir`, `env`, and `shell` can override the container's defaults.
+- Fields like `volumes`, `ports`, `network`, `pull_policy`, etc. cannot be used with `exec` (they're only valid when creating a new container).
+- Only `user`, `working_dir`, `env`, and `shell` can override the container's defaults.
 
 **Shell field:**
 - Non-empty array: first element is shell path, last element is command flag (e.g., `-c`)
@@ -355,14 +355,14 @@ steps:
       image: node:24
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command:
       - npm install
       - npm run build
       - npm test
 ```
 
-Instead of duplicating the `container`, `env`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
+Instead of duplicating the `container`, `env`, `retry_policy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).
 
 ## Key Benefits
 
@@ -393,7 +393,7 @@ Choose how the DAG‑level container starts:
 container:
   image: servercontainers/samba:latest
   startup: entrypoint   # keepalive | entrypoint | command
-  waitFor: healthy      # running | healthy (default running)
+  wait_for: healthy      # running | healthy (default running)
 ```
 
 ```yaml
@@ -401,7 +401,7 @@ container:
   image: alpine:latest
   startup: command
   command: ["sh", "-c", "my-daemon --flag"]
-  restartPolicy: unless-stopped   # optional
+  restart_policy: unless-stopped   # optional
 ```
 
 - `keepalive` (default): preserves current behavior using an embedded
@@ -411,17 +411,17 @@ container:
 
 Readiness before steps run:
 
-- `waitFor: running` (default): continue once the container is running.
-- `waitFor: healthy`: if image defines a Docker healthcheck, wait for healthy;
+- `wait_for: running` (default): continue once the container is running.
+- `wait_for: healthy`: if image defines a Docker healthcheck, wait for healthy;
   if not defined, Dagu falls back to `running` and logs a warning.
-- `logPattern`: optional regex; when set, steps start only after this pattern
-  appears in container logs (after the selected `waitFor` condition passes).
+- `log_pattern`: optional regex; when set, steps start only after this pattern
+  appears in container logs (after the selected `wait_for` condition passes).
 
 Readiness timeout and errors:
 
 - Dagu waits up to 120 seconds for readiness (`running`/`healthy` and any
-  `logPattern`). On timeout, it fails the run and reports the mode and last
-  known state (for example, `status=exited, exitCode=1`).
+  `log_pattern`). On timeout, it fails the run and reports the mode and last
+  known state (for example, `status=exited, exit_code=1`).
 
 ### Examples
 
@@ -470,7 +470,7 @@ steps:
       image: node:24
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command: npm run build
 
   - name: test
@@ -478,7 +478,7 @@ steps:
       image: node:24
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command: npm test
 
   - name: deploy
@@ -505,7 +505,7 @@ steps:
     container:
       exec: my-app-container
       user: www-data
-      workingDir: /var/www
+      working_dir: /var/www
     command: php artisan cache:clear
 
   # Mix exec and image modes in the same workflow

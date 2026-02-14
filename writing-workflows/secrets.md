@@ -60,7 +60,7 @@ secrets:
 
 Relative paths search in order:
 
-1. DAG `workingDir` (if set)
+1. DAG `working_dir` (if set)
 2. Directory that contains the DAG file
 
 The first existing file wins; if none are found the run fails with a clear error.

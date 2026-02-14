@@ -45,9 +45,9 @@ The dispatch decision evaluates these rules in order, stopping at the first matc
 
 | Priority | Condition | Result |
 |----------|-----------|--------|
-| 1 | `workerSelector: local` is set | **Local** — always runs on the main instance |
+| 1 | `worker_selector: local` is set | **Local** — always runs on the main instance |
 | 2 | No coordinator is configured | **Local** — distributed execution is unavailable |
-| 3 | `workerSelector` has labels (e.g., `gpu: "true"`) | **Dispatch** — sent to a matching worker |
+| 3 | `worker_selector` has labels (e.g., `gpu: "true"`) | **Dispatch** — sent to a matching worker |
 | 4 | `defaultExecutionMode: distributed` is set | **Dispatch** — sent to any available worker |
 | 5 | None of the above | **Local** — runs on the main instance |
 
@@ -70,7 +70,7 @@ When a DAG run is enqueued (via API, webhook, or scheduler), it always enters th
 
 ### Sub-DAG Dispatch
 
-Each sub-DAG independently evaluates the dispatch decision. A DAG running locally can dispatch a child to a worker (if the child has `workerSelector` labels), and a DAG running on a worker can force a child to run locally (if the child has `workerSelector: local`). Parent and child dispatch decisions are completely independent.
+Each sub-DAG independently evaluates the dispatch decision. A DAG running locally can dispatch a child to a worker (if the child has `worker_selector` labels), and a DAG running on a worker can force a child to run locally (if the child has `worker_selector: local`). Parent and child dispatch decisions are completely independent.
 
 ## Setting Up Distributed Execution
 
@@ -120,10 +120,10 @@ dagu worker \
 
 ### Step 3: Route Tasks to Workers
 
-Use `workerSelector` in your DAG definitions to route tasks:
+Use `worker_selector` in your DAG definitions to route tasks:
 
 ```yaml
-workerSelector:
+worker_selector:
   gpu: "true"
 
 steps:
@@ -135,15 +135,15 @@ Or at the step level for sub-DAG steps:
 ```yaml
 steps:
   - call: train-model
-    workerSelector:
+    worker_selector:
       gpu: "true"
 ```
 
-See [Worker Labels](./worker-labels) for full details on label matching and step-level `workerSelector`.
+See [Worker Labels](./worker-labels) for full details on label matching and step-level `worker_selector`.
 
 ## Default Execution Mode
 
-By default, DAGs without a `workerSelector` run locally on the main instance. You can change this behavior with the `defaultExecutionMode` server setting so that all DAGs are dispatched to workers automatically.
+By default, DAGs without a `worker_selector` run locally on the main instance. You can change this behavior with the `defaultExecutionMode` server setting so that all DAGs are dispatched to workers automatically.
 
 ```yaml
 # config.yaml
@@ -156,20 +156,20 @@ Or via environment variable:
 export DAGU_DEFAULT_EXECUTION_MODE=distributed
 ```
 
-When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `workerSelector`. DAGs with a `workerSelector` are always dispatched to a matching worker regardless of this setting.
+When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `worker_selector`. DAGs with a `worker_selector` are always dispatched to a matching worker regardless of this setting.
 
 ### Force Local Execution
 
-If `defaultExecutionMode` is `distributed` but you need a specific DAG to always run locally (e.g., a lightweight health-check), use `workerSelector: local`:
+If `defaultExecutionMode` is `distributed` but you need a specific DAG to always run locally (e.g., a lightweight health-check), use `worker_selector: local`:
 
 ```yaml
 # This DAG always runs locally, even when defaultExecutionMode is "distributed"
-workerSelector: local
+worker_selector: local
 
 steps:
   - command: curl -f http://localhost:8080/health
 ```
 
-Setting `workerSelector` to the string `"local"` overrides both the server default and any label-based routing, forcing the DAG to execute on the main instance.
+Setting `worker_selector` to the string `"local"` overrides both the server default and any label-based routing, forcing the DAG to execute on the main instance.
 
 See [How Dispatch Decisions Work](#how-dispatch-decisions-work) for the complete priority order.

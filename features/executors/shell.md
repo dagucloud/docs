@@ -39,10 +39,10 @@ Run system commands and scripts with the default step type.
         - echo "step 3"
       env:
         - MY_VAR: value
-      workingDir: /app
+      working_dir: /app
       stdout: /tmp/output.log
   ```
-  Instead of duplicating `env`, `workingDir`, `stdout`, `retryPolicy`, `preconditions`, etc. across multiple steps, combine commands into one step.
+  Instead of duplicating `env`, `working_dir`, `stdout`, `retry_policy`, `preconditions`, etc. across multiple steps, combine commands into one step.
 - **Command + args array** when you want unambiguous arguments and no shell parsing:
   ```yaml
   steps:
@@ -71,7 +71,7 @@ Run system commands and scripts with the default step type.
     - shell: direct
       command: [/usr/bin/python3, -u, script.py]
   ```
-- **Working directory and env**: set `workingDir`/`dir` and `env` on the step (or DAG defaults) to control context.
+- **Working directory and env**: set `working_dir`/`dir` and `env` on the step (or DAG defaults) to control context.
 
 ## Script Behavior
 

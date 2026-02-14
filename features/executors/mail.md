@@ -111,7 +111,7 @@ steps:
 ### Success/Failure Notifications
 
 ```yaml
-handlerOn:
+handler_on:
   success:
     type: mail
     config:
@@ -141,15 +141,15 @@ steps:
 ### Error Alerts
 
 ```yaml
-errorMail:
+error_mail:
   from: alerts@company.com
   to: oncall@company.com
   prefix: "[CRITICAL]"
-  attachLogs: true
+  attach_logs: true
 
 steps:
   - command: echo "Run some critical task"
-    mailOnError: true
+    mail_on_error: true
 ```
 
 ### With Attachments
@@ -178,7 +178,7 @@ steps:
       from: alerts@company.com
       subject: "Critical Alert"
       message: "Immediate action required."
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 60
+      interval_sec: 60
 ```

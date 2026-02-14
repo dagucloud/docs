@@ -42,7 +42,7 @@ auth:
 
 paths:
   dagsDir: /opt/dagu/workflows
-  logDir: /var/log/dagu
+  log_dir: /var/log/dagu
 ```
 
 ### Docker

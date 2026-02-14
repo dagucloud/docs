@@ -57,10 +57,10 @@ When Dagu loads a DAG, it follows this process:
 
 ```yaml
 # base.yaml
-timeoutSec: 3600
+timeout_sec: 3600
 
 # my-dag.yaml
-timeoutSec: 7200  # Result: 7200
+timeout_sec: 7200  # Result: 7200
 ```
 
 **Array fields** (`env`) - Values are appended, not replaced:
@@ -78,16 +78,16 @@ env:
 # Result: [TZ=UTC, LOG_LEVEL=info, API_KEY=secret]
 ```
 
-**Full override fields** (`mailOn`) - Entire structure is replaced:
+**Full override fields** (`mail_on`) - Entire structure is replaced:
 
 ```yaml
 # base.yaml
-mailOn:
+mail_on:
   failure: true
   success: true
 
 # my-dag.yaml
-mailOn:
+mail_on:
   failure: false
 # Result: failure=false, success=false (not inherited)
 ```
@@ -124,7 +124,7 @@ Define handlers that run on specific events for all DAGs:
 
 ```yaml
 # base.yaml
-handlerOn:
+handler_on:
   init:
     command: echo "Starting DAG ${DAG_NAME}"
 
@@ -175,25 +175,25 @@ smtp:
   username: apikey
   password: ${SENDGRID_API_KEY}
 
-mailOn:
+mail_on:
   failure: true
   success: false
   wait: false
 
-errorMail:
+error_mail:
   from: dagu@mycompany.com
   to:
     - ops-team@mycompany.com
     - oncall@mycompany.com
   prefix: "[DAGU ALERT]"
-  attachLogs: true
+  attach_logs: true
 
-infoMail:
+info_mail:
   from: dagu@mycompany.com
   to:
     - team@mycompany.com
 
-waitMail:
+wait_mail:
   from: dagu@mycompany.com
   to:
     - approvers@mycompany.com
@@ -212,31 +212,31 @@ shell: "bash"
 # shell: ["bash", "-e", "-o", "pipefail"]
 
 # Working directory (default: DAG file location)
-workingDir: "/app/workflows"
+working_dir: "/app/workflows"
 
 # Maximum execution time (seconds)
-timeoutSec: 3600
+timeout_sec: 3600
 
 # Delay before starting (seconds)
-delaySec: 0
+delay_sec: 0
 
 # Wait time before restart (seconds)
-restartWaitSec: 60
+restart_wait_sec: 60
 
 # Max concurrent DAG runs (per DAG)
-maxActiveRuns: 1
+max_active_runs: 1
 
 # Max concurrent steps within a run
-maxActiveSteps: 4
+max_active_steps: 4
 
 # History retention (days)
-histRetentionDays: 30
+hist_retention_days: 30
 
 # Cleanup timeout when stopped (seconds, default 5)
-maxCleanUpTimeSec: 60
+max_clean_up_time_sec: 60
 
 # Max step output capture size (bytes, default 1MB)
-maxOutputSize: 1048576
+max_output_size: 1048576
 ```
 
 ### Logging
@@ -246,12 +246,12 @@ Configure log output behavior:
 ```yaml
 # base.yaml
 # Custom log directory
-logDir: /var/log/dagu
+log_dir: /var/log/dagu
 
 # Log output mode:
 # - "separate": stdout/stderr in separate files (.out, .err)
 # - "merged": combined into single file (.log)
-logOutput: merged
+log_output: merged
 ```
 
 ### External Service Defaults
@@ -265,8 +265,8 @@ ssh:
   host: ""  # Set per-DAG or per-step
   port: 22
   key: ~/.ssh/deploy_key
-  strictHostKey: true
-  knownHostFile: ~/.ssh/known_hosts
+  strict_host_key: true
+  known_host_file: ~/.ssh/known_hosts
   shell: bash
 ```
 
@@ -279,10 +279,10 @@ s3:
   bucket: my-data-bucket
   # For S3-compatible services (MinIO, etc.)
   endpoint: ""
-  forcePathStyle: false
+  force_path_style: false
   # Credentials (prefer IAM roles in production)
-  accessKeyId: ${AWS_ACCESS_KEY_ID}
-  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  access_key_id: ${AWS_ACCESS_KEY_ID}
+  secret_access_key: ${AWS_SECRET_ACCESS_KEY}
 ```
 
 #### LLM Configuration
@@ -293,9 +293,9 @@ llm:
   provider: openai
   model: gpt-4
   temperature: 0.7
-  maxTokens: 4096
+  max_tokens: 4096
   # API key from environment
-  apiKeyName: OPENAI_API_KEY
+  api_key_name: OPENAI_API_KEY
 ```
 
 #### Redis Configuration
@@ -318,8 +318,8 @@ Set default Docker container configuration:
 # base.yaml
 container:
   image: python:3.11-slim
-  pullPolicy: IfNotPresent
-  workingDir: /app
+  pull_policy: IfNotPresent
+  working_dir: /app
   env:
     - PYTHONUNBUFFERED=1
   volumes:
@@ -330,7 +330,7 @@ Registry authentication:
 
 ```yaml
 # base.yaml
-registryAuths:
+registry_auths:
   ghcr.io:
     username: ${GITHUB_USER}
     password: ${GITHUB_TOKEN}
@@ -348,7 +348,7 @@ Configure distributed execution defaults:
 queue: default
 
 # Require specific worker labels
-workerSelector:
+worker_selector:
   region: us-east
   capability: gpu
 ```
@@ -357,7 +357,7 @@ To force local execution for a specific DAG (overriding `defaultExecutionMode: d
 
 ```yaml
 # my-local-dag.yaml
-workerSelector: local
+worker_selector: local
 steps:
   - command: echo "Always runs locally"
 ```
@@ -409,9 +409,9 @@ Control UI behavior:
 
 ```yaml
 # base.yaml
-runConfig:
-  disableParamEdit: false   # Prevent parameter editing in UI
-  disableRunIdEdit: false   # Prevent custom run ID input
+run_config:
+  disable_param_edit: false   # Prevent parameter editing in UI
+  disable_run_id_edit: false   # Prevent custom run ID input
 ```
 
 ## Complete Example
@@ -428,19 +428,19 @@ env:
   - LOG_LEVEL=info
 
 # Execution limits
-timeoutSec: 3600
-histRetentionDays: 30
-maxActiveRuns: 1
-maxCleanUpTimeSec: 30
+timeout_sec: 3600
+hist_retention_days: 30
+max_active_runs: 1
+max_clean_up_time_sec: 30
 
 # Logging
-logOutput: merged
+log_output: merged
 
 # Shell with strict mode
 shell: ["bash", "-e", "-o", "pipefail"]
 
 # Lifecycle handlers for alerting
-handlerOn:
+handler_on:
   failure:
     command: |
       curl -s -X POST "${SLACK_WEBHOOK}" \
@@ -470,21 +470,21 @@ smtp:
   username: apikey
   password: ${SENDGRID_API_KEY}
 
-mailOn:
+mail_on:
   failure: true
 
-errorMail:
+error_mail:
   from: dagu@mycompany.com
   to:
     - platform-team@mycompany.com
   prefix: "[DAGU]"
-  attachLogs: true
+  attach_logs: true
 
 # SSH defaults for deployment servers
 ssh:
   user: deploy
   key: ~/.ssh/deploy_key
-  strictHostKey: true
+  strict_host_key: true
 
 # S3 defaults for data pipelines
 s3:
@@ -501,7 +501,7 @@ s3:
 env:
   - PAGERDUTY_KEY=${PAGERDUTY_ROUTING_KEY}
 
-handlerOn:
+handler_on:
   failure:
     command: |
       curl -X POST https://events.pagerduty.com/v2/enqueue \
@@ -557,7 +557,7 @@ To define handlers for a sub-DAG, add them explicitly in the sub-DAG file:
 
 ```yaml
 # sub-dag.yaml
-handlerOn:
+handler_on:
   failure:
     command: echo "Sub-DAG specific failure handling"
 

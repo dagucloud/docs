@@ -225,7 +225,7 @@ Control maximum output size:
 
 ```yaml
 # Global limit for all steps
-maxOutputSize: 5242880  # 5MB
+max_output_size: 5242880  # 5MB
 
 steps:
   - command: cat large-file.json
@@ -279,20 +279,20 @@ Reference step properties using IDs:
 steps:
   - id: risky
     command: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
-    continueOn: failed
+    continue_on: failed
 
   - command: |
-      if [ "${risky.exitCode}" = "0" ]; then
+      if [ "${risky.exit_code}" = "0" ]; then
         echo "Success! Output was:"
         cat ${risky.stdout}  # Read content from file path
       else
-        echo "Failed with code ${risky.exitCode}"
+        echo "Failed with code ${risky.exit_code}"
         cat ${risky.stderr}  # Read content from file path
       fi
 ```
 
 Available properties:
-- `${id.exitCode}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
+- `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
 - `${id.exit_code}` - Alternative snake_case syntax for exit code
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file

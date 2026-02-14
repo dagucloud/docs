@@ -29,8 +29,8 @@ Workers connect to a coordinator service and poll for tasks via gRPC long-pollin
 
 ## How Workers Operate
 
-1. **Polling**: Each worker runs multiple concurrent pollers (configurable via `maxActiveRuns`, default: 100)
-2. **Task Assignment**: Coordinator matches tasks to workers based on `workerSelector` labels
+1. **Polling**: Each worker runs multiple concurrent pollers (configurable via `max_active_runs`, default: 100)
+2. **Task Assignment**: Coordinator matches tasks to workers based on `worker_selector` labels
 3. **Heartbeat**: Workers send heartbeats every 1 second to report health status
 4. **Execution**: Workers execute assigned DAGs using the same execution engine as the main instance
 
@@ -125,7 +125,7 @@ Response:
 # config.yaml
 worker:
   id: "worker-gpu-01"        # Defaults to hostname@PID
-  maxActiveRuns: 100         # Number of concurrent pollers
+  max_active_runs: 100         # Number of concurrent pollers
   labels:
     gpu: "true"
     memory: "64G"
@@ -139,7 +139,7 @@ In shared-nothing mode (when `worker.coordinators` is configured), workers use a
 # config.yaml
 worker:
   id: "worker-gpu-01"
-  maxActiveRuns: 100
+  max_active_runs: 100
   postgresPool:
     maxOpenConns: 25       # Total connections across ALL PostgreSQL DSNs
     maxIdleConns: 5        # Idle connections per DSN

@@ -66,9 +66,9 @@ The following fields are inherited from base configuration:
 |-------|-------------|
 | `env` | Environment variables (appended) |
 | `params` | Default parameters |
-| `logDir` | Log directory |
-| `histRetentionDays` | History retention |
-| `handlerOn` | Lifecycle handlers |
+| `log_dir` | Log directory |
+| `hist_retention_days` | History retention |
+| `handler_on` | Lifecycle handlers |
 | `smtp` | Email configuration |
 
 ## DAG-Level Variables

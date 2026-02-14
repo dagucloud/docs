@@ -40,10 +40,10 @@ The `local` provider works with any OpenAI-compatible API including Ollama, vLLM
 | `model` | string or array | (required*) | Model identifier or array of models for fallback |
 | `system` | string | (none) | Default system prompt |
 | `temperature` | float | (provider default) | Randomness (0.0-2.0) |
-| `maxTokens` | int | (provider default) | Maximum tokens to generate |
-| `topP` | float | (provider default) | Nucleus sampling (0.0-1.0) |
-| `baseURL` | string | (provider default) | Custom API endpoint |
-| `apiKeyName` | string | (from provider) | Environment variable name for API key |
+| `max_tokens` | int | (provider default) | Maximum tokens to generate |
+| `top_p` | float | (provider default) | Nucleus sampling (0.0-1.0) |
+| `base_url` | string | (provider default) | Custom API endpoint |
+| `api_key_name` | string | (from provider) | Environment variable name for API key |
 | `stream` | bool | `true` | Stream response tokens |
 | `thinking` | object | (none) | Extended thinking/reasoning configuration |
 
@@ -57,8 +57,8 @@ Enable extended thinking/reasoning mode for more thorough, accurate responses on
 |-------|------|---------|-------------|
 | `enabled` | bool | `false` | Enable thinking mode |
 | `effort` | string | `medium` | Reasoning depth: `low`, `medium`, `high`, `xhigh` |
-| `budgetTokens` | int | (from effort) | Explicit token budget (provider-specific) |
-| `includeInOutput` | bool | `false` | Include thinking blocks in stdout |
+| `budget_tokens` | int | (from effort) | Explicit token budget (provider-specific) |
+| `include_in_output` | bool | `false` | Include thinking blocks in stdout |
 
 **Provider Support:**
 
@@ -80,7 +80,7 @@ Enable extended thinking/reasoning mode for more thorough, accurate responses on
 | `xhigh` | 32,768 tokens | Maximum depth (capped at 32K for Anthropic) |
 
 ::: warning
-When thinking is enabled for OpenAI reasoning models, `temperature` and `topP` are automatically disabled as these models don't support them.
+When thinking is enabled for OpenAI reasoning models, `temperature` and `top_p` are automatically disabled as these models don't support them.
 :::
 
 ### Messages (`messages` field)
@@ -240,8 +240,8 @@ steps:
     llm:
       provider: openai
       model: gpt-4o
-      baseURL: "https://my-proxy.example.com/v1"
-      apiKeyName: CUSTOM_API_KEY
+      base_url: "https://my-proxy.example.com/v1"
+      api_key_name: CUSTOM_API_KEY
     messages:
       - role: user
         content: "Hello!"
@@ -327,7 +327,7 @@ steps:
       model: claude-sonnet-4-20250514
       thinking:
         enabled: true
-        budgetTokens: 16384
+        budget_tokens: 16384
     messages:
       - role: user
         content: "Solve this complex optimization problem..."
@@ -425,7 +425,7 @@ Use an array of model objects instead of a single model string:
 ```yaml
 llm:
   temperature: 0.7
-  maxTokens: 4096
+  max_tokens: 4096
   model:
     - provider: openai
       name: gpt-4o
@@ -433,7 +433,7 @@ llm:
       name: claude-sonnet-4-20250514
     - provider: local
       name: llama3.1:8b
-      baseURL: http://localhost:11434/v1
+      base_url: http://localhost:11434/v1
 
 steps:
   - type: chat
@@ -442,7 +442,7 @@ steps:
         content: "What is the capital of France?"
 ```
 
-First model is primary, rest are fallbacks tried in order on any error. Shared config (`temperature`, `maxTokens`, `topP`) applies to all models.
+First model is primary, rest are fallbacks tried in order on any error. Shared config (`temperature`, `max_tokens`, `top_p`) applies to all models.
 
 ### Per-Model Overrides
 
@@ -451,19 +451,19 @@ Shared `llm` config applies to all models. Override per model when needed (e.g.,
 ```yaml
 llm:
   temperature: 0.7
-  maxTokens: 4096
+  max_tokens: 4096
   model:
     - provider: openai
       name: gpt-4o
-      maxTokens: 8192  # GPT-4o supports larger context
+      max_tokens: 8192  # GPT-4o supports larger context
     - provider: anthropic
       name: claude-sonnet-4-20250514
-      # Uses shared maxTokens=4096
+      # Uses shared max_tokens=4096
     - provider: local
       name: llama3.1:8b
-      maxTokens: 2048  # Local model has smaller context window
+      max_tokens: 2048  # Local model has smaller context window
       temperature: 0.5
-      baseURL: http://localhost:11434/v1
+      base_url: http://localhost:11434/v1
 ```
 
 ### Model Entry Fields
@@ -473,10 +473,10 @@ llm:
 | `provider` | string | Required. LLM provider (openai, anthropic, gemini, etc.) |
 | `name` | string | Required. Model name (e.g., gpt-4o, claude-sonnet-4-20250514) |
 | `temperature` | float | Override temperature for this model |
-| `maxTokens` | int | Override maxTokens for this model |
-| `topP` | float | Override topP for this model |
-| `baseURL` | string | Custom API endpoint for this model |
-| `apiKeyName` | string | Environment variable for API key |
+| `max_tokens` | int | Override max_tokens for this model |
+| `top_p` | float | Override top_p for this model |
+| `base_url` | string | Custom API endpoint for this model |
+| `api_key_name` | string | Environment variable for API key |
 
 ### How Fallback Works
 

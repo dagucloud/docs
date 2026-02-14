@@ -173,7 +173,7 @@ For `dagu exec -- python script.py --arg=value`:
 ```yaml
 name: exec-python
 type: chain
-workingDir: /current/directory
+working_dir: /current/directory
 steps:
   - name: main
     command: ["python", "script.py", "--arg=value"]
@@ -192,7 +192,7 @@ Generates:
 ```yaml
 name: exec-python
 type: chain
-workingDir: /current/directory
+working_dir: /current/directory
 env:
   - FOO=bar
 steps:
@@ -242,7 +242,7 @@ While `dagu exec` doesn't support lifecycle hook flags, you can define handlers 
 
 ```yaml
 # ~/.config/dagu/base.yaml
-handlerOn:
+handler_on:
   failure:
     command: 'curl -X POST https://alerts.example.com/webhook -d "dag ${DAG_NAME} failed"'
   success:

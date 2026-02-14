@@ -4,7 +4,7 @@ The chat executor supports function calling (also known as tool use), allowing t
 
 ## How It Works
 
-1. Define tool DAGs with `name`, `description`, and `defaultParams`
+1. Define tool DAGs with `name`, `description`, and `params`
 2. Reference tools in `llm.tools` array
 3. LLM automatically calls tools when needed
 4. Tool results feed back into session
@@ -20,7 +20,7 @@ The chat step finishes in one of two ways:
 - Session is saved and step completes successfully
 
 **2. Max Iterations Reached**
-- Loop hits `maxToolIterations` limit (default: 10)
+- Loop hits `max_tool_iterations` limit (default: 10)
 - Last assistant message content is returned as output
 - Warning logged: `"Max tool iterations reached"`
 - Step still completes successfully (not treated as error)
@@ -46,7 +46,7 @@ steps:
 # Tool DAG definition
 name: calculator
 description: "Perform basic arithmetic operations"
-defaultParams: "operation a b"
+params: "operation a b"
 
 steps:
   - name: calculate
@@ -67,16 +67,16 @@ Tools are standard DAGs with special fields that the LLM uses:
 |-------|---------|---------|
 | `name` | Function name shown to LLM | `search_tool` |
 | `description` | What the tool does | `"Search the web for information"` |
-| `defaultParams` | Parameters (auto-parsed to JSON Schema) | `"query max_results=10"` |
+| `params` | Parameters (auto-parsed to JSON Schema) | `"query max_results=10"` |
 | Steps with `output` | Return values to LLM | `output: RESULT` |
 
 ## Parameter Format
 
-Parameters in `defaultParams` are parsed to generate JSON Schema:
+Parameters in `params` are parsed to generate JSON Schema:
 
 ```yaml
 # Format: "required_param optional=default bool=true number=42"
-defaultParams: "query max_results=10 include_images=false temperature=0.7"
+params: "query max_results=10 include_images=false temperature=0.7"
 
 # Generates JSON Schema:
 # {
@@ -125,7 +125,7 @@ steps:
 # Local tool (inline definition)
 name: local_tool
 description: "A tool defined locally"
-defaultParams: "input"
+params: "input"
 
 steps:
   - command: echo "Processing: $1"
@@ -137,7 +137,7 @@ steps:
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `tools` | string[] | `[]` | DAG names to expose as tools |
-| `maxToolIterations` | int | `10` | Maximum tool calling loops |
+| `max_tool_iterations` | int | `10` | Maximum tool calling loops |
 
 ```yaml
 steps:
@@ -149,7 +149,7 @@ steps:
         - search_tool
         - calculator
         - database_query
-      maxToolIterations: 15  # Allow more iterations for complex tasks
+      max_tool_iterations: 15  # Allow more iterations for complex tasks
     messages:
       - role: user
         content: "Research and analyze..."
@@ -175,7 +175,7 @@ steps:
 # Search tool
 name: web_search
 description: "Search the web for current information"
-defaultParams: "query"
+params: "query"
 
 steps:
   - command: curl "https://api.example.com/search?q=$1"
@@ -185,7 +185,7 @@ steps:
 # Analysis tool
 name: analyze_data
 description: "Analyze data and generate insights"
-defaultParams: "data"
+params: "data"
 
 steps:
   - command: echo "$1" | python analyze.py
@@ -241,10 +241,10 @@ All major providers support tool calling with automatic API mapping:
 - Session continues even if tool fails
 
 **Iteration Limits:**
-- When `maxToolIterations` is reached, the last assistant message is written to stdout
+- When `max_tool_iterations` is reached, the last assistant message is written to stdout
 - If no assistant message exists, outputs: `"[Max tool iterations (N) reached. The LLM may not have provided a complete response.]"`
 - Warning logged but step completes successfully (not as error)
-- Increase `maxToolIterations` for complex multi-step tasks
+- Increase `max_tool_iterations` for complex multi-step tasks
 
 ## Best Practices
 
@@ -252,7 +252,7 @@ All major providers support tool calling with automatic API mapping:
 2. **Specific Parameters**: Use descriptive parameter names and provide defaults
 3. **Structured Output**: Return JSON from tools for easier LLM parsing
 4. **Error Messages**: Provide clear error messages when tools fail
-5. **Iteration Limits**: Set `maxToolIterations` based on task complexity
+5. **Iteration Limits**: Set `max_tool_iterations` based on task complexity
 6. **Tool Modularity**: Keep tools focused on single responsibilities
 7. **Parameter Validation**: Validate inputs in tool DAG steps
 
@@ -269,7 +269,7 @@ steps:
         - fetch_data
         - transform_data
         - store_data
-      maxToolIterations: 20
+      max_tool_iterations: 20
     messages:
       - role: user
         content: "Fetch user data, transform it to standard format, and store in database"
@@ -278,7 +278,7 @@ steps:
 # Fetch data tool
 name: fetch_data
 description: "Fetch data from external API"
-defaultParams: "endpoint"
+params: "endpoint"
 
 steps:
   - command: curl "https://api.example.com/$1"
@@ -288,7 +288,7 @@ steps:
 # Transform data tool
 name: transform_data
 description: "Transform and clean data"
-defaultParams: "data format=json"
+params: "data format=json"
 
 steps:
   - command: echo "$1" | jq '.' > /tmp/transformed.json
@@ -299,7 +299,7 @@ steps:
 # Store data tool
 name: store_data
 description: "Store data in database"
-defaultParams: "data table"
+params: "data table"
 
 steps:
   - type: postgres

@@ -39,7 +39,7 @@ metrics: "private"        # Metrics endpoint access: "private" (default) or "pub
 # Directory Paths (must be under "paths" key)
 paths:
   dagsDir: "~/.config/dagu/dags"                    # DAG definitions
-  logDir: "~/.local/share/dagu/logs"                # Log files
+  log_dir: "~/.local/share/dagu/logs"                # Log files
   dataDir: "~/.local/share/dagu/data"               # Application data
   suspendFlagsDir: "~/.local/share/dagu/suspend"    # Suspend flags
   adminLogsDir: "~/.local/share/dagu/logs/admin"    # Admin logs
@@ -432,7 +432,7 @@ queues:
 `~/.config/dagu/base.yaml` provides shared defaults for all DAGs:
 
 ```yaml
-mailOn:
+mail_on:
   failure: true
 
 smtp:

@@ -44,7 +44,7 @@ steps:
 # Tool DAG definition
 name: calculator
 description: "Perform basic arithmetic operations"
-defaultParams: "operation a b"
+params: "operation a b"
 
 steps:
   - name: calculate
@@ -85,7 +85,7 @@ steps:
 | `provider` | string | required | LLM provider (`openai`, `anthropic`, `gemini`, etc.) |
 | `model` | string | required | Model identifier |
 | `temperature` | float | provider default | Response randomness (0.0-2.0) |
-| `maxTokens` | int | provider default | Maximum tokens to generate |
+| `max_tokens` | int | provider default | Maximum tokens to generate |
 | `stream` | bool | `true` | Stream response tokens |
 
 ### Tool Calling Config
@@ -93,7 +93,7 @@ steps:
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `tools` | string[] | `[]` | DAG names to expose as callable tools |
-| `maxToolIterations` | int | `10` | Maximum tool calling loops |
+| `max_tool_iterations` | int | `10` | Maximum tool calling loops |
 
 ## Examples
 

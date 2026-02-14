@@ -1,6 +1,6 @@
 # Worker Labels
 
-Worker labels are key-value pairs that describe worker capabilities. The coordinator uses labels to match tasks to workers via the `workerSelector` field in DAG definitions.
+Worker labels are key-value pairs that describe worker capabilities. The coordinator uses labels to match tasks to workers via the `worker_selector` field in DAG definitions.
 
 ## Setting Labels
 
@@ -34,16 +34,16 @@ dagu worker
 
 The coordinator's `matchesSelector()` function evaluates whether a worker is eligible for a task:
 
-1. **Empty selector matches any worker** — a task without `workerSelector` (or with an empty map) can run on any available worker.
+1. **Empty selector matches any worker** — a task without `worker_selector` (or with an empty map) can run on any available worker.
 2. **All selector key-value pairs must match exactly** — every key in the selector must exist in the worker's labels with an identical value. Matching is case-sensitive.
 3. **Workers can have extra labels** — a worker with `gpu=true,memory=64G,region=us-east-1` matches a selector of `gpu: "true"` because the worker satisfies all required keys. The extra `memory` and `region` labels are ignored.
 
-## DAG-Level `workerSelector`
+## DAG-Level `worker_selector`
 
-Set `workerSelector` at the top of a DAG file to route the entire DAG to a matching worker:
+Set `worker_selector` at the top of a DAG file to route the entire DAG to a matching worker:
 
 ```yaml
-workerSelector:
+worker_selector:
   gpu: "true"
 
 steps:
@@ -52,44 +52,44 @@ steps:
 
 When the coordinator dispatches this DAG, it selects a worker whose labels include `gpu=true`.
 
-## Step-Level `workerSelector`
+## Step-Level `worker_selector`
 
-Set `workerSelector` on a step to dispatch that step's sub-DAG to a different worker than the parent:
+Set `worker_selector` on a step to dispatch that step's sub-DAG to a different worker than the parent:
 
 ```yaml
 steps:
   - call: train-model
-    workerSelector:
+    worker_selector:
       gpu: "true"
 
   - call: generate-report
-    workerSelector:
+    worker_selector:
       region: "us-east-1"
 ```
 
-Step-level `workerSelector` is only valid on executor types that launch sub-DAGs:
+Step-level `worker_selector` is only valid on executor types that launch sub-DAGs:
 
-| Executor Type | Supports `workerSelector` |
+| Executor Type | Supports `worker_selector` |
 |---------------|--------------------------|
 | `dag` | Yes |
 | `subworkflow` | Yes |
 | `parallel` | Yes |
 | All others (`shell`, `http`, `docker`, etc.) | No — validation error |
 
-Setting `workerSelector` on an unsupported step type produces a validation error: `executor type "shell" does not support workerSelector field`.
+Setting `worker_selector` on an unsupported step type produces a validation error: `executor type "shell" does not support worker_selector field`.
 
-## `workerSelector: local`
+## `worker_selector: local`
 
-Setting `workerSelector` to the string `"local"` (case-insensitive) forces the DAG to run on the main instance, regardless of the `defaultExecutionMode` setting. This sets `ForceLocal=true` in the dispatch decision.
+Setting `worker_selector` to the string `"local"` (case-insensitive) forces the DAG to run on the main instance, regardless of the `defaultExecutionMode` setting. This sets `ForceLocal=true` in the dispatch decision.
 
 ```yaml
-workerSelector: local
+worker_selector: local
 
 steps:
   - command: curl -f http://localhost:8080/health
 ```
 
-The string `"local"` is the only allowed string value for `workerSelector`. Any other string value produces a validation error.
+The string `"local"` is the only allowed string value for `worker_selector`. Any other string value produces a validation error.
 
 ## Example: GPU/CPU Routing
 
@@ -110,24 +110,24 @@ DAG with both DAG-level and step-level selectors:
 steps:
   # Dispatched to a GPU worker
   - call: train-model
-    workerSelector:
+    worker_selector:
       gpu: "true"
 
   # Dispatched to a CPU worker
   - call: aggregate-results
-    workerSelector:
+    worker_selector:
       cpu-optimized: "true"
 
 ---
 name: train-model
-workerSelector:
+worker_selector:
   gpu: "true"
 steps:
   - command: python train.py
 
 ---
 name: aggregate-results
-workerSelector:
+worker_selector:
   cpu-optimized: "true"
 steps:
   - command: python aggregate.py

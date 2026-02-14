@@ -102,7 +102,7 @@ steps:
 - `queued`: DAG is waiting to be executed
 - `running`: DAG is currently executing
 - `succeeded`: All steps completed successfully
-- `partially_succeeded`: Some steps failed but execution continued (via `continueOn`)
+- `partially_succeeded`: Some steps failed but execution continued (via `continue_on`)
 - `failed`: DAG execution failed
 - `aborted`: DAG was manually aborted
 
@@ -131,7 +131,7 @@ graph LR
 ### Status Hooks
 
 ```yaml
-handlerOn:
+handler_on:
   success:
     command: notify-team.sh "Workflow succeeded"
   failure:
@@ -163,7 +163,7 @@ Execute in containers:
 ```yaml
 container:
   image: python:3.11
-  workingDir: /app
+  working_dir: /app
   volumes:
     - /app/data:/data
 steps:
@@ -235,7 +235,7 @@ See [Scheduling](/features/scheduling) for more details.
 Execute commands on workflow events:
 
 ```yaml
-handlerOn:
+handler_on:
   init:
     command: echo "Setting up environment"  # Runs before any steps
 

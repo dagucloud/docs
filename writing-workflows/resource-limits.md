@@ -5,14 +5,14 @@ Manage workflow execution with concurrency limits.
 ## Concurrency Control
 
 ```yaml
-maxActiveSteps: 1       # Max 1 step running concurrently within the DAG
+max_active_steps: 1       # Max 1 step running concurrently within the DAG
 
 steps:
   - command: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
   - command: echo "Processing large dataset"
   - parallel:
       items: ${FILE_LIST}
-      maxConcurrent: 3  # Limit parallel I/O
+      max_concurrent: 3  # Limit parallel I/O
     command: echo "Processing file ${ITEM}"
 ```
 
@@ -23,27 +23,27 @@ For controlling concurrent DAG instances, use global queues (see below).
 Apply execution caps at both the DAG and step level:
 
 ```yaml
-timeoutSec: 600         # (Optional) Overall DAG timeout in seconds
+timeout_sec: 600         # (Optional) Overall DAG timeout in seconds
 
 steps:
   - name: quick-check
     command: curl -sf https://example.com/health
-    timeoutSec: 30      # Kills this step after 30s (overrides DAG-level 600s)
+    timeout_sec: 30      # Kills this step after 30s (overrides DAG-level 600s)
   - name: long-task
     command: python long_task.py   # Inherits DAG-level 600s since no step timeout
 ```
 
 Behavior:
-- A step with `timeoutSec` > 0 gets its own context deadline; it overrides the DAG-level timeout for that step.
+- A step with `timeout_sec` > 0 gets its own context deadline; it overrides the DAG-level timeout for that step.
 - If the timeout is reached, the step is terminated and marked failed with exit code `124` (standard timeout code).
-- DAG-level `timeoutSec` enforces a ceiling on total runtime; steps without their own `timeoutSec` respect this.
+- DAG-level `timeout_sec` enforces a ceiling on total runtime; steps without their own `timeout_sec` respect this.
 - Use step timeouts for unreliable external calls or long‑running operations to fail fast while letting other steps continue.
 
 Validation rules:
-- `timeoutSec` must be >= 0. `0` (or omitted) means "no explicit timeout" at that scope.
+- `timeout_sec` must be >= 0. `0` (or omitted) means "no explicit timeout" at that scope.
 - Negative values are rejected during spec validation.
 
-Tip: Combine `timeoutSec` with retries (repeat policy) so transient network delays get a fresh attempt instead of blocking the whole workflow.
+Tip: Combine `timeout_sec` with retries (repeat policy) so transient network delays get a fresh attempt instead of blocking the whole workflow.
 
 ## Limit by Queue
 

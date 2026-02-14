@@ -15,8 +15,8 @@ tags: {env: prod, team: platform}  # Optional: key-value tags
 schedule: "0 * * * *"      # Optional: cron expression
 
 # Execution control
-maxActiveSteps: 10         # Max parallel steps
-timeoutSec: 3600           # Workflow timeout (seconds)
+max_active_steps: 10         # Max parallel steps
+timeout_sec: 3600           # Workflow timeout (seconds)
 
 # Parameters
 params:
@@ -36,7 +36,7 @@ steps:
     depends: previous-step # Optional
 
 # Lifecycle handlers
-handlerOn:
+handler_on:
   success:
     command: notify-success.sh
   failure:
@@ -61,7 +61,7 @@ handlerOn:
 | `type` | string | Execution type: `chain` or `graph` | `chain` |
 
 - **`chain`** (default): Steps execute sequentially in the order defined. Each step implicitly depends on the previous step. The `depends` field is **not allowed** in chain mode.
-- **`graph`**: Steps execute based on explicit dependencies defined by the `depends` field. Steps without dependencies can run in parallel (up to `maxActiveSteps`).
+- **`graph`**: Steps execute based on explicit dependencies defined by the `depends` field. Steps without dependencies can run in parallel (up to `max_active_steps`).
 
 ```yaml
 # Chain mode (default) - sequential execution
@@ -89,10 +89,10 @@ steps:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `schedule` | string/array | Cron expression(s) | - |
-| `skipIfSuccessful` | boolean | Skip if already succeeded today | `false` |
-| `restartWaitSec` | integer | Wait seconds before restart | `0` |
-| `catchupWindow` | string | Lookback horizon for replaying missed cron runs on scheduler restart. Duration string (e.g. `"6h"`, `"2d12h"`). If omitted, missed runs are not replayed. | - |
-| `overlapPolicy` | string | Catchup overlap behavior when DAG is already running: `"skip"` drops the run, `"all"` retries next tick, `"latest"` keeps only the newest missed interval. | `"skip"` |
+| `skip_if_successful` | boolean | Skip if already succeeded today | `false` |
+| `restart_wait_sec` | integer | Wait seconds before restart | `0` |
+| `catchup_window` | string | Lookback horizon for replaying missed cron runs on scheduler restart. Duration string (e.g. `"6h"`, `"2d12h"`). If omitted, missed runs are not replayed. | - |
+| `overlap_policy` | string | Catchup overlap behavior when DAG is already running: `"skip"` drops the run, `"all"` retries next tick, `"latest"` keeps only the newest missed interval. | `"skip"` |
 
 #### Schedule Formats
 
@@ -122,13 +122,13 @@ schedule:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `maxActiveRuns` | integer | **DEPRECATED**: Use global queues with `queue` field instead. Local queues now use FIFO (concurrency 1). | `1` |
-| `maxActiveSteps` | integer | Max parallel steps | `1` |
-| `timeoutSec` | integer | Workflow timeout in seconds | `0` (no timeout) |
-| `delaySec` | integer | Initial delay before start (seconds) | `0` |
-| `maxCleanUpTimeSec` | integer | Max cleanup time (seconds) | `5` |
+| `max_active_runs` | integer | **DEPRECATED**: Use global queues with `queue` field instead. Local queues now use FIFO (concurrency 1). | `1` |
+| `max_active_steps` | integer | Max parallel steps | `1` |
+| `timeout_sec` | integer | Workflow timeout in seconds | `0` (no timeout) |
+| `delay_sec` | integer | Initial delay before start (seconds) | `0` |
+| `max_clean_up_time_sec` | integer | Max cleanup time (seconds) | `5` |
 | `preconditions` | array | Workflow-level preconditions | - |
-| `runConfig` | object | User interaction controls when starting DAG | - |
+| `run_config` | object | User interaction controls when starting DAG | - |
 
 ### Data Fields
 
@@ -138,12 +138,12 @@ schedule:
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
-| `workingDir` | string | Working directory for the DAG. Sub-DAGs inherit parent's workingDir if not set. | Directory of DAG file (or inherited from parent for sub-DAGs) |
+| `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. | Directory of DAG file (or inherited from parent for sub-DAGs) |
 | `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
-| `logDir` | string | Custom log directory | System default |
-| `logOutput` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
-| `histRetentionDays` | integer | History retention days | `30` |
-| `maxOutputSize` | integer | Max output size per step (bytes) | `1048576` |
+| `log_dir` | string | Custom log directory | System default |
+| `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
+| `hist_retention_days` | integer | History retention days | `30` |
+| `max_output_size` | integer | Max output size per step (bytes) | `1048576` |
 
 ### Container Configuration
 
@@ -167,12 +167,12 @@ container: my-running-container  # Exec into existing container with defaults
 container:
   name: my-workflow        # Optional: custom container name
   image: python:3.11       # Required for image mode
-  pullPolicy: missing      # always, missing, never
+  pull_policy: missing      # always, missing, never
   env:
     - API_KEY=${API_KEY}
   volumes:
     - /data:/data:ro
-  workingDir: /app
+  working_dir: /app
   platform: linux/amd64
   user: "1000:1000"
   ports:
@@ -180,10 +180,10 @@ container:
   network: host
   startup: keepalive       # keepalive | entrypoint | command
   command: ["sh", "-c", "my-daemon"]   # when startup: command
-  waitFor: running         # running | healthy
-  logPattern: "Ready to accept connections"  # optional regex
-  restartPolicy: unless-stopped              # optional: no|always|unless-stopped
-  keepContainer: false     # Keep container after DAG run
+  wait_for: running         # running | healthy
+  log_pattern: "Ready to accept connections"  # optional regex
+  restart_policy: unless-stopped              # optional: no|always|unless-stopped
+  keep_container: false     # Keep container after DAG run
   shell: ["/bin/bash", "-c"]  # Optional: shell wrapper for step commands (enables pipes, &&, etc.)
 ```
 
@@ -193,7 +193,7 @@ container:
 container:
   exec: my-running-container  # Required for exec mode
   user: root                  # Optional: override user
-  workingDir: /app            # Optional: override working directory
+  working_dir: /app            # Optional: override working directory
   env:                        # Optional: additional environment variables
     - DEBUG=true
   shell: ["/bin/sh", "-c"]    # Optional: shell wrapper for step commands
@@ -205,7 +205,7 @@ container:
 |-------|-----------|------------|
 | `exec` | **Required** | Not allowed |
 | `image` | Not allowed | **Required** |
-| `user`, `workingDir`, `env`, `shell` | Optional | Optional |
+| `user`, `working_dir`, `env`, `shell` | Optional | Optional |
 | All other fields | Not allowed | Optional |
 
 > Note: A DAG‑level `container` is started once (image mode) or attached to (exec mode)
@@ -214,7 +214,7 @@ container:
 > If your image's entrypoint dispatches subcommands, invoke it explicitly in
 > the step command (see [Execution Model and Entrypoint Behavior](/writing-workflows/container#execution-model-and-entrypoint-behavior)).
 > For exec mode, the container must be running; Dagu waits up to 120 seconds.
-> For image mode, readiness waiting (running/healthy and optional logPattern) times out after
+> For image mode, readiness waiting (running/healthy and optional log_pattern) times out after
 > 120 seconds with a clear error including the last known state.
 
 ### Secrets
@@ -237,7 +237,7 @@ secrets:
     key: PROD_DB_PASSWORD        # Read from process environment
   - name: API_TOKEN
     provider: file
-    key: ../secrets/api-token    # Relative paths resolve using workingDir then DAG file directory
+    key: ../secrets/api-token    # Relative paths resolve using working_dir then DAG file directory
 ```
 
 Secret values are injected after DAG-level variables and built-in runtime variables, meaning they take precedence over everything except step-level overrides. Resolved values never touch persistent storage and are automatically masked in logs and captured step output.
@@ -257,8 +257,8 @@ ssh:
   port: "22"           # Optional, defaults to "22"
   key: ~/.ssh/id_rsa   # Optional, defaults to standard keys
   password: "${SSH_PASSWORD}" # Optional; prefer keys for security
-  strictHostKey: true  # Optional, defaults to true for security
-  knownHostFile: ~/.ssh/known_hosts  # Optional, defaults to ~/.ssh/known_hosts
+  strict_host_key: true  # Optional, defaults to true for security
+  known_host_file: ~/.ssh/known_hosts  # Optional, defaults to ~/.ssh/known_hosts
   shell: "/bin/bash -e"  # Optional: shell (string or array) for remote execution
 ```
 
@@ -354,19 +354,19 @@ When configured at the DAG level, all redis steps inherit the connection setting
 - `db` - Database number (0-15)
 - `tls` - Enable TLS connection
 - `mode` - Connection mode: `standalone`, `sentinel`, `cluster`
-- `sentinelMaster` - Sentinel master name
-- `sentinelAddrs` - Sentinel addresses
-- `clusterAddrs` - Cluster node addresses
+- `sentinel_master` - Sentinel master name
+- `sentinel_addrs` - Sentinel addresses
+- `cluster_addrs` - Cluster node addresses
 
 See [Redis Executor](/features/executors/redis) for full documentation.
 
 ### Working Directory and Volume Resolution
 
-When using container volumes with relative paths, the paths are resolved relative to the DAG's `workingDir`:
+When using container volumes with relative paths, the paths are resolved relative to the DAG's `working_dir`:
 
 ```yaml
 # DAG with working directory and container volumes
-workingDir: /app/project
+working_dir: /app/project
 container:
   image: python:3.11
   volumes:
@@ -379,17 +379,17 @@ steps:
 ```
 
 **Working Directory Inheritance:**
-- Steps inherit `workingDir` from the DAG if not explicitly set
-- Step-level `workingDir` overrides DAG-level `workingDir`
-- **Sub-DAGs (via `call`)** inherit the parent's `workingDir` when executed locally, unless they define their own explicit `workingDir`
+- Steps inherit `working_dir` from the DAG if not explicitly set
+- Step-level `working_dir` overrides DAG-level `working_dir`
+- **Sub-DAGs (via `call`)** inherit the parent's `working_dir` when executed locally, unless they define their own explicit `working_dir`
 
 ```yaml
-# Example of workingDir inheritance
-workingDir: /project          # DAG-level working directory
+# Example of working_dir inheritance
+working_dir: /project          # DAG-level working directory
 
 steps:
   - command: pwd                   # Outputs: /project
-  - workingDir: /custom   # Override DAG workingDir
+  - working_dir: /custom   # Override DAG working_dir
     command: pwd          # Outputs: /custom
 ```
 
@@ -398,27 +398,27 @@ steps:
 When a parent DAG calls a child DAG using `call:`, the child inherits the parent's working directory for local execution:
 
 ```yaml
-# Parent DAG with workingDir
-workingDir: /app/project
+# Parent DAG with working_dir
+working_dir: /app/project
 
 steps:
-  - call: child-workflow    # Child inherits /app/project as workingDir
+  - call: child-workflow    # Child inherits /app/project as working_dir
 
 ---
-# Child DAG without explicit workingDir
+# Child DAG without explicit working_dir
 name: child-workflow
 steps:
   - command: pwd                     # Outputs: /app/project (inherited from parent)
 
 ---
-# Child DAG with explicit workingDir (overrides inheritance)
+# Child DAG with explicit working_dir (overrides inheritance)
 name: child-with-custom-wd
-workingDir: /custom/path
+working_dir: /custom/path
 steps:
   - command: pwd                     # Outputs: /custom/path
 ```
 
-> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `workerSelector`), sub-DAGs use their own context on the worker node.
+> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `worker_selector`), sub-DAGs use their own context on the worker node.
 
 ### Queue Configuration
 
@@ -454,19 +454,19 @@ See [OpenTelemetry Tracing](../features/opentelemetry.md) for detailed configura
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `mailOn` | object | Email notification triggers | - |
-| `errorMail` | object | Error email configuration | - |
-| `infoMail` | object | Success email configuration | - |
-| `waitMail` | object | Wait status email configuration | - |
+| `mail_on` | object | Email notification triggers | - |
+| `error_mail` | object | Error email configuration | - |
+| `info_mail` | object | Success email configuration | - |
+| `wait_mail` | object | Wait status email configuration | - |
 | `smtp` | object | SMTP server configuration | - |
 
 ```yaml
-mailOn:
+mail_on:
   success: true
   failure: true
   wait: true      # Email when DAG is waiting for approval
 
-errorMail:
+error_mail:
   from: alerts@example.com
   to: oncall@example.com  # Single recipient (string)
   # Or multiple recipients (array):
@@ -474,9 +474,9 @@ errorMail:
   #   - oncall@example.com
   #   - manager@example.com
   prefix: "[ALERT]"
-  attachLogs: true
+  attach_logs: true
 
-infoMail:
+info_mail:
   from: notifications@example.com
   to: team@example.com  # Single recipient (string)
   # Or multiple recipients (array):
@@ -484,13 +484,13 @@ infoMail:
   #   - team@example.com
   #   - stakeholders@example.com
   prefix: "[INFO]"
-  attachLogs: false
+  attach_logs: false
 
-waitMail:
+wait_mail:
   from: dagu@example.com
   to: approvers@example.com
   prefix: "[WAITING]"
-  attachLogs: false
+  attach_logs: false
 
 smtp:
   host: smtp.gmail.com
@@ -503,10 +503,10 @@ smtp:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `handlerOn` | object | Lifecycle event handlers | - |
+| `handler_on` | object | Lifecycle event handlers | - |
 
 ```yaml
-handlerOn:
+handler_on:
   init:
     command: echo "Setting up"      # Runs before any steps
   success:
@@ -521,24 +521,24 @@ handlerOn:
     command: echo "Always running"
 ```
 
-> **Note**: Sub-DAGs (invoked via `call`) do **not** inherit `handlerOn` from base configuration. Each sub-DAG must define its own handlers explicitly. See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
+> **Note**: Sub-DAGs (invoked via `call`) do **not** inherit `handler_on` from base configuration. Each sub-DAG must define its own handlers explicitly. See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
 
 ### RunConfig
 
-The `runConfig` field allows you to control user interactions when starting DAG runs:
+The `run_config` field allows you to control user interactions when starting DAG runs:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `disableParamEdit` | boolean | Prevent parameter editing when starting DAG | `false` |
-| `disableRunIdEdit` | boolean | Prevent custom run ID input when starting DAG | `false` |
+| `disable_param_edit` | boolean | Prevent parameter editing when starting DAG | `false` |
+| `disable_run_id_edit` | boolean | Prevent custom run ID input when starting DAG | `false` |
 
 Example usage:
 
 ```yaml
 # Prevent users from modifying parameters at runtime
-runConfig:
-  disableParamEdit: true
-  disableRunIdEdit: false
+run_config:
+  disable_param_edit: true
+  disable_run_id_edit: false
 
 params:
   - ENVIRONMENT: production  # Users cannot change this
@@ -576,10 +576,10 @@ steps:
       - npm test
     env:
       - NODE_ENV: production
-    workingDir: /app
+    working_dir: /app
 ```
 
-Instead of duplicating `env`, `workingDir`, `retryPolicy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
+Instead of duplicating `env`, `working_dir`, `retry_policy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
 
 Commands run in order and stop on first failure. Retries restart from the first command.
 
@@ -610,11 +610,11 @@ steps:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `workingDir` | string | Working directory (inherits from DAG-level workingDir) | DAG's workingDir |
+| `working_dir` | string | Working directory (inherits from DAG-level working_dir) | DAG's working_dir |
 | `shell` | string/array | Shell program and args for this step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
 | `stdout` | string | Redirect stdout to file | - |
 | `stderr` | string | Redirect stderr to file | - |
-| `logOutput` | string | Override DAG-level log output mode for this step | DAG's logOutput |
+| `log_output` | string | Override DAG-level log output mode for this step | DAG's log_output |
 | `output` | string | Capture output to variable | - |
 | `env` | array/object | Step-specific environment variables (overrides DAG-level) | - |
 | `call` | string | Name of a DAG to execute as a sub DAG-run | - |
@@ -627,14 +627,14 @@ steps:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `parallel` | array | Items to process in parallel | - |
-| `maxConcurrent` | integer | Max parallel executions | No limit |
+| `max_concurrent` | integer | Max parallel executions | No limit |
 
 ```yaml
 steps:
   - call: file-processor
     parallel:
       items: [file1.csv, file2.csv, file3.csv]
-      maxConcurrent: 2
+      max_concurrent: 2
     params: "FILE=${ITEM}"
 ```
 
@@ -643,7 +643,7 @@ steps:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `preconditions` | array | Conditions to check before execution | - |
-| `continueOn` | object | Continue workflow on certain conditions | - |
+| `continue_on` | object | Continue workflow on certain conditions | - |
 
 #### ContinueOn Fields
 
@@ -651,9 +651,9 @@ steps:
 |-------|------|-------------|---------|
 | `failure` | boolean | Continue execution when step fails | `false` |
 | `skipped` | boolean | Continue when step is skipped due to preconditions | `false` |
-| `exitCode` | array | List of exit codes that allow continuation | `[]` |
+| `exit_code` | array | List of exit codes that allow continuation | `[]` |
 | `output` | array | List of stdout patterns that allow continuation (supports regex with `re:` prefix) | `[]` |
-| `markSuccess` | boolean | Mark step as successful when continue conditions are met | `false` |
+| `mark_success` | boolean | Mark step as successful when continue conditions are met | `false` |
 
 #### Precondition Fields
 
@@ -680,12 +680,12 @@ steps:
         negate: true  # Runs when condition does NOT match
 
   - command: echo "Running optional task"
-    continueOn:
+    continue_on:
       failure: true
       skipped: true
-      exitCode: [0, 1, 2]
+      exit_code: [0, 1, 2]
       output: ["WARNING", "SKIP", "re:^INFO:.*"]
-      markSuccess: true
+      mark_success: true
 ```
 
 See the [Continue On Reference](/reference/continue-on) for detailed documentation.
@@ -694,20 +694,20 @@ See the [Continue On Reference](/reference/continue-on) for detailed documentati
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `retryPolicy` | object | Retry configuration | - |
-| `repeatPolicy` | object | Repeat configuration | - |
-| `mailOnError` | boolean | Send email on error | `false` |
-| `signalOnStop` | string | Signal to send on stop | `SIGTERM` |
+| `retry_policy` | object | Retry configuration | - |
+| `repeat_policy` | object | Repeat configuration | - |
+| `mail_on_error` | boolean | Send email on error | `false` |
+| `signal_on_stop` | string | Signal to send on stop | `SIGTERM` |
 
 #### Retry Policy Fields
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `limit` | integer | Maximum retry attempts | - |
-| `intervalSec` | integer | Base interval between retries (seconds) | - |
+| `interval_sec` | integer | Base interval between retries (seconds) | - |
 | `backoff` | any | Exponential backoff multiplier. `true` = 2.0, or specify custom number > 1.0 | - |
-| `maxIntervalSec` | integer | Maximum interval between retries (seconds) | - |
-| `exitCode` | array | Exit codes that trigger retry | All non-zero |
+| `max_interval_sec` | integer | Maximum interval between retries (seconds) | - |
+| `exit_code` | array | Exit codes that trigger retry | All non-zero |
 
 **Exponential Backoff**: When `backoff` is set, intervals increase exponentially using the formula:  
 `interval * (backoff ^ attemptCount)`
@@ -719,13 +719,13 @@ For iterating over a list of items, use [`parallel`](#parallel-execution) instea
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `repeat` | string | Repeat mode: `"while"` or `"until"` | - |
-| `intervalSec` | integer | Base interval between repetitions (seconds) | - |
+| `interval_sec` | integer | Base interval between repetitions (seconds) | - |
 | `backoff` | any | Exponential backoff multiplier. `true` = 2.0, or specify custom number > 1.0 | - |
-| `maxIntervalSec` | integer | Maximum interval between repetitions (seconds) | - |
+| `max_interval_sec` | integer | Maximum interval between repetitions (seconds) | - |
 | `limit` | integer | Maximum number of executions | - |
 | `condition` | string | Condition to evaluate | - |
 | `expected` | string | Expected value/pattern | - |
-| `exitCode` | array | Exit codes that trigger repeat | - |
+| `exit_code` | array | Exit codes that trigger repeat | - |
 
 **Repeat Modes:**
 - `while`: Repeats while the condition is true or exit code matches
@@ -736,35 +736,35 @@ For iterating over a list of items, use [`parallel`](#parallel-execution) instea
 ```yaml
 steps:
   - command: curl https://api.example.com
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 30
-      exitCode: [1, 255]  # Retry only on specific codes
+      interval_sec: 30
+      exit_code: [1, 255]  # Retry only on specific codes
       
   - command: curl https://api.example.com
-    retryPolicy:
+    retry_policy:
       limit: 5
-      intervalSec: 2
+      interval_sec: 2
       backoff: true        # Exponential backoff (2.0x multiplier)
-      maxIntervalSec: 60   # Cap at 60 seconds
-      exitCode: [429, 503] # Rate limit or unavailable
+      max_interval_sec: 60   # Cap at 60 seconds
+      exit_code: [429, 503] # Rate limit or unavailable
     
   - command: check-process.sh
-    repeatPolicy:
+    repeat_policy:
       repeat: while        # Repeat WHILE process is running
-      exitCode: [0]        # Exit code 0 means process found
-      intervalSec: 60
+      exit_code: [0]        # Exit code 0 means process found
+      interval_sec: 60
       limit: 30
       
   - command: echo "Checking status"
     output: STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: until        # Repeat UNTIL status is ready
       condition: "${STATUS}"
       expected: "ready"
-      intervalSec: 5
+      interval_sec: 5
       backoff: 1.5         # Custom backoff multiplier
-      maxIntervalSec: 300  # Cap at 5 minutes
+      max_interval_sec: 300  # Cap at 5 minutes
       limit: 60
 ```
 
@@ -798,7 +798,7 @@ steps:
     container:
       exec: my-app-container
       user: root
-      workingDir: /app
+      working_dir: /app
     command: chown -R app:app /data
 ```
 
@@ -852,10 +852,10 @@ steps:
 - `model`: Model identifier (e.g., `gpt-4o`, `claude-sonnet-4-20250514`)
 - `system`: Default system prompt (optional)
 - `temperature`: Randomness control 0.0-2.0 (optional)
-- `maxTokens`: Maximum tokens to generate (optional)
-- `topP`: Nucleus sampling 0.0-1.0 (optional)
-- `baseURL`: Custom API endpoint (optional)
-- `apiKey`: API key override (optional)
+- `max_tokens`: Maximum tokens to generate (optional)
+- `top_p`: Nucleus sampling 0.0-1.0 (optional)
+- `base_url`: Custom API endpoint (optional)
+- `api_key_name`: API key override (optional)
 - `stream`: Enable streaming output (default: true)
 
 **Message format:**
@@ -892,9 +892,9 @@ See [HITL](/features/executors/hitl) for full documentation.
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `workerSelector` | object \| `"local"` | Worker label requirements for distributed execution, or `"local"` to force local execution | - |
+| `worker_selector` | object \| `"local"` | Worker label requirements for distributed execution, or `"local"` to force local execution | - |
 
-When using distributed execution, specify `workerSelector` to route tasks to workers with matching labels:
+When using distributed execution, specify `worker_selector` to route tasks to workers with matching labels:
 
 ```yaml
 steps:
@@ -902,7 +902,7 @@ steps:
 ---
 # Run on a worker with gpu
 name: gpu-training
-workerSelector:
+worker_selector:
   gpu: "true"
   memory: "64G"
 steps:
@@ -913,17 +913,17 @@ To force a DAG to run locally even when `defaultExecutionMode` is `distributed`,
 
 ```yaml
 # Always runs on the main instance
-workerSelector: local
+worker_selector: local
 steps:
   - command: curl -f http://localhost:8080/health
 ```
 
 **Worker Selection Rules:**
-- All labels in `workerSelector` must match exactly on the worker
+- All labels in `worker_selector` must match exactly on the worker
 - Label values are case-sensitive strings
-- Steps without `workerSelector` can run on any available worker
+- Steps without `worker_selector` can run on any available worker
 - If no workers match the selector, the task waits until a matching worker is available
-- `workerSelector: local` overrides `defaultExecutionMode` and forces local execution
+- `worker_selector: local` overrides `defaultExecutionMode` and forces local execution
 
 See [Distributed Execution](/features/distributed-execution) for complete documentation.
 
@@ -974,7 +974,7 @@ dotenv: []
 - All files are loaded sequentially in order
 - Variables from later files override variables from earlier files
 - Missing files are silently skipped
-- Files are loaded relative to the DAG's `workingDir`
+- Files are loaded relative to the DAG's `working_dir`
 - System environment variables take precedence over .env file variables
 - .env files are loaded at DAG startup, before any steps execute
 
@@ -988,7 +988,7 @@ DEBUG=true
 
 ```yaml
 # DAG using .env variables
-workingDir: /app
+working_dir: /app
 dotenv: .env          # Optional, this is the default
 
 steps:
@@ -1051,9 +1051,9 @@ tags:
   priority: critical
 schedule: "0 2 * * *"
 
-maxActiveSteps: 5
-timeoutSec: 7200
-histRetentionDays: 90
+max_active_steps: 5
+timeout_sec: 7200
+hist_retention_days: 90
 
 params:
   - DATE: "`date +%Y-%m-%d`"
@@ -1069,7 +1069,7 @@ dotenv:
 # Default container for all steps
 container:
   image: python:3.11-slim
-  pullPolicy: missing
+  pull_policy: missing
   env:
     - PYTHONUNBUFFERED=1
   volumes:
@@ -1087,16 +1087,16 @@ steps:
   - command: python extract.py --date=${DATE}
     depends: validate-environment
     output: RAW_DATA_PATH
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 300
+      interval_sec: 300
     
   - call: transform-module
     parallel:
       items: [customers, orders, products]
-      maxConcurrent: 2
+      max_concurrent: 2
     params: "TYPE=${ITEM} INPUT=${RAW_DATA_PATH}"
-    continueOn:
+    continue_on:
       failure: false
 
  # Use different container for this step
@@ -1109,9 +1109,9 @@ steps:
     
   - command: python validate_results.py --date=${DATE}
     depends: load-data
-    mailOnError: true
+    mail_on_error: true
 
-handlerOn:
+handler_on:
   success:
     command: |
       echo "ETL completed successfully for ${DATE}"
@@ -1122,11 +1122,11 @@ handlerOn:
       to: data-team@example.com
       subject: "ETL Failed - ${DATE}"
       body: "Check logs at ${DAG_RUN_LOG_FILE}"
-      attachLogs: true
+      attach_logs: true
   exit:
     command: ./scripts/cleanup.sh ${DATE}
 
-mailOn:
+mail_on:
   failure: true
   
 smtp:

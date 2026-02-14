@@ -1,10 +1,10 @@
 # Continue On Conditions
 
-The `continueOn` configuration allows workflows to continue execution even when steps encounter failures, specific exit codes, or produce certain outputs. This powerful feature enables resilient workflows that can handle errors gracefully and implement sophisticated control flow patterns.
+The `continue_on` configuration allows workflows to continue execution even when steps encounter failures, specific exit codes, or produce certain outputs. This powerful feature enables resilient workflows that can handle errors gracefully and implement sophisticated control flow patterns.
 
 ## Overview
 
-By default, Dagu stops workflow execution when a step fails (returns a non-zero exit code). The `continueOn` configuration overrides this behavior, allowing you to:
+By default, Dagu stops workflow execution when a step fails (returns a non-zero exit code). The `continue_on` configuration overrides this behavior, allowing you to:
 
 - Continue execution after failures
 - Handle specific exit codes differently
@@ -14,7 +14,7 @@ By default, Dagu stops workflow execution when a step fails (returns a non-zero 
 
 ## Syntax
 
-The `continueOn` field supports two syntaxes:
+The `continue_on` field supports two syntaxes:
 
 ### Shorthand Syntax
 
@@ -23,10 +23,10 @@ For simple cases, use a string value:
 ```yaml
 steps:
   - command: rm -rf /tmp/cache/*
-    continueOn: failed    # Continue if step fails
+    continue_on: failed    # Continue if step fails
 
   - command: echo "Optional"
-    continueOn: skipped   # Continue if step is skipped
+    continue_on: skipped   # Continue if step is skipped
 ```
 
 ### Object Syntax
@@ -36,24 +36,24 @@ For advanced configuration with multiple options:
 ```yaml
 steps:
   - command: echo "Complex case"
-    continueOn:
+    continue_on:
       failure: true
-      exitCode: [0, 1, 2]
+      exit_code: [0, 1, 2]
       output: ["WARNING", "re:^INFO:.*"]
-      markSuccess: true
+      mark_success: true
 ```
 
 ## Configuration Fields
 
-The `continueOn` configuration supports the following fields:
+The `continue_on` configuration supports the following fields:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `failure` | boolean | Continue execution when the step fails | `false` |
 | `skipped` | boolean | Continue execution when the step is skipped | `false` |
-| `exitCode` | array | Continue execution for specific exit codes | `[]` |
+| `exit_code` | array | Continue execution for specific exit codes | `[]` |
 | `output` | array | Continue execution when output matches patterns | `[]` |
-| `markSuccess` | boolean | Mark the step as successful when conditions are met | `false` |
+| `mark_success` | boolean | Mark the step as successful when conditions are met | `false` |
 
 ## Field Details
 
@@ -66,12 +66,12 @@ steps:
   # Shorthand syntax
   - name: optional-cleanup
     command: rm -rf /tmp/cache/*
-    continueOn: failed
+    continue_on: failed
 
   # Object syntax (equivalent)
   - name: optional-cleanup
     command: rm -rf /tmp/cache/*
-    continueOn:
+    continue_on:
       failure: true
 ```
 
@@ -87,7 +87,7 @@ steps:
     preconditions:
       - condition: "${ENABLE_FEATURE}"
         expected: "true"
-    continueOn: skipped
+    continue_on: skipped
 
   # Object syntax (equivalent)
   - name: conditional-task
@@ -95,11 +95,11 @@ steps:
     preconditions:
       - condition: "${ENABLE_FEATURE}"
         expected: "true"
-    continueOn:
+    continue_on:
       skipped: true
 ```
 
-### `exitCode`
+### `exit_code`
 
 An array of specific exit codes that should not stop the workflow. This is useful when dealing with commands that use non-zero exit codes for non-error conditions.
 
@@ -107,8 +107,8 @@ An array of specific exit codes that should not stop the workflow. This is usefu
 steps:
   - name: check-service
     command: echo "Health check OK"
-    continueOn:
-      exitCode: [0, 1, 2]  # 0=healthy, 1=warning, 2=maintenance
+    continue_on:
+      exit_code: [0, 1, 2]  # 0=healthy, 1=warning, 2=maintenance
 ```
 
 ### `output`
@@ -119,7 +119,7 @@ An array of patterns to match against the command's stdout output. Supports both
 steps:
   - name: validate-data
     command: echo "Validating"
-    continueOn:
+    continue_on:
       output:
         - "WARNING"                    # Literal string match (substring)
         - "SKIP"                       # Another literal string
@@ -133,7 +133,7 @@ steps:
 - Patterns are matched against each line of **stdout only** (stderr is not checked)
 - Matching is case-sensitive
 
-### `markSuccess`
+### `mark_success`
 
 When set to `true`, the step is marked as successful if any of the continue conditions are met, even if it would normally be considered a failure.
 
@@ -141,9 +141,9 @@ When set to `true`, the step is marked as successful if any of the continue cond
 steps:
   - name: best-effort-optimization
     command: echo "Optimizing"
-    continueOn:
+    continue_on:
       failure: true
-      markSuccess: true  # Step shows as successful in UI/logs
+      mark_success: true  # Step shows as successful in UI/logs
 ```
 
 ## Common Patterns
@@ -156,7 +156,7 @@ For steps that are nice-to-have but not critical:
 steps:
   - name: cache-warmup
     command: echo "Warming cache"
-    continueOn: failed
+    continue_on: failed
 
   - name: main-process
     command: echo "Processing"
@@ -170,8 +170,8 @@ When working with tools that use exit codes for non-error states:
 steps:
   - name: git-diff
     command: git diff --exit-code
-    continueOn:
-      exitCode: [0, 1]  # 0=no changes, 1=changes exist
+    continue_on:
+      exit_code: [0, 1]  # 0=no changes, 1=changes exist
       
   - name: process-changes
     command: echo "Handling changes"
@@ -185,13 +185,13 @@ Continue execution but handle warnings differently:
 steps:
   - name: lint-code
     command: eslint .
-    continueOn:
+    continue_on:
       output: ["WARNING", "re:.*warning.*"]
-      exitCode: [0, 1]  # 0=no issues, 1=warnings only
+      exit_code: [0, 1]  # 0=no issues, 1=warnings only
       
   - name: strict-lint
     command: eslint . --max-warnings 0
-    continueOn:
+    continue_on:
       failure: false  # This one must pass
 ```
 
@@ -203,7 +203,7 @@ Build workflows that degrade gracefully:
 steps:
   - name: try-optimal-method
     command: echo "Processing with optimal settings"
-    continueOn: failed
+    continue_on: failed
 
   - name: fallback-method
     command: echo "Processing with fallback settings"
@@ -220,12 +220,12 @@ React to specific output patterns:
 steps:
   - name: deployment-check
     command: kubectl rollout status deployment/app
-    continueOn:
+    continue_on:
       output:
         - "re:Waiting for.*replicas"
         - "re:deployment.*not found"
         - "Unable to connect"
-      exitCode: [1]
+      exit_code: [1]
       
   - name: handle-deployment-issue
     command: echo "Fixing deployment"
@@ -235,56 +235,56 @@ steps:
 
 ### With Retry Policies
 
-`continueOn` is evaluated after all retries are exhausted:
+`continue_on` is evaluated after all retries are exhausted:
 
 ```yaml
 steps:
   - name: flaky-service
     command: echo "Calling service"
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 5
-    continueOn:
-      exitCode: [503]  # Continue if still 503 after retries
+      interval_sec: 5
+    continue_on:
+      exit_code: [503]  # Continue if still 503 after retries
 ```
 
 ### With Lifecycle Handlers
 
-When a step with `continueOn` fails but the DAG continues, the final status is `partially_succeeded`, which triggers the `onSuccess` handler (not `onFailure`):
+When a step with `continue_on` fails but the DAG continues, the final status is `partially_succeeded`, which triggers the `onSuccess` handler (not `onFailure`):
 
 ```yaml
-handlerOn:
+handler_on:
   success:
     command: echo "DAG completed (status: ${DAG_RUN_STATUS})"  # partially_succeeded
 
 steps:
   - name: optional-step
     command: exit 1
-    continueOn: failed  # Continues, DAG ends as partially_succeeded
+    continue_on: failed  # Continues, DAG ends as partially_succeeded
 ```
 
 ### With Dependencies
 
-Dependent steps see the actual status unless `markSuccess` is used:
+Dependent steps see the actual status unless `mark_success` is used:
 
 ```yaml
 type: graph
 steps:
   - name: step-a
     command: exit 1
-    continueOn:
+    continue_on:
       failure: true
-      markSuccess: false  # Default
+      mark_success: false  # Default
       
   - name: step-b
     command: echo "Step A status: failed"
-    depends: [step-a]  # Runs because of continueOn
+    depends: [step-a]  # Runs because of continue_on
     
   - name: step-c
     command: exit 1
-    continueOn:
+    continue_on:
       failure: true
-      markSuccess: true  # Override status
+      mark_success: true  # Override status
       
   - name: step-d
     command: echo "Step C status: success"
@@ -299,11 +299,11 @@ steps:
 steps:
   - name: run-migration
     command: echo "Running migration"
-    continueOn:
+    continue_on:
       output:
         - "re:WARNING:.*already exists"
         - "re:NOTICE:.*will be created"
-      exitCode: [0, 1]  # 1 might indicate warnings
+      exit_code: [0, 1]  # 1 might indicate warnings
       
   - name: verify-migration
     command: echo "Verifying database"
@@ -315,15 +315,15 @@ steps:
 steps:
   - name: deploy-aws
     command: echo "Deploying to AWS"
-    continueOn: failed  # Continue even if AWS fails
+    continue_on: failed  # Continue even if AWS fails
 
   - name: deploy-gcp
     command: echo "Deploying to GCP"
-    continueOn: failed  # Continue even if GCP fails
+    continue_on: failed  # Continue even if GCP fails
 
   - name: verify-deployment
     command: echo "Verifying cloud deployment"
-    # No continueOn - at least one cloud must be working
+    # No continue_on - at least one cloud must be working
 ```
 
 ### Service Health Check
@@ -332,8 +332,8 @@ steps:
 steps:
   - name: check-primary
     command: curl -f https://primary.example.com/health
-    continueOn:
-      exitCode: [0, 22, 7]  # 22=HTTP error, 7=connection failed
+    continue_on:
+      exit_code: [0, 22, 7]  # 22=HTTP error, 7=connection failed
       
   - name: check-secondary
     command: curl -f https://secondary.example.com/health

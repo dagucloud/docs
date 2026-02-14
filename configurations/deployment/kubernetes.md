@@ -32,7 +32,7 @@ workerPools:
     affinity: {}
 ```
 
-The default `general` pool has `labels: {}`, which means it matches DAGs without a `workerSelector` (an empty selector matches any worker). See [Worker Labels](/features/worker-labels#matching-algorithm) for how matching works.
+The default `general` pool has `labels: {}`, which means it matches DAGs without a `worker_selector` (an empty selector matches any worker). See [Worker Labels](/features/worker-labels#matching-algorithm) for how matching works.
 
 ### Multi-Pool Example
 
@@ -72,10 +72,10 @@ workerPools:
 ```
 
 This creates two Deployments:
-- `<release>-dagu-worker-general` — 3 replicas, no labels, matches any DAG without `workerSelector`
+- `<release>-dagu-worker-general` — 3 replicas, no labels, matches any DAG without `worker_selector`
 - `<release>-dagu-worker-gpu` — 2 replicas, labels `gpu=true,cuda=12.0`, scheduled on GPU nodes
 
-DAGs with `workerSelector: {gpu: "true"}` are dispatched to the `gpu` pool. DAGs without `workerSelector` are dispatched to any pool (including `general`).
+DAGs with `worker_selector: {gpu: "true"}` are dispatched to the `gpu` pool. DAGs without `worker_selector` are dispatched to any pool (including `general`).
 
 ### How Pool Labels Map to Worker Labels
 
@@ -93,7 +93,7 @@ becomes the CLI argument `--worker.labels gpu=true,cuda=12.0`, which is equivale
 dagu worker --worker.labels gpu=true,cuda=12.0
 ```
 
-These labels are then matched against `workerSelector` in DAG definitions. See [Distributed Execution — How Dispatch Decisions Work](/features/distributed-execution#how-dispatch-decisions-work) for the full dispatch logic.
+These labels are then matched against `worker_selector` in DAG definitions. See [Distributed Execution — How Dispatch Decisions Work](/features/distributed-execution#how-dispatch-decisions-work) for the full dispatch logic.
 
 ### Pool Name Validation
 
@@ -209,5 +209,5 @@ auth:
 image:
   repository: ghcr.io/dagu-org/dagu
   tag: latest
-  pullPolicy: IfNotPresent
+  pull_policy: IfNotPresent
 ```

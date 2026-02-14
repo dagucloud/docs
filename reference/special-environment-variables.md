@@ -22,7 +22,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STEP_STDERR_FILE` | Current step or handler only | File path backing the step's captured stderr stream. | `/var/log/dagu/daily-backup/upload-artifacts.stderr.log` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical status: `running` (init handler), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler). | `failed` |
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval (HITL). | `approval-step,review-step` |
-| `PWD` | Current step only | Working directory for the step. Defaults to DAG's `workingDir` or the DAG file's directory. | `/home/user/project` |
+| `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. If the run was started with JSON parameters, the original payload is preserved. | `{"ENVIRONMENT":"prod","batchSize":1000}` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
 

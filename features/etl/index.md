@@ -27,7 +27,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `outputFile` to write directly to a file.
+Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file.
 :::
 
 ::: info Secrets
@@ -65,26 +65,26 @@ For distributed workers running multiple concurrent DAGs, configure PostgreSQL c
 |-------|------|---------|-------------|
 | `timeout` | int | 60 | Query timeout in seconds |
 | `transaction` | bool | false | Wrap in transaction |
-| `isolationLevel` | string | - | `default`, `read_committed`, `repeatable_read`, `serializable` |
+| `isolation_level` | string | - | `default`, `read_committed`, `repeatable_read`, `serializable` |
 | `params` | map/array | - | Query parameters |
 
 ### Output
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `outputFormat` | string | jsonl | `jsonl`, `json`, `csv` |
+| `output_format` | string | jsonl | `jsonl`, `json`, `csv` |
 | `headers` | bool | false | Include headers in CSV |
-| `nullString` | string | null | NULL representation |
-| `maxRows` | int | 0 | Limit rows (0 = unlimited) |
+| `null_string` | string | null | NULL representation |
+| `max_rows` | int | 0 | Limit rows (0 = unlimited) |
 | `streaming` | bool | false | Stream to file |
-| `outputFile` | string | - | Output file path |
+| `output_file` | string | - | Output file path |
 
 ### Locking
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `advisoryLock` | string | Named lock (PostgreSQL only) |
-| `fileLock` | bool | File locking (SQLite only) |
+| `advisory_lock` | string | Named lock (PostgreSQL only) |
+| `file_lock` | bool | File locking (SQLite only) |
 
 ## Data Import
 
@@ -102,31 +102,31 @@ steps:
     config:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
       import:
-        inputFile: /data/users.csv
+        input_file: /data/users.csv
         table: users
         format: csv
-        hasHeader: true
-        batchSize: 1000
+        has_header: true
+        batch_size: 1000
 ```
 
 ### Import Configuration
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `inputFile` | string | required | Source file path |
+| `input_file` | string | required | Source file path |
 | `table` | string | required | Target table name |
 | `format` | string | auto-detect | `csv`, `tsv`, `jsonl` (detected from file extension) |
-| `hasHeader` | bool | true | First row is header |
+| `has_header` | bool | true | First row is header |
 | `delimiter` | string | `,` | Field delimiter |
 | `columns` | []string | - | Explicit column names |
-| `nullValues` | []string | `["", "NULL", "null", "\\N"]` | Values treated as NULL |
-| `batchSize` | int | 1000 | Rows per INSERT |
-| `onConflict` | string | error | `error`, `ignore`, `replace` |
-| `conflictTarget` | string | - | Column(s) for conflict detection (PostgreSQL UPSERT) |
-| `updateColumns` | []string | - | Columns to update on conflict |
-| `skipRows` | int | 0 | Skip N data rows |
-| `maxRows` | int | 0 | Limit rows (0 = unlimited) |
-| `dryRun` | bool | false | Validate without importing |
+| `null_values` | []string | `["", "NULL", "null", "\\N"]` | Values treated as NULL |
+| `batch_size` | int | 1000 | Rows per INSERT |
+| `on_conflict` | string | error | `error`, `ignore`, `replace` |
+| `conflict_target` | string | - | Column(s) for conflict detection (PostgreSQL UPSERT) |
+| `update_columns` | []string | - | Columns to update on conflict |
+| `skip_rows` | int | 0 | Skip N data rows |
+| `max_rows` | int | 0 | Limit rows (0 = unlimited) |
+| `dry_run` | bool | false | Validate without importing |
 
 ## Parameterized Queries
 
@@ -171,7 +171,7 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       transaction: true
-      isolationLevel: serializable
+      isolation_level: serializable
     command: |
       UPDATE accounts SET balance = balance - 100 WHERE id = 1;
       UPDATE accounts SET balance = balance + 100 WHERE id = 2;
@@ -189,7 +189,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      outputFormat: jsonl
+      output_format: jsonl
     command: "SELECT * FROM orders"
 ```
 
@@ -209,7 +209,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      outputFormat: json
+      output_format: json
     command: "SELECT * FROM orders"
 ```
 
@@ -227,7 +227,7 @@ steps:
     type: postgres
     config:
       dsn: "${DATABASE_URL}"
-      outputFormat: csv
+      output_format: csv
       headers: true
     command: "SELECT * FROM orders"
 ```
@@ -243,16 +243,16 @@ steps:
     config:
       dsn: "${DATABASE_URL}"
       streaming: true
-      outputFile: /data/export.jsonl
-      outputFormat: jsonl    # Use jsonl or csv for streaming
+      output_file: /data/export.jsonl
+      output_format: jsonl    # Use jsonl or csv for streaming
     command: "SELECT * FROM large_table"
 ```
 
 ::: tip Best Practices for Large Results
-- Use `outputFormat: jsonl` or `csv` - these formats stream rows immediately
-- Avoid `outputFormat: json` - it buffers all rows in memory before writing
-- Set `maxRows` as a safety limit for unbounded queries
-- Use `streaming: true` with `outputFile` to write directly to disk
+- Use `output_format: jsonl` or `csv` - these formats stream rows immediately
+- Avoid `output_format: json` - it buffers all rows in memory before writing
+- Set `max_rows` as a safety limit for unbounded queries
+- Use `streaming: true` with `output_file` to write directly to disk
 :::
 
 ## Error Handling
@@ -265,10 +265,10 @@ steps:
       dsn: "${DATABASE_URL}"
       timeout: 30
     command: "SELECT * FROM orders"
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 5
-    continueOn:
+      interval_sec: 5
+    continue_on:
       failure: true
 ```
 

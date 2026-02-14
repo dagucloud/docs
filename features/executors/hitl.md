@@ -144,7 +144,7 @@ smtp:
   username: ${SMTP_USER}
   password: ${SMTP_PASSWORD}
 
-waitMail:
+wait_mail:
   from: dagu@example.com
   to:
     - approvers@example.com
@@ -164,7 +164,7 @@ See [Email Notifications](/features/email-notifications) for more details.
 Execute custom logic when the workflow enters wait status:
 
 ```yaml
-handlerOn:
+handler_on:
   wait:
     command: |
       echo "Waiting steps: ${DAG_WAITING_STEPS}"
@@ -203,7 +203,7 @@ This information is visible in the Web UI and accessible via the REST API.
 
 ## Limitations
 
-- HITL steps cannot be used with `workerSelector` (distributed execution) because approval state is stored locally
+- HITL steps cannot be used with `worker_selector` (distributed execution) because approval state is stored locally
 
 ## See Also
 

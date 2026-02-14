@@ -14,8 +14,8 @@ ssh:
   port: 22
   key: ~/.ssh/deploy_key
   password: ${SSH_PASSWORD}  # Optional; prefer keys
-  strictHostKey: true  # Default: true for security
-  knownHostFile: ~/.ssh/known_hosts  # Default: ~/.ssh/known_hosts
+  strict_host_key: true  # Default: true for security
+  known_host_file: ~/.ssh/known_hosts  # Default: ~/.ssh/known_hosts
   shell: "/bin/bash -e"  # Optional: string or array syntax for shell + args (DAG-level only)
   timeout: 60s  # Connection timeout (default: 30s)
 
@@ -49,8 +49,8 @@ steps:
 | `port` | No | `22` | SSH port |
 | `key` | No | Auto-detect | Private key path (see below) |
 | `password` | No | - | Password (not recommended) |
-| `strictHostKey` | No | `true` | Enable host key verification |
-| `knownHostFile` | No | `~/.ssh/known_hosts` | Known hosts file path |
+| `strict_host_key` | No | `true` | Enable host key verification |
+| `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `shell` | No | - | Shell for remote command execution (string or array, e.g., `"/bin/bash -e"` or `["/bin/bash","-e"]`) |
 | `timeout` | No | `30s` | Connection timeout (e.g., `30s`, `1m`) |
 | `bastion` | No | - | Bastion/jump host configuration (see below) |
@@ -64,8 +64,8 @@ steps:
 | `port` | No | `22` | SSH port |
 | `key` | No | Auto-detect | Private key path (see below) |
 | `password` | No | - | Password (not recommended) |
-| `strictHostKey` | No | `true` | Enable host key verification |
-| `knownHostFile` | No | `~/.ssh/known_hosts` | Known hosts file path |
+| `strict_host_key` | No | `true` | Enable host key verification |
+| `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `shell` | No | - | Shell for remote command execution (string form only; e.g., `"/bin/bash -e"`) |
 | `timeout` | No | `30s` | Connection timeout |
 | `bastion` | No | - | Bastion/jump host configuration |
@@ -237,7 +237,7 @@ steps:
         expected: "production"
 ```
 
-Instead of duplicating the SSH executor config, `preconditions`, `retryPolicy`, `env`, etc. across multiple steps, combine commands into one step.
+Instead of duplicating the SSH executor config, `preconditions`, `retry_policy`, `env`, etc. across multiple steps, combine commands into one step.
 
 **Important:** Each command runs in a **new SSH session**, so:
 - Working directory resets to the user's home directory for each command
@@ -246,7 +246,7 @@ Instead of duplicating the SSH executor config, `preconditions`, `retryPolicy`, 
 
 ## Security Best Practices
 
-1. **Host Key Verification**: Always enabled by default (`strictHostKey: true`)
+1. **Host Key Verification**: Always enabled by default (`strict_host_key: true`)
    - Prevents man-in-the-middle attacks
    - Uses `~/.ssh/known_hosts` by default
    - Only disable for testing environments

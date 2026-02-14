@@ -10,16 +10,16 @@ Build resilient workflows with retries, handlers, and notifications.
 steps:
   # Basic retry with fixed interval
   - command: curl https://api.example.com
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 5
+      interval_sec: 5
       
   # Retry specific errors
   - command: make-request
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 30
-      exitCodes: [429, 503]  # Rate limit or unavailable
+      interval_sec: 30
+      exit_code: [429, 503]  # Rate limit or unavailable
 ```
 
 ### Exponential Backoff
@@ -30,27 +30,27 @@ Increase retry intervals exponentially to avoid overwhelming failed services:
 steps:
   # Exponential backoff with default multiplier (2.0)
   - command: curl https://api.example.com/data
-    retryPolicy:
+    retry_policy:
       limit: 5
-      intervalSec: 2
+      interval_sec: 2
       backoff: true        # true = 2.0 multiplier
       # Intervals: 2s, 4s, 8s, 16s, 32s
       
   # Custom backoff multiplier
   - command: echo "Checking service health"
-    retryPolicy:
+    retry_policy:
       limit: 4
-      intervalSec: 1
+      interval_sec: 1
       backoff: 1.5         # Custom multiplier
       # Intervals: 1s, 1.5s, 2.25s, 3.375s
       
   # Backoff with max interval cap
   - command: echo "Syncing data"
-    retryPolicy:
+    retry_policy:
       limit: 10
-      intervalSec: 1
+      interval_sec: 1
       backoff: 2.0
-      maxIntervalSec: 30   # Cap at 30 seconds
+      max_interval_sec: 30   # Cap at 30 seconds
       # Intervals: 1s, 2s, 4s, 8s, 16s, 30s, 30s, 30s...
 ```
 
@@ -68,16 +68,16 @@ Control workflow execution flow when steps encounter errors or specific conditio
 steps:
   # Continue on any failure (shorthand)
   - command: rm -f /tmp/cache/*
-    continueOn: failed
+    continue_on: failed
 
   # Continue on specific exit codes
   - command: echo "Checking status"
-    continueOn:
-      exitCode: [0, 1, 2]  # 0=success, 1=warning, 2=info
+    continue_on:
+      exit_code: [0, 1, 2]  # 0=success, 1=warning, 2=info
 
   # Continue on output patterns
   - command: validate.sh
-    continueOn:
+    continue_on:
       output:
         - command: "WARNING"
         - command: "SKIP"
@@ -86,9 +86,9 @@ steps:
 
   # Mark as success when continuing
   - command: optimize.sh
-    continueOn:
+    continue_on:
       failure: true
-      markSuccess: true  # Shows as successful in UI
+      mark_success: true  # Shows as successful in UI
 ```
 
 ### Advanced Patterns
@@ -97,27 +97,27 @@ steps:
 steps:
   # Database migration with known warnings
   - command: echo "Running migration"
-    continueOn:
+    continue_on:
       output:
         - command: "re:WARNING:.*already exists"
         - command: "re:NOTICE:.*will be created"
-      exitCode: [0, 1]
+      exit_code: [0, 1]
       
   # Service health check with fallback
   - command: curl -f https://primary.example.com/health
-    continueOn:
-      exitCode: [0, 22, 7]  # 22=HTTP error, 7=connection failed
+    continue_on:
+      exit_code: [0, 22, 7]  # 22=HTTP error, 7=connection failed
       
   # Conditional cleanup
   - command: find /tmp -name "*.tmp" -mtime +7 -delete
-    continueOn:
+    continue_on:
       failure: true       # Continue even if cleanup fails
-      exitCode: [0, 1]   # find returns 1 if no files found
+      exit_code: [0, 1]   # find returns 1 if no files found
       
   # Tool with non-standard exit codes
   - command: security-scanner --strict
-    continueOn:
-      exitCode: [0, 4, 8]  # 0=clean, 4=warnings, 8=info
+    continue_on:
+      exit_code: [0, 4, 8]  # 0=clean, 4=warnings, 8=info
       output:
         - command: "re:LOW SEVERITY:"
         - command: "re:INFORMATIONAL:"
@@ -130,7 +130,7 @@ See the [Continue On Reference](/reference/continue-on) for complete documentati
 Lifecycle handlers fire after the main steps complete and let you add notifications or cleanup logic based on the final DAG status. See the [Lifecycle Handlers guide](/writing-workflows/lifecycle-handlers) for execution order, context access, and additional patterns. Quick examples:
 
 ```yaml
-handlerOn:
+handler_on:
   init:
     command: setup-environment.sh  # Runs before any steps
   success:
@@ -143,7 +143,7 @@ handlerOn:
     command: rm -rf /tmp/dag-${DAG_RUN_ID}  # Always runs
 
 # With email
-handlerOn:
+handler_on:
   failure:
     type: mail
     config:
@@ -163,20 +163,20 @@ smtp:
   username: "${SMTP_USER}"
   password: "${SMTP_PASS}"
 
-mailOn:
+mail_on:
   failure: true
   success: false
 
-errorMail:
+error_mail:
   from: "dagu@company.com"
   to: "oncall@company.com"
   prefix: "[ALERT]"
-  attachLogs: true
+  attach_logs: true
 
 # Step-level
 steps:
   - command: backup.sh
-    mailOnError: true
+    mail_on_error: true
     
   # Send custom email
   - type: mail
@@ -193,19 +193,19 @@ steps:
 
 ```yaml
 # DAG timeout
-timeoutSec: 3600  # 1 hour
+timeout_sec: 3600  # 1 hour
 
 # Cleanup timeout
-maxCleanUpTimeSec: 300  # 5 minutes
+max_clean_up_time_sec: 300  # 5 minutes
 
 steps:
   # Step with graceful shutdown
   - command: server.sh
-    signalOnStop: SIGTERM  # Default
+    signal_on_stop: SIGTERM  # Default
 
   # Always cleanup
   - command: analyze.sh
-    continueOn: failed
+    continue_on: failed
 
   - command: cleanup.sh  # Runs even if process fails
 ```

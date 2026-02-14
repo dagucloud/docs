@@ -15,7 +15,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default (JSONL format). Use `output: VAR_NAME` to capture results into an environment variable. For large results, use `streaming: true` with `outputFile`.
+Query results are written to **stdout** by default (JSONL format). Use `output: VAR_NAME` to capture results into an environment variable. For large results, use `streaming: true` with `output_file`.
 :::
 
 ## Connection String
@@ -49,12 +49,12 @@ config:
 ```
 
 ::: tip In-Memory Database Sharing
-By default, `:memory:` databases are ephemeral and not shared between steps. To share an in-memory database across steps within the same DAG run, use `sharedMemory: true`:
+By default, `:memory:` databases are ephemeral and not shared between steps. To share an in-memory database across steps within the same DAG run, use `shared_memory: true`:
 
 ```yaml
 config:
   dsn: ":memory:"
-  sharedMemory: true  # Enables shared cache mode
+  shared_memory: true  # Enables shared cache mode
 ```
 
 This converts the DSN to `file::memory:?cache=shared` internally. For persistent storage, use file databases.
@@ -69,7 +69,7 @@ steps:
     config:
       dsn: "file:./app.db"
       timeout: 30           # Query timeout in seconds
-      sharedMemory: false   # Set true for :memory: databases to share across steps
+      shared_memory: false   # Set true for :memory: databases to share across steps
 ```
 
 ::: tip Connection Pooling
@@ -146,7 +146,7 @@ steps:
     type: sqlite
     config:
       dsn: "file:./shared.db"
-      fileLock: true
+      file_lock: true
     command: |
       DELETE FROM cache WHERE expires_at < datetime('now');
       VACUUM;
@@ -165,7 +165,7 @@ steps:
     type: sqlite
     config:
       dsn: "file:/shared/cache.db"
-      fileLock: true
+      file_lock: true
       transaction: true
     command: |
       -- Safe to run from multiple workers
@@ -184,11 +184,11 @@ steps:
     config:
       dsn: "file:./inventory.db"
       import:
-        inputFile: /data/products.csv
+        input_file: /data/products.csv
         table: products
         format: csv
-        hasHeader: true
-        batchSize: 500
+        has_header: true
+        batch_size: 500
 ```
 
 ### JSONL Import
@@ -200,7 +200,7 @@ steps:
     config:
       dsn: "file:./events.db"
       import:
-        inputFile: /data/events.jsonl
+        input_file: /data/events.jsonl
         table: events
         format: jsonl
 ```
@@ -216,12 +216,12 @@ steps:
     config:
       dsn: "file:./app.db"
       import:
-        inputFile: /data/updates.csv
+        input_file: /data/updates.csv
         table: products
-        onConflict: replace  # Uses INSERT OR REPLACE
+        on_conflict: replace  # Uses INSERT OR REPLACE
 ```
 
-| onConflict | SQLite Behavior |
+| on_conflict | SQLite Behavior |
 |------------|-----------------|
 | `error` | Fail on duplicate (default) |
 | `ignore` | `INSERT OR IGNORE` - skip duplicates |
@@ -241,7 +241,7 @@ steps:
     type: sqlite
     config:
       dsn: "file:./app.db"
-      outputFormat: jsonl
+      output_format: jsonl
     command: "SELECT * FROM products"
 ```
 
@@ -259,12 +259,12 @@ steps:
     type: sqlite
     config:
       dsn: "file:./app.db"
-      outputFormat: json
+      output_format: json
     command: "SELECT * FROM products LIMIT 1000"
 ```
 
 ::: warning Memory Usage
-The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead. Always use `LIMIT` or `maxRows` with `json` format.
+The `json` format buffers ALL rows in memory before writing. For large result sets, use `jsonl` or `csv` instead. Always use `LIMIT` or `max_rows` with `json` format.
 :::
 
 ### CSV
@@ -275,7 +275,7 @@ steps:
     type: sqlite
     config:
       dsn: "file:./app.db"
-      outputFormat: csv
+      output_format: csv
       headers: true
     command: "SELECT id, name, price FROM products"
 ```
@@ -289,15 +289,15 @@ steps:
     config:
       dsn: "file:./logs.db"
       streaming: true
-      outputFile: /data/logs-export.jsonl
-      outputFormat: jsonl    # Use jsonl or csv for large results
+      output_file: /data/logs-export.jsonl
+      output_format: jsonl    # Use jsonl or csv for large results
     command: "SELECT * FROM logs WHERE date >= date('now', '-7 days')"
 ```
 
 ::: tip Best Practices for Large Results
-- Use `outputFormat: jsonl` or `csv` - these formats stream rows immediately
-- Avoid `outputFormat: json` - it buffers all rows in memory before writing
-- Set `maxRows` as a safety limit for unbounded queries
+- Use `output_format: jsonl` or `csv` - these formats stream rows immediately
+- Avoid `output_format: json` - it buffers all rows in memory before writing
+- Set `max_rows` as a safety limit for unbounded queries
 :::
 
 ## Multiple Statements
@@ -358,10 +358,10 @@ steps:
       dsn: "file:./app.db"
       timeout: 30
     command: "SELECT * FROM large_table"
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 2
-    continueOn:
+      interval_sec: 2
+    continue_on:
       failure: true
 ```
 
@@ -396,10 +396,10 @@ steps:
     config:
       dsn: "file:${DB_PATH}"
       import:
-        inputFile: /data/events-${TODAY}.jsonl
+        input_file: /data/events-${TODAY}.jsonl
         table: raw_events
         format: jsonl
-        batchSize: 1000
+        batch_size: 1000
     depends:
       - setup-schema
 
@@ -407,7 +407,7 @@ steps:
     type: sqlite
     config:
       dsn: "file:${DB_PATH}"
-      fileLock: true
+      file_lock: true
       transaction: true
     command: |
       INSERT OR REPLACE INTO daily_stats (date, event_count, unique_types)
@@ -426,8 +426,8 @@ steps:
     config:
       dsn: "file:${DB_PATH}"
       streaming: true
-      outputFile: /reports/daily-stats.json
-      outputFormat: json
+      output_file: /reports/daily-stats.json
+      output_format: json
     command: |
       SELECT * FROM daily_stats
       ORDER BY date DESC

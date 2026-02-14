@@ -206,11 +206,11 @@ Key concepts:
 
 ## Working Directory
 
-By default, DAGs execute in the directory where the YAML file is located. You can override this with `workingDir`:
+By default, DAGs execute in the directory where the YAML file is located. You can override this with `working_dir`:
 
 ```yaml
-# All relative paths are resolved from workingDir
-workingDir: /app/project
+# All relative paths are resolved from working_dir
+working_dir: /app/project
 dotenv: .env          # Loads /app/project/.env
 steps:
   - command: ls -la            # Lists files in /app/project
@@ -248,14 +248,14 @@ Add retries and error handlers:
 ```yaml
 steps:
   - command: curl -f https://example.com/data.zip -o data.zip
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 30
+      interval_sec: 30
       
   - command: echo "Unzipping data and processing"
-    continueOn: failed  # Continue even if this fails (DAG ends as partially_succeeded)
+    continue_on: failed  # Continue even if this fails (DAG ends as partially_succeeded)
       
-handlerOn:
+handler_on:
   failure:
     command: echo "Workflow failed!" | mail -s "Alert" admin@example.com
   success:

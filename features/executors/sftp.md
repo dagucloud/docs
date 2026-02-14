@@ -50,8 +50,8 @@ steps:
 | `port` | No | `22` | SSH port |
 | `key` | No | Auto-detect | Private key path |
 | `password` | No | - | SSH password |
-| `strictHostKey` | No | `true` | Enable host key verification |
-| `knownHostFile` | No | `~/.ssh/known_hosts` | Known hosts file path |
+| `strict_host_key` | No | `true` | Enable host key verification |
+| `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `timeout` | No | `30s` | Connection timeout |
 | `direction` | No | `upload` | `upload` or `download` |
 | `source` | Yes | - | Source path (local for upload, remote for download) |

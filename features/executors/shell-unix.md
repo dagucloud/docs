@@ -52,7 +52,7 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
         import sys
         print("Args:", sys.argv)
   ```
-- **Working directory and env**: Use `workingDir`/`dir` and `env` on the step (or DAG defaults) to control context.
+- **Working directory and env**: Use `working_dir`/`dir` and `env` on the step (or DAG defaults) to control context.
 
 ## Script Behavior (Unix)
 
@@ -66,11 +66,11 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
   With the default or DAG-level shell, Dagu appends `-e` so the shell stops on the first failing command. If you set a step-level shell, add `-e` yourself when you want errexit.
 
 - **nix-shell**  
-  Pin tools per step with `shell: nix-shell` and `shellPackages`:
+  Pin tools per step with `shell: nix-shell` and `shell_packages`:
   ```yaml
   steps:
     - shell: nix-shell
-      shellPackages: [python3, jq]
+      shell_packages: [python3, jq]
       command: |
         python3 --version
         jq --version
@@ -90,4 +90,4 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 - Prefer array syntax for commands with flags to avoid quoting surprises.
 - Keep DAG-level shells stable; override per-step only when you need a different interpreter.
 - Use shebangs in multi-line scripts when you want a specific interpreter without repeating `shell`.
-- When using nix-shell, list every tool your step needs in `shellPackages` for reproducibility.
+- When using nix-shell, list every tool your step needs in `shell_packages` for reproducibility.

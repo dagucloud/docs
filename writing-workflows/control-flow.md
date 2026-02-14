@@ -53,35 +53,35 @@ steps:
     params: "DATA=${transform.output}"
 ```
 
-> **Note**: Sub-DAGs do not inherit `handlerOn` from the base configuration. Each nested workflow should define its own lifecycle handlers if needed. See [Sub-DAG Handler Isolation](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
+> **Note**: Sub-DAGs do not inherit `handler_on` from the base configuration. Each nested workflow should define its own lifecycle handlers if needed. See [Sub-DAG Handler Isolation](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
 
 **Working Directory Inheritance:**
 
-When calling sub-DAGs locally, the child inherits the parent's `workingDir` if it doesn't define its own:
+When calling sub-DAGs locally, the child inherits the parent's `working_dir` if it doesn't define its own:
 
 ```yaml
-workingDir: /app/project
+working_dir: /app/project
 
 steps:
   - call: child-task    # Child runs in /app/project
 
 ---
 name: child-task
-# No workingDir defined - inherits /app/project from parent
+# No working_dir defined - inherits /app/project from parent
 steps:
   - command: pwd                 # Outputs: /app/project
 ```
 
-To override the inherited working directory, define an explicit `workingDir` in the child DAG:
+To override the inherited working directory, define an explicit `working_dir` in the child DAG:
 
 ```yaml
 name: child-with-custom-dir
-workingDir: /custom/path    # Overrides inherited workingDir
+working_dir: /custom/path    # Overrides inherited working_dir
 steps:
   - command: pwd                     # Outputs: /custom/path
 ```
 
-> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `workerSelector`), sub-DAGs use their own context on the worker node.
+> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `worker_selector`), sub-DAGs use their own context on the worker node.
 
 ### Multiple DAGs in One File
 
@@ -114,7 +114,7 @@ steps:
   - call: worker
     parallel:
       items: ${TASK_LIST}
-      maxConcurrent: 1
+      max_concurrent: 1
     params: "FILE=${ITEM}"
 
 ---
@@ -138,7 +138,7 @@ steps:
   - call: worker
     parallel:
       items: ${CHUNKS}
-      maxConcurrent: 3
+      max_concurrent: 3
     params: "CHUNK=${ITEM}"
     output: MAP_RESULTS
 
@@ -190,8 +190,8 @@ steps:
 
 **Note**: When using regex patterns with command outputs, be aware that:
 - Lines over 64KB are automatically handled with larger buffers  
-- If the total output exceeds `maxOutputSize` (default 1MB), the step will fail with an error and the output variable won't be set
-- For `continueOn.output` patterns in log files, lines up to `maxOutputSize` can be matched
+- If the total output exceeds `max_output_size` (default 1MB), the step will fail with an error and the output variable won't be set
+- For `continue_on.output` patterns in log files, lines up to `max_output_size` can be matched
 
 ### Multiple Conditions
 
@@ -269,10 +269,10 @@ The 'while' mode repeats a step while a condition is true.
 ```yaml
 steps:
   - command: nc -z localhost 8080
-    repeatPolicy:
+    repeat_policy:
       repeat: while
-      exitCode: [1]      # Repeat WHILE connection fails (exit code 1)
-      intervalSec: 10    # Wait 10 seconds between attempts
+      exit_code: [1]      # Repeat WHILE connection fails (exit code 1)
+      interval_sec: 10    # Wait 10 seconds between attempts
       limit: 30          # Maximum 30 attempts
 ```
 
@@ -284,11 +284,11 @@ The 'until' mode repeats a step until a condition becomes true.
 steps:
   - command: check-job-status.sh
     output: STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: until
       condition: "${STATUS}"
       expected: "COMPLETED"   # Repeat UNTIL status is COMPLETED
-      intervalSec: 30
+      interval_sec: 30
       limit: 120              # Maximum 1 hour
 ```
 
@@ -298,20 +298,20 @@ steps:
 ```yaml
 steps:
   - command: pgrep -f "my-app"
-    repeatPolicy:
+    repeat_policy:
       repeat: while
-      exitCode: [0]      # Exit code 0 means process found
-      intervalSec: 60    # Check every minute
+      exit_code: [0]      # Exit code 0 means process found
+      interval_sec: 60    # Check every minute
 ```
 
 #### Until File Exists
 ```yaml
 steps:
   - command: test -f /tmp/output.csv
-    repeatPolicy:
+    repeat_policy:
       repeat: until
-      exitCode: [0]      # Exit code 0 means file exists
-      intervalSec: 5
+      exit_code: [0]      # Exit code 0 means file exists
+      interval_sec: 5
       limit: 60          # Maximum 5 minutes
 ```
 
@@ -320,11 +320,11 @@ steps:
 steps:
   - command: curl -s http://api/health
     output: HEALTH_STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: while
       condition: "${HEALTH_STATUS}"
       expected: "healthy"
-      intervalSec: 30
+      interval_sec: 30
 ```
 
 ### Exponential Backoff for Repeats
@@ -335,10 +335,10 @@ Gradually increase intervals between repeat attempts:
 steps:
   # Exponential backoff with while mode
   - command: nc -z localhost 8080
-    repeatPolicy:
+    repeat_policy:
       repeat: while
-      exitCode: [1]        # Repeat while connection fails
-      intervalSec: 1       # Start with 1 second
+      exit_code: [1]        # Repeat while connection fails
+      interval_sec: 1       # Start with 1 second
       backoff: true        # true = 2.0 multiplier
       limit: 10
       # Intervals: 1s, 2s, 4s, 8s, 16s, 32s...
@@ -346,11 +346,11 @@ steps:
   # Custom backoff multiplier with until mode
   - command: check-job-status.sh
     output: STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: until
       condition: "${STATUS}"
       expected: "COMPLETED"
-      intervalSec: 5
+      interval_sec: 5
       backoff: 1.5         # Gentler backoff
       limit: 20
       # Intervals: 5s, 7.5s, 11.25s, 16.875s...
@@ -358,13 +358,13 @@ steps:
   # Backoff with max interval cap
   - command: curl -s https://api.example.com/status
     output: API_STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: until
       condition: "${API_STATUS}"
       expected: "ready"
-      intervalSec: 2
+      interval_sec: 2
       backoff: 2.0
-      maxIntervalSec: 60   # Never wait more than 1 minute
+      max_interval_sec: 60   # Never wait more than 1 minute
       limit: 100
       # Intervals: 2s, 4s, 8s, 16s, 32s, 60s, 60s, 60s...
 ```
@@ -378,7 +378,7 @@ steps:
 ```yaml
 steps:
   - command: echo "Cleaning up"
-    continueOn: failed  # Shorthand syntax
+    continue_on: failed  # Shorthand syntax
   - command: echo "Processing"
 ```
 
@@ -387,8 +387,8 @@ steps:
 ```yaml
 steps:
   - command: echo "Checking status"
-    continueOn:
-      exitCode: [0, 1, 2]  # Continue on these codes
+    continue_on:
+      exit_code: [0, 1, 2]  # Continue on these codes
   - command: echo "Processing"
 ```
 
@@ -397,7 +397,7 @@ steps:
 ```yaml
 steps:
   - command: echo "Validating"
-    continueOn:
+    continue_on:
       output:
         - command: "WARNING"
         - command: "SKIP"
@@ -414,7 +414,7 @@ steps:
     preconditions:
       - condition: "${FEATURE_FLAG}"
         expected: "enabled"
-    continueOn: skipped  # Shorthand syntax
+    continue_on: skipped  # Shorthand syntax
   - command: echo "Processing"  # Runs regardless of optional feature
 ```
 
@@ -423,9 +423,9 @@ steps:
 ```yaml
 steps:
   - command: echo "Running optional task"
-    continueOn:
+    continue_on:
       failure: true
-      markSuccess: true  # Mark step as successful
+      mark_success: true  # Mark step as successful
 ```
 
 ### Complex Conditions
@@ -436,16 +436,16 @@ Combine multiple conditions for sophisticated control flow:
 steps:
   # Tool with complex exit code meanings
   - command: echo "Analyzing data"
-    continueOn:
-      exitCode: [0, 3, 4, 5]  # Various non-error states
+    continue_on:
+      exit_code: [0, 3, 4, 5]  # Various non-error states
       output:
         - command: "Analysis complete with warnings"
         - command: "re:Found [0-9]+ minor issues"
-      markSuccess: true
+      mark_success: true
       
   # Graceful degradation pattern
   - command: echo "Processing with advanced settings"
-    continueOn:
+    continue_on:
       failure: true
       output: ["FALLBACK REQUIRED", "re:.*not available.*"]
       
@@ -459,7 +459,7 @@ steps:
     preconditions:
       - condition: "${ENABLE_FEATURE}"
         expected: "true"
-    continueOn:
+    continue_on:
       skipped: true  # Continue if precondition not met
 ```
 
@@ -508,7 +508,7 @@ steps:
 
 ```yaml
 schedule: "0 * * * *"  # Every hour
-skipIfSuccessful: true  # Skip if already ran successfully today (e.g., run manually)
+skip_if_successful: true  # Skip if already ran successfully today (e.g., run manually)
 
 steps:
   - command: echo "Syncing data"

@@ -223,7 +223,7 @@ Metrics available at `/api/v1/metrics`:
 logFormat: json    # text or json
 debug: true       # Debug mode
 paths:
-  logDir: /var/log/dagu
+  log_dir: /var/log/dagu
 ```
 
 ```bash
@@ -246,14 +246,14 @@ JSON log example:
 
 #### Log Cleanup
 
-Automatic cleanup based on `histRetentionDays`:
+Automatic cleanup based on `hist_retention_days`:
 
 ```yaml
 # Per-DAG
-histRetentionDays: 7  # Keep 7 days
+hist_retention_days: 7  # Keep 7 days
 
 # Or global in base.yaml
-histRetentionDays: 30  # Default
+hist_retention_days: 30  # Default
 ```
 
 Special values:
@@ -297,13 +297,13 @@ smtp:
   username: "notifications@company.com"
   password: "${SMTP_PASSWORD}"
 
-errorMail:
+error_mail:
   from: "dagu@company.com"
   to: "ops-team@company.com"
   prefix: "[ERROR]"
-  attachLogs: true
+  attach_logs: true
 
-mailOn:
+mail_on:
   failure: true
   success: false
 ```
@@ -313,14 +313,14 @@ Per-step notification:
 steps:
   - name: critical-task
     command: echo "Processing"
-    mailOnError: true
+    mail_on_error: true
 ```
 
 #### Webhooks
 
 **Slack:**
 ```yaml
-handlerOn:
+handler_on:
   failure:
     type: http
     config:
@@ -341,7 +341,7 @@ handlerOn:
 
 **PagerDuty:**
 ```yaml
-handlerOn:
+handler_on:
   failure:
     type: http
     config:

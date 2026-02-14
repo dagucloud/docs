@@ -79,7 +79,7 @@ steps:
 ```
 
 ::: tip
-The container is automatically removed after execution. Set `keepContainer: true` to preserve it.
+The container is automatically removed after execution. Set `keep_container: true` to preserve it.
 :::
 
 ### Exec Mode (Use Existing Container)
@@ -98,7 +98,7 @@ steps:
     container:
       exec: my-app-container
       user: root
-      workingDir: /app
+      working_dir: /app
     command: chown -R app:app /data
 ```
 
@@ -111,19 +111,19 @@ steps:
   - name: pull-always
     container:
       image: myapp:latest
-      pullPolicy: always      # Always pull from registry
+      pull_policy: always      # Always pull from registry
     command: ./app
 
   - name: pull-if-missing
     container:
       image: myapp:latest
-      pullPolicy: missing     # Default - pull only if not local
+      pull_policy: missing     # Default - pull only if not local
     command: ./app
 
   - name: never-pull
     container:
       image: local-image:dev
-      pullPolicy: never       # Use local image only
+      pull_policy: never       # Use local image only
     command: ./test
 ```
 
@@ -131,7 +131,7 @@ steps:
 
 ```yaml
 # Configure authentication for private registries
-registryAuths:
+registry_auths:
   docker.io:
     username: ${DOCKER_USERNAME}
     password: ${DOCKER_PASSWORD}
@@ -238,7 +238,7 @@ steps:
   - name: custom-workdir
     container:
       image: python:3.13
-      workingDir: /app
+      working_dir: /app
       env:
         - PYTHONPATH=/app
       volumes:
@@ -254,9 +254,9 @@ steps:
     container:
       name: test-db
       image: postgres:17
-      pullPolicy: missing
+      pull_policy: missing
       platform: linux/amd64
-      keepContainer: true
+      keep_container: true
       env:
         - POSTGRES_USER=test
         - POSTGRES_PASSWORD=test
@@ -343,8 +343,8 @@ Execute S3 operations including upload, download, list, and delete. Supports AWS
 ```yaml
 s3:
   region: us-east-1
-  accessKeyId: ${AWS_ACCESS_KEY_ID}
-  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  access_key_id: ${AWS_ACCESS_KEY_ID}
+  secret_access_key: ${AWS_SECRET_ACCESS_KEY}
   bucket: my-bucket
 
 steps:
@@ -366,8 +366,8 @@ steps:
       bucket: my-bucket
       key: reports/daily.csv
       source: /tmp/report.csv
-      contentType: text/csv
-      storageClass: STANDARD_IA
+      content_type: text/csv
+      storage_class: STANDARD_IA
     command: upload
 ```
 
@@ -393,7 +393,7 @@ steps:
     config:
       bucket: my-bucket
       prefix: logs/2024/
-      maxKeys: 100
+      max_keys: 100
       recursive: true
     command: list
     output: OBJECTS
@@ -426,16 +426,16 @@ steps:
 # MinIO
 s3:
   endpoint: http://localhost:9000
-  accessKeyId: minioadmin
-  secretAccessKey: minioadmin
+  access_key_id: minioadmin
+  secret_access_key: minioadmin
   bucket: my-bucket
-  forcePathStyle: true
+  force_path_style: true
 
 # Google Cloud Storage
 s3:
   endpoint: https://storage.googleapis.com
-  accessKeyId: ${GCS_HMAC_KEY}
-  secretAccessKey: ${GCS_HMAC_SECRET}
+  access_key_id: ${GCS_HMAC_KEY}
+  secret_access_key: ${GCS_HMAC_SECRET}
   bucket: my-gcs-bucket
 ```
 
@@ -512,7 +512,7 @@ steps:
   - name: internal-api
     type: http
     config:
-      skipTLSVerify: true  # Skip certificate verification
+      tls_skip_verify: true  # Skip certificate verification
       headers:
         Authorization: Bearer ${INTERNAL_TOKEN}
     command: GET https://internal-api.local/data
@@ -554,7 +554,7 @@ steps:
     config:
       source: logs.tar.gz
       destination: ./logs
-      verifyIntegrity: true
+      verify_integrity: true
     command: extract
 ```
 
@@ -917,15 +917,15 @@ redis:
 # Sentinel
 redis:
   mode: sentinel
-  sentinelMaster: mymaster
-  sentinelAddrs:
+  sentinel_master: mymaster
+  sentinel_addrs:
     - sentinel1:26379
     - sentinel2:26379
 
 # Cluster
 redis:
   mode: cluster
-  clusterAddrs:
+  cluster_addrs:
     - node1:6379
     - node2:6379
 ```
@@ -1160,11 +1160,11 @@ steps:
   - name: may-fail
     type: dag
     command: risky-process.yaml
-    continueOn:
+    continue_on:
       failure: true
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 300
+      interval_sec: 300
 ```
 
 ### Dynamic DAG Selection

@@ -111,7 +111,7 @@ coordinator:
 
 paths:
   dataDir: "/var/lib/dagu/data"   # Local storage for status
-  logDir: "/var/lib/dagu/logs"    # Local storage for logs
+  log_dir: "/var/lib/dagu/logs"    # Local storage for logs
 
 ---
 # Worker config.yaml

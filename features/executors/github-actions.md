@@ -78,7 +78,7 @@ secrets:
     provider: env
     key: GITHUB_TOKEN
 
-workingDir: /tmp/gha-workspace
+working_dir: /tmp/gha-workspace
 
 steps:
   - name: checkout
@@ -92,16 +92,16 @@ steps:
 
 - `command` holds the action reference (`owner/repo@ref`).
 - `executor` can be the shorthand `gha` shown above, or a map with `type: gha` when you need to add `config`.
-- `workingDir` is set at the DAG level and determines the workspace Dagu mounts into the action container (defaults to the process CWD if omitted).
+- `working_dir` is set at the DAG level and determines the workspace Dagu mounts into the action container (defaults to the process CWD if omitted).
 - `executor.config` contains runner configuration options (see Configuration section below).
 - `params` maps directly to the `with:` block in GitHub Actions YAML. Values support the same variable substitution rules as other step fields.
 
 ## Working Directory
 
-Actions run in the step's resolved `workingDir`:
+Actions run in the step's resolved `working_dir`:
 
-- Defaults to the DAG's `workingDir`, or the process CWD if none is configured.
-- Override per step with `workingDir` / `dir` when you need a dedicated workspace.
+- Defaults to the DAG's `working_dir`, or the process CWD if none is configured.
+- Override per step with `working_dir` / `dir` when you need a dedicated workspace.
 - Files created by actions remain in that directory because the workspace is bind-mounted into the runner container.
 
 ## Passing Secrets
@@ -115,7 +115,7 @@ secrets:
     provider: env
     key: GITHUB_TOKEN
 
-workingDir: /tmp/workspace
+working_dir: /tmp/workspace
 
 steps:
   - command: actions/checkout@v4
@@ -135,7 +135,7 @@ The `executor.config` object accepts the following parameters:
 - **Type**: `string`
 - **Default**: `node:24-bookworm`
 
-### `autoRemove`
+### `auto_remove`
 
 - **Type**: `boolean`
 - **Default**: `true`
@@ -149,14 +149,14 @@ Automatically remove containers after execution. Set to `false` to keep containe
 
 Docker network mode for containers. Options: `bridge`, `host`, `none`, or a custom network name.
 
-### `githubInstance`
+### `github_instance`
 
 - **Type**: `string`
 - **Default**: `github.com`
 
 GitHub instance for action resolution. Use for GitHub Enterprise Server (e.g., `github.company.com`).
 
-### `dockerSocket`
+### `docker_socket`
 
 - **Type**: `string`
 - **Default**: `""` (Docker default socket)
@@ -166,21 +166,21 @@ Custom Docker socket path. Examples:
 - `tcp://remote-docker:2375` - Remote Docker daemon
 - `/run/user/1000/docker.sock` - Rootless Docker
 
-### `containerOptions`
+### `container_options`
 
 - **Type**: `string`
 - **Default**: `""`
 
 Additional Docker run options passed to the container (e.g., `--memory=2g --cpus=2`).
 
-### `reuseContainers`
+### `reuse_containers`
 
 - **Type**: `boolean`
 - **Default**: `false`
 
 Reuse containers between action runs for performance. May cause state pollution.
 
-### `forceRebuild`
+### `force_rebuild`
 
 - **Type**: `boolean`
 - **Default**: `false`

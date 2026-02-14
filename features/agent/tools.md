@@ -139,8 +139,8 @@ Look up DAG YAML schema documentation.
 - `steps` - Step configuration
 - `steps.type` - Executor/step types
 - `steps.container` - Container configuration
-- `handlerOn` - Lifecycle handlers
-- `handlerOn.success` - Success handler
+- `handler_on` - Lifecycle handlers
+- `handler_on.success` - Success handler
 
 ---
 

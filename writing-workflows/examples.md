@@ -36,7 +36,7 @@ steps:
   - call: processor
     parallel:
       items: [A, B, C]
-      maxConcurrent: 2
+      max_concurrent: 2
     params: "ITEM=${ITEM}"
 
 ---
@@ -77,10 +77,10 @@ steps:
       - npm test
     env:
       - NODE_ENV: production
-    workingDir: /app
+    working_dir: /app
 ```
 
-Share step config (`env`, `workingDir`, `retryPolicy`, etc.) across commands instead of duplicating across steps.
+Share step config (`env`, `working_dir`, `retry_policy`, etc.) across commands instead of duplicating across steps.
 
 <a href="/writing-workflows/basics#multiple-commands" class="learn-more">Learn more →</a>
 
@@ -174,16 +174,16 @@ flowchart TD
 ```yaml
 steps:
   - command: curl -f http://service/health
-    repeatPolicy:
+    repeat_policy:
       repeat: true
-      intervalSec: 10
-      exitCode: [1]  # Repeat while exit code is 1
+      interval_sec: 10
+      exit_code: [1]  # Repeat while exit code is 1
 ```
 
 ```mermaid
 flowchart TD
   A[Execute curl -f /health] --> B{Exit code == 1?}
-  B --> |Yes| W[Wait intervalSec] --> A
+  B --> |Yes| W[Wait interval_sec] --> A
   B --> |No| N[Next step]
   style A stroke:lightblue,stroke-width:1.6px,color:#333
   style W stroke:lightblue,stroke-width:1.6px,color:#333
@@ -201,10 +201,10 @@ flowchart TD
 ```yaml
 steps:
   - command: curl -f http://service:8080/health
-    repeatPolicy:
+    repeat_policy:
       repeat: until        # Repeat UNTIL service is healthy
-      exitCode: [0]        # Exit code 0 means success
-      intervalSec: 10      # Wait 10 seconds between attempts
+      exit_code: [0]        # Exit code 0 means success
+      interval_sec: 10      # Wait 10 seconds between attempts
       limit: 30            # Maximum 5 minutes
 ```
 
@@ -230,11 +230,11 @@ flowchart TD
  steps: 
   - command: echo "COMPLETED"  # Simulates job status check
     output: JOB_STATUS
-    repeatPolicy:
+    repeat_policy:
       repeat: until        # Repeat UNTIL job completes
       condition: "${JOB_STATUS}"
       expected: "COMPLETED"
-      intervalSec: 30
+      interval_sec: 30
       limit: 120           # Maximum 1 hour (120 attempts)
 ```
 
@@ -259,9 +259,9 @@ flowchart TD
 ```yaml
 steps:
   - command: echo "heartbeat"  # Sends heartbeat signal
-    repeatPolicy:
+    repeat_policy:
       repeat: while            # Repeat indefinitely while successful
-      intervalSec: 60
+      interval_sec: 60
 ```
 
 <a href="/writing-workflows/control-flow#repeat-basic" class="learn-more">Learn more →</a>
@@ -275,10 +275,10 @@ steps:
 ```yaml
 steps:
   - command: echo "Checking status"
-    repeatPolicy:
+    repeat_policy:
       repeat: until        # Repeat until exit code 0
-      exitCode: [0]
-      intervalSec: 30
+      exit_code: [0]
+      interval_sec: 30
       limit: 20            # Maximum 10 minutes
 ```
 
@@ -448,22 +448,22 @@ flowchart TD
 ```yaml
 steps:
   - command: exit 3  # This will exit with code 3
-    continueOn:
-      exitCode: [0, 3]        # Treat 0 and 3 as non-fatal
+    continue_on:
+      exit_code: [0, 3]        # Treat 0 and 3 as non-fatal
       output:
         - command: "WARNING"
         - command: "re:^INFO:.*"       # Regex match
-      markSuccess: true       # Mark as success when matched
+      mark_success: true       # Mark as success when matched
   - command: echo "Continue regardless"
 ```
 
 ```mermaid
 stateDiagram-v2
   [*] --> Step
-  Step --> Next: exitCode in {0,3} or output matches
+  Step --> Next: exit_code in {0,3} or output matches
   Step --> Failed: otherwise
   Next --> [*]
-  Failed --> Next: continueOn.markSuccess
+  Failed --> Next: continue_on.mark_success
   
   classDef step stroke:lightblue,stroke-width:1.6px,color:#333
   classDef next stroke:green,stroke-width:1.6px,color:#333
@@ -566,7 +566,7 @@ steps:
 
 ---
 name: train-model
-workerSelector:
+worker_selector:
   gpu: "true"
   cuda: "11.8"
   memory: "64G"
@@ -575,7 +575,7 @@ steps:
 
 ---
 name: evaluate-model
-workerSelector:
+worker_selector:
   gpu: "true"
 steps:
   - command: python evaluate.py
@@ -584,7 +584,7 @@ steps:
 ```mermaid
 flowchart LR
   P[prepare_dataset.py] --> TR[call: train-model]
-  TR --> |workerSelector gpu=true,cuda=11.8,memory=64G| GW[(GPU Worker)]
+  TR --> |worker_selector gpu=true,cuda=11.8,memory=64G| GW[(GPU Worker)]
   GW --> TE[python train.py --gpu]
   TE --> EV[call: evaluate-model]
   EV --> |gpu=true| GW2[(GPU Worker)]
@@ -615,7 +615,7 @@ steps:
 
 ---
 name: process-on-gpu
-workerSelector:
+worker_selector:
   gpu: "true"
   gpu-model: "nvidia-a100"
 steps:
@@ -631,16 +631,16 @@ steps:
 ### Force Local Execution
 
 ```yaml
-# When defaultExecutionMode is "distributed", use workerSelector: local
+# When defaultExecutionMode is "distributed", use worker_selector: local
 # to keep specific DAGs on the main instance
-workerSelector: local
+worker_selector: local
 
 steps:
   - command: curl -f http://localhost:8080/health
   - command: echo "Ran locally"
 ```
 
-Use `workerSelector: local` as an escape hatch in distributed deployments for lightweight DAGs that should never leave the main instance.
+Use `worker_selector: local` as an escape hatch in distributed deployments for lightweight DAGs that should never leave the main instance.
 
 <a href="/features/distributed-execution#force-local-execution" class="learn-more">Learn more →</a>
 
@@ -657,13 +657,13 @@ steps:
   - call: chunk-processor
     parallel:
       items: ${CHUNKS}
-      maxConcurrent: 5
+      max_concurrent: 5
     params: "CHUNK=${ITEM}"
   - command: python merge_results.py
 
 ---
 name: chunk-processor
-workerSelector:
+worker_selector:
   memory: "16G"
   cpu-cores: "8"
 params:
@@ -703,7 +703,7 @@ graph TD
 steps:
   # Optional task that may fail
   - command: exit 1  # This will fail
-    continueOn:
+    continue_on:
       failure: true
   # This step always runs
   - command: echo "This must succeed"
@@ -724,7 +724,7 @@ steps:
     preconditions:
       - condition: "${FEATURE_FLAG}"
         expected: "enabled"
-    continueOn:
+    continue_on:
       skipped: true
   # This step always runs
   - command: echo "Processing main task"
@@ -741,9 +741,9 @@ steps:
 ```yaml
 steps:
   - command: curl https://api.example.com
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 30
+      interval_sec: 30
 ```
 
 <a href="/writing-workflows/error-handling#retry" class="learn-more">Learn more →</a>
@@ -757,10 +757,10 @@ steps:
 ```yaml
 steps:
   - command: curl -f https://api.example.com/data
-    retryPolicy:
+    retry_policy:
       limit: 5
-      intervalSec: 30
-      exitCodes: [429, 503, 504]  # Rate limit, service unavailable
+      interval_sec: 30
+      exit_code: [429, 503, 504]  # Rate limit, service unavailable
 ```
 
 <a href="/writing-workflows/error-handling#retry" class="learn-more">Learn more →</a>
@@ -774,11 +774,11 @@ steps:
 ```yaml
 steps:
   - command: curl https://api.example.com/data
-    retryPolicy:
+    retry_policy:
       limit: 5
-      intervalSec: 2
+      interval_sec: 2
       backoff: true        # 2x multiplier
-      maxIntervalSec: 60   # Cap at 60s
+      max_interval_sec: 60   # Cap at 60s
       # Intervals: 2s, 4s, 8s, 16s, 32s → 60s
 ```
 
@@ -795,12 +795,12 @@ steps:
 ```yaml
 steps:
   - command: nc -z localhost 8080
-    repeatPolicy:
+    repeat_policy:
       repeat: while
-      exitCode: [1]        # While connection fails
-      intervalSec: 1
+      exit_code: [1]        # While connection fails
+      interval_sec: 1
       backoff: 2.0
-      maxIntervalSec: 30
+      max_interval_sec: 30
       limit: 20
       # Check intervals: 1s, 2s, 4s, 8s, 16s, 30s...
 ```
@@ -816,7 +816,7 @@ steps:
 ```yaml
 steps:
   - command: echo "Processing main task"
-handlerOn:
+handler_on:
   success:
     command: echo "SUCCESS - Workflow completed"
   failure:
@@ -830,10 +830,10 @@ stateDiagram-v2
     [*] --> Running
     Running --> Success: Success
     Running --> Failed: Failure
-    Success --> NotifySuccess: handlerOn.success
-    Failed --> CleanupFail: handlerOn.failure
-    NotifySuccess --> AlwaysCleanup: handlerOn.exit
-    CleanupFail --> AlwaysCleanup: handlerOn.exit
+    Success --> NotifySuccess: handler_on.success
+    Failed --> CleanupFail: handler_on.failure
+    NotifySuccess --> AlwaysCleanup: handler_on.exit
+    CleanupFail --> AlwaysCleanup: handler_on.exit
     AlwaysCleanup --> [*]
     
     classDef running stroke:lime,stroke-width:1.6px,color:#333
@@ -868,7 +868,7 @@ env:
   - LOG_LEVEL: debug
   - API_KEY: ${SECRET_API_KEY}
 steps:
-  - workingDir: ${SOME_DIR}
+  - working_dir: ${SOME_DIR}
     command: python main.py ${SOME_FILE}
 ```
 
@@ -1036,7 +1036,7 @@ steps:
 
 ```yaml
 # Set maximum output size to 5MB for all steps
-maxOutputSize: 5242880  # 5MB in bytes
+max_output_size: 5242880  # 5MB in bytes
 
 steps:
   - command: "cat large-file.txt"
@@ -1092,7 +1092,7 @@ steps:
     command: python extract.py
     output: DATA
   - command: |
-      echo "Exit code: ${extract.exitCode}"
+      echo "Exit code: ${extract.exit_code}"
       echo "Stdout path: ${extract.stdout}"
     depends: extract
 ```
@@ -1210,11 +1210,11 @@ steps:
 ### Working Directory
 
 ```yaml
-workingDir: /tmp
+working_dir: /tmp
 steps:
   - command: pwd               # Outputs: /tmp
   - command: mkdir -p data
-  - workingDir: /tmp/data
+  - working_dir: /tmp/data
     command: pwd      # Outputs: /tmp/data
 ```
 
@@ -1247,7 +1247,7 @@ steps:
 ```yaml
 steps:
   - shell: nix-shell
-    shellPackages: [python3, curl, jq]
+    shell_packages: [python3, curl, jq]
     command: |
       python3 --version
       curl --version
@@ -1292,10 +1292,10 @@ steps:
 ### Keep Container Running
 
 ```yaml
-# Use keepContainer at DAG level
+# Use keep_container at DAG level
 container:
   image: postgres:16
-  keepContainer: true
+  keep_container: true
   env:
     - POSTGRES_PASSWORD=secret
   ports:
@@ -1304,9 +1304,9 @@ container:
 steps:
   - command: postgres -D /var/lib/postgresql/data
   - command: pg_isready -U postgres -h localhost
-    retryPolicy:
+    retry_policy:
       limit: 10
-      intervalSec: 2
+      interval_sec: 2
 ```
 
 <a href="/reference/yaml#container-configuration" class="learn-more">Learn more →</a>
@@ -1324,7 +1324,7 @@ steps:
       image: node:18
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command: npm run build
 ```
 
@@ -1358,7 +1358,7 @@ steps:
 container:
   exec: my-app-container
   user: root
-  workingDir: /var/www
+  working_dir: /var/www
   env:
     - APP_DEBUG=true
 
@@ -1408,7 +1408,7 @@ secrets:
     provider: env
     key: GITHUB_TOKEN
 
-workingDir: /tmp/workspace
+working_dir: /tmp/workspace
 steps:
   - command: actions/checkout@v4
     type: gha
@@ -1447,7 +1447,7 @@ steps:
 ### Container Volumes: Relative Paths
 
 ```yaml
-workingDir: /app/project
+working_dir: /app/project
 container:
   image: python:3.11
   volumes:
@@ -1508,7 +1508,7 @@ steps:
 ### Archive Extraction
 
 ```yaml
-workingDir: /tmp/data
+working_dir: /tmp/data
 
 steps:
   - type: archive
@@ -1531,9 +1531,9 @@ container:
   image: alpine:latest
   startup: command           # keepalive | entrypoint | command
   command: ["sh", "-c", "my-daemon"]
-  waitFor: healthy           # running | healthy
-  logPattern: "Ready"        # Optional regex to wait for
-  restartPolicy: unless-stopped
+  wait_for: healthy           # running | healthy
+  log_pattern: "Ready"        # Optional regex to wait for
+  restart_policy: unless-stopped
 
 steps:
   - command: echo "Service is ready"
@@ -1544,8 +1544,8 @@ stateDiagram-v2
   [*] --> Starting
   Starting --> Running: container running
   Running --> Healthy: healthcheck ok
-  Running --> Ready: logPattern matched
-  Healthy --> Ready: logPattern matched
+  Running --> Ready: log_pattern matched
+  Healthy --> Ready: log_pattern matched
   Ready --> [*]
   
   classDef node stroke:lightblue,stroke-width:1.6px,color:#333
@@ -1561,7 +1561,7 @@ stateDiagram-v2
 ### Private Registry Auth
 
 ```yaml
-registryAuths:
+registry_auths:
   ghcr.io:
     username: ${GITHUB_USER}
     password: ${GITHUB_TOKEN}
@@ -1588,7 +1588,7 @@ steps:
       image: node:24
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command: npm run build
 
   - name: test
@@ -1596,7 +1596,7 @@ steps:
       image: node:24
       volumes:
         - ./src:/app
-      workingDir: /app
+      working_dir: /app
     command: npm test
 
   - name: deploy
@@ -1630,8 +1630,8 @@ ssh:
   host: app.example.com
   port: 2222
   key: ~/.ssh/deploy_key
-  strictHostKey: true
-  knownHostFile: ~/.ssh/known_hosts
+  strict_host_key: true
+  known_host_file: ~/.ssh/known_hosts
 
 steps:
   - command: systemctl status myapp
@@ -1796,7 +1796,7 @@ steps:
 
 ```yaml
 schedule: "0 */4 * * *"    # Every 4 hours
-skipIfSuccessful: true     # Skip if already succeeded
+skip_if_successful: true     # Skip if already succeeded
 steps:
   - command: echo "Extracting data"
   - command: echo "Transforming data"
@@ -1860,7 +1860,7 @@ schedule:
   start: "0 8 * * *"     # Start 8 AM
   restart: "0 12 * * *"  # Restart noon
   stop: "0 18 * * *"     # Stop 6 PM
-restartWaitSec: 60
+restart_wait_sec: 60
 steps:
   - command: echo "Long-running service"
 ```
@@ -1900,7 +1900,7 @@ Configure queues globally and assign DAGs using the `queue` field.
 ### Email Notifications
 
 ```yaml
-mailOn:
+mail_on:
   failure: true
   success: true
 smtp:
@@ -1910,7 +1910,7 @@ smtp:
   password: "${SMTP_PASS}"
 steps:
   - command: echo "Running critical job"
-    mailOnError: true
+    mail_on_error: true
 ```
 
 <a href="/features/email-notifications" class="learn-more">Learn more →</a>
@@ -1928,7 +1928,7 @@ steps:
 ### History Retention
 
 ```yaml
-histRetentionDays: 30    # Keep 30 days of history
+hist_retention_days: 30    # Keep 30 days of history
 schedule: "0 0 * * *"     # Daily at midnight
 steps:
   - command: echo "Archiving old data"
@@ -1946,7 +1946,7 @@ Control how long execution history is retained.
 ### Output Size Management
 
 ```yaml
-maxOutputSize: 10485760   # 10MB max output per step
+max_output_size: 10485760   # 10MB max output per step
 steps:
   - command: echo "Analyzing logs"
     stdout: /logs/analysis.out
@@ -1962,8 +1962,8 @@ steps:
 ### Custom Log Directory
 
 ```yaml
-logDir: /data/etl/logs/${DAG_NAME}
-histRetentionDays: 90
+log_dir: /data/etl/logs/${DAG_NAME}
+hist_retention_days: 90
 steps:
   - command: echo "Extracting data"
     stdout: extract.log
@@ -1983,12 +1983,12 @@ Organize logs in custom directories with retention.
 ### Timeout & Cleanup
 
 ```yaml
-timeoutSec: 7200          # 2 hour timeout
-maxCleanUpTimeSec: 600    # 10 min cleanup window
+timeout_sec: 7200          # 2 hour timeout
+max_clean_up_time_sec: 600    # 10 min cleanup window
 steps:
   - command: sleep 5 && echo "Processing data"
-    signalOnStop: SIGTERM
-handlerOn:
+    signal_on_stop: SIGTERM
+handler_on:
   exit:
     command: echo "Cleaning up resources"
 ```
@@ -2002,20 +2002,20 @@ handlerOn:
 ### Production Monitoring
 
 ```yaml
-histRetentionDays: 365    # Keep 1 year for compliance
-maxOutputSize: 5242880    # 5MB output limit
-mailOn:
+hist_retention_days: 365    # Keep 1 year for compliance
+max_output_size: 5242880    # 5MB output limit
+mail_on:
   failure: true
-errorMail:
+error_mail:
   from: alerts@company.com
   to: oncall@company.com
   prefix: "[CRITICAL]"
-  attachLogs: true
-infoMail:
+  attach_logs: true
+info_mail:
   from: notifications@company.com
   to: team@company.com
   prefix: "[SUCCESS]"
-handlerOn:
+handler_on:
   failure:
     command: |
       curl -X POST https://metrics.company.com/alerts \
@@ -2023,9 +2023,9 @@ handlerOn:
         -d '{"service": "critical-service", "status": "failed"}'
 steps:
   - command: echo "Checking health"
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 30
+      interval_sec: 30
 ```
 
 <a href="/reference/yaml" class="learn-more">Learn more →</a>
@@ -2061,10 +2061,10 @@ Enable OpenTelemetry tracing for observability.
 
 ```yaml
 type: graph
-maxActiveSteps: 5         # Max 5 parallel steps
+max_active_steps: 5         # Max 5 parallel steps
 queue: "compute-queue"    # Assign to queue for concurrency control
-delaySec: 10              # 10 second initial delay
-skipIfSuccessful: true    # Skip if already succeeded
+delay_sec: 10              # 10 second initial delay
+skip_if_successful: true    # Skip if already succeeded
 steps:
   - name: validate
     command: echo "Validating configuration"
@@ -2104,7 +2104,7 @@ steps:
 ### Limit History Retention
 
 ```yaml
-histRetentionDays: 60     # Keep 60 days history
+hist_retention_days: 60     # Keep 60 days history
 steps:
   - command: echo "Running periodic maintenance"
 ```
@@ -2118,9 +2118,9 @@ steps:
 ### Lock Down Run Inputs
 
 ```yaml
-runConfig:
-  disableParamEdit: true   # Prevent editing params at start
-  disableRunIdEdit: true   # Prevent custom run IDs
+run_config:
+  disable_param_edit: true   # Prevent editing params at start
+  disable_run_id_edit: true   # Prevent custom run IDs
 
 params:
   - ENVIRONMENT: production
@@ -2138,24 +2138,24 @@ params:
 ```yaml
 description: Daily ETL pipeline for analytics
 schedule: "0 2 * * *"
-skipIfSuccessful: true
+skip_if_successful: true
 group: DataPipelines
 tags: daily,critical
 queue: etl-queue          # Assign to global queue for concurrency control
-maxOutputSize: 5242880  # 5MB
-histRetentionDays: 90   # Keep history for 90 days
+max_output_size: 5242880  # 5MB
+hist_retention_days: 90   # Keep history for 90 days
 env:
   - LOG_LEVEL: info
   - DATA_DIR: /data/analytics
 params:
   - DATE: "`date '+%Y-%m-%d'`"
   - ENVIRONMENT: production
-mailOn:
+mail_on:
   failure: true
 smtp:
   host: smtp.company.com
   port: "587"
-handlerOn:
+handler_on:
   success:
     command: echo "ETL completed successfully"
   failure:

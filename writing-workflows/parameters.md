@@ -178,9 +178,9 @@ steps:
 Prevent users from modifying critical parameters:
 
 ```yaml
-runConfig:
-  disableParamEdit: true  # Parameters cannot be changed
-  disableRunIdEdit: false # Custom run IDs still allowed
+run_config:
+  disable_param_edit: true  # Parameters cannot be changed
+  disable_run_id_edit: false # Custom run IDs still allowed
 
 params:
   - ENVIRONMENT: production  # Always production

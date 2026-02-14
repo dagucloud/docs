@@ -123,7 +123,7 @@ schedule:
   restart: "0 12 * * *"  # Restart at noon
   stop: "0 18 * * *"     # Stop at 6 PM
 
-restartWaitSec: 60  # Wait 60s before restart
+restart_wait_sec: 60  # Wait 60s before restart
 ```
 
 ## Skip Redundant Runs
@@ -132,7 +132,7 @@ Prevent overlapping executions:
 
 ```yaml
 schedule: "*/5 * * * *"  # Every 5 minutes
-skipIfSuccessful: true   # Skip if last run succeeded
+skip_if_successful: true   # Skip if last run succeeded
 
 steps:
   - command: echo "Checking status"
@@ -140,11 +140,11 @@ steps:
 
 ## Catchup (Missed Run Replay)
 
-When the scheduler restarts after downtime, it can replay missed cron runs. Set `catchupWindow` to enable this.
+When the scheduler restarts after downtime, it can replay missed cron runs. Set `catchup_window` to enable this.
 
 ```yaml
 schedule: "0 * * * *"
-catchupWindow: "6h"
+catchup_window: "6h"
 
 steps:
   - command: ./hourly-job.sh
@@ -155,7 +155,7 @@ If the scheduler was down from 10:00 to 14:00 and restarts at 14:00, it replays 
 ### How the replay start time is computed
 
 The scheduler replays from the **latest** of these three values:
-- `now - catchupWindow`
+- `now - catchup_window`
 - The last global tick (when the scheduler last processed any tick)
 - The last time this specific DAG was scheduled (per-DAG watermark)
 
@@ -163,7 +163,7 @@ Source: `ComputeReplayFrom()` in `internal/service/scheduler/catchup.go`.
 
 ### Duration syntax
 
-`catchupWindow` accepts Go `time.ParseDuration` syntax plus `d` for days:
+`catchup_window` accepts Go `time.ParseDuration` syntax plus `d` for days:
 
 | Example | Duration |
 |---------|----------|
@@ -176,12 +176,12 @@ The value must be positive. An empty or zero value disables catchup.
 
 ### Overlap during catchup
 
-`overlapPolicy` controls what happens when a catchup run is ready but the DAG is still running from a previous catchup run:
+`overlap_policy` controls what happens when a catchup run is ready but the DAG is still running from a previous catchup run:
 
 ```yaml
 schedule: "0 * * * *"
-catchupWindow: "6h"
-overlapPolicy: "skip"
+catchup_window: "6h"
+overlap_policy: "skip"
 
 steps:
   - command: ./slow-job.sh
@@ -193,7 +193,7 @@ steps:
 | `"all"` | Keep the run in the buffer, retry on the next scheduler tick |
 | `"latest"` | Discard all but the most recent missed interval, dispatch only the newest |
 
-`overlapPolicy` only affects catchup runs. Live scheduled runs use different guards (isRunning check, alreadyFinished check, `skipIfSuccessful`).
+`overlap_policy` only affects catchup runs. Live scheduled runs use different guards (isRunning check, alreadyFinished check, `skip_if_successful`).
 
 ### Catchup buffer limit
 
@@ -226,7 +226,7 @@ When no `queue` is specified, DAGs use a local queue with FIFO processing (concu
 Disable queue processing:
 
 ```yaml
-disableQueue: true  # Skip queue, run immediately
+disable_queue: true  # Skip queue, run immediately
 ```
 
 ## Common Patterns

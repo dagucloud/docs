@@ -130,11 +130,11 @@ steps:
   - name: load
     command: python load.py
     depends: transform
-    retryPolicy:
+    retry_policy:
       limit: 3
-      intervalSec: 10
+      interval_sec: 10
 
-handlerOn:
+handler_on:
   success:
     command: notify.sh "Pipeline succeeded"
   failure:
