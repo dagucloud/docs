@@ -112,6 +112,7 @@ See [Tools Reference](/features/agent/tools) for parameters and examples.
 
 ## See Also
 
+- [Agent Step](/features/agent/step) - Run the agent as a workflow step (`type: agent`)
 - [Tools Reference](/features/agent/tools)
 - [Web UI](/overview/web-ui)
 - [Chat & AI Agents](/features/chat/) - LLM sessions in DAG workflows

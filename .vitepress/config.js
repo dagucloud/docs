@@ -104,6 +104,7 @@ const fullSidebar = [
         collapsed: false,
         items: [
           { text: "Overview", link: "/features/agent/" },
+          { text: "Agent Step", link: "/features/agent/step" },
           { text: "Tools Reference", link: "/features/agent/tools" },
         ],
       },
