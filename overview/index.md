@@ -1,7 +1,7 @@
 # What is Boltbase?
 
 <div style="text-align: center; margin: 2rem 0;">
-  <img src="/logo.webp" alt="Boltbase" style="max-width: 280px; height: auto;" />
+  <img src="/boltbase-logo.webp" alt="Boltbase" style="max-width: 280px; height: auto;" />
 </div>
 
 Boltbase is a self-contained workflow engine for orchestrating shell commands, containers, and remote tasks. Define workflows in declarative YAML, execute them with a single binary, and compose complex pipelines from reusable sub-workflows. No database, message broker, or external dependencies required.
