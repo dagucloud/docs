@@ -50,6 +50,7 @@ const fullSidebar = [
         text: "Lifecycle Handlers",
         link: "/writing-workflows/lifecycle-handlers",
       },
+      { text: "Step Defaults", link: "/writing-workflows/step-defaults" },
       { text: "Error Handling", link: "/writing-workflows/error-handling" },
     ],
   },

@@ -77,6 +77,31 @@
 
   Format: array where first element is the shell path, remaining elements are flags, and the step command is appended as the final argument. See [Container Field](/writing-workflows/container#shell-wrapper) for details.
 
+- **Step Defaults (`defaults`)**: New DAG-level `defaults` field that defines default values inherited by every step and `handler_on` step. Supports 8 fields: `retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`, `env`, `preconditions`. Override fields are applied only when a step does not define its own value. Additive fields (`env`, `preconditions`) prepend default entries before the step's own entries. Unknown keys cause a validation error.
+
+  ```yaml
+  defaults:
+    retry_policy:
+      limit: 3
+      interval_sec: 5
+    env:
+      - LOG_LEVEL: info
+
+  steps:
+    - name: fetch-data
+      command: curl https://api.example.com/data
+      # Inherits retry_policy and LOG_LEVEL from defaults
+
+    - name: custom-step
+      command: ./run.sh
+      retry_policy:
+        limit: 1
+        interval_sec: 0
+      # Overrides retry_policy; still gets LOG_LEVEL from defaults
+  ```
+
+  See [Step Defaults](/writing-workflows/step-defaults) for full documentation.
+
 - **Major UI Redesign**: Complete redesign of the user interface with improved dark mode support, modernized color palette, and streamlined navigation. Enhanced visual hierarchy across all pages including DAG lists, execution views, system status, and admin pages.
 
 - **LLM Secret Masking**: Secrets defined in the `secrets` block are now automatically masked before being sent to LLM providers in chat steps. This prevents accidental exposure of sensitive values to external AI APIs while still allowing secrets to be used in message content via `${VAR}` substitution.

@@ -130,6 +130,77 @@ schedule:
 | `preconditions` | array | Workflow-level preconditions | - |
 | `run_config` | object | User interaction controls when starting DAG | - |
 
+### Step Defaults
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `defaults` | object | Default values applied to every step and `handler_on` step. Steps that define their own value override the default. | - |
+
+The `defaults` block accepts the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `retry_policy` | object | Default [retry policy](#retry-policy-fields) for all steps |
+| `continue_on` | string/object | Default [continue_on](#continueon-fields) condition for all steps |
+| `repeat_policy` | object | Default [repeat policy](#repeat-policy-fields) for all steps |
+| `timeout_sec` | integer | Default step timeout in seconds |
+| `mail_on_error` | boolean | Default mail-on-error flag for all steps |
+| `signal_on_stop` | string | Default signal sent when a step is stopped |
+| `env` | array/object | Environment variables prepended to each step's own `env` |
+| `preconditions` | array | Preconditions prepended to each step's own `preconditions` |
+
+**Merge rules:**
+
+- **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): Applied only when the step does not set its own value. A step-level value fully replaces the default.
+- **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both the default and step values are present at runtime.
+
+Unknown keys inside `defaults` cause a validation error.
+
+```yaml
+# All steps inherit retry_policy and continue_on
+defaults:
+  retry_policy:
+    limit: 3
+    interval_sec: 5
+    exit_code: [1]
+  continue_on: failed
+
+steps:
+  - name: fetch-data
+    command: curl https://api.example.com/data
+
+  - name: process-data
+    command: ./process.sh
+```
+
+```yaml
+# Override + additive behavior
+defaults:
+  retry_policy:
+    limit: 5
+    interval_sec: 10
+  env:
+    - LOG_LEVEL: info
+
+steps:
+  # Inherits retry_policy (limit: 5) and gets LOG_LEVEL from defaults
+  - name: step-a
+    command: ./run.sh
+
+  # Overrides retry_policy with its own; still gets LOG_LEVEL from defaults
+  # plus its own TIMEOUT env var
+  - name: step-b
+    command: ./run-critical.sh
+    retry_policy:
+      limit: 1
+      interval_sec: 0
+    env:
+      - TIMEOUT: "30"
+    # Effective env: [LOG_LEVEL=info, TIMEOUT=30]
+```
+
+See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation and examples.
+
 ### Data Fields
 
 | Field | Type | Description | Default |
