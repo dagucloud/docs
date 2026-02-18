@@ -50,6 +50,8 @@
 
 - **Agent (Tsumugi)**: AI assistant integrated into the Web UI for workflow management. Tsumugi helps create, review, debug, and manage DAG workflows through an interactive chat interface. Supports multiple LLM providers (Anthropic, OpenAI, Google, OpenRouter, local models). Features include shell command execution with approval for dangerous operations, file reading/editing, DAG schema lookup, UI navigation, and web search. See [Agent](/features/agent/) for details.
 
+- **Agent Delegate Tool**: New `delegate` tool for the Tsumugi agent that spawns up to 8 parallel sub-agents for independent sub-tasks. Each sub-agent runs in its own session with the same tools (minus `delegate` to prevent recursion) and returns a summary to the parent. Sub-agent messages stream through the parent SSE connection. Available in interactive chat only (not in DAG agent steps). See [Tools Reference](/features/agent/tools#delegate).
+
 - **Trigger Type Visibility**: DAG runs now display how they were initiated (scheduler, manual, webhook, subdag, retry). The trigger type is shown in the DAG runs list and detail views with distinct icons and labels. Available via the `triggerType` field in the API response.
 
 - **CLI History Command**: New `boltbase history` command displays execution history for DAG runs with comprehensive filtering (by date, status, tags, run ID), pagination (limit support up to 1000 results), and multiple output formats (table, JSON, CSV). Essential for debugging patterns, monitoring workflows, and exporting run data. Features:

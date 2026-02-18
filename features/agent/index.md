@@ -107,6 +107,7 @@ When approval is required:
 | `ask_user` | Interactive prompts |
 | `read_schema` | Look up DAG YAML schema |
 | `web_search` | Search the internet |
+| `delegate` | Spawn sub-agents for parallel tasks |
 
 See [Tools Reference](/features/agent/tools) for parameters and examples.
 

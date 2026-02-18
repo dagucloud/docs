@@ -169,3 +169,75 @@ Search results for "query":
 ```
 
 **Timeouts**: 30 seconds per request, up to 3 retries.
+
+---
+
+## delegate
+
+Spawn sub-agents that execute tasks in parallel.
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `tasks` | array | Yes | | List of sub-task objects (max: 8) |
+| `tasks[].task` | string | Yes | | Description of the sub-task for the sub-agent |
+| `tasks[].max_iterations` | integer | No | 20 | Maximum tool-call rounds for the sub-agent |
+
+Each sub-agent:
+- Runs in a separate session linked to the parent via `ParentSessionID`
+- Receives the same system prompt and all tools **except** `delegate` (no recursion)
+- Does **not** receive the parent conversation history — starts fresh with only the task description as a user message
+- Executes its full tool-calling loop, then returns its last assistant text response as a summary to the parent
+
+Sub-agents inherit the tool policy configured in agent settings (enabled/disabled tools, bash rules). However, sub-agents cannot interact with the user:
+- `ask_user` returns an error
+- `navigate` succeeds but has no effect (no UI connection)
+- In safe mode, bash commands that match a deny rule with `ask_user` behavior are denied because the approval prompt cannot be delivered to the user
+
+**Concurrency**: All tasks run in parallel. If more than 8 tasks are provided, only the first 8 execute; the rest are dropped with a notice appended to the output.
+
+**Output Format**:
+
+The tool returns numbered summaries, one per sub-agent:
+
+```
+[1] Analyze database config: The config at /etc/app/db.yaml uses...
+
+[2] Check disk usage: /var/log is at 78% capacity...
+```
+
+On sub-agent failure:
+```
+[1] Analyze database config: ERROR: Sub-agent failed: LLM request failed: 429 rate limited
+```
+
+If tasks were truncated:
+```
+(2 additional tasks truncated — max 8 per call)
+```
+
+Task descriptions in the output are truncated to 60 characters.
+
+**Availability**: Interactive chat only. Not available in DAG agent steps (`type: agent`). Calling `delegate` in a DAG agent step returns `"Delegate capability is not available in this context"`.
+
+**Sub-sessions**: Each sub-agent creates a persisted session with a unique UUID. Sub-sessions are excluded from the main session list but can be retrieved individually via `GET /api/v1/agent/sessions/{delegateId}`. The tool result message includes a `delegate_ids` field referencing all sub-session IDs created by that call.
+
+**SSE streaming**: Sub-agent messages are forwarded through the parent session's SSE stream as `delegate_messages` events. The parent also receives `delegate_event` notifications with type `started` or `completed` for each sub-agent. The frontend renders a floating panel per active sub-agent.
+
+**Cost**: Sub-agent LLM costs are rolled up to the parent session's total cost.
+
+**Example** — delegate three independent investigation tasks:
+
+```json
+{
+  "tasks": [
+    {
+      "task": "Read the file /opt/app/docker-compose.yaml and check if the postgres service has a health check configured"
+    },
+    {
+      "task": "Run 'df -h' and report any filesystems above 80% usage"
+    },
+    {
+      "task": "Read /opt/app/config/cron.yaml and verify all cron expressions are valid"
+    }
+  ]
+}
