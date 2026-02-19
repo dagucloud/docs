@@ -20,13 +20,10 @@ User management with role-based access control. Supports multiple users with dif
 
 ```yaml
 auth:
-  mode: builtin
+  mode: builtin  # default — can be omitted
   builtin:
-    admin:
-      username: admin
-      # password auto-generated if not set
     token:
-      secret: your-secure-random-secret
+      secret: your-secure-random-secret  # auto-generated if not set
       ttl: 24h
 ```
 
@@ -43,18 +40,10 @@ Simple single-user authentication without user management.
 
 ```yaml
 auth:
+  mode: basic
   basic:
-    enabled: true
     username: admin
     password: secure-password
-```
-
-### Token Authentication
-
-```yaml
-auth:
-  token:
-    value: your-api-token
 ```
 
 ### OIDC Authentication
@@ -68,7 +57,6 @@ auth:
     token:
       secret: your-jwt-secret
   oidc:
-    enabled: true
     client_id: "your-client-id"
     client_secret: "your-client-secret"
     client_url: "http://localhost:8080"
@@ -77,17 +65,9 @@ auth:
     default_role: viewer
 ```
 
-**Standalone OIDC** (simple setup, all users get admin role):
+**Standalone OIDC** (removed — use Builtin + OIDC instead):
 
-```yaml
-auth:
-  mode: oidc
-  oidc:
-    client_id: "your-client-id"
-    client_secret: "your-client-secret"
-    client_url: "http://localhost:8080"
-    issuer: "https://accounts.google.com"
-```
+> Standalone OIDC mode (`auth.mode: oidc`) has been removed. Use builtin + OIDC mode above for SSO with user management.
 
 ## Choosing an Authentication Method
 
@@ -98,8 +78,6 @@ auth:
 | **API Keys** | CI/CD pipelines, automation with role-based access (requires Builtin Auth) |
 | **Webhooks** | External integrations (GitHub, Slack, CI/CD) to trigger specific DAGs (requires Builtin Auth) |
 | **Basic** | Single user, simple setup, no user management needed |
-| **Token** | Simple API-only access, legacy automation scripts |
-| **OIDC (standalone)** | Simple SSO without user management (all users get admin) |
 
 ## Environment Variables
 

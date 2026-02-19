@@ -18,6 +18,8 @@
     key: ${HOME_DIR}/.ssh/deploy_key  # Expanded — HOME_DIR is DAG-scoped
   ```
 
+- **Auth by Default**: The default authentication mode changed from `none` to `builtin`. New installations require creating an admin account via the `/setup` page on first visit. The JWT token secret is auto-generated and persisted to `{dataDir}/auth/token_secret` if not explicitly configured. See [RFC 018](https://github.com/dagu-org/dagu/blob/main/rfcs/018-auth-by-default.md).
+
 - **DAG Type Validation**: DAGs with `type: chain` (the default) no longer allow the `depends` field on steps. Chain execution runs steps sequentially in definition order, making explicit dependencies redundant. To use the `depends` field for custom execution order, set `type: graph` explicitly. This change prevents confusion between chain's implicit sequential ordering and graph's explicit dependency-based execution.
 
 ### Removed
@@ -26,7 +28,13 @@
 
 - **Static API Token (`auth.token`)**: The `auth.token.value` configuration field and `BOLTBASE_AUTH_TOKEN` environment variable have been removed. Use API keys (builtin auth mode) or basic auth instead. API keys provide role-based access control and usage tracking. See [API Keys](/configurations/authentication/api-keys) for migration.
 
-- **Basic Auth Flat Fields**: The top-level `is_basic_auth`, `basic_auth_username`, and `basic_auth_password` configuration fields have been removed. Use the nested `auth.basic` structure with an explicit `enabled` field instead. The legacy `BOLTBASE_BASICAUTH_*` environment variables have also been removed; use `BOLTBASE_AUTH_BASIC_ENABLED`, `BOLTBASE_AUTH_BASIC_USERNAME`, and `BOLTBASE_AUTH_BASIC_PASSWORD`.
+- **Basic Auth Flat Fields**: The top-level `is_basic_auth`, `basic_auth_username`, and `basic_auth_password` configuration fields have been removed. Use `auth.mode: basic` with `auth.basic.username` and `auth.basic.password` instead. The legacy `BOLTBASE_BASICAUTH_*` environment variables have also been removed; use `BOLTBASE_AUTH_MODE=basic`, `BOLTBASE_AUTH_BASIC_USERNAME`, and `BOLTBASE_AUTH_BASIC_PASSWORD`.
+
+- **Standalone OIDC Mode (`auth.mode: oidc`)**: Removed. The valid auth modes are now `none`, `basic`, and `builtin`. Use builtin + OIDC mode for SSO with user management and RBAC. See [Builtin Authentication - OIDC/SSO](/configurations/authentication/builtin#oidcsso-login).
+
+- **Admin Config (`auth.builtin.admin`)**: The `auth.builtin.admin.username` / `auth.builtin.admin.password` config fields and `BOLTBASE_AUTH_ADMIN_USERNAME` / `BOLTBASE_AUTH_ADMIN_PASSWORD` environment variables have been removed. The first admin account is now created via the `/setup` page on first browser visit.
+
+- **Basic Auth `enabled` Field**: The `auth.basic.enabled` field and `BOLTBASE_AUTH_BASIC_ENABLED` environment variable have been removed. Basic auth is activated by setting `auth.mode: basic`.
 
 - **Deprecated YAML Fields**: The following deprecated fields have been removed from the YAML spec. Migrate to the replacement fields:
 
@@ -40,7 +48,7 @@
 
 ### Added
 
-- **Explicit Basic Auth Enabled Field**: Basic authentication now requires an explicit `enabled: true` field under `auth.basic` instead of being implicitly enabled when username and password are set. Environment variable: `BOLTBASE_AUTH_BASIC_ENABLED`.
+- **Auth Mode Selection**: Authentication mode is now configured via `auth.mode` field. Valid modes: `none`, `basic`, `builtin` (default). Basic auth uses `auth.mode: basic` with `auth.basic.username` and `auth.basic.password`. Environment variable: `BOLTBASE_AUTH_MODE`.
 
 - **Coordinator Enabled Config**: New `coordinator.enabled` config option (default: `true`) and `BOLTBASE_COORDINATOR_ENABLED` environment variable to explicitly enable or disable the coordinator service. When disabled, `start-all` skips the coordinator and DAGs are never dispatched to workers. Accepts `true`/`false`/`1`/`0`.
 - **Self-Upgrade Command**: New `boltbase upgrade` command for in-place binary updates with SHA256 verification, backup support, and cross-platform compatibility. See [Self-Upgrade](/features/upgrade) for details.
@@ -188,9 +196,8 @@
     mode: builtin
     builtin:
       token:
-        secret: your-jwt-secret
+        secret: your-jwt-secret  # auto-generated if not set
     oidc:
-      enabled: true
       client_id: your-client-id
       client_secret: your-client-secret
       client_url: https://boltbase.example.com
@@ -920,7 +927,7 @@ Thanks to our contributors for this release:
   - Complete user management APIs (create, list, view, update, delete)
   - File-backed user store with atomic writes and thread-safety
   - Login flow, protected routes, user management UI
-- Config: Added `AUTH_MODE` environment variable supporting `none`, `builtin`, and `oidc` modes (#1463)
+- Config: Added `AUTH_MODE` environment variable supporting `none`, `basic`, and `builtin` modes (#1463)
 
 ### Changed
 - Config: Refactored configuration loader to use service-scoped loading that only loads necessary settings for each command context, improving startup performance (#1467)

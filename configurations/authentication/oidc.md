@@ -33,7 +33,9 @@ See [Builtin Authentication - OIDC/SSO Login](/configurations/authentication/bui
 
 ## Standalone OIDC Mode
 
-Standalone OIDC mode (`auth.mode: oidc`) is available for simple setups where you don't need Boltbase's user management features.
+> **Removed**: Standalone OIDC mode (`auth.mode: oidc`) has been removed. The valid auth modes are `none`, `basic`, and `builtin`. Use [Builtin + OIDC mode](/configurations/authentication/builtin#oidcsso-login) instead, which provides the same SSO functionality with added user management and RBAC.
+
+Standalone OIDC mode was previously available for simple setups where you didn't need Boltbase's user management features.
 
 **Important**: All authenticated OIDC users are granted **admin role** with full access. There is no role-based access control in this mode. Use [Builtin + OIDC mode](/configurations/authentication/builtin#oidcsso-login) if you need RBAC.
 
@@ -150,26 +152,27 @@ Note: Wildcard domains (e.g., `*@company.com`) are NOT supported. You must list 
 - [Auth0](oidc-auth0) - Identity platform with social login support
 - [Keycloak](oidc-keycloak) - Open source identity provider
 
-## Multiple Authentication Methods
+## Migrating from Standalone OIDC
 
-In standalone OIDC mode, you can combine OIDC with token auth for API access:
+If you previously used `auth.mode: oidc`, migrate to builtin + OIDC:
 
 ```yaml
 auth:
-  mode: oidc
-  # OIDC for web UI
+  mode: builtin
+  builtin:
+    token:
+      secret: your-jwt-secret  # auto-generated if not set
   oidc:
-    client_id: "web-client"
-    client_secret: "secret"
+    client_id: "your-client-id"
+    client_secret: "your-client-secret"
     client_url: "https://boltbase.example.com"
     issuer: "https://auth.example.com"
-
-  # Token for API access (works alongside OIDC)
-  token:
-    value: "api-token"
+    auto_signup: true
+    role_mapping:
+      default_role: viewer
 ```
 
-For full user management with SSO, consider using [Builtin + OIDC mode](/configurations/authentication/builtin#oidcsso-login) instead.
+This gives you SSO login with full user management, RBAC, and API key support.
 
 ## Session Management
 

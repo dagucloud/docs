@@ -181,7 +181,7 @@ When using Funnel, ensure authentication is enabled:
 ```yaml
 server:
   auth:
-    mode: builtin  # or oidc
+    mode: builtin  # or basic
 ```
 :::
 

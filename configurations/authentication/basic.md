@@ -9,8 +9,8 @@ Username and password authentication for Boltbase.
 ```yaml
 # ~/.config/boltbase/config.yaml
 auth:
+  mode: basic
   basic:
-    enabled: true
     username: admin
     password: secure-password
 ```
@@ -18,7 +18,7 @@ auth:
 ### Environment Variables
 
 ```bash
-export BOLTBASE_AUTH_BASIC_ENABLED=true
+export BOLTBASE_AUTH_MODE=basic
 export BOLTBASE_AUTH_BASIC_USERNAME=admin
 export BOLTBASE_AUTH_BASIC_PASSWORD=secure-password
 
@@ -31,7 +31,7 @@ boltbase start-all
 
 ```bash
 # Using environment variables
-export BOLTBASE_AUTH_BASIC_ENABLED=true
+export BOLTBASE_AUTH_MODE=basic
 export BOLTBASE_AUTH_BASIC_USERNAME=admin
 export BOLTBASE_AUTH_BASIC_PASSWORD=secure-password
 boltbase status
@@ -50,6 +50,7 @@ curl -H "Authorization: Basic $(echo -n admin:secure-password | base64)" \
 
 ## Notes
 
-- Basic authentication is enabled when `enabled: true` is set along with both username and password
-- Set `enabled: false` or omit the `enabled` field to disable basic authentication
+- Basic authentication is active when `auth.mode` is set to `basic` and both username and password are configured
+- To disable authentication entirely, set `auth.mode: none`
+- Basic mode provides a single shared credential — for multi-user support with RBAC, use `auth.mode: builtin`
 - Credentials are checked on every request

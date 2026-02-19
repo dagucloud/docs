@@ -35,8 +35,8 @@ host: 0.0.0.0
 port: 8080
 
 auth:
+  mode: basic
   basic:
-    enabled: true
     username: admin
     password: ${ADMIN_PASSWORD}
 
@@ -102,8 +102,8 @@ tls:
   key_file: /etc/ssl/key.pem
 
 auth:
+  mode: basic
   basic:
-    enabled: true
     username: admin
     password: ${ADMIN_PASSWORD}
 
@@ -123,8 +123,7 @@ port: 8080
 debug: true
 
 auth:
-  basic:
-    enabled: false
+  mode: none
 ```
 
 ## Environment Variables

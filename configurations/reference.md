@@ -49,28 +49,20 @@ permissions:
 
 # Authentication
 auth:
-  mode: "builtin"          # "none", "builtin" (recommended), or "oidc"
+  mode: "builtin"          # "none", "basic", or "builtin" (default)
 
   # Builtin auth (user management with RBAC)
   builtin:
-    admin:
-      username: "admin"
-      password: ""         # Auto-generated if empty
     token:
-      secret: "your-secret-key"  # Required for JWT signing
+      secret: "your-secret-key"  # Auto-generated if not set
       ttl: "24h"
 
   # Basic auth (simple username/password)
   basic:
-    enabled: true
     username: "admin"
     password: "secret"
 
-  # Token auth (API token)
-  token:
-    value: "your-token"
-
-  # OIDC auth (standalone or under builtin mode)
+  # OIDC auth (auto-enabled under builtin mode when all required fields are set)
   oidc:
     client_id: "your-client-id"
     client_secret: "your-client-secret"
@@ -78,7 +70,6 @@ auth:
     issuer: "https://accounts.google.com"
     scopes: ["openid", "profile", "email"]
     # Builtin-specific settings (only when mode=builtin)
-    enabled: false           # Enable OIDC under builtin auth
     auto_signup: false        # Auto-create users on first login
     default_role: "viewer"    # Role for new users
     allowed_domains: []       # Restrict by email domain
@@ -213,22 +204,19 @@ All options support `BOLTBASE_` prefix.
 **Note:** The `--boltbase-home` CLI flag takes precedence over the `BOLTBASE_HOME` environment variable.
 
 ### Authentication
-- `BOLTBASE_AUTH_MODE` - Authentication mode: `none`, `builtin` (recommended), or `oidc` (default: `none`)
+- `BOLTBASE_AUTH_MODE` - Authentication mode: `none`, `basic`, or `builtin` (default: `builtin`)
 
 #### Builtin Auth (RBAC)
-- `BOLTBASE_AUTH_TOKEN_SECRET` - JWT signing secret (required for builtin auth)
+- `BOLTBASE_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
 - `BOLTBASE_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
-- `BOLTBASE_AUTH_ADMIN_USERNAME` - Initial admin username (default: `admin`)
-- `BOLTBASE_AUTH_ADMIN_PASSWORD` - Initial admin password (auto-generated if empty)
 - `BOLTBASE_USERS_DIR` - User data directory (default: `{data_dir}/users`)
 
 #### Basic Auth
-- `BOLTBASE_AUTH_BASIC_ENABLED` - Enable basic auth
 - `BOLTBASE_AUTH_BASIC_USERNAME` - Basic auth username
 - `BOLTBASE_AUTH_BASIC_PASSWORD` - Basic auth password
 
 #### OIDC Auth
-Core OIDC settings (used by both standalone OIDC mode and builtin+OIDC):
+OIDC settings (used under builtin auth mode, auto-enabled when all required fields are set):
 - `BOLTBASE_AUTH_OIDC_CLIENT_ID` - OAuth2 client ID from your OIDC provider
 - `BOLTBASE_AUTH_OIDC_CLIENT_SECRET` - OAuth2 client secret
 - `BOLTBASE_AUTH_OIDC_CLIENT_URL` - Base URL of your Boltbase instance (for callback)
@@ -237,7 +225,6 @@ Core OIDC settings (used by both standalone OIDC mode and builtin+OIDC):
 - `BOLTBASE_AUTH_OIDC_WHITELIST` - Email addresses allowed to authenticate (comma-separated)
 
 Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
-- `BOLTBASE_AUTH_OIDC_ENABLED` - Enable OIDC login under builtin auth (default: `false`)
 - `BOLTBASE_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `false`)
 - `BOLTBASE_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
 - `BOLTBASE_AUTH_OIDC_ALLOWED_DOMAINS` - Email domains allowed to authenticate (comma-separated)
@@ -441,11 +428,8 @@ port: 443
 auth:
   mode: builtin
   builtin:
-    admin:
-      username: admin
-      password: ${ADMIN_PASSWORD}
     token:
-      secret: ${AUTH_TOKEN_SECRET}
+      secret: ${AUTH_TOKEN_SECRET}  # auto-generated if not set
       ttl: 24h
 
 tls:

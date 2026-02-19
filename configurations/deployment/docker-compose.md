@@ -29,13 +29,12 @@ services:
       - BOLTBASE_DEBUG=true # More verbose logs during dev
       # Paths
       - BOLTBASE_DAGS_DIR=/var/lib/boltbase/dags
-      # Builtin authentication (RBAC) - CHANGE TOKEN_SECRET IN PRODUCTION
+      # Builtin authentication (RBAC) — default auth mode
       - BOLTBASE_AUTH_MODE=builtin
-      - BOLTBASE_AUTH_TOKEN_SECRET=CHANGE_ME_TO_A_SECURE_RANDOM_STRING
-      # Admin credentials: password auto-generated on first run, printed to stdout
-      # - BOLTBASE_AUTH_ADMIN_USERNAME=admin # default is 'admin'
-      # - BOLTBASE_AUTH_ADMIN_PASSWORD=      # set to use a specific password
+      # Token secret: auto-generated if not set (persisted to {dataDir}/auth/token_secret)
+      # - BOLTBASE_AUTH_TOKEN_SECRET=your-secure-random-secret
       # - BOLTBASE_AUTH_TOKEN_TTL=24h        # default is 24h
+      # First admin account created via /setup page on first browser visit
       # Timezone / base path (optional)
       # - BOLTBASE_TZ=UTC
       # - BOLTBASE_BASE_PATH=/boltbase
@@ -57,9 +56,8 @@ services:
     # command: ["boltbase", "worker"]
 
     # Alternative: basic auth (simpler, no user management)
-    # To use basic auth instead of builtin auth, comment out
-    # BOLTBASE_AUTH_MODE and BOLTBASE_AUTH_TOKEN_SECRET above, then uncomment:
-    # environment:
+    # To use basic auth instead of builtin auth, change BOLTBASE_AUTH_MODE above:
+    #   - BOLTBASE_AUTH_MODE=basic
     #   - BOLTBASE_AUTH_BASIC_USERNAME=dev
     #   - BOLTBASE_AUTH_BASIC_PASSWORD=devpass
 

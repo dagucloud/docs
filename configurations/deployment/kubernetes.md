@@ -193,13 +193,10 @@ ui:
 
 ```yaml
 auth:
-  mode: "builtin"  # "none", "builtin", or "oidc"
+  mode: "builtin"  # "none", "basic", or "builtin" (default)
   builtin:
-    admin:
-      username: "admin"
-      password: "changeme"
     token:
-      secret: "changeme"
+      secret: "changeme"  # auto-generated if not set
       ttl: "24h"
 ```
 

@@ -56,28 +56,20 @@ permissions:
 
 # Authentication
 auth:
-  mode: "builtin"              # "none", "builtin", or "oidc"
+  mode: "builtin"              # "none", "basic", or "builtin" (default)
 
   # Builtin auth (user management with RBAC)
   builtin:
-    admin:
-      username: "admin"
-      password: ""             # Auto-generated if empty
     token:
-      secret: "your-secret"    # Required for JWT signing
+      secret: "your-secret"    # Auto-generated if not set
       ttl: "24h"
 
   # Basic auth (simple username/password)
   basic:
-    enabled: true
     username: "admin"
     password: "secret"
 
-  # Token auth (API token)
-  token:
-    value: "your-secret-token"
-
-  # OIDC auth (standalone or under builtin mode)
+  # OIDC auth (auto-enabled under builtin mode when all required fields are set)
   oidc:
     client_id: "your-client-id"
     client_secret: "your-client-secret"
@@ -86,7 +78,6 @@ auth:
     scopes: ["openid", "profile", "email"]
     whitelist: ["admin@example.com"]
     # Builtin-specific fields (only used when mode: builtin)
-    # enabled: true                  # Optional - auto-enabled when required fields are set
     auto_signup: true                 # Auto-create users on first login
     default_role: "viewer"            # Role for new users
     allowed_domains: ["company.com"]  # Allowed email domains
@@ -167,16 +158,13 @@ All options support `BOLTBASE_` prefix:
 - `BOLTBASE_DATA_DIR` - Data
 
 **Auth:**
-- `BOLTBASE_AUTH_MODE` - Auth mode: `none`, `builtin`, or `oidc` (default: `none`)
+- `BOLTBASE_AUTH_MODE` - Auth mode: `none`, `basic`, or `builtin` (default: `builtin`)
 
 *Builtin Auth (RBAC):*
-- `BOLTBASE_AUTH_TOKEN_SECRET` - JWT signing secret (required)
+- `BOLTBASE_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
 - `BOLTBASE_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
-- `BOLTBASE_AUTH_ADMIN_USERNAME` - Initial admin username (default: `admin`)
-- `BOLTBASE_AUTH_ADMIN_PASSWORD` - Initial admin password (auto-generated if empty)
 
 *Basic Auth:*
-- `BOLTBASE_AUTH_BASIC_ENABLED` - Enable basic auth
 - `BOLTBASE_AUTH_BASIC_USERNAME` - Basic auth username
 - `BOLTBASE_AUTH_BASIC_PASSWORD` - Basic auth password
 
@@ -187,7 +175,6 @@ All options support `BOLTBASE_` prefix:
 - `BOLTBASE_AUTH_OIDC_ISSUER` - OIDC issuer URL
 - `BOLTBASE_AUTH_OIDC_SCOPES` - OIDC scopes (comma-separated)
 - `BOLTBASE_AUTH_OIDC_WHITELIST` - OIDC email whitelist (comma-separated)
-- `BOLTBASE_AUTH_OIDC_ENABLED` - Enable OIDC under builtin auth (default: `false`)
 - `BOLTBASE_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first login (default: `false`)
 - `BOLTBASE_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
 - `BOLTBASE_AUTH_OIDC_ALLOWED_DOMAINS` - Allowed email domains (comma-separated)
@@ -222,11 +209,8 @@ permissions:
 auth:
   mode: builtin
   builtin:
-    admin:
-      username: "admin"
-      password: "${ADMIN_PASSWORD}"
     token:
-      secret: "${AUTH_TOKEN_SECRET}"
+      secret: "${AUTH_TOKEN_SECRET}"  # auto-generated if not set
       ttl: "24h"
 tls:
   cert_file: "/etc/ssl/cert.pem"
@@ -238,11 +222,10 @@ tls:
 docker run -d \
   -e BOLTBASE_HOST=0.0.0.0 \
   -e BOLTBASE_AUTH_MODE=builtin \
-  -e BOLTBASE_AUTH_TOKEN_SECRET=your-secure-secret \
   -p 8080:8080 \
   -v boltbase-data:/var/lib/boltbase \
   ghcr.io/dagu-org/boltbase:latest
-# Admin password auto-generated on first run, check logs
+# First admin account created via /setup page on first visit
 ```
 
 ## Authentication
@@ -255,22 +238,18 @@ User management with role-based access control (RBAC). Supports multiple users w
 auth:
   mode: builtin
   builtin:
-    admin:
-      username: "admin"
-      password: ""  # Auto-generated if empty
     token:
-      secret: "${AUTH_TOKEN_SECRET}"  # Required
+      secret: "${AUTH_TOKEN_SECRET}"  # auto-generated if not set
       ttl: "24h"
 ```
 
 ```bash
 # Environment variables
 export BOLTBASE_AUTH_MODE=builtin
-export BOLTBASE_AUTH_TOKEN_SECRET=your-secure-secret
-# Password auto-generated on first run, printed to stdout
+# Token secret auto-generated if not set
 ```
 
-On first startup, an admin user is created. If no password is set, one is auto-generated and printed to stdout. Use the web UI to manage users and change passwords.
+On first startup, visit the web UI to create your admin account via the setup page.
 
 See [Builtin Authentication](authentication/builtin) for detailed setup.
 
@@ -280,38 +259,15 @@ Simple single-user authentication without user management.
 
 ```yaml
 auth:
+  mode: basic
   basic:
-    enabled: true
     username: "admin"
     password: "${ADMIN_PASSWORD}"
 ```
 
-### API Token
-```yaml
-auth:
-  token:
-    value: "${API_TOKEN}"
-```
-
-```bash
-curl -H "Authorization: Bearer your-token" \
-  http://localhost:8080/api/v1/dags
-```
-
 ### OIDC Authentication
 
-**Standalone OIDC** (all users get admin role):
-```yaml
-auth:
-  mode: oidc
-  oidc:
-    client_id: "${OIDC_CLIENT_ID}"
-    client_secret: "${OIDC_CLIENT_SECRET}"
-    client_url: "https://boltbase.example.com"
-    issuer: "https://accounts.google.com"
-```
-
-**Builtin + OIDC** (recommended, with RBAC):
+**Builtin + OIDC** (SSO with user management and RBAC):
 ```yaml
 auth:
   mode: builtin
@@ -319,7 +275,6 @@ auth:
     token:
       secret: "${AUTH_TOKEN_SECRET}"
   oidc:
-    enabled: true
     client_id: "${OIDC_CLIENT_ID}"
     client_secret: "${OIDC_CLIENT_SECRET}"
     client_url: "https://boltbase.example.com"
