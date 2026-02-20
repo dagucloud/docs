@@ -1,7 +1,7 @@
 # What is Dagu?
 
 <div style="text-align: center; margin: 2rem 0;">
-  <img src="/hero-logo.webp" alt="Dagu" style="max-width: 280px; height: auto;" />
+  <img src="/hero-logo.webp" alt="Dagu" style="width: 100%; height: auto;" />
 </div>
 
 Dagu is a self-contained workflow engine for orchestrating shell commands, containers, and remote tasks. Define workflows in declarative YAML, execute them with a single binary, and compose complex pipelines from reusable sub-workflows. No database, message broker, or external dependencies required.

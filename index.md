@@ -2,7 +2,7 @@
 layout: doc
 ---
 
-<img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; max-width: 400px">
+<img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
   <h2>Lightweight workflow engine with distributed execution</h2>
