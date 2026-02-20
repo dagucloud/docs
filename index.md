@@ -5,7 +5,7 @@ layout: doc
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Lightweight workflow engine with distributed execution</h2>
+  <h2>Self-contained CLI workflow engine with first-class AI agent support and distributed execution</h2>
   <p>Define workflows in YAML. Execute with a single binary. No database or message broker required. Ideal for VMs, containers, and bare metal.</p>
 </div>
 

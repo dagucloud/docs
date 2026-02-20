@@ -230,11 +230,15 @@
   color: var(--vp-c-text-3);
 }
 
+.tagline h2 {
+  border-top: none;
+  padding-top: 0;
+}
+
 /* Hero section for doc layout index */
 .hero-section {
   text-align: center;
   padding: 2rem 0 3rem;
-  border-bottom: 1px solid var(--vp-c-divider);
   margin-bottom: 3rem;
 }
 
