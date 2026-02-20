@@ -16,7 +16,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
     - shell: ${SHELL_OVERRIDE:-pwsh -NoProfile}
       command: Write-Host "Runs in the step shell"
   ```
-- **Fallback**: If no shell is set, Boltbase prefers PowerShell, then `pwsh`, then `cmd.exe`.
+- **Fallback**: If no shell is set, Dagu prefers PowerShell, then `pwsh`, then `cmd.exe`.
 - **String or array**: `shell` accepts either `"powershell -NoProfile"` or `["powershell", "-NoProfile"]`; arrays avoid quoting issues.
 
 ## Running Commands
@@ -60,7 +60,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 ## Script Behavior (Windows)
 
 - A `script:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
-- With PowerShell/pwsh, the script is stored as `.ps1` and executed by the selected shell. Boltbase prefixes each script with `$ErrorActionPreference = 'Stop'` and `$PSNativeCommandUseErrorActionPreference = $true` so cmdlet errors and native command failures stop execution. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
+- With PowerShell/pwsh, the script is stored as `.ps1` and executed by the selected shell. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` and `$PSNativeCommandUseErrorActionPreference = $true` so cmdlet errors and native command failures stop execution. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
 - When both `command` and `script` are set, `command` is treated as the interpreter and receives the script path directly (no shell wrapper) — useful for `command: powershell` with inline code.
 
 ## Shell Options

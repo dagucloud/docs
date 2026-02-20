@@ -1,13 +1,13 @@
 # Remote Nodes Authentication
 
-Configure authentication for connecting to remote Boltbase instances.
+Configure authentication for connecting to remote Dagu instances.
 
 ## Configuration
 
 ### YAML Configuration
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 remote_nodes:
   - name: production
     api_base_url: https://prod.example.com/api/v1
@@ -59,10 +59,10 @@ remote_nodes:
   - name: production
     api_base_url: https://prod.example.com/api/v1
     is_auth_token: true
-    auth_token: boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
+    auth_token: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
 
-The remote node will recognize the `boltbase_` prefix and validate it as an API key, applying the key's assigned role permissions.
+The remote node will recognize the `dagu_` prefix and validate it as an API key, applying the key's assigned role permissions.
 
 ::: tip
 Use environment variables to avoid storing API keys in configuration files:
@@ -87,7 +87,7 @@ remote_nodes:
 
 ## Multi-Server Setup with Builtin Auth
 
-A common use case is managing multiple Boltbase servers, each with builtin authentication enabled, from a single UI.
+A common use case is managing multiple Dagu servers, each with builtin authentication enabled, from a single UI.
 
 ### Scenario
 
@@ -114,14 +114,14 @@ curl -X POST http://server-b:8080/api/v1/api-keys \
   }'
 ```
 
-Save the returned `key` value (e.g., `boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B`).
+Save the returned `key` value (e.g., `dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B`).
 
 ### Step 2: Configure Remote Node on Server A
 
 On Server A, add Server B as a remote node:
 
 ```yaml
-# Server A: ~/.config/boltbase/config.yaml
+# Server A: ~/.config/dagu/config.yaml
 auth:
   mode: builtin
 
@@ -129,7 +129,7 @@ remote_nodes:
   - name: server-b
     api_base_url: http://server-b:8080/api/v1
     is_auth_token: true
-    auth_token: boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
+    auth_token: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
 
 ### Step 3: Access Server B from Server A's UI

@@ -267,7 +267,7 @@ steps:
 
 ### Exec Mode
 
-- **Container must exist**: The specified container must exist and be running. Boltbase waits up to 120 seconds for the container to be in running state.
+- **Container must exist**: The specified container must exist and be running. Dagu waits up to 120 seconds for the container to be in running state.
 - **Invalid fields**: Fields like `volumes`, `ports`, `network`, `pull_policy`, `name`, etc. cannot be used with `exec` and will cause validation errors.
 - **Allowed overrides**: Only `user`, `working_dir`, and `env` can be specified to override the container's defaults.
 
@@ -318,7 +318,7 @@ steps:
 
 ### DAG-Level Container
 
-When using a DAG-level `container`, Boltbase starts a single persistent container and executes each step inside it using `docker exec`:
+When using a DAG-level `container`, Dagu starts a single persistent container and executes each step inside it using `docker exec`:
 
 - Step commands run directly in the running container
 - The image's `ENTRYPOINT`/`CMD` are not invoked for step commands
@@ -381,7 +381,7 @@ steps:
 
 ::: tip OS Variables
 OS environment variables not defined in the DAG `env:` block (like `$HOME`, `$PATH`)
-are **not** expanded by Boltbase. They pass through to the container as-is. To use a local
+are **not** expanded by Dagu. They pass through to the container as-is. To use a local
 OS value, explicitly import it in the DAG-level `env:` block:
 
 ```yaml
@@ -392,7 +392,7 @@ env:
 
 ::: tip Literal Dollar Signs
 To emit a literal `$` in non-shell container commands or config fields, escape it as `\$`.
-If you configure `container.shell`, Boltbase leaves `\$` intact and the shell handles the escape.
+If you configure `container.shell`, Dagu leaves `\$` intact and the shell handles the escape.
 :::
 
 ## Output Handling
@@ -499,16 +499,16 @@ steps:
 Mount the Docker socket and run as root to use Docker inside your containers:
 
 ```yaml
-# compose.yml for Boltbase with Docker support
+# compose.yml for Dagu with Docker support
 services:
-  boltbase:
-    image: ghcr.io/dagu-org/boltbase:latest
+  dagu:
+    image: ghcr.io/dagu-org/dagu:latest
     ports:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./dags:/var/lib/boltbase/dags
-    entrypoint: ["boltbase", "start-all"]
+      - ./dags:/var/lib/dagu/dags
+    entrypoint: ["dagu", "start-all"]
     user: "0:0"  # Run as root for Docker access
 ```
 

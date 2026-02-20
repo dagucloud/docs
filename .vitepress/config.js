@@ -7,7 +7,7 @@ const fullSidebar = [
   {
     text: "Overview",
     items: [
-      { text: "What is Boltbase?", link: "/overview/" },
+      { text: "What is Dagu?", link: "/overview/" },
       { text: "Contributing", link: "/overview/contributing" },
       { text: "Architecture", link: "/overview/architecture" },
       { text: "CLI", link: "/overview/cli" },
@@ -218,7 +218,7 @@ const fullSidebar = [
 
 export default withMermaid(
   defineConfig({
-    title: "Boltbase",
+    title: "Dagu",
     description: "Modern workflow orchestration made simple",
     lang: "en-US",
     lastUpdated: true,
@@ -286,8 +286,8 @@ export default withMermaid(
 
     themeConfig: {
       logo: "/logo.webp",
-      siteTitle: "Boltbase",
-      logoLink: "https://docs.boltbase.ai/",
+      siteTitle: "Dagu",
+      logoLink: "https://docs.dagu.sh/",
 
       appearance: {
         defaultTheme: "dark",
@@ -347,7 +347,7 @@ export default withMermaid(
 
       footer: {
         message: "Released under the MIT License.",
-        copyright: "Copyright © 2024 Boltbase Contributors",
+        copyright: "Copyright © 2024 Dagu Contributors",
       },
 
       search: {

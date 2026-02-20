@@ -148,7 +148,7 @@ handler_on:
     type: mail
     config:
       to: oncall@company.com
-      from: boltbase@company.com
+      from: dagu@company.com
       subject: "Failed: ${DAG_NAME}"
       message: "Check logs: ${DAG_RUN_LOG_FILE}"
 ```
@@ -168,7 +168,7 @@ mail_on:
   success: false
 
 error_mail:
-  from: "boltbase@company.com"
+  from: "dagu@company.com"
   to: "oncall@company.com"
   prefix: "[ALERT]"
   attach_logs: true
@@ -182,7 +182,7 @@ steps:
   - type: mail
     config:
       to: team@company.com
-      from: boltbase@company.com
+      from: dagu@company.com
       subject: "Report Ready"
       message: "See attached"
       attachments:

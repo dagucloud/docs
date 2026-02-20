@@ -22,7 +22,7 @@ steps:                     # Workflow steps
 Share common settings across all DAGs using base configuration:
 
 ```yaml
-# ~/.config/boltbase/base.yaml
+# ~/.config/dagu/base.yaml
 env:
   - LOG_LEVEL: info
   - AWS_REGION: us-east-1
@@ -38,7 +38,7 @@ error_mail:
   to: oncall@company.com
   attach_logs: true
 
-hist_retention_days: 30 # Boltbase deletes workflow history and logs older than this
+hist_retention_days: 30 # Dagu deletes workflow history and logs older than this
 queue: "default"      # Default queue for all DAGs (define in config.yaml)
 ```
 

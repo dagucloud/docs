@@ -16,7 +16,7 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
     - shell: ${CUSTOM_SHELL:-/bin/zsh}
       command: echo "Runs in the step shell"
   ```
-- **Fallback**: If no shell is set, Boltbase uses `BOLTBASE_DEFAULT_SHELL`, then `$SHELL`, then `sh`.
+- **Fallback**: If no shell is set, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
 
 ## Running Commands
@@ -57,13 +57,13 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 ## Script Behavior (Unix)
 
 - A `script:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
-- If there is no step-level `shell` and the script has a shebang, that interpreter runs the script. Without a shebang, the resolved shell runs it (Boltbase appends `-e` for sh/bash/zsh/ksh/ash/dash when using the default/DAG-level shell; step-level shells are left unchanged).
+- If there is no step-level `shell` and the script has a shebang, that interpreter runs the script. Without a shebang, the resolved shell runs it (Dagu appends `-e` for sh/bash/zsh/ksh/ash/dash when using the default/DAG-level shell; step-level shells are left unchanged).
 - When both `command` and `script` are set, `command` is treated as the interpreter and receives the script path directly (no shell wrapper) — useful for `command: python3` with inline code.
 
 ## Shell Options
 
 - **POSIX shells (sh/bash/zsh/ksh/ash/dash)**  
-  With the default or DAG-level shell, Boltbase appends `-e` so the shell stops on the first failing command. If you set a step-level shell, add `-e` yourself when you want errexit.
+  With the default or DAG-level shell, Dagu appends `-e` so the shell stops on the first failing command. If you set a step-level shell, add `-e` yourself when you want errexit.
 
 - **nix-shell**  
   Pin tools per step with `shell: nix-shell` and `shell_packages`:
@@ -75,7 +75,7 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
         python3 --version
         jq --version
   ```
-  nix-shell must be installed separately. Boltbase runs inside `nix-shell --run ...`; it defaults to `--pure` if you do not supply purity flags. Include any flags you need (such as `--impure`) in the `shell` array. When Boltbase supplies the shell, it prepends `set -e;` to the command string unless you already provided it.
+  nix-shell must be installed separately. Dagu runs inside `nix-shell --run ...`; it defaults to `--pure` if you do not supply purity flags. Include any flags you need (such as `--impure`) in the `shell` array. When Dagu supplies the shell, it prepends `set -e;` to the command string unless you already provided it.
 
 - **Direct execution (no shell parsing)**  
   `shell: direct` runs binaries without shell features; use array form:

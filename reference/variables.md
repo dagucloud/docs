@@ -6,7 +6,7 @@ For a complete list of the automatically injected run metadata, see [Special Env
 
 ### System Environment Variable Filtering
 
-For security, Boltbase filters which system environment variables are passed to step processes and sub DAGs.
+For security, Dagu filters which system environment variables are passed to step processes and sub DAGs.
 
 **How It Works:**
 
@@ -17,9 +17,9 @@ System environment variables are available for expansion (`${VAR}`) when the DAG
 Only these system environment variables are automatically passed to step processes and sub DAGs:
 
 - **Whitelisted:** `PATH`, `HOME`, `LANG`, `TZ`, `SHELL`
-- **Allowed Prefixes:** `BOLTBASE_*`, `LC_*`, `DAG_*`
+- **Allowed Prefixes:** `DAGU_*`, `LC_*`, `DAG_*`
 
-The `DAG_*` prefix includes the special environment variables that Boltbase automatically sets (see below).
+The `DAG_*` prefix includes the special environment variables that Dagu automatically sets (see below).
 
 **What This Means:**
 
@@ -53,7 +53,7 @@ env:
 
 ### Unknown Variable Handling
 
-When a variable is referenced but not defined in Boltbase's context, the behavior depends on the execution context:
+When a variable is referenced but not defined in Dagu's context, the behavior depends on the execution context:
 
 **Shell expansion enabled (default for local shell execution):**
 Unknown variables become empty strings. This is standard POSIX shell behavior.
@@ -73,10 +73,10 @@ steps:
       host: remote.example.com
     command: |
       cd $HOME/app                    # $HOME preserved — remote shell resolves it
-      git checkout ${DEPLOY_BRANCH}   # Expanded by Boltbase — defined in DAG env
+      git checkout ${DEPLOY_BRANCH}   # Expanded by Dagu — defined in DAG env
 ```
 
-In this example, `$HOME` is not defined in the DAG scope, so it passes through unchanged to the remote shell. `${DEPLOY_BRANCH}` is defined in the DAG `env:`, so Boltbase expands it before sending.
+In this example, `$HOME` is not defined in the DAG scope, so it passes through unchanged to the remote shell. `${DEPLOY_BRANCH}` is defined in the DAG `env:`, so Dagu expands it before sending.
 
 ### Literal Dollar Signs
 
@@ -88,7 +88,7 @@ env:
 ```
 
 Notes:
-- `\$` is only unescaped when Boltbase is the final evaluator (non-shell executors and config fields).
+- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and config fields).
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
 - To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 - In YAML, single quotes preserve backslashes; with double quotes, escape the backslash (e.g., `"\\$9.99"`).
@@ -130,7 +130,7 @@ steps:
 
 Run with custom values:
 ```bash
-boltbase start workflow.yaml -- one two three
+dagu start workflow.yaml -- one two three
 ```
 
 ### Named Parameters
@@ -149,22 +149,22 @@ steps:
 
 Override at runtime:
 ```bash
-boltbase start workflow.yaml -- ENVIRONMENT=prod PORT=80 DEBUG=true
+dagu start workflow.yaml -- ENVIRONMENT=prod PORT=80 DEBUG=true
 ```
 
 ### Accessing Parameters as JSON
 
-Every step receives the full parameter map encoded as JSON via the `BOLTBASE_PARAMS_JSON` environment variable. This value reflects the merged defaults plus any runtime overrides, and when a run is started with JSON parameters, the original payload is preserved.
+Every step receives the full parameter map encoded as JSON via the `DAGU_PARAMS_JSON` environment variable. This value reflects the merged defaults plus any runtime overrides, and when a run is started with JSON parameters, the original payload is preserved.
 
 ```yaml
 steps:
   - name: print params
-    command: echo "Raw payload: ${BOLTBASE_PARAMS_JSON}"
+    command: echo "Raw payload: ${DAGU_PARAMS_JSON}"
   - name: batch size
     type: jq
     config:
       raw: true
-    script: ${BOLTBASE_PARAMS_JSON}
+    script: ${DAGU_PARAMS_JSON}
     command: '"Batch size: \(.batchSize // "n/a")"'
 ```
 
@@ -185,7 +185,7 @@ steps:
 
 Run with:
 ```bash
-boltbase start workflow.yaml -- myapp ENVIRONMENT=prod VERSION=1.2.3
+dagu start workflow.yaml -- myapp ENVIRONMENT=prod VERSION=1.2.3
 ```
 
 ## Command Substitution
@@ -305,7 +305,7 @@ Available properties:
 
 ## Variable Precedence
 
-Boltbase resolves variables in two places: when interpolating `${VAR}` in DAG fields,
+Dagu resolves variables in two places: when interpolating `${VAR}` in DAG fields,
 and when constructing the step process environment.
 
 ### Interpolation precedence (highest to lowest)

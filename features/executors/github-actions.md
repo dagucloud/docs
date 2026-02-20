@@ -1,10 +1,10 @@
 # GitHub Actions
 
-Run individual GitHub Actions inside Boltbase by delegating execution to [nektos/act](https://github.com/nektos/act). This executor is currently **experimental**, so APIs and behaviour may change in upcoming releases. Expect to provide feedback before depending on it for production use.
+Run individual GitHub Actions inside Dagu by delegating execution to [nektos/act](https://github.com/nektos/act). This executor is currently **experimental**, so APIs and behaviour may change in upcoming releases. Expect to provide feedback before depending on it for production use.
 
 ## Prerequisites
 
-- Install Boltbase by following the [installation guide](/getting-started/installation) so the CLI and scheduler are available locally.
+- Install Dagu by following the [installation guide](/getting-started/installation) so the CLI and scheduler are available locally.
 - Docker or a compatible OCI runtime must be available because the executor launches action workloads inside containers.
 - Network egress must be permitted so `act` can resolve action bundles and container images.
 - Provide a GitHub token with at least `contents:read` scope when cloning private repositories or accessing private actions.
@@ -31,14 +31,14 @@ Run individual GitHub Actions inside Boltbase by delegating execution to [nektos
 2. Execute the workflow with:
 
    ```bash
-   boltbase run gha-hello.yaml
+   dagu run gha-hello.yaml
    ```
 
-The first step runs the referenced GitHub Action inside an ephemeral workflow powered by `nektos/act`. Boltbase binds the step's working directory into the runner container (so files persist locally), evaluates `params` into the action `with:` block, and exposes the step's `output` as an environment variable for downstream steps. The follow-up command step can read `ACTION_OUTPUT` like any other Boltbase variable.
+The first step runs the referenced GitHub Action inside an ephemeral workflow powered by `nektos/act`. Dagu binds the step's working directory into the runner container (so files persist locally), evaluates `params` into the action `with:` block, and exposes the step's `output` as an environment variable for downstream steps. The follow-up command step can read `ACTION_OUTPUT` like any other Dagu variable.
 
 ## Scheduled Runs
 
-Let Boltbase trigger your GitHub Action on a cron schedule:
+Let Dagu trigger your GitHub Action on a cron schedule:
 
 ```yaml
 schedules:
@@ -68,7 +68,7 @@ steps:
     command: echo "Open PRs: ${PR_COUNT.count}"
 ```
 
-The first step runs `actions/github-script` inside an isolated Act runner container, executes the JavaScript snippet, and exposes its output as `PR_COUNT`. The follow-up command uses the standard command executor on the host, so no GitHub Action runtime is required locally. The scheduler evaluates the cron expression using the server timezone and executes the DAG automatically, but you can still run it ad-hoc (`boltbase run pr-count.yaml`) before enabling the schedule.
+The first step runs `actions/github-script` inside an isolated Act runner container, executes the JavaScript snippet, and exposes its output as `PR_COUNT`. The follow-up command uses the standard command executor on the host, so no GitHub Action runtime is required locally. The scheduler evaluates the cron expression using the server timezone and executes the DAG automatically, but you can still run it ad-hoc (`dagu run pr-count.yaml`) before enabling the schedule.
 
 ## Basic Usage
 
@@ -92,7 +92,7 @@ steps:
 
 - `command` holds the action reference (`owner/repo@ref`).
 - `executor` can be the shorthand `gha` shown above, or a map with `type: gha` when you need to add `config`.
-- `working_dir` is set at the DAG level and determines the workspace Boltbase mounts into the action container (defaults to the process CWD if omitted).
+- `working_dir` is set at the DAG level and determines the workspace Dagu mounts into the action container (defaults to the process CWD if omitted).
 - `executor.config` contains runner configuration options (see Configuration section below).
 - `params` maps directly to the `with:` block in GitHub Actions YAML. Values support the same variable substitution rules as other step fields.
 
@@ -216,13 +216,13 @@ Artifact server configuration for `actions/upload-artifact` and `actions/downloa
 
 ```yaml
 artifacts:
-  path: /tmp/boltbase-artifacts      # Directory for artifact storage
+  path: /tmp/dagu-artifacts      # Directory for artifact storage
   port: "34567"                  # Artifact server port
 ```
 
 ## Limitations
 
-- Only single-step workflows are supported today; each Boltbase step maps to a single GitHub Action invocation.
+- Only single-step workflows are supported today; each Dagu step maps to a single GitHub Action invocation.
 - The executor synthesises a minimal `push` event payload. Actions that rely on richer event context may need additional wiring.
 - Marketplace actions fetch remote resources on demand. Make sure your environment allows outbound requests and Docker image pulls.
 

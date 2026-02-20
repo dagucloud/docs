@@ -1,6 +1,6 @@
 # Docker Images
 
-Boltbase publishes multiple container images to GitHub Container Registry at `ghcr.io/dagu-org/boltbase`. All images are multi-arch (`linux/amd64`, `linux/arm64`, `linux/arm/v7`) and ship with the same defaults: listen on `8080`, run `boltbase start-all`, and honor `PUID`/`PGID`/`BOLTBASE_*` environment variables.
+Dagu publishes multiple container images to GitHub Container Registry at `ghcr.io/dagu-org/dagu`. All images are multi-arch (`linux/amd64`, `linux/arm64`, `linux/arm/v7`) and ship with the same defaults: listen on `8080`, run `dagu start-all`, and honor `PUID`/`PGID`/`DAGU_*` environment variables.
 
 ## Image overview
 
@@ -10,36 +10,36 @@ Boltbase publishes multiple container images to GitHub Container Registry at `gh
 | `alpine`, `<version>-alpine` | Alpine 3.22 | `apk` | Musl-based image with `bash`, `sudo`, `jq`, `tzdata` | Minimal footprint, Alpine-only environments |
 | `dev`, `<version>-dev` | Ubuntu 24.04 | `apt` | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) | Local development or workflows that need compilers/SDKs baked in |
 
-> Prefer pinning to a specific version tag (`ghcr.io/dagu-org/boltbase:<version>`) for reproducible deployments.
+> Prefer pinning to a specific version tag (`ghcr.io/dagu-org/dagu:<version>`) for reproducible deployments.
 
 ## Examples
 
 Standard image:
 ```bash
-docker run -d -p 8525:8080 -v boltbase-data:/var/lib/boltbase ghcr.io/dagu-org/boltbase:latest
+docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu ghcr.io/dagu-org/dagu:latest
 ```
 
 Alpine image:
 ```bash
-docker run -d -p 8525:8080 -v boltbase-data:/var/lib/boltbase ghcr.io/dagu-org/boltbase:alpine
+docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu ghcr.io/dagu-org/dagu:alpine
 ```
 
 Dev image with extra tooling:
 ```bash
-docker run -d -p 8525:8080 -v boltbase-data:/var/lib/boltbase ghcr.io/dagu-org/boltbase:dev
+docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu ghcr.io/dagu-org/dagu:dev
 ```
 
 For Docker-in-Docker workflows, mount the host socket and run as root:
 ```bash
-docker run -d -p 8525:8080 -v boltbase-data:/var/lib/boltbase -v /var/run/docker.sock:/var/run/docker.sock --user 0:0 ghcr.io/dagu-org/boltbase:latest
+docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu -v /var/run/docker.sock:/var/run/docker.sock --user 0:0 ghcr.io/dagu-org/dagu:latest
 ```
 
 ## Custom Images
 
-If your workflows require additional tools (Python, Perl, Ruby, etc.) not included in the standard images, build a custom image based on Boltbase:
+If your workflows require additional tools (Python, Perl, Ruby, etc.) not included in the standard images, build a custom image based on Dagu:
 
 ```dockerfile
-FROM ghcr.io/dagu-org/boltbase:latest
+FROM ghcr.io/dagu-org/dagu:latest
 
 # Install additional packages
 RUN apt-get update && apt-get install -y \
@@ -54,6 +54,6 @@ RUN pip3 install --break-system-packages requests pandas
 
 Build and run:
 ```bash
-docker build -t my-boltbase .
-docker run -d -p 8080:8080 -v boltbase-data:/var/lib/boltbase my-boltbase
+docker build -t my-dagu .
+docker run -d -p 8080:8080 -v dagu-data:/var/lib/dagu my-dagu
 ```

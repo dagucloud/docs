@@ -1,6 +1,6 @@
 # REST API
 
-Boltbase provides a comprehensive REST API for programmatic control over workflow orchestration. The API enables DAG management, execution control, monitoring, and system operations through standard HTTP endpoints.
+Dagu provides a comprehensive REST API for programmatic control over workflow orchestration. The API enables DAG management, execution control, monitoring, and system operations through standard HTTP endpoints.
 
 ::: tip API Reference
 For the complete API documentation with all endpoints, see [REST API Reference](/reference/api).
@@ -226,7 +226,7 @@ curl "http://localhost:8080/api/v1/dags/search?q=database"
 
 ### Prometheus Metrics
 
-Boltbase exposes Prometheus-compatible metrics for comprehensive monitoring:
+Dagu exposes Prometheus-compatible metrics for comprehensive monitoring:
 
 ```bash
 curl http://localhost:8080/api/v1/metrics

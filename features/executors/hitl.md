@@ -99,7 +99,7 @@ steps:
 
 ### Web UI
 
-1. Navigate to the DAG run in the Boltbase web interface
+1. Navigate to the DAG run in the Dagu web interface
 2. The HITL step displays with "Waiting" status
 3. Click the step to view the prompt and input fields
 4. Fill in any required inputs and click **Approve** to continue, or click **Reject** to stop the workflow
@@ -145,7 +145,7 @@ smtp:
   password: ${SMTP_PASSWORD}
 
 wait_mail:
-  from: boltbase@example.com
+  from: dagu@example.com
   to:
     - approvers@example.com
   prefix: "[APPROVAL REQUIRED]"

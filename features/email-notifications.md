@@ -1,15 +1,15 @@
 # Email Notifications
 
-Boltbase provides built-in email notifications for workflow events and errors.
+Dagu provides built-in email notifications for workflow events and errors.
 
 ## SMTP Configuration
 
 ### Global Configuration
 
-Set up SMTP settings in your Boltbase configuration:
+Set up SMTP settings in your Dagu configuration:
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 smtp:
   host: smtp.gmail.com
   port: "587"
@@ -19,7 +19,7 @@ smtp:
 error_mail:
   from: alerts@example.com
   to: team@example.com  # Single recipient (string format)
-  prefix: "[Boltbase Alert]"
+  prefix: "[Dagu Alert]"
   attach_logs: true
 ```
 
@@ -28,14 +28,14 @@ error_mail:
 Configure SMTP via environment:
 
 ```bash
-export BOLTBASE_SMTP_HOST=smtp.gmail.com
-export BOLTBASE_SMTP_PORT=587
-export BOLTBASE_SMTP_USERNAME=alerts@example.com
-export BOLTBASE_SMTP_PASSWORD=secret-password
+export DAGU_SMTP_HOST=smtp.gmail.com
+export DAGU_SMTP_PORT=587
+export DAGU_SMTP_USERNAME=alerts@example.com
+export DAGU_SMTP_PASSWORD=secret-password
 
-export BOLTBASE_ERROR_MAIL_FROM=alerts@example.com
-export BOLTBASE_ERROR_MAIL_TO=team@example.com
-export BOLTBASE_ERROR_MAIL_PREFIX="[Alert]"
+export DAGU_ERROR_MAIL_FROM=alerts@example.com
+export DAGU_ERROR_MAIL_TO=team@example.com
+export DAGU_ERROR_MAIL_PREFIX="[Alert]"
 ```
 
 ## DAG-Level Configuration
@@ -51,7 +51,7 @@ smtp:
   password: ${SMTP_PASS}
 
 error_mail:
-  from: boltbase@company.com
+  from: dagu@company.com
   to: 
     - oncall@company.com
     - manager@company.com
@@ -64,7 +64,7 @@ mail_on:
   wait: true
 
 wait_mail:
-  from: boltbase@company.com
+  from: dagu@company.com
   to:
     - approvers@company.com
   prefix: "[WAITING]"
@@ -100,7 +100,7 @@ mail_on:
   wait: true
 
 wait_mail:
-  from: boltbase@company.com
+  from: dagu@company.com
   to:
     - approvers@company.com
   prefix: "[APPROVAL REQUIRED]"

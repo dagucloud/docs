@@ -1,10 +1,10 @@
 # OpenTelemetry Tracing
 
-Boltbase supports OpenTelemetry (OTel) distributed tracing to provide deep visibility into workflow execution. This allows you to monitor performance, debug issues, and understand the flow of complex DAGs across your observability platform.
+Dagu supports OpenTelemetry (OTel) distributed tracing to provide deep visibility into workflow execution. This allows you to monitor performance, debug issues, and understand the flow of complex DAGs across your observability platform.
 
 ## Overview
 
-When OpenTelemetry is enabled, Boltbase creates:
+When OpenTelemetry is enabled, Dagu creates:
 - A root span for each DAG execution
 - Child spans for each step execution
 - Proper trace context propagation for nested DAGs
@@ -38,7 +38,7 @@ otel:
   timeout: 30s     # Export timeout
   resource:
     # Resource attributes (all optional)
-    service.name: "boltbase-${DAG_NAME}"  # Default value
+    service.name: "dagu-${DAG_NAME}"  # Default value
     service.version: "1.0.0"
     deployment.environment: "${ENVIRONMENT}"
     # Custom attributes
@@ -59,7 +59,7 @@ otel:
 
 ## Endpoint Configuration
 
-Boltbase automatically detects the protocol based on the endpoint:
+Dagu automatically detects the protocol based on the endpoint:
 
 - **gRPC endpoints**: `host:port` format (e.g., `localhost:4317`)
 - **HTTP endpoints**: Must end with `/v1/traces` (e.g., `http://localhost:4318/v1/traces`)
@@ -104,7 +104,7 @@ The sub DAG's root span will be linked to the parent step span, creating a compl
 
 ### Trace Context Propagation
 
-Boltbase uses the W3C Trace Context standard for propagating trace information between parent and sub DAGs:
+Dagu uses the W3C Trace Context standard for propagating trace information between parent and sub DAGs:
 
 - **Automatic propagation**: Trace context is automatically passed to sub DAGs via environment variables
 - **W3C format**: Uses standard `TRACEPARENT` and `TRACESTATE` environment variables
@@ -135,7 +135,7 @@ otel:
 name: my-workflow
 otel:
   resource:
-    service.name: "boltbase-${DAG_NAME}"  # Override specific attributes
+    service.name: "dagu-${DAG_NAME}"  # Override specific attributes
 steps:
   - command: echo "Processing with telemetry"
 ```
@@ -173,7 +173,7 @@ otel:
   headers:
     Authorization: "Bearer ${OTEL_TOKEN}"
   resource:
-    service.name: "boltbase-${DAG_NAME}"
+    service.name: "dagu-${DAG_NAME}"
     deployment.environment: "production"
     service.version: "${VERSION}"
 ```

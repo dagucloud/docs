@@ -1,6 +1,6 @@
 # Workflow Basics
 
-Learn the fundamentals of writing Boltbase workflows.
+Learn the fundamentals of writing Dagu workflows.
 
 ## Your First Workflow
 
@@ -8,12 +8,12 @@ Create `hello.yaml`:
 
 ```yaml
 steps:
-  - command: echo "Hello from Boltbase!"
+  - command: echo "Hello from Dagu!"
 ```
 
 Run it:
 ```bash
-boltbase start hello.yaml
+dagu start hello.yaml
 ```
 
 ## Workflow Structure
@@ -48,7 +48,7 @@ The basic unit of execution.
 
 ### Step Names
 
-Step names are optional. When omitted, Boltbase automatically generates names based on the step type:
+Step names are optional. When omitted, Dagu automatically generates names based on the step type:
 
 ```yaml
 steps:
@@ -143,7 +143,7 @@ steps:
       echo "Complete"
 ```
 
-If you omit `shell`, Boltbase uses the interpreter declared in the script's shebang (`#!`) when present.
+If you omit `shell`, Dagu uses the interpreter declared in the script's shebang (`#!`) when present.
 
 ### Shell Selection
 
@@ -162,7 +162,7 @@ steps:
 
 The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Arrays avoid quoting issues when you need multiple flags.
 
-When you omit a step-level `shell`, Boltbase runs through the DAG shell (or system default) and automatically adds `-e` on Unix-like shells so scripts stop on first error. If you explicitly set `shell` on a step, include `-e` yourself if you want the same errexit behavior.
+When you omit a step-level `shell`, Dagu runs through the DAG shell (or system default) and automatically adds `-e` on Unix-like shells so scripts stop on first error. If you explicitly set `shell` on a step, include `-e` yourself if you want the same errexit behavior.
 
 ```yaml
 steps:
@@ -244,7 +244,7 @@ steps:
 ```
 
 ::: tip
-Boltbase filters system environment variables for security. See [Environment Variables](/writing-workflows/environment-variables) for details on filtering, inheritance, and `.env` file support.
+Dagu filters system environment variables for security. See [Environment Variables](/writing-workflows/environment-variables) for details on filtering, inheritance, and `.env` file support.
 :::
 
 ## Capturing Output

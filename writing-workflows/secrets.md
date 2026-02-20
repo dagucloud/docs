@@ -1,6 +1,6 @@
 # Secrets
 
-Externalize sensitive values and let Boltbase resolve them just in time. The `secrets` block defines environment variables whose values come from secret providers instead of being committed to YAML.
+Externalize sensitive values and let Dagu resolve them just in time. The `secrets` block defines environment variables whose values come from secret providers instead of being committed to YAML.
 
 ## Declaring secrets
 

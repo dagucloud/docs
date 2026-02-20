@@ -4,7 +4,7 @@ How data moves through your workflows - from parameters to outputs, between step
 
 ## Overview
 
-Boltbase provides multiple mechanisms for passing data through workflows:
+Dagu provides multiple mechanisms for passing data through workflows:
 
 - Output Variables - Capture command output for use in later steps
 - Environment Variables - Define variables accessible to all steps
@@ -194,7 +194,7 @@ steps:
 
 Override at runtime:
 ```bash
-boltbase start workflow.yaml -- ENVIRONMENT=prod BATCH_SIZE=500
+dagu start workflow.yaml -- ENVIRONMENT=prod BATCH_SIZE=500
 ```
 
 ### Dynamic Parameters
@@ -364,7 +364,7 @@ steps:
 
 ## Special Environment Variables
 
-Boltbase automatically injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_STEP_NAME`, and log file locations. See [Special Environment Variables](/reference/special-environment-variables) for the complete reference.
+Dagu automatically injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_STEP_NAME`, and log file locations. See [Special Environment Variables](/reference/special-environment-variables) for the complete reference.
 
 Example usage:
 ```yaml

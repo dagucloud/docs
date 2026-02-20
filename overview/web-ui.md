@@ -1,10 +1,10 @@
 # Web UI
 
-Monitor and manage workflows through Boltbase's built-in web interface.
+Monitor and manage workflows through Dagu's built-in web interface.
 
 ## Overview
 
-Boltbase includes a modern, responsive web UI that provides:
+Dagu includes a modern, responsive web UI that provides:
 - Real-time DAG execution monitoring
 - Visual DAG representation
 - Log viewing and search
@@ -21,8 +21,8 @@ For Web UI configuration options, see [Configuration Reference](/reference/confi
 ## Accessing the UI
 
 ```bash
-# Start Boltbase with web UI
-boltbase start-all
+# Start Dagu with web UI
+dagu start-all
 
 # Open in browser
 # http://localhost:8080
@@ -30,12 +30,12 @@ boltbase start-all
 
 Custom host/port:
 ```bash
-boltbase start-all --host 0.0.0.0 --port 9000
+dagu start-all --host 0.0.0.0 --port 9000
 
 # Or via environment variables
-export BOLTBASE_HOST=0.0.0.0
-export BOLTBASE_PORT=9000
-boltbase start-all
+export DAGU_HOST=0.0.0.0
+export DAGU_PORT=9000
+dagu start-all
 ```
 
 ## Dashboard
@@ -78,8 +78,8 @@ ui:
 
 Or via environment variables:
 ```bash
-export BOLTBASE_UI_DAGS_SORT_FIELD=lastRun
-export BOLTBASE_UI_DAGS_SORT_ORDER=desc
+export DAGU_UI_DAGS_SORT_FIELD=lastRun
+export DAGU_UI_DAGS_SORT_ORDER=desc
 ```
 
 ::: info Backend Sorting
@@ -146,10 +146,10 @@ The execution history page shows past execution results and logs, providing a co
 - Performance trends
 
 ::: tip CLI Alternative
-View execution history from the command line with `boltbase history`:
+View execution history from the command line with `dagu history`:
 - Faster for scripting and automation
-- Export to JSON for analysis: `boltbase history --format json`
-- Advanced filtering: `boltbase history --status failed --last 7d --tags prod`
+- Export to JSON for analysis: `dagu history --format json`
+- Advanced filtering: `dagu history --status failed --last 7d --tags prod`
 - See [CLI Reference](/reference/cli#history) for details
 :::
 
@@ -274,7 +274,7 @@ See [Agent](/features/agent/) for complete documentation.
 
 ## Terminal
 
-The web-based terminal allows executing shell commands directly from the Boltbase UI.
+The web-based terminal allows executing shell commands directly from the Dagu UI.
 
 ### Enabling Terminal
 
@@ -288,12 +288,12 @@ terminal:
 
 Or via environment variable:
 ```bash
-export BOLTBASE_TERMINAL_ENABLED=true
+export DAGU_TERMINAL_ENABLED=true
 ```
 
 ### Security Notes
 
-- Commands run with the same permissions as the Boltbase server process
+- Commands run with the same permissions as the Dagu server process
 - Only enable in trusted environments
 - Consider enabling authentication when using terminal
 - Terminal sessions are logged in the audit log
@@ -322,7 +322,7 @@ audit:
 
 Or via environment variable:
 ```bash
-export BOLTBASE_AUDIT_ENABLED=false
+export DAGU_AUDIT_ENABLED=false
 ```
 
 See [Audit Logging Configuration](/configurations/server#audit-logging) for more details.
@@ -349,7 +349,7 @@ ui:
 
 ## Remote Nodes
 
-Monitor multiple Boltbase instances:
+Monitor multiple Dagu instances:
 
 ```yaml
 remote_nodes:

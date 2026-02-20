@@ -1,6 +1,6 @@
 # Auth0 OIDC Setup
 
-Configure Boltbase with Auth0 as OIDC provider.
+Configure Dagu with Auth0 as OIDC provider.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Configure Boltbase with Auth0 as OIDC provider.
 2. Navigate to Applications > Applications
 3. Click "Create Application"
 4. Choose:
-   - Name: `Boltbase` (or your preference)
+   - Name: `Dagu` (or your preference)
    - Application Type: `Regular Web Applications`
 5. Click Create
 
@@ -33,21 +33,21 @@ Configure Boltbase with Auth0 as OIDC provider.
      ```
      For production add:
      ```
-     https://boltbase.example.com/oidc-callback
+     https://dagu.example.com/oidc-callback
      ```
    - **Allowed Logout URLs** (optional):
      ```
      http://localhost:8080
-     https://boltbase.example.com
+     https://dagu.example.com
      ```
 4. Save Changes
 
-### 3. Configure Boltbase
+### 3. Configure Dagu
 
 #### YAML Configuration
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 auth:
   oidc:
     client_id: "your-auth0-client-id"
@@ -63,13 +63,13 @@ auth:
 #### Environment Variables
 
 ```bash
-export BOLTBASE_AUTH_OIDC_CLIENT_ID="your-auth0-client-id"
-export BOLTBASE_AUTH_OIDC_CLIENT_SECRET="your-auth0-client-secret"
-export BOLTBASE_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
-export BOLTBASE_AUTH_OIDC_ISSUER="https://your-tenant.auth0.com/"
-export BOLTBASE_AUTH_OIDC_SCOPES="openid,profile,email"
+export DAGU_AUTH_OIDC_CLIENT_ID="your-auth0-client-id"
+export DAGU_AUTH_OIDC_CLIENT_SECRET="your-auth0-client-secret"
+export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
+export DAGU_AUTH_OIDC_ISSUER="https://your-tenant.auth0.com/"
+export DAGU_AUTH_OIDC_SCOPES="openid,profile,email"
 
-boltbase start-all
+dagu start-all
 ```
 
 ## User Management
@@ -110,7 +110,7 @@ auth:
 
 ### Additional Scopes
 
-Standard OIDC scopes used by Boltbase:
+Standard OIDC scopes used by Dagu:
 
 ```yaml
 auth:
@@ -121,7 +121,7 @@ auth:
       - "email"
 ```
 
-Note: Boltbase does not support refresh tokens. Sessions expire after 24 hours.
+Note: Dagu does not support refresh tokens. Sessions expire after 24 hours.
 
 ### Organizations
 
@@ -142,7 +142,7 @@ For Auth0 Organizations:
 1. Go to Authentication > Social
 2. Enable desired providers (Google, GitHub, etc.)
 3. Configure each provider with their credentials
-4. No changes needed in Boltbase config
+4. No changes needed in Dagu config
 
 Users can now login with social accounts through Auth0.
 
@@ -155,19 +155,19 @@ Users can now login with social accounts through Auth0.
    - Set appropriate token expiration
    - Configure refresh token rotation
 
-2. Production Boltbase config:
+2. Production Dagu config:
    ```yaml
    auth:
      oidc:
        client_id: "production-client-id"
        client_secret: "production-secret"
-       client_url: "https://boltbase.example.com"
+       client_url: "https://dagu.example.com"
        issuer: "https://your-tenant.auth0.com/"
    
    # Enable HTTPS
    tls:
-     cert_file: "/etc/ssl/boltbase.crt"
-     key_file: "/etc/ssl/boltbase.key"
+     cert_file: "/etc/ssl/dagu.crt"
+     key_file: "/etc/ssl/dagu.key"
    ```
 
 ### Rate Limits
@@ -180,9 +180,9 @@ Monitor usage in Auth0 Dashboard > Monitoring.
 
 ## Testing
 
-1. Start Boltbase:
+1. Start Dagu:
    ```bash
-   boltbase start-all
+   dagu start-all
    ```
 
 2. Access http://localhost:8080
@@ -191,7 +191,7 @@ Monitor usage in Auth0 Dashboard > Monitoring.
 
 4. Login with test user or social account
 
-5. After successful login, redirected back to Boltbase
+5. After successful login, redirected back to Dagu
 
 ## Troubleshooting URLs
 

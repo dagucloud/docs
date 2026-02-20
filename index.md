@@ -2,7 +2,7 @@
 layout: doc
 ---
 
-<img src="/boltbase-logo.webp" alt="Boltbase" style="display: block; margin: 0 auto; max-width: 400px">
+<img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; max-width: 400px">
 
 <div class="tagline" style="text-align: center;">
   <h2>Lightweight workflow engine with distributed execution</h2>
@@ -32,7 +32,7 @@ Explore without installing: [Live Demo](http://23.251.149.55:8525/)
 Credentials: `demouser` / `demouser`
 :::
 
-## Why Boltbase?
+## Why Dagu?
 
 - **Single binary** - No database, message broker, or external services. [Architecture](/overview/architecture)
 - **Declarative YAML** - Define workflows without code. [YAML Reference](/reference/yaml)
@@ -59,15 +59,15 @@ curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installe
 ```
 
 ```bash [Docker]
-docker run --rm -v ~/.boltbase:/var/lib/boltbase -p 8080:8080 ghcr.io/dagu-org/boltbase:latest boltbase start-all
+docker run --rm -v ~/.dagu:/var/lib/dagu -p 8080:8080 ghcr.io/dagu-org/dagu:latest dagu start-all
 ```
 
 ```bash [Homebrew]
-brew install boltbase
+brew install dagu
 ```
 
 ```bash [npm]
-npm install -g --ignore-scripts=false @dagu-org/boltbase
+npm install -g --ignore-scripts=false @dagu-org/dagu
 ```
 
 :::
@@ -77,7 +77,7 @@ npm install -g --ignore-scripts=false @dagu-org/boltbase
 ```bash
 cat > hello.yaml << 'EOF'
 steps:
-  - command: echo "Hello from Boltbase!"
+  - command: echo "Hello from Dagu!"
   - command: echo "Step 2"
 EOF
 ```
@@ -85,13 +85,13 @@ EOF
 ### Run
 
 ```bash
-boltbase start hello.yaml
+dagu start hello.yaml
 ```
 
 ### Start Web UI
 
 ```bash
-boltbase start-all
+dagu start-all
 ```
 
 Visit [http://localhost:8080](http://localhost:8080)
@@ -157,7 +157,7 @@ See [Examples](/writing-workflows/examples) for more patterns.
 <div class="next-steps">
   <div class="step-card">
     <h3><a href="/overview/">Overview</a></h3>
-    <p>What is Boltbase and how it works</p>
+    <p>What is Dagu and how it works</p>
   </div>
   <div class="step-card">
     <h3><a href="/getting-started/">Getting Started</a></h3>

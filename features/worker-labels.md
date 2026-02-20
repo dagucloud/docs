@@ -7,7 +7,7 @@ Worker labels are key-value pairs that describe worker capabilities. The coordin
 ### CLI Flag
 
 ```bash
-boltbase worker --worker.labels gpu=true,memory=64G,region=us-east-1
+dagu worker --worker.labels gpu=true,memory=64G,region=us-east-1
 ```
 
 Labels are comma-separated `key=value` pairs. Keys and values are trimmed of whitespace.
@@ -26,8 +26,8 @@ worker:
 ### Environment Variable
 
 ```bash
-export BOLTBASE_WORKER_LABELS="gpu=true,memory=64G,region=us-east-1"
-boltbase worker
+export DAGU_WORKER_LABELS="gpu=true,memory=64G,region=us-east-1"
+dagu worker
 ```
 
 ## Matching Algorithm
@@ -97,10 +97,10 @@ Workers:
 
 ```bash
 # GPU worker
-boltbase worker --worker.labels gpu=true,cuda=12.0
+dagu worker --worker.labels gpu=true,cuda=12.0
 
 # CPU worker
-boltbase worker --worker.labels cpu-optimized=true,cores=64
+dagu worker --worker.labels cpu-optimized=true,cores=64
 ```
 
 DAG with both DAG-level and step-level selectors:

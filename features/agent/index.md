@@ -1,6 +1,6 @@
 # Agent
 
-Tsumugi is an AI assistant integrated into the Boltbase Web UI for workflow management.
+Tsumugi is an AI assistant integrated into the Dagu Web UI for workflow management.
 
 ## Accessing the Agent
 
@@ -10,7 +10,7 @@ Click the **Agent** button at the bottom-right corner of any page. The button sh
 
 ### Configuration Storage
 
-Configuration is stored in `{BOLTBASE_HOME}/data/agent/config.json`:
+Configuration is stored in `{DAGU_HOME}/data/agent/config.json`:
 
 ```json
 {
@@ -30,11 +30,11 @@ Environment variables override JSON configuration:
 
 | Variable | Type | Description |
 |----------|------|-------------|
-| `BOLTBASE_AGENT_ENABLED` | boolean | Enable or disable the agent |
-| `BOLTBASE_AGENT_LLM_PROVIDER` | string | LLM provider name |
-| `BOLTBASE_AGENT_LLM_MODEL` | string | Model identifier |
-| `BOLTBASE_AGENT_LLM_API_KEY` | string | API key |
-| `BOLTBASE_AGENT_LLM_BASE_URL` | string | Custom API endpoint |
+| `DAGU_AGENT_ENABLED` | boolean | Enable or disable the agent |
+| `DAGU_AGENT_LLM_PROVIDER` | string | LLM provider name |
+| `DAGU_AGENT_LLM_MODEL` | string | Model identifier |
+| `DAGU_AGENT_LLM_API_KEY` | string | API key |
+| `DAGU_AGENT_LLM_BASE_URL` | string | Custom API endpoint |
 
 ### Web UI Configuration
 
@@ -88,7 +88,7 @@ Commands matching these patterns require explicit approval before execution:
 
 - `rm ` - File/directory removal
 - `chmod ` - Permission changes
-- `boltbase start` - DAG execution
+- `dagu start` - DAG execution
 
 When approval is required:
 1. A prompt appears showing the command and working directory

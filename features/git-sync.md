@@ -39,8 +39,8 @@ git_sync:
     interval: 300
 
   commit:
-    author_name: Boltbase
-    author_email: boltbase@localhost
+    author_name: Dagu
+    author_email: dagu@localhost
 ```
 
 Defaults applied when `git_sync.enabled: true`:
@@ -49,8 +49,8 @@ Defaults applied when `git_sync.enabled: true`:
 - `auth.type: token`
 - `auto_sync.on_startup: true`
 - `auto_sync.interval: 300`
-- `commit.author_name: Boltbase`
-- `commit.author_email: boltbase@localhost`
+- `commit.author_name: Dagu`
+- `commit.author_email: dagu@localhost`
 
 ## Authentication
 
@@ -66,8 +66,8 @@ git_sync:
 ```
 
 ```bash
-export BOLTBASE_GITSYNC_AUTH_TYPE=token
-export BOLTBASE_GITSYNC_AUTH_TOKEN=ghp_xxxxxxxxxxxx
+export DAGU_GITSYNC_AUTH_TYPE=token
+export DAGU_GITSYNC_AUTH_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### SSH key
@@ -85,31 +85,31 @@ git_sync:
 ```
 
 ```bash
-export BOLTBASE_GITSYNC_AUTH_TYPE=ssh
-export BOLTBASE_GITSYNC_AUTH_SSH_KEY_PATH=/home/user/.ssh/id_ed25519
-export BOLTBASE_GITSYNC_AUTH_SSH_PASSPHRASE=your-passphrase
+export DAGU_GITSYNC_AUTH_TYPE=ssh
+export DAGU_GITSYNC_AUTH_SSH_KEY_PATH=/home/user/.ssh/id_ed25519
+export DAGU_GITSYNC_AUTH_SSH_PASSPHRASE=your-passphrase
 ```
 
 ## CLI
 
 ```bash
-boltbase sync status
-boltbase sync pull
+dagu sync status
+dagu sync pull
 ```
 
 Publish one item or all modified/untracked items:
 
 ```bash
-boltbase sync publish my-dag -m "Update dag"
-boltbase sync publish memory/MEMORY -m "Update global memory"
-boltbase sync publish --all -m "Batch update"
+dagu sync publish my-dag -m "Update dag"
+dagu sync publish memory/MEMORY -m "Update global memory"
+dagu sync publish --all -m "Batch update"
 ```
 
 Discard one item:
 
 ```bash
-boltbase sync discard my-dag
-boltbase sync discard memory/dags/my-dag/MEMORY
+dagu sync discard my-dag
+dagu sync discard memory/dags/my-dag/MEMORY
 ```
 
 ## Status Values

@@ -24,7 +24,7 @@ Worker 1        Worker 2                Worker 3
 
 ### Storage Modes
 
-Boltbase supports two deployment modes for distributed workers:
+Dagu supports two deployment modes for distributed workers:
 
 | Mode | Description |
 |------|-------------|
@@ -37,7 +37,7 @@ DAG definitions do not need to be shared in either mode — they are transmitted
 
 ## How Dispatch Decisions Work
 
-Every execution path in Boltbase — API, CLI, scheduler, queue, and sub-DAG steps — uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior regardless of how a run is triggered.
+Every execution path in Dagu — API, CLI, scheduler, queue, and sub-DAG steps — uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior regardless of how a run is triggered.
 
 ### Decision Priority
 
@@ -59,7 +59,7 @@ All of the following entry points evaluate the same decision logic:
 |---------|-------------|
 | API start | Immediate execution from the UI or API |
 | API retry | Retrying a failed run from the UI or API |
-| CLI `boltbase start` | Running a DAG from the command line |
+| CLI `dagu start` | Running a DAG from the command line |
 | Scheduler | Cron-triggered scheduled runs |
 | Queue consumer | Dequeuing a previously enqueued run |
 | Sub-DAG step | A `call` step executing a child DAG |
@@ -76,17 +76,17 @@ Each sub-DAG independently evaluates the dispatch decision. A DAG running locall
 
 ### Step 1: Start the Coordinator
 
-The coordinator service can be started with `boltbase start-all` (requires `--coordinator.host` set to a non-localhost address):
+The coordinator service can be started with `dagu start-all` (requires `--coordinator.host` set to a non-localhost address):
 
 ```bash
 # Start all services including coordinator (distributed mode)
-boltbase start-all --coordinator.host=0.0.0.0 --port=8080
+dagu start-all --coordinator.host=0.0.0.0 --port=8080
 
 # Single instance mode (coordinator disabled, default)
-boltbase start-all
+dagu start-all
 
 # Or start coordinator separately
-boltbase coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
+dagu coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
 ```
 
 The coordinator is only started by `start-all` when `--coordinator.host` is set to a non-localhost address (not `127.0.0.1` or `localhost`). This allows running in single instance mode by default.
@@ -95,9 +95,9 @@ For containerized environments (Docker, Kubernetes), configure both the bind add
 
 ```bash
 # Bind to all interfaces and advertise the service name
-boltbase coordinator \
+dagu coordinator \
   --coordinator.host=0.0.0.0 \
-  --coordinator.advertise=boltbase-server \
+  --coordinator.advertise=dagu-server \
   --coordinator.port=50055
 ```
 
@@ -110,11 +110,11 @@ Start workers on your compute nodes with appropriate labels:
 
 ```bash
 # GPU-enabled worker
-boltbase worker \
+dagu worker \
   --worker.labels gpu=true,cuda=11.8,memory=64G
 
 # CPU-optimized worker
-boltbase worker \
+dagu worker \
   --worker.labels cpu-arch=amd64,cpu-cores=32,region=us-east-1
 ```
 
@@ -153,7 +153,7 @@ default_execution_mode: distributed  # "local" (default) or "distributed"
 Or via environment variable:
 
 ```bash
-export BOLTBASE_DEFAULT_EXECUTION_MODE=distributed
+export DAGU_DEFAULT_EXECUTION_MODE=distributed
 ```
 
 When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `worker_selector`. DAGs with a `worker_selector` are always dispatched to a matching worker regardless of this setting.

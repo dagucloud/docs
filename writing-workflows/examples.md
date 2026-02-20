@@ -1,6 +1,6 @@
 # Examples
 
-Quick reference for all Boltbase features. Each example is minimal and copy-paste ready.
+Quick reference for all Dagu features. Each example is minimal and copy-paste ready.
 
 ## Basic Workflows
 
@@ -1242,7 +1242,7 @@ steps:
 
 ### Reproducible Env with Nix Shell
 
-> **Note:** Requires nix-shell to be installed separately. Not included in Boltbase binary or container.
+> **Note:** Requires nix-shell to be installed separately. Not included in Dagu binary or container.
 
 ```yaml
 steps:
@@ -1874,7 +1874,7 @@ steps:
 ### Global Queue Configuration
 
 ```yaml
-# Global queue config in ~/.config/boltbase/config.yaml
+# Global queue config in ~/.config/dagu/config.yaml
 queues:
   enabled: true
   config:
@@ -2041,7 +2041,7 @@ otel:
   enabled: true
   endpoint: "otel-collector:4317"
   resource:
-    service.name: "boltbase-${DAG_NAME}"
+    service.name: "dagu-${DAG_NAME}"
     deployment.environment: "${ENV}"
 steps:
   - command: echo "Fetching data"

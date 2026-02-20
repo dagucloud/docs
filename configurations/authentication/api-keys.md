@@ -1,6 +1,6 @@
 # API Keys
 
-API keys provide programmatic access to the Boltbase API with role-based permissions. Unlike static tokens, API keys support fine-grained access control and can be managed through both the web UI and API.
+API keys provide programmatic access to the Dagu API with role-based permissions. Unlike static tokens, API keys support fine-grained access control and can be managed through both the web UI and API.
 
 ## Features
 
@@ -51,12 +51,12 @@ curl -X POST http://localhost:8080/api/v1/api-keys \
     "name": "ci-pipeline",
     "description": "API key for CI/CD pipeline",
     "role": "operator",
-    "keyPrefix": "boltbase_abc",
+    "keyPrefix": "dagu_abc",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
     "createdBy": "admin-user-id"
   },
-  "key": "boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
+  "key": "dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 }
 ```
 
@@ -69,7 +69,7 @@ The `key` field contains the full API key secret and is **only returned once** a
 API keys are used as Bearer tokens in the `Authorization` header:
 
 ```bash
-curl -H "Authorization: Bearer boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B" \
+curl -H "Authorization: Bearer dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B" \
   http://localhost:8080/api/v1/dags
 ```
 
@@ -78,8 +78,8 @@ curl -H "Authorization: Bearer boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0z
 Set the API key as an environment variable:
 
 ```bash
-export BOLTBASE_API_TOKEN=boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
-boltbase status
+export DAGU_API_TOKEN=dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
+dagu status
 ```
 
 ### CI/CD Integration
@@ -100,10 +100,10 @@ jobs:
 
       - name: Trigger DAG
         env:
-          BOLTBASE_API_KEY: ${{ secrets.BOLTBASE_API_KEY }}
+          DAGU_API_KEY: ${{ secrets.DAGU_API_KEY }}
         run: |
-          curl -X POST "https://boltbase.example.com/api/v1/dags/deploy-pipeline/start" \
-            -H "Authorization: Bearer $BOLTBASE_API_KEY" \
+          curl -X POST "https://dagu.example.com/api/v1/dags/deploy-pipeline/start" \
+            -H "Authorization: Bearer $DAGU_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{"params": "{\"version\": \"${{ github.sha }}\"}"}'
 ```
@@ -115,17 +115,17 @@ deploy:
   stage: deploy
   script:
     - |
-      curl -X POST "https://boltbase.example.com/api/v1/dags/deploy-pipeline/start" \
-        -H "Authorization: Bearer $BOLTBASE_API_KEY" \
+      curl -X POST "https://dagu.example.com/api/v1/dags/deploy-pipeline/start" \
+        -H "Authorization: Bearer $DAGU_API_KEY" \
         -H "Content-Type: application/json" \
         -d "{\"params\": \"{\\\"version\\\": \\\"$CI_COMMIT_SHA\\\"}\"}"
   variables:
-    BOLTBASE_API_KEY: $BOLTBASE_API_KEY
+    DAGU_API_KEY: $DAGU_API_KEY
 ```
 
 ### Remote Node Access
 
-API keys can authenticate requests from other Boltbase servers configured as [remote nodes](remote-nodes). This enables managing multiple Boltbase instances from a single UI with role-based access control.
+API keys can authenticate requests from other Dagu servers configured as [remote nodes](remote-nodes). This enables managing multiple Dagu instances from a single UI with role-based access control.
 
 ```yaml
 # On the main server, configure a remote node using an API key
@@ -133,7 +133,7 @@ remote_nodes:
   - name: production
     api_base_url: https://prod.example.com/api/v1
     is_auth_token: true
-    auth_token: boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
+    auth_token: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
 
 See [Remote Nodes Authentication](remote-nodes) for complete setup instructions.
@@ -168,7 +168,7 @@ curl -H "Authorization: Bearer $TOKEN" \
       "name": "ci-pipeline",
       "description": "API key for CI/CD pipeline",
       "role": "operator",
-      "keyPrefix": "boltbase_7Kq",
+      "keyPrefix": "dagu_7Kq",
       "createdAt": "2024-02-11T12:00:00Z",
       "updatedAt": "2024-02-11T12:00:00Z",
       "createdBy": "admin-user-id",
@@ -210,10 +210,10 @@ curl -X DELETE http://localhost:8080/api/v1/api-keys/{key-id} \
 API keys have the following format:
 
 ```
-boltbase_<base58-encoded-random-bytes>
+dagu_<base58-encoded-random-bytes>
 ```
 
-- **Prefix**: All API keys start with `boltbase_` for easy identification
+- **Prefix**: All API keys start with `dagu_` for easy identification
 - **Random Part**: 32 bytes of cryptographically secure random data, Base58 encoded
 - **Total Length**: Approximately 50 characters
 

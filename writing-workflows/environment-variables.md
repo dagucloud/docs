@@ -1,6 +1,6 @@
 # Environment Variables
 
-Environment variables configure the runtime environment for your workflows. Boltbase supports defining variables at three levels: base configuration, DAG-level, and step-level.
+Environment variables configure the runtime environment for your workflows. Dagu supports defining variables at three levels: base configuration, DAG-level, and step-level.
 
 ## Overview
 
@@ -27,10 +27,10 @@ steps:
 
 ## Base Configuration Inheritance
 
-Define shared environment variables in `~/.config/boltbase/base.yaml` (or set `BOLTBASE_BASE_CONFIG` to a custom path). All DAGs inherit these variables.
+Define shared environment variables in `~/.config/dagu/base.yaml` (or set `DAGU_BASE_CONFIG` to a custom path). All DAGs inherit these variables.
 
 ```yaml
-# ~/.config/boltbase/base.yaml
+# ~/.config/dagu/base.yaml
 env:
   - ENVIRONMENT: production
   - API_ENDPOINT: https://api.example.com
@@ -87,7 +87,7 @@ steps:
 
 ### Supported Formats
 
-Boltbase supports multiple formats for defining environment variables:
+Dagu supports multiple formats for defining environment variables:
 
 ```yaml
 # Format 1: Array of Maps (preserves order)
@@ -150,7 +150,7 @@ env:
 
 ### Referencing System Variables
 
-For security, Boltbase filters which system environment variables are available. To use system variables in your workflow, explicitly reference them:
+For security, Dagu filters which system environment variables are available. To use system variables in your workflow, explicitly reference them:
 
 ```yaml
 env:
@@ -210,7 +210,7 @@ These patterns work in all contexts:
 | `\$` | Literal dollar (non-shell only) | `\$9.99` → `$9.99` |
 
 **Notes:**
-- `\$` is only unescaped when Boltbase is the final evaluator (non-shell executors and config fields).
+- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and config fields).
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
 - To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 
@@ -227,7 +227,7 @@ For non-shell executors, OS-only variables not defined in the DAG scope pass thr
 
 ### Shell Expansion Syntax (Local Execution Only)
 
-When executing commands locally with the default shell executor, Boltbase uses POSIX shell expansion via [mvdan.cc/sh](https://github.com/mvdan/sh). These patterns work only in that context:
+When executing commands locally with the default shell executor, Dagu uses POSIX shell expansion via [mvdan.cc/sh](https://github.com/mvdan/sh). These patterns work only in that context:
 
 | Pattern | Description |
 |---------|-------------|
@@ -269,11 +269,11 @@ For detailed precedence rules, see [Variables Reference - Precedence](/reference
 
 ### System Environment Filtering
 
-Boltbase filters which system environment variables are passed to step processes for security.
+Dagu filters which system environment variables are passed to step processes for security.
 
 **Automatically passed:**
 - `PATH`, `HOME`, `LANG`, `TZ`, `SHELL`
-- Variables with prefixes: `BOLTBASE_*`, `LC_*`, `DAG_*`
+- Variables with prefixes: `DAGU_*`, `LC_*`, `DAG_*`
 
 **Filtered out:**
 - All other system variables (e.g., `AWS_SECRET_ACCESS_KEY`, `DATABASE_URL`)

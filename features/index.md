@@ -1,6 +1,6 @@
 # Features
 
-Boltbase provides a comprehensive set of features for building and managing workflows.
+Dagu provides a comprehensive set of features for building and managing workflows.
 
 ## Interface
 - [Command Line Interface](/overview/cli)

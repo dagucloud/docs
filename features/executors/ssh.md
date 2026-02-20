@@ -104,7 +104,7 @@ Without `shell`, commands are executed directly without shell interpretation. Us
 
 ### Variable Expansion Behavior
 
-Boltbase expands only **DAG-scoped variables** (env, params, secrets, step outputs) before sending commands to the remote host. OS-only variables (e.g., `$HOME`, `$USER`, `$PATH`) are **not** expanded locally — they pass through unchanged, letting the remote shell resolve them. This applies regardless of whether `shell` is configured.
+Dagu expands only **DAG-scoped variables** (env, params, secrets, step outputs) before sending commands to the remote host. OS-only variables (e.g., `$HOME`, `$USER`, `$PATH`) are **not** expanded locally — they pass through unchanged, letting the remote shell resolve them. This applies regardless of whether `shell` is configured.
 
 ```yaml
 ssh:
@@ -117,10 +117,10 @@ env:
 steps:
   - command: |
       cd $HOME/app              # $HOME NOT expanded — remote shell resolves it
-      git checkout ${DEPLOY_BRANCH}  # Expanded by Boltbase — defined in DAG env
+      git checkout ${DEPLOY_BRANCH}  # Expanded by Dagu — defined in DAG env
 ```
 
-This allows you to write shell scripts that use remote variables without Boltbase replacing them:
+This allows you to write shell scripts that use remote variables without Dagu replacing them:
 
 ```yaml
 steps:
@@ -135,7 +135,7 @@ steps:
 ```
 
 To emit a literal `$` in SSH commands or config fields, escape it as `\$`. When `shell` is
-configured, the remote shell handles the escape; without `shell`, Boltbase unescapes it before
+configured, the remote shell handles the escape; without `shell`, Dagu unescapes it before
 sending.
 
 To use a local OS value in SSH commands, explicitly import it via the DAG-level `env:` block:
@@ -168,7 +168,7 @@ The `shell` field controls whether POSIX shell expansion features (default value
 
 ### SSH Key Auto-Detection
 
-If no key is specified, Boltbase automatically tries these default SSH keys in order:
+If no key is specified, Dagu automatically tries these default SSH keys in order:
 1. `~/.ssh/id_rsa`
 2. `~/.ssh/id_ecdsa`
 3. `~/.ssh/id_ed25519`

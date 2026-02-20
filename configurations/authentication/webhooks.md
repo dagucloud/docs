@@ -49,13 +49,13 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook \
   "webhook": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "dagName": "my-dag",
-    "tokenPrefix": "boltbase_wh_abc",
+    "tokenPrefix": "dagu_wh_abc",
     "enabled": true,
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
     "createdBy": "admin-user-id"
   },
-  "token": "boltbase_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
+  "token": "dagu_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 }
 ```
 
@@ -69,7 +69,7 @@ The `token` field contains the full webhook token and is **only returned once** 
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
-  -H "Authorization: Bearer boltbase_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
+  -H "Authorization: Bearer dagu_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 ```
 
 **Response**:
@@ -86,12 +86,12 @@ You can pass data to your DAG via the request body. The payload is made availabl
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
-  -H "Authorization: Bearer boltbase_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B" \
+  -H "Authorization: Bearer dagu_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B" \
   -H "Content-Type: application/json" \
   -d '{"branch": "main", "commit": "abc123"}'
 ```
 
-In your DAG, access the payload fields directly using Boltbase's JSON field access syntax:
+In your DAG, access the payload fields directly using Dagu's JSON field access syntax:
 
 ```yaml
 steps:
@@ -110,7 +110,7 @@ steps:
 ```
 
 ::: tip
-Boltbase automatically parses the JSON payload and allows direct field access using dot notation. For arrays, use numeric indices (e.g., `.commits.0` for the first element).
+Dagu automatically parses the JSON payload and allows direct field access using dot notation. For arrays, use numeric indices (e.g., `.commits.0` for the first element).
 :::
 
 ### Idempotent Requests
@@ -142,7 +142,7 @@ curl -H "Authorization: Bearer $TOKEN" \
     {
       "id": "550e8400-e29b-41d4-a716-446655440000",
       "dagName": "my-dag",
-      "tokenPrefix": "boltbase_wh_7Kq",
+      "tokenPrefix": "dagu_wh_7Kq",
       "enabled": true,
       "createdAt": "2024-02-11T12:00:00Z",
       "updatedAt": "2024-02-11T12:00:00Z",
@@ -194,14 +194,14 @@ curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook \
 Webhook tokens have the following format:
 
 ```
-boltbase_wh_<base58-encoded-random-bytes>
+dagu_wh_<base58-encoded-random-bytes>
 ```
 
-- **Prefix**: All webhook tokens start with `boltbase_wh_` for easy identification
+- **Prefix**: All webhook tokens start with `dagu_wh_` for easy identification
 - **Random Part**: 32 bytes of cryptographically secure random data, Base58 encoded
 - **Total Length**: Approximately 50 characters
 
-The token prefix (first 12 characters including `boltbase_wh_`) is stored and displayed in the UI for identification purposes.
+The token prefix (first 12 characters including `dagu_wh_`) is stored and displayed in the UI for identification purposes.
 
 ## Security Best Practices
 
@@ -241,10 +241,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Trigger Boltbase DAG
+      - name: Trigger Dagu DAG
         run: |
-          curl -X POST "${{ secrets.BOLTBASE_URL }}/api/v1/webhooks/deploy-pipeline" \
-            -H "Authorization: Bearer ${{ secrets.BOLTBASE_WEBHOOK_TOKEN }}" \
+          curl -X POST "${{ secrets.DAGU_URL }}/api/v1/webhooks/deploy-pipeline" \
+            -H "Authorization: Bearer ${{ secrets.DAGU_WEBHOOK_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
               "branch": "${{ github.ref_name }}",
@@ -260,8 +260,8 @@ deploy:
   stage: deploy
   script:
     - |
-      curl -X POST "$BOLTBASE_URL/api/v1/webhooks/deploy-pipeline" \
-        -H "Authorization: Bearer $BOLTBASE_WEBHOOK_TOKEN" \
+      curl -X POST "$DAGU_URL/api/v1/webhooks/deploy-pipeline" \
+        -H "Authorization: Bearer $DAGU_WEBHOOK_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{
           \"branch\": \"$CI_COMMIT_REF_NAME\",
@@ -272,11 +272,11 @@ deploy:
 
 ### GitHub Webhooks
 
-Configure GitHub to send repository events to Boltbase:
+Configure GitHub to send repository events to Dagu:
 
 1. In your GitHub repository, go to **Settings** > **Webhooks**
 2. Add a new webhook with:
-   - **Payload URL**: `https://boltbase.example.com/api/v1/webhooks/github-events`
+   - **Payload URL**: `https://dagu.example.com/api/v1/webhooks/github-events`
    - **Content type**: `application/json`
    - **Secret**: (not used, authentication via Bearer token)
 
@@ -309,14 +309,14 @@ steps:
 
 ### Custom Integrations
 
-Any system that can make HTTP requests can trigger Boltbase DAGs:
+Any system that can make HTTP requests can trigger Dagu DAGs:
 
 ```python
 import requests
 
-def trigger_boltbase_dag(dag_name: str, payload: dict):
+def trigger_dagu_dag(dag_name: str, payload: dict):
     response = requests.post(
-        f"https://boltbase.example.com/api/v1/webhooks/{dag_name}",
+        f"https://dagu.example.com/api/v1/webhooks/{dag_name}",
         headers={
             "Authorization": f"Bearer {WEBHOOK_TOKEN}",
             "Content-Type": "application/json"
@@ -327,7 +327,7 @@ def trigger_boltbase_dag(dag_name: str, payload: dict):
     return response.json()
 
 # Trigger a DAG with custom data
-result = trigger_boltbase_dag("data-pipeline", {
+result = trigger_dagu_dag("data-pipeline", {
     "source": "api",
     "timestamp": "2024-02-11T12:00:00Z"
 })

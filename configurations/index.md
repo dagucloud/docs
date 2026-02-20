@@ -1,20 +1,20 @@
 # Configurations
 
-Deploy, configure, and operate Boltbase.
+Deploy, configure, and operate Dagu.
 
 ## Configuration Methods
 
 Precedence order:
 1. Command-line flags (highest)
-2. Environment variables (`BOLTBASE_` prefix)
+2. Environment variables (`DAGU_` prefix)
 3. Configuration file (lowest)
 
 ```bash
 # Port 9000 wins
-boltbase start-all --port 9000
+dagu start-all --port 9000
 
 # Despite env var
-export BOLTBASE_PORT=8080
+export DAGU_PORT=8080
 
 # And config file
 port: 7000
@@ -25,12 +25,12 @@ port: 7000
 ### Development
 ```bash
 # Zero config
-boltbase start-all
+dagu start-all
 ```
 
 ### Production
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 host: 0.0.0.0
 port: 8080
 
@@ -41,18 +41,18 @@ auth:
     password: ${ADMIN_PASSWORD}
 
 paths:
-  dags_dir: /opt/boltbase/workflows
-  log_dir: /var/log/boltbase
+  dags_dir: /opt/dagu/workflows
+  log_dir: /var/log/dagu
 ```
 
 ### Docker
 ```bash
 docker run -d \
-  -e BOLTBASE_HOST=0.0.0.0 \
-  -e BOLTBASE_AUTH_BASIC_USERNAME=admin \
-  -e BOLTBASE_AUTH_BASIC_PASSWORD=secret \
+  -e DAGU_HOST=0.0.0.0 \
+  -e DAGU_AUTH_BASIC_USERNAME=admin \
+  -e DAGU_AUTH_BASIC_PASSWORD=secret \
   -p 8080:8080 \
-  ghcr.io/dagu-org/boltbase:latest
+  ghcr.io/dagu-org/dagu:latest
 ```
 
 ## Topics
@@ -130,18 +130,18 @@ auth:
 
 ```bash
 # Server
-export BOLTBASE_HOST=0.0.0.0
-export BOLTBASE_PORT=8080
+export DAGU_HOST=0.0.0.0
+export DAGU_PORT=8080
 
 # Paths
-export BOLTBASE_DAGS_DIR=/opt/workflows
-export BOLTBASE_LOG_DIR=/var/log/boltbase
+export DAGU_DAGS_DIR=/opt/workflows
+export DAGU_LOG_DIR=/var/log/dagu
 
 # Auth
-export BOLTBASE_AUTH_BASIC_USERNAME=admin
-export BOLTBASE_AUTH_BASIC_PASSWORD=secret
+export DAGU_AUTH_BASIC_USERNAME=admin
+export DAGU_AUTH_BASIC_PASSWORD=secret
 
-boltbase start-all
+dagu start-all
 ```
 
 ## See Also

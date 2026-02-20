@@ -1,6 +1,6 @@
 # Testing OpenTelemetry Integration
 
-This guide explains how to test Boltbase's OpenTelemetry tracing functionality in various environments.
+This guide explains how to test Dagu's OpenTelemetry tracing functionality in various environments.
 
 ## Quick Start with Jaeger
 
@@ -24,7 +24,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "boltbase-${DAG_NAME}"
+    service.name: "dagu-${DAG_NAME}"
     service.version: "1.0.0"
     environment: "local"
 
@@ -53,13 +53,13 @@ steps:
 ### 3. Run the DAG
 
 ```bash
-boltbase start test-otel.yaml
+dagu start test-otel.yaml
 ```
 
 ### 4. View Traces
 
 Open http://localhost:16686 in your browser:
-1. Select "boltbase-otel-test" from the Service dropdown
+1. Select "dagu-otel-test" from the Service dropdown
 2. Click "Find Traces"
 3. Click on a trace to see the execution timeline
 
@@ -101,7 +101,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "boltbase-${DAG_NAME}"
+    service.name: "dagu-${DAG_NAME}"
     service.version: "2.0.0"
     deployment.environment: "testing"
     team: "platform"
@@ -167,7 +167,7 @@ steps:
 ### 3. Run and Verify
 
 ```bash
-boltbase start parent-workflow.yaml
+dagu start parent-workflow.yaml
 ```
 
 In Jaeger, you should see:
@@ -256,11 +256,11 @@ docker compose up -d
 
 ```bash
 # Run with debug flag
-boltbase start --debug test-otel.yaml
+dagu start --debug test-otel.yaml
 
 # Or set environment variable
-export BOLTBASE_DEBUG=true
-boltbase start test-otel.yaml
+export DAGU_DEBUG=true
+dagu start test-otel.yaml
 ```
 
 ### 2. Test Connectivity
@@ -319,7 +319,7 @@ steps:
 EOF
 
 # Time execution without OTel
-time boltbase start perf-test-no-otel.yaml
+time dagu start perf-test-no-otel.yaml
 ```
 
 ### 2. With OTel Enabled
@@ -337,7 +337,7 @@ steps:
 EOF
 
 # Time execution with OTel
-time boltbase start perf-test-with-otel.yaml
+time dagu start perf-test-with-otel.yaml
 ```
 
 ### 3. Load Testing
@@ -345,7 +345,7 @@ time boltbase start perf-test-with-otel.yaml
 ```bash
 # Run multiple DAGs concurrently
 for i in {1..10}; do
-  boltbase start test-otel.yaml &
+  dagu start test-otel.yaml &
 done
 wait
 
@@ -367,7 +367,7 @@ otel:
     Authorization: "Bearer ${OTEL_TOKEN}"
   timeout: 30s
   resource:
-    service.name: "boltbase-${DAG_NAME}"
+    service.name: "dagu-${DAG_NAME}"
     service.version: "${APP_VERSION}"
     deployment.environment: "${ENVIRONMENT}"
 steps:
@@ -381,5 +381,5 @@ export OTEL_TOKEN="your-token"
 export APP_VERSION="1.0.0"
 export ENVIRONMENT="staging"
 
-boltbase start production-like-test.yaml
+dagu start production-like-test.yaml
 ```

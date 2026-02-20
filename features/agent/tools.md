@@ -13,7 +13,7 @@ Execute shell commands.
 
 **Output**: Combined stdout/stderr, truncated at 100,000 characters.
 
-**Requires Approval**: Commands containing `rm `, `chmod `, or `boltbase start`.
+**Requires Approval**: Commands containing `rm `, `chmod `, or `dagu start`.
 
 ---
 

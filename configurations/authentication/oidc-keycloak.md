@@ -1,6 +1,6 @@
 # Keycloak OIDC Setup
 
-Configure Boltbase with Keycloak as OIDC provider.
+Configure Dagu with Keycloak as OIDC provider.
 
 ## Quick Start with Docker
 
@@ -35,18 +35,18 @@ docker compose -f docker-compose-keycloak.yml up -d
 2. Login with admin/admin
 3. Create a new realm:
    - Click "Create Realm"
-   - Name: `boltbase` (or your preference)
+   - Name: `dagu` (or your preference)
 4. Create a client:
    - Clients > Create client
    - Client type: OpenID Connect
-   - Client ID: `boltbase-client`
+   - Client ID: `dagu-client`
    - Click Next
    - Client authentication: ON
    - Click Next
    - Valid redirect URIs: `http://localhost:8080/oidc-callback`
    - Click Save
 5. Get credentials:
-   - Go to Clients > boltbase-client > Credentials
+   - Go to Clients > dagu-client > Credentials
    - Copy the Client Secret
 
 ### 3. Create Test User
@@ -59,18 +59,18 @@ docker compose -f docker-compose-keycloak.yml up -d
 6. Credentials tab > Set password
 7. Temporary: OFF
 
-### 4. Configure Boltbase
+### 4. Configure Dagu
 
 #### YAML Configuration
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 auth:
   oidc:
-    client_id: "boltbase-client"
+    client_id: "dagu-client"
     client_secret: "copy-from-keycloak-credentials-tab"
     client_url: "http://localhost:8080"
-    issuer: "http://localhost:8081/realms/boltbase"
+    issuer: "http://localhost:8081/realms/dagu"
     scopes:
       - "openid"
       - "profile"
@@ -80,13 +80,13 @@ auth:
 #### Environment Variables
 
 ```bash
-export BOLTBASE_AUTH_OIDC_CLIENT_ID="boltbase-client"
-export BOLTBASE_AUTH_OIDC_CLIENT_SECRET="your-client-secret"
-export BOLTBASE_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
-export BOLTBASE_AUTH_OIDC_ISSUER="http://localhost:8081/realms/boltbase"
-export BOLTBASE_AUTH_OIDC_SCOPES="openid,profile,email"
+export DAGU_AUTH_OIDC_CLIENT_ID="dagu-client"
+export DAGU_AUTH_OIDC_CLIENT_SECRET="your-client-secret"
+export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
+export DAGU_AUTH_OIDC_ISSUER="http://localhost:8081/realms/dagu"
+export DAGU_AUTH_OIDC_SCOPES="openid,profile,email"
 
-boltbase start-all
+dagu start-all
 ```
 
 ## Production Setup
@@ -97,9 +97,9 @@ boltbase start-all
 # Production Keycloak
 auth:
   oidc:
-    client_id: "boltbase-prod"
+    client_id: "dagu-prod"
     client_secret: "production-secret"
-    client_url: "https://boltbase.example.com"
+    client_url: "https://dagu.example.com"
     issuer: "https://auth.example.com/realms/production"
     scopes:
       - "openid"
@@ -115,8 +115,8 @@ docker compose -f docker-compose-keycloak.yml up -d
 
 # 2. Configure realm and client as above
 
-# 3. Start Boltbase
-boltbase start-all
+# 3. Start Dagu
+dagu start-all
 
 # 4. Access http://localhost:8080
 # You'll be redirected to Keycloak login
@@ -127,12 +127,12 @@ boltbase start-all
 ## Keycloak URLs
 
 - Admin Console: http://localhost:8081/admin
-- Realm Settings: http://localhost:8081/admin/master/console/#/boltbase
-- OpenID Configuration: http://localhost:8081/realms/boltbase/.well-known/openid-configuration
+- Realm Settings: http://localhost:8081/admin/master/console/#/dagu
+- OpenID Configuration: http://localhost:8081/realms/dagu/.well-known/openid-configuration
 
 ## Notes
 
-- Keycloak runs on port 8081 to avoid conflict with Boltbase (8080)
+- Keycloak runs on port 8081 to avoid conflict with Dagu (8080)
 - Issuer URL format: `http://keycloak-host/realms/realm-name`
 - Client authentication must be enabled for confidential clients
 - Development mode (`start-dev`) is insecure - use production mode for real deployments

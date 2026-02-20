@@ -1,8 +1,8 @@
 # Quick Start
 
-Get up and running with Boltbase in under 2 minutes.
+Get up and running with Dagu in under 2 minutes.
 
-## Install Boltbase
+## Install Dagu
 
 ::: code-group
 
@@ -18,7 +18,7 @@ curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.s
 ```
 
 ```powershell [Windows]
-# Install latest version to default location (%LOCALAPPDATA%\Programs\boltbase)
+# Install latest version to default location (%LOCALAPPDATA%\Programs\dagu)
 irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
 
 # Install specific version
@@ -26,15 +26,15 @@ irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 |
 ```
 
 ```bash [Docker]
-docker pull ghcr.io/dagu-org/boltbase:latest
+docker pull ghcr.io/dagu-org/dagu:latest
 ```
 
 ```bash [Homebrew]
-brew update && brew install boltbase
+brew update && brew install dagu
 ```
 
 ```bash [npm]
-npm install -g --ignore-scripts=false @dagu-org/boltbase
+npm install -g --ignore-scripts=false @dagu-org/dagu
 ```
 
 :::
@@ -44,7 +44,7 @@ See [Installation Guide](/getting-started/installation) for more options.
 ## Your First Workflow
 
 ::: info Example DAGs
-When you first start Boltbase with an empty DAGs directory, it automatically creates several example workflows to help you get started:
+When you first start Dagu with an empty DAGs directory, it automatically creates several example workflows to help you get started:
 - `example-01-basic-sequential.yaml` - Basic sequential execution
 - `example-02-parallel-execution.yaml` - Parallel task execution
 - `example-03-complex-dependencies.yaml` - Complex dependency graphs
@@ -52,7 +52,7 @@ When you first start Boltbase with an empty DAGs directory, it automatically cre
 - `example-05-nested-workflows.yaml` - Nested sub-workflows
 - `example-06-container-workflow.yaml` - Container-based workflows
 
-To skip creating these examples, set `BOLTBASE_SKIP_EXAMPLES=true` or add `skip_examples: true` to your config file.
+To skip creating these examples, set `DAGU_SKIP_EXAMPLES=true` or add `skip_examples: true` to your config file.
 :::
 
 ### 1. Create a workflow
@@ -60,17 +60,17 @@ To skip creating these examples, set `BOLTBASE_SKIP_EXAMPLES=true` or add `skip_
 ::: code-group
 
 ```bash [Binary]
-mkdir -p ~/.config/boltbase/dags && cat > ~/.config/boltbase/dags/hello.yaml << 'EOF'
+mkdir -p ~/.config/dagu/dags && cat > ~/.config/dagu/dags/hello.yaml << 'EOF'
 steps:
-  - echo "Hello from Boltbase!"
+  - echo "Hello from Dagu!"
   - echo "Running step 2"
 EOF
 ```
 
 ```bash [Docker]
-mkdir -p ~/.boltbase/dags && cat > ~/.boltbase/dags/hello.yaml << 'EOF'
+mkdir -p ~/.dagu/dags && cat > ~/.dagu/dags/hello.yaml << 'EOF'
 steps:
-  - echo "Hello from Boltbase!"
+  - echo "Hello from Dagu!"
   - echo "Running step 2"
 EOF
 ```
@@ -80,14 +80,14 @@ EOF
 ::: code-group
 
 ```bash [Binary]
-boltbase start hello
+dagu start hello
 ```
 
 ```bash [Docker]
 docker run --rm \
-  -v ~/.boltbase:/var/lib/boltbase \
-  ghcr.io/dagu-org/boltbase:latest \
-  boltbase start hello
+  -v ~/.dagu:/var/lib/dagu \
+  ghcr.io/dagu-org/dagu:latest \
+  dagu start hello
 ```
 
 :::
@@ -108,7 +108,7 @@ Progress: ███████████████████████�
 Before running, you can validate the DAG structure without executing it:
 
 ```bash
-boltbase validate ~/.config/boltbase/dags/hello.yaml
+dagu validate ~/.config/dagu/dags/hello.yaml
 ```
 
 If there are issues, the command prints human‑readable errors and exits with code 1.
@@ -118,14 +118,14 @@ If there are issues, the command prints human‑readable errors and exits with c
 ::: code-group
 
 ```bash [Binary]
-boltbase status hello
+dagu status hello
 ```
 
 ```bash [Docker]
 docker run --rm \
-  -v ~/.boltbase:/var/lib/boltbase \
-  ghcr.io/dagu-org/boltbase:latest \
-  boltbase status hello
+  -v ~/.dagu:/var/lib/dagu \
+  ghcr.io/dagu-org/dagu:latest \
+  dagu status hello
 ```
 
 :::
@@ -138,24 +138,24 @@ Check past runs of your workflow:
 
 ```bash [Binary]
 # View recent runs
-boltbase history hello
+dagu history hello
 
 # View last 50 runs
-boltbase history hello --limit 50
+dagu history hello --limit 50
 
 # Export to JSON
-boltbase history hello --format json
+dagu history hello --format json
 
 # Export to CSV
-boltbase history hello --format csv
+dagu history hello --format csv
 ```
 
 ```bash [Docker]
 # View recent runs
 docker run --rm \
-  -v ~/.boltbase:/var/lib/boltbase \
-  ghcr.io/dagu-org/boltbase:latest \
-  boltbase history hello
+  -v ~/.dagu:/var/lib/dagu \
+  ghcr.io/dagu-org/dagu:latest \
+  dagu history hello
 ```
 
 :::
@@ -174,15 +174,15 @@ For more filtering options, see the [CLI reference](/reference/cli#history).
 ::: code-group
 
 ```bash [Binary]
-boltbase start-all
+dagu start-all
 ```
 
 ```bash [Docker]
 docker run -d \
   -p 8080:8080 \
-  -v ~/.boltbase:/var/lib/boltbase \
-  ghcr.io/dagu-org/boltbase:latest \
-  boltbase start-all
+  -v ~/.dagu:/var/lib/dagu \
+  ghcr.io/dagu-org/dagu:latest \
+  dagu start-all
 ```
 
 :::
@@ -238,7 +238,7 @@ steps:
 Run with parameters:
 
 ```bash
-boltbase start backup.yaml -- SOURCE=/important/data DEST=/backups
+dagu start backup.yaml -- SOURCE=/important/data DEST=/backups
 ```
 
 ## Error Handling
@@ -274,7 +274,7 @@ container:
     - ./data:/data
 steps:
   # write data to a file
-  - command: python -c "with open('/data/output.txt', 'w') as f: f.write('Hello from Boltbase!')"
+  - command: python -c "with open('/data/output.txt', 'w') as f: f.write('Hello from Dagu!')"
   # read data from the file
   - command: python -c "with open('/data/output.txt') as f: print(f.read())"
 ```
@@ -293,7 +293,7 @@ The workflow will execute every day at 2 AM.
 
 ## What's Next?
 
-- [Core Concepts](/getting-started/concepts) - Understand Boltbase's architecture
+- [Core Concepts](/getting-started/concepts) - Understand Dagu's architecture
 - [Writing Workflows](/writing-workflows/) - Learn advanced features
 - [Examples](/writing-workflows/examples) - Ready-to-use workflow patterns
 - [CLI Reference](/reference/cli) - All command options

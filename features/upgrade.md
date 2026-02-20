@@ -1,28 +1,28 @@
 # Self-Upgrade
 
-Boltbase includes a built-in upgrade command that allows you to update to the latest version directly from the command line.
+Dagu includes a built-in upgrade command that allows you to update to the latest version directly from the command line.
 
 ## Overview
 
-The `boltbase upgrade` command downloads and installs the latest version of Boltbase, with built-in checksum verification for security.
+The `dagu upgrade` command downloads and installs the latest version of Dagu, with built-in checksum verification for security.
 
 ## Basic Usage
 
 ```bash
 # Upgrade to latest version
-boltbase upgrade
+dagu upgrade
 
 # Check if update is available (no installation)
-boltbase upgrade --check
+dagu upgrade --check
 
 # Upgrade to specific version
-boltbase upgrade --version v1.30.0
+dagu upgrade --version v1.30.0
 
 # Preview changes without installing
-boltbase upgrade --dry-run
+dagu upgrade --dry-run
 
 # Skip confirmation prompt
-boltbase upgrade -y
+dagu upgrade -y
 ```
 
 ## Command Options
@@ -38,14 +38,14 @@ boltbase upgrade -y
 
 ## Installation Methods
 
-The upgrade command automatically detects how Boltbase was installed:
+The upgrade command automatically detects how Dagu was installed:
 
 | Method | Self-Upgrade | Recommended Action |
 |--------|--------------|-------------------|
-| Binary download | Yes | `boltbase upgrade` |
+| Binary download | Yes | `dagu upgrade` |
 | Go install | No | `go install github.com/dagu-org/dagu@latest` |
-| Homebrew | No | `brew upgrade boltbase` |
-| Snap | No | `snap refresh boltbase` |
+| Homebrew | No | `brew upgrade dagu` |
+| Snap | No | `snap refresh dagu` |
 | Docker | No | Pull latest image |
 
 ## How It Works
@@ -66,14 +66,14 @@ The upgrade command automatically detects how Boltbase was installed:
 
 ## Update Notifications
 
-Boltbase caches update check results for 24 hours. When an update is available, you'll see a notification in the web UI.
+Dagu caches update check results for 24 hours. When an update is available, you'll see a notification in the web UI.
 
 ## Examples
 
 ### Check for Updates
 
 ```bash
-boltbase upgrade --check
+dagu upgrade --check
 ```
 
 Output:
@@ -81,13 +81,13 @@ Output:
 Current version: v1.30.0
 Latest version:  v1.30.3
 
-An update is available. Run 'boltbase upgrade' to update.
+An update is available. Run 'dagu upgrade' to update.
 ```
 
 ### Dry Run
 
 ```bash
-boltbase upgrade --dry-run
+dagu upgrade --dry-run
 ```
 
 Output:
@@ -98,29 +98,29 @@ Current version: v1.30.0
 Target version:  v1.30.3
 
 The following changes will be made:
-  - Download: boltbase_1.30.3_darwin_arm64.tar.gz (25.3 MB)
+  - Download: dagu_1.30.3_darwin_arm64.tar.gz (25.3 MB)
   - Verify:   SHA256 checksum
-  - Replace:  /usr/local/bin/boltbase
+  - Replace:  /usr/local/bin/dagu
 ```
 
 ### Upgrade with Backup
 
 ```bash
-boltbase upgrade --backup
+dagu upgrade --backup
 ```
 
-Creates `/usr/local/bin/boltbase.bak` before replacing.
+Creates `/usr/local/bin/dagu.bak` before replacing.
 
 ### Upgrade to Specific Version
 
 ```bash
-boltbase upgrade --version v1.30.0
+dagu upgrade --version v1.30.0
 ```
 
 ### Include Pre-releases
 
 ```bash
-boltbase upgrade --pre-release
+dagu upgrade --pre-release
 ```
 
 ## Security

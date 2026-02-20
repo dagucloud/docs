@@ -8,7 +8,7 @@ Workers connect to a coordinator service and poll for tasks via gRPC long-pollin
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Boltbase Instance                           │
+│                     Dagu Instance                           │
 ├──────────────┬────────────────┬─────────────────────────────┤
 │  Scheduler   │   Web UI       │      Coordinator Service    │
 │              │                │         (gRPC Server)       │
@@ -39,7 +39,7 @@ Workers connect to a coordinator service and poll for tasks via gRPC long-pollin
 Workers are identified by a unique ID that defaults to `hostname@PID`. This can be customized:
 
 ```bash
-boltbase worker --worker.id=gpu-worker-01
+dagu worker --worker.id=gpu-worker-01
 ```
 
 ## Deployment Modes
@@ -154,15 +154,15 @@ See [Shared Nothing Mode — PostgreSQL Connection Pool Management](/features/wo
 ### Environment Variables
 
 ```bash
-export BOLTBASE_WORKER_ID=worker-01
-export BOLTBASE_WORKER_LABELS="gpu=true,region=us-east-1"
-export BOLTBASE_WORKER_MAX_ACTIVE_RUNS=50
+export DAGU_WORKER_ID=worker-01
+export DAGU_WORKER_LABELS="gpu=true,region=us-east-1"
+export DAGU_WORKER_MAX_ACTIVE_RUNS=50
 
 # PostgreSQL connection pool (shared-nothing mode only)
-export BOLTBASE_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
-export BOLTBASE_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
-export BOLTBASE_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
-export BOLTBASE_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
+export DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
+export DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
 ```
 
 ## Technical Details

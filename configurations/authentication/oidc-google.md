@@ -1,6 +1,6 @@
 # Google OIDC Setup
 
-Configure Boltbase with Google as OIDC provider.
+Configure Dagu with Google as OIDC provider.
 
 ## Prerequisites
 
@@ -25,16 +25,16 @@ Configure Boltbase with Google as OIDC provider.
    ```
    For production:
    ```
-   https://boltbase.example.com/oidc-callback
+   https://dagu.example.com/oidc-callback
    ```
 8. Save and copy the Client ID and Client Secret
 
-### 2. Configure Boltbase
+### 2. Configure Dagu
 
 #### YAML Configuration
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 auth:
   oidc:
     client_id: "123456789012-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com"
@@ -50,13 +50,13 @@ auth:
 #### Environment Variables
 
 ```bash
-export BOLTBASE_AUTH_OIDC_CLIENT_ID="123456789012-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com"
-export BOLTBASE_AUTH_OIDC_CLIENT_SECRET="GOCSPX-1234567890abcdefghijklmno"
-export BOLTBASE_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
-export BOLTBASE_AUTH_OIDC_ISSUER="https://accounts.google.com"
-export BOLTBASE_AUTH_OIDC_SCOPES="openid,profile,email"
+export DAGU_AUTH_OIDC_CLIENT_ID="123456789012-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com"
+export DAGU_AUTH_OIDC_CLIENT_SECRET="GOCSPX-1234567890abcdefghijklmno"
+export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
+export DAGU_AUTH_OIDC_ISSUER="https://accounts.google.com"
+export DAGU_AUTH_OIDC_SCOPES="openid,profile,email"
 
-boltbase start-all
+dagu start-all
 ```
 
 ## Google Workspace Setup
@@ -70,7 +70,7 @@ auth:
   oidc:
     client_id: "your-client-id"
     client_secret: "your-secret"
-    client_url: "https://boltbase.company.com"
+    client_url: "https://dagu.company.com"
     issuer: "https://accounts.google.com"
 ```
 
@@ -94,27 +94,27 @@ auth:
   oidc:
     client_id: "your-production-client-id"
     client_secret: "your-production-secret"
-    client_url: "https://boltbase.example.com"
+    client_url: "https://dagu.example.com"
     issuer: "https://accounts.google.com"
 
 # Also enable TLS
 tls:
-  cert_file: "/etc/ssl/boltbase.crt"
-  key_file: "/etc/ssl/boltbase.key"
+  cert_file: "/etc/ssl/dagu.crt"
+  key_file: "/etc/ssl/dagu.key"
 ```
 
 ## Testing
 
-1. Start Boltbase:
+1. Start Dagu:
    ```bash
-   boltbase start-all
+   dagu start-all
    ```
 
 2. Open browser to http://localhost:8080
 
 3. You should be redirected to Google login
 
-4. After login, redirected back to Boltbase
+4. After login, redirected back to Dagu
 
 5. Check browser developer tools for cookie named `oidc-token`
 

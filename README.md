@@ -1,6 +1,6 @@
-# Boltbase Documentation
+# Dagu Documentation
 
-This repository contains the VitePress site that powers the Boltbase documentation. It includes guides, references, and workflow authoring tutorials for Boltbase users.
+This repository contains the VitePress site that powers the Dagu documentation. It includes guides, references, and workflow authoring tutorials for Dagu users.
 
 ## Prerequisites
 - Node.js 18 or newer
@@ -26,7 +26,7 @@ pnpm preview
 
 ## Directory Overview
 - `index.md` — landing page for the documentation.
-- `getting-started/` — onboarding material for new Boltbase users.
+- `getting-started/` — onboarding material for new Dagu users.
 - `features/` — feature-focused guides.
 - `reference/` — API and configuration references.
 - `writing-workflows/` — authoring workflows and best practices.

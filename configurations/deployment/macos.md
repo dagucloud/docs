@@ -1,19 +1,19 @@
 # macOS Service
 
-## Install Boltbase via Homebrew
+## Install Dagu via Homebrew
 
 ```bash
-# Install Boltbase
-brew update && brew install boltbase
+# Install Dagu
+brew update && brew install dagu
 
-# Update Boltbase
-brew update && brew upgrade boltbase
+# Update Dagu
+brew update && brew upgrade dagu
 ```
 
 
 ## Create Config File
 
-Create `~/.config/boltbase/config.yaml`:
+Create `~/.config/dagu/config.yaml`:
 
 ```yaml
 host: 127.0.0.1
@@ -22,10 +22,10 @@ port: 8525
 
 ## Create LaunchAgent
 
-Create `~/Library/LaunchAgents/local.boltbase.server.plist`:
+Create `~/Library/LaunchAgents/local.dagu.server.plist`:
 
 ```sh
-vim ~/Library/LaunchAgents/local.boltbase.server.plist
+vim ~/Library/LaunchAgents/local.dagu.server.plist
 ```
 
 Contents:
@@ -36,10 +36,10 @@ Contents:
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>local.boltbase.server</string>
+    <string>local.dagu.server</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/bin/boltbase</string>
+        <string>/opt/homebrew/bin/dagu</string>
         <string>start-all</string>
     </array>
     <key>RunAtLoad</key>
@@ -47,9 +47,9 @@ Contents:
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/boltbase.out.log</string>
+    <string>/tmp/dagu.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/boltbase.err.log</string>
+    <string>/tmp/dagu.err.log</string>
 </dict>
 </plist>
 ```
@@ -58,26 +58,26 @@ Contents:
 
 ```bash
 # Load and start service
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.boltbase.server.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.dagu.server.plist
 
 # Check status
-launchctl list | grep boltbase
+launchctl list | grep dagu
 
 # Stop service
-launchctl bootout gui/$(id -u)/local.boltbase.server
+launchctl bootout gui/$(id -u)/local.dagu.server
 
 # Restart service
-launchctl kickstart -k gui/$(id -u)/local.boltbase.server
+launchctl kickstart -k gui/$(id -u)/local.dagu.server
 ```
 
 ## Uninstall
 
 ```bash
 # Stop and unload service
-launchctl bootout gui/$(id -u)/local.boltbase.server
+launchctl bootout gui/$(id -u)/local.dagu.server
 
 # Remove plist file
-rm ~/Library/LaunchAgents/local.boltbase.server.plist
+rm ~/Library/LaunchAgents/local.dagu.server.plist
 ```
 
 ## Access

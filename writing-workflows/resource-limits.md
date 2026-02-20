@@ -50,7 +50,7 @@ Tip: Combine `timeout_sec` with retries (repeat policy) so transient network del
 Control concurrent DAG instances using global queues:
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 queues:
   enabled: true
   config:

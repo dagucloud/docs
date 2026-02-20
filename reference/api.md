@@ -10,8 +10,8 @@
 
 The API supports multiple authentication methods:
 
-- **API Keys**: Include `Authorization: Bearer boltbase_<key>` header (requires Builtin Auth)
-- **Webhooks**: Include `Authorization: Bearer boltbase_wh_<token>` header for triggering specific DAGs (requires Builtin Auth)
+- **API Keys**: Include `Authorization: Bearer dagu_<key>` header (requires Builtin Auth)
+- **Webhooks**: Include `Authorization: Bearer dagu_wh_<token>` header for triggering specific DAGs (requires Builtin Auth)
 - **JWT Token**: Include `Authorization: Bearer <jwt-token>` header (from login endpoint)
 - **Basic Auth**: Include `Authorization: Basic <base64(username:password)>` header
 - **No Authentication**: When auth is disabled (default for local development)
@@ -24,7 +24,7 @@ API keys are recommended for general programmatic access as they support role-ba
 
 **Endpoint**: `GET /api/v1/health`
 
-Checks the health status of the Boltbase server.
+Checks the health status of the Dagu server.
 
 **Response (200)**:
 ```json
@@ -177,7 +177,7 @@ Fetches detailed information about a specific DAG.
       "DATA_SOURCE=postgres://prod-db:5432/analytics",
       "WAREHOUSE_URL=${WAREHOUSE_URL}"
     ],
-    "log_dir": "/var/log/boltbase/pipelines",
+    "log_dir": "/var/log/dagu/pipelines",
     "handler_on": {
       "success": {
         "name": "notify_success",
@@ -1532,35 +1532,35 @@ Returns Prometheus-compatible metrics.
 
 **Response (200)** (text/plain):
 ```text
-# HELP boltbase_info Boltbase build information
-# TYPE boltbase_info gauge
-boltbase_info{version="1.14.0",build_date="2024-01-01T12:00:00Z",go_version="1.21"} 1
+# HELP dagu_info Dagu build information
+# TYPE dagu_info gauge
+dagu_info{version="1.14.0",build_date="2024-01-01T12:00:00Z",go_version="1.21"} 1
 
-# HELP boltbase_uptime_seconds Time since server start
-# TYPE boltbase_uptime_seconds gauge
-boltbase_uptime_seconds 3600
+# HELP dagu_uptime_seconds Time since server start
+# TYPE dagu_uptime_seconds gauge
+dagu_uptime_seconds 3600
 
-# HELP boltbase_dag_runs_currently_running Number of currently running DAG runs
-# TYPE boltbase_dag_runs_currently_running gauge
-boltbase_dag_runs_currently_running 5
+# HELP dagu_dag_runs_currently_running Number of currently running DAG runs
+# TYPE dagu_dag_runs_currently_running gauge
+dagu_dag_runs_currently_running 5
 
-# HELP boltbase_dag_runs_queued_total Total number of DAG runs in queue
-# TYPE boltbase_dag_runs_queued_total gauge
-boltbase_dag_runs_queued_total 8
+# HELP dagu_dag_runs_queued_total Total number of DAG runs in queue
+# TYPE dagu_dag_runs_queued_total gauge
+dagu_dag_runs_queued_total 8
 
-# HELP boltbase_dag_runs_total Total number of DAG runs by status
-# TYPE boltbase_dag_runs_total counter
-boltbase_dag_runs_total{status="succeeded"} 2493
-boltbase_dag_runs_total{status="failed"} 15
-boltbase_dag_runs_total{status="aborted"} 7
+# HELP dagu_dag_runs_total Total number of DAG runs by status
+# TYPE dagu_dag_runs_total counter
+dagu_dag_runs_total{status="succeeded"} 2493
+dagu_dag_runs_total{status="failed"} 15
+dagu_dag_runs_total{status="aborted"} 7
 
-# HELP boltbase_dags_total Total number of DAGs
-# TYPE boltbase_dags_total gauge
-boltbase_dags_total 45
+# HELP dagu_dags_total Total number of DAGs
+# TYPE dagu_dags_total gauge
+dagu_dags_total 45
 
-# HELP boltbase_scheduler_running Whether the scheduler is running
-# TYPE boltbase_scheduler_running gauge
-boltbase_scheduler_running 1
+# HELP dagu_scheduler_running Whether the scheduler is running
+# TYPE dagu_scheduler_running gauge
+dagu_scheduler_running 1
 ```
 
 ## Error Handling
@@ -2105,7 +2105,7 @@ curl "http://localhost:8080/api/v1/dags/search?q=database" \
 
 ### Get Metrics for Monitoring
 ```bash
-curl "http://localhost:8080/api/v1/metrics" | grep boltbase_dag_runs_currently_running
+curl "http://localhost:8080/api/v1/metrics" | grep dagu_dag_runs_currently_running
 ```
 
 ### Stop a Running DAG
@@ -2209,7 +2209,7 @@ curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
     "name": "data_processing_pipeline",
     "group": "ETL"
   },
-  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlog_dir: /var/log/boltbase/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\ntags:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
+  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\ntags:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
   "errors": []
 }
 ```
@@ -2292,7 +2292,7 @@ Retrieves all API keys. Requires admin role.
       "name": "ci-pipeline",
       "description": "API key for CI/CD pipeline",
       "role": "operator",
-      "keyPrefix": "boltbase_7Kq",
+      "keyPrefix": "dagu_7Kq",
       "createdAt": "2024-02-11T12:00:00Z",
       "updatedAt": "2024-02-11T12:00:00Z",
       "createdBy": "admin-user-id",
@@ -2332,12 +2332,12 @@ Creates a new API key. Requires admin role.
     "name": "ci-pipeline",
     "description": "API key for CI/CD pipeline",
     "role": "operator",
-    "keyPrefix": "boltbase_7Kq",
+    "keyPrefix": "dagu_7Kq",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
     "createdBy": "admin-user-id"
   },
-  "key": "boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
+  "key": "dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 }
 ```
 
@@ -2367,7 +2367,7 @@ Retrieves a specific API key by ID. Requires admin role.
     "name": "ci-pipeline",
     "description": "API key for CI/CD pipeline",
     "role": "operator",
-    "keyPrefix": "boltbase_7Kq",
+    "keyPrefix": "dagu_7Kq",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
     "createdBy": "admin-user-id",
@@ -2409,7 +2409,7 @@ All fields are optional. Only provided fields are updated.
     "name": "production-ci",
     "description": "Updated description",
     "role": "manager",
-    "keyPrefix": "boltbase_7Kq",
+    "keyPrefix": "dagu_7Kq",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T16:00:00Z",
     "createdBy": "admin-user-id",
@@ -2558,7 +2558,7 @@ Retrieves all webhooks. Requires admin role.
     {
       "id": "550e8400-e29b-41d4-a716-446655440000",
       "dagName": "my-dag",
-      "tokenPrefix": "boltbase_wh_7Kq",
+      "tokenPrefix": "dagu_wh_7Kq",
       "enabled": true,
       "createdAt": "2024-02-11T12:00:00Z",
       "updatedAt": "2024-02-11T12:00:00Z",
@@ -2580,7 +2580,7 @@ Retrieves the webhook for a specific DAG. Requires admin role.
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "dagName": "my-dag",
-  "tokenPrefix": "boltbase_wh_7Kq",
+  "tokenPrefix": "dagu_wh_7Kq",
   "enabled": true,
   "createdAt": "2024-02-11T12:00:00Z",
   "updatedAt": "2024-02-11T12:00:00Z",
@@ -2609,13 +2609,13 @@ Creates a webhook for a DAG. Requires admin role. Each DAG can only have one web
   "webhook": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "dagName": "my-dag",
-    "tokenPrefix": "boltbase_wh_7Kq",
+    "tokenPrefix": "dagu_wh_7Kq",
     "enabled": true,
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
     "createdBy": "admin-user-id"
   },
-  "token": "boltbase_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
+  "token": "dagu_wh_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 }
 ```
 
@@ -2667,13 +2667,13 @@ Regenerates the token for a webhook. The old token is immediately invalidated. R
   "webhook": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "dagName": "my-dag",
-    "tokenPrefix": "boltbase_wh_9Xz",
+    "tokenPrefix": "dagu_wh_9Xz",
     "enabled": true,
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T16:00:00Z",
     "createdBy": "admin-user-id"
   },
-  "token": "boltbase_wh_9XzNewTokenGeneratedHereAfterRegeneration"
+  "token": "dagu_wh_9XzNewTokenGeneratedHereAfterRegeneration"
 }
 ```
 
@@ -2703,7 +2703,7 @@ Enables or disables a webhook without regenerating the token. Requires admin rol
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "dagName": "my-dag",
-  "tokenPrefix": "boltbase_wh_7Kq",
+  "tokenPrefix": "dagu_wh_7Kq",
   "enabled": false,
   "createdAt": "2024-02-11T12:00:00Z",
   "updatedAt": "2024-02-11T16:00:00Z",
@@ -2865,4 +2865,4 @@ curl "http://localhost:8080/api/v1/dags?remoteNode=production" \
      -H "Authorization: Bearer your-token"
 ```
 
-Remote nodes are configured in the server configuration file and allow managing DAGs across multiple Boltbase instances from a single interface.
+Remote nodes are configured in the server configuration file and allow managing DAGs across multiple Dagu instances from a single interface.

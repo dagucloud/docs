@@ -1,12 +1,12 @@
 # Data and Variables
 
-Boltbase provides multiple ways to handle data and variables in your DAGs, from simple environment variables to complex parameter passing between steps.
+Dagu provides multiple ways to handle data and variables in your DAGs, from simple environment variables to complex parameter passing between steps.
 
 ## Environment Variables
 
 ### System Environment Variable Security
 
-For security, Boltbase limits which system environment variables are passed to step processes and sub DAGs.
+For security, Dagu limits which system environment variables are passed to step processes and sub DAGs.
 
 **How It Works:**
 
@@ -16,9 +16,9 @@ System environment variables are available for expansion (`${VAR}`) in the DAG-l
 
 Only these are automatically passed to step processes:
 - **Whitelisted:** `PATH`, `HOME`, `LANG`, `TZ`, `SHELL`
-- **Allowed Prefixes:** `BOLTBASE_*`, `LC_*`, `DAG_*`
+- **Allowed Prefixes:** `DAGU_*`, `LC_*`, `DAG_*`
 
-The `DAG_*` prefix includes special variables automatically set by Boltbase for each step execution.
+The `DAG_*` prefix includes special variables automatically set by Dagu for each step execution.
 
 **To Use Sensitive Variables:**
 
@@ -91,7 +91,7 @@ steps:
 
 Specify `.env` files to load environment variables from.
 
-> **Note**: If `dotenv` is not specified, Boltbase automatically loads `.env` from the working directory. To disable this default behavior, use `dotenv: []`.
+> **Note**: If `dotenv` is not specified, Dagu automatically loads `.env` from the working directory. To disable this default behavior, use `dotenv: []`.
 
 ```yaml
 dotenv: .env  # Load a single dotenv file
@@ -104,7 +104,7 @@ dotenv:
 ```
 
 **Loading behavior:**
-- If `dotenv` is not specified, Boltbase loads `.env` by default
+- If `dotenv` is not specified, Dagu loads `.env` by default
 - When files are specified, `.env` is automatically prepended to the list (and deduplicated if already included)
 - All files are loaded sequentially in order
 - Variables from later files override variables from earlier files
@@ -176,7 +176,7 @@ Providers can expose additional configuration through the optional `options` map
 
 ### Resolution and masking
 
-Secrets are evaluated after DAG-level variables and system-provided runtime variables, so they override values defined in `env` or `.env` files unless a step sets its own value. Resolved secrets are never written to disk or the database, and Boltbase automatically masks them in step output and scheduler logs.
+Secrets are evaluated after DAG-level variables and system-provided runtime variables, so they override values defined in `env` or `.env` files unless a step sets its own value. Resolved secrets are never written to disk or the database, and Dagu automatically masks them in step output and scheduler logs.
 
 Read the dedicated [Secrets guide](/writing-workflows/secrets) for provider details, masking behavior, and best practices.
 
@@ -208,21 +208,21 @@ steps:
 
 ### Working with Parameters as JSON
 
-Every step automatically receives the merged parameter payload as JSON through the `BOLTBASE_PARAMS_JSON` environment variable. This is especially helpful when parameters were provided as nested JSON via the CLI or API.
+Every step automatically receives the merged parameter payload as JSON through the `DAGU_PARAMS_JSON` environment variable. This is especially helpful when parameters were provided as nested JSON via the CLI or API.
 
 ```yaml
 steps:
   - name: inspect params
-    command: echo "Full payload: ${BOLTBASE_PARAMS_JSON}"
+    command: echo "Full payload: ${DAGU_PARAMS_JSON}"
   - name: region lookup
     type: jq
     config:
       raw: true
-    script: ${BOLTBASE_PARAMS_JSON}
+    script: ${DAGU_PARAMS_JSON}
     command: '"Region: \(.region // "us-east-1")"'
 ```
 
-If the run was started with JSON parameters, the original payload is preserved verbatim; otherwise, Boltbase serializes the resolved key/value pairs from your `params` block plus any overrides.
+If the run was started with JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides.
 
 ### Capture Output
 
@@ -234,7 +234,7 @@ steps:
     output: FOO  # Will contain "foo"
 ```
 
-**Output Size Limits**: To prevent memory issues from large command outputs, Boltbase enforces a size limit on captured output. By default, this limit is 1MB. If a step's output exceeds this limit, the step will fail with an error.
+**Output Size Limits**: To prevent memory issues from large command outputs, Dagu enforces a size limit on captured output. By default, this limit is 1MB. If a step's output exceeds this limit, the step will fail with an error.
 
 You can configure the maximum output size at the DAG level:
 
@@ -386,7 +386,7 @@ steps:
 
 ## Global Configuration
 
-Common settings can be shared using `$HOME/.config/boltbase/base.yaml`. This is useful for setting default values for:
+Common settings can be shared using `$HOME/.config/dagu/base.yaml`. This is useful for setting default values for:
 - `env` - Shared environment variables
 - `params` - Default parameters
 - `log_dir` - Default log directory
@@ -395,13 +395,13 @@ Common settings can be shared using `$HOME/.config/boltbase/base.yaml`. This is 
 Example base configuration:
 
 ```yaml
-# ~/.config/boltbase/base.yaml
+# ~/.config/dagu/base.yaml
 env:
   - ENVIRONMENT: production
   - API_ENDPOINT: https://api.example.com
 params:
   - DEFAULT_BATCH_SIZE: 100
-log_dir: /var/log/boltbase
+log_dir: /var/log/dagu
 ```
 
 Individual DAGs inherit these settings and can override them as needed.

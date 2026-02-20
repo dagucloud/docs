@@ -7,21 +7,21 @@ Automate workflow execution with cron-based scheduling.
 Start the scheduler process:
 
 ```bash
-boltbase scheduler
+dagu scheduler
 ```
 
-Or use `boltbase start-all` to run both scheduler and web server.
+Or use `dagu start-all` to run both scheduler and web server.
 
 ### High Availability
 
-Boltbase supports running multiple scheduler instances for high availability with automatic failover:
+Dagu supports running multiple scheduler instances for high availability with automatic failover:
 
 ```bash
 # Start primary scheduler
-boltbase scheduler
+dagu scheduler
 
 # Start standby schedulers (on other machines)
-boltbase scheduler  # Will wait for lock and take over if primary fails
+dagu scheduler  # Will wait for lock and take over if primary fails
 ```
 
 The scheduler uses directory-based locking to ensure only one instance is active at a time. When the primary scheduler fails, a standby automatically takes over within 30 seconds.
@@ -40,7 +40,7 @@ scheduler:
 
 When enabled, access the health endpoint at `http://localhost:8090/health`.
 
-**Note**: The health check only runs when using `boltbase scheduler` directly, not with `boltbase start-all`.
+**Note**: The health check only runs when using `dagu scheduler` directly, not with `dagu start-all`.
 
 ### Zombie Detection
 
@@ -204,7 +204,7 @@ At most 1000 missed runs are buffered per DAG. If more than 1000 runs were misse
 Control concurrent executions using global queues:
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 queues:
   enabled: true
   config:

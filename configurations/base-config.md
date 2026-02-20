@@ -4,7 +4,7 @@ Define shared defaults for all DAGs using a `base.yaml` file. This eliminates du
 
 ## Overview
 
-The base configuration file provides default values that are automatically inherited by every DAG in your Boltbase installation. Use it for:
+The base configuration file provides default values that are automatically inherited by every DAG in your Dagu installation. Use it for:
 
 - **Shared environment variables** - Common settings like timezone, API keys
 - **Global handlers** - Failure notifications, cleanup routines
@@ -16,20 +16,20 @@ Individual DAG files can override any setting from the base configuration.
 
 ## File Location
 
-Boltbase looks for the base configuration file based on your directory structure:
+Dagu looks for the base configuration file based on your directory structure:
 
 | Mode | Base Config Path |
 |------|------------------|
-| **XDG** (default) | `~/.config/boltbase/base.yaml` |
-| **Unified** (`BOLTBASE_HOME` set) | `{BOLTBASE_HOME}/base.yaml` |
-| **Legacy** (`~/.boltbase` exists) | `~/.boltbase/base.yaml` |
+| **XDG** (default) | `~/.config/dagu/base.yaml` |
+| **Unified** (`DAGU_HOME` set) | `{DAGU_HOME}/base.yaml` |
+| **Legacy** (`~/.dagu` exists) | `~/.dagu/base.yaml` |
 
 ### Custom Location
 
 Override the default path in your server configuration:
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 paths:
   base_config: "/path/to/custom/base.yaml"
 ```
@@ -37,12 +37,12 @@ paths:
 Or via environment variable:
 
 ```bash
-export BOLTBASE_BASE_CONFIG=/path/to/custom/base.yaml
+export DAGU_BASE_CONFIG=/path/to/custom/base.yaml
 ```
 
 ## How Inheritance Works
 
-When Boltbase loads a DAG, it follows this process:
+When Dagu loads a DAG, it follows this process:
 
 ```
 1. Load base.yaml (if exists)
@@ -181,20 +181,20 @@ mail_on:
   wait: false
 
 error_mail:
-  from: boltbase@mycompany.com
+  from: dagu@mycompany.com
   to:
     - ops-team@mycompany.com
     - oncall@mycompany.com
-  prefix: "[BOLTBASE ALERT]"
+  prefix: "[DAGU ALERT]"
   attach_logs: true
 
 info_mail:
-  from: boltbase@mycompany.com
+  from: dagu@mycompany.com
   to:
     - team@mycompany.com
 
 wait_mail:
-  from: boltbase@mycompany.com
+  from: dagu@mycompany.com
   to:
     - approvers@mycompany.com
   prefix: "[APPROVAL REQUIRED]"
@@ -246,7 +246,7 @@ Configure log output behavior:
 ```yaml
 # base.yaml
 # Custom log directory
-log_dir: /var/log/boltbase
+log_dir: /var/log/dagu
 
 # Log output mode:
 # - "separate": stdout/stderr in separate files (.out, .err)
@@ -419,7 +419,7 @@ run_config:
 A production-ready base configuration:
 
 ```yaml
-# ~/.config/boltbase/base.yaml
+# ~/.config/dagu/base.yaml
 
 # Environment defaults
 env:
@@ -461,7 +461,7 @@ handler_on:
   exit:
     command: |
       # Cleanup temp files
-      rm -rf /tmp/boltbase-${DAG_RUN_ID}-* 2>/dev/null || true
+      rm -rf /tmp/dagu-${DAG_RUN_ID}-* 2>/dev/null || true
 
 # Email notifications
 smtp:
@@ -474,10 +474,10 @@ mail_on:
   failure: true
 
 error_mail:
-  from: boltbase@mycompany.com
+  from: dagu@mycompany.com
   to:
     - platform-team@mycompany.com
-  prefix: "[BOLTBASE]"
+  prefix: "[DAGU]"
   attach_logs: true
 
 # SSH defaults for deployment servers
@@ -512,7 +512,7 @@ handler_on:
           "payload": {
             "summary": "DAG '"${DAG_NAME}"' failed",
             "severity": "error",
-            "source": "boltbase"
+            "source": "dagu"
           }
         }'
 ```
@@ -523,10 +523,10 @@ Use different base configs per environment:
 
 ```bash
 # Development
-export BOLTBASE_BASE_CONFIG=/etc/boltbase/base-dev.yaml
+export DAGU_BASE_CONFIG=/etc/dagu/base-dev.yaml
 
 # Production
-export BOLTBASE_BASE_CONFIG=/etc/boltbase/base-prod.yaml
+export DAGU_BASE_CONFIG=/etc/dagu/base-prod.yaml
 ```
 
 ### Shared Database Credentials
@@ -568,7 +568,7 @@ steps:
 
 ## See Also
 
-- [Server Configuration](/configurations/server) - Configure the Boltbase server
+- [Server Configuration](/configurations/server) - Configure the Dagu server
 - [Environment Variables](/writing-workflows/environment-variables) - Variable handling in workflows
 - [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) - Handler details
 - [Email Notifications](/features/email-notifications) - Email setup guide

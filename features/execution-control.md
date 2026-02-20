@@ -105,7 +105,7 @@ steps:
 Control concurrent workflow instances using global queues:
 
 ```yaml
-# ~/.config/boltbase/config.yaml
+# ~/.config/dagu/config.yaml
 queues:
   enabled: true
   config:
@@ -124,10 +124,10 @@ When no `queue` is specified, DAGs use a local queue with FIFO processing (concu
 Manual queue control:
 ```bash
 # Enqueue with custom ID
-boltbase enqueue workflow.yaml --run-id=custom-id
+dagu enqueue workflow.yaml --run-id=custom-id
 
 # Remove from queue
-boltbase dequeue default --dag-run=workflow:custom-id
+dagu dequeue default --dag-run=workflow:custom-id
 ```
 
 ## Timeout Control

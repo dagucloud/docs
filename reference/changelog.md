@@ -4,7 +4,7 @@
 
 ### Changed
 
-- **OS Environment Variable Expansion**: OS environment variables (e.g., `$HOME`, `$PATH`) are no longer expanded by Boltbase for non-shell executor types (docker, http, ssh, jq, mail, s3, redis, etc.) **and DAG-level configuration fields** (`ssh`, `smtp`, `s3`, `registry_auths`). Only variables explicitly defined in the DAG scope (`env:`, `params:`, `secrets:`, step outputs) are expanded. OS variables pass through unchanged, letting the target environment (container, remote shell, etc.) resolve them. Shell command execution is unaffected. See [RFC 007](https://github.com/dagu-org/dagu/blob/main/rfcs/007-os-env-expansion-rules.md).
+- **OS Environment Variable Expansion**: OS environment variables (e.g., `$HOME`, `$PATH`) are no longer expanded by Dagu for non-shell executor types (docker, http, ssh, jq, mail, s3, redis, etc.) **and DAG-level configuration fields** (`ssh`, `smtp`, `s3`, `registry_auths`). Only variables explicitly defined in the DAG scope (`env:`, `params:`, `secrets:`, step outputs) are expanded. OS variables pass through unchanged, letting the target environment (container, remote shell, etc.) resolve them. Shell command execution is unaffected. See [RFC 007](https://github.com/dagu-org/dagu/blob/main/rfcs/007-os-env-expansion-rules.md).
 
   To use a local OS variable in a config field, explicitly import it via the `env:` block:
 
@@ -26,15 +26,15 @@
 
 - **API v1**: The legacy v1 API (`/api/v1/*`) has been completely removed from the codebase. All clients should migrate to the v2 API (`/api/v1/*`). The v1 API was previously disabled when authentication was enabled (v1.26.2), and is now fully removed.
 
-- **Static API Token (`auth.token`)**: The `auth.token.value` configuration field and `BOLTBASE_AUTH_TOKEN` environment variable have been removed. Use API keys (builtin auth mode) or basic auth instead. API keys provide role-based access control and usage tracking. See [API Keys](/configurations/authentication/api-keys) for migration.
+- **Static API Token (`auth.token`)**: The `auth.token.value` configuration field and `DAGU_AUTH_TOKEN` environment variable have been removed. Use API keys (builtin auth mode) or basic auth instead. API keys provide role-based access control and usage tracking. See [API Keys](/configurations/authentication/api-keys) for migration.
 
-- **Basic Auth Flat Fields**: The top-level `is_basic_auth`, `basic_auth_username`, and `basic_auth_password` configuration fields have been removed. Use `auth.mode: basic` with `auth.basic.username` and `auth.basic.password` instead. The legacy `BOLTBASE_BASICAUTH_*` environment variables have also been removed; use `BOLTBASE_AUTH_MODE=basic`, `BOLTBASE_AUTH_BASIC_USERNAME`, and `BOLTBASE_AUTH_BASIC_PASSWORD`.
+- **Basic Auth Flat Fields**: The top-level `is_basic_auth`, `basic_auth_username`, and `basic_auth_password` configuration fields have been removed. Use `auth.mode: basic` with `auth.basic.username` and `auth.basic.password` instead. The legacy `DAGU_BASICAUTH_*` environment variables have also been removed; use `DAGU_AUTH_MODE=basic`, `DAGU_AUTH_BASIC_USERNAME`, and `DAGU_AUTH_BASIC_PASSWORD`.
 
 - **Standalone OIDC Mode (`auth.mode: oidc`)**: Removed. The valid auth modes are now `none`, `basic`, and `builtin`. Use builtin + OIDC mode for SSO with user management and RBAC. See [Builtin Authentication - OIDC/SSO](/configurations/authentication/builtin#oidcsso-login).
 
-- **Admin Config (`auth.builtin.admin`)**: The `auth.builtin.admin.username` / `auth.builtin.admin.password` config fields and `BOLTBASE_AUTH_ADMIN_USERNAME` / `BOLTBASE_AUTH_ADMIN_PASSWORD` environment variables have been removed. The first admin account is now created via the `/setup` page on first browser visit.
+- **Admin Config (`auth.builtin.admin`)**: The `auth.builtin.admin.username` / `auth.builtin.admin.password` config fields and `DAGU_AUTH_ADMIN_USERNAME` / `DAGU_AUTH_ADMIN_PASSWORD` environment variables have been removed. The first admin account is now created via the `/setup` page on first browser visit.
 
-- **Basic Auth `enabled` Field**: The `auth.basic.enabled` field and `BOLTBASE_AUTH_BASIC_ENABLED` environment variable have been removed. Basic auth is activated by setting `auth.mode: basic`.
+- **Basic Auth `enabled` Field**: The `auth.basic.enabled` field and `DAGU_AUTH_BASIC_ENABLED` environment variable have been removed. Basic auth is activated by setting `auth.mode: basic`.
 
 - **Deprecated YAML Fields**: The following deprecated fields have been removed from the YAML spec. Migrate to the replacement fields:
 
@@ -48,10 +48,10 @@
 
 ### Added
 
-- **Auth Mode Selection**: Authentication mode is now configured via `auth.mode` field. Valid modes: `none`, `basic`, `builtin` (default). Basic auth uses `auth.mode: basic` with `auth.basic.username` and `auth.basic.password`. Environment variable: `BOLTBASE_AUTH_MODE`.
+- **Auth Mode Selection**: Authentication mode is now configured via `auth.mode` field. Valid modes: `none`, `basic`, `builtin` (default). Basic auth uses `auth.mode: basic` with `auth.basic.username` and `auth.basic.password`. Environment variable: `DAGU_AUTH_MODE`.
 
-- **Coordinator Enabled Config**: New `coordinator.enabled` config option (default: `true`) and `BOLTBASE_COORDINATOR_ENABLED` environment variable to explicitly enable or disable the coordinator service. When disabled, `start-all` skips the coordinator and DAGs are never dispatched to workers. Accepts `true`/`false`/`1`/`0`.
-- **Self-Upgrade Command**: New `boltbase upgrade` command for in-place binary updates with SHA256 verification, backup support, and cross-platform compatibility. See [Self-Upgrade](/features/upgrade) for details.
+- **Coordinator Enabled Config**: New `coordinator.enabled` config option (default: `true`) and `DAGU_COORDINATOR_ENABLED` environment variable to explicitly enable or disable the coordinator service. When disabled, `start-all` skips the coordinator and DAGs are never dispatched to workers. Accepts `true`/`false`/`1`/`0`.
+- **Self-Upgrade Command**: New `dagu upgrade` command for in-place binary updates with SHA256 verification, backup support, and cross-platform compatibility. See [Self-Upgrade](/features/upgrade) for details.
 - **Literal Dollar Escape for Non-Shell Executors**: Use `\$` to emit a literal `$` in non-shell contexts (docker, http, ssh, jq, mail, etc.) and config fields. Shell-executed commands preserve native semantics. To emit a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 - **Router Examples in Documentation**: Added two router examples to the [Examples](/writing-workflows/examples) page under "Control Flow & Conditions": routing based on environment variable values and routing based on step output. Removed the "Complex Preconditions" example to streamline the page.
 - **Unified Execution Dispatch (`defaultExecutionMode`)**: New server-level `defaultExecutionMode` setting controls whether DAGs run locally or are dispatched to workers. When set to `distributed`, all DAGs are automatically dispatched to the coordinator for worker execution, even without an explicit `worker_selector`. A centralized `ShouldDispatchToCoordinator` function ensures consistent dispatch logic across all execution paths (API, CLI, scheduler, sub-DAG). DAGs that must remain on the main instance can use `worker_selector: local` to override this behavior. See [Distributed Execution](/features/distributed-execution) and [Worker Labels](/features/worker-labels) for details.
@@ -62,7 +62,7 @@
 
 - **Trigger Type Visibility**: DAG runs now display how they were initiated (scheduler, manual, webhook, subdag, retry). The trigger type is shown in the DAG runs list and detail views with distinct icons and labels. Available via the `triggerType` field in the API response.
 
-- **CLI History Command**: New `boltbase history` command displays execution history for DAG runs with comprehensive filtering (by date, status, tags, run ID), pagination (limit support up to 1000 results), and multiple output formats (table, JSON, CSV). Essential for debugging patterns, monitoring workflows, and exporting run data. Features:
+- **CLI History Command**: New `dagu history` command displays execution history for DAG runs with comprehensive filtering (by date, status, tags, run ID), pagination (limit support up to 1000 results), and multiple output formats (table, JSON, CSV). Essential for debugging patterns, monitoring workflows, and exporting run data. Features:
   - Date filtering: absolute (`--from`/`--to`) or relative (`--last 7d`, `24h`, `1w`)
   - Status filtering: all execution states with aliases (e.g., `success` → `succeeded`)
   - Tag filtering: comma-separated with AND logic
@@ -164,10 +164,10 @@
 
   See [Chat - Tool Calling](/features/chat/tool-calling) for full documentation.
 
-- **Tailscale Tunnel**: Built-in remote access via embedded Tailscale node. Access Boltbase from anywhere without port forwarding or VPN setup.
+- **Tailscale Tunnel**: Built-in remote access via embedded Tailscale node. Access Dagu from anywhere without port forwarding or VPN setup.
 
   ```bash
-  boltbase server --tunnel
+  dagu server --tunnel
   ```
 
   **Modes:**
@@ -189,7 +189,7 @@
 
   Access via the navigation menu under "Overview" (admin users only).
 
-- **OIDC Integration for Builtin Auth (Recommended)**: Added OIDC/SSO login capability under builtin authentication mode. This is now the recommended way to use OIDC with Boltbase, as it combines SSO convenience with full user management and RBAC.
+- **OIDC Integration for Builtin Auth (Recommended)**: Added OIDC/SSO login capability under builtin authentication mode. This is now the recommended way to use OIDC with Dagu, as it combines SSO convenience with full user management and RBAC.
 
   ```yaml
   auth:
@@ -200,7 +200,7 @@
     oidc:
       client_id: your-client-id
       client_secret: your-client-secret
-      client_url: https://boltbase.example.com
+      client_url: https://dagu.example.com
       issuer: https://accounts.google.com
       auto_signup: true
       default_role: viewer
@@ -398,14 +398,14 @@
 
   See [Workers](/features/workers/) for deployment options and configuration.
 
-- **Web Terminal**: Added optional web-based terminal for executing shell commands directly from the Boltbase UI. Disabled by default for security.
+- **Web Terminal**: Added optional web-based terminal for executing shell commands directly from the Dagu UI. Disabled by default for security.
 
   ```yaml
   terminal:
     enabled: true   # default: false
   ```
 
-  Or via environment variable: `BOLTBASE_TERMINAL_ENABLED=true`
+  Or via environment variable: `DAGU_TERMINAL_ENABLED=true`
 
   See [Terminal Configuration](/configurations/server#terminal) for details.
 
@@ -416,7 +416,7 @@
     enabled: true   # default: true
   ```
 
-  Or via environment variable: `BOLTBASE_AUDIT_ENABLED=false`
+  Or via environment variable: `DAGU_AUDIT_ENABLED=false`
 
   See [Audit Logging](/configurations/server#audit-logging) for details.
 
@@ -430,10 +430,10 @@
 
 - **DAG-level `max_active_runs` field**: The `max_active_runs` field in DAG files is now deprecated for local (DAG-based) queues. Local queues now always use FIFO processing with concurrency of 1.
 
-  **Migration**: For concurrency control, define global queues in `~/.config/boltbase/config.yaml` and assign DAGs using the `queue` field:
+  **Migration**: For concurrency control, define global queues in `~/.config/dagu/config.yaml` and assign DAGs using the `queue` field:
 
   ```yaml
-  # ~/.config/boltbase/config.yaml
+  # ~/.config/dagu/config.yaml
   queues:
     enabled: true
     config:
@@ -563,11 +563,11 @@ Thanks to our contributors for this release:
   See [Chat](/features/chat/) for full documentation.
 
 - **Per-DAG Prometheus Metrics**: Enhanced observability with granular per-DAG metrics and histograms. (#1411)
-  - `boltbase_dag_runs_currently_running_by_dag` - Running count per DAG
-  - `boltbase_dag_runs_queued_by_dag` - Queue depth per DAG
-  - `boltbase_dag_runs_total_by_dag` - Run counts by DAG and status
-  - `boltbase_dag_run_duration_seconds` - Duration histogram per DAG
-  - `boltbase_queue_wait_seconds` - Queue wait time histogram per DAG
+  - `dagu_dag_runs_currently_running_by_dag` - Running count per DAG
+  - `dagu_dag_runs_queued_by_dag` - Queue depth per DAG
+  - `dagu_dag_runs_total_by_dag` - Run counts by DAG and status
+  - `dagu_dag_run_duration_seconds` - Duration histogram per DAG
+  - `dagu_queue_wait_seconds` - Queue wait time histogram per DAG
 
   See [Prometheus Metrics](/features/prometheus-metrics) for full documentation.
 
@@ -595,7 +595,7 @@ Thanks to our contributors for this release:
     - command: composer install
   ```
 
-  Exec mode works at both DAG-level and step-level. The container must be running; Boltbase waits up to 120 seconds for the container to be in running state.
+  Exec mode works at both DAG-level and step-level. The container must be running; Dagu waits up to 120 seconds for the container to be in running state.
 
   See [Container Field](/writing-workflows/container#exec-mode-use-existing-container) for full documentation.
 
@@ -610,7 +610,7 @@ Thanks to our contributors for this release:
   cache: normal   # options: low, normal, high (default: normal)
   ```
 
-  Or via environment variable: `BOLTBASE_CACHE=low`
+  Or via environment variable: `DAGU_CACHE=low`
 
   | Preset | DAG | DAGRun | APIKey | Webhook |
   |--------|-----|--------|--------|---------|
@@ -620,7 +620,7 @@ Thanks to our contributors for this release:
 
   See [Server Configuration](/configurations/server#cache-configuration) for details.
 
-- **`BOLTBASE_PARAMS_JSON` availability**: Every step now receives the merged parameter payload as JSON via the `BOLTBASE_PARAMS_JSON` environment variable, even when parameters are supplied through legacy CLI strings. If a run starts with raw JSON parameters, the original payload is preserved verbatim. This makes it easier for scripts to consume structured parameter data without re-parsing shell strings. (#1550)
+- **`DAGU_PARAMS_JSON` availability**: Every step now receives the merged parameter payload as JSON via the `DAGU_PARAMS_JSON` environment variable, even when parameters are supplied through legacy CLI strings. If a run starts with raw JSON parameters, the original payload is preserved verbatim. This makes it easier for scripts to consume structured parameter data without re-parsing shell strings. (#1550)
 - **DAG Spec Tab in Status View**: Added a new "Spec" tab to the DAG status page and DAG run details modal/panel. This tab displays the DAG YAML specification in readonly mode with the Schema Documentation sidebar available for reference. The spec shown is the exact spec that was used at execution time, not the current spec. (#XXXX)
 - **Wait Status Email Notifications**: Added `mail_on.wait` and `wait_mail` configuration for sending email notifications when a DAG enters wait status (Human In The Loop). This enables teams to be notified when workflows require human approval.
 
@@ -629,7 +629,7 @@ Thanks to our contributors for this release:
     wait: true
 
   wait_mail:
-    from: boltbase@example.com
+    from: dagu@example.com
     to: approvers@example.com
     prefix: "[WAITING]"
     attach_logs: false
@@ -696,7 +696,7 @@ Thanks to our contributors for this release:
 
 ### Changed
 
-- **Metrics Endpoint Access Control**: The `/api/v1/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `BOLTBASE_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
+- **Metrics Endpoint Access Control**: The `/api/v1/metrics` endpoint now requires authentication by default for improved security. Configure `metrics: "public"` or set `DAGU_SERVER_METRICS=public` to restore the previous public access behavior. When private, use API tokens or basic auth for Prometheus scraping. (#1411)
 
   ```yaml
   # Require authentication (new default)
@@ -763,7 +763,7 @@ steps:
   - Role-based permissions (admin, manager, operator, viewer) per key
   - Usage tracking with `lastUsedAt` timestamp
   - Secure key generation with bcrypt hashing
-  - Keys use `boltbase_` prefix for easy identification
+  - Keys use `dagu_` prefix for easy identification
   - Web UI management at Settings > API Keys (admin only)
   - Full REST API at `/api/v1/api-keys` endpoints
 
@@ -775,7 +775,7 @@ curl -X POST http://localhost:8080/api/v1/api-keys \
   -d '{"name": "ci-pipeline", "role": "operator"}'
 
 # Use the API key
-curl -H "Authorization: Bearer boltbase_your-key-here" \
+curl -H "Authorization: Bearer dagu_your-key-here" \
   http://localhost:8080/api/v1/dags
 ```
 
@@ -783,7 +783,7 @@ Requires builtin authentication mode (`auth.mode: builtin`). See [API Keys docum
 
 - **Webhook Management**: Added DAG-specific webhooks for triggering workflow executions from external systems like CI/CD pipelines, GitHub, and Slack.
   - Create, regenerate, enable/disable, and delete webhooks via Web UI or REST API
-  - DAG-specific tokens (one webhook per DAG) with `boltbase_wh_` prefix
+  - DAG-specific tokens (one webhook per DAG) with `dagu_wh_` prefix
   - Payload passthrough via `WEBHOOK_PAYLOAD` environment variable
   - Idempotent execution support with custom `dagRunId`
   - Usage tracking with `lastUsedAt` timestamp
@@ -797,7 +797,7 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook \
 
 # Trigger DAG via webhook with payload
 curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
-  -H "Authorization: Bearer boltbase_wh_your-webhook-token" \
+  -H "Authorization: Bearer dagu_wh_your-webhook-token" \
   -H "Content-Type: application/json" \
   -d '{"payload": {"branch": "main", "commit": "abc123"}}'
 ```
@@ -1123,8 +1123,8 @@ Thanks to our contributors for this release:
 - UI: Enhanced sub DAG run display with execution timeline showing datetime, status indicators, and lazy loading of execution details (#1041)
 - API: Added `POST /api/v1/dag-runs/{name}/{dagRunId}/reschedule` endpoint for replaying runs while enforcing singleton mode to block reschedules when the DAG already has active or queued runs (#1347)
 - API: Added `POST /api/v1/dag-runs/enqueue` to enqueue DAG-runs directly from inline YAML specs without creating DAG files, including optional queue overrides (#1375)
-- CLI: Added `--from-run-id` flag to `boltbase start` for cloning historic runs with their saved parameters (#1378)
-- CLI: Added `boltbase exec` command to run shell commands without writing YAML files, with full logging, history, environment control, and queue support (#1348)
+- CLI: Added `--from-run-id` flag to `dagu start` for cloning historic runs with their saved parameters (#1378)
+- CLI: Added `dagu exec` command to run shell commands without writing YAML files, with full logging, history, environment control, and queue support (#1348)
 - UI: Added grouped view with preset and specific date range selectors on the DAG-runs page for faster historical exploration (#1377)
 - Executors: Added an archive executor (`type: archive`) with extract, create, and list operations
 
@@ -1215,13 +1215,13 @@ No external contributors for this release - documentation update only.
 
 ### Changed
 - Status: Adopted canonical lowercase tokens for DAG and node lifecycle states (`not_started`, `queued`, `running`, `succeeded`, `partially_succeeded`, `failed`, `canceled`), and updated API examples, docs, and telemetry labels to match.
-- Security: Implemented security filtering for system environment variables passed to step processes and sub DAGs. System variables remain available for expansion (`${VAR}`) during DAG configuration parsing, but only whitelisted variables (`PATH`, `HOME`, `LANG`, `TZ`, `SHELL`) and variables with allowed prefixes (`BOLTBASE_*`, `LC_*`, `DAG_*`) are passed to the step execution environment. This prevents accidental exposure of sensitive credentials to subprocess environments. Other variables must be explicitly defined in the workflow's `env` section to be available in step processes.
+- Security: Implemented security filtering for system environment variables passed to step processes and sub DAGs. System variables remain available for expansion (`${VAR}`) during DAG configuration parsing, but only whitelisted variables (`PATH`, `HOME`, `LANG`, `TZ`, `SHELL`) and variables with allowed prefixes (`DAGU_*`, `LC_*`, `DAG_*`) are passed to the step execution environment. This prevents accidental exposure of sensitive credentials to subprocess environments. Other variables must be explicitly defined in the workflow's `env` section to be available in step processes.
 - Scheduler: Queue handler now processes items asynchronously, acknowledging work before heartbeat checks so long-running startups no longer starve the queue.
 - Runtime: Subcommand execution inherits the filtered base environment and uses the caller's working directory.
 
 ### Added
-- CLI: Added `--boltbase-home` global flag to override the application home directory on a per-command basis. Useful for testing, running multiple instances with isolated data, and CI/CD scenarios.
-- CLI: Added `boltbase validate` command to validate DAG specifications without executing them. Prints human‑readable errors and exits with code 1 on failure.
+- CLI: Added `--dagu-home` global flag to override the application home directory on a per-command basis. Useful for testing, running multiple instances with isolated data, and CI/CD scenarios.
+- CLI: Added `dagu validate` command to validate DAG specifications without executing them. Prints human‑readable errors and exits with code 1 on failure.
 - API: Added `POST /api/v1/dags/validate` to validate DAG YAML. Returns `{ valid: boolean, errors: string[], dag?: DAGDetails }`.
 - API: `POST /api/v1/dags` now accepts optional `spec` to initialize a DAG. The spec is validated before creation and returns 400 on invalid input.
 - API: Added `POST /api/v1/dag-runs` to create and start a DAG-run directly from an inline YAML `spec` without persisting a DAG file. Supports optional `name`, `params`, `dagRunId`, and `singleton`.
@@ -1319,7 +1319,7 @@ Thanks to our contributors for this release:
 - **Optional Step Names**: Made step names optional to remove the 40-character limit restriction, allowing more flexibility in workflow definitions (#1193) - Thanks to [@jonathonc](https://github.com/jonathonc) for raising the issue
 - **Singleton DAG Execution**: Added `--singleton` flag to ensure only one instance of a DAG runs at a time, preventing duplicate executions (#1195) - Thanks to [@Kaiden0001](https://github.com/Kaiden0001) for the feature request
 - **DAG-level SSH Configuration**: Implemented DAG-level SSH config for better control over remote executions across all steps (#1184)
-- **Example DAGs for New Users**: Auto-create example DAGs when starting Boltbase for the first time, helping new users get started quickly (#1190)
+- **Example DAGs for New Users**: Auto-create example DAGs when starting Dagu for the first time, helping new users get started quickly (#1190)
 - **DAG-run Details Refresh**: Added refresh button to the DAG-run details page for immediate status updates (#1192)
 - **Invalid DAG Handling**: Improved UI handling of invalid DAG configurations with better error messages and graceful degradation (#1186)
 
@@ -1387,7 +1387,7 @@ Thanks to our contributors for this release:
 - **Stop Operation**: Fixed stop operation to properly handle multiple running instances of the same DAG (#1167) - Thanks to [@jeremydelattre59](https://github.com/jeremydelattre59) for reporting
 - **Scheduler Queue Processing**: Fixed scheduler to use heartbeat monitoring instead of status files for more reliable process detection (#1166) - Thanks to [@jrisch](https://github.com/jrisch) for feedback
 - **Environment Variables**: Corrected environment variable mapping for coordinator host and port configuration (#1162)
-- **Docker Permissions**: Ensured BOLTBASE_HOME directory has proper permissions in Docker containers (#1161)
+- **Docker Permissions**: Ensured DAGU_HOME directory has proper permissions in Docker containers (#1161)
 
 ### Bug Fixes
 - **Continue On Skipped**: Fixed exit code 0 incorrectly triggering continuation for skipped steps with repeat policies (#1158) - Thanks to [@jeremydelattre59](https://github.com/jeremydelattre59) for reporting and [@thefishhat](https://github.com/thefishhat) for the fix
@@ -1422,7 +1422,7 @@ Thanks to our contributors for this release:
 
 ### New Features
 - **npm Package Verification**: Added automatic verification after npm package publishing (#1149)
-- **npm Installation**: Added support for installing Boltbase via npm
+- **npm Installation**: Added support for installing Dagu via npm
 
 ### Contributors
 
@@ -1451,7 +1451,7 @@ Thanks to our contributors for this release:
 - **Scheduler Health Check**: Added health check endpoint for scheduler monitoring (#1129) - Thanks to [@jonasban](https://github.com/jonasban) for the feature request
 - **Default DAG Sorting Configuration**: Added configuration for default DAG list sorting (#1135)
 - **GitHub Repository Link**: Added GitHub repository link to sidebar
-- **npm Installation Support**: Added global npm package for easy cross-platform installation via `npm install -g @dagu-org/boltbase`
+- **npm Installation Support**: Added global npm package for easy cross-platform installation via `npm install -g @dagu-org/dagu`
 
 ### Improvements
 - **Output Capture**: Fixed maximum size setting for output capture
@@ -1497,7 +1497,7 @@ Thanks to our contributors for this release:
 ## v1.17.4 (2025-06-30)
 
 ### New Features
-- **Interactive DAG Selection**: Run `boltbase start` without arguments to select DAGs interactively (#1074)
+- **Interactive DAG Selection**: Run `dagu start` without arguments to select DAGs interactively (#1074)
 - **Bubble Tea Progress Display**: Replaced ANSI progress display with Bubble Tea TUI framework
 - **OpenTelemetry Support**: Added distributed tracing with W3C trace context propagation (#1068)
 - **Windows Support**: Initial Windows compatibility with PowerShell and cmd.exe (#1066)
@@ -1540,7 +1540,7 @@ Thanks to our contributors for this release:
 - **HTTP Executor**: Added `skipTLSVerify` option to support self-signed certificates (#1046)
 
 ### Bug Fixes
-- **Configuration**: Fixed BOLTBASE_DAGS_DIR environment variable not being recognized (#1060)
+- **Configuration**: Fixed DAGU_DAGS_DIR environment variable not being recognized (#1060)
 - **SSH Executor**: Fixed stdout and stderr streams being incorrectly merged (#1057)
 - **Repeat Policy**: Fixed nodes being marked as failed when using repeat policy with non-zero exit codes (#1052)
 - **UI**: Fixed retry individual step functionality for remote nodes (#1049)
@@ -1557,7 +1557,7 @@ Thanks to our contributors for this release:
 | Contribution | Contributor |
 |--------------|--------|
 | HTTP executor skipTLSVerify feature | [@mnmercer](https://github.com/mnmercer) (report), [@nightly-brew](https://github.com/nightly-brew) (feedback) |
-| BOLTBASE_DAGS_DIR environment variable fix | [@Daffdi](https://github.com/Daffdi) (report) |
+| DAGU_DAGS_DIR environment variable fix | [@Daffdi](https://github.com/Daffdi) (report) |
 | SSH executor stdout/stderr separation | [@NebulaCoding1029](https://github.com/NebulaCoding1029) (report) |
 | Repeat policy bug fixes and documentation | [@jeremydelattre59](https://github.com/jeremydelattre59) (reports) |
 | Retry individual step UI fix | [@jeremydelattre59](https://github.com/jeremydelattre59) (report), [@thefishhat](https://github.com/thefishhat) (implementation) |
@@ -1584,7 +1584,7 @@ Thanks to our contributors for this release:
 
 ### Bug Fixes
 - **Docker**: Fixed asset serving with base path and corrected storage volume locations (#1037)
-- **Docker**: Updated Docker storage paths from `/boltbase` to `/var/lib/boltbase`
+- **Docker**: Updated Docker storage paths from `/dagu` to `/var/lib/dagu`
 - **Steps**: Support camel case for step exit code field (#1031)
 
 ### Contributors
@@ -1670,10 +1670,10 @@ New execution history page with:
 Added enqueue functionality for both API and UI:
 ```bash
 # Queue a DAG for later execution
-boltbase enqueue --run-id=custom-id my-dag.yaml
+dagu enqueue --run-id=custom-id my-dag.yaml
 
 # Dequeue
-boltbase dequeue default
+dagu dequeue default
 ```
 
 ####  Partial Success Status
@@ -1774,10 +1774,10 @@ steps:
 
 ```bash
 # Migrate history data
-boltbase migrate history
+dagu migrate history
 ```
 
-After successful migration, legacy history directories are moved to `<BOLTBASE_DATA_DIR>/history_migrated_<timestamp>` for safekeeping.
+After successful migration, legacy history directories are moved to `<DAGU_DATA_DIR>/history_migrated_<timestamp>` for safekeeping.
 
 ### Contributors
 
@@ -1798,7 +1798,7 @@ Try the beta version:
 
 ```bash
 # Docker
-docker run --rm -p 8080:8080 ghcr.io/dagu-org/boltbase:latest boltbase start-all
+docker run --rm -p 8080:8080 ghcr.io/dagu-org/dagu:latest dagu start-all
 
 # Or download specific version
 curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash -s -- --version v1.17.0-beta
@@ -1881,13 +1881,13 @@ params:
 **CLI Flexibility**: Support both named and positional parameters:
 ```bash
 # Positional
-boltbase start my_dag -- param1 param2
+dagu start my_dag -- param1 param2
 
 # Named
-boltbase start my_dag -- PARAM1=value1 PARAM2=value2
+dagu start my_dag -- PARAM1=value1 PARAM2=value2
 
 # Mixed
-boltbase start my_dag -- param1 param2 --param3 value3
+dagu start my_dag -- param1 param2 --param3 value3
 ```
 
 ####  Enhanced Continue On Conditions

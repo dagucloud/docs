@@ -332,11 +332,11 @@ container:
 - `network` accepts `bridge`, `host`, `none`, `container:<name|id>`, or a custom network name.
 - `restart_policy` supports `no`, `always`, or `unless-stopped`; other values fail.
 - `startup` must be one of `keepalive` (default), `entrypoint`, `command`; invalid values fail.
-- `wait_for` must be `running` (default) or `healthy`; if `healthy` is chosen but no healthcheck exists, Boltbase falls back to `running` with a warning.
+- `wait_for` must be `running` (default) or `healthy`; if `healthy` is chosen but no healthcheck exists, Dagu falls back to `running` with a warning.
 - `log_pattern` must be a valid regex; readiness waits up to 120s (including `log_pattern`), then errors with the last known state.
 
 **Exec mode:**
-- The container must exist and be running; Boltbase waits up to 120 seconds for the container to be running.
+- The container must exist and be running; Dagu waits up to 120 seconds for the container to be running.
 - Fields like `volumes`, `ports`, `network`, `pull_policy`, etc. cannot be used with `exec` (they're only valid when creating a new container).
 - Only `user`, `working_dir`, `env`, and `shell` can override the container's defaults.
 
@@ -373,7 +373,7 @@ Instead of duplicating the `container`, `env`, `retry_policy`, `preconditions`, 
 
 ## Execution Model and Entrypoint Behavior
 
-- **How it runs:** When you set a DAG‑level `container`, Boltbase starts one
+- **How it runs:** When you set a DAG‑level `container`, Dagu starts one
   long‑lived container for the workflow. By default (`startup: keepalive`),
   it runs a lightweight keepalive process (or sleep) so the container stays
   up. Each step then runs inside that container via `docker exec`.
@@ -413,13 +413,13 @@ Readiness before steps run:
 
 - `wait_for: running` (default): continue once the container is running.
 - `wait_for: healthy`: if image defines a Docker healthcheck, wait for healthy;
-  if not defined, Boltbase falls back to `running` and logs a warning.
+  if not defined, Dagu falls back to `running` and logs a warning.
 - `log_pattern`: optional regex; when set, steps start only after this pattern
   appears in container logs (after the selected `wait_for` condition passes).
 
 Readiness timeout and errors:
 
-- Boltbase waits up to 120 seconds for readiness (`running`/`healthy` and any
+- Dagu waits up to 120 seconds for readiness (`running`/`healthy` and any
   `log_pattern`). On timeout, it fails the run and reports the mode and last
   known state (for example, `status=exited, exit_code=1`).
 

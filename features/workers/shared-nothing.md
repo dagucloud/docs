@@ -6,7 +6,7 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Boltbase Instance                           │
+│                     Dagu Instance                           │
 │  (Scheduler + Web UI + Coordinator)                         │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐    │
@@ -34,7 +34,7 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
 Workers connect directly to coordinators using explicit addresses:
 
 ```bash
-boltbase worker --worker.coordinators=coordinator-1:50055,coordinator-2:50055
+dagu worker --worker.coordinators=coordinator-1:50055,coordinator-2:50055
 ```
 
 No service registry or shared storage is required.
@@ -82,12 +82,12 @@ When a worker stops sending heartbeats:
 
 ```bash
 # Bind to all interfaces
-boltbase coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
+dagu coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
 
 # With advertise address for Kubernetes/Docker
-boltbase coordinator \
+dagu coordinator \
   --coordinator.host=0.0.0.0 \
-  --coordinator.advertise=boltbase-coordinator.default.svc.cluster.local \
+  --coordinator.advertise=dagu-coordinator.default.svc.cluster.local \
   --coordinator.port=50055
 ```
 
@@ -95,7 +95,7 @@ boltbase coordinator \
 
 ```bash
 # Connect to specific coordinators (no service registry)
-boltbase worker \
+dagu worker \
   --worker.coordinators=coordinator-1:50055,coordinator-2:50055 \
   --worker.labels=gpu=true,region=us-east-1
 ```
@@ -107,11 +107,11 @@ boltbase worker \
 coordinator:
   host: 0.0.0.0
   port: 50055
-  advertise: boltbase-coordinator.default.svc.cluster.local
+  advertise: dagu-coordinator.default.svc.cluster.local
 
 paths:
-  data_dir: "/var/lib/boltbase/data"   # Local storage for status
-  log_dir: "/var/lib/boltbase/logs"    # Local storage for logs
+  data_dir: "/var/lib/dagu/data"   # Local storage for status
+  log_dir: "/var/lib/dagu/logs"    # Local storage for logs
 
 ---
 # Worker config.yaml
@@ -134,15 +134,15 @@ worker:
 
 ```bash
 # Worker
-export BOLTBASE_WORKER_COORDINATORS="coordinator-1:50055,coordinator-2:50055"
-export BOLTBASE_WORKER_ID=worker-01
-export BOLTBASE_WORKER_LABELS="gpu=true,region=us-east-1"
+export DAGU_WORKER_COORDINATORS="coordinator-1:50055,coordinator-2:50055"
+export DAGU_WORKER_ID=worker-01
+export DAGU_WORKER_LABELS="gpu=true,region=us-east-1"
 
 # PostgreSQL connection pool (optional, defaults shown)
-export BOLTBASE_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
-export BOLTBASE_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
-export BOLTBASE_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
-export BOLTBASE_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
+export DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
+export DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300
+export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
 ```
 
 ## PostgreSQL Connection Pool Management
@@ -185,19 +185,19 @@ Global pool management applies only to PostgreSQL. SQLite steps always use 1 con
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: boltbase-coordinator
+  name: dagu-coordinator
 spec:
   replicas: 1
   template:
     spec:
       containers:
-        - name: boltbase
-          image: boltbase:latest
+        - name: dagu
+          image: dagu:latest
           args:
             - "start-all"
             - "--host=0.0.0.0"
             - "--coordinator.host=0.0.0.0"
-            - "--coordinator.advertise=boltbase-coordinator.default.svc.cluster.local"
+            - "--coordinator.advertise=dagu-coordinator.default.svc.cluster.local"
           ports:
             - containerPort: 8080
               name: http
@@ -205,20 +205,20 @@ spec:
               name: grpc
           volumeMounts:
             - name: data
-              mountPath: /var/lib/boltbase
+              mountPath: /var/lib/dagu
             - name: dags
-              mountPath: /etc/boltbase/dags
+              mountPath: /etc/dagu/dags
       volumes:
         - name: data
           emptyDir: {}  # Local ephemeral storage
         - name: dags
           configMap:
-            name: boltbase-dags
+            name: dagu-dags
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: boltbase-coordinator
+  name: dagu-coordinator
 spec:
   ports:
     - port: 8080
@@ -226,22 +226,22 @@ spec:
     - port: 50055
       name: grpc
   selector:
-    app: boltbase-coordinator
+    app: dagu-coordinator
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: boltbase-worker
+  name: dagu-worker
 spec:
   replicas: 5
   template:
     spec:
       containers:
         - name: worker
-          image: boltbase:latest
+          image: dagu:latest
           args:
             - "worker"
-            - "--worker.coordinators=boltbase-coordinator.default.svc.cluster.local:50055"
+            - "--worker.coordinators=dagu-coordinator.default.svc.cluster.local:50055"
             - "--worker.labels=region=us-east-1"
           # No volume mounts needed - all state via gRPC
 ```
@@ -257,12 +257,12 @@ Workers can connect to coordinators across different clusters or clouds:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: boltbase-coordinator
+  name: dagu-coordinator
 spec:
   template:
     spec:
       containers:
-        - name: boltbase
+        - name: dagu
           args:
             - "start-all"
             - "--coordinator.host=0.0.0.0"
@@ -273,7 +273,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: boltbase-worker
+  name: dagu-worker
 spec:
   template:
     spec:
@@ -291,14 +291,14 @@ For production deployments, enable TLS for gRPC communication:
 
 ```bash
 # Coordinator with TLS
-boltbase coordinator \
+dagu coordinator \
   --coordinator.host=0.0.0.0 \
   --peer.insecure=false \
   --peer.cert-file=/certs/server.crt \
   --peer.key-file=/certs/server.key
 
 # Worker with TLS
-boltbase worker \
+dagu worker \
   --worker.coordinators=coordinator:50055 \
   --peer.insecure=false \
   --peer.cert-file=/certs/client.crt \
@@ -352,7 +352,7 @@ Workers automatically clean up temporary files after each execution:
 
 | File Type | Location | Cleaned After |
 |-----------|----------|---------------|
-| DAG files | `/tmp/boltbase/worker-dags/` | Each execution |
-| Log directories | `/tmp/boltbase/worker-logs/` | Each execution |
+| DAG files | `/tmp/dagu/worker-dags/` | Each execution |
+| Log directories | `/tmp/dagu/worker-logs/` | Each execution |
 
 Workers are safe to run on ephemeral nodes without risk of disk accumulation.

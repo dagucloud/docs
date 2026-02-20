@@ -4,7 +4,7 @@ The `continue_on` configuration allows workflows to continue execution even when
 
 ## Overview
 
-By default, Boltbase stops workflow execution when a step fails (returns a non-zero exit code). The `continue_on` configuration overrides this behavior, allowing you to:
+By default, Dagu stops workflow execution when a step fails (returns a non-zero exit code). The `continue_on` configuration overrides this behavior, allowing you to:
 
 - Continue execution after failures
 - Handle specific exit codes differently

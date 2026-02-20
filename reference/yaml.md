@@ -2,7 +2,7 @@
 
 ## Overview
 
-Boltbase workflows are defined using YAML files. Each file represents a DAG (Directed Acyclic Graph) that describes your workflow steps and their relationships.
+Dagu workflows are defined using YAML files. Each file represents a DAG (Directed Acyclic Graph) that describes your workflow steps and their relationships.
 
 ## Basic Structure
 
@@ -284,7 +284,7 @@ container:
 > This means step commands do not pass through the image's `ENTRYPOINT`/`CMD`.
 > If your image's entrypoint dispatches subcommands, invoke it explicitly in
 > the step command (see [Execution Model and Entrypoint Behavior](/writing-workflows/container#execution-model-and-entrypoint-behavior)).
-> For exec mode, the container must be running; Boltbase waits up to 120 seconds.
+> For exec mode, the container must be running; Dagu waits up to 120 seconds.
 > For image mode, readiness waiting (running/healthy and optional log_pattern) times out after
 > 120 seconds with a clear error including the last known state.
 
@@ -365,7 +365,7 @@ steps:
 - Step-level SSH configuration completely overrides DAG-level configuration (no partial overrides)
 - Password authentication is supported but not recommended; prefer key-based auth
 - Default SSH keys are tried if no key is specified: `~/.ssh/id_rsa`, `~/.ssh/id_ecdsa`, `~/.ssh/id_ed25519`, `~/.ssh/id_dsa`
-- `ssh.shell` at the DAG level accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Boltbase tokenizes the value into the remote shell executable and arguments before wrapping commands.
+- `ssh.shell` at the DAG level accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
 - For step-level SSH executor configs (`executor.config.shell`), use string form (e.g., `"/bin/bash -e"`). Array syntax is not supported when decoding the YAML map into the executor config.
 
 ### LLM Configuration
@@ -497,7 +497,7 @@ steps:
 |-------|------|-------------|---------|
 | `queue` | string | Assign to a global queue defined in `config.yaml` for concurrency control. See [Queues](/features/queues). | DAG name (local queue) |
 
-> **Note**: For concurrency control, define global queues in `~/.config/boltbase/config.yaml` and reference them with the `queue` field. Local (DAG-based) queues always use FIFO processing with concurrency of 1.
+> **Note**: For concurrency control, define global queues in `~/.config/dagu/config.yaml` and reference them with the `queue` field. Local (DAG-based) queues always use FIFO processing with concurrency of 1.
 
 ### OpenTelemetry Configuration
 
@@ -514,7 +514,7 @@ otel:
   insecure: false
   timeout: 30s
   resource:
-    service.name: "boltbase-${DAG_NAME}"
+    service.name: "dagu-${DAG_NAME}"
     service.version: "1.0.0"
     deployment.environment: "${ENVIRONMENT}"
 ```
@@ -558,7 +558,7 @@ info_mail:
   attach_logs: false
 
 wait_mail:
-  from: boltbase@example.com
+  from: dagu@example.com
   to: approvers@example.com
   prefix: "[WAITING]"
   attach_logs: false
@@ -1040,7 +1040,7 @@ dotenv: []
 ```
 
 **Loading behavior:**
-- If `dotenv` is not specified, Boltbase loads `.env` by default
+- If `dotenv` is not specified, Dagu loads `.env` by default
 - When files are specified, `.env` is automatically prepended to the list (and deduplicated if already included)
 - All files are loaded sequentially in order
 - Variables from later files override variables from earlier files
@@ -1135,7 +1135,7 @@ env:
   - LOG_LEVEL: info
   
 dotenv:
-  - /etc/boltbase/production.env
+  - /etc/dagu/production.env
 
 # Default container for all steps
 container:

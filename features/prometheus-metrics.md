@@ -1,6 +1,6 @@
 # Prometheus Metrics
 
-Boltbase exposes Prometheus metrics for monitoring workflow execution, system health, and operational insights. These metrics can be scraped by Prometheus and visualized in tools like Grafana.
+Dagu exposes Prometheus metrics for monitoring workflow execution, system health, and operational insights. These metrics can be scraped by Prometheus and visualized in tools like Grafana.
 
 ## Endpoint
 
@@ -16,7 +16,7 @@ By default, the metrics endpoint requires authentication. You can configure publ
 
 ### Configuration
 
-**Config file (`~/.config/boltbase/config.yaml`):**
+**Config file (`~/.config/dagu/config.yaml`):**
 ```yaml
 # Require authentication (default)
 metrics: "private"
@@ -27,7 +27,7 @@ metrics: "public"
 
 **Environment variable:**
 ```bash
-export BOLTBASE_SERVER_METRICS=public
+export DAGU_SERVER_METRICS=public
 ```
 
 ## Available Metrics
@@ -36,10 +36,10 @@ export BOLTBASE_SERVER_METRICS=public
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `boltbase_info` | Gauge | Build information (version, go_version labels) |
-| `boltbase_uptime_seconds` | Gauge | Time since server start |
-| `boltbase_scheduler_running` | Gauge | Whether the scheduler is running (1) or not (0) |
-| `boltbase_dags_total` | Gauge | Total number of DAGs |
+| `dagu_info` | Gauge | Build information (version, go_version labels) |
+| `dagu_uptime_seconds` | Gauge | Time since server start |
+| `dagu_scheduler_running` | Gauge | Whether the scheduler is running (1) or not (0) |
+| `dagu_dags_total` | Gauge | Total number of DAGs |
 
 ### Aggregate DAG Run Metrics
 
@@ -47,9 +47,9 @@ These metrics provide system-wide totals across all DAGs:
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `boltbase_dag_runs_currently_running` | Gauge | - | Total number of currently running DAG runs |
-| `boltbase_dag_runs_queued_total` | Gauge | - | Total number of DAG runs in queue |
-| `boltbase_dag_runs_total` | Counter | `status` | Total DAG runs by status (today) |
+| `dagu_dag_runs_currently_running` | Gauge | - | Total number of currently running DAG runs |
+| `dagu_dag_runs_queued_total` | Gauge | - | Total number of DAG runs in queue |
+| `dagu_dag_runs_total` | Counter | `status` | Total DAG runs by status (today) |
 
 **Status values:** `succeeded`, `failed`, `aborted`, `running`, `queued`, `not_started`, `partially_succeeded`
 
@@ -59,29 +59,29 @@ These metrics provide granular visibility into individual DAG performance:
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `boltbase_dag_runs_currently_running_by_dag` | Gauge | `dag` | Running count per DAG |
-| `boltbase_dag_runs_queued_by_dag` | Gauge | `dag` | Queue depth per DAG |
-| `boltbase_dag_runs_total_by_dag` | Counter | `dag`, `status` | DAG runs by DAG and status (today) |
-| `boltbase_dag_run_duration_seconds` | Histogram | `dag` | Duration of completed DAG runs |
-| `boltbase_queue_wait_seconds` | Histogram | `dag` | Time spent waiting in queue |
+| `dagu_dag_runs_currently_running_by_dag` | Gauge | `dag` | Running count per DAG |
+| `dagu_dag_runs_queued_by_dag` | Gauge | `dag` | Queue depth per DAG |
+| `dagu_dag_runs_total_by_dag` | Counter | `dag`, `status` | DAG runs by DAG and status (today) |
+| `dagu_dag_run_duration_seconds` | Histogram | `dag` | Duration of completed DAG runs |
+| `dagu_queue_wait_seconds` | Histogram | `dag` | Time spent waiting in queue |
 
 ### Histogram Buckets
 
-**DAG Run Duration (`boltbase_dag_run_duration_seconds`):**
+**DAG Run Duration (`dagu_dag_run_duration_seconds`):**
 - Buckets: 1s, 5s, 15s, 30s, 60s, 120s, 300s, 600s, 1800s, 3600s
 - Designed for workflow-appropriate timescales
 
-**Queue Wait Time (`boltbase_queue_wait_seconds`):**
+**Queue Wait Time (`dagu_queue_wait_seconds`):**
 - Buckets: 1s, 5s, 10s, 30s, 60s, 120s, 300s, 600s
 - Shorter timescales for queue latency monitoring
 
 ### Cache Metrics
 
-Boltbase exposes internal cache statistics for memory monitoring and debugging:
+Dagu exposes internal cache statistics for memory monitoring and debugging:
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `boltbase_cache_entries_total` | Gauge | `cache` | Number of entries in each cache |
+| `dagu_cache_entries_total` | Gauge | `cache` | Number of entries in each cache |
 
 **Cache names:** `dag_definition`, `dag_run_status`, `api_key`, `webhook`
 
@@ -91,7 +91,7 @@ Cache limits are configurable via the `cache` setting:
 cache: normal   # options: low, normal, high (default: normal)
 ```
 
-Or via environment variable: `BOLTBASE_CACHE=low`
+Or via environment variable: `DAGU_CACHE=low`
 
 **Preset values:**
 | Preset | DAG | DAGRun | APIKey | Webhook |
@@ -121,22 +121,22 @@ When `metrics: "private"`, configure Prometheus to authenticate:
 **Using API Token:**
 ```yaml
 scrape_configs:
-  - job_name: 'boltbase'
+  - job_name: 'dagu'
     bearer_token: 'your-api-token'
     static_configs:
-      - targets: ['boltbase:8080']
+      - targets: ['dagu:8080']
     metrics_path: '/api/v1/metrics'
 ```
 
 **Using Basic Auth:**
 ```yaml
 scrape_configs:
-  - job_name: 'boltbase'
+  - job_name: 'dagu'
     basic_auth:
       username: 'admin'
       password: 'secret'
     static_configs:
-      - targets: ['boltbase:8080']
+      - targets: ['dagu:8080']
     metrics_path: '/api/v1/metrics'
 ```
 
@@ -146,9 +146,9 @@ When `metrics: "public"`, no authentication is needed:
 
 ```yaml
 scrape_configs:
-  - job_name: 'boltbase'
+  - job_name: 'dagu'
     static_configs:
-      - targets: ['boltbase:8080']
+      - targets: ['dagu:8080']
     metrics_path: '/api/v1/metrics'
 ```
 
@@ -157,36 +157,36 @@ scrape_configs:
 ### DAG Success Rate (Today)
 
 ```txt
-sum(boltbase_dag_runs_total{status="succeeded"}) /
-sum(boltbase_dag_runs_total) * 100
+sum(dagu_dag_runs_total{status="succeeded"}) /
+sum(dagu_dag_runs_total) * 100
 ```
 
 ### Per-DAG Success Rate
 
 ```txt
-sum by (dag) (boltbase_dag_runs_total_by_dag{status="succeeded"}) /
-sum by (dag) (boltbase_dag_runs_total_by_dag) * 100
+sum by (dag) (dagu_dag_runs_total_by_dag{status="succeeded"}) /
+sum by (dag) (dagu_dag_runs_total_by_dag) * 100
 ```
 
 ### Average DAG Duration (Per DAG)
 
 ```txt
-sum by (dag) (rate(boltbase_dag_run_duration_seconds_sum[1h])) /
-sum by (dag) (rate(boltbase_dag_run_duration_seconds_count[1h]))
+sum by (dag) (rate(dagu_dag_run_duration_seconds_sum[1h])) /
+sum by (dag) (rate(dagu_dag_run_duration_seconds_count[1h]))
 ```
 
 ### Average DAG Duration (Overall)
 
 ```txt
-sum(rate(boltbase_dag_run_duration_seconds_sum[1h])) /
-sum(rate(boltbase_dag_run_duration_seconds_count[1h]))
+sum(rate(dagu_dag_run_duration_seconds_sum[1h])) /
+sum(rate(dagu_dag_run_duration_seconds_count[1h]))
 ```
 
 ### 95th Percentile Duration (Per DAG)
 
 ```txt
 histogram_quantile(0.95,
-  sum by (dag, le) (rate(boltbase_dag_run_duration_seconds_bucket[1h]))
+  sum by (dag, le) (rate(dagu_dag_run_duration_seconds_bucket[1h]))
 )
 ```
 
@@ -194,20 +194,20 @@ histogram_quantile(0.95,
 
 ```txt
 histogram_quantile(0.95,
-  sum by (le) (rate(boltbase_dag_run_duration_seconds_bucket[1h]))
+  sum by (le) (rate(dagu_dag_run_duration_seconds_bucket[1h]))
 )
 ```
 
 ### Queue Depth Over Time
 
 ```txt
-boltbase_dag_runs_queued_total
+dagu_dag_runs_queued_total
 ```
 
 ### Currently Running DAGs
 
 ```txt
-boltbase_dag_runs_currently_running
+dagu_dag_runs_currently_running
 ```
 
 ### Slowest DAGs (P95 Duration)
@@ -215,7 +215,7 @@ boltbase_dag_runs_currently_running
 ```txt
 topk(10,
   histogram_quantile(0.95,
-    sum by (dag, le) (rate(boltbase_dag_run_duration_seconds_bucket[24h]))
+    sum by (dag, le) (rate(dagu_dag_run_duration_seconds_bucket[24h]))
   )
 )
 ```
@@ -223,13 +223,13 @@ topk(10,
 ### Cache Size Monitoring
 
 ```txt
-boltbase_cache_entries_total
+dagu_cache_entries_total
 ```
 
 ### Cache Growth Rate
 
 ```txt
-rate(boltbase_cache_entries_total[1h])
+rate(dagu_cache_entries_total[1h])
 ```
 
 ## Grafana Dashboard
@@ -259,22 +259,22 @@ You can create a Grafana dashboard with panels for:
 
 ```json
 {
-  "title": "Boltbase Workflow Metrics",
+  "title": "Dagu Workflow Metrics",
   "panels": [
     {
       "title": "Running DAGs",
       "type": "stat",
-      "targets": [{"expr": "boltbase_dag_runs_currently_running"}]
+      "targets": [{"expr": "dagu_dag_runs_currently_running"}]
     },
     {
       "title": "Queue Depth",
       "type": "stat",
-      "targets": [{"expr": "boltbase_dag_runs_queued_total"}]
+      "targets": [{"expr": "dagu_dag_runs_queued_total"}]
     },
     {
       "title": "DAG Runs by Status",
       "type": "piechart",
-      "targets": [{"expr": "sum by (status) (boltbase_dag_runs_total)"}]
+      "targets": [{"expr": "sum by (status) (dagu_dag_runs_total)"}]
     }
   ]
 }
@@ -286,12 +286,12 @@ You can create a Grafana dashboard with panels for:
 
 ```yaml
 groups:
-  - name: boltbase
+  - name: dagu
     rules:
-      - alert: BoltbaseHighFailureRate
+      - alert: DaguHighFailureRate
         expr: |
-          sum(rate(boltbase_dag_runs_total{status="failed"}[1h])) /
-          sum(rate(boltbase_dag_runs_total[1h])) > 0.1
+          sum(rate(dagu_dag_runs_total{status="failed"}[1h])) /
+          sum(rate(dagu_dag_runs_total[1h])) > 0.1
         for: 5m
         labels:
           severity: warning
@@ -303,10 +303,10 @@ groups:
 ### Long Queue Wait
 
 ```yaml
-      - alert: BoltbaseLongQueueWait
+      - alert: DaguLongQueueWait
         expr: |
           histogram_quantile(0.95,
-            sum by (le) (rate(boltbase_queue_wait_seconds_bucket[15m]))
+            sum by (le) (rate(dagu_queue_wait_seconds_bucket[15m]))
           ) > 300
         for: 10m
         labels:
@@ -319,20 +319,20 @@ groups:
 ### Scheduler Down
 
 ```yaml
-      - alert: BoltbaseSchedulerDown
-        expr: boltbase_scheduler_running == 0
+      - alert: DaguSchedulerDown
+        expr: dagu_scheduler_running == 0
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "Boltbase scheduler is not running"
+          summary: "Dagu scheduler is not running"
 ```
 
 ### Cache Size Growing
 
 ```yaml
-      - alert: BoltbaseCacheGrowing
-        expr: boltbase_cache_entries_total > 10000
+      - alert: DaguCacheGrowing
+        expr: dagu_cache_entries_total > 10000
         for: 30m
         labels:
           severity: warning

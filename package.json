@@ -1,7 +1,7 @@
 {
-  "name": "boltbase-docs",
+  "name": "dagu-docs",
   "version": "1.0.0",
-  "description": "Boltbase Documentation",
+  "description": "Dagu Documentation",
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
@@ -9,12 +9,12 @@
     "preview": "vitepress preview"
   },
   "keywords": [
-    "boltbase",
+    "dagu",
     "workflow",
     "orchestration",
     "documentation"
   ],
-  "author": "Boltbase Contributors",
+  "author": "Dagu Contributors",
   "license": "MIT",
   "devDependencies": {
     "mermaid": "^11.12.0",

@@ -1,6 +1,6 @@
 # Installation
 
-Install Boltbase on your system.
+Install Dagu on your system.
 
 ## Quick Install
 
@@ -23,14 +23,14 @@ This detects your OS/architecture and installs to `~/.local/bin` by default. Pro
 ::: code-group
 
 ```powershell [PowerShell]
-# Install latest version to default location (%LOCALAPPDATA%\Programs\boltbase)
+# Install latest version to default location (%LOCALAPPDATA%\Programs\dagu)
 irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
 
 # Install specific version
 & ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) v1.24.0
 
 # Install to custom directory
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) latest "C:\tools\boltbase"
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) latest "C:\tools\dagu"
 ```
 
 ```cmd [CMD/PowerShell]
@@ -41,7 +41,7 @@ REM Install specific version
 curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd v1.24.0 && del installer.cmd
 
 REM Install to custom directory
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd latest "C:\tools\boltbase" && del installer.cmd
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd latest "C:\tools\dagu" && del installer.cmd
 ```
 
 :::
@@ -49,14 +49,14 @@ curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installe
 The installer downloads the appropriate binary and adds it to your PATH.
 
 ::: tip Running as a Windows Service
-If you plan to run Boltbase as a Windows service, you should install it to `Program Files` which requires administrator privileges. Download the installer script and run it as Administrator:
+If you plan to run Dagu as a Windows service, you should install it to `Program Files` which requires administrator privileges. Download the installer script and run it as Administrator:
 
 ```powershell
 # Download the installer
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1" -OutFile "installer.ps1"
 
 # Right-click PowerShell → "Run as Administrator", then:
-.\installer.ps1 latest "C:\Program Files\boltbase"
+.\installer.ps1 latest "C:\Program Files\dagu"
 ```
 :::
 
@@ -64,11 +64,11 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/dagu-org/dagu/main/scr
 
 ```bash
 docker run -d \
-  --name boltbase \
+  --name dagu \
   -p 8080:8080 \
-  -v ~/.boltbase:/var/lib/boltbase \
-  ghcr.io/dagu-org/boltbase:latest \
-  boltbase start-all
+  -v ~/.dagu:/var/lib/dagu \
+  ghcr.io/dagu-org/dagu:latest \
+  dagu start-all
 ```
 
 Visit http://localhost:8080. See [Docker Images](/configurations/deployment/docker-images) for available tags and variants.
@@ -78,15 +78,15 @@ Visit http://localhost:8080. See [Docker Images](/configurations/deployment/dock
 ### npm
 
 ```bash
-npm install -g --ignore-scripts=false @dagu-org/boltbase
+npm install -g --ignore-scripts=false @dagu-org/dagu
 ```
 
-This installs Boltbase globally with automatic platform detection.
+This installs Dagu globally with automatic platform detection.
 
 ### Homebrew
 
 ```bash
-brew update && brew install boltbase
+brew update && brew install dagu
 ```
 
 ### Manual Download
@@ -123,20 +123,20 @@ curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.s
 
 ```yaml
 services:
-  boltbase:
-    image: ghcr.io/dagu-org/boltbase:latest
+  dagu:
+    image: ghcr.io/dagu-org/dagu:latest
     ports:
       - "8080:8080"
     environment:
-      - BOLTBASE_TZ=America/New_York
-      - BOLTBASE_PORT=8080 # optional. default is 8080
-      - BOLTBASE_HOME=/boltbase # optional.
+      - DAGU_TZ=America/New_York
+      - DAGU_PORT=8080 # optional. default is 8080
+      - DAGU_HOME=/dagu # optional.
       - PUID=1000 # optional. default is 1000
       - PGID=1000 # optional. default is 1000
     volumes:
-      - boltbase:/var/lib/boltbase
+      - dagu:/var/lib/dagu
 volumes:
-  boltbase: {}
+  dagu: {}
 ```
 
 Run with `docker compose up -d`.
@@ -147,17 +147,17 @@ For Docker executor support:
 
 ```yaml
 services:
-  boltbase:
-    image: ghcr.io/dagu-org/boltbase:latest
+  dagu:
+    image: ghcr.io/dagu-org/dagu:latest
     ports:
       - "8080:8080"
     volumes:
-      - boltbase:/var/lib/boltbase
+      - dagu:/var/lib/dagu
       - /var/run/docker.sock:/var/run/docker.sock
     entrypoint: [] # Override default entrypoint
     user: "0:0"    # Run as root for Docker access
 volumes:
-  boltbase: {}
+  dagu: {}
 ```
 
 ⚠️ **Security**: Mounting Docker socket grants full Docker access.
@@ -171,13 +171,13 @@ Requirements:
 
 ```bash
 git clone https://github.com/dagu-org/dagu.git
-cd boltbase
+cd dagu
 
 # Build everything
 make build
 
 # Install
-sudo cp .local/bin/boltbase /usr/local/bin/
+sudo cp .local/bin/dagu /usr/local/bin/
 ```
 
 Development:
@@ -189,15 +189,15 @@ make run         # Start with hot reload
 
 ## Directory Structure
 
-Boltbase uses standard locations:
+Dagu uses standard locations:
 
 ```
-~/.config/boltbase/
+~/.config/dagu/
 ├── dags/         # Workflows
 ├── config.yaml   # Configuration
 └── base.yaml     # Shared config
 
-~/.local/share/boltbase/
+~/.local/share/dagu/
 ├── logs/         # Execution logs
 ├── data/         # History
 └── suspend/      # Pause flags
@@ -205,20 +205,20 @@ Boltbase uses standard locations:
 
 Override with environment variables:
 ```bash
-export BOLTBASE_HOME=/opt/boltbase           # All-in-one directory
-export BOLTBASE_DAGS_DIR=/workflows      # Custom workflow location
-export BOLTBASE_LOG_DIR=/var/log/boltbase    # Custom log location
-export BOLTBASE_DATA_DIR=/var/lib/boltbase    # Custom data location
+export DAGU_HOME=/opt/dagu           # All-in-one directory
+export DAGU_DAGS_DIR=/workflows      # Custom workflow location
+export DAGU_LOG_DIR=/var/log/dagu    # Custom log location
+export DAGU_DATA_DIR=/var/lib/dagu    # Custom data location
 ```
 
 ## Verify Installation
 
 ```bash
-boltbase version
+dagu version
 ```
 
 ## Next Steps
 
 - [Quick Start](/getting-started/quickstart) - Create your first workflow
-- [Configuration](/configurations/) - Customize Boltbase
+- [Configuration](/configurations/) - Customize Dagu
 - [Web UI](/overview/web-ui) - Explore the interface

@@ -2,7 +2,7 @@
 
 ## Multi-Environment
 
-By setting up remote nodes, you can run workflows on different Boltbase server environments (e.g., development, staging, production) in a single Boltbase server Web UI.
+By setting up remote nodes, you can run workflows on different Dagu server environments (e.g., development, staging, production) in a single Dagu server Web UI.
 
 ```yaml
 remote_nodes:
@@ -32,7 +32,7 @@ remote_nodes:
   - name: "production"
     api_base_url: "https://prod.example.com/api/v1"
     is_auth_token: true
-    auth_token: "boltbase_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
+    auth_token: "dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 ```
 
 API keys provide fine-grained role-based permissions (admin, manager, operator, viewer) and usage tracking. See [Remote Nodes Authentication](/configurations/authentication/remote-nodes) for detailed setup instructions.
@@ -45,9 +45,9 @@ remote_nodes:
   - name: "secure-prod"
     api_base_url: "https://secure.example.com/api/v1"
     tlsConfig:
-      cert_file: "/etc/boltbase/certs/client.crt"
-      key_file: "/etc/boltbase/certs/client.key"
-      ca_file: "/etc/boltbase/certs/ca.crt"
+      cert_file: "/etc/dagu/certs/client.crt"
+      key_file: "/etc/dagu/certs/client.key"
+      ca_file: "/etc/dagu/certs/ca.crt"
 ```
 
 ## See Also

@@ -133,7 +133,7 @@ When a step specifies `llm:`, it **completely replaces** the DAG-level configura
 DAG-level `llm` configuration also works with base DAG inheritance:
 
 ```yaml
-# ~/.config/boltbase/base.yaml
+# ~/.config/dagu/base.yaml
 llm:
   provider: openai
   model: gpt-4o

@@ -81,7 +81,7 @@ steps:
 
 ## Atomic Uploads
 
-Uploads write to a temporary file (`.boltbase-tmp-{random}`) then rename to the final destination. This prevents partial files on failure.
+Uploads write to a temporary file (`.dagu-tmp-{random}`) then rename to the final destination. This prevents partial files on failure.
 
 ## See Also
 

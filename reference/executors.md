@@ -2,7 +2,7 @@
 
 ## Overview
 
-Step types extend Boltbase's capabilities beyond simple shell commands. Available step types:
+Step types extend Dagu's capabilities beyond simple shell commands. Available step types:
 
 - [Shell](/features/executors/shell) (default) - Execute shell commands
 - [Docker](/features/executors/docker) - Run commands in Docker containers
@@ -168,7 +168,7 @@ steps:
 For the full guide, see [GitHub Actions](/features/executors/github-actions).
 :::
 
-Run marketplace actions (e.g. `actions/checkout@v4`) inside Boltbase steps.
+Run marketplace actions (e.g. `actions/checkout@v4`) inside Dagu steps.
 
 ```yaml
 secrets:
@@ -485,7 +485,7 @@ steps:
     type: http
     config:
       query:
-        q: "boltbase workflow"
+        q: "dagu workflow"
         limit: "10"
         offset: "0"
       silent: true
@@ -641,7 +641,7 @@ steps:
         - ops@company.com
         - alerts@company.com
         - oncall@company.com
-      from: boltbase@company.com
+      from: dagu@company.com
       subject: "[ALERT] Process Failed"
       message: |
         The critical process has failed.

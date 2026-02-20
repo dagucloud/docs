@@ -1,20 +1,20 @@
 # Server Configuration
 
-Configure Boltbase server settings.
+Configure Dagu server settings.
 
 ## Configuration Methods
 
 Precedence order:
 1. Command-line flags (highest)
-2. Environment variables (`BOLTBASE_` prefix)
+2. Environment variables (`DAGU_` prefix)
 3. Configuration file (lowest)
 
 ```bash
 # CLI flag wins
-boltbase start-all --port=8000
+dagu start-all --port=8000
 
 # Even with env var
-export BOLTBASE_PORT=8080
+export DAGU_PORT=8080
 
 # And config file
 port: 7000
@@ -22,13 +22,13 @@ port: 7000
 
 ## Configuration File
 
-Location: `~/.config/boltbase/config.yaml`
+Location: `~/.config/dagu/config.yaml`
 
 ```yaml
 # Server Configuration
 host: "127.0.0.1"         # Web UI binding host
 port: 8080                # Web UI binding port
-base_path: ""              # Base path for reverse proxy (e.g., "/boltbase")
+base_path: ""              # Base path for reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
 tz: "Asia/Tokyo"          # Server timezone
 debug: false              # Debug mode
@@ -38,12 +38,12 @@ metrics: "private"        # Metrics endpoint access: "private" (default) or "pub
 
 # Directory Paths (must be under "paths" key)
 paths:
-  dags_dir: "~/.config/boltbase/dags"                    # DAG definitions
-  log_dir: "~/.local/share/boltbase/logs"                # Log files
-  data_dir: "~/.local/share/boltbase/data"               # Application data
-  suspend_flags_dir: "~/.local/share/boltbase/suspend"    # Suspend flags
-  admin_logs_dir: "~/.local/share/boltbase/logs/admin"    # Admin logs
-  base_config: "~/.config/boltbase/base.yaml"            # Base configuration
+  dags_dir: "~/.config/dagu/dags"                    # DAG definitions
+  log_dir: "~/.local/share/dagu/logs"                # Log files
+  data_dir: "~/.local/share/dagu/data"               # Application data
+  suspend_flags_dir: "~/.local/share/dagu/suspend"    # Suspend flags
+  admin_logs_dir: "~/.local/share/dagu/logs/admin"    # Admin logs
+  base_config: "~/.config/dagu/base.yaml"            # Base configuration
   dag_runs_dir: ""                                    # Auto: {data_dir}/dag-runs
   queue_dir: ""                                      # Auto: {data_dir}/queue
   proc_dir: ""                                       # Auto: {data_dir}/proc
@@ -91,7 +91,7 @@ tls:
 # UI Customization
 ui:
   navbar_color: "#1976d2"        # Header color (hex or name)
-  navbar_title: "Boltbase"           # Header title
+  navbar_title: "Dagu"           # Header title
   log_encoding_charset: "utf-8"   # Log file encoding (see reference for supported encodings)
   max_dashboard_page_limit: 100    # Max items on dashboard
   dags:
@@ -141,55 +141,55 @@ remote_nodes:
 
 ## Environment Variables
 
-All options support `BOLTBASE_` prefix:
+All options support `DAGU_` prefix:
 
 **Server:**
-- `BOLTBASE_HOST` - Host (default: `127.0.0.1`)
-- `BOLTBASE_PORT` - Port (default: `8080`)
-- `BOLTBASE_TZ` - Timezone
-- `BOLTBASE_DEBUG` - Debug mode
-- `BOLTBASE_LOG_FORMAT` - Log format (`text`/`json`)
-- `BOLTBASE_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
+- `DAGU_HOST` - Host (default: `127.0.0.1`)
+- `DAGU_PORT` - Port (default: `8080`)
+- `DAGU_TZ` - Timezone
+- `DAGU_DEBUG` - Debug mode
+- `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
+- `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 
 **Paths:**
-- `BOLTBASE_HOME` - Set all paths
-- `BOLTBASE_DAGS_DIR` - DAGs directory
-- `BOLTBASE_LOG_DIR` - Logs
-- `BOLTBASE_DATA_DIR` - Data
+- `DAGU_HOME` - Set all paths
+- `DAGU_DAGS_DIR` - DAGs directory
+- `DAGU_LOG_DIR` - Logs
+- `DAGU_DATA_DIR` - Data
 
 **Auth:**
-- `BOLTBASE_AUTH_MODE` - Auth mode: `none`, `basic`, or `builtin` (default: `builtin`)
+- `DAGU_AUTH_MODE` - Auth mode: `none`, `basic`, or `builtin` (default: `builtin`)
 
 *Builtin Auth (RBAC):*
-- `BOLTBASE_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
-- `BOLTBASE_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
+- `DAGU_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
+- `DAGU_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
 
 *Basic Auth:*
-- `BOLTBASE_AUTH_BASIC_USERNAME` - Basic auth username
-- `BOLTBASE_AUTH_BASIC_PASSWORD` - Basic auth password
+- `DAGU_AUTH_BASIC_USERNAME` - Basic auth username
+- `DAGU_AUTH_BASIC_PASSWORD` - Basic auth password
 
 *OIDC Auth:*
-- `BOLTBASE_AUTH_OIDC_CLIENT_ID` - OIDC client ID
-- `BOLTBASE_AUTH_OIDC_CLIENT_SECRET` - OIDC client secret
-- `BOLTBASE_AUTH_OIDC_CLIENT_URL` - OIDC client URL
-- `BOLTBASE_AUTH_OIDC_ISSUER` - OIDC issuer URL
-- `BOLTBASE_AUTH_OIDC_SCOPES` - OIDC scopes (comma-separated)
-- `BOLTBASE_AUTH_OIDC_WHITELIST` - OIDC email whitelist (comma-separated)
-- `BOLTBASE_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first login (default: `false`)
-- `BOLTBASE_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
-- `BOLTBASE_AUTH_OIDC_ALLOWED_DOMAINS` - Allowed email domains (comma-separated)
-- `BOLTBASE_AUTH_OIDC_BUTTON_LABEL` - SSO login button text
+- `DAGU_AUTH_OIDC_CLIENT_ID` - OIDC client ID
+- `DAGU_AUTH_OIDC_CLIENT_SECRET` - OIDC client secret
+- `DAGU_AUTH_OIDC_CLIENT_URL` - OIDC client URL
+- `DAGU_AUTH_OIDC_ISSUER` - OIDC issuer URL
+- `DAGU_AUTH_OIDC_SCOPES` - OIDC scopes (comma-separated)
+- `DAGU_AUTH_OIDC_WHITELIST` - OIDC email whitelist (comma-separated)
+- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first login (default: `false`)
+- `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
+- `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Allowed email domains (comma-separated)
+- `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text
 
 **UI:**
-- `BOLTBASE_UI_DAGS_SORT_FIELD` - Default DAGs page sort field
-- `BOLTBASE_UI_DAGS_SORT_ORDER` - Default DAGs page sort order
+- `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page sort field
+- `DAGU_UI_DAGS_SORT_ORDER` - Default DAGs page sort order
 
 **Terminal:**
-- `BOLTBASE_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
+- `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
 
 **Audit Logging:**
-- `BOLTBASE_AUDIT_ENABLED` - Enable audit logging (default: `true`)
-- `BOLTBASE_AUDIT_RETENTION_DAYS` - Days to keep audit logs (default: `7`, `0` = keep forever)
+- `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
+- `DAGU_AUDIT_RETENTION_DAYS` - Days to keep audit logs (default: `7`, `0` = keep forever)
 
 ## Common Setups
 
@@ -220,11 +220,11 @@ tls:
 ### Docker
 ```bash
 docker run -d \
-  -e BOLTBASE_HOST=0.0.0.0 \
-  -e BOLTBASE_AUTH_MODE=builtin \
+  -e DAGU_HOST=0.0.0.0 \
+  -e DAGU_AUTH_MODE=builtin \
   -p 8080:8080 \
-  -v boltbase-data:/var/lib/boltbase \
-  ghcr.io/dagu-org/boltbase:latest
+  -v dagu-data:/var/lib/dagu \
+  ghcr.io/dagu-org/dagu:latest
 # First admin account created via /setup page on first visit
 ```
 
@@ -245,7 +245,7 @@ auth:
 
 ```bash
 # Environment variables
-export BOLTBASE_AUTH_MODE=builtin
+export DAGU_AUTH_MODE=builtin
 # Token secret auto-generated if not set
 ```
 
@@ -277,7 +277,7 @@ auth:
   oidc:
     client_id: "${OIDC_CLIENT_ID}"
     client_secret: "${OIDC_CLIENT_SECRET}"
-    client_url: "https://boltbase.example.com"
+    client_url: "https://dagu.example.com"
     issuer: "https://accounts.google.com"
     auto_signup: true
     default_role: viewer
@@ -289,22 +289,22 @@ See [OIDC Configuration](authentication/oidc) for detailed setup.
 
 **Let's Encrypt:**
 ```bash
-certbot certonly --standalone -d boltbase.example.com
+certbot certonly --standalone -d dagu.example.com
 
-export BOLTBASE_CERT_FILE=/etc/letsencrypt/live/boltbase.example.com/fullchain.pem
-export BOLTBASE_KEY_FILE=/etc/letsencrypt/live/boltbase.example.com/privkey.pem
+export DAGU_CERT_FILE=/etc/letsencrypt/live/dagu.example.com/fullchain.pem
+export DAGU_KEY_FILE=/etc/letsencrypt/live/dagu.example.com/privkey.pem
 ```
 
 **Behind Nginx:**
 ```yaml
 # config.yaml
-base_path: "/boltbase"
+base_path: "/dagu"
 host: "127.0.0.1"
 port: 8080
 ```
 
 ```nginx
-location /boltbase/ {
+location /dagu/ {
     proxy_pass http://127.0.0.1:8080/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -349,7 +349,7 @@ ui:
 
 **Environment variable:**
 ```bash
-export BOLTBASE_UI_LOG_ENCODING_CHARSET="shift_jis"
+export DAGU_UI_LOG_ENCODING_CHARSET="shift_jis"
 ```
 
 ## Remote Nodes
@@ -384,7 +384,7 @@ queues:
 
 ## Base Configuration
 
-`~/.config/boltbase/base.yaml` provides shared defaults for all DAGs:
+`~/.config/dagu/base.yaml` provides shared defaults for all DAGs:
 
 ```yaml
 mail_on:
@@ -404,7 +404,7 @@ See [Base Configuration](/configurations/base-config) for complete documentation
 
 ## Metrics Endpoint
 
-Boltbase exposes Prometheus metrics at `/api/v1/metrics`. By default, this endpoint requires authentication.
+Dagu exposes Prometheus metrics at `/api/v1/metrics`. By default, this endpoint requires authentication.
 
 ### Configuration
 
@@ -418,7 +418,7 @@ metrics: "public"
 
 Or via environment variable:
 ```bash
-export BOLTBASE_SERVER_METRICS=public
+export DAGU_SERVER_METRICS=public
 ```
 
 ### Prometheus Scraping
@@ -427,37 +427,37 @@ When metrics is set to `private` (default), configure Prometheus to authenticate
 
 ```yaml
 scrape_configs:
-  - job_name: 'boltbase'
+  - job_name: 'dagu'
     bearer_token: 'your-api-token'
     static_configs:
-      - targets: ['boltbase:8080']
+      - targets: ['dagu:8080']
     metrics_path: '/api/v1/metrics'
 ```
 
 Or with basic auth:
 ```yaml
 scrape_configs:
-  - job_name: 'boltbase'
+  - job_name: 'dagu'
     basic_auth:
       username: 'admin'
       password: 'secret'
     static_configs:
-      - targets: ['boltbase:8080']
+      - targets: ['dagu:8080']
     metrics_path: '/api/v1/metrics'
 ```
 
 When metrics is set to `public`, no authentication is needed:
 ```yaml
 scrape_configs:
-  - job_name: 'boltbase'
+  - job_name: 'dagu'
     static_configs:
-      - targets: ['boltbase:8080']
+      - targets: ['dagu:8080']
     metrics_path: '/api/v1/metrics'
 ```
 
 ## Cache Configuration
 
-Boltbase uses in-memory caches to improve performance. Cache limits can be configured via presets:
+Dagu uses in-memory caches to improve performance. Cache limits can be configured via presets:
 
 ```yaml
 cache: normal   # options: low, normal, high (default: normal)
@@ -465,7 +465,7 @@ cache: normal   # options: low, normal, high (default: normal)
 
 Or via environment variable:
 ```bash
-export BOLTBASE_CACHE=low
+export DAGU_CACHE=low
 ```
 
 ### Presets
@@ -486,14 +486,14 @@ TTL (time-to-live): DAG caches expire after 12 hours, API key/webhook caches aft
 
 Use Prometheus metrics to monitor cache sizes:
 ```txt
-boltbase_cache_entries_total
+dagu_cache_entries_total
 ```
 
 See [Prometheus Metrics](/features/prometheus-metrics#cache-metrics) for more details.
 
 ## Terminal
 
-The web-based terminal allows executing shell commands directly from the Boltbase UI. This feature is **disabled by default** for security reasons.
+The web-based terminal allows executing shell commands directly from the Dagu UI. This feature is **disabled by default** for security reasons.
 
 ### Configuration
 
@@ -504,19 +504,19 @@ terminal:
 
 Or via environment variable:
 ```bash
-export BOLTBASE_TERMINAL_ENABLED=true
+export DAGU_TERMINAL_ENABLED=true
 ```
 
 ### Security Notes
 
-- The terminal runs commands with the same permissions as the Boltbase server process
+- The terminal runs commands with the same permissions as the Dagu server process
 - Only enable in trusted environments where users should have shell access
 - Consider using authentication (`auth.mode: builtin`) when enabling terminal access
 - Terminal sessions are logged in the audit log (when audit logging is enabled)
 
 ## Audit Logging
 
-Boltbase maintains audit logs for security-sensitive operations. Audit logging is **enabled by default**.
+Dagu maintains audit logs for security-sensitive operations. Audit logging is **enabled by default**.
 
 ### Configuration
 
@@ -527,8 +527,8 @@ audit:
 
 Or via environment variable:
 ```bash
-export BOLTBASE_AUDIT_ENABLED=false
-export BOLTBASE_AUDIT_RETENTION_DAYS=30
+export DAGU_AUDIT_ENABLED=false
+export DAGU_AUDIT_RETENTION_DAYS=30
 ```
 
 ### Retention
@@ -554,7 +554,7 @@ When enabled, the following events are recorded:
 
 Audit logs are stored as daily JSONL files in `{admin_logs_dir}/audit/`:
 ```
-~/.local/share/boltbase/logs/admin/audit/
+~/.local/share/dagu/logs/admin/audit/
 ├── 2025-01-10.jsonl
 ├── 2025-01-11.jsonl
 └── ...

@@ -92,7 +92,7 @@ handler_on:
     type: mail
     config:
       to: oncall@company.com
-      from: boltbase@company.com
+      from: dagu@company.com
       subject: "${DAG_NAME} failed"
       message: |
         Run ID: ${DAG_RUN_ID}
