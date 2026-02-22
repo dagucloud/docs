@@ -28,6 +28,10 @@ audit:
   enabled: true           # Enable audit logging (default: true)
   retention_days: 7        # Days to keep audit logs (default: 7, 0 = keep forever)
 
+# Session Storage
+session:
+  max_per_user: 100        # Max sessions per user (default: 100, 0 = unlimited)
+
 # Directories (must be under "paths" key)
 paths:
   dags_dir: "~/.config/dagu/dags"
@@ -185,6 +189,9 @@ All options support `DAGU_` prefix.
 ### Audit Logging
 - `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
 - `DAGU_AUDIT_RETENTION_DAYS` - Days to keep audit logs (default: `7`, `0` = keep forever)
+
+### Session Storage
+- `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
 
 ### Directories
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)

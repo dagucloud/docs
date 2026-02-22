@@ -114,6 +114,10 @@ audit:
   enabled: true               # Enable audit logging (default: true)
   retention_days: 7            # Days to keep audit logs (default: 7, 0 = keep forever)
 
+# Session Storage
+session:
+  max_per_user: 100            # Max sessions per user (default: 100, 0 = unlimited)
+
 # Queue System
 queues:
   enabled: true                 # Enable queue system (default: true)
@@ -190,6 +194,9 @@ All options support `DAGU_` prefix:
 **Audit Logging:**
 - `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
 - `DAGU_AUDIT_RETENTION_DAYS` - Days to keep audit logs (default: `7`, `0` = keep forever)
+
+**Session Storage:**
+- `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
 
 ## Common Setups
 
@@ -561,6 +568,28 @@ Audit logs are stored as daily JSONL files in `{admin_logs_dir}/audit/`:
 ```
 
 Logs can be viewed through the web UI at Settings > Audit Logs.
+
+## Session Storage
+
+Agent chat sessions are stored as JSON files per user. To prevent unbounded disk growth, sessions are automatically cleaned up when a per-user limit is exceeded.
+
+### Configuration
+
+```yaml
+session:
+  max_per_user: 100   # Max sessions per user (default: 100, 0 = unlimited)
+```
+
+Or via environment variable:
+```bash
+export DAGU_SESSION_MAX_PER_USER=50
+```
+
+### Cleanup Behavior
+
+- When a new session is created and the user exceeds the limit, the oldest sessions are deleted
+- Sub-sessions (created by delegate agents) are deleted together with their parent session and do not count toward the limit
+- Set to `0` to disable cleanup (keep all sessions)
 
 ## See Also
 
