@@ -395,4 +395,5 @@ steps:
 - [Tools Reference](/features/agent/tools) — Full parameter documentation for each tool
 - [Chat & AI Agents](/features/chat/) — `type: chat` for simple LLM calls with DAG-based tools
 - [HITL](/features/executors/hitl) — Human-in-the-loop approval steps
+- [Scheduled Agents](/features/agent/scheduling) — Running agent steps on a cron schedule
 - [Data Flow](/features/data-flow) — Passing data between steps with `output`
