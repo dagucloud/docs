@@ -6,8 +6,7 @@ Run the AI agent as a workflow step. The agent executes a multi-turn tool-callin
 
 ```yaml
 steps:
-  - name: analyze-logs
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: |
@@ -24,8 +23,7 @@ The `agent` block is optional. When omitted, the step uses defaults from the glo
 
 ```yaml
 steps:
-  - name: fix-config
-    type: agent
+  - type: agent
     agent:
       model: claude-sonnet
       tools:
@@ -79,15 +77,13 @@ defaults:
     max_iterations: 30
 
 steps:
-  - name: analyze
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Analyze the logs"
     # Uses defaults: model=claude-opus, soul=tsumugi, safe_mode=true, max_iterations=30
 
-  - name: review
-    type: agent
+  - type: agent
     agent:
       model: claude-sonnet   # overrides defaults.agent.model
     messages:
@@ -206,8 +202,7 @@ params:
   - OUTPUT_DIR
 
 steps:
-  - name: process
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Analyze ${INPUT_FILE} and write results to ${OUTPUT_DIR}"
@@ -243,16 +238,13 @@ The step's `output` field captures whatever the agent writes to stdout via the `
 
 ```yaml
 steps:
-  - name: analyze
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Count the number of .go files in this directory"
     output: FILE_COUNT
 
-  - name: report
-    command: echo "Found ${FILE_COUNT} Go files"
-    depends: [analyze]
+  - command: echo "Found ${FILE_COUNT} Go files"
 ```
 
 The agent is instructed (via system prompt) to call the `output` tool with its final result. The content is written directly to stdout and captured by the `output` field.
@@ -265,8 +257,7 @@ If the agent never calls the `output` tool, the output variable will be empty.
 
 ```yaml
 steps:
-  - name: summarize
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Summarize the README.md in this repository"
@@ -277,8 +268,7 @@ steps:
 
 ```yaml
 steps:
-  - name: review
-    type: agent
+  - type: agent
     agent:
       model: claude-opus
     messages:
@@ -291,8 +281,7 @@ steps:
 
 ```yaml
 steps:
-  - name: read-only-analysis
-    type: agent
+  - type: agent
     agent:
       tools:
         enabled:
@@ -309,8 +298,7 @@ steps:
 
 ```yaml
 steps:
-  - name: deploy-check
-    type: agent
+  - type: agent
     agent:
       tools:
         bash_policy:
@@ -337,15 +325,13 @@ params:
   - REPO_PATH
 
 steps:
-  - name: analyze
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Analyze the test coverage of ${REPO_PATH} and identify untested code paths"
     output: COVERAGE_ANALYSIS
 
-  - name: write-tests
-    type: agent
+  - type: agent
     agent:
       model: claude-opus
       max_iterations: 100
@@ -356,7 +342,6 @@ steps:
           ${COVERAGE_ANALYSIS}
 
           Write unit tests for the untested code paths in ${REPO_PATH}.
-    depends: [analyze]
     output: TEST_RESULT
 ```
 
@@ -379,8 +364,7 @@ steps:
       prompt: "Review the migration plan and approve if acceptable"
     depends: [draft]
 
-  - name: execute
-    type: agent
+  - type: agent
     agent:
       safe_mode: true
     messages:
@@ -396,4 +380,5 @@ steps:
 - [Chat & AI Agents](/features/chat/) — `type: chat` for simple LLM calls with DAG-based tools
 - [HITL](/features/executors/hitl) — Human-in-the-loop approval steps
 - [Scheduled Agents](/features/agent/scheduling) — Running agent steps on a cron schedule
+- [Nested Agents](/features/agent/nesting) — Compose agent workflows hierarchically via sub-DAGs
 - [Data Flow](/features/data-flow) — Passing data between steps with `output`

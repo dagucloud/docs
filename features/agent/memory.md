@@ -61,8 +61,7 @@ Memory can be enabled in `type: agent` DAG steps:
 
 ```yaml
 steps:
-  - name: analyze
-    type: agent
+  - type: agent
     agent:
       memory:
         enabled: true

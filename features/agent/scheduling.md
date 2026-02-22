@@ -17,8 +17,7 @@ A daily agent that summarizes system health:
 schedule: "0 8 * * *"  # Every day at 8 AM
 
 steps:
-  - name: health-check
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: |
@@ -39,8 +38,7 @@ params:
   - THRESHOLD=100
 
 steps:
-  - name: check-errors
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: |
@@ -59,17 +57,14 @@ The agent writes its result via the `output` tool, which is captured by the step
 schedule: "0 6 * * *"
 
 steps:
-  - name: analyze
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Analyze yesterday's deployment logs and summarize any issues."
     output: ANALYSIS
 
-  - name: send-report
-    command: |
+  - command: |
       echo "${ANALYSIS}" | mail -s "Daily Deployment Report" team@example.com
-    depends: [analyze]
 ```
 
 If the agent never calls the `output` tool, the output variable will be empty.
@@ -84,8 +79,7 @@ catchup_window: "6h"           # Replay up to 6 hours of missed runs
 overlap_policy: "skip"         # Skip if previous catchup run is still active
 
 steps:
-  - name: hourly-monitor
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Check application metrics for the last hour and flag anomalies."
@@ -107,8 +101,7 @@ schedule: "*/30 * * * *"
 queue: agent-tasks
 
 steps:
-  - name: review
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: "Review open pull requests and summarize their status."
@@ -134,8 +127,7 @@ queues:
 schedule: "0 7 * * *"
 
 steps:
-  - name: analyze-logs
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: |
@@ -151,8 +143,7 @@ steps:
 schedule: "0 9 * * MON"
 
 steps:
-  - name: generate-report
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: |
@@ -160,9 +151,7 @@ steps:
           Write a concise weekly summary in Markdown format.
     output: WEEKLY_SUMMARY
 
-  - name: save-report
-    command: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
-    depends: [generate-report]
+  - command: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
 ```
 
 ### Scheduled Agent with Restricted Tools and Bash Policy
@@ -171,8 +160,7 @@ steps:
 schedule: "0 */6 * * *"
 
 steps:
-  - name: security-scan
-    type: agent
+  - type: agent
     agent:
       tools:
         enabled:
@@ -221,8 +209,7 @@ steps:
         content: "Review application health endpoints and response times."
     output: APP_STATUS
 
-  - name: summarize
-    type: agent
+  - type: agent
     messages:
       - role: user
         content: |

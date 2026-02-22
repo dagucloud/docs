@@ -33,6 +33,7 @@ const fullSidebar = [
       { text: "Memory", link: "/features/agent/memory" },
       { text: "Souls", link: "/features/agent/souls" },
       { text: "Scheduling", link: "/features/agent/scheduling" },
+      { text: "Nesting", link: "/features/agent/nesting" },
       {
         text: "Chat & LLM",
         collapsed: false,
