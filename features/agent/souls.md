@@ -10,11 +10,6 @@ Soul files use YAML frontmatter followed by a Markdown body:
 ---
 name: Dagu Assistant
 description: General-purpose workflow automation assistant
-version: "1.0"
-author: Dagu
-tags:
-  - general
-  - default
 ---
 
 # Identity
@@ -41,9 +36,6 @@ and DAG management for Dagu.
 |-------|------|----------|-------------|
 | `name` | string | yes | Display name shown in the soul selector |
 | `description` | string | no | Brief description of the soul's focus |
-| `version` | string | no | Version identifier |
-| `author` | string | no | Author name |
-| `tags` | string[] | no | Tags for categorization and search |
 
 The Markdown body after the frontmatter is the soul's content. This content is injected into the `<identity>` block of the agent's system prompt.
 
@@ -100,7 +92,7 @@ All soul endpoints require admin role.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/v1/settings/agent/souls` | List souls (paginated, searchable by query and tags) |
+| GET | `/api/v1/settings/agent/souls` | List souls (paginated, searchable by query) |
 | POST | `/api/v1/settings/agent/souls` | Create a new soul |
 | GET | `/api/v1/settings/agent/souls/{soulId}` | Get soul by ID |
 | PATCH | `/api/v1/settings/agent/souls/{soulId}` | Update soul (partial) |
@@ -110,8 +102,7 @@ All soul endpoints require admin role.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `q` | string | Search query (matches name, description, tags) |
-| `tags` | string | Comma-separated tag filter (AND semantics) |
+| `q` | string | Search query (matches name, description) |
 | `page` | int | Page number (default: 1) |
 | `perPage` | int | Results per page (default: 50) |
 
@@ -127,11 +118,6 @@ Create a file `{DAGsDir}/souls/concise-ops.md`:
 ---
 name: Concise Ops
 description: Minimal, operations-focused assistant
-version: "1.0"
-author: Platform Team
-tags:
-  - ops
-  - concise
 ---
 
 # Identity
@@ -157,4 +143,5 @@ Then select it from Agent Settings or via the API.
 ## See Also
 
 - [Agent Overview](/features/agent/) — Chat interface and configuration
+- [Agent Step](/features/agent/step) — Using souls in DAG agent steps
 - [Git Sync](/features/git-sync) — Synchronizing soul files with Git

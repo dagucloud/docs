@@ -49,6 +49,8 @@ steps:
 |-------|------|---------|-------------|
 | `model` | string | global default | Model ID from Agent Settings. Overrides the default model for this step. |
 | `tools` | object | — | Tool selection and bash policy. See [Tools](#tools). |
+| `skills` | string[] | — | Skill IDs the agent is allowed to use. If omitted, falls back to globally enabled skills. |
+| `soul` | string | — | Soul ID for this step's identity. When omitted, inherits from `defaults.agent.soul`. |
 | `memory` | object | `{ enabled: false }` | When `enabled: true`, loads global and per-DAG memory into the agent context. See [Memory](/features/agent/memory). |
 | `prompt` | string | — | Additional instructions appended to the built-in system prompt. |
 | `max_iterations` | int | `50` | Maximum tool-call rounds before the agent stops. |
@@ -63,6 +65,51 @@ The agent step resolves its model from the global Agent Settings (configured at 
 3. If no default model is configured, the step fails with: `"no model configured; set a default model in Agent Settings or specify agent.model in the step"`
 
 Model configuration (provider, API key, base URL) is managed entirely through Agent Settings. This avoids duplicating credentials in DAG files.
+
+## DAG-Level Defaults
+
+Use `defaults.agent` to set default agent configuration for all agent-type steps in the DAG. Each field is applied only when the step does not set its own value.
+
+```yaml
+defaults:
+  agent:
+    model: claude-opus
+    soul: tsumugi
+    safe_mode: true
+    max_iterations: 30
+
+steps:
+  - name: analyze
+    type: agent
+    messages:
+      - role: user
+        content: "Analyze the logs"
+    # Uses defaults: model=claude-opus, soul=tsumugi, safe_mode=true, max_iterations=30
+
+  - name: review
+    type: agent
+    agent:
+      model: claude-sonnet   # overrides defaults.agent.model
+    messages:
+      - role: user
+        content: "Review the analysis"
+    # Uses model=claude-sonnet (override), soul=tsumugi (default), etc.
+```
+
+**Resolution order (per field):** `step.agent.<field>` → `defaults.agent.<field>` → built-in default
+
+### Supported Default Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `model` | string | Default model ID for agent steps |
+| `tools` | object | Default tool selection and bash policy |
+| `skills` | string[] | Default skill IDs |
+| `soul` | string | Default soul ID |
+| `memory` | object | Default memory configuration |
+| `prompt` | string | Default additional system prompt instructions |
+| `max_iterations` | int | Default max tool-call rounds |
+| `safe_mode` | bool | Default safe mode setting |
 
 ## Tools
 
