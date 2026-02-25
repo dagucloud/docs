@@ -1,5 +1,5 @@
 {
-  "name": "docs-dagu-cloud",
+  "name": "docs-dagu-sh",
   "compatibility_date": "2025-04-01",
   "assets": {
     "directory": ".vitepress/dist/"
