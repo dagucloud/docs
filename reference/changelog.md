@@ -1,5 +1,7 @@
 # Changelog
 
+> **Note**: For patch version release notes (e.g., v2.0.1, v2.0.2), see the [GitHub Releases](https://github.com/dagu-org/dagu/releases) page.
+
 ## v2.0.0 (2026-02-28)
 
 ### Changed
