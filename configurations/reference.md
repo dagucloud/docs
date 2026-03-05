@@ -35,6 +35,7 @@ session:
 # Directories (must be under "paths" key)
 paths:
   dags_dir: "~/.config/dagu/dags"
+  docs_dir: ""                # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
   suspend_flags_dir: "~/.local/share/dagu/suspend"
@@ -220,6 +221,7 @@ All options support `DAGU_` prefix.
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
 - `DAGU_DAGS_DIR` - DAG definitions
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
+- `DAGU_DOCS_DIR` - Documents directory (default: `{dags_dir}/docs`)
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
 - `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags

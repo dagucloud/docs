@@ -135,6 +135,7 @@ export DAGU_PORT=8080
 
 # Paths
 export DAGU_DAGS_DIR=/opt/workflows
+export DAGU_DOCS_DIR=/opt/workflows/docs
 export DAGU_LOG_DIR=/var/log/dagu
 
 # Auth

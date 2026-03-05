@@ -40,6 +40,7 @@ metrics: "private"        # Metrics endpoint access: "private" (default) or "pub
 # Directory Paths (must be under "paths" key)
 paths:
   dags_dir: "~/.config/dagu/dags"                    # DAG definitions
+  docs_dir: ""                                       # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"                # Log files
   data_dir: "~/.local/share/dagu/data"               # Application data
   suspend_flags_dir: "~/.local/share/dagu/suspend"    # Suspend flags
