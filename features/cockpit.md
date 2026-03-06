@@ -2,8 +2,6 @@
 
 A workspace-scoped kanban view for monitoring DAG runs across dates. Available at `/cockpit` in the Web UI.
 
-Requires `agentEnabled` to be `true` in the server configuration. The menu item only appears when this is enabled.
-
 ## Page Structure
 
 The page renders two areas unconditionally:
