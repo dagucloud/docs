@@ -4,7 +4,7 @@
   <img src="/hero-logo.webp" alt="Dagu" style="width: 100%; height: auto;" />
 </div>
 
-Dagu is a local-first workflow engine that orchestrates CLI commands, containers, AI agents, and remote tasks. Define workflows in declarative YAML, execute with a single binary, and scale from laptop to distributed cluster. No database, message broker, or external dependencies required.
+Dagu is a local-first workflow engine. It is declarative, file-based, self-contained, and air-gapped ready. It runs as a single binary and scales from laptop to distributed cluster.
 
 ## Key Capabilities
 

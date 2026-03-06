@@ -5,8 +5,8 @@ layout: doc
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Local-first CLI and AI-agent orchestration that runs anywhere.</h2>
-  <p>Declarative, file-based, self-contained, air-gapped ready. One binary that scales from laptop to distributed cluster.</p>
+  <h2>Local-first workflow engine.</h2>
+  <p>Declarative, file-based, self-contained, and air-gapped ready. One binary that scales from laptop to distributed cluster.</p>
 </div>
 
 <div class="hero-section">
