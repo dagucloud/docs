@@ -227,7 +227,7 @@ const fullSidebar = [
 export default withMermaid(
   defineConfig({
     title: "Dagu",
-    description: "Orchestrate complex workflows in simple YAML. Single binary. No external dependencies.",
+    description: "Local-first CLI and AI-agent orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
     lang: "en-US",
     lastUpdated: true,
     cleanUrls: true,
@@ -237,14 +237,14 @@ export default withMermaid(
         "meta",
         {
           name: "description",
-          content: "Orchestrate complex workflows in simple YAML. Shell, Docker, SSH, AI agents. Single binary with Web UI.",
+          content: "Local-first CLI and AI-agent orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
         },
       ],
       [
         "meta",
         {
           property: "og:description",
-          content: "Orchestrate complex workflows in simple YAML. Shell, Docker, SSH, AI agents. Single binary with Web UI.",
+          content: "Local-first CLI and AI-agent orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
         },
       ],
       ["link", { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
