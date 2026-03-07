@@ -209,7 +209,7 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
-| `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. | Directory of DAG file (or inherited from parent for sub-DAGs) |
+| `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. When not set, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. | Per-run work directory (or inherited from parent for sub-DAGs) |
 | `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
 | `log_dir` | string | Custom log directory | System default |
 | `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
@@ -448,6 +448,10 @@ container:
 steps:
   - command: python process.py
 ```
+
+**Default Working Directory:**
+- When `working_dir` is **not** set in the DAG YAML or base config, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. This gives each run an isolated workspace automatically.
+- When `working_dir` **is** explicitly set, the explicit value is used. `DAG_RUN_WORK_DIR` is still available as an environment variable.
 
 **Working Directory Inheritance:**
 - Steps inherit `working_dir` from the DAG if not explicitly set
@@ -1109,6 +1113,7 @@ These variables are automatically available:
 | `DAG_RUN_STEP_NAME` | Current step name |
 | `DAG_RUN_STEP_STDOUT_FILE` | Step stdout file path |
 | `DAG_RUN_STEP_STDERR_FILE` | Step stderr file path |
+| `DAG_RUN_WORK_DIR` | Per-run isolated work directory path |
 | `ITEM` | Current item in parallel execution |
 
 ## Complete Example
