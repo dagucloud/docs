@@ -145,6 +145,7 @@ handler_on:
 ### AI Agent Workflow
 
 ```yaml
+type: graph
 steps:
   - name: analyze
     type: agent
@@ -152,15 +153,12 @@ steps:
       - role: user
         content: "Review error logs and suggest fixes"
     output: ANALYSIS
-
-  - name: approve
-    type: hitl
-    config:
+    approval:
       prompt: "Review AI analysis before applying"
 
   - name: apply
     command: ./apply-fix.sh "${ANALYSIS}"
-    depends: approve
+    depends: [analyze]
 ```
 
 See [Examples](/writing-workflows/examples) for more patterns.
@@ -168,7 +166,7 @@ See [Examples](/writing-workflows/examples) for more patterns.
 ## Use Cases
 
 - **CLI Orchestration** - Chain shell scripts, Docker containers, and remote commands into reliable workflows
-- **AI-Agent Workflows** - LLM-powered agents with tool calling, human-in-the-loop approval, and memory
+- **AI-Agent Workflows** - LLM-powered agents with tool calling, approval gates, and memory
 - **Deployment Automation** - Multi-environment rollouts with approval gates
 - **Scheduled Operations** - Cron-based maintenance, backups, and reporting
 - **Legacy Migration** - Wrap existing scripts without rewriting them

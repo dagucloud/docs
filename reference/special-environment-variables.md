@@ -21,7 +21,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step or handler only | File path backing the step's captured stdout stream. | `/var/log/dagu/daily-backup/upload-artifacts.stdout.log` |
 | `DAG_RUN_STEP_STDERR_FILE` | Current step or handler only | File path backing the step's captured stderr stream. | `/var/log/dagu/daily-backup/upload-artifacts.stderr.log` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical status: `running` (init handler), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler). | `failed` |
-| `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval (HITL). | `approval-step,review-step` |
+| `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval. | `approval-step,review-step` |
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
 | `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>`. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/daily-backup` |

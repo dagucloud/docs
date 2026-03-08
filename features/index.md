@@ -45,7 +45,7 @@ Dagu includes a built-in AI assistant powered by LLMs, with tool calling, persis
 - [Mail](/features/executors/mail)
 - [JQ](/features/executors/jq)
 - [GitHub Actions](/features/executors/github-actions)
-- [Human in the Loop (HITL)](/features/executors/hitl)
+- [Approval](/features/approval)
 - [S3](/features/executors/s3)
 - [Redis](/features/executors/redis)
 

@@ -93,7 +93,7 @@ steps:
 
 ### Wait Status Notifications
 
-Send notifications when a DAG is waiting for human approval (HITL - Human In The Loop):
+Send notifications when a DAG is waiting for human approval:
 
 ```yaml
 mail_on:

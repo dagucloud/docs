@@ -10,7 +10,7 @@ Lifecycle handlers let you run extra steps after the main DAG completes. Use the
 | `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continue_on`) | Deliver success notifications, enqueue downstream jobs |
 | `failure` | The DAG ended with `failed` or `rejected` status (precondition failure) | Page on-call, collect diagnostics |
 | `abort` | A stop request interrupted the run (manual stop, queue eviction, timeout cancellation) | Roll back partial work, release locks |
-| `wait` | The DAG has paused waiting for human approval (HITL) | Notify approvers, send Slack messages |
+| `wait` | The DAG has paused waiting for human approval | Notify approvers, send Slack messages |
 | `exit` | Always runs after the status-specific handler finishes (including when it fails or is skipped) | File system clean-up, archival tasks |
 
 Only the handlers you define are executed. The `init` handler runs first (before any steps), then the main steps execute, then the status-specific handler runs (if present), and finally the `exit` handler runs last. The `wait` handler is special: it runs when the workflow pauses for approval, before the workflow completes.
@@ -118,9 +118,9 @@ handler_on:
       find /tmp/${DAG_RUN_ID} -maxdepth 1 -type f -delete
 ```
 
-### Notify on Wait (HITL Approval)
+### Notify on Wait (Approval)
 
-When using [HITL steps](/features/executors/hitl) for human-in-the-loop approval, notify stakeholders:
+When using [approval steps](/features/approval), notify stakeholders:
 
 ```yaml
 handler_on:
@@ -128,11 +128,12 @@ handler_on:
     command: notify-slack.sh "Approval needed: ${DAG_WAITING_STEPS}"
 
 steps:
-  - command: ./deploy.sh staging
-  - type: hitl
-    config:
+  - name: deploy-staging
+    command: ./deploy.sh staging
+    approval:
       prompt: "Approve production?"
-  - command: ./deploy.sh production
+  - name: deploy-prod
+    command: ./deploy.sh production
 ```
 
 The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of step names currently waiting for approval.

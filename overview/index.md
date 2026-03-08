@@ -138,7 +138,7 @@ See [Architecture](/overview/architecture) for details.
 | `ssh` | Remote command execution via SSH |
 | `docker` | Container execution with volume mounts and registry auth |
 | `http` | HTTP/REST API requests |
-| `hitl` | Human-in-the-loop approval gates |
+| `approval` | Human approval gate (field on any step type) |
 | `jq` | JSON query and transformation |
 | `mail` | Email notifications with attachments |
 | `dag` | Sub-workflow execution (hierarchical composition) |

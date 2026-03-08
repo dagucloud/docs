@@ -378,7 +378,7 @@ steps:
     output: TEST_RESULT
 ```
 
-### Graph DAG with Agent and HITL
+### Graph DAG with Agent and Approval
 
 ```yaml
 type: graph
@@ -390,20 +390,17 @@ steps:
       - role: user
         content: "Draft a migration plan for upgrading the database from v3 to v4"
     output: MIGRATION_PLAN
-
-  - name: approve
-    type: hitl
-    config:
+    approval:
       prompt: "Review the migration plan and approve if acceptable"
-    depends: [draft]
 
-  - type: agent
+  - name: execute
+    type: agent
     agent:
       safe_mode: true
     messages:
       - role: user
         content: "Execute the approved migration plan: ${MIGRATION_PLAN}"
-    depends: [approve]
+    depends: [draft]
 ```
 
 ## See Also
@@ -411,7 +408,7 @@ steps:
 - [Agent Overview](/features/agent/) — Web UI agent with sessions and interactive tools
 - [Tools Reference](/features/agent/tools) — Full parameter documentation for each tool
 - [Chat & AI Agents](/features/chat/) — `type: chat` for simple LLM calls with DAG-based tools
-- [HITL](/features/executors/hitl) — Human-in-the-loop approval steps
+- [Approval](/features/approval) — Human approval gates
 - [Scheduled Agents](/features/agent/scheduling) — Running agent steps on a cron schedule
 - [Nested Agents](/features/agent/nesting) — Compose agent workflows hierarchically via sub-DAGs
 - [Data Flow](/features/data-flow) — Passing data between steps with `output`

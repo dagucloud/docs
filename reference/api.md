@@ -1401,6 +1401,121 @@ Manually updates a step's execution status.
 }
 ```
 
+### Approve Step
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/approve`
+
+Approves a step that is in Waiting status. If the step's `approval.input` defines input fields, the provided `inputs` are available as environment variables in subsequent steps.
+
+**Request Body** (optional):
+```json
+{
+  "inputs": {
+    "FEEDBACK": "Looks good, proceed.",
+    "PRIORITY": "high"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `inputs` | object | Key-value pairs injected as environment variables in subsequent steps. Keys must match `approval.input` if defined. |
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "20240211_140000_abc123",
+  "stepName": "deploy-staging",
+  "resumed": true
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dagRunId` | string | The DAG run ID |
+| `stepName` | string | The approved step name |
+| `resumed` | boolean | Whether the DAG run was re-enqueued for execution |
+
+**Error Responses**:
+- `400`: Step is not in Waiting status, or required inputs missing
+- `404`: DAG-run or step not found
+
+**Sub DAG variant**: `POST /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/approve`
+
+### Reject Step
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/reject`
+
+Rejects a step that is in Waiting status. The step transitions to Rejected, the DAG status becomes `rejected`, dependent steps are aborted, and the `failure` handler runs.
+
+**Request Body** (optional):
+```json
+{
+  "reason": "Output quality insufficient"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reason` | string | Optional reason for rejection |
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "20240211_140000_abc123",
+  "stepName": "deploy-staging"
+}
+```
+
+**Error Responses**:
+- `400`: Step is not in Waiting status
+- `404`: DAG-run or step not found
+
+**Sub DAG variant**: `POST /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/reject`
+
+### Push Back Step
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/push-back`
+
+Pushes back a Waiting step for re-execution with feedback. The step is reset to `NotStarted`, the `approvalIteration` counter increments, any downstream dependents are also reset, and the step re-executes with the provided inputs injected as environment variables.
+
+**Request Body** (optional):
+```json
+{
+  "inputs": {
+    "FEEDBACK": "Include error counts in the summary",
+    "FORMAT": "markdown"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `inputs` | object | Key-value pairs injected as environment variables when the step re-executes |
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "20240211_140000_abc123",
+  "stepName": "generate-report",
+  "approvalIteration": 2,
+  "resumed": true
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dagRunId` | string | The DAG run ID |
+| `stepName` | string | The pushed-back step name |
+| `approvalIteration` | integer | The approval iteration count after push-back |
+| `resumed` | boolean | Whether the DAG run was re-enqueued for execution |
+
+**Error Responses**:
+- `400`: Step is not in Waiting status, step has no approval config, or required inputs missing
+- `404`: DAG-run or step not found
+
+**Sub DAG variant**: `POST /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/push-back`
+
 ## Search Endpoints
 
 ### Search DAGs
@@ -2124,6 +2239,30 @@ curl -X PATCH "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20
 ```
 
 **Response (200)**: Success (empty response body)
+
+### Approve a Waiting Step
+```bash
+curl -X POST "http://localhost:8080/api/v1/dag-runs/deploy-pipeline/20240211_120000/steps/deploy-staging/approve" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer your-token" \
+     -d '{"inputs": {"APPROVED_BY": "ops-team"}}'
+```
+
+### Reject a Waiting Step
+```bash
+curl -X POST "http://localhost:8080/api/v1/dag-runs/deploy-pipeline/20240211_120000/steps/deploy-staging/reject" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer your-token" \
+     -d '{"reason": "Not ready for production"}'
+```
+
+### Push Back a Waiting Step
+```bash
+curl -X POST "http://localhost:8080/api/v1/dag-runs/report-pipeline/20240211_120000/steps/generate-report/push-back" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer your-token" \
+     -d '{"inputs": {"FEEDBACK": "Include error counts"}}'
+```
 
 ### Enqueue a DAG Run
 ```bash

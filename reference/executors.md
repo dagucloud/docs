@@ -10,7 +10,6 @@ Step types extend Dagu's capabilities beyond simple shell commands. Available st
 - [Docker](/features/executors/docker) - Run commands in Docker containers
 - [HTTP](/features/executors/http) - Make HTTP requests
 - [Router](/features/executors/router) - Route execution to different steps based on pattern matching
-- [HITL](/features/executors/hitl) - Human-in-the-loop approval gates
 - [Mail](/features/executors/mail) - Send emails
 - [Chat](/features/chat/) - Execute LLM requests (OpenAI, Anthropic, Gemini, etc.)
 - [JQ](/features/executors/jq) - Process JSON data
@@ -573,53 +572,6 @@ steps:
     routes:
       "all": [step_a, step_b, step_c]
 ```
-
-## HITL (Human in the Loop)
-
-::: info
-For detailed HITL documentation, see [HITL Guide](/features/executors/hitl).
-:::
-
-Pause workflow execution until human approval or rejection. This enables human-in-the-loop (HITL) workflows where manual review or authorization is required before proceeding.
-
-### Basic Usage
-
-```yaml
-steps:
-  - command: ./deploy.sh staging
-  - type: hitl
-  - command: ./deploy.sh production
-```
-
-### With Prompt and Inputs
-
-```yaml
-steps:
-  - command: ./deploy.sh staging
-  - type: hitl
-    config:
-      prompt: "Approve production deployment?"
-      input: [APPROVED_BY, RELEASE_NOTES]
-      required: [APPROVED_BY]
-  - command: |
-      echo "Approved by: ${APPROVED_BY}"
-      ./deploy.sh production
-```
-
-### Configuration Options
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `prompt` | string | Message displayed to the approver |
-| `input` | string[] | Parameter names to collect from approver |
-| `required` | string[] | Parameters that must be provided (subset of `input`) |
-
-### Approval and Rejection
-
-HITL steps can be approved or rejected via the Web UI or REST API:
-
-- **Approval**: The step succeeds and execution continues
-- **Rejection**: The step enters `Rejected` status, the DAG status becomes `Rejected`, and dependent steps are aborted
 
 ## DAG (Subworkflow)
 
@@ -1370,7 +1322,7 @@ This executor is experimental. It depends on Docker, downloads images on demand,
 - [Docker](/features/executors/docker) - Container execution guide
 - [HTTP](/features/executors/http) - API interaction guide
 - [Router](/features/executors/router) - Pattern-based routing guide
-- [HITL](/features/executors/hitl) - Human-in-the-loop approval guide
+- [Approval](/features/approval) - Human approval gates
 - [Mail](/features/executors/mail) - Email notification guide
 - [Chat](/features/chat/) - LLM integration guide
 - [JQ](/features/executors/jq) - JSON processing guide

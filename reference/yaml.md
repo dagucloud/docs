@@ -939,29 +939,29 @@ steps:
 
 See [Chat Executor](/features/chat/) for full documentation.
 
-### HITL (Human in the Loop)
+### Approval
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Set to `hitl` for approval gate steps | - |
-| `config.prompt` | string | Message displayed to the approver | - |
-| `config.input` | string[] | Parameter names to collect from approver | - |
-| `config.required` | string[] | Required parameters (subset of input) | - |
+| `approval.prompt` | string | Message displayed to the approver | - |
+| `approval.input` | string[] | Parameter names to collect from approver | - |
+| `approval.required` | string[] | Required parameters (subset of `input`) | - |
 
 ```yaml
 steps:
-  - command: ./deploy.sh staging
-  - type: hitl
-    config:
+  - name: deploy-staging
+    command: ./deploy.sh staging
+    approval:
       prompt: "Approve production?"
       input: [APPROVED_BY]
       required: [APPROVED_BY]
-  - command: ./deploy.sh production
+  - name: deploy-prod
+    command: ./deploy.sh production
 ```
 
-HITL steps pause workflow execution until approval is granted via UI or API. Collected inputs become environment variables in subsequent steps.
+The step executes normally, then enters `Waiting` status until approved. Collected inputs become environment variables in subsequent steps.
 
-See [HITL](/features/executors/hitl) for full documentation.
+See [Approval](/features/approval) for full documentation.
 
 ### Distributed Execution
 

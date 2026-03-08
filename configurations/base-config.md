@@ -151,7 +151,7 @@ handler_on:
 | `failure` | Any step failed |
 | `abort` | DAG was cancelled |
 | `exit` | Always runs on completion (cleanup) |
-| `wait` | DAG enters HITL wait status |
+| `wait` | DAG enters wait status (approval step pending) |
 
 **Special environment variables** available in handlers:
 
