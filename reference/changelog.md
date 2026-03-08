@@ -17,7 +17,6 @@
 - Batch Delete for Git-Sync Items: Multiple git-sync items can now be selected and deleted in bulk. ([#1736](https://github.com/dagu-org/dagu/pull/1736))
 - Cockpit Review Column: The cockpit kanban board now includes a "Review" column for DAG runs in waiting/approval status. The cockpit is now the default landing page.
 - Cockpit Toolbar on Docs Page: The CockpitToolbar is available on the Docs page for quick access to DAG preview and start actions.
-- Auto-Open Start Dialog in Cockpit: Opening a DAG preview modal from the cockpit automatically opens the start dialog.
 - Agent DAG Authoring Guidance: The agent system prompt now includes DAG authoring guidance for better workflow generation.
 
 ### Changed
