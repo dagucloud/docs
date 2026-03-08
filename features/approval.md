@@ -121,26 +121,49 @@ Push-back is only available on steps with the `approval` field.
 
 ### Example
 
+A step queries metrics and outputs a summary. The approver can push back with different parameters until the output looks right:
+
 ```yaml
 steps:
-  - name: generate-report
-    command: ./generate-report.sh
+  - name: query-metrics
+    script: |
+      SINCE="${SINCE:-7d}"
+      GROUPING="${GROUPING:-daily}"
+      echo "Querying error rates (since=$SINCE, grouping=$GROUPING)"
+      curl -s "https://metrics.internal/api/errors?since=$SINCE&group=$GROUPING" \
+        | jq '.[] | "\(.date): \(.count) errors (\(.rate)%)"'
     approval:
-      prompt: "Review the generated report"
+      prompt: "Review error rate summary. Push back to adjust query parameters."
+      input: [SINCE, GROUPING]
+  - name: send-report
+    depends: [query-metrics]
+    command: ./send-to-slack.sh
+```
+
+First run: `SINCE` and `GROUPING` are unset, so the script defaults to `7d` and `daily`. The approver reviews the output and pushes back with `SINCE=30d` and `GROUPING=weekly`. The step re-runs with those values, producing a different summary. The approver can push back again or approve.
+
+### Example: Iterating on LLM Output
+
+Use `claude -p` in a command step to generate content, then push back with feedback to regenerate:
+
+```yaml
+steps:
+  - name: draft-changelog
+    script: |
+      PROMPT="Generate a changelog from these git commits for a public release blog post."
+      if [ -n "$FEEDBACK" ]; then
+        PROMPT="$PROMPT Incorporate this feedback: $FEEDBACK"
+      fi
+      git log --oneline v1.2.0..HEAD | claude -p "$PROMPT"
+    approval:
+      prompt: "Review the draft changelog. Push back with feedback to revise."
       input: [FEEDBACK]
-      required: [FEEDBACK]
+  - name: publish
+    depends: [draft-changelog]
+    command: ./publish-changelog.sh
 ```
 
-On push-back with `FEEDBACK="Include quarterly comparison"`, the step re-runs with `FEEDBACK` available as an environment variable. The script can read it:
-
-```bash
-#!/bin/bash
-# generate-report.sh
-if [ -n "$FEEDBACK" ]; then
-  echo "Incorporating feedback: $FEEDBACK"
-fi
-# ... generate report ...
-```
+First run: Claude generates a changelog from the git log. The reviewer reads the output in the Approval tab and pushes back with `FEEDBACK="Make it more concise and group by feature area"`. The step re-runs, this time passing the feedback into the prompt. This loop continues until the reviewer approves.
 
 ### REST API
 
@@ -149,7 +172,8 @@ curl -X POST "http://localhost:8080/api/v1/dag-runs/{name}/{dagRunId}/steps/{ste
   -H "Content-Type: application/json" \
   -d '{
     "inputs": {
-      "FEEDBACK": "Include quarterly comparison"
+      "SINCE": "30d",
+      "GROUPING": "weekly"
     }
   }'
 ```
@@ -159,7 +183,7 @@ Response:
 ```json
 {
   "dagRunId": "...",
-  "stepName": "generate-report",
+  "stepName": "query-metrics",
   "approvalIteration": 1,
   "resumed": true
 }
