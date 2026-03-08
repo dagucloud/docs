@@ -893,7 +893,7 @@ Everyone who participated in discussions, reported feedback, or helped other use
   - Approve or reject via web UI or REST API
   - New statuses: `waiting` (paused for approval) and `rejected` (approval denied)
 
-  See [HITL](/features/executors/hitl) for full documentation.
+  See [Approval](/features/approval) for full documentation.
 
 - **Wait Handler**: Added `handler_on.wait` lifecycle handler that executes when a workflow enters wait status.
 
