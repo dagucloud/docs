@@ -16,15 +16,7 @@ layout: doc
   </div>
 </div>
 
-## Demo
-
-**[CLI](/overview/cli)**: Execute workflows from the command line.
-
-![CLI Demo](/demo-cli.webp)
-
-**[Web UI](/overview/web-ui)**: Monitor, control, and debug workflows visually.
-
-![Web UI Demo](/demo-web-ui.webp)
+<video src="/cockpit-demo.webm" autoplay loop muted playsinline style="width: 100%; border-radius: 12px; margin: 8px 0 24px;" />
 
 ::: tip Try It Live
 Explore without installing: [Live Demo](https://demo-instance.dagu.sh/)
