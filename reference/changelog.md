@@ -2,6 +2,18 @@
 
 > **Note**: For patch version release notes (e.g., v2.0.1, v2.0.2), see the [GitHub Releases](https://github.com/dagu-org/dagu/releases) page.
 
+## v2.2.4 (2026-03-11)
+
+### Added
+
+- `dagu ai install` Command: New command to install Dagu as an AI coding tool skill (e.g., for Claude Code, Codex). Automatically sets up skill configuration for supported tools. ([#1750](https://github.com/dagu-org/dagu/pull/1750))
+- Built-in AI Agent References: The AI agent now ships with built-in reference documents (schema, executors, CLI, env vars, coding agents) that are seeded to the data directory and available in the agent prompt. ([#1751](https://github.com/dagu-org/dagu/pull/1751))
+
+### Fixed
+
+- SSE Endpoint Authentication: Basic auth credentials are now required for SSE (Server-Sent Events) endpoints, closing an unauthenticated access path. ([#1752](https://github.com/dagu-org/dagu/pull/1752))
+- Mermaid Dark Mode: Fixed mermaid diagram rendering in dark mode and improved code block text visibility in docs preview.
+
 ## v2.2.0 (2026-03-08)
 
 ### Added
