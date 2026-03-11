@@ -23,6 +23,7 @@ const fullSidebar = [
       { text: "Installation", link: "/getting-started/installation" },
       { text: "Core Concepts", link: "/getting-started/concepts" },
       { text: "CLI Commands", link: "/getting-started/cli" },
+      { text: "AI Agent", link: "/getting-started/ai-agent" },
     ],
   },
   {
