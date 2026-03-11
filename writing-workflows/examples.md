@@ -1891,7 +1891,7 @@ steps:
 
 Configure queues globally and assign DAGs using the `queue` field.
 
-<a href="/writing-workflows/queues#advanced" class="learn-more">Learn more →</a>
+<a href="/server-admin/queues" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -2109,7 +2109,7 @@ steps:
   - command: echo "Running periodic maintenance"
 ```
 
-<a href="/writing-workflows/queues" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/yaml-specification#data-fields" class="learn-more">Learn more →</a>
 
 </div>
 

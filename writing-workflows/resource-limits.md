@@ -71,4 +71,4 @@ steps:
 
 When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).
 
-See [Queue System](/writing-workflows/queues) for details.
+See [Queue Assignment](/writing-workflows/queues) for details.

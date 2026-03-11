@@ -380,6 +380,8 @@ remote_nodes:
 
 ## Queues
 
+See [Queue Configuration](/server-admin/queues) for full documentation.
+
 ```yaml
 queues:
   enabled: true
