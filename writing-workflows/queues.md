@@ -1,88 +1,45 @@
-# Queue Management
+# Queue Assignment
 
-Control concurrent execution and resource usage with queues.
+Assign a DAG to a named queue to control how many instances of DAGs in that queue can run concurrently. Queues themselves are defined in `config.yaml` — see [Queue Configuration](/server-admin/queues).
 
-## Overview
+## Assigning a DAG to a Queue
 
-Dagu's queue system helps you:
-- Limit concurrent workflow executions
-- Manage resource usage
-- Prioritize critical workflows
-- Prevent system overload
-
-**How Queues Work:**
-
-- **Global queues** (defined in `config.yaml`) control concurrency via `max_concurrency`
-- **Local queues** (per-DAG, used when no `queue` field is set) always process FIFO with concurrency of 1
-- To control concurrent execution, define global queues and assign DAGs using the `queue` field
-
-## Basic Queue Configuration
-
-### Assign to Queue
+Set the `queue` field at the top level of a DAG file:
 
 ```yaml
-queue: "batch"              # Assign to global queue for concurrency control
-schedule: "*/10 * * * *"    # Every 10 minutes
+queue: "batch"
+schedule: "*/10 * * * *"
 
 steps:
-  - command: echo "Processing batch"
+  - id: process
+    command: echo "Processing batch"
 ```
 
-The queue's `max_concurrency` (defined in `config.yaml`) controls how many DAGs assigned to this queue can run concurrently.
-
-## Global Queue Configuration
-
-Configure queues in server config:
-
-```yaml
-# ~/.config/dagu/config.yaml
-queues:
-  enabled: true
-  config:
-    - name: "critical"
-      max_concurrency: 5      # 5 critical jobs concurrently
-    - name: "batch"
-      max_concurrency: 1      # One batch job at a time
-    - name: "reporting"
-      max_concurrency: 3      # 3 reports concurrently
-```
+The scheduler places this DAG into the `batch` queue. The queue's `max_concurrency` (defined in `config.yaml`) determines how many DAGs in this queue can run at the same time.
 
 ## Default Queue via Base Config
 
-Set a default queue for all workflows in your base config:
+Set a default queue for all DAGs using `base.yaml`:
 
 ```yaml
 # ~/.config/dagu/base.yaml
 queue: "default"
-
-# All DAGs inherit this queue assignment
-# Define the "default" queue in config.yaml with desired max_concurrency
 ```
 
-## Manual Queue Management
+Every DAG inherits this unless it sets its own `queue` field. The corresponding queue must be defined in `config.yaml`.
 
-### Enqueue Workflows
+See [Base Configuration](/server-admin/base-config) for how base config merging works.
+
+## Behavior Without a Queue
+
+When a DAG does not set `queue` (and no base config default exists), it runs in a local queue named after the DAG itself. Local queues have a fixed concurrency of 1 — only one instance of that DAG runs at a time.
+
+## Overriding at Enqueue Time
+
+The `--queue` flag on `dagu enqueue` overrides the DAG's `queue` field:
 
 ```bash
-# Basic enqueue
-dagu enqueue workflow.yaml
-
-# With custom run ID
-dagu enqueue workflow.yaml --run-id=batch-2024-01-15
-
-# With parameters
-dagu enqueue process.yaml -- DATE=2024-01-15 TYPE=daily
-
-# Override the queue at enqueue-time
 dagu enqueue --queue=high-priority workflow.yaml
 ```
 
-### Remove from Queue
-
-```bash
-# Remove the next item in a queue
-dagu dequeue default
-
-# Remove a specific run from a queue
-dagu dequeue default --dag-run=workflow:batch-2024-01-15
-```
+See [Queue Configuration](/server-admin/queues) for the full `enqueue` and `dequeue` CLI reference.

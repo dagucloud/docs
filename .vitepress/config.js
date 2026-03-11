@@ -38,7 +38,7 @@ const fullSidebar = [
       { text: "Control Flow", link: "/writing-workflows/control-flow" },
       { text: "Scheduling", link: "/writing-workflows/scheduling" },
       { text: "Execution Control", link: "/writing-workflows/execution-control" },
-      { text: "Queue System", link: "/writing-workflows/queues" },
+      { text: "Queue Assignment", link: "/writing-workflows/queues" },
       { text: "Approval Gates", link: "/writing-workflows/approval" },
       { text: "Error Handling", link: "/writing-workflows/error-handling" },
       { text: "Continue On", link: "/writing-workflows/continue-on" },
@@ -122,6 +122,7 @@ const fullSidebar = [
       { text: "Base Configuration", link: "/server-admin/base-config" },
       { text: "Reference", link: "/server-admin/reference" },
       { text: "Operations", link: "/server-admin/operations" },
+      { text: "Queue Configuration", link: "/server-admin/queues" },
       {
         text: "Authentication",
         collapsed: false,
