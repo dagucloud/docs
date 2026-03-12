@@ -39,6 +39,31 @@ export DAGU_PORT=9000
 dagu start-all
 ```
 
+## Cockpit
+
+The Cockpit page (`/cockpit`) provides a workspace-scoped kanban board for monitoring DAG runs across dates. DAG runs are grouped into four status columns — Queued, Running, Done, and Failed — with date sections that load incrementally via infinite scroll (up to 30 days back). Today's section receives real-time updates via SSE.
+
+![Cockpit](/cockipit.png)
+
+Workspaces organize DAG runs using `workspace=<name>` tags. The workspace selector lets you create, switch, and delete workspaces. A template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs with the workspace tag automatically injected.
+
+See [Cockpit](/web-ui/cockpit) for full details.
+
+## Documents
+
+The Documents page (`/docs`) is a built-in markdown document manager. Documents are `.md` files stored under `{DAGsDir}/docs/` and can be browsed, edited, and searched directly in the web UI.
+
+![Documents](/docs.png)
+
+The page uses a resizable split layout:
+
+- **Left panel** — a file tree showing documents organized in directories. Supports expand/collapse all, inline renaming (double-click or F2), drag-and-drop to move files, multi-select (Ctrl/Cmd+Click or Shift+Click) with batch delete, and full-text search across document content. A collapsible **Outline** section at the bottom lists headings extracted from the active document — clicking a heading scrolls to it in the preview.
+- **Right panel** — a tabbed editor. Multiple documents can be open simultaneously. Each tab shows an unsaved-changes indicator and provides close/close-others/close-all actions. The editor area toggles between **Edit** mode (Monaco editor with markdown syntax highlighting) and **Preview** mode (rendered markdown with GFM support and Mermaid diagram rendering). The mode preference persists across sessions.
+
+Documents can also be generated from DAG steps using the `DAG_DOCS_DIR` environment variable — files written there appear in the tree automatically.
+
+See [Documents](/web-ui/documents) for storage format, API reference, and permissions.
+
 ## Dashboard
 
 The main dashboard shows:
@@ -272,14 +297,6 @@ Click the **Agent** button at the bottom-left corner of any page.
 Configure the agent at `/settings/agent` (requires admin role).
 
 See [Agent](/features/agent/) for complete documentation.
-
-## Cockpit
-
-The Cockpit page (`/cockpit`) provides a workspace-scoped kanban board for monitoring DAG runs across dates. DAG runs are grouped into four status columns — Queued, Running, Done, and Failed — with date sections that load incrementally via infinite scroll (up to 30 days back). Today's section receives real-time updates via SSE.
-
-Workspaces organize DAG runs using `workspace=<name>` tags. The workspace selector lets you create, switch, and delete workspaces. A template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs with the workspace tag automatically injected.
-
-See [Cockpit](/web-ui/cockpit) for full details.
 
 ## Terminal
 
