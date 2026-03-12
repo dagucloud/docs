@@ -41,7 +41,7 @@ dagu start-all
 
 ## Cockpit
 
-The Cockpit page (`/cockpit`) provides a workspace-scoped kanban board for monitoring DAG runs across dates. DAG runs are grouped into four status columns — Queued, Running, Done, and Failed — with date sections that load incrementally via infinite scroll (up to 30 days back). Today's section receives real-time updates via SSE.
+The Cockpit page (`/cockpit`) provides a workspace-scoped kanban board for monitoring DAG runs across dates. DAG runs are grouped into four status columns (Queued, Running, Done, and Failed) with date sections that load incrementally via infinite scroll (up to 30 days back). Today's section receives real-time updates via SSE.
 
 ![Cockpit](/cockpit.png)
 
@@ -51,16 +51,20 @@ See [Cockpit](/web-ui/cockpit) for full details.
 
 ## Documents
 
-The Documents page (`/docs`) is a built-in markdown document manager. Documents are `.md` files stored under `{DAGsDir}/docs/` and can be browsed, edited, and searched directly in the web UI.
+The Documents page (`/docs`) is a built-in markdown document manager with a full REST API. Documents are `.md` files stored under `{DAGsDir}/docs/`. They can be browsed, edited, and searched in the web UI, and created or updated programmatically through the `/api/v1/docs` endpoints.
 
 ![Documents](/docs.png)
 
 The page uses a resizable split layout:
 
-- **Left panel** — a file tree showing documents organized in directories. Supports expand/collapse all, inline renaming (double-click or F2), drag-and-drop to move files, multi-select (Ctrl/Cmd+Click or Shift+Click) with batch delete, and full-text search across document content. A collapsible **Outline** section at the bottom lists headings extracted from the active document — clicking a heading scrolls to it in the preview.
-- **Right panel** — a tabbed editor. Multiple documents can be open simultaneously. Each tab shows an unsaved-changes indicator and provides close/close-others/close-all actions. The editor area toggles between **Edit** mode (Monaco editor with markdown syntax highlighting) and **Preview** mode (rendered markdown with GFM support and Mermaid diagram rendering). The mode preference persists across sessions.
+- **Left panel**: a file tree showing documents organized in directories. Supports expand/collapse all, inline renaming (double-click or F2), drag-and-drop to move files, multi-select (Ctrl/Cmd+Click or Shift+Click) with batch delete, and full-text search across document content. A collapsible **Outline** section at the bottom lists headings extracted from the active document; clicking a heading scrolls to it in the preview.
+- **Right panel**: a tabbed editor. Multiple documents can be open simultaneously. Each tab shows an unsaved-changes indicator and provides close/close-others/close-all actions. The editor area toggles between **Edit** mode (Monaco editor with markdown syntax highlighting) and **Preview** mode (rendered markdown with GFM support and Mermaid diagram rendering). The mode preference persists across sessions.
 
-Documents can also be generated from DAG steps using the `DAG_DOCS_DIR` environment variable — files written there appear in the tree automatically.
+DAG steps can generate documents at runtime using the `DAG_DOCS_DIR` environment variable. Files written there appear in the tree automatically.
+
+### AI Agent Integration
+
+The built-in AI agent can reference documents via `@` mentions in the agent chat, and navigate to the documents page or a specific document using its `navigate` tool. External AI tools (Claude Code, Codex, custom agents) can create, read, update, delete, and search documents through the REST API at `/api/v1/docs`. This makes documents a useful shared knowledge base between human operators and AI agents working on the same workflows.
 
 See [Documents](/web-ui/documents) for storage format, API reference, and permissions.
 
