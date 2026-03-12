@@ -43,7 +43,7 @@ dagu start-all
 
 The Cockpit page (`/cockpit`) provides a workspace-scoped kanban board for monitoring DAG runs across dates. DAG runs are grouped into four status columns — Queued, Running, Done, and Failed — with date sections that load incrementally via infinite scroll (up to 30 days back). Today's section receives real-time updates via SSE.
 
-![Cockpit](/cockipit.png)
+![Cockpit](/cockpit.png)
 
 Workspaces organize DAG runs using `workspace=<name>` tags. The workspace selector lets you create, switch, and delete workspaces. A template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs with the workspace tag automatically injected.
 
