@@ -199,10 +199,12 @@ Define default named parameters that can be overridden:
 ```yaml
 params:
   - FOO: 1           # Default value for ${FOO}
-  - BAR: "`echo 2`"  # Default value for ${BAR}, using command substitution
+  - BAR: hello       # Default value for ${BAR}
 steps:
   - command: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
 ```
+
+Parameter values are literal strings — no variable expansion, command substitution, or shell evaluation is performed on them. Use `env:` for dynamic values (see [Command Substitution](#command-substitution)).
 
 ## Output Handling
 

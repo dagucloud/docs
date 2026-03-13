@@ -18,10 +18,10 @@ schedule: "0 * * * *"      # Optional: cron expression
 max_active_steps: 10         # Max parallel steps
 timeout_sec: 3600           # Workflow timeout (seconds)
 
-# Parameters
+# Parameters (values are literal strings — no expansion)
 params:
   - KEY: default_value
-  - ANOTHER_KEY: "${ENV_VAR}"
+  - ANOTHER_KEY: other_value
 
 # Environment variables
 env:
@@ -1132,10 +1132,10 @@ timeout_sec: 7200
 hist_retention_days: 90
 
 params:
-  - DATE: "`date +%Y-%m-%d`"
   - ENVIRONMENT: production
 
 env:
+  - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /data/etl
   - LOG_LEVEL: info
   

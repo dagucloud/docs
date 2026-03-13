@@ -190,7 +190,7 @@ dagu start workflow.yaml -- myapp ENVIRONMENT=prod VERSION=1.2.3
 
 ## Command Substitution
 
-Execute commands and use their output:
+Execute commands and use their output in `env:` blocks using backticks. This runs the command at DAG load time and stores the result:
 
 ```yaml
 env:
@@ -198,13 +198,11 @@ env:
   - HOSTNAME: "`hostname -f`"
   - GIT_COMMIT: "`git rev-parse HEAD`"
 
-params:
-  - TIMESTAMP: "`date +%s`"
-  - USER_COUNT: "`wc -l < users.txt`"
-
 steps:
   - command: echo "Deploy on ${TODAY} from ${HOSTNAME}"
 ```
+
+**Note:** Command substitution is only supported in `env:` blocks. Parameter values (`params:`) are treated as literal strings — backticks in params are not executed.
 
 ## Output Variables
 

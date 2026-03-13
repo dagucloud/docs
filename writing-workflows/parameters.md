@@ -1,6 +1,8 @@
 # Parameters
 
-Make workflows dynamic and reusable with runtime parameters.
+Parameters are literal string values passed into a DAG. They are stored exactly as written — no variable expansion, command substitution, or shell evaluation is performed on parameter values at parse time.
+
+Named parameters are injected into the step execution environment as environment variables. Steps can then reference them using standard shell syntax (`${PARAM_NAME}`), and the shell expands them at runtime.
 
 ## Parameter Definition
 
@@ -127,29 +129,38 @@ dagu start workflow.yaml -- config.json ENVIRONMENT=prod
 dagu start workflow.yaml -- MESSAGE="Hello World"
 ```
 
-## Dynamic Parameters
+## Parameter Values Are Literal
+
+Parameter values are **not** evaluated at parse time. Variable references like `${VAR}`, backtick commands like `` `date` ``, and shell syntax like `${VAR:-default}` are all stored as literal strings.
 
 ```yaml
 params:
-  # Command substitution
-  - DATE: "`date +%Y-%m-%d`"
-  - GIT_COMMIT: "`git rev-parse --short HEAD`"
-  
-  # Environment variables
-  - USER: ${USER}
-  - LOG_PATH: ${LOG_DIR:-/var/log}  # With default
-  
-  # Substring slices & param chaining
-  - SOURCE_ID: HBL01_22OCT2025_0536
-  - PREFIX: ${SOURCE_ID:0:5}
-  - REMAINDER: ${SOURCE_ID:5}
-  - ARTIFACT: backup-${PREFIX}-${DATE}.tar.gz
+  - DATE: "2025-01-15"               # literal string
+  - SOURCE_ID: HBL01_22OCT2025_0536  # literal string
+  - MESSAGE: "hello world"           # literal string with spaces
 
 steps:
-  - command: backup-${DATE}-${GIT_COMMIT}.tar.gz
+  - command: echo ${DATE} ${SOURCE_ID}
 ```
 
-## Using Parameters
+If you need dynamic values (command output, variable expansion), use `env:` instead of `params:`. The `env:` block supports variable expansion and command substitution:
+
+```yaml
+env:
+  - DATE: "`date +%Y-%m-%d`"
+  - GIT_COMMIT: "`git rev-parse --short HEAD`"
+
+params:
+  - INPUT: data.csv
+  - THREADS: 4
+
+steps:
+  - command: python processor.py --input ${INPUT} --threads ${THREADS} --date ${DATE}
+```
+
+## Using Parameters in Steps
+
+Named parameters are available as environment variables in step commands. The shell expands `${PARAM_NAME}` at runtime:
 
 ```yaml
 params:
@@ -160,17 +171,17 @@ params:
 steps:
   # In commands
   - command: python processor.py --input ${INPUT} --threads ${THREADS}
-    
+
   # In conditions
   - command: npm test
     preconditions:
       - condition: "${SKIP_TESTS}"
         expected: "false"
-        
-  # In environment
+
+  # In step-level env (step env supports variable expansion)
   - env:
-      - API_VERSION: ${VERSION:-v1}
-    command: ./app
+      - FULL_PATH: ${INPUT}_processed
+    command: echo ${FULL_PATH}
 ```
 
 ## Enforcing Fixed Parameters
