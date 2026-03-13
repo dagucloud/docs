@@ -36,6 +36,9 @@ auth:
     token:
       secret: your-secure-random-secret-key  # auto-generated if not set
       ttl: 24h
+    initial_admin:              # optional — auto-create admin on first startup
+      username: admin
+      password: your-secure-password
 ```
 
 ### Token TTL Format
@@ -75,18 +78,43 @@ export DAGU_AUTH_MODE=builtin  # default — can be omitted
 export DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret-key  # auto-generated if not set
 export DAGU_AUTH_TOKEN_TTL=24h  # default: 24h
 
+# Optional - auto-create admin on first startup (both required together)
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
+
 dagu start-all
 ```
 
 ## Initial Setup
 
-On first startup with builtin auth enabled:
+On first startup with builtin auth enabled and no users in the store:
 
-1. If no users exist, the server enters setup mode
-2. Visit the web UI — you will be redirected to the `/setup` page
-3. Create your initial admin account with a username and password
-4. After setup, you are automatically authenticated and redirected to the dashboard
-5. Use the admin account to manage users, API keys, and webhooks
+**Option A: Via config or environment variables (headless)**
+
+Set `initial_admin.username` and `initial_admin.password` in the config file or via `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` and `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` environment variables. The server creates the admin user at startup and is immediately ready — no browser interaction required.
+
+```yaml
+auth:
+  mode: builtin
+  builtin:
+    initial_admin:
+      username: admin
+      password: a-strong-password-here
+```
+
+Both fields must be provided together. If only one is set, the server fails validation and does not start.
+
+The admin is only created when the user store is empty (zero users). On subsequent restarts, the config is ignored and the existing users are untouched. If all users are deleted and the config is still present, the admin is re-created on the next restart.
+
+If the password is shorter than 8 characters or the user store is unwritable, the server exits with a non-zero code. It does not fall back to the setup page.
+
+The server emits a warning at startup if the password matches a known weak value (`password`, `changeme`, `admin`, `dagu`, `12345678`).
+
+**Option B: Via the setup page (interactive)**
+
+1. Visit the web UI — you will be redirected to the `/setup` page
+2. Create your initial admin account with a username and password
+3. After setup, you are automatically authenticated and redirected to the dashboard
 
 ## API Access
 
@@ -198,7 +226,9 @@ services:
     environment:
       - DAGU_AUTH_MODE=builtin
       - DAGU_AUTH_TOKEN_SECRET=change-me-to-secure-random-string
-      # First admin account created via /setup page on first browser visit
+      # Auto-create admin on first startup (remove after first run if desired)
+      - DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+      - DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=${ADMIN_PASSWORD}
     ports:
       - "8080:8080"
     volumes:
@@ -207,6 +237,8 @@ services:
 volumes:
   dagu-data:
 ```
+
+If `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` and `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` are not set, the server shows the `/setup` page on first visit instead.
 
 ## Important Notes
 

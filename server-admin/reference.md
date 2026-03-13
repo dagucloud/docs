@@ -241,6 +241,8 @@ All options support `DAGU_` prefix.
 #### Builtin Auth (RBAC)
 - `DAGU_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
 - `DAGU_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
+- `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` - Auto-provision admin username on first startup (requires password)
+- `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` - Auto-provision admin password on first startup (requires username, minimum 8 characters)
 - `DAGU_USERS_DIR` - User data directory (default: `{data_dir}/users`)
 
 #### Basic Auth
