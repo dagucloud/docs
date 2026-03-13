@@ -42,18 +42,44 @@ The chart does not render:
 
 ## Install
 
-From the repository root:
+Official Helm repository URL:
+
+```text
+https://dagu-org.github.io/dagu
+```
+
+Add the repository and install the chart:
 
 ```bash
-helm template dagu ./charts/dagu
-helm install dagu ./charts/dagu --set persistence.storageClass=nfs-client
+helm repo add dagu https://dagu-org.github.io/dagu
+helm repo update
+helm install dagu dagu/dagu --set persistence.storageClass=nfs-client
+```
+
+Render manifests without installing:
+
+```bash
+helm template dagu dagu/dagu --set persistence.storageClass=nfs-client
 ```
 
 To upgrade an existing release:
 
 ```bash
-helm upgrade dagu ./charts/dagu --set persistence.storageClass=nfs-client
+helm repo update
+helm upgrade dagu dagu/dagu --set persistence.storageClass=nfs-client
 ```
+
+From the repository root, the local chart path remains available:
+
+```bash
+helm install dagu ./charts/dagu --set persistence.storageClass=nfs-client
+```
+
+## Version Fields
+
+`charts/dagu/Chart.yaml` defines the chart `version`, which is the version published in the Helm repository.
+
+The deployed container image comes from `values.yaml -> image.repository` and `values.yaml -> image.tag`. With the current defaults, the chart deploys `ghcr.io/dagu-org/dagu:latest`.
 
 ## Pod Configuration
 
@@ -204,12 +230,12 @@ The PVC template enforces two conditions:
 Examples:
 
 ```bash
-helm install dagu ./charts/dagu \
+helm install dagu dagu/dagu \
   --set persistence.storageClass=nfs-client
 ```
 
 ```bash
-helm install dagu ./charts/dagu \
+helm install dagu dagu/dagu \
   --set persistence.accessMode=ReadWriteOnce \
   --set persistence.skipValidation=true \
   --set workerPools.general.replicas=1
@@ -352,7 +378,14 @@ workerPools:
 Install with that file:
 
 ```bash
-helm install dagu ./charts/dagu -f values.yaml
+helm install dagu dagu/dagu -f values.yaml
+```
+
+To force a different image tag:
+
+```yaml
+image:
+  tag: 2.2.4
 ```
 
 ## Access The UI
