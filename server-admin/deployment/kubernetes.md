@@ -53,27 +53,29 @@ Add the repository and install the chart:
 ```bash
 helm repo add dagu https://dagu-org.github.io/dagu
 helm repo update
-helm install dagu dagu/dagu --set persistence.storageClass=nfs-client
+helm install dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-class>
 ```
 
 Render manifests without installing:
 
 ```bash
-helm template dagu dagu/dagu --set persistence.storageClass=nfs-client
+helm template dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-class>
 ```
 
 To upgrade an existing release:
 
 ```bash
 helm repo update
-helm upgrade dagu dagu/dagu --set persistence.storageClass=nfs-client
+helm upgrade dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-class>
 ```
 
 From the repository root, the local chart path remains available:
 
 ```bash
-helm install dagu ./charts/dagu --set persistence.storageClass=nfs-client
+helm install dagu ./charts/dagu --set persistence.storageClass=<your-rwx-storage-class>
 ```
+
+Replace `<your-rwx-storage-class>` with a StorageClass in your cluster that supports `ReadWriteMany`. If your cluster default storage class already supports `ReadWriteMany`, you can omit the flag.
 
 ## Version Fields
 
@@ -231,7 +233,7 @@ Examples:
 
 ```bash
 helm install dagu dagu/dagu \
-  --set persistence.storageClass=nfs-client
+  --set persistence.storageClass=<your-rwx-storage-class>
 ```
 
 ```bash
@@ -357,7 +359,7 @@ persistence:
   enabled: true
   accessMode: ReadWriteMany
   size: 10Gi
-  storageClass: nfs-client
+  storageClass: "<your-rwx-storage-class>"
 
 workerPools:
   general:
