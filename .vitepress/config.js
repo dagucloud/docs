@@ -312,7 +312,7 @@ export default withMermaid(
       },
 
       editLink: {
-        pattern: "https://github.com/dagu-org/dagu/edit/main/docs-next/:path",
+        pattern: "https://github.com/dagu-org/docs/edit/main/:path",
         text: "Edit this page on GitHub",
       },
 
