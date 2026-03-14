@@ -55,6 +55,8 @@ The API only supports server-side sorting by the `name` field. While the API acc
 curl http://localhost:8080/api/v1/dags/my-dag.yaml
 ```
 
+The DAG detail response includes `paramDefs` when Dagu can derive typed parameter metadata from inline rich `params:` definitions or a representable external schema. UI clients use this to render typed start/enqueue forms.
+
 #### Create New DAG
 ```bash
 # Create with default template
@@ -118,6 +120,8 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/start \
   }'
 ```
 
+`params` remains a JSON string payload. The server validates and coerces its values against the DAG's inline param definitions or external parameter schema before execution.
+
 #### Enqueue DAG
 ```bash
 curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/enqueue \
@@ -128,6 +132,8 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/enqueue \
     "queue": "high-priority"  // optional: override queue
   }'
 ```
+
+The same validation rules apply to enqueue requests. Invalid typed values are rejected before the run is queued.
 
 #### Suspend/Resume DAG
 ```bash

@@ -8,13 +8,22 @@ schedule: "0 2 * * *"      # Optional: cron schedule
 queue: "daily-jobs"        # Optional: assign to global queue for concurrency control
 
 params:                    # Runtime parameters
-  - DATE: "`date +%Y-%m-%d`"
+  - name: ENVIRONMENT
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+  - name: BATCH_SIZE
+    type: integer
+    default: 25
+    minimum: 1
+    maximum: 100
 
 env:                       # Environment variables
+  - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /tmp/data
 
 steps:                     # Workflow steps
-  - command: echo "Processing for date ${DATE}"
+  - command: echo "Processing ${ENVIRONMENT} for date ${DATE} with batch ${BATCH_SIZE}"
 ```
 
 ## Base Configuration
@@ -78,9 +87,16 @@ See [Base Configuration](/server-admin/base-config) for complete documentation o
 schedule: "0 2 * * *"
 
 params:
-  - DATE: "`date +%Y-%m-%d`"
+  - name: ENVIRONMENT
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+  - name: DRY_RUN
+    type: boolean
+    default: false
 
 env:
+  - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /tmp/data/${DATE}
 
 steps:
@@ -89,7 +105,7 @@ steps:
       limit: 3
       interval_sec: 60
 
-  - command: python validate.py ${DATA_DIR}/${DATE}.csv
+  - command: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
     continue_on:
       failure: false
 

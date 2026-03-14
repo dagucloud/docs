@@ -243,6 +243,27 @@ Fetches detailed information about a specific DAG.
     "max_active_runs": 1,
     "max_active_steps": 5,
     "params": ["date", "env", "batch_size"],
+    "paramDefs": [
+      {
+        "name": "date",
+        "type": "string",
+        "description": "Pipeline run date",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      {
+        "name": "env",
+        "type": "string",
+        "default": "dev",
+        "enum": ["dev", "staging", "prod"]
+      },
+      {
+        "name": "batch_size",
+        "type": "integer",
+        "default": 1000,
+        "minimum": 1,
+        "maximum": 10000
+      }
+    ],
     "defaultParams": "{\"batch_size\": 1000, \"env\": \"dev\"}",
     "tags": ["production", "etl", "daily"]
   },
@@ -285,6 +306,8 @@ Fetches detailed information about a specific DAG.
   "errors": []
 }
 ```
+
+`paramDefs` is additive metadata derived from DAG-level `params:`. Typed clients can use it to render start/enqueue controls. When Dagu cannot derive a faithful typed field model, the field is omitted and clients should fall back to the raw parameter editor.
 
 ### Delete DAG
 
@@ -469,12 +492,14 @@ Creates and starts a DAG run with optional parameters.
 **Request Fields**:
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
-| params | string | JSON string of parameters | No |
+| params | string | JSON string of parameters. Values are validated and coerced against DAG param definitions or external parameter schema before execution. | No |
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 
 > **Tip:** Overriding the DAG name changes the identifier used for queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
+
+> **Note:** `GET /api/v1/dags/{fileName}` returns `paramDefs` for typed UI rendering. The start endpoint still accepts a JSON string in `params`, and the server performs the authoritative validation/coercion.
 **Response (200)**:
 ```json
 {
@@ -511,7 +536,7 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
 | timeout | integer | Maximum seconds to wait for completion (1-86400) | **Yes** |
-| params | string | JSON string of parameters | No |
+| params | string | JSON string of parameters. Values are validated and coerced against DAG param definitions or external parameter schema before execution. | No |
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
@@ -583,7 +608,7 @@ Adds a DAG run to the queue for later execution.
 **Request Fields**:
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
-| params | string | JSON string of parameters | No |
+| params | string | JSON string of parameters. Values are validated and coerced against DAG param definitions or external parameter schema before the run is queued. | No |
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for the queued run (must satisfy DAG name validation) | No |
 | queue | string | Queue name override | No |

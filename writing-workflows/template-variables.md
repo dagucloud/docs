@@ -154,7 +154,7 @@ dagu start workflow.yaml -- ENVIRONMENT=prod PORT=80 DEBUG=true
 
 ### Accessing Parameters as JSON
 
-Every step receives the full parameter map encoded as JSON via `DAG_PARAMS_JSON`. This value reflects the merged defaults plus any runtime overrides, and when a run is started with JSON parameters, the original payload is preserved. Not set when the DAG has no parameters and none were supplied.
+Every step receives the full parameter map encoded as JSON via `DAG_PARAMS_JSON`. This value reflects the merged defaults plus any runtime overrides. Resolved DAG params are serialized as strings, and when a run is started with raw JSON parameters, the original payload is preserved. The variable is not set when the DAG has no parameters and none were supplied.
 
 ```yaml
 steps:

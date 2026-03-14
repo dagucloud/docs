@@ -246,10 +246,16 @@ You can define parameters for workflows to make them reusable:
 
 ```yaml
 # backup.yaml
+env:
+  - TS: "`date +%Y%m%d_%H%M%S`"
+
 params:
-  - SOURCE: /data
-  - DEST: /backup
-  - TS: "`date +%Y%m%d_%H%M%S`"  # Command substitution
+  - name: SOURCE
+    default: /data
+    description: Source directory to archive
+  - name: DEST
+    default: /backup
+    description: Destination directory for archives
 
 steps:
   # Backup files

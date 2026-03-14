@@ -20,8 +20,15 @@ timeout_sec: 3600           # Workflow timeout (seconds)
 
 # Parameters (values are literal strings — no expansion)
 params:
-  - KEY: default_value
-  - ANOTHER_KEY: other_value
+  - name: environment
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+  - name: batch_size
+    type: integer
+    default: 25
+    minimum: 1
+    maximum: 100
 
 # Environment variables
 env:
@@ -205,7 +212,7 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `params` | array | Default parameters | `[]` |
+| `params` | string/array/object | Default DAG parameters. Supports positional strings, named params, inline rich definitions, and external schema mode. | `[]` |
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
@@ -215,6 +222,52 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 | `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
 | `hist_retention_days` | integer | History retention days | `30` |
 | `max_output_size` | integer | Max output size per step (bytes) | `1048576` |
+
+#### `params`
+
+Top-level DAG `params:` supports:
+
+- Positional strings such as `params: first second`
+- Named strings such as `params: ENV=dev PORT=8080`
+- Ordered lists of strings or single-key maps
+- Inline rich definitions in list form using objects with a required `name` field
+- External schema mode with `{ schema, values }`
+
+Recommended authored form:
+
+```yaml
+params:
+  - name: region
+    type: string
+    default: us-east-1
+    enum: [us-east-1, us-west-2]
+    description: Deployment region
+  - name: instance_count
+    type: integer
+    default: 3
+    minimum: 1
+    maximum: 10
+  - name: debug
+    type: boolean
+    default: false
+```
+
+The older nested-map form such as `- region: { type: string }` is not accepted for rich definitions.
+
+Inline definition fields use `snake_case` in YAML:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `default` | string/integer/number/boolean | Default value |
+| `description` | string | Help text |
+| `type` | string | `string`, `integer`, `number`, or `boolean` |
+| `required` | boolean | Requires runtime input when no default exists |
+| `enum` | array | Allowed values |
+| `minimum` / `maximum` | number | Numeric bounds |
+| `min_length` / `max_length` | integer | String length bounds |
+| `pattern` | string | RE2 regex for string validation |
+
+Inline types affect validation and typed UI controls. Runtime shell variables and `DAG_PARAMS_JSON` remain string-based.
 
 ### Container Configuration
 
@@ -616,8 +669,13 @@ run_config:
   disable_run_id_edit: false
 
 params:
-  - ENVIRONMENT: production  # Users cannot change this
-  - VERSION: 1.0.0           # This is fixed
+  - name: environment
+    type: string
+    default: production
+    description: Users cannot change this
+  - name: version
+    default: 1.0.0
+    description: Fixed release version
 ```
 
 This is useful when:

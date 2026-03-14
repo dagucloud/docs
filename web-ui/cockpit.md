@@ -80,6 +80,10 @@ Opens as a side panel from the right edge, covering 3/4 of the viewport (`md:w-3
 
 The modal renders the same `DAGDetailsContent` component used on `/dags/{fileName}/spec`, with real-time SSE updates via `useDAGSSE`.
 
+Before rendering the start/enqueue form, Cockpit fetches the full DAG details from `GET /api/v1/dags/{fileName}`. That ensures the modal uses the same `runConfig`, defaults, and `paramDefs` metadata as the full DAG details page.
+
+When `paramDefs` is present, enqueue/start controls are rendered as typed inputs. When it is absent, the modal falls back to the raw parameter editor.
+
 ### Enqueue Behavior
 
 When enqueueing a DAG from the preview modal, the workspace tag `workspace=<name>` is injected into the YAML spec before submission:

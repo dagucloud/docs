@@ -133,6 +133,15 @@ Click any DAG to see detailed information including real-time status, logs, and 
 - **Retry**: Retry failed execution
 - **Edit**: Modify workflow (if permitted)
 
+When a DAG exposes `paramDefs` metadata, the Start and Enqueue dialogs render typed controls automatically:
+
+- strings use text inputs
+- enums use selects
+- integers and numbers use numeric inputs with bounds
+- booleans use a toggle or checkbox
+
+Descriptions are shown inline, client-side validation runs before submission, and the server still performs the authoritative validation. If a DAG does not expose typed parameter metadata, the UI falls back to the raw parameter editor.
+
 ### Information Tabs
 - **Graph**: Visual representation
   - **Drill-down**: Navigate to sub DAG executions by double-clicking steps

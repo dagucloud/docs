@@ -206,6 +206,26 @@ steps:
 
 Parameter values are literal strings — no variable expansion, command substitution, or shell evaluation is performed on them. Use `env:` for dynamic values (see [Command Substitution](#command-substitution)).
 
+Inline rich definitions add validation and UI metadata while keeping runtime values string-based:
+
+```yaml
+params:
+  - name: environment
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+    description: Deployment target
+  - name: batch_size
+    type: integer
+    default: 100
+    minimum: 1
+    maximum: 1000
+steps:
+  - command: python main.py --env "${environment}" --batch "${batch_size}"
+```
+
+CLI/API/sub-DAG inputs are coerced to the declared type before validation, but step commands still receive strings.
+
 ## Output Handling
 
 ### Working with Parameters as JSON
@@ -224,7 +244,7 @@ steps:
     command: '"Region: \(.region // "us-east-1")"'
 ```
 
-If the run was started with JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides.
+If the run was started with raw JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides as a string-only JSON object. Inline typed params do not change this behavior.
 
 ### Capture Output
 
