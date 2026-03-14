@@ -191,7 +191,7 @@ dagu start workflow.yaml -- config.json ENVIRONMENT=prod
 dagu start workflow.yaml -- '{"environment":"prod","batch_size":50}'
 ```
 
-The Web UI uses `paramDefs` from `GET /api/v1/dags/{fileName}` to render typed controls in the start/enqueue modal when the DAG exposes inline definitions or representable external schema metadata. If no typed metadata is available, the UI falls back to the raw parameter editor.
+The Web UI uses `paramDefs` from `GET /api/v1/dags/{fileName}` to render typed controls in the start/enqueue modal when the DAG exposes inline definitions or representable external schema metadata. Param descriptions are shown inline below each typed control. If no typed metadata is available, the UI falls back to the raw parameter editor.
 
 ## External JSON Schema Validation
 

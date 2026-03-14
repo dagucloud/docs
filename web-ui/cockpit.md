@@ -82,7 +82,7 @@ The modal renders the same `DAGDetailsContent` component used on `/dags/{fileNam
 
 Before rendering the start/enqueue form, Cockpit fetches the full DAG details from `GET /api/v1/dags/{fileName}`. That ensures the modal uses the same `runConfig`, defaults, and `paramDefs` metadata as the full DAG details page.
 
-When `paramDefs` is present, enqueue/start controls are rendered as typed inputs. When it is absent, the modal falls back to the raw parameter editor.
+When `paramDefs` is present, enqueue/start controls are rendered as typed inputs, and each param `description` is shown inline below its control as help text. When it is absent, the modal falls back to the raw parameter editor.
 
 ### Enqueue Behavior
 
