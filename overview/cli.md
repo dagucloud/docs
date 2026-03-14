@@ -251,6 +251,9 @@ dagu ai install
 
 # Skip prompts — install to all detected tools
 dagu ai install --yes
+
+# Install only into an explicit skills directory
+dagu ai install --skills-dir ~/.agents/skills
 ```
 
 Supported tools: Claude Code, Codex, OpenCode, Gemini CLI, Copilot CLI. See [`ai install` reference](/getting-started/cli#ai-install) for detection logic and install paths.

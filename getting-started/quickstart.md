@@ -47,6 +47,9 @@ If you use an AI coding tool (Claude Code, Codex, OpenCode, Gemini CLI, or Copil
 
 ```bash
 dagu ai install
+
+# Install only into a specific skills directory
+dagu ai install --skills-dir ~/.agents/skills
 ```
 
 This auto-detects installed tools and prompts you for each one. Use `--yes` to skip prompts:
@@ -55,9 +58,11 @@ This auto-detects installed tools and prompts you for each one. Use `--yes` to s
 dagu ai install --yes
 ```
 
+If you pass one or more `--skills-dir` values, Dagu skips auto-detection and installs only into those skills directories.
+
 After installation, your AI coding tool can generate, edit, and debug Dagu DAG definitions with knowledge of the full YAML schema, all 18+ executor types, CLI commands, and common pitfalls.
 
-See [`dagu ai install`](/getting-started/cli#ai-install) for details on detection logic and install locations.
+See [`dagu ai install`](/getting-started/cli#ai-install) for details on detection logic, custom skills directories, and install locations.
 
 ## Your First Workflow
 

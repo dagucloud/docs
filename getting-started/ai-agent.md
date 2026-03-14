@@ -79,6 +79,9 @@ dagu ai install
 
 # Non-interactive — installs to all detected tools
 dagu ai install --yes
+
+# Explicit — installs only into the specified skills directory
+dagu ai install --skills-dir ~/.agents/skills
 ```
 
 See [`ai` in CLI Commands](/getting-started/cli#ai) for details.

@@ -638,6 +638,7 @@ dagu ai install [options]
 
 **Options:**
 - `--yes, -y` - Install to all detected tools without prompting
+- `--skills-dir` - Install only into the specified skills directory. Repeatable. Skips auto-detection when provided.
 
 **Supported tools and detection:**
 
@@ -651,20 +652,28 @@ dagu ai install [options]
 
 For skill-based tools, the installer copies a `SKILL.md` file and a `references/` directory containing `cli.md`, `schema.md`, `executors.md`, `env.md`, and `pitfalls.md`. For Copilot CLI, the content is concatenated (without YAML frontmatter) and injected into `copilot-instructions.md` between marker comments. Re-running `dagu ai install` overwrites existing skill files or replaces the marked section.
 
+If you provide one or more `--skills-dir` values, Dagu skips auto-detection and installs only into those skills roots. Each skills directory receives the Dagu skill under `<dir>/dagu/SKILL.md`.
+
 ```bash
 # Interactive — prompts for each detected tool
 dagu ai install
 
 # Non-interactive — installs to all detected tools
 dagu ai install --yes
+
+# Explicit — installs only into the specified skills directory
+dagu ai install --skills-dir ~/.agents/skills
+
+# Multiple explicit skills directories
+dagu ai install --skills-dir ~/.agents/skills --skills-dir ~/.config/opencode/skills
 ```
 
 **Example output:**
 ```
-Found 3 tool(s)
+Found 3 installation target(s)
 
-  Claude Code    ✓ ~/.claude/skills/dagu/SKILL.md
-  Codex          ✓ ~/.agents/skills/dagu/SKILL.md
+  Claude Code    ✓ installed ~/.claude/skills/dagu/SKILL.md
+  Codex          ✓ installed ~/.agents/skills/dagu/SKILL.md
   Gemini CLI     skipped
 ```
 
