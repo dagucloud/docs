@@ -158,6 +158,10 @@ scheduler:
   lock_stale_threshold: "30s"  # Time after which a scheduler lock is considered stale
   lock_retry_interval: "5s"   # Interval between lock acquisition attempts
   zombie_detection_interval: "45s"  # Interval for detecting zombie DAG runs (0 to disable)
+  heartbeat_interval: "5s"         # How often running processes write a heartbeat timestamp
+  heartbeat_sync_interval: "10s"   # How often heartbeat files are fsynced to disk
+  stale_threshold: "90s"           # Time after which a heartbeat is considered stale
+  failure_threshold: 3             # Consecutive stale checks before marking a run as failed
 
 # Resource Monitoring
 monitoring:
@@ -313,6 +317,10 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_SCHEDULER_LOCK_STALE_THRESHOLD` - Time after which a scheduler lock is considered stale (default: `30s`)
 - `DAGU_SCHEDULER_LOCK_RETRY_INTERVAL` - Interval between lock acquisition attempts (default: `5s`)
 - `DAGU_SCHEDULER_ZOMBIE_DETECTION_INTERVAL` - Interval for detecting zombie DAG runs (default: `45s`, `0` to disable)
+- `DAGU_SCHEDULER_HEARTBEAT_INTERVAL` - How often running processes write a heartbeat timestamp (default: `5s`)
+- `DAGU_SCHEDULER_HEARTBEAT_SYNC_INTERVAL` - How often heartbeat files are fsynced to disk (default: `10s`)
+- `DAGU_SCHEDULER_STALE_THRESHOLD` - Time after which a heartbeat is considered stale (default: `90s`)
+- `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)
 
 ### Resource Monitoring
 - `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)

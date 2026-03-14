@@ -98,9 +98,10 @@ Dagu follows the XDG Base Directory specification for file organization:
 │   │   └── my-workflow/
 │   │       ├── item_high_20240315_120000_123Z_priority1.json  # High priority
 │   │       └── item_low_20240315_120030_456Z_batch1.json      # Low priority
-│   └── proc/          # Process tracking files (heartbeats)
-│       └── my-workflow/
-│           └── abc123_1710504000  # Process heartbeat (binary)
+│   └── proc/          # Process heartbeat files for liveness detection
+│       └── {proc_group}/
+│           └── {dag_name}/
+│               └── proc_YYYYMMDD_HHMMSSZ_{run_id}.proc  # 8-byte binary timestamp
 ├── logs/              # Human-readable execution logs
 │   ├── admin/         # Admin/scheduler logs
 │   │   ├── scheduler.log
