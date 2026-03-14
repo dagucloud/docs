@@ -1,5 +1,5 @@
 {
-  "name": "dagu-sh-docs",
+  "name": "docs-dagu-sh",
   "compatibility_date": "2025-04-01",
   "routes": [
     { "pattern": "docs.dagu.sh", "custom_domain": true },
