@@ -48,11 +48,12 @@ The scheduler detects and cleans up "zombie" DAG runs — processes whose status
 
 #### How it works
 
-Each running DAG process writes an 8-byte binary timestamp to a proc file every `heartbeat_interval` (default: 5s) and fsyncs every `heartbeat_sync_interval` (default: 10s). The zombie detector runs every `zombie_detection_interval` (default: 45s) and checks all runs with status "running":
+Each running DAG process writes an 8-byte binary timestamp to a proc file every `proc.heartbeat_interval` (default: 5s) and fsyncs every `proc.heartbeat_sync_interval` (default: 10s). The zombie detector runs every `scheduler.zombie_detection_interval` (default: 45s) and checks all runs with status "running":
 
-1. Read the proc file timestamp. If `now - timestamp < stale_threshold`, the run is alive — skip it.
-2. If stale, increment a per-run counter. If the counter is below `failure_threshold` (default: 3), wait for the next cycle.
-3. After `failure_threshold` consecutive stale checks, re-read the run's status. If it is still active (running/queued/waiting), write status "failed". If the run already completed (succeeded/cancelled/failed), do nothing.
+1. Read the proc file timestamp. If `now - timestamp < proc.stale_threshold`, the run is alive, so skip it.
+2. If stale, increment a per-run counter. If the counter is below `scheduler.failure_threshold` (default: 3), wait for the next cycle.
+3. After `scheduler.failure_threshold` consecutive stale checks, re-read the run's status. If it is still active (running/queued/waiting), write status "failed". If the run already completed (succeeded/cancelled/failed), do nothing.
+4. Independent of the background detector, status reads also repair verified stale local runs so `dagu server` and direct CLI execution do not leave runs stuck in `running`.
 
 With defaults, a truly dead process is detected in at most `failure_threshold × zombie_detection_interval` = 3 × 45s = **135 seconds**. A transiently stale process (GC pause, I/O lag) survives as long as it recovers within that window.
 
@@ -62,26 +63,30 @@ If a heartbeat file is deleted externally while the process is still alive, the 
 
 ```yaml
 # config.yaml
-scheduler:
-  zombie_detection_interval: "45s"   # How often the detector scans (default: 45s, "0" to disable)
+proc:
   heartbeat_interval: "5s"           # Process heartbeat write interval (default: 5s)
   heartbeat_sync_interval: "10s"     # Heartbeat fsync interval (default: 10s)
   stale_threshold: "90s"             # Heartbeat age to be considered stale (default: 90s)
+
+scheduler:
+  zombie_detection_interval: "45s"   # How often the detector scans (default: 45s, "0" to disable)
   failure_threshold: 3               # Consecutive stale checks before kill (default: 3)
 ```
 
-The timing invariant: `stale_threshold` should be significantly larger than `heartbeat_sync_interval` to avoid false positives. With defaults, the margin is 80s (90s - 10s).
+The timing invariant: `proc.stale_threshold` should be significantly larger than `proc.heartbeat_sync_interval` to avoid false positives. With defaults, the margin is 80s (90s - 10s).
 
 #### Example: tuning for faster detection
 
 To detect dead processes in ~30 seconds at the cost of more frequent disk writes:
 
 ```yaml
-scheduler:
-  zombie_detection_interval: "10s"
+proc:
   heartbeat_interval: "2s"
   heartbeat_sync_interval: "4s"
   stale_threshold: "20s"
+
+scheduler:
+  zombie_detection_interval: "10s"
   failure_threshold: 3
 ```
 
