@@ -19,8 +19,8 @@ If `base.yaml` does not exist and base-config auto-creation is enabled, Dagu wri
 
 ```yaml
 retry_policy:
-  limit: 1
-  interval_sec: 60
+  limit: 3
+  interval_sec: 5
 ```
 
 ## File Location

@@ -198,8 +198,8 @@ When Dagu auto-creates `base.yaml` for a first-time installation, the generated 
 
 ```yaml
 retry_policy:
-  limit: 1
-  interval_sec: 60
+  limit: 3
+  interval_sec: 5
 ```
 
 If you keep that generated `base.yaml`, every DAG inherits one scheduler-issued DAG retry.
@@ -208,8 +208,8 @@ If you keep that generated `base.yaml`, every DAG inherits one scheduler-issued 
 
 ```yaml
 retry_policy:
-  limit: 1
-  interval_sec: 60
+  limit: 3
+  interval_sec: 5
 
 defaults:
   retry_policy:
@@ -233,4 +233,4 @@ Exact behavior:
 
 - `fetch` can retry twice inside the current DAG attempt
 - `deploy` does not retry because it overrides the default with `limit: 0`
-- if the DAG still ends in `Failed`, the scheduler can create one more DAG attempt after 60 seconds
+- if the DAG still ends in `Failed`, the scheduler can create up to three more DAG attempts, 5 seconds apart
