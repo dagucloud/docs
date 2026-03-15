@@ -48,14 +48,20 @@ The scheduler detects and cleans up "zombie" DAG runs — processes whose status
 
 #### How it works
 
-Each running DAG process writes an 8-byte binary timestamp to a proc file every `proc.heartbeat_interval` (default: 5s) and fsyncs every `proc.heartbeat_sync_interval` (default: 10s). The zombie detector runs every `scheduler.zombie_detection_interval` (default: 45s) and checks all runs with status "running":
+Each running DAG process writes an 8-byte binary timestamp to a proc file every `proc.heartbeat_interval` (default: 5s) and fsyncs every `proc.heartbeat_sync_interval` (default: 10s).
+
+A local run is treated as dead when Dagu cannot find any non-stale proc heartbeat file for that run. This is a local heartbeat-based decision, not an OS-level PID lookup.
+
+The zombie detector runs every `scheduler.zombie_detection_interval` (default: 45s) and checks all runs with status "running":
 
 1. Read the proc file timestamp. If `now - timestamp < proc.stale_threshold`, the run is alive, so skip it.
 2. If stale, increment a per-run counter. If the counter is below `scheduler.failure_threshold` (default: 3), wait for the next cycle.
 3. After `scheduler.failure_threshold` consecutive stale checks, re-read the run's status. If it is still active (running/queued/waiting), write status "failed". If the run already completed (succeeded/cancelled/failed), do nothing.
-4. Independent of the background detector, status reads also repair verified stale local runs so `dagu server` and direct CLI execution do not leave runs stuck in `running`.
+4. Independent of the background detector, status reads also repair verified stale local runs immediately once no fresh local proc heartbeat remains, so `dagu server` and direct CLI execution do not leave runs stuck in `running`.
 
-With defaults, a truly dead process is detected in at most `scheduler.failure_threshold × scheduler.zombie_detection_interval` = 3 × 45s = **135 seconds**. A transiently stale process (GC pause, I/O lag) survives as long as it recovers within that window.
+With defaults, a truly dead process is detected by the background scheduler in at most `scheduler.failure_threshold × scheduler.zombie_detection_interval` = 3 × 45s = **135 seconds**. A transiently stale process (GC pause, I/O lag) survives as long as it recovers within that window.
+
+That 135-second worst case applies to the background scheduler detector only. `dagu server` and direct CLI status reads can repair sooner because they do not wait for `scheduler.failure_threshold` once the local proc heartbeat is already stale.
 
 If a heartbeat file is deleted externally while the process is still alive, the heartbeat goroutine detects the missing file and recreates it on the next tick.
 
@@ -74,6 +80,8 @@ scheduler:
 ```
 
 The timing invariant: `proc.stale_threshold` should be significantly larger than `proc.heartbeat_sync_interval` to avoid false positives. With defaults, the margin is 80s (90s - 10s).
+
+Legacy compatibility: `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_interval`, and `scheduler.stale_threshold` are still accepted as deprecated aliases for `proc.*`. If both are set, `proc.*` wins.
 
 #### Example: tuning for faster detection
 
@@ -94,7 +102,7 @@ Worst-case detection: 3 × 10s = 30s. Heartbeat writes: one 8-byte write every 2
 
 #### Distributed mode
 
-Zombie detection for distributed runs (runs with a `worker_id`) is handled by the coordinator via worker heartbeats, not by the scheduler's zombie detector. The scheduler skips any run where `worker_id` is set and is not `"local"`.
+Zombie detection for distributed runs (runs with a `worker_id`) is handled by the coordinator via worker heartbeats, not by the scheduler's zombie detector. The scheduler and local status-read repair paths skip any run where `worker_id` is set and is not `"local"`.
 
 ## Basic Scheduling
 

@@ -35,7 +35,7 @@ The scheduler periodically checks each queue. For each queue it calculates:
 free_slots = max_concurrency - running_count - inflight_count
 ```
 
-- **running_count** — processes with an active heartbeat in the proc store
+- **running_count** — runs with at least one non-stale proc heartbeat in the proc store; stale proc files are pruned during these checks so leaked heartbeats do not keep queue capacity artificially full
 - **inflight_count** — items currently being dispatched
 
 If `free_slots` is zero or negative, no new items are dequeued. Otherwise, up to `free_slots` items are dequeued and started.

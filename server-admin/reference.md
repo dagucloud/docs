@@ -160,7 +160,7 @@ scheduler:
   zombie_detection_interval: "45s"  # Interval for detecting zombie DAG runs (0 to disable)
   failure_threshold: 3             # Consecutive stale checks before marking a run as failed
 
-# Local proc heartbeat/liveness
+# Local proc heartbeat/liveness (used by all local run owners: server, scheduler, CLI runs, and workers)
 proc:
   heartbeat_interval: "5s"         # How often local workflow processes write a heartbeat timestamp
   heartbeat_sync_interval: "10s"   # How often heartbeat files are fsynced to disk
@@ -323,12 +323,16 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)
 
 ### Proc Liveness
+These settings apply to all locally owned DAG runs, not just `dagu scheduler`.
+
 - `DAGU_PROC_HEARTBEAT_INTERVAL` - How often local workflow processes write a heartbeat timestamp (default: `5s`)
 - `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL` - How often heartbeat files are fsynced to disk (default: `10s`)
 - `DAGU_PROC_STALE_THRESHOLD` - Time after which a heartbeat is considered stale (default: `90s`)
 - `DAGU_SCHEDULER_HEARTBEAT_INTERVAL` - Deprecated alias for `DAGU_PROC_HEARTBEAT_INTERVAL`
 - `DAGU_SCHEDULER_HEARTBEAT_SYNC_INTERVAL` - Deprecated alias for `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL`
 - `DAGU_SCHEDULER_STALE_THRESHOLD` - Deprecated alias for `DAGU_PROC_STALE_THRESHOLD`
+
+Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_interval`, and `scheduler.stale_threshold` are also still accepted as deprecated aliases. Use `proc.*` for new configuration. If both are set, `proc.*` takes precedence.
 
 ### Resource Monitoring
 - `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)
