@@ -26,7 +26,7 @@ steps:                     # Workflow steps
   - command: echo "Processing ${ENVIRONMENT} for date ${DATE} with batch ${BATCH_SIZE}"
 ```
 
-Parameter defaults are literal unless you opt in to `eval_params: true`. See [Parameters](/writing-workflows/parameters) for evaluation rules, override behavior, and typed validation.
+Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
 
 ## Base Configuration
 

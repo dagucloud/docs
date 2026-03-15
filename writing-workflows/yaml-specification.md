@@ -18,7 +18,7 @@ schedule: "0 * * * *"      # Optional: cron expression
 max_active_steps: 10         # Max parallel steps
 timeout_sec: 3600           # Workflow timeout (seconds)
 
-# Parameters (literal by default; optional evaluation with eval_params)
+# Parameters (`default` is literal; inline `eval` is optional)
 params:
   - name: environment
     type: string
@@ -242,7 +242,6 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `params` | string/array/object | Default DAG parameters. Supports positional strings, named params, inline rich definitions, and external schema mode. | `[]` |
-| `eval_params` | boolean | Evaluate YAML-authored parameter defaults using the expression engine before runtime use. CLI/API/sub-DAG overrides remain literal. | `false` |
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
@@ -263,7 +262,7 @@ Top-level DAG `params:` supports:
 - Inline rich definitions in list form using objects with a required `name` field
 - External schema mode with `{ schema, values }`
 
-Defaults are literal unless `eval_params: true` is enabled on the DAG or inherited from `base.yaml`.
+Literal `default` values stay inert. Inline rich definitions may also set `eval` to compute the effective default at execution time.
 
 Recommended authored form:
 
@@ -290,6 +289,7 @@ Inline definition fields use `snake_case` in YAML:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `eval` | string | Expression evaluated at execution time for the effective default |
 | `default` | string/integer/number/boolean | Default value |
 | `description` | string | Help text |
 | `type` | string | `string`, `integer`, `number`, or `boolean` |
@@ -301,31 +301,38 @@ Inline definition fields use `snake_case` in YAML:
 
 Inline types affect validation and typed UI controls. Runtime shell variables and `DAG_PARAMS_JSON` remain string-based.
 
-#### `eval_params`
+If both `eval` and `default` are present, `eval` wins at execution time and `default` becomes the literal fallback and display value.
 
-`eval_params` is an opt-in top-level boolean:
+#### `params[].eval`
+
+`eval` is available on inline rich definitions:
 
 ```yaml
 env:
   - BASE_DIR: /srv/data
 
-eval_params: true
 params:
-  - OUTPUT_DIR: "${BASE_DIR}/out"
-  - TODAY: "`date +%Y-%m-%d`"
-  - name: WORKERS
+  - name: output_dir
+    eval: "$BASE_DIR/out"
+    default: /tmp/out
+  - name: today
+    eval: "`date +%Y-%m-%d`"
+  - name: workers
     type: integer
-    default: "`nproc`"
+    eval: "`nproc`"
 ```
 
 Behavior:
 
-- Default is `false`.
-- Only YAML-authored defaults are evaluated.
+- `default` remains literal.
+- Runtime precedence is: override, then `eval`, then `default`.
 - DAG `env:` is evaluated first, then params are evaluated sequentially from top to bottom.
 - Later params can reference earlier params.
-- Inline typed defaults are evaluated before coercion and validation.
+- Inline typed eval results are coerced before validation.
+- If `eval` fails and `default` exists, Dagu falls back to `default`.
+- If `eval` fails and no `default` exists, the run fails before any step starts.
 - CLI, API, and sub-DAG runtime overrides are never evaluated.
+- Metadata-only loads skip `eval`.
 - External-schema-backed defaults are not evaluated.
 
 ### Container Configuration

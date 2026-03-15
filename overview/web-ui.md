@@ -142,7 +142,7 @@ When a DAG exposes `paramDefs` metadata, the Start and Enqueue dialogs render ty
 
 Descriptions are shown inline, client-side validation runs before submission, and the server still performs the authoritative validation. If a DAG does not expose typed parameter metadata, the UI falls back to the raw parameter editor.
 
-When a DAG enables `eval_params`, dynamic defaults may appear as display hints instead of prefilled values. The server remains the source of truth and evaluates YAML-authored defaults when the run starts.
+When a DAG uses `params[].eval`, computed defaults are resolved by the server when the run starts or is enqueued. The dialogs may not show those computed values ahead of time unless a literal `default` is also present.
 
 ### Information Tabs
 - **Graph**: Visual representation

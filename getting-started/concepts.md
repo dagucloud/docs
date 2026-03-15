@@ -89,7 +89,7 @@ Override at runtime:
 dagu start workflow.yaml -- env=prod region=eu-west-1
 ```
 
-Parameter defaults are literal by default. If you need `${VAR}` or backtick evaluation in YAML-authored defaults, enable `eval_params: true`. Runtime overrides from the CLI, API, and sub-DAG calls remain literal.
+Parameter defaults are literal by default. If you need `$VAR` or backtick evaluation for a DAG param, use `eval:` on an inline rich parameter definition. Runtime overrides from the CLI, API, and sub-DAG calls remain literal.
 
 ### Variables
 

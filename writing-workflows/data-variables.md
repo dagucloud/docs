@@ -204,7 +204,7 @@ steps:
   - command: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
 ```
 
-Parameter defaults are literal by default. If you need `${VAR}` expansion or backtick command substitution in YAML-authored defaults, enable `eval_params: true`. Runtime overrides from the CLI, API, and sub-DAG calls remain literal. See [Parameters](/writing-workflows/parameters) for the full evaluation rules.
+Parameter defaults are literal by default. If you need `$VAR` expansion or backtick command substitution for a DAG param, use `eval:` on an inline rich param definition (`- name: ...`). Runtime overrides from the CLI, API, and sub-DAG calls remain literal. See [Parameters](/writing-workflows/parameters) for precedence, fallback, and validation rules.
 
 Inline rich definitions add validation and UI metadata while keeping runtime values string-based:
 

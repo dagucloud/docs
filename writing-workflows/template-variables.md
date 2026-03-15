@@ -202,7 +202,7 @@ steps:
   - command: echo "Deploy on ${TODAY} from ${HOSTNAME}"
 ```
 
-**Note:** Command substitution is always supported in `env:` blocks. For DAG-level `params:`, backticks and `${VAR}` are evaluated only when `eval_params: true` is enabled. Runtime overrides from the CLI, API, and sub-DAG calls remain literal.
+**Note:** Command substitution is always supported in `env:` blocks. For DAG-level `params:`, use `eval:` on an inline rich param definition when you want `$VAR` expansion or backtick command substitution. Literal `default` values and runtime overrides from the CLI, API, and sub-DAG calls remain literal.
 
 ## Output Variables
 
