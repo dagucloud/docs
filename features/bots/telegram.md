@@ -25,7 +25,7 @@ Before configuring Dagu, you need to create a bot on Telegram and get its token.
 
 ## Running
 
-The Telegram bot starts automatically when `bots.telegram.token` is configured and you run either:
+The Telegram bot starts automatically when `bots.provider` is set to `telegram` and you run either:
 
 ```bash
 dagu server
@@ -41,10 +41,11 @@ In both modes, the bot shares the server's agent API instance.
 
 ## Configuration
 
-The bot requires a token and at least one allowed chat ID. Set these in the Dagu config file (`~/.config/dagu/config.yaml` or the path set by `DAGU_HOME`):
+Set `provider: telegram` under `bots` and configure the Telegram-specific fields. Only one bot provider can be active at a time. Set these in the Dagu config file (`~/.config/dagu/config.yaml` or the path set by `DAGU_HOME`):
 
 ```yaml
 bots:
+  provider: telegram
   safe_mode: true
   telegram:
     token: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
@@ -57,6 +58,7 @@ bots:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
+| `provider` | string | `""` (disabled) | Which bot to run. Currently only `"telegram"` is supported. If empty, no bot starts. |
 | `safe_mode` | bool | `true` | Passed to the agent's `ChatRequest.SafeMode` field. Applies to all bots. |
 
 ### `bots.telegram` fields
@@ -70,9 +72,10 @@ bots:
 
 | Variable | Config equivalent |
 |----------|-------------------|
+| `DAGU_BOTS_PROVIDER` | `bots.provider` |
+| `DAGU_BOTS_SAFE_MODE` | `bots.safe_mode` |
 | `DAGU_BOTS_TELEGRAM_TOKEN` | `bots.telegram.token` |
 | `DAGU_BOTS_TELEGRAM_ALLOWED_CHAT_IDS` | `bots.telegram.allowed_chat_ids` |
-| `DAGU_BOTS_SAFE_MODE` | `bots.safe_mode` |
 
 The environment variable takes precedence over the config file value for the token.
 
