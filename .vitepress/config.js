@@ -107,6 +107,13 @@ const fullSidebar = [
     ],
   },
   {
+    text: "Bots",
+    items: [
+      { text: "Overview", link: "/features/bots/" },
+      { text: "Telegram", link: "/features/bots/telegram" },
+    ],
+  },
+  {
     text: "Web UI & Tools",
     items: [
       { text: "Cockpit", link: "/web-ui/cockpit" },
