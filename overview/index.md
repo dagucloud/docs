@@ -170,20 +170,6 @@ See [Architecture](/overview/architecture) for details.
 
 See [Step Types Reference](/step-types/shell) for configuration details.
 
-## Demo
-
-**CLI**: Create and execute workflows from the command line.
-
-![CLI Demo](/demo-cli.webp)
-
-[CLI Documentation](/overview/cli)
-
-**Web UI**: Monitor executions, view logs, and manage workflows visually.
-
-![Web UI Demo](/demo-web-ui.webp)
-
-[Web UI Documentation](/overview/web-ui)
-
 ## Learn More
 
 - [Quick Start](/getting-started/quickstart) - Running in minutes
