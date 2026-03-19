@@ -697,6 +697,7 @@ dagu coordinator [options]
 - `--coordinator.host` - Host address to bind (default: `127.0.0.1`)
 - `--coordinator.advertise` - Address to advertise in service registry (default: auto-detected hostname)
 - `--coordinator.port` - Port number (default: `50055`)
+- `--coordinator.health-port` - HTTP health check port (default: `8091`, `0` disables)
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
 - `--peer.client-ca-file` - Path to CA certificate file for client verification (mTLS)
@@ -711,7 +712,8 @@ dagu coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
 dagu coordinator \
   --coordinator.host=0.0.0.0 \
   --coordinator.advertise=dagu-server \
-  --coordinator.port=50055
+  --coordinator.port=50055 \
+  --coordinator.health-port=8091
 
 # With TLS
 dagu coordinator \
@@ -735,6 +737,8 @@ The coordinator service enables distributed task execution by:
 - Providing task distribution API with automatic failover
 - Managing worker lifecycle through file-based registry
 
+When run directly, the coordinator also exposes `GET /health` on `--coordinator.health-port` for per-instance liveness checks. `dagu start-all` does not expose this dedicated coordinator health port.
+
 ### `worker`
 
 Start a worker that polls the coordinator for tasks.
@@ -746,6 +750,7 @@ dagu worker [options]
 **Options:**
 - `--worker.id` - Worker instance ID (default: `hostname@PID`)
 - `--worker.max-active-runs` - Maximum number of active runs (default: `100`)
+- `--worker.health-port` - HTTP health check port (default: `8092`, `0` disables)
 - `--worker.labels, -l` - Worker labels for capability matching (format: `key1=value1,key2=value2`)
 - `--peer.insecure` - Use insecure connection (h2c) instead of TLS (default: `true`)
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
@@ -760,7 +765,8 @@ dagu worker
 # With custom configuration
 dagu worker \
   --worker.id=worker-1 \
-  --worker.max-active-runs=50
+  --worker.max-active-runs=50 \
+  --worker.health-port=8092
 
 # With labels for capability matching
 dagu worker --worker.labels gpu=true,memory=64G,region=us-east-1
@@ -784,6 +790,7 @@ dagu worker \
 ```
 
 Workers automatically register in the service registry system, send regular heartbeats, and poll the coordinator for tasks matching their labels to execute them locally.
+Each worker also exposes `GET /health` on `--worker.health-port` for per-instance liveness checks.
 
 ## Configuration
 

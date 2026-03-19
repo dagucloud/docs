@@ -130,11 +130,13 @@ coordinator:
   enabled: true           # Enable coordinator (default: true)
   host: "127.0.0.1"       # Bind address
   port: 50055             # gRPC port
+  health_port: 8091       # HTTP health check port (0 to disable)
 
 # Worker (for distributed execution)
 worker:
   id: ""                  # Worker ID (default: hostname@PID)
   max_active_runs: 100      # Max parallel task executions
+  health_port: 8092         # HTTP health check port (0 to disable)
   labels:                 # Worker capabilities
     gpu: "false"
     memory: "16G"
@@ -301,10 +303,12 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_COORDINATOR_HOST` - Coordinator bind address (default: `127.0.0.1`)
 - `DAGU_COORDINATOR_ADVERTISE` - Address to advertise in service registry (default: auto-detected hostname)
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
+- `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
 
 ### Worker
 - `DAGU_WORKER_ID` - Worker instance ID (default: `hostname@PID`)
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
+- `DAGU_WORKER_HEALTH_PORT` - Worker HTTP health check port (default: `8092`, `0` to disable)
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS` - PostgreSQL max idle connections per DSN (default: `5`)

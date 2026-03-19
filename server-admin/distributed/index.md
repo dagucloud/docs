@@ -98,11 +98,15 @@ For containerized environments (Docker, Kubernetes), configure both the bind add
 dagu coordinator \
   --coordinator.host=0.0.0.0 \
   --coordinator.advertise=dagu-server \
-  --coordinator.port=50055
+  --coordinator.port=50055 \
+  --coordinator.health-port=8091
 ```
 
 - `--coordinator.host`: Address to bind the gRPC server (use `0.0.0.0` for containers)
 - `--coordinator.advertise`: Address workers use to connect (defaults to hostname if not set)
+- `--coordinator.health-port`: Dedicated HTTP `/health` port for per-instance liveness checks (`0` disables)
+
+If you need an independent coordinator health probe, run `dagu coordinator` as a separate service. `dagu start-all` keeps using the main web/API process health endpoint and does not expose the dedicated coordinator HTTP health server.
 
 ### Step 2: Deploy Workers
 
@@ -111,12 +115,16 @@ Start workers on your compute nodes with appropriate labels:
 ```bash
 # GPU-enabled worker
 dagu worker \
-  --worker.labels gpu=true,cuda=11.8,memory=64G
+  --worker.labels gpu=true,cuda=11.8,memory=64G \
+  --worker.health-port=8092
 
 # CPU-optimized worker
 dagu worker \
-  --worker.labels cpu-arch=amd64,cpu-cores=32,region=us-east-1
+  --worker.labels cpu-arch=amd64,cpu-cores=32,region=us-east-1 \
+  --worker.health-port=8092
 ```
+
+Each worker exposes `GET /health` on its configured `worker.health_port`, which is intended for container-orchestrator liveness and readiness probes for that specific worker process.
 
 ### Step 3: Route Tasks to Workers
 
