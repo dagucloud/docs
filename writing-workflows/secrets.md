@@ -69,9 +69,22 @@ The first existing file wins; if none are found the run fails with a clear error
 
 Reads from Hashicorp Vault kv engine. Use this when secrets data is already being managed in a vault.
 
-As environment variables, Provide `VAULT_ADDR` and `VAULT_TOKEN` to dagu.
+Set shared Vault defaults in `config.yaml`, not in `base.yaml`:
 
-or use `options`
+```yaml
+secrets:
+  vault:
+    address: https://vault.example.com
+    token: hvs.DummyToken
+```
+
+Or provide them as Dagu configuration environment variables:
+
+- `DAGU_SECRETS_VAULT_ADDRESS`
+- `DAGU_SECRETS_VAULT_TOKEN`
+
+Per-secret `options` still override the global defaults:
+
 ```yaml
 secrets:
   - name: SLACK_TOKEN

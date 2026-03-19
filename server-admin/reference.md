@@ -48,6 +48,12 @@ paths:
   service_registry_dir: ""    # Auto: {data_dir}/service-registry
   executable: ""            # Auto: current executable path
 
+# External Secret Providers
+secrets:
+  vault:
+    address: "https://vault.example.com"
+    token: "hvs.DummyToken"
+
 # Permissions
 permissions:
   write_dags: true         # Create/edit/delete DAGs
@@ -344,6 +350,10 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 ### Resource Monitoring
 - `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)
 - `DAGU_MONITORING_INTERVAL` - How often to collect resource metrics (default: `5s`)
+
+### External Secrets
+- `DAGU_SECRETS_VAULT_ADDRESS` - Default Vault server address for the `vault` secret provider
+- `DAGU_SECRETS_VAULT_TOKEN` - Default Vault token for the `vault` secret provider
 
 ### Git Sync
 - `DAGU_GITSYNC_ENABLED` - Enable git sync (default: `false`)
