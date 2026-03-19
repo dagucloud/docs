@@ -2,6 +2,115 @@
 
 > **Note**: For patch version release notes (e.g., v2.0.1, v2.0.2), see the [GitHub Releases](https://github.com/dagu-org/dagu/releases) page.
 
+## v2.3.1 (2026-03-19)
+
+### Added
+
+- Coordinator and Worker Health Endpoints: New `/healthz` endpoints for the coordinator and worker services, enabling native health checks in Kubernetes and other orchestrators. ([#1802](https://github.com/dagu-org/dagu/pull/1802))
+
+### Changed
+
+- Vault Environment Variable Renamed: The HashiCorp Vault environment variable has been renamed for consistency with the `DAGU_` prefix convention. ([#1801](https://github.com/dagu-org/dagu/pull/1801))
+- Centralized Vault Config Defaults: Vault configuration defaults are now centralized, reducing duplication and improving maintainability. ([#1804](https://github.com/dagu-org/dagu/pull/1804))
+
+### Fixed
+
+- Retry Endpoint Blocking: The retry API endpoint now returns immediately without blocking until the DAG run completes. ([#1786](https://github.com/dagu-org/dagu/pull/1786))
+- Scheduler Health Server Startup: The health server now starts before the scheduler acquires its lock, ensuring health checks pass during lock contention. ([#1789](https://github.com/dagu-org/dagu/pull/1789))
+- Duplicate Workers Across Coordinators: Workers are now deduplicated across multiple coordinator instances in distributed mode, preventing ghost entries in the System Status page. ([#1791](https://github.com/dagu-org/dagu/pull/1791))
+- Bot Session Continuity: Hardened Slack and Telegram bot session management for improved continuity and responsiveness. ([#1793](https://github.com/dagu-org/dagu/pull/1793))
+- Retry Scanner Scope: Narrowed the retry scanner's DAG-run scan scope to reduce unnecessary I/O. ([#1794](https://github.com/dagu-org/dagu/pull/1794))
+- Cancel Failed Auto-Retry DAG Runs: Failed DAG runs with auto-retry enabled can now be properly canceled. ([#1795](https://github.com/dagu-org/dagu/pull/1795))
+- Parallel Scheduling During Sub-DAG Retries: Fixed a deadlock where sub-DAG retries blocked parallel scheduling of other DAGs. ([#1796](https://github.com/dagu-org/dagu/pull/1796))
+- Parallel Sub-DAG Item Targets: Resolved variable expansion for `parallel` item targets in sub-DAG paths and hardened cancellation handling. ([#1797](https://github.com/dagu-org/dagu/pull/1797))
+- Bot Notifications Consolidation: Consolidated and hardened bot notification delivery to prevent duplicate or dropped messages. ([#1798](https://github.com/dagu-org/dagu/pull/1798))
+- SSE Topics and Dev Asset Versioning: Hardened SSE topic routing and fixed dev asset cache-busting. ([#1799](https://github.com/dagu-org/dagu/pull/1799))
+- Agent Approval Prompts: Fixed agent approval prompts being prematurely dismissed during long-running approval waits. ([#1800](https://github.com/dagu-org/dagu/pull/1800))
+- DAG File Traversal via Encoded Slashes: Rejected encoded slashes in DAG file paths to prevent path traversal attacks. ([#1803](https://github.com/dagu-org/dagu/pull/1803))
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Retry endpoint non-blocking fix ([#1786](https://github.com/dagu-org/dagu/pull/1786)) | [@mvanhorn](https://github.com/mvanhorn) |
+| Vault environment variable rename ([#1801](https://github.com/dagu-org/dagu/pull/1801)) | [@dohq](https://github.com/dohq) |
+| Retry endpoint blocking bug report ([#608](https://github.com/dagu-org/dagu/issues/608)) | [@kamandir](https://github.com/kamandir) (report) |
+| Scheduler health check misbehavior in multi-instance deployments ([#1156](https://github.com/dagu-org/dagu/issues/1156)) | [@jonasban](https://github.com/jonasban) (report) |
+| Incorrect System Status in distributed mode ([#1787](https://github.com/dagu-org/dagu/issues/1787)), coordinator/worker health endpoint request ([#1788](https://github.com/dagu-org/dagu/issues/1788)) | [@jonasban](https://github.com/jonasban) (report) |
+| Task with retry stays in running state, blocking scheduling ([#1792](https://github.com/dagu-org/dagu/issues/1792)) | [@mtaohuang](https://github.com/mtaohuang) (report) |
+| Variables not resolved in sub-DAG paths with `parallel` ([#1790](https://github.com/dagu-org/dagu/issues/1790)) | [@VKdennis](https://github.com/VKdennis) (report) |
+
+**Full Changelog**: [v2.3.0...v2.3.1](https://github.com/dagu-org/dagu/compare/v2.3.0...v2.3.1)
+
+## v2.3.0 (2026-03-16)
+
+### Added
+
+- HashiCorp Vault Integration: Secrets can now be sourced from HashiCorp Vault. Supports KV v1 and v2 secret engines with token and AppRole authentication. Vault secrets are referenced in DAG YAML via `secrets:` block and resolved at runtime. ([#1757](https://github.com/dagu-org/dagu/pull/1757))
+- Slack Bot for AI Agent Interaction: Interact with the Dagu AI agent directly from Slack. Send messages in configured channels to create, debug, and manage DAG workflows through conversational chat. ([#1785](https://github.com/dagu-org/dagu/pull/1785))
+- Telegram Bot for AI Agent Interaction: Interact with the Dagu AI agent via Telegram. Supports the same conversational workflow management as the Slack bot. ([#1783](https://github.com/dagu-org/dagu/pull/1783))
+- Rich DAG Params with Typed Run Modal: DAG parameters now support a rich schema with `type`, `default`, `options`, and `description` fields. The Start/Enqueue modals render typed inputs (text, number, select, checkbox, textarea) based on the parameter definitions. ([#1770](https://github.com/dagu-org/dagu/pull/1770))
+- `params[].eval` for DAG Param Defaults: Parameters can define an `eval` field containing a shell expression evaluated at runtime to compute the default value (e.g., `eval: "date +%Y-%m-%d"`). ([#1775](https://github.com/dagu-org/dagu/pull/1775))
+- DAG-Level Retry Policy: New top-level `retryPolicy` field enables automatic retry of entire DAG runs on failure, with configurable `limit` and `intervalSec`. Auto-retry metadata is surfaced in the DAG run list. ([#1774](https://github.com/dagu-org/dagu/pull/1774), [#1779](https://github.com/dagu-org/dagu/pull/1779))
+- Z.AI (GLM Models) as LLM Provider: Added Z.AI as a supported LLM provider for the AI agent and chat steps. ([#1780](https://github.com/dagu-org/dagu/pull/1780))
+- Auto-Provision Initial Admin User: The initial admin user can now be provisioned via config (`auth.builtin.initial_admin`) or environment variables, enabling headless deployment without the `/setup` page. ([#1765](https://github.com/dagu-org/dagu/pull/1765))
+- Schedule Time Propagation: The original scheduled time is now preserved and propagated through the DAG run lifecycle, including retries and sub-DAG invocations. ([#1763](https://github.com/dagu-org/dagu/pull/1763))
+- Catchup Runs via Enqueue Path: Catchup (missed schedule) runs are now routed through the enqueue path with deterministic IDs, ensuring consistent behavior with regular scheduled runs. ([#1772](https://github.com/dagu-org/dagu/pull/1772))
+- Server-Side Sorting for Doc Tree Sidebar: The doc tree sidebar now supports server-side sorting for improved performance with large doc collections. ([#1759](https://github.com/dagu-org/dagu/pull/1759))
+- Multi-Select, Batch Delete & Keyboard Shortcuts for Doc Tree: Select multiple documents with Shift/Ctrl+click or keyboard shortcuts and delete them in bulk. ([#1756](https://github.com/dagu-org/dagu/pull/1756))
+- Helm Chart Repository: Official Helm chart published for Kubernetes deployment.
+- Discard Changes Button: Spec and doc editors now include a discard changes button to revert unsaved edits.
+- Mobile-Responsive Cockpit Layout: The cockpit kanban board uses a tabbed layout on mobile devices.
+- Doc Outline Panel State Persistence: The doc outline panel collapsed/expanded state is persisted in localStorage.
+
+### Changed
+
+- Step Name Limit Relaxed to 255 Characters: The maximum step name length has been increased from 40 to 255 characters. ([#1753](https://github.com/dagu-org/dagu/pull/1753))
+- Abort Handler Renamed to `onAbort`: The abort handler contract has been renamed from `onExit` semantics to the explicit `onAbort` name for clarity. ([#1764](https://github.com/dagu-org/dagu/pull/1764))
+- DAG Params Treated as Literal Values: DAG parameters are now treated as literal values by default — OS environment variable expansion in params has been removed to prevent unintended substitution. ([#1767](https://github.com/dagu-org/dagu/pull/1767))
+
+### Fixed
+
+- JQ Step Large Number Output: Fixed raw output mode producing scientific notation for large numbers in the jq step. ([#1754](https://github.com/dagu-org/dagu/pull/1754))
+- `onAbort` Label in Lifecycle Hooks: The lifecycle hooks UI now correctly displays the `onAbort` label instead of the old name. ([#1760](https://github.com/dagu-org/dagu/pull/1760))
+- YAML Spec Workspace Tag on Enqueue: YAML spec is now saved with the workspace tag at enqueue time from the cockpit page. ([#1758](https://github.com/dagu-org/dagu/pull/1758))
+- Shared Storage Paths in Kubernetes: Aligned shared storage paths in the Helm chart for correct volume mounting. ([#1766](https://github.com/dagu-org/dagu/pull/1766))
+- SSE Connection Stability: Stabilized multiplexed SSE connection management to prevent dropped events and reconnection storms. ([#1768](https://github.com/dagu-org/dagu/pull/1768))
+- Queue Startup Lookup Churn: Reduced unnecessary DAG lookups during queue startup in the scheduler. ([#1769](https://github.com/dagu-org/dagu/pull/1769))
+- AI Installer and Skills Dirs: Hardened the AI installer and added support for explicit skills directories. ([#1771](https://github.com/dagu-org/dagu/pull/1771))
+- False Positive Zombie Detector Kills: Eliminated false positive kills by the zombie detector when DAG runs are slow but still active. ([#1773](https://github.com/dagu-org/dagu/pull/1773))
+- Terminal WebSocket Bridge Lifecycle: Hardened the terminal WebSocket bridge lifecycle to prevent orphaned connections. ([#1777](https://github.com/dagu-org/dagu/pull/1777))
+- Container Env Variable Resolution: DAG `env` and `params` references are now correctly resolved in container environment variables. ([#1778](https://github.com/dagu-org/dagu/pull/1778))
+- Agent Chat SSE Transport: Hardened the agent chat SSE transport for improved reliability. ([#1781](https://github.com/dagu-org/dagu/pull/1781))
+- Graceful Shutdown: Improved graceful shutdown handling for both the HTTP server and scheduler to prevent in-flight request loss. ([#1782](https://github.com/dagu-org/dagu/pull/1782))
+- First Chat Message Visibility: The first chat message in new agent sessions is now displayed immediately.
+- Auto-Retry Badge Display: The auto-retry badge is now only shown when the DAG run status is `failed`.
+- Sidebar Default State: The sidebar is now expanded by default for better discoverability.
+- Docker Version Suffix: Removed git hash suffix from the embedded version string in Docker builds.
+- DAG Details Side Panels: Hardened DAG details side panels for consistent rendering.
+- Mermaid Error Element Cleanup: Removed mermaid error elements leaked into the document body.
+- Cockpit UI Polish: Fixed template selector tag list clipping, cockpit modal theming, and dev server proxy connection exhaustion.
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Relax step name limit to 255 characters ([#1753](https://github.com/dagu-org/dagu/pull/1753)), fix onAbort label in lifecycle hooks UI ([#1760](https://github.com/dagu-org/dagu/pull/1760)) | [@SergioChan](https://github.com/SergioChan) |
+| Fix raw output mode for large numbers in jq step ([#1754](https://github.com/dagu-org/dagu/pull/1754)) | [@tushar5526](https://github.com/tushar5526) |
+| HashiCorp Vault integration ([#1757](https://github.com/dagu-org/dagu/pull/1757)) | [@dohq](https://github.com/dohq) |
+| Step name 40-character limit issue report ([#1189](https://github.com/dagu-org/dagu/issues/1189)) | [@jonathonc](https://github.com/jonathonc) (report) |
+| JQ step scientific notation output bug report ([#1648](https://github.com/dagu-org/dagu/issues/1648)) | [@insanity54](https://github.com/insanity54) (report) |
+| Handler On Abort display bug report ([#1476](https://github.com/dagu-org/dagu/issues/1476)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
+| Container env variable resolution bug report ([#1776](https://github.com/dagu-org/dagu/issues/1776)) | [@Popo8701](https://github.com/Popo8701) (report) |
+| Dynamic parameter in UI feature request ([#1761](https://github.com/dagu-org/dagu/issues/1761)) | [@YLombardi](https://github.com/YLombardi) (request) |
+| High memory usage report related to queue improvements ([#546](https://github.com/dagu-org/dagu/issues/546)) | [@helmut72](https://github.com/helmut72) (report) |
+
+**Full Changelog**: [v2.2.4...v2.3.0](https://github.com/dagu-org/dagu/compare/v2.2.4...v2.3.0)
+
 ## v2.2.4 (2026-03-11)
 
 ### Added
