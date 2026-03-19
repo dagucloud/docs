@@ -38,6 +38,7 @@ const fullSidebar = [
       { text: "Control Flow", link: "/writing-workflows/control-flow" },
       { text: "Scheduling", link: "/writing-workflows/scheduling" },
       { text: "Execution Control", link: "/writing-workflows/execution-control" },
+      { text: "Durable Execution", link: "/writing-workflows/durable-execution" },
       { text: "Queue Assignment", link: "/writing-workflows/queues" },
       { text: "Approval Gates", link: "/writing-workflows/approval" },
       { text: "Error Handling", link: "/writing-workflows/error-handling" },
@@ -103,6 +104,14 @@ const fullSidebar = [
           { text: "Tool Calling", link: "/features/chat/tool-calling" },
         ],
       },
+    ],
+  },
+  {
+    text: "Bots",
+    items: [
+      { text: "Overview", link: "/features/bots/" },
+      { text: "Telegram", link: "/features/bots/telegram" },
+      { text: "Slack", link: "/features/bots/slack" },
     ],
   },
   {
@@ -312,7 +321,7 @@ export default withMermaid(
       },
 
       editLink: {
-        pattern: "https://github.com/dagu-org/dagu/edit/main/docs-next/:path",
+        pattern: "https://github.com/dagu-org/docs/edit/main/:path",
         text: "Edit this page on GitHub",
       },
 

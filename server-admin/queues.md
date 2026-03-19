@@ -19,7 +19,7 @@ queues:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `enabled` | bool | Enable the queue system. Default: `true`. Env: `DAGU_QUEUE_ENABLED`. |
+| `enabled` | bool | Enable the queue system. Default: `true`. Env: `DAGU_QUEUE_ENABLED`. Required for catchup — see [Catchup](/writing-workflows/scheduling#catchup-missed-run-replay). |
 | `config[].name` | string | Queue name. DAGs reference this via `queue: "name"`. |
 | `config[].max_concurrency` | int | Maximum concurrent DAG runs in this queue. |
 
@@ -35,12 +35,20 @@ The scheduler periodically checks each queue. For each queue it calculates:
 free_slots = max_concurrency - running_count - inflight_count
 ```
 
-- **running_count** — processes with an active heartbeat in the proc store
+- **running_count** — runs with at least one non-stale proc heartbeat in the proc store; stale proc files are pruned during these checks so leaked heartbeats do not keep queue capacity artificially full
 - **inflight_count** — items currently being dispatched
 
 If `free_slots` is zero or negative, no new items are dequeued. Otherwise, up to `free_slots` items are dequeued and started.
 
-Items within a queue are processed FIFO with two priority levels: high and low. High-priority items are dequeued first. The `dagu enqueue` command enqueues with low priority.
+Items within a queue are processed FIFO with two priority levels: high and low. High-priority items are dequeued first. The `dagu enqueue` command and catchup runs both enqueue with low priority.
+
+## Catchup Runs and Queues
+
+Catchup runs (missed run replay) are dispatched through the queue system. When the scheduler detects missed cron intervals for a DAG with `catchup_window` set, it enqueues each interval as a queue item with a deterministic run ID. The queue processor then executes them in order.
+
+This means `queues.enabled: true` is required for catchup to work. If queues are disabled, the scheduler logs a warning per DAG and skips catchup entirely.
+
+See [Catchup](/writing-workflows/scheduling#catchup-missed-run-replay) for the full catchup documentation.
 
 ## Queues for DAGs Without a `queue` Field
 

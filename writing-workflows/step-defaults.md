@@ -2,6 +2,8 @@
 
 Define default step configuration once at the DAG level. Steps inherit these values and can override them individually.
 
+`defaults.retry_policy` uses the same retry semantics as a step-level `retry_policy`. For exact field behavior and the difference between step retry and root DAG retry, see [Durable Execution](/writing-workflows/durable-execution).
+
 ## Supported Fields
 
 The `defaults` block accepts the following fields:
@@ -77,7 +79,7 @@ steps:
     command: echo "cleanup done"
 ```
 
-### Step Override
+### Step Override or Disable
 
 A step defines its own `retry_policy`, replacing the default entirely:
 
@@ -98,6 +100,13 @@ steps:
     command: ./notify.sh
     retry_policy:
       limit: 1
+      interval_sec: 0
+
+  # Disables the inherited retry policy for this step
+  - id: run_once
+    command: ./run-once.sh
+    retry_policy:
+      limit: 0
       interval_sec: 0
 ```
 

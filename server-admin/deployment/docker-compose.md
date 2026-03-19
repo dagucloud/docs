@@ -34,7 +34,9 @@ services:
       # Token secret: auto-generated if not set (persisted to {dataDir}/auth/token_secret)
       # - DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret
       # - DAGU_AUTH_TOKEN_TTL=24h        # default is 24h
-      # First admin account created via /setup page on first browser visit
+      # Auto-create admin on first startup (both required; omit to use /setup page instead)
+      # - DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+      # - DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
       # Timezone / base path (optional)
       # - DAGU_TZ=UTC
       # - DAGU_BASE_PATH=/dagu

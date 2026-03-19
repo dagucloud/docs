@@ -133,6 +133,17 @@ Click any DAG to see detailed information including real-time status, logs, and 
 - **Retry**: Retry failed execution
 - **Edit**: Modify workflow (if permitted)
 
+When a DAG exposes `paramDefs` metadata, the Start and Enqueue dialogs render typed controls automatically:
+
+- strings use text inputs
+- enums use selects
+- integers and numbers use numeric inputs with bounds
+- booleans use a toggle or checkbox
+
+Descriptions are shown inline, client-side validation runs before submission, and the server still performs the authoritative validation. If a DAG does not expose typed parameter metadata, the UI falls back to the raw parameter editor.
+
+When a DAG uses `params[].eval`, computed defaults are resolved by the server when the run starts or is enqueued. The dialogs may not show those computed values ahead of time unless a literal `default` is also present.
+
 ### Information Tabs
 - **Graph**: Visual representation
   - **Drill-down**: Navigate to sub DAG executions by double-clicking steps
@@ -319,11 +330,13 @@ Terminal is **disabled by default** for security reasons. Enable it in your conf
 # config.yaml
 terminal:
   enabled: true
+  max_sessions: 5
 ```
 
 Or via environment variable:
 ```bash
 export DAGU_TERMINAL_ENABLED=true
+export DAGU_TERMINAL_MAX_SESSIONS=5
 ```
 
 ### Security Notes

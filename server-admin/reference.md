@@ -22,6 +22,7 @@ metrics: "private"        # Metrics endpoint: "private" (default) or "public"
 # Terminal (web-based shell access)
 terminal:
   enabled: false          # Enable web terminal (default: false)
+  max_sessions: 5         # Max concurrent terminals per server (default: 5)
 
 # Audit Logging
 audit:
@@ -129,11 +130,13 @@ coordinator:
   enabled: true           # Enable coordinator (default: true)
   host: "127.0.0.1"       # Bind address
   port: 50055             # gRPC port
+  health_port: 8091       # HTTP health check port (0 to disable)
 
 # Worker (for distributed execution)
 worker:
   id: ""                  # Worker ID (default: hostname@PID)
   max_active_runs: 100      # Max parallel task executions
+  health_port: 8092         # HTTP health check port (0 to disable)
   labels:                 # Worker capabilities
     gpu: "false"
     memory: "16G"
@@ -158,6 +161,14 @@ scheduler:
   lock_stale_threshold: "30s"  # Time after which a scheduler lock is considered stale
   lock_retry_interval: "5s"   # Interval between lock acquisition attempts
   zombie_detection_interval: "45s"  # Interval for detecting zombie DAG runs (0 to disable)
+  retry_failure_window: "24h"  # Lookback window for DAG-level retry scanning (0 to disable). Current limitation: window uses the original DAG-run time bucket, not the latest failed attempt timestamp.
+  failure_threshold: 3             # Consecutive stale checks before marking a run as failed
+
+# Local proc heartbeat/liveness (used by all local run owners: server, scheduler, CLI runs, and workers)
+proc:
+  heartbeat_interval: "5s"         # How often local workflow processes write a heartbeat timestamp
+  heartbeat_sync_interval: "10s"   # How often heartbeat files are fsynced to disk
+  stale_threshold: "90s"           # Time after which a heartbeat is considered stale
 
 # Resource Monitoring
 monitoring:
@@ -209,6 +220,7 @@ All options support `DAGU_` prefix.
 
 ### Terminal
 - `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
+- `DAGU_TERMINAL_MAX_SESSIONS` - Maximum concurrent terminal sessions (default: `5`)
 
 ### Audit Logging
 - `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
@@ -241,6 +253,8 @@ All options support `DAGU_` prefix.
 #### Builtin Auth (RBAC)
 - `DAGU_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
 - `DAGU_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
+- `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` - Auto-provision admin username on first startup (requires password)
+- `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` - Auto-provision admin password on first startup (requires username, minimum 8 characters)
 - `DAGU_USERS_DIR` - User data directory (default: `{data_dir}/users`)
 
 #### Basic Auth
@@ -289,10 +303,12 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_COORDINATOR_HOST` - Coordinator bind address (default: `127.0.0.1`)
 - `DAGU_COORDINATOR_ADVERTISE` - Address to advertise in service registry (default: auto-detected hostname)
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
+- `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
 
 ### Worker
 - `DAGU_WORKER_ID` - Worker instance ID (default: `hostname@PID`)
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
+- `DAGU_WORKER_HEALTH_PORT` - Worker HTTP health check port (default: `8092`, `0` to disable)
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS` - PostgreSQL max idle connections per DSN (default: `5`)
@@ -311,6 +327,19 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_SCHEDULER_LOCK_STALE_THRESHOLD` - Time after which a scheduler lock is considered stale (default: `30s`)
 - `DAGU_SCHEDULER_LOCK_RETRY_INTERVAL` - Interval between lock acquisition attempts (default: `5s`)
 - `DAGU_SCHEDULER_ZOMBIE_DETECTION_INTERVAL` - Interval for detecting zombie DAG runs (default: `45s`, `0` to disable)
+- `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)
+
+### Proc Liveness
+These settings apply to all locally owned DAG runs, not just `dagu scheduler`.
+
+- `DAGU_PROC_HEARTBEAT_INTERVAL` - How often local workflow processes write a heartbeat timestamp (default: `5s`)
+- `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL` - How often heartbeat files are fsynced to disk (default: `10s`)
+- `DAGU_PROC_STALE_THRESHOLD` - Time after which a heartbeat is considered stale (default: `90s`)
+- `DAGU_SCHEDULER_HEARTBEAT_INTERVAL` - Deprecated alias for `DAGU_PROC_HEARTBEAT_INTERVAL`
+- `DAGU_SCHEDULER_HEARTBEAT_SYNC_INTERVAL` - Deprecated alias for `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL`
+- `DAGU_SCHEDULER_STALE_THRESHOLD` - Deprecated alias for `DAGU_PROC_STALE_THRESHOLD`
+
+Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_interval`, and `scheduler.stale_threshold` are also still accepted as deprecated aliases. Use `proc.*` for new configuration. If both are set, `proc.*` takes precedence.
 
 ### Resource Monitoring
 - `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)
@@ -555,6 +584,7 @@ peer:
 - `default_execution_mode`: `local`
 - `coordinator.enabled`: `true`
 - `terminal.enabled`: `false`
+- `terminal.max_sessions`: `5`
 - `audit.enabled`: `true`
 
 ### Auto-generated Paths

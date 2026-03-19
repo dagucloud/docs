@@ -451,8 +451,8 @@ steps:
     continue_on:
       exit_code: [0, 3]        # Treat 0 and 3 as non-fatal
       output:
-        - command: "WARNING"
-        - command: "re:^INFO:.*"       # Regex match
+        - "WARNING"
+        - "re:^INFO:.*"       # Regex match
       mark_success: true       # Mark as success when matched
   - command: echo "Continue regardless"
 ```
@@ -942,11 +942,17 @@ steps:
 
 ```yaml
 params:
-  - FOO: 1           # Default value for ${FOO}
-  - BAR: "`echo 2`"  # Command substitution in defaults
-  - ENVIRONMENT: dev
+  - name: foo
+    type: integer
+    default: 1
+  - name: bar
+    default: "2"
+  - name: environment
+    type: string
+    default: dev
+    enum: [dev, staging, prod]
 steps:
-  - command: python main.py ${FOO} ${BAR} --env=${ENVIRONMENT}
+  - command: python main.py ${foo} ${bar} --env=${environment}
 ```
 
 <a href="/writing-workflows/data-variables#named-params" class="learn-more">Learn more →</a>
@@ -2147,9 +2153,14 @@ hist_retention_days: 90   # Keep history for 90 days
 env:
   - LOG_LEVEL: info
   - DATA_DIR: /data/analytics
-params:
   - DATE: "`date '+%Y-%m-%d'`"
-  - ENVIRONMENT: production
+params:
+  - name: ENVIRONMENT
+    type: string
+    default: production
+  - name: DRY_RUN
+    type: boolean
+    default: false
 mail_on:
   failure: true
 smtp:

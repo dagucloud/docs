@@ -6,7 +6,7 @@ The Dagu agent is an LLM-powered assistant integrated into the Web UI. It can re
 
 1. **Enable the agent** — Toggle it on in the Web UI at `/agent-settings`, or set the environment variable `DAGU_AGENT_ENABLED=true`.
 
-2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `gemini`, `openrouter`, `local` (Ollama, vLLM, etc.).
+2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `gemini`, `openrouter`, `zai`, `local` (Ollama, vLLM, etc.).
 
 3. **Set a default model** — Click the star icon next to a model to make it the default.
 
@@ -79,6 +79,9 @@ dagu ai install
 
 # Non-interactive — installs to all detected tools
 dagu ai install --yes
+
+# Explicit — installs only into the specified skills directory
+dagu ai install --skills-dir ~/.agents/skills
 ```
 
 See [`ai` in CLI Commands](/getting-started/cli#ai) for details.

@@ -638,6 +638,7 @@ dagu ai install [options]
 
 **Options:**
 - `--yes, -y` - Install to all detected tools without prompting
+- `--skills-dir` - Install only into the specified skills directory. Repeatable. Skips auto-detection when provided.
 
 **Supported tools and detection:**
 
@@ -651,20 +652,28 @@ dagu ai install [options]
 
 For skill-based tools, the installer copies a `SKILL.md` file and a `references/` directory containing `cli.md`, `schema.md`, `executors.md`, `env.md`, and `pitfalls.md`. For Copilot CLI, the content is concatenated (without YAML frontmatter) and injected into `copilot-instructions.md` between marker comments. Re-running `dagu ai install` overwrites existing skill files or replaces the marked section.
 
+If you provide one or more `--skills-dir` values, Dagu skips auto-detection and installs only into those skills roots. Each skills directory receives the Dagu skill under `<dir>/dagu/SKILL.md`.
+
 ```bash
 # Interactive — prompts for each detected tool
 dagu ai install
 
 # Non-interactive — installs to all detected tools
 dagu ai install --yes
+
+# Explicit — installs only into the specified skills directory
+dagu ai install --skills-dir ~/.agents/skills
+
+# Multiple explicit skills directories
+dagu ai install --skills-dir ~/.agents/skills --skills-dir ~/.config/opencode/skills
 ```
 
 **Example output:**
 ```
-Found 3 tool(s)
+Found 3 installation target(s)
 
-  Claude Code    ✓ ~/.claude/skills/dagu/SKILL.md
-  Codex          ✓ ~/.agents/skills/dagu/SKILL.md
+  Claude Code    ✓ installed ~/.claude/skills/dagu/SKILL.md
+  Codex          ✓ installed ~/.agents/skills/dagu/SKILL.md
   Gemini CLI     skipped
 ```
 
@@ -688,6 +697,7 @@ dagu coordinator [options]
 - `--coordinator.host` - Host address to bind (default: `127.0.0.1`)
 - `--coordinator.advertise` - Address to advertise in service registry (default: auto-detected hostname)
 - `--coordinator.port` - Port number (default: `50055`)
+- `--coordinator.health-port` - HTTP health check port (default: `8091`, `0` disables)
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
 - `--peer.client-ca-file` - Path to CA certificate file for client verification (mTLS)
@@ -702,7 +712,8 @@ dagu coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
 dagu coordinator \
   --coordinator.host=0.0.0.0 \
   --coordinator.advertise=dagu-server \
-  --coordinator.port=50055
+  --coordinator.port=50055 \
+  --coordinator.health-port=8091
 
 # With TLS
 dagu coordinator \
@@ -726,6 +737,8 @@ The coordinator service enables distributed task execution by:
 - Providing task distribution API with automatic failover
 - Managing worker lifecycle through file-based registry
 
+When run directly, the coordinator also exposes `GET /health` on `--coordinator.health-port` for per-instance liveness checks. `dagu start-all` does not expose this dedicated coordinator health port.
+
 ### `worker`
 
 Start a worker that polls the coordinator for tasks.
@@ -737,6 +750,7 @@ dagu worker [options]
 **Options:**
 - `--worker.id` - Worker instance ID (default: `hostname@PID`)
 - `--worker.max-active-runs` - Maximum number of active runs (default: `100`)
+- `--worker.health-port` - HTTP health check port (default: `8092`, `0` disables)
 - `--worker.labels, -l` - Worker labels for capability matching (format: `key1=value1,key2=value2`)
 - `--peer.insecure` - Use insecure connection (h2c) instead of TLS (default: `true`)
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
@@ -751,7 +765,8 @@ dagu worker
 # With custom configuration
 dagu worker \
   --worker.id=worker-1 \
-  --worker.max-active-runs=50
+  --worker.max-active-runs=50 \
+  --worker.health-port=8092
 
 # With labels for capability matching
 dagu worker --worker.labels gpu=true,memory=64G,region=us-east-1
@@ -775,6 +790,7 @@ dagu worker \
 ```
 
 Workers automatically register in the service registry system, send regular heartbeats, and poll the coordinator for tasks matching their labels to execute them locally.
+Each worker also exposes `GET /health` on `--worker.health-port` for per-instance liveness checks.
 
 ## Configuration
 

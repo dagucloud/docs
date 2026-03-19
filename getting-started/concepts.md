@@ -71,17 +71,25 @@ steps:
 
 ```yaml
 params:
-  - ENV: dev
-  - REGION: us-east-1
+  - name: env
+    type: string
+    default: dev
+    enum: [dev, staging, prod]
+    description: Target environment
+  - name: region
+    default: us-east-1
+    description: Deployment region
 
 steps:
-  - command: echo "Deploying to ${ENV} in ${REGION}"
+  - command: echo "Deploying to ${env} in ${region}"
 ```
 
 Override at runtime:
 ```bash
-dagu start workflow.yaml -- ENV=prod REGION=eu-west-1
+dagu start workflow.yaml -- env=prod region=eu-west-1
 ```
+
+Parameter defaults are literal by default. If you need `$VAR` or backtick evaluation for a DAG param, use `eval:` on an inline rich parameter definition. Runtime overrides from the CLI, API, and sub-DAG calls remain literal.
 
 ### Variables
 

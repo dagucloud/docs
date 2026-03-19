@@ -199,10 +199,32 @@ Define default named parameters that can be overridden:
 ```yaml
 params:
   - FOO: 1           # Default value for ${FOO}
-  - BAR: "`echo 2`"  # Default value for ${BAR}, using command substitution
+  - BAR: hello       # Default value for ${BAR}
 steps:
   - command: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
 ```
+
+Parameter defaults are literal by default. If you need `$VAR` expansion or backtick command substitution for a DAG param, use `eval:` on an inline rich param definition (`- name: ...`). Runtime overrides from the CLI, API, and sub-DAG calls remain literal. See [Parameters](/writing-workflows/parameters) for precedence, fallback, and validation rules.
+
+Inline rich definitions add validation and UI metadata while keeping runtime values string-based:
+
+```yaml
+params:
+  - name: environment
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+    description: Deployment target
+  - name: batch_size
+    type: integer
+    default: 100
+    minimum: 1
+    maximum: 1000
+steps:
+  - command: python main.py --env "${environment}" --batch "${batch_size}"
+```
+
+CLI/API/sub-DAG inputs are coerced to the declared type before validation, but step commands still receive strings.
 
 ## Output Handling
 
@@ -222,7 +244,7 @@ steps:
     command: '"Region: \(.region // "us-east-1")"'
 ```
 
-If the run was started with JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides.
+If the run was started with raw JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides as a string-only JSON object. Raw JSON may be an object or an array, but named params should use an object. Inline typed params do not change this behavior.
 
 ### Capture Output
 

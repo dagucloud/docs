@@ -154,7 +154,7 @@ dagu start workflow.yaml -- ENVIRONMENT=prod PORT=80 DEBUG=true
 
 ### Accessing Parameters as JSON
 
-Every step receives the full parameter map encoded as JSON via `DAG_PARAMS_JSON`. This value reflects the merged defaults plus any runtime overrides, and when a run is started with JSON parameters, the original payload is preserved. Not set when the DAG has no parameters and none were supplied.
+Every step receives the full parameter map encoded as JSON via `DAG_PARAMS_JSON`. This value reflects the merged defaults plus any runtime overrides. Resolved DAG params are serialized as strings, and when a run is started with raw JSON parameters, the original payload is preserved. Raw JSON may be an object or an array, but named params should use an object. The variable is not set when the DAG has no parameters and none were supplied.
 
 ```yaml
 steps:
@@ -190,7 +190,7 @@ dagu start workflow.yaml -- myapp ENVIRONMENT=prod VERSION=1.2.3
 
 ## Command Substitution
 
-Execute commands and use their output:
+Execute commands and use their output in `env:` blocks using backticks. This runs the command at DAG load time and stores the result:
 
 ```yaml
 env:
@@ -198,13 +198,11 @@ env:
   - HOSTNAME: "`hostname -f`"
   - GIT_COMMIT: "`git rev-parse HEAD`"
 
-params:
-  - TIMESTAMP: "`date +%s`"
-  - USER_COUNT: "`wc -l < users.txt`"
-
 steps:
   - command: echo "Deploy on ${TODAY} from ${HOSTNAME}"
 ```
+
+**Note:** Command substitution is always supported in `env:` blocks. For DAG-level `params:`, use `eval:` on an inline rich param definition when you want `$VAR` expansion or backtick command substitution. Literal `default` values and runtime overrides from the CLI, API, and sub-DAG calls remain literal.
 
 ## Output Variables
 

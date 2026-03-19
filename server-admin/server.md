@@ -110,6 +110,7 @@ default_execution_mode: "local"      # "local" (default) or "distributed"
 # Terminal Configuration
 terminal:
   enabled: false              # Enable web-based terminal (default: false)
+  max_sessions: 5             # Maximum concurrent terminal sessions per server
 
 # Audit Logging
 audit:
@@ -193,6 +194,7 @@ All options support `DAGU_` prefix:
 
 **Terminal:**
 - `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
+- `DAGU_TERMINAL_MAX_SESSIONS` - Maximum concurrent terminal sessions (default: `5`)
 
 **Audit Logging:**
 - `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
@@ -232,10 +234,12 @@ tls:
 docker run -d \
   -e DAGU_HOST=0.0.0.0 \
   -e DAGU_AUTH_MODE=builtin \
+  -e DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin \
+  -e DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password \
   -p 8080:8080 \
   -v dagu-data:/var/lib/dagu \
   ghcr.io/dagu-org/dagu:latest
-# First admin account created via /setup page on first visit
+# Admin auto-created on first startup; omit INITIAL_ADMIN vars to use the /setup page instead
 ```
 
 ## Authentication
@@ -251,15 +255,22 @@ auth:
     token:
       secret: "${AUTH_TOKEN_SECRET}"  # auto-generated if not set
       ttl: "24h"
+    initial_admin:                    # optional — auto-create admin on first startup
+      username: admin
+      password: "${ADMIN_PASSWORD}"
 ```
 
 ```bash
 # Environment variables
 export DAGU_AUTH_MODE=builtin
 # Token secret auto-generated if not set
+
+# Optional — auto-create admin on first startup (both required together)
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
 ```
 
-On first startup, visit the web UI to create your admin account via the setup page.
+When `initial_admin` is configured and no users exist, the server creates the admin at startup and skips the setup page. When `initial_admin` is not configured, visit the web UI on first startup to create your admin account via the setup page.
 
 See [Builtin Authentication](authentication/builtin) for detailed setup.
 
@@ -511,12 +522,14 @@ The web-based terminal allows executing shell commands directly from the Dagu UI
 
 ```yaml
 terminal:
-  enabled: true   # Enable web-based terminal (default: false)
+  enabled: true
+  max_sessions: 5
 ```
 
 Or via environment variable:
 ```bash
 export DAGU_TERMINAL_ENABLED=true
+export DAGU_TERMINAL_MAX_SESSIONS=5
 ```
 
 ### Security Notes
@@ -524,6 +537,7 @@ export DAGU_TERMINAL_ENABLED=true
 - The terminal runs commands with the same permissions as the Dagu server process
 - Only enable in trusted environments where users should have shell access
 - Consider using authentication (`auth.mode: builtin`) when enabling terminal access
+- New sessions are rejected with HTTP `429` after `terminal.max_sessions` active terminals
 - Terminal sessions are logged in the audit log (when audit logging is enabled)
 
 ## Audit Logging (Pro)

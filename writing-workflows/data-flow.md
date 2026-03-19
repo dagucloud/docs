@@ -197,12 +197,12 @@ Override at runtime:
 dagu start workflow.yaml -- ENVIRONMENT=prod BATCH_SIZE=500
 ```
 
-### Dynamic Parameters
+### Dynamic Values
 
-Use command substitution in defaults:
+Use `env:` for computed values. DAG-level `params:` are treated as literal input and do not evaluate backticks or `${VAR}`.
 
 ```yaml
-params:
+env:
   - DATE: "`date +%Y-%m-%d`"
   - RUN_ID: "`uuidgen`"
   - USER: "`whoami`"

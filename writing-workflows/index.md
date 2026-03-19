@@ -8,14 +8,25 @@ schedule: "0 2 * * *"      # Optional: cron schedule
 queue: "daily-jobs"        # Optional: assign to global queue for concurrency control
 
 params:                    # Runtime parameters
-  - DATE: "`date +%Y-%m-%d`"
+  - name: ENVIRONMENT
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+  - name: BATCH_SIZE
+    type: integer
+    default: 25
+    minimum: 1
+    maximum: 100
 
 env:                       # Environment variables
+  - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /tmp/data
 
 steps:                     # Workflow steps
-  - command: echo "Processing for date ${DATE}"
+  - command: echo "Processing ${ENVIRONMENT} for date ${DATE} with batch ${BATCH_SIZE}"
 ```
+
+Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
 
 ## Base Configuration
 
@@ -67,10 +78,11 @@ See [Base Configuration](/server-admin/base-config) for complete documentation o
 2. **[Container](/writing-workflows/container)** - Run workflows in Docker containers
 3. **[Control Flow](/writing-workflows/control-flow)** - Parallel execution, conditions, loops
 4. **[Data & Variables](/writing-workflows/data-variables)** - Parameters, outputs, data passing
-5. **[Error Handling](/writing-workflows/error-handling)** - Retries, failures, notifications
-6. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup, notifications, post-run tasks
-7. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition, optimization, best practices
-8. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
+5. **[Durable Execution](/writing-workflows/durable-execution)** - Step retries, default step retries, DAG retries
+6. **[Error Handling](/writing-workflows/error-handling)** - Continue-on behavior, handlers, notifications
+7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
+8. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
+9. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
 
 ## Complete Example
 
@@ -78,9 +90,16 @@ See [Base Configuration](/server-admin/base-config) for complete documentation o
 schedule: "0 2 * * *"
 
 params:
-  - DATE: "`date +%Y-%m-%d`"
+  - name: ENVIRONMENT
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+  - name: DRY_RUN
+    type: boolean
+    default: false
 
 env:
+  - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /tmp/data/${DATE}
 
 steps:
@@ -89,7 +108,7 @@ steps:
       limit: 3
       interval_sec: 60
 
-  - command: python validate.py ${DATA_DIR}/${DATE}.csv
+  - command: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
     continue_on:
       failure: false
 

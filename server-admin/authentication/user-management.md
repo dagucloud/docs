@@ -8,7 +8,13 @@ Requires `auth.mode: builtin` (default).
 
 ## Initial Setup
 
-On first launch with builtin auth, Dagu requires creating an admin account. The web UI redirects to a setup page automatically. This can also be done via API:
+On first launch with builtin auth and no existing users, an admin account must be created. There are three ways to do this:
+
+**Via config or environment variables** — set `initial_admin` in the config file or `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` / `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` environment variables. The server creates the admin at startup. See [Builtin Authentication](./builtin#initial-setup) for details.
+
+**Via the setup page** — the web UI redirects to `/setup` automatically.
+
+**Via API** — call the setup endpoint directly:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/setup \

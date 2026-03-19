@@ -1,6 +1,6 @@
 # Basic Chat
 
-Execute Large Language Model (LLM) requests to AI providers like OpenAI, Anthropic, Google Gemini, OpenRouter, and local models.
+Execute Large Language Model (LLM) requests to AI providers like OpenAI, Anthropic, Google Gemini, OpenRouter, Z.AI, and local models.
 
 ## Basic Usage
 
@@ -24,6 +24,7 @@ steps:
 | `anthropic` | `ANTHROPIC_API_KEY` | `https://api.anthropic.com` |
 | `gemini` | `GOOGLE_API_KEY` | `https://generativelanguage.googleapis.com/v1beta` |
 | `openrouter` | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` |
+| `zai` | `ZAI_API_KEY` | `https://api.z.ai/api/paas/v4` |
 | `local` | (none) | `http://localhost:11434/v1` |
 
 ::: tip

@@ -6,7 +6,7 @@ Execute Large Language Model (LLM) requests and build AI agents that can use too
 
 | Feature | Description |
 |---------|-------------|
-| [Basic Chat](/features/chat/basics) | Simple LLM sessions with OpenAI, Anthropic, Gemini, and more |
+| [Basic Chat](/features/chat/basics) | Simple LLM sessions with OpenAI, Anthropic, Gemini, Z.AI, and more |
 | [Tool Calling](/features/chat/tool-calling) | AI agents that execute DAG workflows as tools during sessions |
 
 ## Quick Start
@@ -64,11 +64,12 @@ steps:
 | `anthropic` | `ANTHROPIC_API_KEY` | Claude 3, Claude 4, Claude Sonnet |
 | `gemini` | `GOOGLE_API_KEY` | Gemini 1.5, Gemini 2 |
 | `openrouter` | `OPENROUTER_API_KEY` | 100+ models via OpenRouter |
+| `zai` | `ZAI_API_KEY` | GLM-5, GLM-4.6 |
 | `local` | (none) | Ollama, vLLM, LM Studio (OpenAI-compatible) |
 
 ## Key Features
 
-- **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, and local models
+- **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, Z.AI, and local models
 - **Session History** - Automatic message inheritance between dependent steps
 - **Extended Thinking** - Enable reasoning mode for complex tasks (Anthropic, OpenAI, Gemini)
 - **Secret Masking** - Automatic masking of sensitive values before sending to LLM
@@ -82,7 +83,7 @@ steps:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `provider` | string | required | LLM provider (`openai`, `anthropic`, `gemini`, etc.) |
+| `provider` | string | required | LLM provider (`openai`, `anthropic`, `gemini`, `zai`, etc.) |
 | `model` | string | required | Model identifier |
 | `temperature` | float | provider default | Response randomness (0.0-2.0) |
 | `max_tokens` | int | provider default | Maximum tokens to generate |

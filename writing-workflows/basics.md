@@ -29,12 +29,15 @@ tags: [etl, production]
 # Configuration  
 schedule: "0 2 * * *"
 params:
-  - DATE: ${DATE:-today}
+  - DATE: "2026-03-14"
+
+env:
+  - RUN_DATE: "`date +%Y-%m-%d`"
 
 # Steps
 steps:
   - id: process
-    command: python process.py ${DATE}
+    command: python process.py ${DATE} ${RUN_DATE}
 
 # Handlers
 handler_on:

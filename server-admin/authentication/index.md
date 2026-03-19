@@ -25,6 +25,9 @@ auth:
     token:
       secret: your-secure-random-secret  # auto-generated if not set
       ttl: 24h
+    initial_admin:              # optional — skip the setup page
+      username: admin
+      password: your-secure-password
 ```
 
 Or via environment variables:
@@ -32,6 +35,9 @@ Or via environment variables:
 ```bash
 export DAGU_AUTH_MODE=builtin
 export DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret
+# Optional — auto-create admin on first startup
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
 ```
 
 ### Basic Authentication

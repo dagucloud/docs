@@ -556,10 +556,10 @@ steps:
   - command: echo "Validating"
     continue_on:
       output:
-        - command: "WARNING"
-        - command: "SKIP"
-        - command: "re:^\[WARN\]"        # Regex: lines starting with [WARN]
-        - command: "re:error.*ignored"   # Regex: error...ignored pattern
+        - "WARNING"
+        - "SKIP"
+        - "re:^\[WARN\]"        # Regex: lines starting with [WARN]
+        - "re:error.*ignored"   # Regex: error...ignored pattern
   - command: echo "Processing"
 ```
 

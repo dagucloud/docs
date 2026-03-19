@@ -65,6 +65,42 @@ Relative paths search in order:
 
 The first existing file wins; if none are found the run fails with a clear error.
 
+### `vault`
+
+Reads from Hashicorp Vault kv engine. Use this when secrets data is already being managed in a vault.
+
+As environment variables, Provide `DAGU_VAULT_ADDR` and `DAGU_VAULT_TOKEN` to dagu.
+
+or use `options`
+```yaml
+secrets:
+  - name: SLACK_TOKEN
+    provider: vault
+    key: kv/data/secrets/slack_token
+    options:
+      vault_address: https://vault.example.com
+      vault_token: hvs.DummyToken
+```
+
+Basic Usage
+```yaml
+secrets:
+  - name: SLACK_TOKEN
+    provider: vault
+    key: kv/data/secrets/slack_token # <- path is kv/data/secrets, field name is slack_token
+```
+if use vault kv v2, require `/data/` in key.
+
+Use the field option to override the default convention.
+```yaml
+secrets:
+  - name: SSH_PASSWORD
+    provider: vault
+    key: kv/data/secrets
+    options:
+      field: slack_token
+```
+
 ## Resolution workflow
 
 1. It parses the `secrets` block and validates required fields and duplicate names.

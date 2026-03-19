@@ -23,7 +23,7 @@ Click **Add Model** to configure an LLM provider. Each model has:
 | Field | Required | Description |
 |-------|----------|-------------|
 | Name | yes | Display name |
-| Provider | yes | `anthropic`, `openai`, `gemini`, `openrouter`, or `local` |
+| Provider | yes | `anthropic`, `openai`, `gemini`, `openrouter`, `zai`, or `local` |
 | Model | yes | Model identifier (e.g., `claude-sonnet-4-5`, `gpt-4o`) |
 | API Key | yes* | Provider API key. Not required for `local` provider. |
 | Base URL | no | Custom endpoint. Required for `local` provider (e.g., `http://localhost:11434/v1`). |

@@ -1,62 +1,13 @@
 # Error Handling
 
-Build resilient workflows with retries, handlers, and notifications.
+Use `continue_on`, handlers, and mail settings to control what happens after a step fails or a DAG finishes.
 
-## Retry Policies
+Automatic retries are documented in [Durable Execution](/writing-workflows/durable-execution). That page covers:
 
-### Basic Retry
-
-```yaml
-steps:
-  # Basic retry with fixed interval
-  - command: curl https://api.example.com
-    retry_policy:
-      limit: 3
-      interval_sec: 5
-      
-  # Retry specific errors
-  - command: make-request
-    retry_policy:
-      limit: 3
-      interval_sec: 30
-      exit_code: [429, 503]  # Rate limit or unavailable
-```
-
-### Exponential Backoff
-
-Increase retry intervals exponentially to avoid overwhelming failed services:
-
-```yaml
-steps:
-  # Exponential backoff with default multiplier (2.0)
-  - command: curl https://api.example.com/data
-    retry_policy:
-      limit: 5
-      interval_sec: 2
-      backoff: true        # true = 2.0 multiplier
-      # Intervals: 2s, 4s, 8s, 16s, 32s
-      
-  # Custom backoff multiplier
-  - command: echo "Checking service health"
-    retry_policy:
-      limit: 4
-      interval_sec: 1
-      backoff: 1.5         # Custom multiplier
-      # Intervals: 1s, 1.5s, 2.25s, 3.375s
-      
-  # Backoff with max interval cap
-  - command: echo "Syncing data"
-    retry_policy:
-      limit: 10
-      interval_sec: 1
-      backoff: 2.0
-      max_interval_sec: 30   # Cap at 30 seconds
-      # Intervals: 1s, 2s, 4s, 8s, 16s, 30s, 30s, 30s...
-```
-
-**Backoff Formula**: `interval * (backoff ^ attemptCount)`
-
-**Note**: Backoff values must be greater than 1.0 for exponential growth.
+- `steps[].retry_policy`
+- `defaults.retry_policy`
+- root `retry_policy`
+- scheduler requirements for DAG-level retry
 
 ## Continue On Conditions
 
@@ -79,10 +30,10 @@ steps:
   - command: validate.sh
     continue_on:
       output:
-        - command: "WARNING"
-        - command: "SKIP"
-        - command: "re:^INFO:.*"      # Regex pattern
-        - command: "re:WARN-[0-9]+"   # Another regex
+        - "WARNING"
+        - "SKIP"
+        - "re:^INFO:.*"      # Regex pattern
+        - "re:WARN-[0-9]+"   # Another regex
 
   # Mark as success when continuing
   - command: optimize.sh
@@ -99,8 +50,8 @@ steps:
   - command: echo "Running migration"
     continue_on:
       output:
-        - command: "re:WARNING:.*already exists"
-        - command: "re:NOTICE:.*will be created"
+        - "re:WARNING:.*already exists"
+        - "re:NOTICE:.*will be created"
       exit_code: [0, 1]
       
   # Service health check with fallback
@@ -119,8 +70,8 @@ steps:
     continue_on:
       exit_code: [0, 4, 8]  # 0=clean, 4=warnings, 8=info
       output:
-        - command: "re:LOW SEVERITY:"
-        - command: "re:INFORMATIONAL:"
+        - "re:LOW SEVERITY:"
+        - "re:INFORMATIONAL:"
 ```
 
 See the [Continue On Reference](/writing-workflows/continue-on) for complete documentation.

@@ -18,10 +18,17 @@ schedule: "0 * * * *"      # Optional: cron expression
 max_active_steps: 10         # Max parallel steps
 timeout_sec: 3600           # Workflow timeout (seconds)
 
-# Parameters
+# Parameters (`default` is literal; inline `eval` is optional)
 params:
-  - KEY: default_value
-  - ANOTHER_KEY: "${ENV_VAR}"
+  - name: environment
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
+  - name: batch_size
+    type: integer
+    default: 25
+    minimum: 1
+    maximum: 100
 
 # Environment variables
 env:
@@ -128,7 +135,36 @@ schedule:
 | `delay_sec` | integer | Initial delay before start (seconds) | `0` |
 | `max_clean_up_time_sec` | integer | Max cleanup time (seconds) | `5` |
 | `preconditions` | array | Workflow-level preconditions | - |
+| `retry_policy` | object | Scheduler-driven retry policy for the whole DAG | - |
 | `run_config` | object | User interaction controls when starting DAG | - |
+
+### DAG Retry Policy
+
+Root `retry_policy` is a DAG-level retry policy. It is different from step `retry_policy`.
+
+- It retries the whole DAG after a failed attempt.
+- It requires the scheduler.
+- It creates a new attempt under the same DAG-run ID.
+- It does not support `exit_code`.
+
+See [Durable Execution](/writing-workflows/durable-execution) for the full behavior, including scheduler polling and `scheduler.retry_failure_window`.
+
+#### DAG Retry Policy Fields
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `limit` | integer/string | Maximum number of scheduler-issued DAG retries. Must be positive. Numeric strings are accepted. | required |
+| `interval_sec` | integer/string | Base delay before retrying, in seconds. Must be positive. Numeric strings are accepted. | `60` |
+| `backoff` | boolean/number | `true` means `2.0`. A number greater than `1.0` is used as the multiplier. `false`, `0`, or omission keeps a fixed interval. | fixed interval |
+| `max_interval_sec` | integer | Maximum retry delay in seconds. Must be positive. | `3600` |
+
+```yaml
+retry_policy:
+  limit: 2
+  interval_sec: 60
+  backoff: true
+  max_interval_sec: 900
+```
 
 ### Step Defaults
 
@@ -205,7 +241,7 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `params` | array | Default parameters | `[]` |
+| `params` | string/array/object | Default DAG parameters. Supports positional strings, named params, inline rich definitions, and external schema mode. | `[]` |
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
@@ -215,6 +251,89 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 | `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
 | `hist_retention_days` | integer | History retention days | `30` |
 | `max_output_size` | integer | Max output size per step (bytes) | `1048576` |
+
+#### `params`
+
+Top-level DAG `params:` supports:
+
+- Positional strings such as `params: first second`
+- Named strings such as `params: ENV=dev PORT=8080`
+- Ordered lists of strings or single-key maps
+- Inline rich definitions in list form using objects with a required `name` field
+- External schema mode with `{ schema, values }`
+
+Literal `default` values stay inert. Inline rich definitions may also set `eval` to compute the effective default at execution time.
+
+Recommended authored form:
+
+```yaml
+params:
+  - name: region
+    type: string
+    default: us-east-1
+    enum: [us-east-1, us-west-2]
+    description: Deployment region
+  - name: instance_count
+    type: integer
+    default: 3
+    minimum: 1
+    maximum: 10
+  - name: debug
+    type: boolean
+    default: false
+```
+
+The older nested-map form such as `- region: { type: string }` is not accepted for rich definitions.
+
+Inline definition fields use `snake_case` in YAML:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `eval` | string | Expression evaluated at execution time for the effective default |
+| `default` | string/integer/number/boolean | Default value |
+| `description` | string | Help text |
+| `type` | string | `string`, `integer`, `number`, or `boolean` |
+| `required` | boolean | Requires runtime input when no default exists |
+| `enum` | array | Allowed values |
+| `minimum` / `maximum` | number | Numeric bounds |
+| `min_length` / `max_length` | integer | String length bounds |
+| `pattern` | string | RE2 regex for string validation |
+
+Inline types affect validation and typed UI controls. Runtime shell variables and `DAG_PARAMS_JSON` remain string-based.
+
+If both `eval` and `default` are present, `eval` wins at execution time and `default` becomes the literal fallback and display value.
+
+#### `params[].eval`
+
+`eval` is available on inline rich definitions:
+
+```yaml
+env:
+  - BASE_DIR: /srv/data
+
+params:
+  - name: output_dir
+    eval: "$BASE_DIR/out"
+    default: /tmp/out
+  - name: today
+    eval: "`date +%Y-%m-%d`"
+  - name: workers
+    type: integer
+    eval: "`nproc`"
+```
+
+Behavior:
+
+- `default` remains literal.
+- Runtime precedence is: override, then `eval`, then `default`.
+- DAG `env:` is evaluated first, then params are evaluated sequentially from top to bottom.
+- Later params can reference earlier params.
+- Inline typed eval results are coerced before validation.
+- If `eval` fails and `default` exists, Dagu falls back to `default`.
+- If `eval` fails and no `default` exists, the run fails before any step starts.
+- CLI, API, and sub-DAG runtime overrides are never evaluated.
+- Metadata-only loads skip `eval`.
+- External-schema-backed defaults are not evaluated.
 
 ### Container Configuration
 
@@ -616,8 +735,13 @@ run_config:
   disable_run_id_edit: false
 
 params:
-  - ENVIRONMENT: production  # Users cannot change this
-  - VERSION: 1.0.0           # This is fixed
+  - name: environment
+    type: string
+    default: production
+    description: Users cannot change this
+  - name: version
+    default: 1.0.0
+    description: Fixed release version
 ```
 
 This is useful when:
@@ -778,14 +902,18 @@ See the [Continue On Reference](/writing-workflows/continue-on) for detailed doc
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `limit` | integer | Maximum retry attempts | - |
-| `interval_sec` | integer | Base interval between retries (seconds) | - |
-| `backoff` | any | Exponential backoff multiplier. `true` = 2.0, or specify custom number > 1.0 | - |
-| `max_interval_sec` | integer | Maximum interval between retries (seconds) | - |
+| `limit` | integer/string | Maximum retry attempts after the first failure. Required when `retry_policy` is present. | required |
+| `interval_sec` | integer/string | Base interval between retries in seconds. Required when `retry_policy` is present. | required |
+| `backoff` | boolean/number | Exponential backoff multiplier. `true` = 2.0, or specify a number greater than 1.0. `false`, `0`, or omission keeps a fixed interval. | fixed interval |
+| `max_interval_sec` | integer | Maximum interval between retries in seconds. Applied only when greater than `0`. | uncapped |
 | `exit_code` | array | Exit codes that trigger retry | All non-zero |
 
 **Exponential Backoff**: When `backoff` is set, intervals increase exponentially using the formula:  
 `interval * (backoff ^ attemptCount)`
+
+String values for step `limit` and `interval_sec` are evaluated at runtime and must resolve to integers.
+
+Root `retry_policy` is different from this step-level `retry_policy`. See [DAG Retry Policy](#dag-retry-policy).
 
 #### Repeat Policy Fields
 
@@ -923,7 +1051,7 @@ steps:
 ```
 
 **LLM configuration fields:**
-- `provider`: LLM provider (`openai`, `anthropic`, `gemini`, `openrouter`, `local`)
+- `provider`: LLM provider (`openai`, `anthropic`, `gemini`, `openrouter`, `zai`, `local`)
 - `model`: Model identifier (e.g., `gpt-4o`, `claude-sonnet-4-20250514`)
 - `system`: Default system prompt (optional)
 - `temperature`: Randomness control 0.0-2.0 (optional)
@@ -1132,10 +1260,10 @@ timeout_sec: 7200
 hist_retention_days: 90
 
 params:
-  - DATE: "`date +%Y-%m-%d`"
   - ENVIRONMENT: production
 
 env:
+  - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /data/etl
   - LOG_LEVEL: info
   

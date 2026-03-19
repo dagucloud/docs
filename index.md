@@ -31,6 +31,7 @@ Credentials: `demouser` / `demouser`
 - **Composable** - Nest sub-workflows with parameters. [Control Flow](/writing-workflows/control-flow)
 - **Distributed** - Route tasks to workers via labels. [Distributed Execution](/server-admin/distributed/)
 - **AI Agent** - Built-in LLM-powered assistant with tools, memory, and configurable personalities. [AI Agent](/features/agent/)
+- **Slack & Telegram Bots** - Talk to the AI agent from Slack or Telegram. Debug issues, check logs, and recover from incidents through chat. [Bots](/features/bots/)
 - **Production-ready** - Retries, hooks, metrics, RBAC. [Error Handling](/writing-workflows/error-handling)
 
 ## Quick Start
@@ -99,6 +100,7 @@ Visit [http://localhost:8080](http://localhost:8080)
 | [**Step Types**](/step-types/shell) | Shell, Docker, SSH, HTTP, JQ, Mail, and more |
 | [**Observability**](/server-admin/opentelemetry) | Live logs, Gantt charts, [Prometheus metrics](/server-admin/prometheus-metrics), OpenTelemetry |
 | [**AI Agent**](/features/agent/) | Built-in LLM assistant with tool calling, persistent memory, and souls |
+| [**Slack & Telegram Bots**](/features/bots/) | Chat with the AI agent from Slack or Telegram to manage workflows |
 | [**Security**](/server-admin/authentication/) | Built-in RBAC (Pro) with admin, manager, operator, and viewer roles |
 
 ## Examples
@@ -158,7 +160,7 @@ See [Examples](/writing-workflows/examples) for more patterns.
 ## Use Cases
 
 - **CLI Orchestration** - Chain shell scripts, Docker containers, and remote commands into reliable workflows
-- **AI-Agent Workflows** - LLM-powered agents with tool calling, approval gates, and memory
+- **AI-Agent Workflows** - LLM-powered agents with tool calling, approval gates, and memory. Manage workflows from [Slack or Telegram](/features/bots/)
 - **Deployment Automation** - Multi-environment rollouts with approval gates
 - **Scheduled Operations** - Cron-based maintenance, backups, and reporting
 - **Legacy Migration** - Wrap existing scripts without rewriting them
@@ -173,7 +175,7 @@ See [Examples](/writing-workflows/examples) for more patterns.
     <p>What is Dagu and how it works</p>
   </div>
   <div class="step-card">
-    <h3><a href="/getting-started/">Getting Started</a></h3>
+    <h3><a href="/getting-started/quickstart">Getting Started</a></h3>
     <p>Installation and first workflow</p>
   </div>
   <div class="step-card">
@@ -187,6 +189,10 @@ See [Examples](/writing-workflows/examples) for more patterns.
   <div class="step-card">
     <h3><a href="/features/agent/">AI Agent</a></h3>
     <p>Chat, tools, memory, and souls</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/features/bots/">Slack & Telegram Bots</a></h3>
+    <p>Manage workflows through chat</p>
   </div>
   <div class="step-card">
     <h3><a href="/step-types/shell">Step Types</a></h3>

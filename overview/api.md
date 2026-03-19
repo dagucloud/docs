@@ -55,6 +55,10 @@ The API only supports server-side sorting by the `name` field. While the API acc
 curl http://localhost:8080/api/v1/dags/my-dag.yaml
 ```
 
+The DAG detail response includes `evalParams` and `paramDefs` when Dagu can derive parameter metadata. `evalParams` tells clients whether YAML-authored defaults are evaluated at runtime. `paramDefs` carries typed metadata for inline rich `params:` definitions and representable external schemas. For named params, clients should submit a JSON object payload; JSON arrays are mainly for positional or mixed raw input.
+
+When `evalParams` is `true`, `paramDefs.default` still represents the authored default template. Clients should treat dynamic defaults such as `${BASE_DIR}/out` or `` `nproc` `` as display metadata and let the server perform the actual evaluation.
+
 #### Create New DAG
 ```bash
 # Create with default template
@@ -118,6 +122,8 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/start \
   }'
 ```
 
+`params` remains a JSON string payload. The server validates and coerces its values against the DAG's inline param definitions or external parameter schema before execution.
+
 #### Enqueue DAG
 ```bash
 curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/enqueue \
@@ -128,6 +134,8 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/enqueue \
     "queue": "high-priority"  // optional: override queue
   }'
 ```
+
+The same validation rules apply to enqueue requests. Invalid typed values are rejected before the run is queued.
 
 #### Suspend/Resume DAG
 ```bash
