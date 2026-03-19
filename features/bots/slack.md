@@ -1,10 +1,10 @@
-# Slack Bot
+# Workflow Operator on Slack
 
-A Slack bot that maps each Slack channel to a Dagu AI agent session using [Socket Mode](https://api.slack.com/apis/socket-mode) (WebSocket-based, no public HTTP endpoint required). Messages sent in Slack are forwarded to the agent, and agent responses are posted back. When a DAG run completes, the bot can also send AI-generated notifications.
+Workflow Operator on Slack uses a Slack bot to map each Slack channel to a persistent Dagu AI agent session using [Socket Mode](https://api.slack.com/apis/socket-mode) (WebSocket-based, no public HTTP endpoint required). Messages sent in Slack are forwarded to the built-in AI agent, and agent responses are posted back. When a DAG run completes, Workflow Operator can also send AI-generated notifications so follow-up stays in the same conversation.
 
 ## Prerequisites
 
-Before setting up the bot, configure the AI agent in the Web UI. Go to **Agent Settings** (`/agent-settings`) and set your LLM provider and API key. The bot forwards messages to the built-in agent, so it must be configured first. See [Agent Overview](/features/agent/) for details.
+Before setting up Workflow Operator on Slack, configure the AI agent in the Web UI. Go to **Agent Settings** (`/agent-settings`) and set your LLM provider and API key. The Slack bot forwards messages to the built-in agent, so it must be configured first. See [Agent Overview](/features/agent/) for details.
 
 ## Creating a Slack App
 
@@ -113,7 +113,7 @@ The `C07ABC123DE` part is the channel ID.
 
 ## Running
 
-The Slack bot starts automatically when `bots.provider` is set to `slack` and you run either:
+The Slack connector for Workflow Operator starts automatically when `bots.provider` is set to `slack` and you run either:
 
 ```bash
 dagu server
@@ -125,11 +125,11 @@ or
 dagu start-all
 ```
 
-In both modes, the bot shares the server's agent API instance.
+In both modes, the connector shares the server's agent API instance.
 
 ## Configuration
 
-Set `provider: slack` under `bots` and configure the Slack-specific fields. Only one bot provider can be active at a time.
+Set `provider: slack` under `bots` and configure the Slack-specific fields. Only one connector can be active at a time.
 
 ```yaml
 bots:
@@ -148,8 +148,8 @@ bots:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `provider` | string | `""` (disabled) | Which bot to run. Set to `"slack"` for Slack. If empty, no bot starts. |
-| `safe_mode` | bool | `true` | Passed to the agent's `ChatRequest.SafeMode` field. Applies to all bots. |
+| `provider` | string | `""` (disabled) | Which connector to run. Set to `"slack"` for Slack. If empty, no bot starts. |
+| `safe_mode` | bool | `true` | Passed to the agent's `ChatRequest.SafeMode` field. Applies to all bot connectors. |
 
 ### `bots.slack` fields
 

@@ -107,7 +107,7 @@ const fullSidebar = [
     ],
   },
   {
-    text: "Bots",
+    text: "Workflow Operator",
     items: [
       { text: "Overview", link: "/features/bots/" },
       { text: "Telegram", link: "/features/bots/telegram" },

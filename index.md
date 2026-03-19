@@ -31,7 +31,7 @@ Credentials: `demouser` / `demouser`
 - **Composable** - Nest sub-workflows with parameters. [Control Flow](/writing-workflows/control-flow)
 - **Distributed** - Route tasks to workers via labels. [Distributed Execution](/server-admin/distributed/)
 - **AI Agent** - Built-in LLM-powered assistant with tools, memory, and configurable personalities. [AI Agent](/features/agent/)
-- **Slack & Telegram Bots** - Talk to the AI agent from Slack or Telegram. Debug issues, check logs, and recover from incidents through chat. [Bots](/features/bots/)
+- **Workflow Operator** - Persistent AI operator for Slack and Telegram. Monitor runs, debug failures, recover incidents, and continue follow-up in context. [Workflow Operator](/features/bots/)
 - **Production-ready** - Retries, hooks, metrics, RBAC. [Error Handling](/writing-workflows/error-handling)
 
 ## Quick Start
@@ -100,7 +100,7 @@ Visit [http://localhost:8080](http://localhost:8080)
 | [**Step Types**](/step-types/shell) | Shell, Docker, SSH, HTTP, JQ, Mail, and more |
 | [**Observability**](/server-admin/opentelemetry) | Live logs, Gantt charts, [Prometheus metrics](/server-admin/prometheus-metrics), OpenTelemetry |
 | [**AI Agent**](/features/agent/) | Built-in LLM assistant with tool calling, persistent memory, and souls |
-| [**Slack & Telegram Bots**](/features/bots/) | Chat with the AI agent from Slack or Telegram to manage workflows |
+| [**Workflow Operator**](/features/bots/) | Persistent AI operator for Slack and Telegram to manage workflows and incident follow-up |
 | [**Security**](/server-admin/authentication/) | Built-in RBAC (Pro) with admin, manager, operator, and viewer roles |
 
 ## Examples
@@ -160,7 +160,7 @@ See [Examples](/writing-workflows/examples) for more patterns.
 ## Use Cases
 
 - **CLI Orchestration** - Chain shell scripts, Docker containers, and remote commands into reliable workflows
-- **AI-Agent Workflows** - LLM-powered agents with tool calling, approval gates, and memory. Manage workflows from [Slack or Telegram](/features/bots/)
+- **AI-Agent Workflows** - LLM-powered agents with tool calling, approval gates, and memory. Manage workflows through [Workflow Operator](/features/bots/) in Slack or Telegram
 - **Deployment Automation** - Multi-environment rollouts with approval gates
 - **Scheduled Operations** - Cron-based maintenance, backups, and reporting
 - **Legacy Migration** - Wrap existing scripts without rewriting them
@@ -191,8 +191,8 @@ See [Examples](/writing-workflows/examples) for more patterns.
     <p>Chat, tools, memory, and souls</p>
   </div>
   <div class="step-card">
-    <h3><a href="/features/bots/">Slack & Telegram Bots</a></h3>
-    <p>Manage workflows through chat</p>
+    <h3><a href="/features/bots/">Workflow Operator</a></h3>
+    <p>Manage workflows from Slack or Telegram with persistent follow-up context</p>
   </div>
   <div class="step-card">
     <h3><a href="/step-types/shell">Step Types</a></h3>

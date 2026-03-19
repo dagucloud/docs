@@ -1,10 +1,10 @@
-# Telegram Bot
+# Workflow Operator on Telegram
 
-A Telegram bot that maps each Telegram chat to a Dagu AI agent session. Messages sent in Telegram are forwarded to the agent, and agent responses are sent back to Telegram. When a DAG run completes, the bot can also send AI-generated notifications.
+Workflow Operator on Telegram uses a Telegram bot to map each Telegram chat to a persistent Dagu AI agent session. Messages sent in Telegram are forwarded to the built-in AI agent, and agent responses are sent back to Telegram. When a DAG run completes, Workflow Operator can also send AI-generated notifications so follow-up stays in the same conversation.
 
 ## Prerequisites
 
-Before setting up the bot, configure the AI agent in the Web UI. Go to **Agent Settings** (`/agent-settings`) and set your LLM provider and API key. The bot forwards messages to the built-in agent, so it must be configured first. See [Agent Overview](/features/agent/) for details.
+Before setting up Workflow Operator on Telegram, configure the AI agent in the Web UI. Go to **Agent Settings** (`/agent-settings`) and set your LLM provider and API key. The Telegram bot forwards messages to the built-in agent, so it must be configured first. See [Agent Overview](/features/agent/) for details.
 
 ## Creating a Telegram Bot
 
@@ -29,7 +29,7 @@ Before configuring Dagu, you need to create a bot on Telegram and get its token.
 
 ## Running
 
-The Telegram bot starts automatically when `bots.provider` is set to `telegram` and you run either:
+The Telegram connector for Workflow Operator starts automatically when `bots.provider` is set to `telegram` and you run either:
 
 ```bash
 dagu server
@@ -41,11 +41,11 @@ or
 dagu start-all
 ```
 
-In both modes, the bot shares the server's agent API instance.
+In both modes, the connector shares the server's agent API instance.
 
 ## Configuration
 
-Set `provider: telegram` under `bots` and configure the Telegram-specific fields. Only one bot provider can be active at a time. Set these in the Dagu config file (`~/.config/dagu/config.yaml` or the path set by `DAGU_HOME`):
+Set `provider: telegram` under `bots` and configure the Telegram-specific fields. Only one connector can be active at a time. Set these in the Dagu config file (`~/.config/dagu/config.yaml` or the path set by `DAGU_HOME`):
 
 ```yaml
 bots:
@@ -62,8 +62,8 @@ bots:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `provider` | string | `""` (disabled) | Which bot to run. Set to `"telegram"` or `"slack"`. If empty, no bot starts. Only one provider can be active at a time. |
-| `safe_mode` | bool | `true` | Passed to the agent's `ChatRequest.SafeMode` field. Applies to all bots. |
+| `provider` | string | `""` (disabled) | Which connector to run. Set to `"telegram"` or `"slack"`. If empty, no bot starts. Only one provider can be active at a time. |
+| `safe_mode` | bool | `true` | Passed to the agent's `ChatRequest.SafeMode` field. Applies to all bot connectors. |
 
 ### `bots.telegram` fields
 

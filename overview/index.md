@@ -13,7 +13,7 @@ Dagu is a local-first workflow engine. It is declarative, file-based, self-conta
 - **Composable workflows** - Nest sub-DAGs with parameters (depth limited only by available memory)
 - **Distributed execution** - Route tasks to workers via labels (GPU, region, etc.)
 - **Built-in scheduling** - Cron expressions with start/stop/restart support
-- **Slack & Telegram bots** - Manage workflows and debug issues through chat
+- **Workflow Operator** - Manage workflows and debug issues from Slack or Telegram
 - **Web UI** - Monitor, control, and debug workflows in real-time
 
 ## AI Agent
@@ -42,29 +42,29 @@ steps:
 
 See [Agent Overview](/features/agent/) and [Agent Step](/features/agent/step) for full documentation.
 
-## Slack & Telegram Bots
+## Workflow Operator
 
-Talk to the AI agent directly from Slack or Telegram. The bot bridges your messaging platform with the built-in agent, so you can manage workflows without opening the Web UI.
+Workflow Operator is Dagu's persistent AI operator for Slack and Telegram. It uses a Slack or Telegram bot to bridge your messaging platform with the built-in AI agent, so you can manage workflows without opening the Web UI.
 
 - **Debug issues** - ask the agent to check logs and diagnose failures
 - **Recover from incidents** - re-run workflows with adjusted parameters through chat
 - **Get notified** - receive DAG run completion notifications with AI-generated summaries
 - **Approve actions** - respond to approval gates via interactive buttons in Slack or Telegram
 
-Each conversation maps to a persistent agent session. The bot supports safe mode with configurable bash command policies.
+Each conversation maps to a persistent agent session. The Slack or Telegram bot connector supports safe mode with configurable bash command policies.
 
 ```yaml
-# Enable Telegram bot
+# Enable Workflow Operator on Telegram
 bots:
   provider: telegram
-
-telegram:
-  token: ${TELEGRAM_BOT_TOKEN}
-  allowed_chats:
-    - 123456789
+  safe_mode: true
+  telegram:
+    token: ${TELEGRAM_BOT_TOKEN}
+    allowed_chat_ids:
+      - 123456789
 ```
 
-See [Bots](/features/bots/) for setup instructions.
+See [Workflow Operator](/features/bots/) for setup instructions.
 
 ## How It Works
 
@@ -175,6 +175,6 @@ See [Step Types Reference](/step-types/shell) for configuration details.
 - [Quick Start](/getting-started/quickstart) - Running in minutes
 - [Core Concepts](/getting-started/concepts) - Workflows, steps, and dependencies
 - [AI Agent](/features/agent/) - Built-in LLM agent for workflow management
-- [Slack & Telegram Bots](/features/bots/) - Manage workflows through chat
+- [Workflow Operator](/features/bots/) - Manage workflows from Slack or Telegram
 - [Architecture](/overview/architecture) - System internals and distributed execution
 - [Examples](/writing-workflows/examples) - Ready-to-use workflow patterns
