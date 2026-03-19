@@ -69,7 +69,7 @@ The first existing file wins; if none are found the run fails with a clear error
 
 Reads from Hashicorp Vault kv engine. Use this when secrets data is already being managed in a vault.
 
-As environment variables, Provide `VAULT_ADDR` and `VAULT_TOKEN` to dagu.
+As environment variables, Provide `DAGU_VAULT_ADDR` and `DAGU_VAULT_TOKEN` to dagu.
 
 or use `options`
 ```yaml
