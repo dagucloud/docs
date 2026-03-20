@@ -93,6 +93,8 @@ On first startup with builtin auth enabled and no users in the store:
 
 Set `initial_admin.username` and `initial_admin.password` in the config file or via `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` and `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` environment variables. The server creates the admin user at startup and is immediately ready — no browser interaction required.
 
+The guided script installers can collect these credentials for you during setup and verify that the first admin login works before they finish.
+
 ```yaml
 auth:
   mode: builtin

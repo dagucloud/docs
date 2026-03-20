@@ -4,33 +4,40 @@ Install Dagu on your system.
 
 ## Quick Install
 
+The script installers are the recommended path for most users, especially if you want Dagu set up for you. They open a guided wizard that can:
+
+- install Dagu
+- add it to your PATH
+- set it up as a background service
+- create and verify the first admin account
+- install the Dagu AI skill when a supported AI tool is detected
+
 ### macOS/Linux
 
 ```bash
-# Install to ~/.local/bin (default, no sudo required)
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
+# Open the guided installer with recommended defaults
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
 
-# Store temporary files outside /tmp (e.g., limited-size NAS)
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+# Store temporary files outside /tmp (for example, on a NAS with a small /tmp)
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
   bash -s -- --working-dir /volume1/tmp
 ```
 
-This detects your OS/architecture and installs to `~/.local/bin` by default. Provide
-`--working-dir` if `/tmp` is constrained on your system (for example, on some NAS devices).
+The wizard uses friendly defaults. On Linux it can also create a `systemd` service. On macOS it can install a LaunchAgent.
 
 ### Windows
 
 ::: code-group
 
 ```powershell [PowerShell]
-# Install latest version to default location (%LOCALAPPDATA%\Programs\dagu)
+# Open the guided installer with recommended defaults
 irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
 
 # Install specific version
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) v1.24.0
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) -Version vX.Y.Z
 
 # Install to custom directory
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) latest "C:\tools\dagu"
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) -Version latest -InstallDir "C:\tools\dagu"
 ```
 
 ```cmd [CMD/PowerShell]
@@ -38,25 +45,28 @@ REM Install latest version
 curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd && del installer.cmd
 
 REM Install specific version
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd v1.24.0 && del installer.cmd
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd -Version vX.Y.Z && del installer.cmd
 
 REM Install to custom directory
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd latest "C:\tools\dagu" && del installer.cmd
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd -Version latest -InstallDir "C:\tools\dagu" && del installer.cmd
 ```
 
 :::
 
-The installer downloads the appropriate binary and adds it to your PATH.
+The Windows wizard can also install Dagu as a Windows service using a version-pinned WinSW wrapper downloaded during setup.
+
+> The guided setup flow is only available from the script installers. Homebrew, npm, Docker, Helm, and manual downloads install Dagu without the wizard, service setup, first-admin bootstrap, or AI skill prompts.
 
 ::: tip Running as a Windows Service
-If you plan to run Dagu as a Windows service, you should install it to `Program Files` which requires administrator privileges. Download the installer script and run it as Administrator:
+If you plan to run Dagu as a Windows service, the installer will prompt to elevate automatically. For non-interactive setups, start PowerShell as Administrator and run:
 
 ```powershell
-# Download the installer
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1" -OutFile "installer.ps1"
-
-# Right-click PowerShell → "Run as Administrator", then:
-.\installer.ps1 latest "C:\Program Files\dagu"
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) `
+  -Version latest `
+  -Service yes `
+  -InstallDir "C:\Program Files\Dagu" `
+  -AdminUsername admin `
+  -AdminPassword "change-me-now"
 ```
 :::
 
@@ -86,7 +96,7 @@ This installs Dagu globally with automatic platform detection.
 ### Homebrew
 
 ```bash
-brew update && brew install dagu
+brew install dagu
 ```
 
 ### Manual Download
@@ -99,24 +109,152 @@ Download from [GitHub Releases](https://github.com/dagu-org/dagu/releases).
 
 ```bash
 # Install to custom location
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
   bash -s -- --install-dir ~/bin
 
 # Install to system-wide location (requires sudo)
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
   bash -s -- --install-dir /usr/local/bin
 
 # Install specific version
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
-  bash -s -- --version v1.17.0
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --version vX.Y.Z
 
 # Combine options
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
-  bash -s -- --version v1.17.0 --install-dir ~/bin
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --version vX.Y.Z --install-dir ~/bin
 
 # Use a custom working directory for temporary files
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
   bash -s -- --working-dir /volume1/tmp
+```
+
+### Service Setup Examples
+
+```bash
+# Linux/macOS: install, start a background service, and create the first admin
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --service yes --admin-username admin --admin-password 'change-me-now'
+
+# Linux: force a system service and install to /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --service yes --service-scope system --install-dir /usr/local/bin \
+    --admin-username admin --admin-password 'change-me-now'
+```
+
+```powershell
+# Windows: install as a service and create the first admin
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) `
+  -Service yes `
+  -AdminUsername admin `
+  -AdminPassword "change-me-now"
+```
+
+### Non-Interactive / CI
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --dry-run --no-prompt --version latest
+```
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) `
+  -DryRun -NoPrompt -Version latest
+```
+
+## Uninstall
+
+The script installers also support uninstall. In interactive mode, the wizard can now start in either install/repair or uninstall mode.
+
+By default, uninstall removes:
+
+- the `dagu` binary
+- the installer-managed background service
+- installer-managed PATH changes
+
+By default, uninstall keeps:
+
+- the Dagu data directory
+- workflow data and logs
+- the Dagu AI skill
+
+Use the extra flags only when you want a deeper cleanup.
+
+### macOS/Linux
+
+```bash
+# Remove Dagu, its background service, and the installer PATH block
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --uninstall
+
+# Also delete the detected Dagu data directory
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --uninstall --purge-data
+
+# Also remove Dagu AI skill installs
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --uninstall --remove-skill
+```
+
+Linux examples:
+
+```bash
+# Uninstall only the user-scoped Linux service and matching install
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --uninstall --service-scope user
+
+# Uninstall a custom install directory non-interactively
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+  bash -s -- --uninstall --install-dir /usr/local/bin --no-prompt
+```
+
+### Windows
+
+```powershell
+# Remove Dagu, its Windows service, and PATH entry
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) `
+  -Uninstall
+
+# Also delete the detected Dagu data directory
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) `
+  -Uninstall -PurgeData
+
+# Also remove Dagu AI skill installs
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) `
+  -Uninstall -RemoveSkill
+```
+
+```cmd
+REM Remove Dagu with the CMD launcher
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd -Uninstall && del installer.cmd
+```
+
+Notes:
+
+- Non-interactive uninstall keeps data and AI skills unless you add `--purge-data` / `-PurgeData` or `--remove-skill` / `-RemoveSkill`.
+- If more than one Dagu install is detected, non-interactive uninstall requires `--install-dir` or `-InstallDir`.
+- On Windows, the installer prompts to elevate automatically when uninstall needs Administrator rights.
+
+### Dagu AI Skill
+
+If you installed Dagu with Homebrew, npm, or a manual download and use an AI coding tool, run this after `dagu` is available on your PATH. When the wizard detects a supported AI tool, it offers to install the same Dagu skill automatically.
+
+You can install or rerun it later with:
+
+```bash
+dagu ai install --yes
+```
+
+To install into an explicit skills directory:
+
+```bash
+dagu ai install --skills-dir ~/.agents/skills
+```
+
+Or use the shared installer as a fallback:
+
+```bash
+npx skills add https://github.com/dagu-org/dagu --skill dagu
 ```
 
 ### Docker Compose

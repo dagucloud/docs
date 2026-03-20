@@ -8,21 +8,21 @@ Get up and running with Dagu in under 2 minutes.
 
 ```bash [macOS/Linux]
 # Install to ~/.local/bin (default, no sudo required)
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
 
 # Install specific version
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash -s -- --version v1.17.0
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash -s -- --version vX.Y.Z
 
 # Install to custom directory
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash -s -- --install-dir /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash -s -- --install-dir /usr/local/bin
 ```
 
 ```powershell [Windows]
-# Install latest version to default location (%LOCALAPPDATA%\Programs\dagu)
+# Open the guided installer with recommended defaults
 irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
 
 # Install specific version
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) v1.24.0
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1))) -Version vX.Y.Z
 ```
 
 ```bash [Docker]
@@ -30,7 +30,7 @@ docker pull ghcr.io/dagu-org/dagu:latest
 ```
 
 ```bash [Homebrew]
-brew update && brew install dagu
+brew install dagu
 ```
 
 ```bash [npm]
@@ -39,27 +39,31 @@ npm install -g --ignore-scripts=false @dagu-org/dagu
 
 :::
 
+The script installers open a guided wizard. They can install Dagu, add it to your PATH, set it up as a background service, create the first admin account, and install the Dagu AI skill when a supported AI tool is detected. Homebrew, npm, and Docker remain available, but they do not include the guided setup flow.
+
 See [Installation Guide](/getting-started/installation) for more options.
 
 ## AI-Assisted Workflow Authoring
 
 If you use an AI coding tool (Claude Code, Codex, OpenCode, Gemini CLI, or Copilot CLI), install the Dagu skill so the AI knows how to write correct DAG YAML files.
 
+If you installed Dagu with Homebrew, npm, or a manual binary download, run this after `dagu` is available on your PATH. The guided installer can offer the same step automatically.
+
 Use Dagu's built-in installer:
 
 ```bash
-dagu ai install --skills-dir ~/.agents/skills
+dagu ai install --yes
 ```
 
-Or use the shared `skills` CLI:
+Fallback via the shared `skills` CLI:
 
 ```bash
 npx skills add https://github.com/dagu-org/dagu --skill dagu
 ```
 
-After installation, your AI coding tool can generate, edit, and debug Dagu DAG definitions with knowledge of the full YAML schema, all 18+ executor types, CLI commands, and common pitfalls.
+For explicit skills directories, see the [Installation Guide](/getting-started/installation) and [CLI Commands](/getting-started/cli#ai).
 
-See [CLI Commands](/getting-started/cli#ai) for more details.
+After installation, your AI coding tool can generate, edit, and debug Dagu DAG definitions with knowledge of the full YAML schema, all 18+ executor types, CLI commands, environment variables, and common pitfalls.
 
 ## Your First Workflow
 

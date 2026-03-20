@@ -270,7 +270,7 @@ export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
 export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
 ```
 
-When `initial_admin` is configured and no users exist, the server creates the admin at startup and skips the setup page. When `initial_admin` is not configured, visit the web UI on first startup to create your admin account via the setup page.
+When `initial_admin` is configured and no users exist, the server creates the admin at startup and skips the setup page. The guided script installers can populate these settings for you during setup. When `initial_admin` is not configured, visit the web UI on first startup to create your admin account via the setup page.
 
 See [Builtin Authentication](authentication/builtin) for detailed setup.
 

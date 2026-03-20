@@ -8,11 +8,13 @@ Requires `auth.mode: builtin` (default).
 
 ## Initial Setup
 
-On first launch with builtin auth and no existing users, an admin account must be created. There are three ways to do this:
+On first launch with builtin auth and no existing users, an admin account must be created. There are four ways to do this:
+
+**Via the guided installer** — the script installers can collect the first admin credentials for you and use the same bootstrap flow as `initial_admin`.
 
 **Via config or environment variables** — set `initial_admin` in the config file or `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` / `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` environment variables. The server creates the admin at startup. See [Builtin Authentication](./builtin#initial-setup) for details.
 
-**Via the setup page** — the web UI redirects to `/setup` automatically.
+**Via the setup page** — the web UI redirects to `/setup` automatically for manual installs that do not configure `initial_admin`.
 
 **Via API** — call the setup endpoint directly:
 

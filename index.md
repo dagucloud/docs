@@ -41,7 +41,7 @@ Credentials: `demouser` / `demouser`
 ::: code-group
 
 ```bash [macOS/Linux]
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
 ```
 
 ```powershell [Windows (PowerShell)]
@@ -65,6 +65,8 @@ npm install -g --ignore-scripts=false @dagu-org/dagu
 ```
 
 :::
+
+The script installers open a guided wizard that can install Dagu, add it to your PATH, set up a background service, create the first admin, and offer Dagu AI skill installation. Homebrew, npm, Docker, and manual downloads remain available, but they do not include the guided setup flow. See the [Installation Guide](/getting-started/installation) for details.
 
 ### Create a Workflow
 
