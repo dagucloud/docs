@@ -22,8 +22,7 @@ steps:
 | `silent` | Return body only (suppress status/headers on success) | `true` |
 | `debug` | Enable debug mode (logs request/response details) | `true` |
 | `format` | Response output format. `"json"` for structured output (status code, headers, body). | `"json"` |
-| `json` | Legacy boolean alias for `format: "json"`. Either field works. | `true` |
-| `tls_skip_verify` | Skip TLS certificate verification | `true` |
+| `skip_tls_verify` | Skip TLS certificate verification | `true` |
 
 ## Examples
 
@@ -111,6 +110,15 @@ steps:
 The legacy `json: true` boolean is still supported and behaves identically to `format: "json"`.
 
 Output format:
+
+```json
+{
+  "body": {"key": "value"}
+}
+```
+
+Without `silent` (or `silent: false`), the output also includes status code and headers:
+
 ```json
 {
   "status_code": 200,
@@ -165,7 +173,7 @@ steps:
   - id: internal_api
     type: http
     config:
-      tls_skip_verify: true  # Allow self-signed certificates
+      skip_tls_verify: true  # Allow self-signed certificates
       headers:
         Authorization: "Bearer ${INTERNAL_TOKEN}"
     command: GET https://internal-api.company.local/data
