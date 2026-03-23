@@ -82,8 +82,9 @@ auth:
     issuer: "https://accounts.google.com"
     scopes: ["openid", "profile", "email"]
     # Builtin-specific settings (only when mode=builtin)
-    auto_signup: false        # Auto-create users on first login
-    default_role: "viewer"    # Role for new users
+    auto_signup: true         # Auto-create users on first login
+    role_mapping:
+      default_role: "viewer"  # Role for new users
     allowed_domains: []       # Restrict by email domain
     button_label: "Login with SSO"
 
@@ -277,7 +278,7 @@ OIDC settings (used under builtin auth mode, auto-enabled when all required fiel
 - `DAGU_AUTH_OIDC_WHITELIST` - Email addresses allowed to authenticate (comma-separated)
 
 Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
-- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `false`)
+- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `true`)
 - `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
 - `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Email domains allowed to authenticate (comma-separated)
 - `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text (default: `Login with SSO`)

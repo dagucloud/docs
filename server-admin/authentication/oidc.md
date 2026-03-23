@@ -1,17 +1,17 @@
-# OIDC Authentication (Pro)
+# OIDC Authentication
 
-::: info Pro License
-OIDC/SSO login requires a [Dagu Pro license](https://dagu.sh/pricing).
+::: info Deployment Model
+This page covers OIDC/SSO setup for self-hosted Dagu. On self-hosted Dagu, OIDC/SSO login requires an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes authentication features by default, so you do not configure OIDC through `config.yaml` there.
 :::
 
-OpenID Connect (OIDC) authentication for Dagu using OAuth2.
+OpenID Connect (OIDC) is configured under builtin auth mode.
 
-## Recommended: Builtin + OIDC Mode (Pro)
+## Recommended: Builtin + OIDC
 
-For most use cases, we recommend using **builtin auth mode with OIDC enabled** instead of standalone OIDC mode. This gives you:
+For most self-hosted deployments, enable OIDC under builtin auth. This gives you:
 
-- SSO/OIDC login convenience
-- Dagu's user management and RBAC
+- SSO/OIDC login
+- Dagu user management and role-based access
 - API key management
 - Role mapping from IdP groups
 - Auto-signup for new users (enabled by default)
@@ -23,140 +23,57 @@ auth:
     token:
       secret: your-jwt-secret
   oidc:
-    # OIDC is auto-enabled when all required fields are set
     client_id: your-client-id
     client_secret: your-client-secret
     client_url: https://dagu.example.com
     issuer: https://accounts.google.com
-    # auto_signup defaults to true
+    scopes: ["openid", "profile", "email"]
+    auto_signup: true
     role_mapping:
       default_role: viewer
 ```
 
-See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for full documentation.
-
-## Standalone OIDC Mode
-
-> **Removed**: Standalone OIDC mode (`auth.mode: oidc`) has been removed. The valid auth modes are `none`, `basic`, and `builtin`. Use [Builtin + OIDC mode](/server-admin/authentication/builtin#oidcsso-login) instead, which provides the same SSO functionality with added user management and RBAC.
-
-Standalone OIDC mode was previously available for simple setups where you didn't need Dagu's user management features.
-
-**Important**: All authenticated OIDC users are granted **admin role** with full access. There is no role-based access control in this mode. Use [Builtin + OIDC mode](/server-admin/authentication/builtin#oidcsso-login) if you need RBAC.
-
-### Limitations
-
-Standalone OIDC mode has the following limitations compared to [Builtin + OIDC mode](/server-admin/authentication/builtin#oidcsso-login):
-
-| Feature | Standalone OIDC | Builtin + OIDC |
-|---------|-----------------|----------------|
-| Role-based access control | No (all users are admin) | Yes (4 roles) |
-| User management | No | Yes |
-| Role mapping from IdP | No | Yes |
-| API key management | No | Yes |
-| Domain-based filtering | No | Yes |
-| Configurable session TTL | No (24h fixed) | Yes |
-
-## Configuration
-
-### YAML Configuration
-
-```yaml
-# ~/.config/dagu/config.yaml
-auth:
-  mode: oidc  # Standalone OIDC mode
-  oidc:
-    client_id: "your-client-id"
-    client_secret: "your-client-secret"
-    client_url: "http://localhost:8080"
-    issuer: "https://accounts.google.com"
-    scopes:
-      - "openid"
-      - "profile"
-      - "email"
-    whitelist:
-      - "admin@example.com"
-      - "team@example.com"
-```
-
-### Environment Variables
-
 ```bash
-export DAGU_AUTH_MODE=oidc
-export DAGU_AUTH_OIDC_CLIENT_ID="your-client-id"
-export DAGU_AUTH_OIDC_CLIENT_SECRET="your-client-secret"
-export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
-export DAGU_AUTH_OIDC_ISSUER="https://accounts.google.com"
-export DAGU_AUTH_OIDC_SCOPES="openid,profile,email"
-export DAGU_AUTH_OIDC_WHITELIST="admin@example.com,team@example.com"
+export DAGU_AUTH_MODE=builtin
+export DAGU_AUTH_TOKEN_SECRET=your-jwt-secret
+export DAGU_AUTH_OIDC_CLIENT_ID=your-client-id
+export DAGU_AUTH_OIDC_CLIENT_SECRET=your-client-secret
+export DAGU_AUTH_OIDC_CLIENT_URL=https://dagu.example.com
+export DAGU_AUTH_OIDC_ISSUER=https://accounts.google.com
+export DAGU_AUTH_OIDC_SCOPES=openid,profile,email
 
 dagu start-all
 ```
 
-## Configuration Fields
+OIDC is automatically enabled when the required fields (`client_id`, `client_secret`, `client_url`, `issuer`) are configured. No separate `enabled` flag is needed.
 
-- **client_id**: OAuth2 client ID from your OIDC provider (required)
-- **client_secret**: OAuth2 client secret (required)
-- **client_url**: Base URL of your Dagu instance, used for callback (required)
-- **issuer**: OIDC provider URL (required)
-- **scopes**: OAuth2 scopes to request (default: `["openid", "profile", "email"]`)
-- **whitelist**: Email addresses allowed to authenticate (optional)
-
-OIDC is automatically enabled when client_id, client_secret, and issuer are provided.
+See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for advanced settings such as `allowed_domains`, `whitelist`, and IdP role mapping.
 
 ## Callback URL
 
-The OIDC callback URL is automatically configured as:
-```
+Register this callback URL with your provider:
+
+```txt
 {client_url}/oidc-callback
 ```
 
-For example, if `client_url` is `http://localhost:8080`, the callback URL is:
+For example:
+
+```txt
+https://dagu.example.com/oidc-callback
 ```
-http://localhost:8080/oidc-callback
-```
-
-Register this callback URL with your OIDC provider.
-
-## How It Works
-
-1. User accesses Dagu web interface
-2. If not authenticated, redirected to OIDC provider
-3. User logs in with provider
-4. Provider redirects back to Dagu callback URL
-5. Dagu validates the token and creates a session
-6. Session stored in secure cookie (24 hour validity)
-
-## Email Whitelist
-
-Restrict access to specific email addresses:
-
-```yaml
-auth:
-  oidc:
-    # ... other config ...
-    whitelist:
-      - "admin@company.com"
-      - "team@company.com"
-      - "user1@company.com"
-```
-
-Or use comma-separated format (useful for environment variables):
-
-```bash
-export DAGU_AUTH_OIDC_WHITELIST="admin@company.com,team@company.com"
-```
-
-**Important:** When whitelist is set, only emails in the whitelist are allowed. If whitelist is empty or not specified, all authenticated users are allowed.
-
-Note: Wildcard domains (e.g., `*@company.com`) are NOT supported. You must list each email address explicitly.
 
 ## Common OIDC Providers
 
-- [Google](oidc-google) - Google Workspace/Cloud Identity
-- [Auth0](oidc-auth0) - Identity platform with social login support
+- [Google](oidc-google) - Google Workspace / Cloud Identity
+- [Auth0](oidc-auth0) - Hosted identity platform
 - [Keycloak](oidc-keycloak) - Open source identity provider
 
-## Migrating from Standalone OIDC
+## Removed: Standalone OIDC Mode
+
+> Standalone OIDC mode (`auth.mode: oidc`) has been removed. Use builtin + OIDC instead.
+
+## Migrating from Older Configs
 
 If you previously used `auth.mode: oidc`, migrate to builtin + OIDC:
 
@@ -165,30 +82,22 @@ auth:
   mode: builtin
   builtin:
     token:
-      secret: your-jwt-secret  # auto-generated if not set
+      secret: your-jwt-secret
   oidc:
-    client_id: "your-client-id"
-    client_secret: "your-client-secret"
-    client_url: "https://dagu.example.com"
-    issuer: "https://auth.example.com"
+    client_id: your-client-id
+    client_secret: your-client-secret
+    client_url: https://dagu.example.com
+    issuer: https://auth.example.com
     auto_signup: true
     role_mapping:
       default_role: viewer
 ```
 
-This gives you SSO login with full user management, RBAC, and API key support.
-
-## Session Management
-
-- Sessions stored in secure HTTP-only cookies
-- 24 hour session duration (fixed, not configurable)
-- No refresh token support - users must re-authenticate after 24 hours
-- No logout endpoint (close browser to end session)
-- Original URL preserved through authentication flow
+This preserves SSO login while adding Dagu's user management, role-based access, and API key support.
 
 ## Notes
 
-- HTTPS recommended in production for secure cookies
-- Provider must support OpenID Connect Discovery
-- Minimum required scopes: openid, profile, email
-- State and nonce parameters used for security
+- HTTPS is recommended in production for secure cookies
+- The provider must support OpenID Connect Discovery
+- Minimum required scopes are `openid`, `profile`, and `email`
+- State and nonce parameters are used to protect the login flow

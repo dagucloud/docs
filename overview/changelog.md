@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.3.4 (2026-03-23)
+
+## Fixed
+
+- fix(config): preserve implicit local timezone behavior ([#1831](https://github.com/dagu-org/dagu/pull/1831)) [@yottahmd](https://github.com/yottahmd)
+- fix: initialize compacted session loop immediately ([#1832](https://github.com/dagu-org/dagu/pull/1832)) [@yottahmd](https://github.com/yottahmd)
+- fix: reject unknown named DAG start parameters ([#1834](https://github.com/dagu-org/dagu/pull/1834)) [@yottahmd](https://github.com/yottahmd)
+
 ## v2.3.3 (2026-03-22)
 
 ### Added

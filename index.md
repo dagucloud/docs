@@ -103,7 +103,7 @@ Visit [http://localhost:8080](http://localhost:8080)
 | [**Observability**](/server-admin/opentelemetry) | Live logs, Gantt charts, [Prometheus metrics](/server-admin/prometheus-metrics), OpenTelemetry |
 | [**AI Agent**](/features/agent/) | Built-in LLM assistant with tool calling, persistent memory, and souls |
 | [**Workflow Operator**](/features/bots/) | Persistent AI operator for Slack and Telegram to manage workflows and incident follow-up |
-| [**Security**](/server-admin/authentication/) | Built-in RBAC (Pro) with admin, manager, operator, and viewer roles |
+| [**Security**](/server-admin/authentication/) | Builtin auth, API keys, OIDC, audit logging, and role-based access guidance |
 
 ## Examples
 

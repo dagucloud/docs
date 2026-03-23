@@ -2,6 +2,10 @@
 
 Configure Dagu with Auth0 as OIDC provider.
 
+::: info Deployment Model
+This guide applies to self-hosted Dagu using builtin auth + OIDC. Hosted Dagu Cloud includes authentication features by default, so you do not configure Auth0 through `config.yaml` there.
+:::
+
 ## Prerequisites
 
 - Auth0 account (free tier works)
@@ -49,6 +53,10 @@ Configure Dagu with Auth0 as OIDC provider.
 ```yaml
 # ~/.config/dagu/config.yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     client_id: "your-auth0-client-id"
     client_secret: "your-auth0-client-secret"
@@ -63,6 +71,8 @@ auth:
 #### Environment Variables
 
 ```bash
+export DAGU_AUTH_MODE=builtin
+export DAGU_AUTH_TOKEN_SECRET="replace-with-a-random-jwt-secret"
 export DAGU_AUTH_OIDC_CLIENT_ID="your-auth0-client-id"
 export DAGU_AUTH_OIDC_CLIENT_SECRET="your-auth0-client-secret"
 export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
@@ -88,6 +98,10 @@ Restrict access to specific users:
 
 ```yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     # ... auth0 config ...
     whitelist:
@@ -103,6 +117,10 @@ If using Auth0 custom domain:
 
 ```yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     issuer: "https://auth.yourdomain.com/"
     # ... rest of config
@@ -114,6 +132,10 @@ Standard OIDC scopes used by Dagu:
 
 ```yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     scopes:
       - "openid"

@@ -2,6 +2,10 @@
 
 Configure Dagu with Google as OIDC provider.
 
+::: info Deployment Model
+This guide applies to self-hosted Dagu using builtin auth + OIDC. Hosted Dagu Cloud includes authentication features by default, so you do not configure Google OIDC through `config.yaml` there.
+:::
+
 ## Prerequisites
 
 - Google Cloud account or Google Workspace
@@ -36,6 +40,10 @@ Configure Dagu with Google as OIDC provider.
 ```yaml
 # ~/.config/dagu/config.yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     client_id: "123456789012-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com"
     client_secret: "GOCSPX-1234567890abcdefghijklmno"
@@ -50,6 +58,8 @@ auth:
 #### Environment Variables
 
 ```bash
+export DAGU_AUTH_MODE=builtin
+export DAGU_AUTH_TOKEN_SECRET="replace-with-a-random-jwt-secret"
 export DAGU_AUTH_OIDC_CLIENT_ID="123456789012-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com"
 export DAGU_AUTH_OIDC_CLIENT_SECRET="GOCSPX-1234567890abcdefghijklmno"
 export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
@@ -67,6 +77,10 @@ For Google Workspace domains:
 
 ```yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     client_id: "your-client-id"
     client_secret: "your-secret"
@@ -78,6 +92,10 @@ auth:
 
 ```yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     # ... google config ...
     whitelist:
@@ -91,6 +109,10 @@ auth:
 ```yaml
 # Production with HTTPS
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     client_id: "your-production-client-id"
     client_secret: "your-production-secret"
@@ -110,13 +132,11 @@ tls:
    dagu start-all
    ```
 
-2. Open browser to http://localhost:8080
+2. Open browser to http://localhost:8080/login
 
-3. You should be redirected to Google login
+3. Click **Login with SSO**
 
-4. After login, redirected back to Dagu
-
-5. Check browser developer tools for cookie named `oidc-token`
+4. After login, you should be redirected back to Dagu as an authenticated user
 
 ## Notes
 

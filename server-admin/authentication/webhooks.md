@@ -218,7 +218,7 @@ The token prefix (first 12 characters including `dagu_wh_`) is stored and displa
 |---------|----------|----------|
 | Scope | Single DAG | All API endpoints |
 | Purpose | Trigger DAG execution | General API access |
-| Role Support | No (execute only) | Yes (admin, manager, operator, viewer) |
+| Role Support | No (execute only) | Yes (admin, manager, developer, operator, viewer) |
 | Multiple per DAG | No (one per DAG) | Yes (unlimited) |
 | Payload Support | Yes (WEBHOOK_PAYLOAD) | Via request body |
 | Best For | External integrations | Automation scripts, CI/CD |

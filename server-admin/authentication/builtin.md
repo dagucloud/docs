@@ -1,18 +1,20 @@
 # Builtin Authentication
 
-Builtin authentication provides user management with role-based access control (RBAC) using JWT tokens.
+Builtin authentication is the recommended authentication mode for self-hosted Dagu. It provides JWT-based login, admin bootstrap, password management, API keys, and the role-based access model used by self-hosted Dagu.
 
-::: info Pro License
-User management and RBAC require a [Dagu Pro license](https://dagu.sh/pricing).
+::: info Deployment Model
+This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users and enabling OIDC/SSO login require an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes those features by default.
 :::
 
 ## Features
 
-- **User Management (Pro)**: Create, update, and delete users through the web UI
-- **Role-Based Access Control (Pro)**: Five roles with different permission levels
 - **JWT Authentication**: Secure token-based authentication
+- **Initial Admin Bootstrap**: Create the first admin through config, environment variables, or the setup page
 - **Password Management**: Users can change their own passwords; admins can reset any user's password
 - **API Key Management**: Create and manage API keys for programmatic access with role-based permissions
+- **User Management**: List and inspect users, reset passwords, and, with an active self-host license, create, update, disable, and delete users through the web UI and API
+- **Role-Based Access Control**: Five roles with different permission levels
+- **OIDC/SSO Integration**: Add enterprise identity providers under builtin auth
 
 ## Roles
 
@@ -282,9 +284,11 @@ curl -H "Authorization: Bearer dagu_your-api-key-here" \
 
 For detailed documentation, see [API Keys](api-keys).
 
-## OIDC/SSO Login (Pro)
+## OIDC/SSO Login
 
-Builtin authentication supports OIDC/SSO login, allowing users to authenticate via enterprise identity providers (Google, Okta, Auth0, Keycloak, etc.) while maintaining Dagu's user management and RBAC system.
+On self-hosted Dagu, builtin + OIDC requires an active self-host license. Hosted Dagu Cloud includes authentication features by default.
+
+Builtin authentication supports OIDC/SSO login, allowing users to authenticate via enterprise identity providers (Google, Okta, Auth0, Keycloak, and others) while maintaining Dagu's user management and RBAC system.
 
 ### Enabling OIDC
 
@@ -427,7 +431,7 @@ role_mapping:
 2. Redirected to OIDC provider for authentication
 3. After successful authentication, Dagu validates the token
 4. If `auto_signup` is enabled and user doesn't exist, a new user is created
-5. Role is determined by `role_mapping` (if configured) or `default_role`
+5. Role is determined by `role_mapping` (if configured) or `role_mapping.default_role`
 6. User receives a JWT token for the Dagu session
 
 ### Notes
@@ -439,15 +443,14 @@ role_mapping:
 
 ## Comparison with Other Auth Methods
 
-| Feature | Basic Auth | Token Auth | OIDC (standalone) | Builtin (Recommended) |
-|---------|------------|------------|-------------------|----------------------|
-| User Management | No | No | No | Yes |
-| Role-Based Access | No | No | No | Yes |
-| Password Change | No | No | No | Yes |
-| Multiple Users | No | No | Yes | Yes |
-| API Key Management | No | No | No | Yes |
-| SSO/OIDC Login | No | No | Yes | Yes |
-| Role Mapping from IdP | No | No | No | Yes |
-| Self-Hosted | Yes | Yes | Yes | Yes |
+| Feature | Basic Auth | Builtin | Builtin + OIDC |
+|---------|------------|---------|----------------|
+| Multiple Users | No | Yes | Yes |
+| Role-Based Access | No | Yes | Yes |
+| Password Change | No | Yes | Yes |
+| API Key Management | No | Yes | Yes |
+| SSO/OIDC Login | No | No | Yes |
+| Role Mapping from IdP | No | No | Yes |
+| Self-Hosted | Yes | Yes | Yes |
 
-Builtin mode (`auth.mode: builtin`) is suitable for production deployments that require user management and RBAC. Enable OIDC under builtin mode for SSO while retaining full user management capabilities.
+Builtin mode (`auth.mode: builtin`) is the recommended authentication mode for self-hosted Dagu. Add OIDC under builtin mode when you want self-hosted SSO while retaining Dagu's user management and API key capabilities.

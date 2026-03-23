@@ -2,6 +2,10 @@
 
 Deploy, configure, and operate Dagu.
 
+::: info Deployment Model
+These pages primarily document self-hosted Dagu. Hosted Dagu Cloud includes managed authentication, audit logging, and related platform features by default, so those capabilities usually do not need manual `config.yaml` setup there.
+:::
+
 ## Configuration Methods
 
 Precedence order:

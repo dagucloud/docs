@@ -1,7 +1,7 @@
-# User Management (Pro)
+# User Management
 
-::: info Pro License
-Creating, updating, and deleting users requires a [Dagu Pro license](https://dagu.sh/pricing). Listing users, viewing user details, and password operations work without a license.
+::: info Deployment Model
+This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users requires an active [self-host license](https://dagu.sh/pricing). Listing users, viewing user details, and password operations work with builtin auth. Hosted Dagu Cloud includes user management by default.
 :::
 
 Requires `auth.mode: builtin` (default).
@@ -69,7 +69,7 @@ Fields returned by the API:
 
 ## API
 
-All endpoints require admin role. Pro-gated endpoints return `403` with message `"User management requires a Dagu Pro license"` when unlicensed.
+All endpoints require admin role. On self-hosted Dagu, create, update, and delete operations return `403` when the required self-host license is not active.
 
 ### List Users
 
@@ -95,7 +95,7 @@ curl http://localhost:8080/api/v1/users \
 }
 ```
 
-### Create User (Pro)
+### Create User
 
 `POST /api/v1/users`
 
@@ -119,7 +119,7 @@ curl http://localhost:8080/api/v1/users/USER_ID \
 
 Returns `200` with `{"user": User}`. Returns `404` if not found.
 
-### Update User (Pro)
+### Update User
 
 `PATCH /api/v1/users/{userId}`
 
@@ -134,7 +134,7 @@ curl -X PATCH http://localhost:8080/api/v1/users/USER_ID \
 
 Returns `200` with updated user. Returns `409` if new username conflicts.
 
-### Delete User (Pro)
+### Delete User
 
 `DELETE /api/v1/users/{userId}`
 
@@ -151,7 +151,7 @@ Returns `204` on success. Returns `403` if attempting self-deletion.
 
 `POST /api/v1/users/{userId}/reset-password`
 
-Admin resets another user's password. Not Pro-gated.
+Admin resets another user's password. This works with builtin auth and does not require a self-host license.
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/users/USER_ID/reset-password \

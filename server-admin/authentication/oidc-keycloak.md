@@ -2,6 +2,10 @@
 
 Configure Dagu with Keycloak as OIDC provider.
 
+::: info Deployment Model
+This guide applies to self-hosted Dagu using builtin auth + OIDC. Hosted Dagu Cloud includes authentication features by default, so you do not configure Keycloak through `config.yaml` there.
+:::
+
 ## Quick Start with Docker
 
 ### 1. Start Keycloak
@@ -66,6 +70,10 @@ docker compose -f docker-compose-keycloak.yml up -d
 ```yaml
 # ~/.config/dagu/config.yaml
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     client_id: "dagu-client"
     client_secret: "copy-from-keycloak-credentials-tab"
@@ -80,6 +88,8 @@ auth:
 #### Environment Variables
 
 ```bash
+export DAGU_AUTH_MODE=builtin
+export DAGU_AUTH_TOKEN_SECRET="replace-with-a-random-jwt-secret"
 export DAGU_AUTH_OIDC_CLIENT_ID="dagu-client"
 export DAGU_AUTH_OIDC_CLIENT_SECRET="your-client-secret"
 export DAGU_AUTH_OIDC_CLIENT_URL="http://localhost:8080"
@@ -96,6 +106,10 @@ dagu start-all
 ```yaml
 # Production Keycloak
 auth:
+  mode: builtin
+  builtin:
+    token:
+      secret: "replace-with-a-random-jwt-secret"
   oidc:
     client_id: "dagu-prod"
     client_secret: "production-secret"

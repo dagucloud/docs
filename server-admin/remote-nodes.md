@@ -35,7 +35,7 @@ remote_nodes:
     auth_token: "dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 ```
 
-API keys provide fine-grained role-based permissions (admin, manager, operator, viewer) and usage tracking. See [Remote Nodes Authentication](/server-admin/authentication/remote-nodes) for detailed setup instructions.
+API keys provide fine-grained role-based permissions (admin, manager, developer, operator, viewer) and usage tracking. See [Remote Nodes Authentication](/server-admin/authentication/remote-nodes) for detailed setup instructions.
 
 ## See Also
 

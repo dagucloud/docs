@@ -2,6 +2,10 @@
 
 Configure Dagu server settings.
 
+::: info Deployment Model
+This page documents self-hosted Dagu server configuration. Hosted Dagu Cloud includes managed authentication, audit logging, and related platform services by default, so you typically do not configure those features through `config.yaml` there.
+:::
+
 ## Configuration Methods
 
 Precedence order:
@@ -60,7 +64,7 @@ permissions:
 auth:
   mode: "builtin"              # "none", "basic", or "builtin" (default)
 
-  # Builtin auth (user management with RBAC)
+  # Builtin auth (JWT sessions, API keys, and role-based access)
   builtin:
     token:
       secret: "your-secret"    # Auto-generated if not set
@@ -81,7 +85,8 @@ auth:
     whitelist: ["admin@example.com"]
     # Builtin-specific fields (only used when mode: builtin)
     auto_signup: true                 # Auto-create users on first login
-    default_role: "viewer"            # Role for new users
+    role_mapping:
+      default_role: "viewer"          # Role for new users
     allowed_domains: ["company.com"]  # Allowed email domains
     button_label: "Login with SSO"    # SSO button text
 
@@ -183,7 +188,7 @@ All options support `DAGU_` prefix:
 - `DAGU_AUTH_OIDC_ISSUER` - OIDC issuer URL
 - `DAGU_AUTH_OIDC_SCOPES` - OIDC scopes (comma-separated)
 - `DAGU_AUTH_OIDC_WHITELIST` - OIDC email whitelist (comma-separated)
-- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first login (default: `false`)
+- `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first login (default: `true`)
 - `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
 - `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Allowed email domains (comma-separated)
 - `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text
@@ -246,7 +251,7 @@ docker run -d \
 
 ### Builtin Auth
 
-User management with role-based access control (RBAC). Supports multiple users with roles: `admin`, `manager`, `operator`, `viewer`.
+Builtin auth provides JWT sessions, initial admin bootstrap, password management, API keys, and the role model used by self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting additional users requires an active self-host license. Available roles are `admin`, `manager`, `developer`, `operator`, and `viewer`.
 
 ```yaml
 auth:
@@ -301,7 +306,8 @@ auth:
     client_url: "https://dagu.example.com"
     issuer: "https://accounts.google.com"
     auto_signup: true
-    default_role: viewer
+    role_mapping:
+      default_role: viewer
 ```
 
 See [OIDC Configuration](authentication/oidc) for detailed setup.
@@ -540,10 +546,10 @@ export DAGU_TERMINAL_MAX_SESSIONS=5
 - New sessions are rejected with HTTP `429` after `terminal.max_sessions` active terminals
 - Terminal sessions are logged in the audit log (when audit logging is enabled)
 
-## Audit Logging (Pro)
+## Audit Logging
 
-::: info Pro License
-Audit logging requires a [Dagu Pro license](https://dagu.sh/pricing).
+::: info Self-Host License
+On self-hosted Dagu, audit logging requires an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes audit logging by default.
 :::
 
 Dagu maintains audit logs for security-sensitive operations. Audit logging is **enabled by default**.
