@@ -29,8 +29,8 @@ Thanks to our contributors for this release:
 
 | Contribution | Contributor |
 | --- | --- |
-| Format string config option for HTTP response output ([#1826](https://github.com/dagu-org/dagu/pull/1826)) | [@mvanhorn](https://github.com/mvanhorn) |
-| Handler On Abort display bug report ([#1476](https://github.com/dagu-org/dagu/issues/1476)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
+| feat(http): add format string config option for response output ([#1826](https://github.com/dagu-org/dagu/pull/1826)) | [@mvanhorn](https://github.com/mvanhorn) |
+| [BUG] ignore-missing parameter for sha256sum does not exist for QNAP NAS for installer.sh ([#1818](https://github.com/dagu-org/dagu/issues/1818)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
 
 **Full Changelog**: [v2.3.1...v2.3.3](https://github.com/dagu-org/dagu/compare/v2.3.1...v2.3.3)
 
