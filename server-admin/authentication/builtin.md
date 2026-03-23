@@ -3,7 +3,7 @@
 Builtin authentication is the recommended authentication mode for self-hosted Dagu. It provides JWT-based login, admin bootstrap, password management, API keys, and the role-based access model used by self-hosted Dagu.
 
 ::: info Deployment Model
-This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users and enabling OIDC/SSO login require an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes those features by default.
+This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users and enabling OIDC/SSO login require an active self-host license. Hosted Dagu Cloud includes those features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 ## Features
@@ -286,7 +286,7 @@ For detailed documentation, see [API Keys](api-keys).
 
 ## OIDC/SSO Login
 
-On self-hosted Dagu, builtin + OIDC requires an active self-host license. Hosted Dagu Cloud includes authentication features by default.
+On self-hosted Dagu, builtin + OIDC requires an active self-host license. Hosted Dagu Cloud includes authentication features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 
 Builtin authentication supports OIDC/SSO login, allowing users to authenticate via enterprise identity providers (Google, Okta, Auth0, Keycloak, and others) while maintaining Dagu's user management and RBAC system.
 

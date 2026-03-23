@@ -3,7 +3,7 @@
 Configure Dagu server settings.
 
 ::: info Deployment Model
-This page documents self-hosted Dagu server configuration. Hosted Dagu Cloud includes managed authentication, audit logging, and related platform services by default, so you typically do not configure those features through `config.yaml` there.
+This page documents self-hosted Dagu server configuration. Hosted Dagu Cloud includes managed authentication, audit logging, and related platform services by default, so you typically do not configure those features through `config.yaml` there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 ## Configuration Methods
@@ -251,7 +251,7 @@ docker run -d \
 
 ### Builtin Auth
 
-Builtin auth provides JWT sessions, initial admin bootstrap, password management, API keys, and the role model used by self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting additional users requires an active self-host license. Available roles are `admin`, `manager`, `developer`, `operator`, and `viewer`.
+Builtin auth provides JWT sessions, initial admin bootstrap, password management, API keys, and the role model used by self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting additional users requires an active self-host license. Hosted Dagu Cloud includes user management by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability. Available roles are `admin`, `manager`, `developer`, `operator`, and `viewer`.
 
 ```yaml
 auth:
@@ -549,7 +549,7 @@ export DAGU_TERMINAL_MAX_SESSIONS=5
 ## Audit Logging
 
 ::: info Self-Host License
-On self-hosted Dagu, audit logging requires an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes audit logging by default.
+On self-hosted Dagu, audit logging requires an active self-host license. Hosted Dagu Cloud includes audit logging by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 Dagu maintains audit logs for security-sensitive operations. Audit logging is **enabled by default**.

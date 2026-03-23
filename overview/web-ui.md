@@ -349,7 +349,7 @@ export DAGU_TERMINAL_MAX_SESSIONS=5
 ## Audit Logs
 
 ::: info Self-Host License
-On self-hosted Dagu, audit logs require an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes audit logging by default.
+On self-hosted Dagu, audit logs require an active self-host license. Hosted Dagu Cloud includes audit logging by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 The Audit Logs page (under Settings) provides a searchable log of security-sensitive operations.

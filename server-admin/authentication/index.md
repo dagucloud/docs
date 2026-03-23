@@ -3,7 +3,7 @@
 Configure authentication and access control for your Dagu instance.
 
 ::: info Deployment Model
-These pages focus on configuring self-hosted Dagu. Hosted Dagu Cloud includes managed user authentication, user management, OIDC/SSO, and audit logging by default, so you typically do not need to configure those features manually there.
+These pages focus on configuring self-hosted Dagu. Hosted Dagu Cloud includes managed user authentication, user management, OIDC/SSO, and audit logging by default, so you typically do not need to configure those features manually there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 ## Available Authentication Methods
@@ -20,7 +20,7 @@ These pages focus on configuring self-hosted Dagu. Hosted Dagu Cloud includes ma
 
 ### Builtin Authentication (Recommended)
 
-Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu. On self-hosted Dagu, creating additional users or enabling OIDC/SSO requires an active self-host license.
+Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu. On self-hosted Dagu, creating additional users or enabling OIDC/SSO requires an active self-host license. Hosted Dagu Cloud includes those features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 
 ```yaml
 auth:
@@ -60,7 +60,7 @@ auth:
 
 **Recommended: Builtin + OIDC** for self-hosted SSO:
 
-On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Hosted Dagu Cloud includes authentication features by default.
+On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Hosted Dagu Cloud includes authentication features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 
 ```yaml
 auth:

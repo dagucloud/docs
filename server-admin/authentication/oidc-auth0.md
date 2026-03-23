@@ -3,7 +3,7 @@
 Configure Dagu with Auth0 as OIDC provider.
 
 ::: info Deployment Model
-This guide applies to self-hosted Dagu using builtin auth + OIDC. Hosted Dagu Cloud includes authentication features by default, so you do not configure Auth0 through `config.yaml` there.
+This guide applies to self-hosted Dagu using builtin auth + OIDC. Hosted Dagu Cloud includes authentication features by default, so you do not configure Auth0 through `config.yaml` there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 ## Prerequisites

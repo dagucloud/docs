@@ -1,7 +1,7 @@
 # OIDC Authentication
 
 ::: info Deployment Model
-This page covers OIDC/SSO setup for self-hosted Dagu. On self-hosted Dagu, OIDC/SSO login requires an active [self-host license](https://dagu.sh/pricing). Hosted Dagu Cloud includes authentication features by default, so you do not configure OIDC through `config.yaml` there.
+This page covers OIDC/SSO setup for self-hosted Dagu. On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Hosted Dagu Cloud includes authentication features by default, so you do not configure OIDC through `config.yaml` there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 OpenID Connect (OIDC) is configured under builtin auth mode.
