@@ -251,8 +251,11 @@ What happens when a variable is not defined depends on the execution context:
 |---------|----------|---------|
 | Local shell execution (default) | Unknown vars become empty | `$UNDEFINED` → `` |
 | Non-shell executors (docker, http, ssh, jq, mail, etc.) | OS-only vars preserved as-is | `$HOME` → `$HOME` |
+| `template` step `script` | Dagu skips variable expansion entirely | `${HOME}` → `${HOME}` |
 
 For non-shell executors, OS-only variables not defined in the DAG scope pass through unchanged to the target environment (container, remote shell, etc.), which resolves them. DAG-scoped variables (env, params, secrets, step outputs) are still expanded normally.
+
+`template` steps are stricter: the `script` body is never expanded by Dagu, so `${VAR}` remains literal there. If you want expanded values in a template step, pass them through `config.data`.
 
 ### Shell Expansion Syntax (Local Execution Only)
 
@@ -266,7 +269,7 @@ When executing commands locally with the default shell executor, Dagu uses POSIX
 | `${VAR:+alternate}` | Use `alternate` if VAR is set and non-empty |
 | `${VAR:offset:length}` | Substring extraction |
 
-These patterns do **not** work for non-shell executors (docker, http, ssh, jq, mail, etc.). In those cases, only basic `$VAR` and `${VAR}` syntax is supported, and OS-only variables pass through unchanged to the target environment.
+These patterns do **not** work for non-shell executors (docker, http, ssh, jq, mail, etc.). In those cases, only basic `$VAR` and `${VAR}` syntax is supported, and OS-only variables pass through unchanged to the target environment. `template` steps are stricter still: their `script` body is not expanded at all.
 
 ### Escaped Backticks
 

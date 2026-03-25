@@ -64,13 +64,19 @@ steps:
   - type: http                     # Auto-named: http_4
     config:
       url: https://api.example.com
-  - call: child-workflow            # Auto-named: dag_5
+  - type: template                 # Auto-named: template_5
+    config:
+      data:
+        name: Dagu
+    script: "Hello, {{ .name }}!"
+  - call: child-workflow           # Auto-named: dag_6
 ```
 
 Auto-generated names follow the pattern `{type}_{number}`:
 - `cmd_N` - Command steps
 - `script_N` - Script steps
 - `http_N` - HTTP steps
+- `template_N` - Template steps
 - `dag_N` - DAG steps
 - `container_N` - Docker/container steps
 - `ssh_N` - SSH steps
@@ -131,7 +137,9 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 **Supported step types:** shell, command, docker, container, ssh
 
-**Not supported:** jq, http, archive, mail, github_action, dag (these only accept single commands)
+**Not supported:** jq, http, archive, mail, github_action, dag, template
+
+These step types do not support multi-command arrays. Use `script:` for `template` steps.
 
 ### Multi-line Scripts
 

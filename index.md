@@ -99,7 +99,7 @@ Visit [http://localhost:8080](http://localhost:8080)
 | [**Nested Workflows**](/writing-workflows/control-flow#nested-workflows) | Reusable sub-DAGs with full execution lineage tracking |
 | [**Distributed Execution**](/server-admin/distributed/) | Label-based worker routing with automatic service discovery |
 | [**Error Handling**](/writing-workflows/error-handling) | Exponential backoff retries, lifecycle hooks, continue-on-failure |
-| [**Step Types**](/step-types/shell) | Shell, Docker, SSH, HTTP, JQ, Mail, and more |
+| [**Step Types**](/step-types/shell) | Shell, Docker, SSH, HTTP, Template, JQ, Mail, and more |
 | [**Observability**](/server-admin/opentelemetry) | Live logs, Gantt charts, [Prometheus metrics](/server-admin/prometheus-metrics), OpenTelemetry |
 | [**AI Agent**](/features/agent/) | Built-in LLM assistant with tool calling, persistent memory, and souls |
 | [**Workflow Operator**](/features/bots/) | Persistent AI operator for Slack and Telegram to manage workflows and incident follow-up |
@@ -198,7 +198,7 @@ See [Examples](/writing-workflows/examples) for more patterns.
   </div>
   <div class="step-card">
     <h3><a href="/step-types/shell">Step Types</a></h3>
-    <p>Shell, Docker, SSH, HTTP, SQL, Redis, and more</p>
+    <p>Shell, Docker, SSH, HTTP, Template, SQL, and more</p>
   </div>
   <div class="step-card">
     <h3><a href="/server-admin/">Configuration</a></h3>

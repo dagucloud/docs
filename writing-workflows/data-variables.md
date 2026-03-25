@@ -10,7 +10,7 @@ For security, Dagu limits which system environment variables are passed to step 
 
 **How It Works:**
 
-System environment variables are available for expansion (`${VAR}`) in the DAG-level `env:` block during configuration parsing. For non-shell executors (docker, http, ssh, etc.), OS-only variables in executor config, step env, and scripts pass through unchanged — only variables defined in the DAG scope are expanded. Filtered variables are passed to the step execution environment.
+System environment variables are available for expansion (`${VAR}`) in the DAG-level `env:` block during configuration parsing. For non-shell executors (docker, http, ssh, etc.), OS-only variables in executor config, step env, and scripts pass through unchanged — only variables defined in the DAG scope are expanded. `template` steps are a special case: the `script` body is not expanded by Dagu, while `config.data` values are expanded before rendering. Filtered variables are passed to the step execution environment.
 
 **Filtered Variables:**
 

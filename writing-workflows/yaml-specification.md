@@ -786,7 +786,9 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 **Supported step types:** shell, command, docker, container, ssh
 
-**Not supported:** jq, http, archive, mail, github_action, dag (configuration rejected at parse time)
+**Not supported:** jq, http, archive, mail, github_action, dag, template
+
+These step types do not support multi-command arrays. Use `script:` for `template` steps. Unsupported configurations are rejected at parse time.
 
 ### Step Definition Formats
 

@@ -70,6 +70,7 @@ const fullSidebar = [
       { text: "Router", link: "/step-types/router" },
       { text: "Mail", link: "/step-types/mail" },
       { text: "JQ", link: "/step-types/jq" },
+      { text: "Template", link: "/step-types/template" },
       { text: "S3", link: "/step-types/s3" },
       { text: "Redis", link: "/step-types/redis" },
       { text: "Archive", link: "/step-types/archive" },

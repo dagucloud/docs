@@ -165,6 +165,7 @@ See [Architecture](/overview/architecture) for details.
 | `http` | HTTP/REST API requests |
 | `approval` | Human approval gate (field on any step type) |
 | `jq` | JSON query and transformation |
+| `template` | Text rendering with Go templates and structured data |
 | `mail` | Email notifications with attachments |
 | `dag` | Sub-workflow execution (hierarchical composition) |
 

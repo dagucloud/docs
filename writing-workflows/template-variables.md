@@ -62,6 +62,9 @@ Unknown variables become empty strings. This is standard POSIX shell behavior.
 **Non-shell executors (docker, http, ssh, jq, mail, etc.):**
 OS-only variables not defined in the DAG scope are preserved as-is, letting the target environment resolve them. DAG-scoped variables (env, params, secrets, step outputs) are still expanded normally.
 
+**Template steps:**
+The `script` body is not expanded by Dagu at all, so `${VAR}` remains literal there. Pass values through `config.data` when you want Dagu to expand them before template rendering.
+
 ```yaml
 # Example: Non-shell executor (SSH)
 env:
@@ -93,6 +96,7 @@ Notes:
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
 - To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 - In YAML, single quotes preserve backslashes; with double quotes, escape the backslash (e.g., `"\\$9.99"`).
+- `template` step `script` bodies are excluded because Dagu does not process `$` there.
 
 ### Loading from .env Files
 
@@ -352,7 +356,9 @@ and when constructing the step process environment.
    execution time. For non-shell executors (docker, http, ssh, jq, mail, etc.),
    OS environment is **not** used as a fallback during variable interpolation —
    only DAG-scoped sources (levels 1–5) are checked. OS-only variables pass
-   through unchanged, letting the target environment resolve them.
+   through unchanged, letting the target environment resolve them. `template`
+   step `script` bodies are a special case: Dagu does not interpolate them at
+   all, while `config.data` values still use DAG-scoped sources.
 
 ### Step process environment precedence (lowest to highest)
 
