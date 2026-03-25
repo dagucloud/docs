@@ -494,6 +494,21 @@ steps:
     command: analyze-results
 ```
 
+## Remote Docker Daemon
+
+The Docker daemon connection variables `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, and `DOCKER_API_VERSION` are included in Dagu's environment whitelist. They are automatically passed through to step processes and sub-DAGs without needing to redeclare them in `env:`.
+
+This means Docker steps connect to the correct daemon when these variables are set in the Dagu process environment:
+
+```bash
+# Start Dagu pointing at a remote Docker daemon
+DOCKER_HOST=tcp://build-server:2375 dagu start-all
+```
+
+All `container:` steps and `type: docker` steps will use the remote daemon automatically.
+
+> **Note:** `DOCKER_AUTH_CONFIG` is **not** whitelisted — it may contain credentials. Use `registry_auths:` in the DAG file or reference it explicitly via `env:` or `secrets:` if needed.
+
 ## Docker in Docker
 
 Mount the Docker socket and run as root to use Docker inside your containers:

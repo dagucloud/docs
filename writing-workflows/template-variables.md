@@ -14,10 +14,11 @@ System environment variables are available for expansion (`${VAR}`) when the DAG
 
 **Filtered Variables:**
 
-Only these system environment variables are automatically passed to step processes and sub DAGs:
+The following system environment variables are automatically passed to step processes and sub DAGs (platform-dependent):
 
-- **Whitelisted:** `PATH`, `HOME`, `LANG`, `TZ`, `SHELL`
-- **Allowed Prefixes:** `DAGU_*`, `LC_*`, `DAG_*`
+- **Unix/macOS:** `PATH`, `HOME`, `USER`, `SHELL`, `TMPDIR`, `TERM`, `EDITOR`, `VISUAL`, `LANG`, `LC_ALL`, `LC_CTYPE`, `TZ`, `LD_LIBRARY_PATH`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
+- **Windows:** `USERPROFILE`, `SYSTEMROOT`, `WINDIR`, `SYSTEMDRIVE`, `COMSPEC`, `PATHEXT`, `TEMP`, `TMP`, `PATH`, `PSMODULEPATH`, `HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
+- **Allowed Prefixes (all platforms):** `DAGU_*`, `LC_*`, `DAG_*`
 
 The `DAG_*` prefix includes the special environment variables that Dagu automatically sets (see below).
 
@@ -291,15 +292,17 @@ steps:
 
 Available properties:
 - `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
-- `${id.exit_code}` - Alternative snake_case syntax for exit code
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file
+- `${id.output}` - Captured output value (requires `output:` on the referenced step)
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content.
 >
 > - To read content: use `cat ${id.stdout}`
 > - To capture output for later steps: use the `output:` field instead
 > - Substring slicing like `${id.stdout:0:5}` operates on the **file path string**, not file content
+>
+> `${id.output}` returns the actual captured text value. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal. Substring slicing works: `${id.output:0:5}` extracts the first 5 characters of the captured value.
 
 ## Variable Precedence
 

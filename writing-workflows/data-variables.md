@@ -334,8 +334,9 @@ Available step properties when using ID references:
 - `${id.stdout}`: Path to stdout file
 - `${id.stderr}`: Path to stderr file
 - `${id.exit_code}`: Exit code of the step (as a string)
+- `${id.output}`: Captured output value (requires `output:` on the referenced step)
 
-> **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. To capture output content directly into a variable, use the `output:` field instead.
+> **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. `${id.output}` returns the actual captured text value. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal.
 
 ## Command Substitution
 

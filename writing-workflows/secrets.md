@@ -46,6 +46,7 @@ secrets:
 
 - Fails fast if the variable is missing (`LookupEnv` is used to distinguish unset vs empty).
 - Suitable for development, CI, and any platform that can inject process env securely.
+- **Subprocess resolution:** When Dagu spawns a subprocess locally (e.g., for `start`, `restart`, or `retry`), env-provider secret source variables are pre-resolved in the parent process and passed to the subprocess via internal transport variables. This means the subprocess can resolve the secret even if the original environment variable is not in the whitelist. The internal transport variables are excluded from step environments — they are only used by the secret resolver. In distributed (coordinator/worker) mode, the worker does not pre-resolve env-provider secrets because the DAG is not loaded in the dispatch path.
 
 ### `file`
 

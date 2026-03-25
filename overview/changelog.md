@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.3.7 (2026-03-25)
+
+### Added
+
+- feat: add `template` executor for inline text rendering ([#1845](https://github.com/dagu-org/dagu/pull/1845)) — Render Go templates with structured data. See [Template step type](/step-types/template).
+- feat: support slim-sprig functions in template steps ([#1850](https://github.com/dagu-org/dagu/pull/1850)) — Template steps include functions from slim-sprig (hermetic subset).
+- feat: support step-scoped access to captured output values ([#1844](https://github.com/dagu-org/dagu/pull/1844)) — Use `${step_id.output}` to reference a step's captured output value directly. See [Data Flow](/writing-workflows/data-flow#step-output-references).
+
+### Fixed
+
+- fix: add Docker daemon connection vars to env whitelist ([#1846](https://github.com/dagu-org/dagu/pull/1846)) — `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, and `DOCKER_API_VERSION` are now automatically passed to step processes.
+- fix: resolve env-provider secrets in parent before subprocess filtering ([#1853](https://github.com/dagu-org/dagu/pull/1853)) — Env-provider secrets are pre-resolved in the parent process so subprocesses can access them even when the source variable is not in the whitelist.
+- fix: prevent scheduler split-brain via fence token and self-fencing ([#1854](https://github.com/dagu-org/dagu/pull/1854)) — The scheduler lock now uses fence tokens to prevent two schedulers from running simultaneously after a lock theft.
+- fix: prevent distributed runs from remaining running after execution stops ([#1851](https://github.com/dagu-org/dagu/pull/1851)) — Distributed runs with stale leases are now detected and marked as failed by the coordinator's zombie detector.
+
+**Full Changelog**: [v2.3.6...v2.3.7](https://github.com/dagu-org/dagu/compare/v2.3.6...v2.3.7)
+
 ## v2.3.5 (2026-03-24)
 
 ### Fixed

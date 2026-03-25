@@ -234,8 +234,41 @@ Available properties:
 - `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file
+- `${id.output}` - Captured output value (requires `output:` on the referenced step)
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. To capture output content directly into a variable for use in subsequent steps, use the `output:` field instead.
+
+### Step Output References
+
+When a step has an `output:` field, downstream steps can access the captured value directly via `${id.output}`:
+
+```yaml
+type: graph
+steps:
+  - id: extract_title
+    output: RESULT
+    script: |
+      printf 'Quarterly Revenue'
+
+  - id: extract_summary
+    output: RESULT
+    script: |
+      printf 'Revenue grew 18 percent year over year.'
+
+  - id: report
+    depends: [extract_title, extract_summary]
+    script: |
+      printf 'Title: %s\nSummary: %s' "${extract_title.output}" "${extract_summary.output}"
+    output: REPORT
+```
+
+`${id.output}` vs `${id.stdout}`:
+- `${id.output}` returns the **captured value** (the content that was written to stdout and stored via `output:`). It is the actual text.
+- `${id.stdout}` returns a **file path** to the stdout log. Use `cat ${id.stdout}` to read it.
+
+If the referenced step does not have `output:` configured, `${id.output}` is not expanded — it passes through as a literal string.
+
+Substring slicing works on the output value: `${id.output:0:5}` extracts the first 5 characters of the captured output.
 
 ## Sub DAG Outputs
 
