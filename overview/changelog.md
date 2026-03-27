@@ -18,6 +18,7 @@ Thanks to our contributors for this release:
 | Contribution | Contributor |
 | --- | --- |
 | Bug: some scheduled tasks are queued but not run ([#1837](https://github.com/dagu-org/dagu/issues/1837)) | [@jonasban](https://github.com/jonasban) (report) |
+| Bug: DAG did not start after coordinator dispatch ([#1858](https://github.com/dagu-org/dagu/issues/1858)) | [@pommetjehorlepiep](https://github.com/pommetjehorlepiep) (report) |
 | [Feat] history is now displayed in execution order instead of alphabetic order ([#1859](https://github.com/dagu-org/dagu/pull/1859)) | [@nikkeitk](https://github.com/nikkeitk) |
 | [Feat] step in order in history ([#1087](https://github.com/dagu-org/dagu/issues/1087)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
 | bug: block variables resolve empty for enqueued runs but work for start ([#1856](https://github.com/dagu-org/dagu/issues/1856)) | [@mvgijssel](https://github.com/mvgijssel) (report) |
