@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.3.9 (2026-03-28)
+
+### Fixed
+
+- fix: dependency vulnerabilities reported in #1862 ([#1863](https://github.com/dagu-org/dagu/pull/1863)) [@yottahmd](https://github.com/yottahmd)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| High and critical fixable vulnerabilities ([#1862](https://github.com/dagu-org/dagu/issues/1862)) | [@gchiesa](https://github.com/gchiesa) (report) |
+
 ## v2.3.8 (2026-03-27)
 
 ### Added
