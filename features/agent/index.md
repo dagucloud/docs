@@ -1,45 +1,41 @@
-# Agent
+# AI Agent
 
-The Dagu agent is an LLM-powered assistant integrated into the Web UI. It can read, create, and modify your workflows through a chat interface with tool-calling capabilities.
+The Dagu AI Agent is the built-in assistant integrated into the Web UI. It can read files, modify workflows, run tools, and help users operate Dagu through a persistent chat interface.
+
+The same agent foundation also powers:
+
+- The Web UI assistant
+- The workflow `type: agent` step
+- Workflow Operator for Slack and Telegram
 
 ## Accessing the Agent
 
 Click the **Agent** button at the bottom-left corner of any page. The button shows a yellow pulsing indicator when the agent is processing.
 
-## Setup
+## Documentation Map
 
-All agent configuration is managed through the Web UI at `/agent-settings` (requires admin role).
+Use this section as the entry point for the agent-related docs:
 
-### 1. Enable the Agent
+- [Settings](/features/agent/settings) — Configure the built-in Web UI agent, models, tool policy, souls, and web search
+- [Agent Step](/features/agent/step) — Run the agent as a workflow step inside a DAG
+- [Tools Reference](/features/agent/tools) — Understand the built-in tools and their parameters
+- [Workflow Operator](/features/bots/) — Use the built-in agent through Slack or Telegram chatbots
+- [Chat & AI Agents](/features/chat/) — Use `type: chat` for direct LLM calls in workflows
 
-Toggle the agent on from the settings page. Alternatively, set the environment variable `DAGU_AGENT_ENABLED=true`.
+## Settings
 
-This is the only setting configurable via environment variable. Everything else is configured through the Web UI.
+All built-in agent configuration is managed through the Web UI at `/agent-settings` and is documented on the dedicated [Settings](/features/agent/settings) page.
 
-### 2. Add a Model
+That page covers:
 
-Click **Add Model** to configure an LLM provider. Each model has:
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| Name | yes | Display name |
-| Provider | yes | `anthropic`, `openai`, `gemini`, `openrouter`, `zai`, or `local` |
-| Model | yes | Model identifier (e.g., `claude-sonnet-4-5`, `gpt-4o`) |
-| API Key | yes* | Provider API key. Not required for `local` provider. |
-| Base URL | no | Custom endpoint. For `local`, if omitted, Dagu defaults to `http://localhost:11434/v1`. |
-| Context Window | no | Token context size |
-| Max Output Tokens | no | Maximum output tokens |
-| Input Cost / 1M | no | Cost per 1M input tokens (for cost tracking) |
-| Output Cost / 1M | no | Cost per 1M output tokens (for cost tracking) |
-| Supports Thinking | no | Enable extended thinking capability |
-
-The settings page includes presets for common models (Claude, GPT-4, Gemini, etc.) that pre-fill these fields.
+- Enabling or disabling the built-in agent
+- Adding and managing models
+- Setting the default model
+- Selecting the default soul/personality
+- Configuring tool permissions and bash policy
+- Enabling provider-native web search
 
 For Ollama and other local model servers, see [Local AI](/features/chat/local-ai) for the exact `Base URL` format Dagu expects.
-
-### 3. Set a Default Model
-
-Click the star icon next to a model to set it as the default. The agent uses this model unless overridden per-session or per-step.
 
 ## Chat Interface
 
@@ -152,8 +148,10 @@ Models are stored separately and managed through their own API. Do not edit thes
 
 ## See Also
 
+- [Settings](/features/agent/settings) — Configure the built-in Web UI agent
 - [Agent Step](/features/agent/step) — Run the agent as a workflow step (`type: agent`)
 - [Tools Reference](/features/agent/tools) — Full parameter documentation for each tool
 - [Memory](/features/agent/memory) — Persistent context across sessions
 - [Souls](/features/agent/souls) — Configurable agent personalities
+- [Workflow Operator](/features/bots/) — Use the built-in agent through Slack or Telegram
 - [Chat & AI Agents](/features/chat/) — `type: chat` for simpler LLM calls in DAG workflows

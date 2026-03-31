@@ -14,6 +14,8 @@ Once configured, click the **Agent** button at the bottom-left corner of any pag
 
 If you are using Ollama or another local model server, read [Local AI](/features/chat/local-ai) before setting the `Base URL`. Dagu expects an OpenAI-compatible base such as `http://localhost:11434/v1`, not a native Ollama endpoint like `/api/generate`.
 
+For the full built-in agent configuration surface, see [Agent Settings](/features/agent/settings). That page covers model management, tool permissions, souls, bash policy, and web search.
+
 ## Available Tools
 
 The agent can use these built-in tools. Some are only available when the corresponding feature is configured:
@@ -93,6 +95,8 @@ See [`ai` in CLI Commands](/getting-started/cli#ai) for more details.
 ## See Also
 
 - [Full Agent Documentation](/features/agent/) — Complete guide to the agent's features and configuration
+- [Agent Settings](/features/agent/settings) — Configure the built-in Web UI agent
 - [Agent Step](/features/agent/step) — Using the agent as a workflow step
 - [Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
+- [Workflow Operator](/features/bots/) — Use the built-in agent from Slack or Telegram
 - [Basic Chat](/features/chat/basics) — Single-shot LLM calls in workflows

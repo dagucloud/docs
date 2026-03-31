@@ -90,6 +90,7 @@ const fullSidebar = [
     text: "AI Agent",
     items: [
       { text: "Overview", link: "/features/agent/" },
+      { text: "Settings", link: "/features/agent/settings" },
       { text: "Agent Step", link: "/features/agent/step" },
       { text: "Tools Reference", link: "/features/agent/tools" },
       { text: "Memory", link: "/features/agent/memory" },
@@ -97,23 +98,23 @@ const fullSidebar = [
       { text: "Scheduling", link: "/features/agent/scheduling" },
       { text: "Nesting", link: "/features/agent/nesting" },
       {
-        text: "Chat & LLM",
+        text: "Workflow Operator",
         collapsed: false,
         items: [
-          { text: "Overview", link: "/features/chat/" },
-          { text: "Basic Chat", link: "/features/chat/basics" },
-          { text: "Local AI", link: "/features/chat/local-ai" },
-          { text: "Tool Calling", link: "/features/chat/tool-calling" },
+          { text: "Overview", link: "/features/bots/" },
+          { text: "Telegram", link: "/features/bots/telegram" },
+          { text: "Slack", link: "/features/bots/slack" },
         ],
       },
     ],
   },
   {
-    text: "Workflow Operator",
+    text: "Chat & LLM",
     items: [
-      { text: "Overview", link: "/features/bots/" },
-      { text: "Telegram", link: "/features/bots/telegram" },
-      { text: "Slack", link: "/features/bots/slack" },
+      { text: "Overview", link: "/features/chat/" },
+      { text: "Basic Chat", link: "/features/chat/basics" },
+      { text: "Local AI", link: "/features/chat/local-ai" },
+      { text: "Tool Calling", link: "/features/chat/tool-calling" },
     ],
   },
   {
