@@ -98,7 +98,7 @@ const fullSidebar = [
       { text: "Scheduling", link: "/features/agent/scheduling" },
       { text: "Nesting", link: "/features/agent/nesting" },
       {
-        text: "Workflow Operator",
+        text: "Chat Bot",
         collapsed: false,
         items: [
           { text: "Overview", link: "/features/bots/" },
