@@ -70,12 +70,15 @@ The current Web UI provider dropdown offers:
 
 - `Anthropic`
 - `OpenAI`
+- `OpenAI Codex`
 - `Google Gemini`
 - `OpenRouter`
 - `Local`
 - `Z.AI`
 
 If presets are available, the create form also shows **Import from Preset**.
+
+For the subscription-backed `OpenAI Codex` path, see [OpenAI Subscription](/features/agent/settings/openai-subscription).
 
 ## Local Models
 
@@ -111,6 +114,7 @@ When the exact runtime behavior matters, use the provider-specific documentation
 ## See Also
 
 - [Agent Settings](/features/agent/settings/)
+- [OpenAI Subscription](/features/agent/settings/openai-subscription)
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls)
 - [Personality & Web Search](/features/agent/settings/behavior)
 - [Local AI](/features/chat/local-ai)

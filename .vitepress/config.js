@@ -97,6 +97,7 @@ const fullSidebar = [
         items: [
           { text: "Overview", link: "/features/agent/settings/" },
           { text: "Models & Providers", link: "/features/agent/settings/models" },
+          { text: "OpenAI Subscription", link: "/features/agent/settings/openai-subscription" },
           { text: "Tool Permissions", link: "/features/agent/settings/controls" },
           { text: "Personality & Web Search", link: "/features/agent/settings/behavior" },
         ],

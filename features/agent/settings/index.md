@@ -20,6 +20,7 @@ If you are looking for workflow YAML configuration, see [Agent Step](/features/a
 The settings surface is split into smaller pages:
 
 - [Models & Providers](/features/agent/settings/models) for enabling the built-in agent, adding models, choosing a default model, and understanding model fields
+- [OpenAI Subscription](/features/agent/settings/openai-subscription) for connecting a ChatGPT subscription and using the `openai-codex` provider
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls) for deciding which tools the agent may use and how bash commands are filtered
 - [Personality & Web Search](/features/agent/settings/behavior) for selecting a default soul and enabling provider-native web search
 
@@ -65,6 +66,7 @@ See:
 
 - [AI Agent Overview](/features/agent/)
 - [Models & Providers](/features/agent/settings/models)
+- [OpenAI Subscription](/features/agent/settings/openai-subscription)
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls)
 - [Personality & Web Search](/features/agent/settings/behavior)
 - [Local AI](/features/chat/local-ai)
