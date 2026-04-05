@@ -30,6 +30,11 @@ audit:
   enabled: true           # Enable audit logging (default: true)
   retention_days: 7        # Days to keep audit logs (default: 7, 0 = keep forever)
 
+# Centralized Event Store
+event_store:
+  enabled: true           # Enable centralized event logging (default: true)
+  retention_days: 3        # Days to keep event log files (default: 3, 0 = keep forever)
+
 # Session Storage
 session:
   max_per_user: 100        # Max sessions per user (default: 100, 0 = unlimited)
@@ -42,11 +47,13 @@ paths:
   data_dir: "~/.local/share/dagu/data"
   suspend_flags_dir: "~/.local/share/dagu/suspend"
   admin_logs_dir: "~/.local/share/dagu/logs/admin"
+  event_store_dir: ""        # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"
   dag_runs_dir: ""            # Auto: {data_dir}/dag-runs
   queue_dir: ""              # Auto: {data_dir}/queue
   proc_dir: ""               # Auto: {data_dir}/proc
   service_registry_dir: ""    # Auto: {data_dir}/service-registry
+  contexts_dir: ""           # Auto: {data_dir}/contexts
   executable: ""            # Auto: current executable path
 
 # External Secret Providers
@@ -129,12 +136,12 @@ queues:
 remote_nodes:
   - name: "staging"
     api_base_url: "https://staging.example.com/api/v1"
-    is_basic_auth: true
+    auth_type: "basic"
     basic_auth_username: "admin"
     basic_auth_password: "password"
   - name: "production"
     api_base_url: "https://prod.example.com/api/v1"
-    is_auth_token: true
+    auth_type: "token"
     auth_token: "prod-token"
     skip_tls_verify: false
 
@@ -242,6 +249,10 @@ All options support `DAGU_` prefix.
 - `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
 - `DAGU_AUDIT_RETENTION_DAYS` - Days to keep audit logs (default: `7`, `0` = keep forever)
 
+### Event Store
+- `DAGU_EVENT_STORE_ENABLED` - Enable centralized event logging (default: `true`)
+- `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `3`, `0` = keep forever)
+
 ### Session Storage
 - `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
 
@@ -254,11 +265,13 @@ All options support `DAGU_` prefix.
 - `DAGU_DATA_DIR` - Application data
 - `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags
 - `DAGU_ADMIN_LOG_DIR` - Admin logs
+- `DAGU_EVENT_STORE_DIR` - Centralized event log directory (default: `{admin_logs_dir}/events`)
 - `DAGU_BASE_CONFIG` - Base configuration
 - `DAGU_DAG_RUNS_DIR` - DAG run data directory
 - `DAGU_QUEUE_DIR` - Queue data directory
 - `DAGU_PROC_DIR` - Process data directory
 - `DAGU_SERVICE_REGISTRY_DIR` - Service registry data directory
+- `DAGU_CONTEXTS_DIR` - CLI contexts directory (default: `{data_dir}/contexts`)
 - `DAGU_EXECUTABLE` - Path to Dagu executable
 
 **Note:** The `--dagu-home` CLI flag takes precedence over the `DAGU_HOME` environment variable.
@@ -390,6 +403,7 @@ These variables are maintained for backward compatibility but should not be used
 - `DAGU__DATA` - Use `DAGU_DATA_DIR`
 - `DAGU__SUSPEND_FLAGS_DIR` - Use `DAGU_SUSPEND_FLAGS_DIR`
 - `DAGU__ADMIN_LOGS_DIR` - Use `DAGU_ADMIN_LOG_DIR`
+- `DAGU__EVENT_STORE_DIR` - Use `DAGU_EVENT_STORE_DIR`
 
 ## Base Configuration
 
@@ -483,12 +497,14 @@ Dagu sets metadata like `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, and the active `DAG_RU
 ~/.local/share/dagu/
 ├── logs/              # All log files
 │   ├── admin/         # Admin/server logs
-│   │   └── audit/     # Audit logs (daily JSONL files)
+│   │   ├── audit/     # Audit logs (daily JSONL files)
+│   │   └── events/    # Centralized event logs
 │   └── dags/          # DAG execution logs
 ├── data/              # Application data
 │   ├── dag-runs/      # DAG run history
 │   ├── queue/         # Queue data
 │   ├── proc/          # Process data
+│   ├── contexts/      # CLI remote contexts
 │   └── service-registry/  # Service registry data
 └── suspend/           # DAG suspend flags
 ```
@@ -499,11 +515,13 @@ $DAGU_HOME/
 ├── dags/              # DAG definitions
 ├── logs/              # All log files
 │   └── admin/         # Admin/server logs
-│       └── audit/     # Audit logs (daily JSONL files)
+│       ├── audit/     # Audit logs (daily JSONL files)
+│       └── events/    # Centralized event logs
 ├── data/              # Application data
 │   ├── dag-runs/      # DAG run history
 │   ├── queue/         # Queue data
 │   ├── proc/          # Process data
+│   ├── contexts/      # CLI remote contexts
 │   └── service-registry/  # Service registry data
 ├── suspend/           # DAG suspend flags
 ├── config.yaml        # Main configuration
@@ -547,12 +565,12 @@ ui:
 remote_nodes:
   - name: staging
     api_base_url: https://staging.example.com/api/v1
-    is_auth_token: true
+    auth_type: token
     auth_token: ${STAGING_TOKEN}
 
   - name: production
     api_base_url: https://prod.example.com/api/v1
-    is_auth_token: true
+    auth_type: token
     auth_token: ${PROD_TOKEN}
 ```
 
@@ -607,12 +625,16 @@ peer:
 - `terminal.enabled`: `false`
 - `terminal.max_sessions`: `5`
 - `audit.enabled`: `true`
+- `event_store.enabled`: `true`
+- `event_store.retention_days`: `3`
 
 ### Auto-generated Paths
-When not specified, these paths are automatically set based on `paths.data_dir`:
+When not specified, these paths are automatically derived:
 - `paths.dag_runs_dir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
 - `paths.queue_dir`: `{paths.data_dir}/queue` - Stores queue data
 - `paths.proc_dir`: `{paths.data_dir}/proc` - Stores process data
+- `paths.contexts_dir`: `{paths.data_dir}/contexts` - Stores CLI remote contexts
+- `paths.event_store_dir`: `{paths.admin_logs_dir}/events` - Stores centralized event logs
 - `paths.executable`: Current executable path - Auto-detected from running process
 
 ## Supported Log Encodings

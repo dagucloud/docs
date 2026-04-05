@@ -13,11 +13,50 @@ dagu [global options] command [command options] [arguments...]
 ```
 
 - `--config, -c` - Config file (default: `~/.config/dagu/config.yaml`)
+- `--context` - CLI context name for context-aware commands (default: current context or `local`)
 - `--dagu-home` - Override DAGU_HOME for this command invocation
 - `--quiet, -q` - Suppress output
 - `--cpu-profile` - Enable CPU profiling
 - `--help, -h` - Show help
 - `--version, -v` - Print version
+
+## Remote Contexts
+
+CLI contexts let context-aware commands target a remote Dagu server instead of the built-in `local` context.
+
+Context-aware commands are:
+
+- `start`
+- `enqueue`
+- `status`
+- `history`
+- `stop`
+- `retry`
+- `restart`
+- `dequeue`
+
+The built-in `local` context is always available. Remote contexts are stored under `paths.contexts_dir`, and their API keys are encrypted at rest.
+
+```bash
+# Add a remote server
+dagu context add staging \
+  --server https://staging.example.com \
+  --api-key dagu_xxxxxxxxxxxxxxxxxxxx \
+  --description "Staging Dagu server"
+
+# Make it the current context
+dagu context use staging
+
+# Or target a context explicitly for one command
+dagu --context staging status nightly-backup
+```
+
+Remote command rules:
+
+- Remote contexts only operate on DAGs that already exist on the remote server.
+- For `start`, `enqueue`, `status`, `stop`, `retry`, and `restart`, pass the remote DAG `fileName` or a unique deployed DAG name. Local YAML paths such as `./job.yaml` are rejected.
+- For `history`, pass a deployed DAG name. Local YAML paths are rejected.
+- Commands that are not context-aware always run against the local instance and reject non-local contexts.
 
 ## Commands
 
@@ -265,6 +304,45 @@ Error: --from date (2026-02-01) must be before --to date (2026-01-01)
 - [`status`](#status) - Current run status
 - [`cleanup`](#cleanup) - Remove old run history
 
+### `context`
+
+Manage CLI contexts for local and remote Dagu servers.
+
+```bash
+dagu context list
+dagu context add <name> [flags]
+dagu context update <name> [flags]
+dagu context remove <name>
+dagu context use <name|local>
+dagu context test <name|local>
+```
+
+**Add / Update Flags:**
+- `--server` - Remote server base URL (`http://` or `https://`)
+- `--api-key` - Remote API key (`dagu_...`)
+- `--description` - Optional description shown in `dagu context list`
+- `--skip-tls-verify` - Skip TLS certificate verification
+- `--timeout` - HTTP timeout in seconds
+
+```bash
+# List contexts and show the current one
+dagu context list
+
+# Add a context (if --api-key is omitted in a terminal, Dagu prompts for it)
+dagu context add prod \
+  --server https://dagu.example.com \
+  --api-key dagu_xxxxxxxxxxxxxxxxxxxx \
+  --timeout 60
+
+# Update selected fields
+dagu context update prod --description "Production cluster"
+
+# Switch back to the built-in local context
+dagu context use local
+
+# Test connectivity
+dagu context test prod
+```
 
 ### `server`
 

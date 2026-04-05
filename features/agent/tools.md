@@ -231,11 +231,11 @@ Search configured skills by keyword or tag without loading full skill content.
 
 ## remote_agent
 
-Send a task to a configured remote Dagu node.
+Send a task to a configured remote node.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `node` | string | Yes | Remote node name |
+| `context` | string | Yes | Remote node name |
 | `message` | string | Yes | Task or prompt to send to the remote agent |
 
 **Availability**: Only shown when remote nodes are configured.
@@ -248,7 +248,7 @@ Send a task to a configured remote Dagu node.
 
 ---
 
-## list_remote_nodes
+## list_contexts
 
 List remote nodes available to `remote_agent`.
 

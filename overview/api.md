@@ -70,7 +70,7 @@ curl "http://localhost:8080/api/v1/dags?sort=nextRun&order=asc"
 
 #### Get DAG Details
 ```bash
-curl http://localhost:8080/api/v1/dags/my-dag.yaml
+curl http://localhost:8080/api/v1/dags/my-dag
 ```
 
 The DAG detail response includes `paramDefs` when Dagu can derive parameter metadata. `paramDefs` carries typed metadata for inline rich `params:` definitions, top-level inline JSON Schema, and representable external schemas. For named params, clients should submit a JSON object payload; JSON arrays are mainly for positional or mixed raw input.
@@ -133,7 +133,7 @@ Example response (invalid):
 
 #### Start DAG
 ```bash
-curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/start \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/start \
   -H "Content-Type: application/json" \
   -d '{
     "params": "{\"env\": \"production\"}",
@@ -146,7 +146,7 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/start \
 
 #### Enqueue DAG
 ```bash
-curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/enqueue \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/enqueue \
   -H "Content-Type: application/json" \
   -d '{
     "params": "{\"env\": \"production\"}",
@@ -160,12 +160,12 @@ The same validation rules apply to enqueue requests. Invalid typed values are re
 #### Suspend/Resume DAG
 ```bash
 # Suspend
-curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/suspend \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/suspend \
   -H "Content-Type: application/json" \
   -d '{"suspend": true}'
 
 # Resume
-curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/suspend \
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/suspend \
   -H "Content-Type: application/json" \
   -d '{"suspend": false}'
 ```
@@ -174,21 +174,38 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag.yaml/suspend \
 
 #### List Queues
 ```bash
-# Get all queues with running and queued DAG runs
+# Get queue summaries
 curl http://localhost:8080/api/v1/queues
 ```
 
-Shows all execution queues organized by queue name, including both custom queues and DAG-based queues. Returns queue summaries with running and queued DAG run counts.
+`GET /queues` returns queue summaries only: queue type (`global` or `dag-based`), optional `maxConcurrency`, `runningCount`, `queuedCount`, currently running items, and a top-level capacity summary.
+
+To inspect queue contents, use `GET /queues/{name}/items`:
+
+```bash
+# Get queued items from one queue
+curl "http://localhost:8080/api/v1/queues/default/items?type=queued&page=1&perPage=20"
+
+# Get running items from one queue
+curl "http://localhost:8080/api/v1/queues/default/items?type=running&page=1&perPage=20"
+```
 
 ### DAG Run Management
 
 #### List DAG Runs
 ```bash
-# Get all DAG runs
+# Get the newest DAG runs
 curl http://localhost:8080/api/v1/dag-runs
 
 # Filter by name and status
 curl "http://localhost:8080/api/v1/dag-runs?name=my-dag&status=2"
+```
+
+`GET /dag-runs` and `GET /dag-runs/{name}` now use forward-only cursor pagination. Each response returns `dagRuns` and, when more data exists, `nextCursor`.
+
+```bash
+# Follow the next page
+curl "http://localhost:8080/api/v1/dag-runs?limit=100&cursor=<opaque-cursor>"
 ```
 
 #### Run From Inline Spec
@@ -246,11 +263,46 @@ curl -X PATCH http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/steps
 
 ### Search Operations
 
-Search across DAG definitions:
+Legacy full DAG search is still available:
 
 ```bash
 curl "http://localhost:8080/api/v1/dags/search?q=database"
 ```
+
+The global search page uses cursor-based feed endpoints:
+
+```bash
+# Lightweight DAG search results
+curl "http://localhost:8080/api/v1/search/dags?q=database"
+
+# Lightweight document search results
+curl "http://localhost:8080/api/v1/search/docs?q=runbook"
+
+# Load more snippets for one DAG result
+curl "http://localhost:8080/api/v1/search/dags/example/matches?q=database&cursor=<opaque-cursor>"
+
+# Load more snippets for one document result
+curl "http://localhost:8080/api/v1/search/docs/matches?path=runbooks/oncall&q=runbook&cursor=<opaque-cursor>"
+```
+
+The feed endpoints return lightweight results with preview matches, `hasMore`, and optional cursors for both additional results and additional snippets per result.
+
+### Event Logs
+
+Centralized event logs are available through `GET /event-logs` when the event store is enabled:
+
+```bash
+curl "http://localhost:8080/api/v1/event-logs?kind=dag_run&type=dag.run.failed&limit=50"
+```
+
+Supported filters include `kind`, `type`, `dagName`, `dagRunId`, `attemptId`, `sessionId`, `userId`, `model`, `startTime`, and `endTime`.
+
+The endpoint supports:
+
+- offset pagination with `limit` and `offset`
+- cursor pagination with `limit`, `paginationMode=cursor`, and `cursor`
+
+When builtin authentication is enabled, this endpoint requires a `manager` or `admin` role.
 
 ## Monitoring and Metrics
 
@@ -299,7 +351,7 @@ Common error codes:
 {
   "dags": [
     {
-      "fileName": "example.yaml",
+      "fileName": "example",
       "dag": {
         "name": "example_dag",
         "schedule": [{"expression": "0 * * * *"}],

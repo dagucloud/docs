@@ -92,7 +92,7 @@ Retrieves DAG definitions with optional filtering by name and tags.
 {
   "dags": [
     {
-      "fileName": "example.yaml",
+      "fileName": "example",
       "dag": {
         "name": "example_dag",
         "group": "default",
@@ -844,29 +844,33 @@ Gets detailed status of a specific DAG run.
 
 **Endpoint**: `GET /api/v1/dag-runs`
 
-Retrieves all DAG runs with optional filtering.
+Retrieves the newest DAG runs with forward-only cursor pagination.
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
 | name | string | Filter by DAG name | - |
-| status | integer | Filter by status (0-6) | - |
+| status | integer | Filter by status (0-8) | - |
 | fromDate | integer | Unix timestamp start | - |
 | toDate | integer | Unix timestamp end | - |
 | dagRunId | string | Filter by run ID | - |
+| limit | integer | Page size (max 500) | 100 |
+| cursor | string | Opaque cursor returned by the previous page | - |
 | tags | string | Filter by DAG tags. Comma-separated. Same syntax as DAG filtering. Supports `*` and `?` wildcards. AND logic. | - |
 | remoteNode | string | Remote node name | "local" |
 
-**Note**: This endpoint does not support pagination. All matching results are returned.
+The response includes `nextCursor` when older results are available. Repeat the same request with `cursor=<nextCursor>` to continue.
 
 **Status Values**:
 - 0: Not started
 - 1: Running
 - 2: Failed
-- 3: Cancelled
+- 3: Aborted
 - 4: Success
 - 5: Queued
 - 6: Partial Success
+- 7: Waiting
+- 8: Rejected
 
 **Response (200)**:
 ```json
@@ -917,7 +921,8 @@ Retrieves all DAG runs with optional filtering.
       "log": "/logs/ml_training_pipeline/20240211_143000_ml.log",
       "params": "{\"model\": \"recommendation_v2\", \"dataset\": \"user_interactions\"}"
     }
-  ]
+  ],
+  "nextCursor": "eyJvY2N1cnJlZEF0IjoiMjAyNC0wMi0xMVQxNDozMDowMFoiLCJkYWdSdW5JZCI6IjIwMjQwMjExXzE0MzAwMF9tbCJ9"
 }
 ```
 
@@ -1573,7 +1578,7 @@ Pushes back a Waiting step for re-execution with feedback. The step is reset to 
 
 **Endpoint**: `GET /api/v1/dags/search`
 
-Performs full-text search across DAG definitions.
+Performs full-text search across DAG definitions. This endpoint remains available for direct DAG search requests.
 
 **Query Parameters**:
 | Parameter | Type | Description | Required |
@@ -1633,6 +1638,178 @@ Performs full-text search across DAG definitions.
     }
   ],
   "errors": []
+}
+```
+
+### Search DAG Feed
+
+**Endpoint**: `GET /api/v1/search/dags`
+
+Returns lightweight cursor-based DAG search results for the global search page.
+
+**Query Parameters**:
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| q | string | Search query | Yes |
+| limit | integer | Number of results to return (max 50) | No |
+| cursor | string | Opaque cursor returned by a previous response | No |
+| remoteNode | string | Remote node name | No |
+
+Each result includes preview snippets plus `hasMoreMatches` and `nextMatchesCursor` for loading more snippets from that result.
+
+**Response (200)**:
+```json
+{
+  "results": [
+    {
+      "fileName": "database_backup",
+      "name": "database_backup",
+      "hasMoreMatches": true,
+      "nextMatchesCursor": "eyJmaWxlTmFtZSI6ImRhdGFiYXNlX2JhY2t1cCJ9",
+      "matches": [
+        {
+          "line": "    command: pg_dump ${target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
+          "lineNumber": 25,
+          "startLine": 20
+        }
+      ]
+    }
+  ],
+  "hasMore": true,
+  "nextCursor": "eyJmaWxlTmFtZSI6ImRhdGFiYXNlX2JhY2t1cCJ9"
+}
+```
+
+### Search Document Feed
+
+**Endpoint**: `GET /api/v1/search/docs`
+
+Returns lightweight cursor-based document search results for the global search page.
+
+**Query Parameters**:
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| q | string | Search query | Yes |
+| limit | integer | Number of results to return (max 50) | No |
+| cursor | string | Opaque cursor returned by a previous response | No |
+| remoteNode | string | Remote node name | No |
+
+This endpoint is available only when document management is enabled.
+
+**Response (200)**:
+```json
+{
+  "results": [
+    {
+      "id": "runbooks/oncall",
+      "title": "runbooks/oncall",
+      "hasMoreMatches": false,
+      "matches": [
+        {
+          "line": "Escalate to the database team when the replication lag exceeds 5 minutes.",
+          "lineNumber": 18,
+          "startLine": 16
+        }
+      ]
+    }
+  ],
+  "hasMore": false
+}
+```
+
+### Search DAG Match Snippets
+
+**Endpoint**: `GET /api/v1/search/dags/{fileName}/matches`
+
+Loads additional cursor-based snippets for one DAG search result.
+
+**Query Parameters**:
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| q | string | Search query | Yes |
+| limit | integer | Number of snippets to return (max 50) | No |
+| cursor | string | Opaque cursor returned by a previous snippet response | No |
+| remoteNode | string | Remote node name | No |
+
+**Response (200)**:
+```json
+{
+  "matches": [
+    {
+      "line": "description: Weekly database backup job",
+      "lineNumber": 3,
+      "startLine": 1
+    }
+  ],
+  "hasMore": false
+}
+```
+
+### Search Document Match Snippets
+
+**Endpoint**: `GET /api/v1/search/docs/matches`
+
+Loads additional cursor-based snippets for one document search result.
+
+**Query Parameters**:
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| path | string | Document path | Yes |
+| q | string | Search query | Yes |
+| limit | integer | Number of snippets to return (max 50) | No |
+| cursor | string | Opaque cursor returned by a previous snippet response | No |
+| remoteNode | string | Remote node name | No |
+
+### Event Logs
+
+**Endpoint**: `GET /api/v1/event-logs`
+
+Returns centralized operational event log entries. When builtin authentication is enabled, this endpoint requires a `manager` or `admin` role.
+
+**Query Parameters**:
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| kind | string | Event kind such as `dag_run` or `llm_usage` | No |
+| type | string | Event type such as `dag.run.failed` or `llm.usage.recorded` | No |
+| dagName | string | Filter by DAG name | No |
+| dagRunId | string | Filter by DAG run ID | No |
+| attemptId | string | Filter by attempt ID | No |
+| sessionId | string | Filter by session ID | No |
+| userId | string | Filter by user ID | No |
+| model | string | Filter by model name | No |
+| startTime | string | ISO 8601 start time filter | No |
+| endTime | string | ISO 8601 end time filter | No |
+| limit | integer | Number of entries to return (max 500) | No |
+| offset | integer | Offset for compatibility pagination | No |
+| paginationMode | string | `offset` or `cursor` | No |
+| cursor | string | Opaque cursor for older entries | No |
+| remoteNode | string | Remote node name | No |
+
+If `cursor` is provided, cursor pagination is used automatically and `offset` must be omitted.
+
+**Response (200)**:
+```json
+{
+  "entries": [
+    {
+      "id": "dag_4ac3b3b9b16bdb10",
+      "schemaVersion": 1,
+      "occurredAt": "2026-04-05T08:05:12Z",
+      "recordedAt": "2026-04-05T08:05:12Z",
+      "kind": "dag_run",
+      "type": "dag.run.failed",
+      "sourceService": "scheduler",
+      "sourceInstance": "worker-1:12345",
+      "dagName": "nightly-report",
+      "dagRunId": "20260405_080000_abc123",
+      "attemptId": "attempt-1",
+      "status": "failed",
+      "data": {
+        "trigger": "scheduler"
+      }
+    }
+  ],
+  "nextCursor": "eyJvY2N1cnJlZEF0IjoiMjAyNi0wNC0wNVQwODowNToxMloiLCJpZCI6ImRhZ180YWMzYjNiOWIxNmJkYjEwIn0"
 }
 ```
 
@@ -1971,22 +2148,19 @@ Updates the status of a step in a sub DAG run.
 
 **Endpoint**: `GET /api/v1/queues`
 
-Retrieves all execution queues with their running and queued DAG runs. Queues are organized by queue name, with two types: "custom" (explicitly defined queues) and "dag-based" (DAG name used as queue name).
+Retrieves queue summaries. Use `GET /api/v1/queues/{name}/items` to fetch paginated running or queued items for a specific queue.
 
 **Response (200)**:
 ```json
 {
   "queues": [
     {
-      "name": "etl-pipeline",
-      "type": "custom",
+      "name": "critical",
+      "type": "global",
       "maxConcurrency": 2,
-      "summary": {
-        "running": 1,
-        "queued": 2,
-        "total": 3
-      },
-      "runningDAGRuns": [
+      "runningCount": 1,
+      "queuedCount": 2,
+      "running": [
         {
           "dagRunId": "20240211_140000_abc123",
           "name": "data_processing_pipeline",
@@ -1996,37 +2170,14 @@ Retrieves all execution queues with their running and queued DAG runs. Queues ar
           "finishedAt": "",
           "log": "/logs/data_processing_pipeline/20240211_140000_abc123.log"
         }
-      ],
-      "queuedDAGRuns": [
-        {
-          "dagRunId": "20240211_143000_def456",
-          "name": "ml_training_pipeline",
-          "status": 5,
-          "statusLabel": "queued",
-          "startedAt": "",
-          "finishedAt": "",
-          "log": "/logs/ml_training_pipeline/20240211_143000_def456.log"
-        },
-        {
-          "dagRunId": "20240211_144000_ghi789",
-          "name": "analytics_pipeline",
-          "status": 5,
-          "statusLabel": "queued",
-          "startedAt": "",
-          "finishedAt": "",
-          "log": "/logs/analytics_pipeline/20240211_144000_ghi789.log"
-        }
       ]
     },
     {
       "name": "backup_job",
       "type": "dag-based",
-      "summary": {
-        "running": 1,
-        "queued": 0,
-        "total": 1
-      },
-      "runningDAGRuns": [
+      "runningCount": 1,
+      "queuedCount": 0,
+      "running": [
         {
           "dagRunId": "20240211_150000_backup",
           "name": "backup_job",
@@ -2037,24 +2188,63 @@ Retrieves all execution queues with their running and queued DAG runs. Queues ar
           "log": "/logs/backup_job/20240211_150000_backup.log"
         }
       ],
-      "queuedDAGRuns": []
+      "maxConcurrency": 1
     }
-  ]
+  ],
+  "summary": {
+    "totalQueues": 2,
+    "totalRunning": 2,
+    "totalQueued": 2,
+    "totalCapacity": 3,
+    "utilizationPercentage": 66.666664
+  }
 }
 ```
 
 **Response Fields**:
-- `queues`: Array of queue objects containing running and queued DAG runs
-- `name`: Queue name (either custom queue name or DAG name for dag-based queues)
-- `type`: Queue type - "custom" for explicitly defined queues, "dag-based" for DAG name queues
-- `max_concurrency`: Maximum concurrent runs (only present for custom queues)
-- `summary`: Count summary with running, queued, and total DAG runs
-- `runningDAGRuns`: Array of currently running DAG runs (uses DAGRunSummary schema)
-- `queuedDAGRuns`: Array of queued DAG runs waiting for execution (uses DAGRunSummary schema)
+- `queues`: Queue summary objects
+- `type`: `global` for configured global queues, `dag-based` when the DAG name itself acts as the queue
+- `running`: Only currently running DAG-runs are embedded here
+- `summary`: Capacity and utilization totals across all queues
 
-**Queue Types**:
-- **Custom**: Explicitly defined queues with configurable `max_concurrency`
-- **DAG-based**: Implicit queues where DAG name serves as the queue name
+### List Queue Items
+
+**Endpoint**: `GET /api/v1/queues/{name}/items`
+
+Returns paginated items for one queue.
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| type | string | `queued` or `running` | `queued` |
+| page | integer | Page number | 1 |
+| perPage | integer | Items per page | 50 |
+| remoteNode | string | Remote node name | "local" |
+
+**Response (200)**:
+```json
+{
+  "items": [
+    {
+      "dagRunId": "20240211_143000_def456",
+      "name": "ml_training_pipeline",
+      "status": 5,
+      "statusLabel": "queued",
+      "queuedAt": "2024-02-11T14:30:00Z",
+      "startedAt": "",
+      "finishedAt": "",
+      "log": "/logs/ml_training_pipeline/20240211_143000_def456.log"
+    }
+  ],
+  "pagination": {
+    "totalRecords": 2,
+    "currentPage": 1,
+    "totalPages": 2,
+    "nextPage": 2,
+    "prevPage": null
+  }
+}
+```
 
 **Error Response (500)**:
 ```json
@@ -2070,7 +2260,7 @@ Retrieves all execution queues with their running and queued DAG runs. Queues ar
 
 **Endpoint**: `GET /api/v1/dag-runs/{name}`
 
-Lists all DAG runs for a specific DAG name.
+Lists DAG runs for a specific DAG name using forward-only cursor pagination.
 
 **Path Parameters**:
 | Parameter | Type | Description |
@@ -2080,11 +2270,15 @@ Lists all DAG runs for a specific DAG name.
 **Query Parameters**:
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| status | integer | Filter by status (0-6) | - |
+| status | integer | Filter by status (0-8) | - |
 | fromDate | integer | Unix timestamp start | - |
 | toDate | integer | Unix timestamp end | - |
 | dagRunId | string | Filter by run ID | - |
+| limit | integer | Page size (max 500) | 100 |
+| cursor | string | Opaque cursor returned by the previous page | - |
 | remoteNode | string | Remote node name | "local" |
+
+Use `nextCursor` from the previous response to continue loading older runs.
 
 **Response (200)**:
 ```json
@@ -2120,7 +2314,8 @@ Lists all DAG runs for a specific DAG name.
       "log": "/logs/data_processing_pipeline/20240211_020000_def456.log",
       "params": "{\"date\": \"2024-02-11\", \"env\": \"production\", \"batch_size\": 5000}"
     }
-  ]
+  ],
+  "nextCursor": "eyJvY2N1cnJlZEF0IjoiMjAyNC0wMi0xMVQxNDowMDowMFoiLCJkYWdSdW5JZCI6IjIwMjQwMjExXzE0MzAwMF9tbCJ9"
 }
 ```
 
@@ -2410,8 +2605,8 @@ curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
 curl "http://localhost:8080/api/v1/dag-runs?status=2&fromDate=$(date -d '24 hours ago' +%s)" \
      -H "Authorization: Bearer your-token"
 
-# Get DAG runs for a specific DAG with pagination
-curl "http://localhost:8080/api/v1/dag-runs?name=data-processing-pipeline&page=2&perPage=20" \
+# Get DAG runs for a specific DAG with cursor pagination
+curl "http://localhost:8080/api/v1/dag-runs?name=data-processing-pipeline&limit=20" \
      -H "Authorization: Bearer your-token"
 
 # Search for DAGs with specific tags
@@ -2428,6 +2623,10 @@ curl "http://localhost:8080/api/v1/dag-runs?status=5" \
 
 # View all execution queues with running and queued DAG runs
 curl "http://localhost:8080/api/v1/queues" \
+     -H "Authorization: Bearer your-token"
+
+# Load queued items from one queue
+curl "http://localhost:8080/api/v1/queues/default/items?type=queued&page=1&perPage=20" \
      -H "Authorization: Bearer your-token"
 ```
 

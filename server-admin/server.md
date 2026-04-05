@@ -50,10 +50,12 @@ paths:
   data_dir: "~/.local/share/dagu/data"               # Application data
   suspend_flags_dir: "~/.local/share/dagu/suspend"    # Suspend flags
   admin_logs_dir: "~/.local/share/dagu/logs/admin"    # Admin logs
+  event_store_dir: ""                                 # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"            # Base configuration
   dag_runs_dir: ""                                    # Auto: {data_dir}/dag-runs
   queue_dir: ""                                      # Auto: {data_dir}/queue
   proc_dir: ""                                       # Auto: {data_dir}/proc
+  contexts_dir: ""                                   # Auto: {data_dir}/contexts
   executable: ""                                    # Auto: current executable
 
 # Permissions
@@ -123,6 +125,11 @@ audit:
   enabled: true               # Enable audit logging (default: true)
   retention_days: 7            # Days to keep audit logs (default: 7, 0 = keep forever)
 
+# Centralized Event Store
+event_store:
+  enabled: true               # Enable centralized event logging (default: true)
+  retention_days: 3            # Days to keep event log files (default: 3, 0 = keep forever)
+
 # Session Storage
 session:
   max_per_user: 100            # Max sessions per user (default: 100, 0 = unlimited)
@@ -142,12 +149,12 @@ queues:
 remote_nodes:
   - name: "staging"
     api_base_url: "https://staging.example.com/api/v1"
-    is_basic_auth: true
+    auth_type: "basic"
     basic_auth_username: "admin"
     basic_auth_password: "password"
   - name: "production"
     api_base_url: "https://prod.example.com/api/v1"
-    is_auth_token: true
+    auth_type: "token"
     auth_token: "prod-token"
     skip_tls_verify: false
 ```
@@ -171,6 +178,8 @@ All options support `DAGU_` prefix:
 - `DAGU_DAGS_DIR` - DAGs directory
 - `DAGU_LOG_DIR` - Logs
 - `DAGU_DATA_DIR` - Data
+- `DAGU_EVENT_STORE_DIR` - Centralized event log directory
+- `DAGU_CONTEXTS_DIR` - CLI contexts directory
 
 **Auth:**
 - `DAGU_AUTH_MODE` - Auth mode: `none`, `basic`, or `builtin` (default: `builtin`)
@@ -206,6 +215,10 @@ All options support `DAGU_` prefix:
 **Audit Logging:**
 - `DAGU_AUDIT_ENABLED` - Enable audit logging (default: `true`)
 - `DAGU_AUDIT_RETENTION_DAYS` - Days to keep audit logs (default: `7`, `0` = keep forever)
+
+**Event Store:**
+- `DAGU_EVENT_STORE_ENABLED` - Enable centralized event logging (default: `true`)
+- `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `3`, `0` = keep forever)
 
 **Session Storage:**
 - `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
@@ -387,13 +400,13 @@ export DAGU_UI_LOG_ENCODING_CHARSET="shift_jis"
 remote_nodes:
   - name: "production"
     api_base_url: "https://prod.example.com/api/v1"
-    is_basic_auth: true
+    auth_type: "basic"
     basic_auth_username: "admin"
     basic_auth_password: "${PROD_PASSWORD}"
 
   - name: "staging"
     api_base_url: "https://staging.example.com/api/v1"
-    is_auth_token: true
+    auth_type: "token"
     auth_token: "${STAGING_TOKEN}"
 ```
 
@@ -599,6 +612,30 @@ Audit logs are stored as daily JSONL files in `{admin_logs_dir}/audit/`:
 ```
 
 Logs can be viewed through the web UI at Settings > Audit Logs.
+
+## Event Store
+
+The centralized event store persists operational events such as DAG-run outcomes and LLM usage records. It is enabled by default in `dagu server` and `dagu start-all`.
+
+The `/api/v1/event-logs` endpoint reads from this store, and the Slack and Telegram DAG-run monitors use it when available.
+
+### Configuration
+
+```yaml
+event_store:
+  enabled: true
+  retention_days: 3
+```
+
+Or via environment variables:
+```bash
+export DAGU_EVENT_STORE_ENABLED=true
+export DAGU_EVENT_STORE_RETENTION_DAYS=7
+```
+
+### Storage
+
+Event log files are stored under `{admin_logs_dir}/events/`. The collector writes JSONL files and removes old data according to `event_store.retention_days`.
 
 ## Session Storage
 

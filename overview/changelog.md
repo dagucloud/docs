@@ -1,5 +1,56 @@
 # Changelog
 
+## v2.4.2 (2026-04-05)
+
+### Added
+
+- feat: improve queue browsing and dequeue reliability ([#1967](https://github.com/dagu-org/dagu/pull/1967))
+- feat: paginate cockpit and dashboard DAG runs ([#1969](https://github.com/dagu-org/dagu/pull/1969))
+
+### Fixed
+
+- fix: replace app live polling with event-driven SSE updates ([#1968](https://github.com/dagu-org/dagu/pull/1968))
+- fix(chart): restore helm release publishing
+- fix: use dagucloud container image
+
+**Full Changelog**: [v2.4.1...v2.4.2](https://github.com/dagu-org/dagu/compare/v2.4.1...v2.4.2)
+
+## v2.4.1 (2026-04-04)
+
+### Fixed
+
+- fix: route reschedule through enqueue ([#1966](https://github.com/dagu-org/dagu/pull/1966))
+
+**Full Changelog**: [v2.4.0...v2.4.1](https://github.com/dagu-org/dagu/compare/v2.4.0...v2.4.1)
+
+## v2.4.0 (2026-04-04)
+
+### Added
+
+- feat: add centralized event store ([#1885](https://github.com/dagu-org/dagu/pull/1885))
+- feat: add kubernetes step executor and DAG defaults ([#1886](https://github.com/dagu-org/dagu/pull/1886))
+- feat: add inline JSON Schema validation for DAG params ([#1887](https://github.com/dagu-org/dagu/pull/1887))
+- feat: support OpenAI Codex auth and reasoning effort in agent settings ([#1921](https://github.com/dagu-org/dagu/pull/1921))
+- feat: add configurable env passthrough for step execution ([#1925](https://github.com/dagu-org/dagu/pull/1925))
+- feat: add configurable automatic update checks ([#1941](https://github.com/dagu-org/dagu/pull/1941))
+- feat: replace CLI remote nodes with contexts ([#1949](https://github.com/dagu-org/dagu/pull/1949))
+- feat: add cursor pagination for dag runs ([#1952](https://github.com/dagu-org/dagu/pull/1952))
+- feat: show next scheduled dag run in details ([#1953](https://github.com/dagu-org/dagu/pull/1953))
+- feat: add event feed UI and harden event-driven bot notifications ([#1946](https://github.com/dagu-org/dagu/pull/1946))
+
+### Fixed
+
+- fix: allow keyless local agent setup ([#1936](https://github.com/dagu-org/dagu/pull/1936))
+- fix: preserve inline schema params metadata and legacy map handling ([#1923](https://github.com/dagu-org/dagu/pull/1923))
+- fix: preserve kubernetes discovery env for worker command steps ([#1924](https://github.com/dagu-org/dagu/pull/1924))
+- fix: redesign global search with cursor feeds ([#1945](https://github.com/dagu-org/dagu/pull/1945))
+- fix: stop dashboard and cockpit dag run refetch loop ([#1954](https://github.com/dagu-org/dagu/pull/1954))
+- fix: preserve dashboard timeline state on refresh
+- fix: inherit DAG type from base config before build ([#1964](https://github.com/dagu-org/dagu/pull/1964))
+- fix: reschedule inline DAG run snapshots correctly ([#1965](https://github.com/dagu-org/dagu/pull/1965))
+
+**Full Changelog**: [v2.3.11...v2.4.0](https://github.com/dagu-org/dagu/compare/v2.3.11...v2.4.0)
+
 ## v2.3.11 (2026-03-30)
 
 ### Added

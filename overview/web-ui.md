@@ -13,7 +13,7 @@ Dagu includes a modern, responsive web UI that provides:
 - Interactive DAG management (start, stop, retry, etc.)
 - Cockpit: workspace-scoped kanban view of DAG runs
 - Web-based terminal (optional)
-- Audit logging for security events
+- Audit logs and centralized event logs
 
 ::: tip Configuration
 For Web UI configuration options, see [Configuration Reference](/server-admin/reference#ui-configuration).
@@ -213,13 +213,16 @@ permissions:
 
 ## Search
 
-The search functionality allows you to search for specific text across all DAGs in your system, making it easy to find workflows by content, variables, or any other text within the DAG definitions.
+The Search page (`/search`) provides cursor-based full-text search with two scopes:
+
+- **DAGs**: searches DAG definitions and returns lightweight results with preview snippets
+- **Docs**: searches managed markdown documents and returns lightweight results with preview snippets
+
+Each result can load additional snippets on demand through **Show more matches**, and the page supports infinite loading for more results.
 
 ![Search](/search.png)
 
-### Global Search
-- Search across all DAGs
-- Find by name, tags, or content
+The **Docs** scope is available only when document management is enabled on the server. When it is unavailable, the page returns a permission error instead of silently falling back.
 
 ## System Status
 
@@ -366,6 +369,22 @@ export DAGU_AUDIT_ENABLED=false
 
 See [Audit Logging Configuration](/server-admin/server#audit-logging) for more details.
 
+## Event Logs
+
+The Event Logs page (`/event-logs`) shows centralized operational events recorded by the event store.
+
+The current page focuses on DAG-run events and supports filtering by:
+
+- outcome type
+- DAG name
+- DAG run ID
+- attempt ID
+- time range
+
+The feed uses cursor pagination. Newer entries auto-refresh while you are at the head of the feed; loading older entries switches the page into manual historical browsing.
+
+When builtin authentication is enabled, viewing event logs requires a `manager` or `admin` role.
+
 ## UI Customization
 
 ### Branding
@@ -394,15 +413,15 @@ Monitor multiple Dagu instances:
 remote_nodes:
   - name: staging
     api_base_url: https://staging.example.com/api/v1
+    auth_type: basic
+    basic_auth_username: admin
+    basic_auth_password: ${STAGING_PASSWORD}
 
   - name: production
     api_base_url: https://prod.example.com/api/v1
+    auth_type: token
     auth_token: ${PROD_TOKEN}
 ```
-
-### Features
-- Unified dashboard
-- Centralized management
 
 ## Security Considerations
 
@@ -411,15 +430,6 @@ remote_nodes:
 tls:
   cert_file: /path/to/cert.pem
   key_file: /path/to/key.pem
-```
-
-### CORS Configuration
-Configure for API access from different domains:
-```yaml
-cors:
-  enabled: true
-  allowedOrigins:
-    - https://app.example.com
 ```
 
 ## See Also

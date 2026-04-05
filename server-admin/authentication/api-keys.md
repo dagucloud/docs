@@ -132,7 +132,7 @@ API keys can authenticate requests from other Dagu servers configured as [remote
 remote_nodes:
   - name: production
     api_base_url: https://prod.example.com/api/v1
-    is_auth_token: true
+    auth_type: token
     auth_token: dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B
 ```
 

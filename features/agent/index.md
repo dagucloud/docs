@@ -87,7 +87,7 @@ The agent tool registry currently includes these tools. Skills and remote-node t
 | `use_skill` | Execute a skill from the skill store (when skills are configured) |
 | `search_skills` | Search available skills by query (when skills are configured) |
 | `remote_agent` | Delegate tasks to agents on remote nodes (when remote nodes are configured) |
-| `list_remote_nodes` | List available remote nodes (when remote nodes are configured) |
+| `list_contexts` | List available remote nodes for `remote_agent` (when remote nodes are configured) |
 
 Provider-native web search is configured separately in agent settings. It is not exposed as a standalone tool.
 

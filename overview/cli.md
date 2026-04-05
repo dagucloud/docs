@@ -27,6 +27,27 @@ dagu start --help
 dagu version
 ```
 
+## Remote Contexts
+
+The CLI can route context-aware commands to a remote Dagu server through named CLI contexts.
+
+```bash
+# Register a remote server
+dagu context add staging \
+  --server https://staging.example.com \
+  --api-key dagu_xxxxxxxxxxxxxxxxxxxx
+
+# Use it for later commands
+dagu context use staging
+
+# Or target it explicitly for one command
+dagu --context staging status nightly-backup
+```
+
+Only these commands are context-aware: `start`, `enqueue`, `status`, `history`, `stop`, `retry`, `restart`, and `dequeue`.
+
+Remote contexts only work with DAGs that already exist on the remote server. Local YAML paths are rejected.
+
 ## Essential Commands
 
 ### Running Workflows

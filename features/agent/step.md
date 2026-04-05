@@ -120,8 +120,8 @@ The agent step has access to these tools:
 | `think` | Record reasoning without executing actions |
 | `use_skill` | Execute a skill from the skill store (available when skills are configured) |
 | `search_skills` | Search available skills by query (available when skills are configured) |
-| `remote_agent` | Delegate tasks to agents on remote nodes (available when remote nodes are configured) |
-| `list_remote_nodes` | List available remote nodes (available when remote nodes are configured) |
+| `remote_agent` | Delegate tasks to agents through remote CLI contexts (available when contexts are configured) |
+| `list_contexts` | List available remote CLI contexts for `remote_agent` (available when contexts are configured) |
 | `output` | Write the final result to stdout (step-only, see [Output Capture](#output-capture)) |
 
 The `navigate`, `ask_user`, and `delegate` tools are not available in agent steps because they require the Web UI.

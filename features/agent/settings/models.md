@@ -24,7 +24,7 @@ The table shows:
 - `ID`
 - `Provider`
 - `Model`
-- Whether an API key is configured
+- Credential status
 - Which model is the default
 
 From the row menu, you can:
@@ -57,6 +57,7 @@ The current Web UI form includes these fields:
 | `Input Cost / 1M tokens` | Optional pricing metadata |
 | `Output Cost / 1M tokens` | Optional pricing metadata |
 | `Supports Thinking` | Optional capability metadata |
+| `Reasoning Effort` | Optional default thinking depth. Shown only when `Supports Thinking` is enabled. Stored as `low`, `medium`, `high`, or `xhigh`; empty uses the provider default. |
 
 ## ID Behavior
 
@@ -70,12 +71,22 @@ The current Web UI provider dropdown offers:
 
 - `Anthropic`
 - `OpenAI`
+- `OpenAI Codex`
 - `Google Gemini`
 - `OpenRouter`
 - `Local`
 - `Z.AI`
 
 If presets are available, the create form also shows **Import from Preset**.
+
+## Credential Handling
+
+The model form currently supports two credential modes:
+
+- **Direct credential providers**: `anthropic`, `openai`, `gemini`, `openrouter`, `local`, and `zai` use the `API Key` field. `local` keeps this optional.
+- **Subscription-backed provider**: `openai-codex` hides `API Key` and `Base URL` and instead shows a connection card for the OpenAI Codex login flow.
+
+For `openai-codex`, the current Web UI requires an active connection before the model can be saved. The table's **Credential** column shows `Subscription` when that provider is connected.
 
 ## Local Models
 
@@ -104,6 +115,7 @@ For example:
 
 - `Base URL` changes where requests are sent
 - Pricing fields are stored as model metadata used by Dagu
+- `Thinking Effort` is stored as model metadata and used only when the request path enables thinking mode for that model
 - Some fields are capability or UI metadata rather than provider-native knobs
 
 When the exact runtime behavior matters, use the provider-specific documentation for that path. For local models, see [Local AI](/features/chat/local-ai).

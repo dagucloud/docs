@@ -6,7 +6,9 @@ The Dagu agent is an LLM-powered assistant integrated into the Web UI. It can re
 
 1. **Enable the agent** — Toggle it on in the Web UI at `/agent-settings`, or set the environment variable `DAGU_AGENT_ENABLED=true`.
 
-2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `gemini`, `openrouter`, `zai`, `local` (Ollama, vLLM, etc.).
+2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `openai-codex`, `gemini`, `openrouter`, `zai`, `local` (Ollama, vLLM, etc.).
+
+   For `openai-codex`, connect the ChatGPT Plus/Pro subscription in the model form before saving the model.
 
 3. **Set a default model** — Click the star icon next to a model to make it the default.
 
@@ -32,7 +34,7 @@ The agent can use these built-in tools. Some are only available when the corresp
 | `use_skill` | Execute a skill from the skill store (when skills are configured) |
 | `search_skills` | Search available skills by query (when skills are configured) |
 | `remote_agent` | Delegate tasks to agents on remote nodes (when remote nodes are configured) |
-| `list_remote_nodes` | List available remote nodes (when remote nodes are configured) |
+| `list_contexts` | List available remote nodes for `remote_agent` (when remote nodes are configured) |
 
 Provider-native web search is configured in model and agent settings rather than exposed as a separate callable tool.
 
