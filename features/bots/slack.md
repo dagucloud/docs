@@ -232,7 +232,7 @@ The bot tracks token usage across all messages in a session. When total tokens e
 
 ## DAG Run Notifications
 
-When a `DAGRunStore` is available (it is in both `server` and `start-all` modes), the bot starts a DAG run monitor that polls for completed runs and sends notifications.
+When the centralized event store is available (the default in both `server` and `start-all` modes), the bot starts a DAG run monitor that reads persisted DAG-run events and sends notifications. If the event store is disabled or unavailable, Slack chat works normally but DAG-run notifications stay disabled.
 
 ### Monitored statuses
 
@@ -247,11 +247,11 @@ Notifications are sent for these DAG run statuses:
 
 ### How notifications work
 
-1. The monitor polls every **10 seconds** for runs with the above statuses from the last hour.
-2. On startup, it seeds its "seen" set with all completed runs from the last 24 hours to avoid notifying about old runs.
+1. The monitor polls the event store every **10 seconds** and reads only new DAG-run events, using durable on-disk state so restarts do not lose pending notifications.
+2. On first startup, it seeds its cursor at the current event-store head, so existing channels only receive future events.
 3. For each new completion, it creates a **dedicated agent session** per allowed channel, sends a structured prompt with the run details (DAG name, status, error, start/finish times, step results), and waits for the agent to generate a notification message (up to **10 minutes**).
 4. The notification session is **adopted** as the channel's active session, so users can send follow-up messages like "show me the logs" or "retry it".
-5. Seen entries are evicted after **2 hours**.
+5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.
 
 ### Fallback
 
