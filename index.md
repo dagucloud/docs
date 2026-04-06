@@ -5,7 +5,7 @@ layout: doc
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Local-first Workflow Engine</h2>
+  <h2>Local-first Workflow Engine with AI-agents</h2>
   <p>Declarative, self-contained, and air-gapped ready. One binary that scales from laptop to distributed cluster.</p>
 </div>
 
