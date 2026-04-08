@@ -151,7 +151,7 @@ schedule:
 | `timeout_sec` | integer | Workflow timeout in seconds | `0` (no timeout) |
 | `delay_sec` | integer | Initial delay before start (seconds) | `0` |
 | `max_clean_up_time_sec` | integer | Max cleanup time (seconds) | `5` |
-| `preconditions` | array | Workflow-level preconditions | - |
+| `preconditions` | string/array | Workflow-level preconditions | - |
 | `retry_policy` | object | Scheduler-driven retry policy for the whole DAG | - |
 | `run_config` | object | User interaction controls when starting DAG | - |
 
@@ -200,11 +200,13 @@ The `defaults` block accepts the following fields:
 | `mail_on_error` | boolean | Default mail-on-error flag for all steps |
 | `signal_on_stop` | string | Default signal sent when a step is stopped |
 | `env` | array/object | Environment variables prepended to each step's own `env` |
-| `preconditions` | array | Preconditions prepended to each step's own `preconditions` |
+| `preconditions` | string/array | Preconditions prepended to each step's own `preconditions` |
+| `agent` | object | Default agent configuration merged per field into a step's `agent` block. See [Agent Step](/features/agent/step#dag-level-defaults). |
 
 **Merge rules:**
 
 - **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): Applied only when the step does not set its own value. A step-level value fully replaces the default.
+- **Agent fields** (`agent`): Applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `skills`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 - **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both the default and step values are present at runtime.
 
 Unknown keys inside `defaults` cause a validation error.
@@ -915,8 +917,8 @@ steps:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `preconditions` | array | Conditions to check before execution | - |
-| `continue_on` | object | Continue workflow on certain conditions | - |
+| `preconditions` | string/array | Conditions to check before execution | - |
+| `continue_on` | string/object | Continue workflow on certain conditions | - |
 
 #### ContinueOn Fields
 

@@ -17,7 +17,8 @@ The `defaults` block accepts the following fields:
 | `mail_on_error` | boolean | Send email on step error |
 | `signal_on_stop` | string | Signal sent when a step is stopped |
 | `env` | array/object | Environment variables added to each step |
-| `preconditions` | array | Preconditions added to each step |
+| `preconditions` | string/array | Preconditions added to each step |
+| `agent` | object | Agent configuration merged per field into a step's `agent` block |
 
 See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults) for the field reference.
 
@@ -33,8 +34,11 @@ See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#s
 | `signal_on_stop` | Step value replaces default |
 | `env` | Default entries prepended before step entries |
 | `preconditions` | Default entries prepended before step entries |
+| `agent` | Step `agent.<field>` value replaces the matching default subfield |
 
 **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): The default is applied only when the step does not set its own value. When a step defines the field, the step's value is used entirely — there is no field-level merging within the object.
+
+**Agent fields** (`agent`): Defaults are applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `skills`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 
 **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both sets are present at runtime.
 
@@ -169,6 +173,33 @@ handler_on:
     # timeout_sec: 300 (inherited)
 ```
 
+### Agent Defaults
+
+Use `defaults.agent` to share agent-step configuration across steps:
+
+```yaml
+defaults:
+  agent:
+    model: claude-sonnet
+    soul: reviewer
+    max_iterations: 30
+
+steps:
+  - type: agent
+    messages:
+      - role: user
+        content: "Review the failing workflow"
+    # Inherits model, soul, and max_iterations
+
+  - type: agent
+    agent:
+      model: claude-opus
+    messages:
+      - role: user
+        content: "Summarize the review"
+    # Overrides only model; still inherits soul and max_iterations
+```
+
 ### Combined Example
 
 A realistic workflow using multiple default fields with a step override:
@@ -211,4 +242,5 @@ The `defaults` field is a DAG-level field. When set in [base configuration](/ser
 
 - [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults) — Field reference
 - [Error Handling](/writing-workflows/error-handling) — `retry_policy`, `continue_on` usage
+- [Agent Step](/features/agent/step) — `agent` fields and DAG-level agent defaults
 - [Base Configuration](/server-admin/base-config) — Shared defaults across all DAGs
