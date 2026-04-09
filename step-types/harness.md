@@ -19,6 +19,36 @@ steps:
 
 The `command` field is the prompt sent to the coding agent. The `config.provider` field is required. All other config keys are passed directly as CLI flags (`--key value` for strings/numbers, `--key` for booleans).
 
+## DAG-level Defaults
+
+You can define a top-level `harness:` block to share default provider settings across all harness steps:
+
+```yaml
+harness:
+  provider: claude
+  model: sonnet
+  bare: true
+  fallback:
+    - provider: codex
+      full-auto: true
+
+steps:
+  - command: "Write tests for the auth module" # inferred as type: harness
+
+  - type: harness
+    command: "Fix the flaky integration tests"
+    config:
+      model: opus
+      effort: high
+```
+
+Merge rules:
+
+- DAG-level `harness:` is the base config for every harness step.
+- Step-level `config:` overrides the primary DAG-level keys on conflict.
+- Step-level `fallback:` replaces the DAG-level fallback list; it is not merged.
+- If a DAG has `harness:` and a step omits `type:`, Dagu treats that step as `type: harness`.
+
 ## Providers
 
 Each provider maps to a specific CLI tool and its non-interactive invocation mode:
@@ -33,7 +63,7 @@ Each provider maps to a specific CLI tool and its non-interactive invocation mod
 
 ## How Config Maps to CLI Flags
 
-Config keys (except `provider`) are converted to CLI flags:
+Config keys are converted to CLI flags unless they are reserved by the harness executor.
 
 | YAML type | CLI output | Example |
 |-----------|-----------|---------|
@@ -43,7 +73,60 @@ Config keys (except `provider`) are converted to CLI flags:
 | `key: 123` | `--key 123` | `max-turns: 20` → `--max-turns 20` |
 | `key: [a, b]` | `--key a --key b` | *(repeated flag)* |
 
+Reserved keys are not passed through as CLI flags:
+
+- `provider`
+- `binary`
+- `prompt_args`
+- `fallback`
+
 Config keys are the exact CLI flag names without the `--` prefix. Refer to each provider's CLI documentation for available flags.
+
+## Fallbacks
+
+Use `config.fallback` to provide alternative provider configs that are tried in order if the primary attempt fails:
+
+```yaml
+steps:
+  - name: implement
+    type: harness
+    command: "Implement the feature and add tests"
+    config:
+      provider: claude
+      model: sonnet
+      bare: true
+      fallback:
+        - provider: codex
+          full-auto: true
+        - provider: copilot
+          yolo: true
+          silent: true
+```
+
+Fallback behavior:
+
+- Dagu tries the primary provider first, then each fallback in order.
+- If the step context is cancelled (timeout, DAG stop), remaining fallbacks are skipped.
+- Only the successful attempt's stdout is emitted as the step output.
+- Stderr from every attempt remains visible in the step logs.
+
+## Custom Binaries
+
+Use `binary` and `prompt_args` when the CLI is not one of the built-in providers:
+
+```yaml
+steps:
+  - name: custom-agent
+    type: harness
+    command: "Summarize the repository status"
+    config:
+      binary: gemini
+      prompt_args: ["-p"]
+      model: gemini-2.5-pro
+      yolo: true
+```
+
+Specify either `provider` or `binary`, not both.
 
 ## Stdin Piping
 
@@ -167,12 +250,13 @@ steps:
 
 ### Variable Substitution in Config
 
-Config values support `${VAR}` expansion:
+Config values support `${VAR}` expansion, including `provider`. Interpolated scalar strings such as `"true"` and `"10"` are coerced before flags are generated, so parameterized booleans and numbers work the same way as literal YAML values.
 
 ```yaml
 env:
   - MODEL: sonnet
   - PROVIDER: claude
+  - FULL_AUTO: true
 
 steps:
   - name: task
@@ -181,6 +265,7 @@ steps:
     config:
       provider: "${PROVIDER}"
       model: "${MODEL}"
+      full-auto: "${FULL_AUTO}"
       effort: high
 ```
 

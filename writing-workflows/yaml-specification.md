@@ -538,6 +538,52 @@ When configured at the DAG level, all chat steps inherit the LLM configuration. 
 
 See [Chat Executor](/features/chat/) for full documentation.
 
+### Harness Configuration
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `harness` | object | Default harness configuration for coding-agent steps | - |
+
+```yaml
+harness:
+  provider: claude
+  model: sonnet
+  bare: true
+  fallback:
+    - provider: codex
+      full-auto: true
+    - provider: copilot
+      yolo: true
+      silent: true
+
+steps:
+  - command: "Write tests" # inferred as type: harness
+
+  - type: harness
+    command: "Fix bugs"
+    config:
+      model: opus
+      effort: high
+```
+
+When configured at the DAG level, harness steps inherit the root `harness:` block.
+
+- Steps with `type: harness` inherit the DAG-level primary config.
+- Steps without an explicit `type:` are treated as `type: harness` when `harness:` is present.
+- Step-level `config:` overrides DAG-level primary keys on conflict.
+- Step-level `fallback:` replaces the DAG-level fallback list instead of merging with it.
+
+The `harness:` block accepts the same fields as step-level harness `config:`:
+
+- `provider` for built-in providers such as `claude`, `codex`, `copilot`, `opencode`, and `pi`
+- `binary` and `prompt_args` for custom CLIs
+- arbitrary CLI flag keys passed through to the provider
+- `fallback`, an ordered list of alternative provider configs
+
+Reserved keys `provider`, `binary`, `prompt_args`, and `fallback` are consumed by the harness executor and are not passed through as CLI flags.
+
+See [Harness Step](/step-types/harness) for provider details, fallback behavior, and examples.
+
 ### Redis Configuration
 
 | Field | Type | Description | Default |
