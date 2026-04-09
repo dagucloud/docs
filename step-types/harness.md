@@ -158,7 +158,7 @@ steps:
     command: "Run the test suite, identify failures, and fix them"
     config:
       provider: codex
-      model: gpt-5.4
+      model: gpt-5-codex
       effort: high
       sandbox: workspace-write
       ephemeral: true
