@@ -38,7 +38,7 @@ See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#s
 
 **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): The default is applied only when the step does not set its own value. When a step defines the field, the step's value is used entirely — there is no field-level merging within the object.
 
-**Agent fields** (`agent`): Defaults are applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `skills`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
+**Agent fields** (`agent`): Defaults are applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 
 **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both sets are present at runtime.
 

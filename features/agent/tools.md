@@ -139,13 +139,11 @@ Spawn sub-agents that execute tasks in parallel.
 |-----------|------|----------|-------------|
 | `tasks` | array | Yes | List of sub-task objects (max: 8) |
 | `tasks[].task` | string | Yes | Description of the sub-task for the sub-agent |
-| `tasks[].skills` | string[] | No | Skill IDs to pre-load into the sub-agent context |
 
 Each sub-agent:
 - Runs in a separate session linked to the parent via `ParentSessionID`
 - Receives the same system prompt and all tools except `delegate`, `ask_user`, and `navigate`
 - Does not receive the parent conversation history
-- Can start with specific skills pre-loaded via `tasks[].skills`
 - Executes its full tool-calling loop, then returns its last assistant text response as a summary to the parent
 
 Sub-agents inherit the tool policy configured in agent settings. In safe mode, bash commands denied with `ask_user` behavior are also denied because the approval prompt cannot be delivered to the user.
@@ -189,43 +187,11 @@ Task descriptions in the output are truncated to 60 characters.
       "task": "Run 'df -h' and report any filesystems above 80% usage"
     },
     {
-      "task": "Read /opt/app/config/cron.yaml and verify all cron expressions are valid",
-      "skills": ["linux-ops"]
+      "task": "Read /opt/app/config/cron.yaml and verify all cron expressions are valid"
     }
   ]
 }
 ```
-
----
-
-## use_skill
-
-Load knowledge from a configured skill.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `skill_id` | string | Yes | Skill ID to load |
-
-**Availability**: Only shown when a skill store is configured.
-
-**Output**: The tool returns the skill knowledge wrapped in a `<skill ...>` block for the model to use in the current task.
-
----
-
-## search_skills
-
-Search configured skills by keyword or tag without loading full skill content.
-
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `query` | string | No | | Keyword matched against name, description, and tags |
-| `tags` | string[] | No | | Tags that must all match |
-| `page` | integer | No | 1 | Page number |
-| `per_page` | integer | No | 50 | Results per page (max: 200) |
-
-**Availability**: Only shown when a skill store is configured.
-
-**Output**: Paginated skill summaries including ID, name, description, and tags.
 
 ---
 

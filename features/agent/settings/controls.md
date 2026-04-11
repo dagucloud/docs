@@ -20,7 +20,7 @@ Examples include:
 - `ask_user`
 - `delegate`
 
-The exact tool list is loaded from the backend. Skill-related tools and remote-node tools only appear when those features are configured.
+The exact tool list is loaded from the backend. Remote-node tools only appear when remote nodes are configured.
 
 See [Tools Reference](/features/agent/tools) for what each tool does.
 

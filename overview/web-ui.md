@@ -69,7 +69,7 @@ Click the **Agent** button at the bottom-left corner of any page.
 - Execute shell commands subject to the configured bash policy
 - Read files and edit repository content
 - Navigate to UI pages
-- Use skills or remote nodes when those features are configured
+- Delegate tasks to remote nodes when configured
 
 ### Configuration
 

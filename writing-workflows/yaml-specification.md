@@ -206,7 +206,7 @@ The `defaults` block accepts the following fields:
 **Merge rules:**
 
 - **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): Applied only when the step does not set its own value. A step-level value fully replaces the default.
-- **Agent fields** (`agent`): Applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `skills`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
+- **Agent fields** (`agent`): Applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 - **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both the default and step values are present at runtime.
 
 Unknown keys inside `defaults` cause a validation error.

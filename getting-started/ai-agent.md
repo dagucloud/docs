@@ -31,8 +31,6 @@ The agent can use these built-in tools. Some are only available when the corresp
 | `navigate` | Open pages in the Dagu UI |
 | `ask_user` | Prompt the user with options or free-text input |
 | `delegate` | Spawn sub-agents for parallel tasks |
-| `use_skill` | Execute a skill from the skill store (when skills are configured) |
-| `search_skills` | Search available skills by query (when skills are configured) |
 | `remote_agent` | Delegate tasks to agents on remote nodes (when remote nodes are configured) |
 | `list_contexts` | List available remote nodes for `remote_agent` (when remote nodes are configured) |
 
