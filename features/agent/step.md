@@ -46,7 +46,6 @@ steps:
 |-------|------|---------|-------------|
 | `model` | string | global default | Model ID from Agent Settings. Overrides the default model for this step. |
 | `tools` | object | — | Tool selection and bash policy. See [Tools](#tools). |
-| `skills` | string[] | — | Skill IDs the agent is allowed to use. If omitted, falls back to globally enabled skills. |
 | `soul` | string | — | Soul ID for this step's identity. When omitted, inherits from `defaults.agent.soul`. |
 | `memory` | object | `{ enabled: false }` | When `enabled: true`, loads global and per-DAG memory into the agent context. See [Memory](/features/agent/memory). |
 | `prompt` | string | — | Additional instructions appended to the built-in system prompt. |
@@ -99,7 +98,6 @@ steps:
 |-------|------|-------------|
 | `model` | string | Default model ID for agent steps |
 | `tools` | object | Default tool selection and bash policy |
-| `skills` | string[] | Default skill IDs |
 | `soul` | string | Default soul ID |
 | `memory` | object | Default memory configuration |
 | `prompt` | string | Default additional system prompt instructions |
@@ -118,8 +116,6 @@ The agent step has access to these tools:
 | `read` | Read file contents with line numbers (max 1MB, 2000 lines default) |
 | `patch` | Create, edit, or delete files |
 | `think` | Record reasoning without executing actions |
-| `use_skill` | Execute a skill from the skill store (available when skills are configured) |
-| `search_skills` | Search available skills by query (available when skills are configured) |
 | `remote_agent` | Delegate tasks to agents through remote CLI contexts (available when contexts are configured) |
 | `list_contexts` | List available remote CLI contexts for `remote_agent` (available when contexts are configured) |
 | `output` | Write the final result to stdout (step-only, see [Output Capture](#output-capture)) |

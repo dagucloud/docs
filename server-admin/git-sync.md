@@ -1,6 +1,6 @@
 # Git Sync
 
-Git Sync synchronizes local DAG files and agent files (memory, skills, souls) with a remote Git repository.
+Git Sync synchronizes local DAG files and agent files (memory, souls) with a remote Git repository.
 
 ## Tracked Files and Item IDs
 
@@ -12,7 +12,6 @@ Git Sync tracks items by `itemId` — the file path relative to the DAGs directo
 | `subdir/report.yml` | `subdir/report` | `dag` |
 | `memory/MEMORY.md` | `memory/MEMORY` | `memory` |
 | `memory/dags/my-dag/MEMORY.md` | `memory/dags/my-dag/MEMORY` | `memory` |
-| `skills/my-skill/SKILL.md` | `skills/my-skill/SKILL` | `skill` |
 | `souls/persona.md` | `souls/persona` | `soul` |
 
 ## File Scanning Rules
@@ -21,7 +20,7 @@ Implemented in `internal/gitsync/service.go`.
 
 ### Remote scan
 
-Includes files with extensions `.yaml`, `.yml`, and `.md`. Files with `.md` extension are only accepted when the item ID starts with `memory/`, `skills/`, or `souls/`.
+Includes files with extensions `.yaml`, `.yml`, and `.md`. Files with `.md` extension are only accepted when the item ID starts with `memory/` or `souls/`.
 
 ### Local untracked scan
 
@@ -29,7 +28,6 @@ Discovers local files not yet in sync state:
 
 - **DAGs**: `.yaml` and `.yml` files in the root of `{dags_dir}/`. Flat scan, not recursive.
 - **Memory**: any `.md` file under `memory/`. Recursive walk through all subdirectories.
-- **Skills**: only `skills/<name>/SKILL.md`. Scans one level of subdirectories under `skills/`, looking specifically for `SKILL.md` in each.
 - **Souls**: `souls/*.md`. Flat scan, not recursive.
 
 ## Configuration
@@ -333,7 +331,7 @@ Response:
 
 - `items` are sorted by `filePath`.
 - For `kind=dag`, `filePath` is `itemId + ".yaml"`.
-- For `kind=memory`, `kind=skill`, or `kind=soul`, `filePath` is `itemId + ".md"`.
+- For `kind=memory` or `kind=soul`, `filePath` is `itemId + ".md"`.
 - `displayName` equals `filePath`.
 
 ### Diff
@@ -480,7 +478,7 @@ DAGState fields:
 | Field | Type | Description |
 |---|---|---|
 | `status` | string | `synced`, `modified`, `untracked`, `conflict`, or `missing` |
-| `kind` | string | `dag`, `memory`, `skill`, or `soul` |
+| `kind` | string | `dag`, `memory`, or `soul` |
 | `baseCommit` | string | Commit hash when item was last synced |
 | `lastSyncedHash` | string | Content hash at last sync (`sha256:...`) |
 | `lastSyncedAt` | datetime | When item was last synced |
