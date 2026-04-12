@@ -45,6 +45,7 @@ paths:
   docs_dir: ""                # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
+  artifact_dir: ""           # Auto: {data_dir}/artifacts
   suspend_flags_dir: "~/.local/share/dagu/suspend"
   admin_logs_dir: "~/.local/share/dagu/logs/admin"
   event_store_dir: ""        # Auto: {admin_logs_dir}/events
@@ -263,6 +264,7 @@ All options support `DAGU_` prefix.
 - `DAGU_DOCS_DIR` - Documents directory (default: `{dags_dir}/docs`)
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
+- `DAGU_ARTIFACT_DIR` - DAG run artifact directory (default: `{data_dir}/artifacts`)
 - `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags
 - `DAGU_ADMIN_LOG_DIR` - Admin logs
 - `DAGU_EVENT_STORE_DIR` - Centralized event log directory (default: `{admin_logs_dir}/events`)
@@ -275,6 +277,8 @@ All options support `DAGU_` prefix.
 - `DAGU_EXECUTABLE` - Path to Dagu executable
 
 **Note:** The `--dagu-home` CLI flag takes precedence over the `DAGU_HOME` environment variable.
+
+`paths.artifact_dir` is the global artifact base directory. A DAG can override it with `artifacts.dir`.
 
 ### Authentication
 - `DAGU_AUTH_MODE` - Authentication mode: `none`, `basic`, or `builtin` (default: `builtin`)
@@ -499,8 +503,9 @@ Dagu sets metadata like `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, and the active `DAG_RU
 │   ├── admin/         # Admin/server logs
 │   │   ├── audit/     # Audit logs (daily JSONL files)
 │   │   └── events/    # Centralized event logs
-│   └── dags/          # DAG execution logs
+│   └── <dag name>/    # Per-DAG run logs
 ├── data/              # Application data
+│   ├── artifacts/     # DAG run artifacts
 │   ├── dag-runs/      # DAG run history
 │   ├── queue/         # Queue data
 │   ├── proc/          # Process data
@@ -514,10 +519,12 @@ Dagu sets metadata like `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, and the active `DAG_RU
 $DAGU_HOME/
 ├── dags/              # DAG definitions
 ├── logs/              # All log files
+│   ├── <dag name>/    # Per-DAG run logs
 │   └── admin/         # Admin/server logs
 │       ├── audit/     # Audit logs (daily JSONL files)
 │       └── events/    # Centralized event logs
 ├── data/              # Application data
+│   ├── artifacts/     # DAG run artifacts
 │   ├── dag-runs/      # DAG run history
 │   ├── queue/         # Queue data
 │   ├── proc/          # Process data
@@ -630,6 +637,7 @@ peer:
 
 ### Auto-generated Paths
 When not specified, these paths are automatically derived:
+- `paths.artifact_dir`: `{paths.data_dir}/artifacts` - Stores DAG run artifacts
 - `paths.dag_runs_dir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
 - `paths.queue_dir`: `{paths.data_dir}/queue` - Stores queue data
 - `paths.proc_dir`: `{paths.data_dir}/proc` - Stores process data

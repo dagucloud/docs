@@ -11,6 +11,7 @@ The base configuration file provides default values that are automatically inher
 - **Default timeouts** - Consistent execution limits
 - **Email/alerting setup** - Team-wide notification configuration
 - **External service defaults** - SSH, S3, database connections
+- **Artifact defaults** - Shared per-run artifact storage settings
 
 Individual DAG files can override any setting from the base configuration.
 
@@ -328,7 +329,7 @@ Schema defaults are applied to `config` at the call site, the result is validate
 
 See [Custom Step Types](/writing-workflows/custom-step-types) for the exact field rules and template behavior.
 
-### Logging
+### Logging and Artifacts
 
 Configure log output behavior:
 
@@ -341,7 +342,14 @@ log_dir: /var/log/dagu
 # - "separate": stdout/stderr in separate files (.out, .err)
 # - "merged": combined into single file (.log)
 log_output: merged
+
+# Per-run artifact storage
+artifacts:
+  enabled: true
+  dir: /var/lib/dagu/artifacts
 ```
+
+`artifacts.dir` uses the same per-run directory pattern as `log_dir`. `artifacts.dir` alone does not enable artifact storage; set `artifacts.enabled: true`.
 
 ### External Service Defaults
 

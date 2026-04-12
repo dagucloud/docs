@@ -35,6 +35,10 @@ env:
   - VAR_NAME: value
   - PATH: ${PATH}:/custom/path
 
+# DAG run artifacts
+artifacts:
+  enabled: true
+
 # Workflow steps (type: graph requires explicit depends)
 type: graph
 steps:
@@ -284,6 +288,7 @@ See [Custom Step Types](/writing-workflows/custom-step-types) for the full defin
 | `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. When not set, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. | Per-run work directory (or inherited from parent for sub-DAGs) |
 | `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
 | `log_dir` | string | Custom log directory | System default |
+| `artifacts` | object | Per-run artifact storage configuration. Storage stays disabled unless `artifacts.enabled` is `true`. | - |
 | `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
 | `hist_retention_days` | integer | History retention days | `30` |
 | `max_output_size` | integer | Max output size per step (bytes) | `1048576` |
@@ -320,6 +325,26 @@ params:
     type: boolean
     default: false
 ```
+
+#### `artifacts`
+
+Use `artifacts` to store arbitrary files for each DAG run.
+
+```yaml
+artifacts:
+  enabled: true
+  dir: /mnt/dagu-artifacts
+```
+
+Rules:
+
+- `enabled: true` is required to turn artifact storage on.
+- `dir` changes the base directory for this DAG only.
+- `dir` without `enabled: true` does not enable artifact storage.
+- Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and handlers when artifact storage is enabled.
+- The resolved per-run path is recorded in DAG run status as `archiveDir`.
+
+See [DAG Run Artifacts](/writing-workflows/artifacts) for directory layout, Web UI, and API details.
 
 The older nested-map form such as `- region: { type: string }` is not accepted for rich definitions.
 

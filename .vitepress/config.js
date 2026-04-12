@@ -50,6 +50,7 @@ const fullSidebar = [
       { text: "Container", link: "/writing-workflows/container" },
       { text: "Data Flow", link: "/writing-workflows/data-flow" },
       { text: "DAG Run Outputs", link: "/writing-workflows/outputs" },
+      { text: "DAG Run Artifacts", link: "/writing-workflows/artifacts" },
       { text: "Tags", link: "/writing-workflows/tags" },
       { text: "Examples", link: "/writing-workflows/examples/" },
       { text: "YAML Specification", link: "/writing-workflows/yaml-specification" },

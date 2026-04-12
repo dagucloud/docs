@@ -8,6 +8,7 @@ Dagu includes a modern, responsive web UI that provides:
 - Real-time DAG execution monitoring
 - Visual DAG representation
 - Log viewing and search
+- Artifact browsing with preview and download
 - DAG execution history
 - DAG (YAML) editor with syntax highlighting and auto-completion
 - Interactive DAG management (start, stop, retry, etc.)
@@ -140,6 +141,7 @@ When a DAG uses `params[].eval`, computed defaults are resolved by the server wh
 - **Graph**: Visual representation
   - **Drill-down**: Navigate to sub DAG executions by double-clicking steps
   - **Update Status**: Change step status manually by right-clicking steps
+- **Artifacts**: File tree plus preview/download for DAG-run artifacts when the DAG enables artifact storage or the run already has artifacts
 - **Config**: YAML definition
 - **History**: Past executions
 - **Log**: Current execution logs

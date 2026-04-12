@@ -24,6 +24,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval. | `approval-step,review-step` |
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
+| `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is enabled | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Not set when `artifacts.enabled` is not `true`. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>`. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/daily-backup` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
@@ -75,6 +76,47 @@ steps:
     depends:
       - build
 ```
+
+## Artifacts Directory (`DAG_RUN_ARTIFACTS_DIR`)
+
+`DAG_RUN_ARTIFACTS_DIR` is set only when the DAG enables artifact storage:
+
+```yaml
+artifacts:
+  enabled: true
+```
+
+The path uses the same per-run layout as `log_dir`:
+
+```text
+<base>/<safe dag name>/dag-run_<YYYYMMDD_HHMMSSZ>_<dag-run-id>/
+```
+
+Base directory resolution:
+
+- If the DAG sets `artifacts.dir`, that value is used as `<base>`.
+- Otherwise Dagu uses `paths.artifact_dir`.
+- If `paths.artifact_dir` is not configured explicitly, the default is `<paths.data_dir>/artifacts`.
+
+Execution mode behavior:
+
+- **Local** and **shared-filesystem distributed** execution use the final artifact directory directly.
+- **Shared-nothing distributed** workers receive a temporary worker-local directory in `DAG_RUN_ARTIFACTS_DIR`. Dagu uploads its contents to the coordinator when the attempt finishes.
+
+Example:
+
+```yaml
+artifacts:
+  enabled: true
+
+steps:
+  - id: write-report
+    command: |
+      mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/reports"
+      printf '# Report\n' > "${DAG_RUN_ARTIFACTS_DIR}/reports/summary.md"
+```
+
+See [DAG Run Artifacts](/writing-workflows/artifacts) for the full configuration, API, and Web UI behavior.
 
 ## Docs Directory (`DAG_DOCS_DIR`)
 
