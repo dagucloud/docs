@@ -32,6 +32,7 @@ const fullSidebar = [
       // Core foundations
       { text: "Introduction", link: "/writing-workflows/" },
       { text: "Basics", link: "/writing-workflows/basics" },
+      { text: "Base Configuration", link: "/server-admin/base-config" },
       { text: "Parameters", link: "/writing-workflows/parameters" },
       { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
       { text: "Secrets", link: "/writing-workflows/secrets" },
@@ -153,7 +154,6 @@ const fullSidebar = [
     items: [
       { text: "Overview", link: "/server-admin/" },
       { text: "Server Configuration", link: "/server-admin/server" },
-      { text: "Base Configuration", link: "/server-admin/base-config" },
       { text: "Reference", link: "/server-admin/reference" },
       { text: "Operations", link: "/server-admin/operations" },
       { text: "Queue Configuration", link: "/server-admin/queues" },
