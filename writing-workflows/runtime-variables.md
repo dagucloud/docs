@@ -116,7 +116,7 @@ steps:
       printf '# Report\n' > "${DAG_RUN_ARTIFACTS_DIR}/reports/summary.md"
 ```
 
-See [DAG Run Artifacts](/writing-workflows/artifacts) for the full configuration, API, and Web UI behavior.
+See [Artifacts](/writing-workflows/artifacts) for the full configuration, API, and Web UI behavior.
 
 ## Docs Directory (`DAG_DOCS_DIR`)
 

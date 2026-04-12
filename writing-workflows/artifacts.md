@@ -1,4 +1,4 @@
-# DAG Run Artifacts
+# Artifacts
 
 DAG run artifacts are arbitrary files written by a DAG run. They are separate from logs, step outputs, and managed documents.
 

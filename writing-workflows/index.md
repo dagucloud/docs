@@ -110,7 +110,7 @@ The most common pattern is a `type: command` custom step with a templated `scrip
 6. **[Error Handling](/writing-workflows/error-handling)** - Continue-on behavior, handlers, notifications
 7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
 8. **[Custom Step Types](/writing-workflows/custom-step-types)** - Reusable typed wrappers around builtin step types
-9. **[DAG Run Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
+9. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
 10. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
 11. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
 

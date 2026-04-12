@@ -188,7 +188,7 @@ You can also define reusable `step_types` in a DAG or base config. See [Custom S
 
 - [Quick Start](/getting-started/quickstart) - Running in minutes
 - [Core Concepts](/getting-started/concepts) - Workflows, steps, and dependencies
-- [DAG Run Artifacts](/writing-workflows/artifacts) - Per-run files, previews, and downloads
+- [Artifacts](/writing-workflows/artifacts) - Per-run files, previews, and downloads
 - [AI Agent](/features/agent/) - Built-in LLM agent for workflow management
 - [Workflow Operator](/features/bots/) - Manage workflows from Slack or Telegram
 - [Architecture](/overview/architecture) - System internals and distributed execution

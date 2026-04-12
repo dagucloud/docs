@@ -1385,7 +1385,7 @@ steps:
 ```
 
 - API endpoint: `GET /api/v1/dag-runs/{name}/{dagRunId}/outputs`
-- See [DAG Run Outputs](/writing-workflows/outputs) for full documentation
+- See [Outputs](/writing-workflows/outputs) for full documentation
 - UI: Added wrap/unwrap toggle button in log viewer for better readability of long lines
 - API Key Management: Added comprehensive API key management for programmatic access with role-based permissions. API keys provide a secure alternative to static tokens with fine-grained access control.
   - Create, list, update, and delete API keys via Web UI or REST API

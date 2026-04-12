@@ -344,7 +344,7 @@ Rules:
 - Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and handlers when artifact storage is enabled.
 - The resolved per-run path is recorded in DAG run status as `archiveDir`.
 
-See [DAG Run Artifacts](/writing-workflows/artifacts) for directory layout, Web UI, and API details.
+See [Artifacts](/writing-workflows/artifacts) for directory layout, Web UI, and API details.
 
 The older nested-map form such as `- region: { type: string }` is not accepted for rich definitions.
 

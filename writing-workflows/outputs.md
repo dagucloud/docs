@@ -1,4 +1,4 @@
-# DAG Run Outputs
+# Outputs
 
 Collect, validate, and access step outputs from completed DAG runs.
 

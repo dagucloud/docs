@@ -449,4 +449,4 @@ For detailed precedence rules including interpolation vs runtime environment, se
 
 All step outputs are automatically collected into a structured `outputs.json` file when the DAG completes. This enables viewing outputs in the Web UI and accessing them via API.
 
-See [DAG Run Outputs](/writing-workflows/outputs) for complete documentation on output collection, access methods, and security features.
+See [Outputs](/writing-workflows/outputs) for complete documentation on output collection, access methods, and security features.
