@@ -45,6 +45,7 @@ const fullSidebar = [
           { text: "Env Provider", link: "/writing-workflows/secrets/env-provider" },
           { text: "File Provider", link: "/writing-workflows/secrets/file-provider" },
           { text: "Vault Provider", link: "/writing-workflows/secrets/vault-provider" },
+          { text: "Kubernetes Provider", link: "/writing-workflows/secrets/kubernetes-provider" },
         ],
       },
       // Variables & data
