@@ -487,6 +487,8 @@ The `secrets` block defines environment variables whose values are fetched at ru
 | `key` | string | Provider-specific key (required). For `env` this is the source variable name. For `file` this is a path. For `vault` this is a Vault path or a `path/field` pair, depending on `options.field`. |
 | `options` | object | Provider-specific options (optional). Values must be strings. |
 
+`key` and `options` are literal provider inputs. Dagu does not expand `${...}` expressions inside them.
+
 Example:
 
 ```yaml

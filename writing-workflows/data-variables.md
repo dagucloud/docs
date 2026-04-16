@@ -146,17 +146,19 @@ dotenv:
 
 ### Loading Order
 
-Dotenv files are loaded **before** secrets resolution, allowing secrets to reference dotenv variables:
+Dotenv files are loaded **before** secrets resolution. The `env` secret provider can read variables loaded from dotenv files:
 
 ```yaml
-# .env contains: SECRET_FILE_PATH=/etc/secrets/token
+# .env contains: PROD_TOKEN=secret-value
 dotenv: .env
 
 secrets:
   - name: TOKEN
-    provider: file
-    key: ${SECRET_FILE_PATH}  # Expanded from dotenv
+    provider: env
+    key: PROD_TOKEN
 ```
+
+Secret `key` and `options` fields are literal provider inputs. Dagu does not expand `${...}` inside them.
 
 ```yaml
 # Disable dotenv loading entirely
@@ -186,15 +188,16 @@ steps:
 ### Built-in providers
 
 - `env` reads from existing environment variables. Use it when CI/CD or your process manager injects secrets into the runtime environment.
-- `file` reads from files. Relative paths first try the DAG’s `working_dir`, then fall back to the directory containing the DAG file, which makes this provider ideal for Secret Store CSI or Docker secrets mounted beside the DAG.
+- `file` reads from files. Relative paths first try the DAG’s `working_dir`, then fall back to the directory containing the DAG file.
+- `vault` reads one field from a HashiCorp Vault secret response.
 
 Providers can expose additional configuration through the optional `options` map. Values must be strings so they can be forwarded to provider-specific clients.
 
 ### Resolution and masking
 
-Secrets are evaluated after DAG-level variables and system-provided runtime variables, so they override values defined in `env` or `.env` files unless a step sets its own value. Resolved secrets are never written to disk or the database, and Dagu automatically masks them in step output and scheduler logs.
+Secrets are evaluated after DAG-level variables and system-provided runtime variables, so they override values defined in `env` or `.env` files unless a step sets its own value. Dagu masks exact non-empty secret values in managed step logs and in final collected outputs.
 
-Read the dedicated [Secrets guide](/writing-workflows/secrets) for provider details, masking behavior, and best practices.
+Read the dedicated [Secrets guide](/writing-workflows/secrets) for provider details, resolution order, and masking behavior.
 
 ## Parameters
 

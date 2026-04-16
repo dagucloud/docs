@@ -35,7 +35,18 @@ const fullSidebar = [
       { text: "Base Configuration", link: "/server-admin/base-config" },
       { text: "Parameters", link: "/writing-workflows/parameters" },
       { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
-      { text: "Secrets", link: "/writing-workflows/secrets" },
+      {
+        text: "Secrets",
+        link: "/writing-workflows/secrets",
+        collapsed: false,
+        items: [
+          { text: "Overview", link: "/writing-workflows/secrets" },
+          { text: "Dotenv Loading", link: "/writing-workflows/secrets/dotenv" },
+          { text: "Env Provider", link: "/writing-workflows/secrets/env-provider" },
+          { text: "File Provider", link: "/writing-workflows/secrets/file-provider" },
+          { text: "Vault Provider", link: "/writing-workflows/secrets/vault-provider" },
+        ],
+      },
       // Variables & data
       { text: "Template Variables", link: "/writing-workflows/template-variables" },
       { text: "Runtime Variables", link: "/writing-workflows/runtime-variables" },

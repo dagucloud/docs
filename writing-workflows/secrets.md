@@ -1,173 +1,163 @@
 # Secrets
 
-The `secrets` block defines environment variables whose values are resolved by a secret provider at execution time.
+`secrets:` declares environment variables whose values are resolved when a DAG run starts.
+
+The current built-in resolver registry contains exactly these providers:
+
+| Provider | Source |
+|----------|--------|
+| `env` | A variable from the context environment scope, an internal Dagu transport variable, or the Dagu process environment |
+| `file` | The complete contents of one local file |
+| `vault` | One field from a HashiCorp Vault secret response |
+
+`dotenv:` is related, but it is not a secret provider. Dotenv files load normal DAG environment variables. A dotenv value becomes a masked secret only when a `secrets:` entry reads it through `provider: env`.
+
+## Secret Reference Schema
+
+Each `secrets:` item has this shape:
 
 ```yaml
+secrets:
+  - name: TARGET_ENV_NAME
+    provider: env
+    key: SOURCE_ENV_NAME
+    options:
+      option_name: option_value
+```
+
+| Field | Required | Meaning |
+|-------|----------|---------|
+| `name` | Yes | Target environment variable name injected into the run |
+| `provider` | Yes | Resolver name. Built-in values are `env`, `file`, and `vault` |
+| `key` | Yes | Provider-specific lookup key |
+| `options` | No | Provider-specific string map |
+
+At DAG build time, Dagu checks only that `name`, `provider`, and `key` are present and that `name` is unique inside the DAG. Provider existence is checked when secrets are resolved. An unknown provider such as `unknown-provider` fails the run with `unknown secret provider`.
+
+Dagu does not currently enforce an environment-variable name pattern for `name`. Use normal environment variable names such as `DB_PASSWORD` when the value must be available to step processes.
+
+## Literal Keys And Options
+
+`secrets[].key` and `secrets[].options` are not evaluated with Dagu's variable engine. They are passed to the provider as literal strings.
+
+This does not resolve `SECRET_FILE_PATH`:
+
+```yaml
+env:
+  - SECRET_FILE_PATH: /run/secrets/api-token
+
+secrets:
+  - name: API_TOKEN
+    provider: file
+    key: ${SECRET_FILE_PATH} # literal path, not expanded
+```
+
+To read a value loaded from `.env`, use the `env` provider:
+
+```dotenv
+# .env
+PROD_API_TOKEN=token-from-dotenv
+```
+
+```yaml
+dotenv: .env
+
 secrets:
   - name: API_TOKEN
     provider: env
     key: PROD_API_TOKEN
-  - name: DB_PASSWORD
-    provider: file
-    key: /run/secrets/db-password
-
-steps:
-  - command: ./deploy.sh
-    env:
-      - DATABASE_URL: postgres://app:${DB_PASSWORD}@db/prod
-      - AUTH_HEADER: "Bearer ${API_TOKEN}"
 ```
 
-## Schema
+## Resolution Time
 
-Each item in `secrets:` has these fields:
+When a DAG run starts, Dagu:
 
-- `name`: environment variable name exposed to the DAG runtime and step processes
-- `provider`: resolver name
-- `key`: provider-specific lookup key
-- `options`: optional map of string keys and string values
+1. Loads dotenv files into the DAG environment.
+2. Resolves all entries in `secrets:`.
+3. Adds resolved secret values to the run environment with source `secret`.
+4. Starts steps only if secret resolution succeeds.
 
-At spec build time, Dagu validates:
+If any secret fails to resolve, the run initialization fails and steps do not execute. `dagu dry` also resolves secrets. `dagu validate` checks YAML shape and DAG structure, but it does not contact providers and does not verify that a secret exists.
 
-- `name` is present
-- `provider` is present
-- `key` is present
-- secret names are unique within the DAG
+## Variable Precedence
 
-`dagu validate` checks that schema only. It does not contact secret providers and does not verify that the secret exists.
+During step execution, the environment scope is layered so later layers override earlier layers:
 
-## Execution Behavior
+1. Step environment values, including evaluated `env:` entries and container env entries for the step.
+2. Output variables from dependency steps.
+3. Secrets.
+4. DAG-level environment values, including values loaded from dotenv files, runtime metadata, and params.
+5. Filtered process environment values.
 
-When a DAG run starts, Dagu resolves each secret and adds it to the execution environment.
-
-Precedence in the execution scope is:
-
-1. Step `env`
-2. Step outputs
-3. `secrets`
-4. DAG `env`, `dotenv`, runtime-managed DAG variables, and params
-5. Filtered OS environment
-
-If a secret and a DAG-level variable use the same name, the secret wins. A step-level `env` entry can still override that name for that step.
-
-## Masking Behavior
-
-Resolved secret values are masked with `*******` in Dagu-managed outputs that use the runtime masker:
-
-- step stdout/stderr log files
-- captured step outputs (`output:` values and `outputs.json`)
-- agent outputs
-- chat step messages sent to external LLM providers
-
-Dagu does not stop your workflow code from writing a secret to arbitrary files, remote APIs, databases, or other systems. The masking only applies to the Dagu-managed sinks above.
-
-## `env` Provider
-
-The `env` provider resolves `key` in this order:
-
-1. values already present in the DAG evaluation scope
-   This includes DAG `env:` entries and values loaded through `dotenv:`
-2. an internal `_DAGU_PRESOLVED_SECRET_<KEY>` transport variable used for subprocess handoff
-3. the process environment visible to the Dagu process
-
-If the variable is unset, resolution fails. If the variable exists and is empty, the empty string is accepted. Values are returned as-is; whitespace is not trimmed.
-
-Example using the process environment:
+This means a secret overrides DAG `env:` and dotenv values with the same name. A step-level `env:` value can still override the secret for that step.
 
 ```yaml
+env:
+  - DB_PASSWORD: visible-dag-env
+
 secrets:
-  - name: SLACK_TOKEN
+  - name: DB_PASSWORD
     provider: env
-    key: PROD_SLACK_TOKEN
+    key: PROD_DB_PASSWORD
+
+steps:
+  - name: uses-secret
+    command: ./migrate.sh
+
+  - name: overrides-for-one-step
+    env:
+      - DB_PASSWORD: local-test-password
+    command: ./test.sh
 ```
 
-Example using `dotenv` as the source for the `env` provider:
+## Masking
+
+Dagu creates a masker from non-empty resolved secret values. The replacement string is `*******`.
+
+The masker is applied to:
+
+- Step stdout and stderr log writers.
+- Step stdout and stderr redirect writers.
+- Final `outputs.json` values collected from declared step outputs.
+- Chat step messages immediately before they are sent to the LLM provider.
+
+The matcher replaces exact secret values. It does not mask empty values. It also does not mask values loaded through `env:` or `dotenv:` unless those values are resolved through `secrets:`.
+
+Masking is not a process sandbox. The step process receives the raw secret in its environment and can write it to files, databases, APIs, child processes, or output variables used by later steps.
+
+## Provider Pages
+
+- [Dotenv Loading](/writing-workflows/secrets/dotenv)
+- [`env` Provider](/writing-workflows/secrets/env-provider)
+- [`file` Provider](/writing-workflows/secrets/file-provider)
+- [HashiCorp Vault Provider](/writing-workflows/secrets/vault-provider)
+
+## Complete Example
+
+```dotenv
+# /srv/app/.env
+SLACK_BOT_TOKEN=xoxb-from-dotenv
+```
 
 ```yaml
 working_dir: /srv/app
 dotenv: .env
 
 secrets:
-  - name: DATABASE_URL
+  - name: SLACK_TOKEN
     provider: env
-    key: DATABASE_URL
-
-steps:
-  - command: ./migrate.sh
-```
-
-## `file` Provider
-
-The `file` provider reads the contents of a file and returns them unchanged.
-
-- Absolute paths are used as-is.
-- Relative paths are searched in this order:
-  1. `working_dir`
-  2. the directory containing the DAG file
-- If the path does not exist, resolution fails.
-- If the path points to a directory, resolution fails.
-- The provider does not trim trailing newlines or surrounding whitespace.
-
-Example:
-
-```yaml
-working_dir: /srv/app
-
-secrets:
+    key: SLACK_BOT_TOKEN
   - name: DB_PASSWORD
     provider: file
-    key: secrets/db-password
+    key: /run/secrets/db-password
+  - name: API_KEY
+    provider: vault
+    key: kv/data/prod/api/key
 
 steps:
-  - command: ./deploy.sh
+  - name: deploy
+    command: ./deploy.sh
     env:
-      - STRICT_MODE: "1"
       - DATABASE_URL: postgres://app:${DB_PASSWORD}@db/prod
-```
-
-## `vault` Provider
-
-The `vault` provider reads from HashiCorp Vault.
-
-Client settings are resolved in this order:
-
-1. Vault defaults in Dagu config:
-   - `secrets.vault.address`
-   - `secrets.vault.token`
-2. per-secret overrides in `options`:
-   - `vault_address`
-   - `vault_token`
-
-Field selection works like this:
-
-- If `options.field` is set, Dagu reads `key` as the Vault path and `options.field` as the field name.
-- Otherwise Dagu splits `key` on the last `/`:
-  - path = everything before the last slash
-  - field = everything after the last slash
-- If `key` has no slash, the field name defaults to `value`
-
-If the Vault response contains a top-level `data` object, Dagu unwraps it before field lookup. This is how KV v2 responses are handled.
-
-For KV v2, the path must include `/data/`.
-
-Example using the default "last path segment is the field name" rule:
-
-```yaml
-secrets:
-  - name: SLACK_TOKEN
-    provider: vault
-    key: kv/data/integrations/slack/token
-```
-
-That reads path `kv/data/integrations/slack` and field `token`.
-
-Example with an explicit field:
-
-```yaml
-secrets:
-  - name: SSH_PASSWORD
-    provider: vault
-    key: kv/data/ops/ssh
-    options:
-      field: password
+      - AUTH_HEADER: "Bearer ${API_KEY}"
 ```
