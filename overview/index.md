@@ -20,6 +20,52 @@ Dagu is a local-first workflow engine. It is declarative, file-based, self-conta
 
 **The Dagu Difference**: Keep workflow orchestration separate from business logic. Define workflows declaratively, stay zero-invasive to application code, and get a more capable alternative to cron without taking on Airflow-level complexity.
 
+## Real-World Use Cases
+
+Dagu is useful anywhere a script, container, or operational task needs scheduling, visibility, retries, and a safe way for a team to run it.
+
+<div class="features-grid">
+  <div class="feature-card noninteractive-card">
+    <h3>Customer Support Automation</h3>
+    <p><strong>Run:</strong> diagnostics, account repair jobs, data checks, and approval-gated support actions.</p>
+    <p><strong>Why Dagu fits:</strong> non-engineers can operate reviewed workflows from the Web UI while engineers keep every command, log, and result visible.</p>
+  </div>
+  <div class="feature-card noninteractive-card">
+    <h3>Media Conversion</h3>
+    <p><strong>Run:</strong> <code>ffmpeg</code>, thumbnail extraction, audio normalization, and image processing in local, Docker, or worker environments.</p>
+    <p><strong>Why Dagu fits:</strong> command output, status, and logs are attached to each run, so conversion jobs are easy to retry and audit.</p>
+  </div>
+  <div class="feature-card noninteractive-card">
+    <h3>Container and Kubernetes Workflows</h3>
+    <p><strong>Run:</strong> Docker images, Kubernetes Jobs, shell glue, and follow-up validation steps.</p>
+    <p><strong>Why Dagu fits:</strong> teams can compose image-based workflows without building a custom control plane around containers.</p>
+  </div>
+  <div class="feature-card noninteractive-card">
+    <h3>Server Management</h3>
+    <p><strong>Run:</strong> backups, cleanup, deploy scripts, patch windows, and remote checks over SSH.</p>
+    <p><strong>Why Dagu fits:</strong> scheduled remote operations get retries, notifications, history, and per-step logs instead of disappearing into cron output.</p>
+  </div>
+  <div class="feature-card noninteractive-card">
+    <h3>IoT and Edge Workflows</h3>
+    <p><strong>Run:</strong> sensor polling, local file cleanup, offline sync, health checks, and device maintenance jobs.</p>
+    <p><strong>Why Dagu fits:</strong> the single binary and file-backed state work well on small devices such as Raspberry Pi systems while still providing a Web UI.</p>
+  </div>
+  <div class="feature-card noninteractive-card">
+    <h3>ETL and Data Operations</h3>
+    <p><strong>Run:</strong> SQL queries, object storage transfers, JSON transforms, validation steps, and daily reporting jobs.</p>
+    <p><strong>Why Dagu fits:</strong> the full workflow is visualized, failures are easy to retry, and operators can inspect logs without reverse-engineering scripts.</p>
+  </div>
+  <div class="feature-card noninteractive-card">
+    <h3>AI Agent Automation</h3>
+    <p><strong>Run:</strong> agent-authored YAML workflows, log analysis, repair steps, and human-reviewed automation.</p>
+    <p><strong>Why Dagu fits:</strong> workflows are plain files, so agents can create and debug them while humans can review the YAML and run history.</p>
+  </div>
+</div>
+
+::: tip
+If it can run from a shell command, Docker image, Kubernetes Job, SSH session, HTTP call, SQL query, or AI agent step, Dagu can usually orchestrate it without changing the application code.
+:::
+
 ## AI Agent
 
 Dagu includes a built-in LLM-powered agent that can read, create, and modify your workflows. Use it interactively through the Web UI chat, or add `type: agent` steps to your DAGs for automation.

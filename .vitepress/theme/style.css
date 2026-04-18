@@ -121,6 +121,15 @@
   box-shadow: 0 4px 12px rgba(196, 149, 106, 0.15);
 }
 
+.feature-card.noninteractive-card {
+  transition: none;
+}
+
+.feature-card.noninteractive-card:hover {
+  border-color: var(--vp-c-divider);
+  box-shadow: none;
+}
+
 /* Example cards grid */
 .examples-grid {
   display: grid;
