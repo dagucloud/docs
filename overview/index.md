@@ -1,61 +1,277 @@
 # What is Dagu?
 
-<div style="text-align: center; margin: 2rem 0;">
-  <img src="/hero-logo.webp" alt="Dagu" style="width: 100%; height: auto;" />
+<div class="overview-hero">
+  <div class="overview-hero-copy">
+    <h2>A simple command to run workflows defined in declarative YAML.</h2>
+    <p>
+      Dagu runs workflows, or DAGs, from simple YAML files. A workflow can call commands, scripts, Docker images, Kubernetes Jobs, SSH tasks, HTTP calls, SQL queries, and AI agent steps.
+    </p>
+    <p>
+      It gives those jobs visible dependencies, execution status, logs, retries, schedules, and Web UI controls without requiring a DBMS server or message broker.
+    </p>
+    <div class="overview-actions">
+      <a href="/getting-started/quickstart" class="overview-button overview-button-primary">Start in minutes</a>
+      <a href="/writing-workflows/examples" class="overview-button overview-button-secondary">Browse examples</a>
+    </div>
+  </div>
+  <div class="overview-command-card" aria-label="Example Dagu workflow">
+    <div class="overview-command-header">
+      <span>workflow.yaml</span>
+    </div>
+    <div class="overview-code-lines" aria-hidden="true">
+      <span>params:</span>
+      <span>&nbsp;&nbsp;- name: DATE</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;type: string</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;default: "2026-04-18"</span>
+      <span>&nbsp;&nbsp;- name: BUCKET</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;type: string</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;default: "s3://reports"</span>
+      <span></span>
+      <span>steps:</span>
+      <span>&nbsp;&nbsp;- id: extract</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;command: python extract.py --date ${DATE}</span>
+      <span></span>
+      <span>&nbsp;&nbsp;- id: transform</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;command: python transform.py --date ${DATE}</span>
+      <span></span>
+      <span>&nbsp;&nbsp;- id: load</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;type: docker</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;config:</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image: acme/loader:v1</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;auto_remove: true</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;command: python load.py --bucket ${BUCKET}</span>
+    </div>
+  </div>
 </div>
 
-Dagu is a local-first workflow engine. It is declarative, file-based, self-contained, and air-gapped ready. It runs as a single binary and scales from laptop to distributed cluster.
+<div class="overview-statement">
+  <strong>Dagu makes operational jobs visible and manageable.</strong>
+  <span>Define the DAG in YAML, run it from one binary, inspect every step in the browser, and rerun or stop workflows without SSHing into servers.</span>
+</div>
 
-## Key Capabilities
+## Motivation
 
-- **Declarative YAML** - JSON Schema validation with clear error messages
-- **Custom step types** - Reusable wrappers around builtin step types with JSON Schema-validated input
-- **Composable workflows** - Nest sub-DAGs with parameters (depth limited only by available memory)
-- **Distributed execution** - Route tasks to workers via labels (GPU, region, etc.)
-- **Scheduler** - Cron expressions with start/stop/restart support
-- **Run artifacts** - Persist per-run files with Web UI preview and download
-- **AI Agent integration** - Built-in AI agent for workflow management and workflow steps operate on your computer
-- **Durable execution** - Automatic retries, hooks, and state persistence for long-running workflows
-- **Web UI** - Monitor, control, and debug workflows in real-time
+Many environments grow into hundreds of cron jobs and shell scripts on large servers. The jobs may be important, but their dependencies are hidden in crontabs, comments, filenames, and operator knowledge. When one job fails, it is hard to know which downstream jobs were affected, which script should be rerun, and where the relevant logs are.
 
-**The Dagu Difference**: Keep workflow orchestration separate from business logic. Define workflows declaratively, stay zero-invasive to application code, and get a more capable alternative to cron without taking on Airflow-level complexity.
+Dagu was built for that situation: visualize job dependencies, execution status, and logs in a web browser, then rerun or stop a workflow with clear context.
+
+## Core Terminology
+
+Understanding Dagu is easier once the main terms are clear.
+
+| Term | Meaning |
+|------|---------|
+| **DAG** | A workflow file written in YAML. Steps run according to dependencies, so the execution order is explicit. |
+| **Step** | One unit of work. A step can run a command, container, SSH command, HTTP request, SQL query, sub-workflow, or AI agent task. |
+| **Step type** | The kind of work a step runs, such as `command`, `docker`, `kubernetes`, `ssh`, `http`, `postgres`, `s3`, or `agent`. You can also define custom step types with the `step_types` field. |
+| **Run** | One execution of a DAG. Runs keep status, logs, timing, outputs, and artifacts. |
+| **Schedule** | Cron-based automation for starting DAG runs, including timezone support. |
+| **Queue** | Concurrency control for workflows, useful when jobs must not overlap or when workers are shared. |
+| **Worker** | A machine that executes tasks in distributed mode. Workers can be selected by labels such as region, GPU, or environment. |
+| **Artifact** | A file produced by a run and stored with the run history for preview, download, or audit. |
+
+See [Core Concepts](/getting-started/concepts) for the deeper model.
+
+## How a Workflow Runs
+
+Dagu keeps the workflow definition separate from the code it executes. Your scripts, containers, or services stay the same. Dagu wraps them with orchestration.
+
+```yaml
+steps:
+  - id: fetch_orders
+    command: python scripts/fetch_orders.py
+
+  - id: normalize
+    command: python scripts/normalize.py
+
+  - id: load_warehouse
+    type: postgres
+    config:
+      dsn: "${WAREHOUSE_DSN}"
+    command: "CALL load_daily_orders()"
+```
+
+<div class="overview-lifecycle" aria-label="Dagu workflow lifecycle">
+  <span>Write YAML</span>
+  <span>Validate</span>
+  <span>Schedule or Run</span>
+  <span>Monitor</span>
+  <span>Retry or Approve</span>
+  <span>Notify and Audit</span>
+</div>
+
+During a run, Dagu resolves dependencies, starts ready steps, captures stdout and stderr, persists state, applies retry rules, stores artifacts, and updates the Web UI in real time.
+
+## Why Teams Choose Dagu
+
+<div class="overview-card-grid overview-strengths-grid">
+  <div class="overview-card">
+    <h3>Single binary</h3>
+    <p>Install one executable. No external database, broker, scheduler service, or separate web server is required for the default setup.</p>
+  </div>
+  <div class="overview-card">
+    <h3>Local-first storage</h3>
+    <p>State is file-backed by default, which keeps self-hosting simple and works well in private networks and air-gapped environments.</p>
+  </div>
+  <div class="overview-card">
+    <h3>Zero-invasive workflows</h3>
+    <p>Wrap existing scripts and commands instead of rewriting application code around a workflow SDK.</p>
+  </div>
+  <div class="overview-card">
+    <h3>Observable by default</h3>
+    <p>Every run has status, per-step logs, timing, history, artifacts, and UI controls for debugging and recovery.</p>
+  </div>
+  <div class="overview-card">
+    <h3>Scales gradually</h3>
+    <p>Start on one machine, then move heavy or specialized jobs to distributed workers with label-based routing.</p>
+  </div>
+  <div class="overview-card">
+    <h3>Plain YAML</h3>
+    <p>Workflows can be reviewed in Git, generated by tools, edited by AI agents, and validated with JSON Schema.</p>
+  </div>
+</div>
+
+## Architecture at a Glance
+
+Dagu can run in a small local setup or scale out when workloads grow. The operating model changes, but the workflow YAML does not need to be rewritten.
+
+<div class="overview-mode-grid">
+  <div class="overview-mode-card">
+    <h3>Standalone</h3>
+    <p><code>dagu start-all</code> runs the Web UI, scheduler, and workflow engine in one process.</p>
+    <p>Best for one server, a team utility box, a private automation host, or getting started quickly.</p>
+  </div>
+  <div class="overview-mode-card">
+    <h3>Headless</h3>
+    <p>Run workflows from the CLI or API without relying on the Web UI.</p>
+    <p>Best for CI-like automation, locked-down servers, or environments where Dagu is managed by another system.</p>
+  </div>
+  <div class="overview-mode-card">
+    <h3>Coordinator and Workers</h3>
+    <p>The scheduler queues work, the coordinator assigns tasks, and workers execute DAGs over gRPC.</p>
+    <p>Best for many machines, GPU jobs, regional routing, mixed workloads, and high-throughput batch processing.</p>
+  </div>
+</div>
+
+```mermaid
+flowchart LR
+    subgraph Interfaces["Interfaces"]
+        CLI["CLI"]
+        UI["Web UI"]
+        API["REST API"]
+    end
+
+    subgraph Dagu["Dagu Engine<br/>single process in standalone mode"]
+        Scheduler["Scheduler"]
+        Queue["Queue"]
+        Runs["Run state<br/>logs<br/>artifacts<br/>status"]
+    end
+
+    subgraph Distributed["Distributed Mode"]
+        Coordinator["Coordinator"]
+        WorkerA["Worker"]
+        WorkerB["Worker"]
+    end
+
+    CLI --> Scheduler
+    UI --> Scheduler
+    API --> Scheduler
+
+    Scheduler --> Runs
+    Scheduler --> Queue
+    Queue --> Coordinator
+    Coordinator --> WorkerA
+    Coordinator --> WorkerB
+    WorkerA --> Runs
+    WorkerB --> Runs
+
+    classDef interface fill:#2a2420,stroke:#c4956a,color:#e8e2d8
+    classDef engine fill:#1f1a16,stroke:#8b7355,color:#e8e2d8
+    classDef distributed fill:#1f1a16,stroke:#7da87d,color:#e8e2d8
+    class CLI,UI,API interface
+    class Scheduler,Queue,Runs engine
+    class Coordinator,WorkerA,WorkerB distributed
+```
+
+See [Architecture](/overview/architecture) for internals, storage, coordinator/worker execution, and deployment patterns.
+
+## How Dagu Is Different
+
+<div class="comparison-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Tool</th>
+        <th>Best For</th>
+        <th>Where Dagu Is Different</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Cron</td>
+        <td>Simple scheduled commands</td>
+        <td>Dagu makes dependencies visible and adds logs, history, retries, status, UI controls, notifications, and approval gates.</td>
+      </tr>
+      <tr>
+        <td>Airflow</td>
+        <td>Large data platforms</td>
+        <td>Dagu has a smaller default footprint, does not require a DBMS server, and uses YAML instead of a Python platform model.</td>
+      </tr>
+      <tr>
+        <td>GitHub Actions</td>
+        <td>Repository CI/CD</td>
+        <td>Dagu runs inside your own infrastructure and can manage servers, containers, edge devices, and internal operations.</td>
+      </tr>
+      <tr>
+        <td>Temporal</td>
+        <td>Durable application workflows</td>
+        <td>Dagu is simpler for command, script, and container orchestration when you do not want to write workflow code.</td>
+      </tr>
+      <tr>
+        <td>Rundeck</td>
+        <td>Operations runbooks</td>
+        <td>Dagu focuses on DAG-based YAML workflows, explicit dependencies, local-first execution, and simple file-backed operation.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 ## Real-World Use Cases
 
 Dagu is useful anywhere a script, container, or operational task needs scheduling, visibility, retries, and a safe way for a team to run it.
 
-<div class="features-grid">
-  <div class="feature-card noninteractive-card">
+<div class="overview-card-grid">
+  <div class="overview-card overview-usecase-card">
     <h3>Customer Support Automation</h3>
     <p><strong>Run:</strong> diagnostics, account repair jobs, data checks, and approval-gated support actions.</p>
     <p><strong>Why Dagu fits:</strong> non-engineers can operate reviewed workflows from the Web UI while engineers keep every command, log, and result visible.</p>
   </div>
-  <div class="feature-card noninteractive-card">
+  <div class="overview-card overview-usecase-card">
     <h3>Media Conversion</h3>
     <p><strong>Run:</strong> <code>ffmpeg</code>, thumbnail extraction, audio normalization, and image processing in local, Docker, or worker environments.</p>
-    <p><strong>Why Dagu fits:</strong> command output, status, and logs are attached to each run, so conversion jobs are easy to retry and audit.</p>
+    <p><strong>Why Dagu fits:</strong> media conversion can run across distributed workers while status, history, logs, and artifacts stay in one persistence layer for monitoring, debugging, and retries.</p>
   </div>
-  <div class="feature-card noninteractive-card">
+  <div class="overview-card overview-usecase-card">
     <h3>Container and Kubernetes Workflows</h3>
     <p><strong>Run:</strong> Docker images, Kubernetes Jobs, shell glue, and follow-up validation steps.</p>
     <p><strong>Why Dagu fits:</strong> teams can compose image-based workflows without building a custom control plane around containers.</p>
   </div>
-  <div class="feature-card noninteractive-card">
+  <div class="overview-card overview-usecase-card">
     <h3>Server Management</h3>
     <p><strong>Run:</strong> backups, cleanup, deploy scripts, patch windows, and remote checks over SSH.</p>
     <p><strong>Why Dagu fits:</strong> scheduled remote operations get retries, notifications, history, and per-step logs instead of disappearing into cron output.</p>
   </div>
-  <div class="feature-card noninteractive-card">
+  <div class="overview-card overview-usecase-card">
     <h3>IoT and Edge Workflows</h3>
     <p><strong>Run:</strong> sensor polling, local file cleanup, offline sync, health checks, and device maintenance jobs.</p>
     <p><strong>Why Dagu fits:</strong> the single binary and file-backed state work well on small devices such as Raspberry Pi systems while still providing a Web UI.</p>
   </div>
-  <div class="feature-card noninteractive-card">
+  <div class="overview-card overview-usecase-card">
     <h3>ETL and Data Operations</h3>
     <p><strong>Run:</strong> SQL queries, object storage transfers, JSON transforms, validation steps, and daily reporting jobs.</p>
     <p><strong>Why Dagu fits:</strong> the full workflow is visualized, failures are easy to retry, and operators can inspect logs without reverse-engineering scripts.</p>
   </div>
-  <div class="feature-card noninteractive-card">
+  <div class="overview-card overview-usecase-card">
     <h3>AI Agent Automation</h3>
     <p><strong>Run:</strong> agent-authored YAML workflows, log analysis, repair steps, and human-reviewed automation.</p>
     <p><strong>Why Dagu fits:</strong> workflows are plain files, so agents can create and debug them while humans can review the YAML and run history.</p>
@@ -66,17 +282,9 @@ Dagu is useful anywhere a script, container, or operational task needs schedulin
 If it can run from a shell command, Docker image, Kubernetes Job, SSH session, HTTP call, SQL query, or AI agent step, Dagu can usually orchestrate it without changing the application code.
 :::
 
-## AI Agent
+## AI Agent and Workflow Operator
 
-Dagu includes a built-in LLM-powered agent that can read, create, and modify your workflows. Use it interactively through the Web UI chat, or add `type: agent` steps to your DAGs for automation.
-
-- **Create and update workflows** — describe what you need; the agent generates valid DAG YAML, validates it against the schema, and opens it in the UI
-- **Debug and fix failures** — point the agent at a failed run; it reads logs, suggests probable causes, and can patch configurations
-- **Answer questions** — ask what a DAG does, how to configure an executor, or why a step failed
-
-The agent runs as an LLM tool-calling loop with configurable tools (shell execution, file read/write, schema lookup, sub-agent delegation) and safety controls (RBAC enforcement, per-tool enable/disable, regex-based bash command policies). Results are non-deterministic and should be reviewed.
-
-Bring your own model: Anthropic, OpenAI, Gemini, OpenRouter, and local servers (Ollama, vLLM) are supported. Models and API keys are configured in the Web UI at `/agent-settings`.
+Dagu includes AI features, but they build on the same workflow engine. The agent can read, create, update, and debug DAGs. Agent steps can also run inside workflows.
 
 ```yaml
 steps:
@@ -85,157 +293,42 @@ steps:
     messages:
       - role: user
         content: |
-          Analyze the error logs at /var/log/app/errors.log from the last hour.
-          Summarize the root causes and suggest fixes.
+          Analyze /var/log/app/errors.log from the last hour.
+          Summarize likely causes and suggest a safe recovery plan.
     output: ANALYSIS_RESULT
 ```
 
-See [Agent Overview](/features/agent/) and [Agent Step](/features/agent/step) for full documentation.
+Workflow Operator connects Slack or Telegram to the built-in agent, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat.
 
-## Workflow Operator
-
-Workflow Operator is Dagu's persistent AI operator for Slack and Telegram. It uses a Slack or Telegram bot to bridge your messaging platform with the built-in AI agent, so you can manage workflows without opening the Web UI.
-
-- **Debug issues** - ask the agent to check logs and diagnose failures
-- **Recover from incidents** - re-run workflows with adjusted parameters through chat
-- **Get notified** - receive DAG run completion notifications with AI-generated summaries
-- **Approve actions** - respond to approval gates via interactive buttons in Slack or Telegram
-
-Each conversation maps to a persistent agent session. The Slack or Telegram bot connector supports safe mode with configurable bash command policies.
-
-```yaml
-# Enable Workflow Operator on Telegram
-bots:
-  provider: telegram
-  safe_mode: true
-  telegram:
-    token: ${TELEGRAM_BOT_TOKEN}
-    allowed_chat_ids:
-      - 123456789
-```
-
-See [Workflow Operator](/features/bots/) for setup instructions.
-
-## How It Works
-
-Dagu executes workflows defined as steps in YAML. Steps form a Directed Acyclic Graph (DAG), ensuring predictable execution order.
-
-### Sequential Execution
-
-```yaml
-type: chain
-steps:
-  - command: echo "Step 1"
-  - command: echo "Step 2"
-```
-
-```mermaid
-graph LR
-    A["Step 1"] --> B["Step 2"]
-    style A stroke:green,stroke-width:1.6px,color:#333
-    style B stroke:lime,stroke-width:1.6px,color:#333
-```
-
-### Parallel Execution
-
-```yaml
-type: graph
-steps:
-  - id: step_1
-    command: echo "Step 1"
-  - id: step_2a
-    command: echo "Step 2a"
-    depends: [step_1]
-  - id: step_2b
-    command: echo "Step 2b"
-    depends: [step_1]
-  - id: step_3
-    command: echo "Step 3"
-    depends: [step_2a, step_2b]
-```
-
-```mermaid
-graph TD
-    A[step_1] --> B[step_2a]
-    A --> C[step_2b]
-    B --> D[step_3]
-    C --> D
-    style A stroke:green,stroke-width:1.6px,color:#333
-    style B stroke:lime,stroke-width:1.6px,color:#333
-    style C stroke:lime,stroke-width:1.6px,color:#333
-    style D stroke:lightblue,stroke-width:1.6px,color:#333
-```
-
-## Architecture Overview
-
-```mermaid
-graph TB
-    subgraph Interfaces["User Interfaces"]
-        CLI[CLI]
-        UI[Web UI]
-        API[REST API]
-    end
-
-    subgraph Engine["Core Engine"]
-        SCH[Scheduler]
-        AGT[Agent]
-        EXE[Executors]
-    end
-
-    subgraph Distributed["Distributed Mode"]
-        COORD[Coordinator]
-        W1["Worker 1"]
-        WN["Worker N"]
-    end
-
-    CLI --> AGT
-    UI --> AGT
-    API --> AGT
-    SCH --> AGT
-    AGT --> EXE
-    SCH -.->|gRPC| COORD
-    COORD --> W1
-    COORD --> WN
-```
-
-**Local mode**: CLI, Web UI, or API triggers the Agent, which runs steps via Executors.
-
-**Distributed mode**: Scheduler dispatches work to a Coordinator, which routes tasks to Workers based on label selectors (e.g., `gpu=true`, `region=us-east`).
-
-See [Architecture](/overview/architecture) for details.
-
-## Built-in Step Types
-
-| Type | Description |
-|------|-------------|
-| `command` | Shell commands (bash, sh, PowerShell, cmd) |
-| `agent` | LLM-powered agent with tool-calling loop |
-| `ssh` | Remote command execution via SSH |
-| `sftp` | Remote file transfer via SFTP |
-| `docker` | Container execution with volume mounts and registry auth |
-| `k8s`, `kubernetes` | Run a step as a Kubernetes Job with DAG-level defaults |
-| `harness` | Run CLI-based coding agents and custom harness adapters |
-| `http` | HTTP/REST API requests |
-| `jq` | JSON query and transformation |
-| `template` | Text rendering with Go templates and structured data |
-| `mail` | Email notifications with attachments |
-| `dag` | Sub-workflow execution (hierarchical composition) |
-| `router` | Route execution by evaluated value |
-| `postgres`, `sqlite` | SQL queries |
-| `redis` | Redis commands and scripts |
-| `s3` | S3 object operations |
-| `chat` | LLM chat completion |
-
-`approval` is not a step type. It is a field available on steps to pause a workflow for human review. See [Approval](/writing-workflows/approval).
-
-You can also define reusable `step_types` in a DAG or base config. See [Custom Step Types](/writing-workflows/custom-step-types) and [Step Types Reference](/step-types/shell) for the exact configuration surface.
+- [Agent Overview](/features/agent/) explains interactive workflow generation and debugging.
+- [Agent Step](/features/agent/step) explains how to run agent tasks inside DAGs.
+- [Workflow Operator](/features/bots/) explains Slack and Telegram operation.
 
 ## Learn More
 
-- [Quick Start](/getting-started/quickstart) - Running in minutes
-- [Core Concepts](/getting-started/concepts) - Workflows, steps, and dependencies
-- [Artifacts](/writing-workflows/artifacts) - Per-run files, previews, and downloads
-- [AI Agent](/features/agent/) - Built-in LLM agent for workflow management
-- [Workflow Operator](/features/bots/) - Manage workflows from Slack or Telegram
-- [Architecture](/overview/architecture) - System internals and distributed execution
-- [Examples](/writing-workflows/examples) - Ready-to-use workflow patterns
+<div class="next-steps">
+  <div class="step-card">
+    <h3><a href="/getting-started/quickstart">Quick Start</a></h3>
+    <p>Install Dagu, create your first workflow, and run it locally.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/getting-started/concepts">Core Concepts</a></h3>
+    <p>Learn workflows, steps, dependencies, parameters, and execution behavior.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/step-types/shell">Step Types</a></h3>
+    <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, S3, and agent execution.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/overview/architecture">Architecture</a></h3>
+    <p>Understand standalone mode, distributed workers, storage, queues, and service layout.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/writing-workflows/examples">Examples</a></h3>
+    <p>Start from practical workflow patterns and adapt them to your environment.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/features/agent/">AI Agent</a></h3>
+    <p>Use Dagu's built-in agent to create, update, and debug workflows.</p>
+  </div>
+</div>
