@@ -42,6 +42,12 @@ const fullSidebar = [
     ],
   },
   {
+    text: "Embedding Dagu",
+    items: [
+      { text: "Embedded Go API", link: "/getting-started/embedded" },
+    ],
+  },
+  {
     text: "Writing Workflows",
     items: [
       // Core foundations
