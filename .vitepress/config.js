@@ -38,6 +38,7 @@ const fullSidebar = [
       },
       { text: "Core Concepts", link: "/getting-started/concepts" },
       { text: "CLI Commands", link: "/getting-started/cli" },
+      { text: "Embedded Go API", link: "/getting-started/embedded" },
       { text: "AI Agent", link: "/getting-started/ai-agent" },
     ],
   },
