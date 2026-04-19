@@ -8,6 +8,12 @@ The API is marked experimental in the package documentation. Names, options, and
 import "github.com/dagucloud/dagu"
 ```
 
+## License
+
+Dagu is distributed under `GPL-3.0-or-later`. Applications that import or link the embedded Go API and distribute the resulting binary should evaluate GPL obligations for the combined work.
+
+For proprietary products that need to distribute Dagu as part of a non-GPL application, see [Licensing](/embedding/licensing).
+
 ## Local Execution
 
 `dagu.New` creates an embedded engine backed by Dagu's file stores. `RunFile` and `RunYAML` load a DAG, start the run asynchronously, and return a `*dagu.Run`.

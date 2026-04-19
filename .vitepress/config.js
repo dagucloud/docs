@@ -44,7 +44,8 @@ const fullSidebar = [
   {
     text: "Embedding Dagu",
     items: [
-      { text: "Embedded Go API", link: "/getting-started/embedded" },
+      { text: "Go API", link: "/embedding/go-api" },
+      { text: "Licensing", link: "/embedding/licensing" },
     ],
   },
   {
