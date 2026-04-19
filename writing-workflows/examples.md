@@ -2233,7 +2233,7 @@ description: Daily ETL pipeline for analytics
 schedule: "0 2 * * *"
 skip_if_successful: true
 group: DataPipelines
-tags: daily,critical
+labels: daily,critical
 queue: etl-queue          # Assign to global queue for concurrency control
 max_output_size: 5242880  # 5MB
 hist_retention_days: 90   # Keep history for 90 days

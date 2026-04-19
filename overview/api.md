@@ -52,7 +52,7 @@ When authentication is enabled, `/openapi.json` requires the same auth as the re
 curl http://localhost:8080/api/v1/dags
 
 # With filtering and pagination
-curl "http://localhost:8080/api/v1/dags?page=1&perPage=10&name=example&tags=prod"
+curl "http://localhost:8080/api/v1/dags?page=1&perPage=10&name=example&labels=prod"
 
 # Sort alphabetically
 curl "http://localhost:8080/api/v1/dags?sort=name&order=desc"
@@ -356,7 +356,7 @@ Common error codes:
         "name": "example_dag",
         "schedule": [{"expression": "0 * * * *"}],
         "description": "Example DAG",
-        "tags": ["example", "demo"]
+        "labels": ["example", "demo"]
       },
       "nextRun": "2026-03-29T09:30:00+09:00",
       "latestDAGRun": {

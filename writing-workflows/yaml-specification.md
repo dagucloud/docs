@@ -9,7 +9,7 @@ Dagu workflows are defined using YAML files. Each file represents a DAG (Directe
 ```yaml
 # Workflow metadata
 description: "What this workflow does"
-tags: {env: prod, team: platform}  # Optional: key-value tags
+labels: {env: prod, team: platform}  # Optional: key-value labels
 
 # Scheduling
 schedule: "0 * * * *"      # Optional: cron expression or typed start/stop/restart schedule map
@@ -62,7 +62,7 @@ handler_on:
 |-------|------|-------------|---------|
 | `name` | string | Workflow name | Filename without extension |
 | `description` | string | Human-readable description | - |
-| `tags` | string/object/array | Tags for categorization. Supports key-value pairs. See [Tags](/writing-workflows/tags). | `[]` |
+| `labels` | string/object/array | Labels for categorization. Supports key-value pairs. See [Labels](/writing-workflows/labels). | `[]` |
 | `group` | string | Group name for organization | - |
 
 ### Execution Type
@@ -1499,7 +1499,7 @@ These variables are automatically available:
 ```yaml
 name: production-etl
 description: Daily ETL pipeline for production data
-tags:
+labels:
   env: production
   type: etl
   priority: critical

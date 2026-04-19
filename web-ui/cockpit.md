@@ -15,7 +15,7 @@ The page renders two areas unconditionally:
 
 A dropdown listing all workspaces by name.
 
-- **"All workspaces"** -- deselects the workspace filter, shows all DAG runs regardless of workspace tag
+- **"All workspaces"** -- deselects the workspace filter, shows all DAG runs regardless of workspace label
 - **"New workspace"** -- opens an inline text input; only visible when the current user has the `canWrite` permission (checked via `useCanWrite()` from the auth context)
 - **Delete** -- trash icon next to the currently selected workspace; opens a confirmation dialog before deleting
 
@@ -30,15 +30,15 @@ See [Workspaces](/web-ui/workspaces) for the API and storage details.
 A dropdown to browse and select a DAG definition. Selecting a DAG opens the preview modal.
 
 - **Search** -- text input with 300ms debounce, queries `GET /api/v1/dags` with `name` filter and `perPage=50`
-- **Tag filter** -- clickable tag badges below the search input; tags with `workspace=` prefix are hidden from the filter row
+- **Label filter** -- clickable label badges below the search input; labels with `workspace=` prefix are hidden from the filter row
 - **Grouping** -- DAGs are grouped by their `group` field, sorted alphabetically; ungrouped DAGs appear last under `(ungrouped)`
-- **Workspace filtering** -- when a workspace is selected, DAGs with a `workspace=X` tag that doesn't match the selected workspace are excluded; DAGs with no `workspace=` tag are always shown
+- **Workspace filtering** -- when a workspace is selected, DAGs with a `workspace=X` label that doesn't match the selected workspace are excluded; DAGs with no `workspace=` label are always shown
 - **Keyboard** -- `ArrowDown`/`ArrowUp` to navigate, `Enter` to select, `Escape` to close and reset filters
 
 Each item shows:
 - DAG name (red with warning icon if it has load errors)
 - Description (truncated to one line)
-- First 3 tags as badges, with `+N` overflow indicator
+- First 3 labels as badges, with `+N` overflow indicator
 - Parameter count (e.g., `3p`)
 
 ## Kanban Board
@@ -86,13 +86,13 @@ When `paramDefs` is present, enqueue/start controls are rendered as typed inputs
 
 ### Enqueue Behavior
 
-When enqueueing a DAG from the preview modal, the workspace tag `workspace=<name>` is injected into the YAML spec before submission:
+When enqueueing a DAG from the preview modal, the workspace label `workspace=<name>` is injected into the YAML spec before submission:
 
 1. The workspace name is sanitized: `name.replace(/[^a-zA-Z0-9_-]/g, '')`
-2. The tag is injected into the YAML spec using string manipulation:
-   - If a `tags:` key exists with array-style values (e.g., `- tag1`), a new `- workspace=<name>` line is appended
-   - If a `tags:` key exists with scalar value (e.g., `tags: "foo,bar"`), it becomes `tags: "foo,bar,workspace=<name>"`
-   - If no `tags:` key exists, `tags:\n  - workspace=<name>\n` is appended to the end
+2. The label is injected into the YAML spec using string manipulation:
+   - If a `labels:` key exists with array-style values (e.g., `- tag1`), a new `- workspace=<name>` line is appended
+   - If a `labels:` key exists with scalar value (e.g., `labels: "foo,bar"`), it becomes `labels: "foo,bar,workspace=<name>"`
+   - If no `labels:` key exists, `labels:\n  - workspace=<name>\n` is appended to the end
 3. The modified spec is submitted via `POST /api/v1/dag-runs/enqueue`
 
 If no workspace is selected (`selectedWorkspace` is empty), the enqueue handler returns early without submitting.
@@ -112,14 +112,14 @@ Shortcuts are suppressed when focus is inside an input/textarea (checked via `sh
 ```
 Workspace selected
   -> localStorage: dagu_cockpit_workspace = <name>
-  -> Tag filter: workspace=<name>
-  -> GET /api/v1/dag-runs?remoteNode=<node>&tags=workspace%3D<name>&fromDate=<unix>&toDate=<unix>
+  -> Label filter: workspace=<name>
+  -> GET /api/v1/dag-runs?remoteNode=<node>&labels=workspace%3D<name>&fromDate=<unix>&toDate=<unix>
   -> groupByStatus() -> Kanban columns
 ```
 
 For today's date, SSE replaces polling:
 ```
-SSE {apiURL}/events/dag-runs?remoteNode=<node>&tags=workspace%3D<name>&fromDate=<unix>&toDate=<unix>
+SSE {apiURL}/events/dag-runs?remoteNode=<node>&labels=workspace%3D<name>&fromDate=<unix>&toDate=<unix>
 ```
 
 The `fromDate` and `toDate` are unix timestamps representing the start and end of the day, adjusted for the configured timezone offset (`tzOffsetInSec`).

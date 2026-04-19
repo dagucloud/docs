@@ -24,7 +24,7 @@ A complete workflow contains:
 # Metadata
 name: data-pipeline
 description: Process daily data
-tags: [etl, production]
+labels: [etl, production]
 
 # Configuration  
 schedule: "0 2 * * *"
@@ -321,13 +321,13 @@ steps:
     command: python etl.py
 ```
 
-## Tags and Organization
+## Labels and Organization
 
 Group related workflows:
 
 ```yaml
 name: customer-report
-tags: 
+labels:
   - reports
   - customer
   - daily

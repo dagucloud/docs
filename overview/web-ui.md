@@ -46,7 +46,7 @@ The Cockpit page (`/cockpit`) provides a workspace-scoped kanban board for monit
 
 ![Cockpit](/cockpit.png)
 
-Workspaces organize DAG runs using `workspace=<name>` tags. The workspace selector lets you create, switch, and delete workspaces. A template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs with the workspace tag automatically injected.
+Workspaces organize DAG runs using `workspace=<name>` labels. The workspace selector lets you create, switch, and delete workspaces. A template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs with the workspace label automatically injected.
 
 See [Cockpit](/web-ui/cockpit) for full details.
 
@@ -189,7 +189,7 @@ The execution history page shows past execution results and logs, providing a co
 View execution history from the command line with `dagu history`:
 - Faster for scripting and automation
 - Export to JSON for analysis: `dagu history --format json`
-- Advanced filtering: `dagu history --status failed --last 7d --tags prod`
+- Advanced filtering: `dagu history --status failed --last 7d --labels prod`
 - See [CLI Reference](/getting-started/cli#history) for details
 :::
 

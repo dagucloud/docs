@@ -69,7 +69,7 @@ Queues must be enabled in `config.yaml`, otherwise the command returns an error.
 | `--run-id` | `-r` | DAG run ID. Auto-generated if omitted. |
 | `--name` | `-N` | Override the DAG name. |
 | `--queue` | `-u` | Override the DAG's `queue` field. |
-| `--tags` | | Comma-separated tags (`key=value` or key-only). |
+| `--labels` | | Comma-separated labels (`key=value` or key-only). |
 | `--default-working-dir` | | Default working directory for the DAG. |
 | `--trigger-type` | | How the run was initiated: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`. Default: `manual`. |
 

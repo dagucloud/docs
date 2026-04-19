@@ -1,12 +1,12 @@
 # Workspaces
 
-Named entities used to group DAG runs via tag-based filtering in the Cockpit UI.
+Named entities used to group DAG runs via label-based filtering in the Cockpit UI.
 
 ## How It Works
 
-A workspace is a named record stored on the server. When a DAG run is enqueued from the Cockpit UI, a `workspace=<name>` tag is injected into the in-memory YAML spec before submission. The Cockpit then filters DAG runs by this tag using the `tags` query parameter on `GET /api/v1/dag-runs`.
+A workspace is a named record stored on the server. When a DAG run is enqueued from the Cockpit UI, a `workspace=<name>` label is injected into the in-memory YAML spec before submission. The Cockpit then filters DAG runs by this label using the `labels` query parameter on `GET /api/v1/dag-runs`.
 
-Workspaces do not modify DAG definitions on disk. The tag injection happens at enqueue time on a copy of the spec.
+Workspaces do not modify DAG definitions on disk. The label injection happens at enqueue time on a copy of the spec.
 
 ## Storage
 
