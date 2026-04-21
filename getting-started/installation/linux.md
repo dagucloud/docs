@@ -13,7 +13,6 @@ By default the wizard installs to `~/.local/bin` (no sudo required). It can also
 - add `dagu` to your `PATH`
 - register a `systemd --user` unit (per-user) or a system unit (root)
 - create and verify the first admin account
-- install the Dagu AI skill when a supported AI tool is detected
 
 ### Non-interactive with user service
 

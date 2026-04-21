@@ -12,7 +12,6 @@ The script installers double as uninstallers. In interactive mode the wizard off
 
 - the Dagu data directory (`~/.local/share/dagu/` or `DAGU_HOME`)
 - your workflow YAML files and run history
-- the Dagu AI skill
 
 Opt into deeper cleanup with the flags below.
 
@@ -26,10 +25,6 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 # Also delete the data directory
 curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
   bash -s -- --uninstall --purge-data
-
-# Also remove the AI skill
-curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
-  bash -s -- --uninstall --remove-skill
 ```
 
 ### Linux-specific
@@ -54,10 +49,6 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 # Also delete the data directory
 & ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) `
   -Uninstall -PurgeData
-
-# Also remove the AI skill
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) `
-  -Uninstall -RemoveSkill
 ```
 
 CMD launcher:
@@ -68,7 +59,7 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 ## Notes
 
-- Non-interactive uninstall keeps data and AI skills unless you pass `--purge-data` / `-PurgeData` and `--remove-skill` / `-RemoveSkill`.
+- Non-interactive uninstall keeps data unless you pass `--purge-data` / `-PurgeData`.
 - If multiple Dagu installs are detected, non-interactive uninstall requires `--install-dir` / `-InstallDir` to pick one.
 - On Windows, the installer auto-elevates when uninstall needs Administrator rights.
 

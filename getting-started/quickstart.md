@@ -28,7 +28,7 @@ npm install -g --ignore-scripts=false @dagucloud/dagu
 
 :::
 
-The script installers run a guided wizard: PATH setup, background service, first admin account, and — if a supported AI coding tool is detected — the Dagu AI skill. Homebrew, npm, and Docker install the binary only.
+The script installers run a guided wizard for PATH setup, background service setup, and the first admin account. Homebrew, npm, and Docker install the binary only.
 
 Full options (specific versions, custom directories, service scope, uninstall, CI/non-interactive): [Installation Guide](/getting-started/installation/).
 
@@ -194,16 +194,6 @@ dotenv: .env                 # resolved from working_dir
 steps:
   - command: ls -la
 ```
-
-## AI-assisted authoring
-
-If you use Claude Code, Codex, OpenCode, Gemini CLI, or Copilot CLI, install the Dagu skill so the assistant knows the full DAG schema, all 18 executor types, and common pitfalls:
-
-```bash
-dagu ai install --yes
-```
-
-The guided installer can do this automatically when it detects a supported tool. See [AI Agent](/getting-started/ai-agent) for details.
 
 ## Next steps
 

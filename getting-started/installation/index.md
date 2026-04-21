@@ -29,7 +29,6 @@ The `installer.sh` / `installer.ps1` / `installer.cmd` scripts open a guided wiz
 - Add it to your `PATH`
 - Set it up as a background service (systemd on Linux, LaunchAgent on macOS, Windows service on Windows)
 - Create and verify the first admin account
-- Install the Dagu AI skill when a supported AI coding tool is detected
 
 Homebrew, npm, Docker, Helm, and manual downloads install the binary only — no wizard, no service, no admin bootstrap.
 

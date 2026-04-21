@@ -16,7 +16,7 @@ Upgrade later with `brew upgrade dagu`. Homebrew installs the binary only — no
 curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | bash
 ```
 
-The wizard can add `dagu` to your `PATH`, register a LaunchAgent, create the first admin account, and (if a supported AI coding tool is detected) install the Dagu AI skill.
+The wizard can add `dagu` to your `PATH`, register a LaunchAgent, and create the first admin account.
 
 ### Non-interactive install with service
 
