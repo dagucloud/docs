@@ -16,7 +16,7 @@ layout: doc
   </div>
 </div>
 
-<img src="/cockpit-demo.gif" alt="Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;" />
+<video src="/cockpit-demo.mp4" controls preload="metadata" playsinline aria-label="Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;"></video>
 
 ::: tip Try It Live
 Explore without installing: [Live Demo](https://demo-instance.dagu.sh/)
