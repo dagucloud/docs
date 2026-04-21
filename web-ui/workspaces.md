@@ -11,7 +11,7 @@ The selector has three kinds of values:
 | UI label | API value | Meaning |
 |----------|-----------|---------|
 | `all` | `workspaceScope=all` | Show all data the current user or API key can access. |
-| `default` | `workspaceScope=none` | Show resources with no valid `workspace=<name>` label. This is not an automatically created workspace record. |
+| `default` | `workspaceScope=default` | Show resources with no valid `workspace=<name>` label. This is not an automatically created workspace record. |
 | `<workspace>` | `workspaceScope=workspace&workspace=<name>` | Show one named workspace. |
 
 Missing or invalid workspace selection defaults to `all`.
@@ -42,14 +42,14 @@ The value can contain letters, numbers, underscores, and hyphens. It cannot be e
 List and search APIs accept:
 
 - `workspaceScope=all` for `all`
-- `workspaceScope=none` for `default`
+- `workspaceScope=default` for `default`
 - `workspaceScope=workspace&workspace=<name>` for one named workspace
 
 When `workspaceScope` is omitted, list and search APIs default to `all`.
 
 Single-resource and mutation APIs use only mutable scopes:
 
-- `workspaceScope=none`
+- `workspaceScope=default`
 - `workspaceScope=workspace&workspace=<name>`
 
 `workspaceScope=all` is an aggregate read scope and cannot be used as the target for creating, updating, deleting, or renaming one resource.

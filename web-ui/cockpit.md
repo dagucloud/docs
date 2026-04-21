@@ -107,7 +107,7 @@ Shortcuts are ignored while focus is inside an input or textarea.
 ```text
 Global workspace selection
   -> localStorage: dagu-selected-workspace-scope
-  -> Cockpit query: workspaceScope=<all|none|workspace>[&workspace=<name>]
+  -> Cockpit query: workspaceScope=<all|default|workspace>[&workspace=<name>]
   -> GET /api/v1/dags for templates
   -> GET /api/v1/dag-runs for kanban columns
 ```

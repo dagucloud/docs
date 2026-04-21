@@ -37,10 +37,10 @@ The Documents page follows the global workspace selector:
 | UI label | API scope | Behavior |
 |----------|-----------|----------|
 | `all` | `workspaceScope=all` | Lists and searches all documents the current identity can access. |
-| `default` | `workspaceScope=none` | Lists and edits documents outside known workspace folders. |
+| `default` | `workspaceScope=default` | Lists and edits documents outside known workspace folders. |
 | `<workspace>` | `workspaceScope=workspace&workspace=<name>` | Lists and edits documents under `{docs_dir}/<workspace>/`. |
 
-Read/list/search endpoints accept all three scopes. Create, update, delete, and rename endpoints accept only `none` or `workspace`, because `all` is an aggregate view and is not a valid mutation target.
+Read/list/search endpoints accept all three scopes. Create, update, delete, and rename endpoints accept only `default` or `workspace`, because `all` is an aggregate view and is not a valid mutation target.
 
 ## Generating Documents from DAG Steps
 
@@ -162,14 +162,14 @@ Read/list/search endpoints:
 
 | Parameter | Type | Description |
 |---|---|---|
-| `workspaceScope` | `all`, `none`, `workspace` | Scope to read. Omitted defaults to `all`. |
-| `workspace` | string | Required when `workspaceScope=workspace`; omitted for `all` and `none`. |
+| `workspaceScope` | `all`, `default`, `workspace` | Scope to read. Omitted defaults to `all`. |
+| `workspace` | string | Required when `workspaceScope=workspace`; omitted for `all` and `default`. |
 
 Mutation endpoints:
 
 | Parameter | Type | Description |
 |---|---|---|
-| `workspaceScope` | `none`, `workspace` | Target scope. Omitted defaults to `none`. |
+| `workspaceScope` | `default`, `workspace` | Target scope. Omitted defaults to `default`. |
 | `workspace` | string | Required when `workspaceScope=workspace`. |
 
 ### List Documents

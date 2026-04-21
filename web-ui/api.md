@@ -1654,7 +1654,7 @@ Returns lightweight cursor-based DAG search results for the global search page.
 | limit | integer | Number of results to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous response | No |
 | remoteNode | string | Remote node name | No |
-| workspaceScope | `all`, `none`, `workspace` | Workspace scope. Omitted defaults to `all`. | No |
+| workspaceScope | `all`, `default`, `workspace` | Workspace scope. Omitted defaults to `all`. | No |
 | workspace | string | Workspace name when `workspaceScope=workspace` | No |
 
 Each result includes preview snippets plus `hasMoreMatches` and `nextMatchesCursor` for loading more snippets from that result.
@@ -1695,7 +1695,7 @@ Returns lightweight cursor-based document search results for the global search p
 | limit | integer | Number of results to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous response | No |
 | remoteNode | string | Remote node name | No |
-| workspaceScope | `all`, `none`, `workspace` | Workspace scope. Omitted defaults to `all`. | No |
+| workspaceScope | `all`, `default`, `workspace` | Workspace scope. Omitted defaults to `all`. | No |
 | workspace | string | Workspace name when `workspaceScope=workspace` | No |
 
 This endpoint is available only when document management is enabled.
@@ -1734,7 +1734,7 @@ Loads additional cursor-based snippets for one DAG search result.
 | limit | integer | Number of snippets to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous snippet response | No |
 | remoteNode | string | Remote node name | No |
-| workspaceScope | `none`, `workspace` | Resource scope for the selected DAG result. | No |
+| workspaceScope | `default`, `workspace` | Resource scope for the selected DAG result. | No |
 | workspace | string | Workspace name when `workspaceScope=workspace` | No |
 
 **Response (200)**:
@@ -1765,7 +1765,7 @@ Loads additional cursor-based snippets for one document search result.
 | limit | integer | Number of snippets to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous snippet response | No |
 | remoteNode | string | Remote node name | No |
-| workspaceScope | `none`, `workspace` | Resource scope for the selected document result. | No |
+| workspaceScope | `default`, `workspace` | Resource scope for the selected document result. | No |
 | workspace | string | Workspace name when `workspaceScope=workspace` | No |
 
 ### Event Logs
@@ -3615,10 +3615,10 @@ Workspace-aware list and search APIs use `workspaceScope`:
 | Value | Meaning |
 |-------|---------|
 | `all` | All resources the current user or API key can access. |
-| `none` | Resources without a valid `workspace=<name>` label. The Web UI labels this scope as `default`. |
+| `default` | Resources without a valid `workspace=<name>` label. |
 | `workspace` | One named workspace, with `workspace=<name>`. |
 
-Mutation APIs use only `none` or `workspace`; `all` is an aggregate read scope.
+Mutation APIs use only `default` or `workspace`; `all` is an aggregate read scope.
 
 ### List Workspaces
 
