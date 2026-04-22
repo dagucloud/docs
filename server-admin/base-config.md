@@ -288,47 +288,6 @@ max_clean_up_time_sec: 60
 max_output_size: 1048576
 ```
 
-### Custom Step Types
-
-Define reusable step types in `base.yaml` when you want every DAG to share the same abstraction:
-
-```yaml
-step_types:
-  greet:
-    type: command
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [message]
-      properties:
-        message:
-          type: string
-        repeat:
-          type: integer
-          default: 2
-    template:
-      script: |
-        #!/bin/bash
-        for ((i=0; i<{{ .input.repeat }}; i++)); do
-          printf '%s\n' {{ json .input.message }}
-        done
-```
-
-Any DAG loaded with this base config can use:
-
-```yaml
-steps:
-  - type: greet
-    config:
-      message: hello from base
-```
-
-Base-config and DAG-local `step_types` are merged per YAML document. If a DAG declares the same custom type name as the base config, Dagu fails the load with a duplicate-definition error.
-
-Schema defaults are applied to `config` at the call site, the result is validated against `input_schema`, and `template` expands to a builtin step before normal step validation runs.
-
-See [Custom Step Types](/writing-workflows/custom-step-types) for the exact field rules and template behavior.
-
 ### Logging and Artifacts
 
 Configure log output behavior:

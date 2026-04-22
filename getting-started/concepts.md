@@ -212,34 +212,6 @@ steps:
 
 See [HTTP](/step-types/http) for more details.
 
-### Custom Step Types
-
-Define reusable step types in `step_types` when you want a typed wrapper around a builtin step type:
-
-```yaml
-step_types:
-  greet:
-    type: command
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [message]
-      properties:
-        message:
-          type: string
-    template:
-      script: |
-        #!/bin/bash
-        printf '%s\n' {{ json .input.message }}
-
-steps:
-  - type: greet
-    config:
-      message: hello
-```
-
-The common case is a `type: command` custom step with a templated `script`. Schema defaults can be applied to the `config` object, the result is validated against `input_schema`, and then the template expands to a builtin step before execution. See [Custom Step Types](/writing-workflows/custom-step-types) for the full rules.
-
 ## Scheduling
 
 Cron-based scheduling:

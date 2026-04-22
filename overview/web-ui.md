@@ -43,13 +43,13 @@ dagu start-all
 
 ## Global Workspace Selector
 
-The navigation includes a workspace selector above the remote node selector. It applies to Dashboard, DAG Definitions, DAG Runs, Search, Design, Cockpit, and Documents.
+The navigation includes a workspace selector above the remote node selector. It applies to Dashboard, DAG Definitions, DAG Runs, Search, Cockpit, and Documents.
 
 The selector values are:
 
 - `all`: all data the current user can access
-- `default`: data without a valid `workspace=<name>` label
-- Named workspace: data with the matching `workspace=<name>` label
+- `default`: data without a valid `workspace=<name>` tag
+- Named workspace: data with the matching `workspace=<name>` tag
 
 See [Workspaces](/web-ui/workspaces) for setup, API parameters, document layout, and access control behavior.
 
@@ -59,13 +59,13 @@ The Cockpit page (`/cockpit`) provides a kanban board for monitoring DAG runs ac
 
 ![Cockpit](/cockpit.png)
 
-Workspaces organize DAG runs using `workspace=<name>` labels. The global workspace selector in the navigation controls Cockpit and other workspace-aware pages:
+Workspaces organize DAG runs using `workspace=<name>` tags. The global workspace selector in the navigation controls Cockpit and other workspace-aware pages:
 
 - `all` shows every resource the current user can access
-- `default` shows resources without a valid workspace label
+- `default` shows resources without a valid workspace tag
 - A named workspace shows only that workspace
 
-Cockpit's template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs. When a named workspace is selected, Cockpit adds the matching `workspace=<name>` label to the enqueue request.
+Cockpit's template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs. When a named workspace is selected, Cockpit adds the matching `workspace=<name>` tag to the enqueue request.
 
 See [Cockpit](/web-ui/cockpit) for full details.
 
@@ -198,6 +198,7 @@ The execution history page shows past execution results and logs, providing a co
 - Sortable by date, status, duration
 - Pagination for large histories
 - Quick actions (retry, view logs)
+- Select loaded runs and submit retry or reschedule requests in sequence
 
 ### Execution Timeline
 - Visual timeline of executions
@@ -208,7 +209,7 @@ The execution history page shows past execution results and logs, providing a co
 View execution history from the command line with `dagu history`:
 - Faster for scripting and automation
 - Export to JSON for analysis: `dagu history --format json`
-- Advanced filtering: `dagu history --status failed --last 7d --labels prod`
+- Advanced filtering: `dagu history --status failed --last 7d --tags prod`
 - See [CLI Reference](/getting-started/cli#history) for details
 :::
 
@@ -351,7 +352,7 @@ The page uses a resizable split layout:
 - **Left panel**: a file tree showing documents organized in directories. Supports expand/collapse all, inline renaming (double-click or F2), drag-and-drop to move files, multi-select (Ctrl/Cmd+Click or Shift+Click) with batch delete, and full-text search across document content. A collapsible **Outline** section at the bottom lists headings extracted from the active document; clicking a heading scrolls to it in the preview.
 - **Right panel**: a tabbed editor. Multiple documents can be open simultaneously. Each tab shows an unsaved-changes indicator and provides close/close-others/close-all actions. The editor area toggles between **Edit** mode (Monaco editor with markdown syntax highlighting) and **Preview** mode (rendered markdown with GFM support and Mermaid diagram rendering). The mode preference persists across sessions.
 
-DAG steps can generate documents at runtime using the `DAG_DOCS_DIR` environment variable. For a DAG with `workspace=<name>`, Dagu sets `DAG_DOCS_DIR` to `<paths.docs_dir>/<workspace>/<DAG name>`. For `default` DAGs, it uses `<paths.docs_dir>/<DAG name>`. Files written there appear in the tree automatically for the selected workspace.
+DAG steps can generate documents at runtime using the `DAG_DOCS_DIR` environment variable. For a DAG tagged with `workspace=<name>`, Dagu sets `DAG_DOCS_DIR` to `<paths.docs_dir>/<workspace>/<DAG name>`. For `default` DAGs, it uses `<paths.docs_dir>/<DAG name>`. Files written there appear in the tree automatically for the selected workspace.
 
 ## Audit Logs
 

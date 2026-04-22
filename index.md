@@ -203,8 +203,6 @@ Common built-in step types include:
 | `chat` | LLM chat completion |
 | `agent` | Tool-using agent step |
 
-DAGs can also declare reusable `step_types` that expand to builtin step types at load time. See [Custom Step Types](/writing-workflows/custom-step-types) and [Step Types](/step-types/shell) for the exact configuration surface.
-
 ## Scheduling and Reliability
 
 | Feature | Details |

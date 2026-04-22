@@ -27,7 +27,7 @@ This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and 
 | `operator` | Run and stop DAGs (execute only) |
 | `viewer` | Read-only access to DAGs and execution history |
 
-Workspace access can further scope a user to selected workspaces. This is UI/API data scoping, not tenant isolation. Selected-workspace users keep top-level role `viewer` and receive per-workspace grants such as `developer` for `ops` and `operator` for `prod`. Resources with no workspace label are shown as `default` and remain visible through the top-level viewer role.
+Workspace access can further scope a user to selected workspaces. This is UI/API data scoping, not tenant isolation. Selected-workspace users keep top-level role `viewer` and receive per-workspace grants such as `developer` for `ops` and `operator` for `prod`. Resources with no workspace tag are shown as `default` and remain visible through the top-level viewer role.
 
 See [User Management](./user-management#workspace-access) for the full workspace access rules and API schema.
 

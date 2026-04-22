@@ -47,6 +47,7 @@ steps:
 |-------|----------|---------|-------------|
 | `user` | Yes | - | SSH username |
 | `host` | Yes | - | SSH hostname |
+| `ip` | No | - | Alias for `host` |
 | `port` | No | `22` | SSH port |
 | `key` | No | Auto-detect | Private key path |
 | `password` | No | - | SSH password |

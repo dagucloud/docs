@@ -145,8 +145,8 @@ dagu history --format json --limit 500 > history.json
 # Export to CSV for spreadsheets
 dagu history --format csv > history.csv
 
-# Filter by labels (AND logic)
-dagu history --labels "prod,critical"
+# Filter by tags (AND logic)
+dagu history --tags "prod,critical"
 ```
 
 **Key features:**

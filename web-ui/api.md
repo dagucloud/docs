@@ -74,7 +74,7 @@ Returns the normalized OpenAPI document served by this Dagu instance.
 
 **Endpoint**: `GET /api/v1/dags`
 
-Retrieves DAG definitions with optional filtering by name and labels.
+Retrieves DAG definitions with optional filtering by name and tags.
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |
@@ -82,7 +82,7 @@ Retrieves DAG definitions with optional filtering by name and labels.
 | page | integer | Page number (1-based) | 1 |
 | perPage | integer | Items per page (max 1000) | 50 |
 | name | string | Filter DAGs by name | - |
-| labels | string | Filter by labels. Comma-separated. Syntax: `key`, `key=value`, `!key`, `key*`, `key=value*`. Supports `*` and `?` wildcards. AND logic. | - |
+| tags | string | Filter by tags. Comma-separated. Syntax: `key`, `key=value`, `!key`, `key*`, `key=value*`. Supports `*` and `?` wildcards. AND logic. | - |
 | sort | string | Sort field: `name` or `nextRun` | `ui.dags.sort_field` (fallback `name`) |
 | order | string | Sort order: `asc` or `desc` | `ui.dags.sort_order` (fallback `asc`) |
 | remoteNode | string | Remote node name | "local" |
@@ -100,7 +100,7 @@ Retrieves DAG definitions with optional filtering by name and labels.
         "description": "Example DAG",
         "params": ["param1", "param2"],
         "defaultParams": "{}",
-        "labels": ["example", "demo"]
+        "tags": ["example", "demo"]
       },
       "nextRun": "2026-03-29T09:30:00+09:00",
       "latestDAGRun": {
@@ -285,7 +285,7 @@ Fetches detailed information about a specific DAG.
       }
     ],
     "defaultParams": "{\"batch_size\": 1000, \"env\": \"dev\"}",
-    "labels": ["production", "etl", "daily"]
+    "tags": ["production", "etl", "daily"]
   },
   "localDags": [
     {
@@ -440,7 +440,7 @@ Validates a DAG YAML specification without persisting any changes. Returns a lis
     "schedule": [],
     "params": [],
     "defaultParams": "{}",
-    "labels": []
+    "tags": []
   }
 }
 ```
@@ -511,7 +511,8 @@ Creates and starts a DAG run with optional parameters.
   "params": "{\"env\": \"production\", \"version\": \"1.2.3\"}",
   "dagRunId": "custom-run-id",
   "dagName": "on-demand-data-load",
-  "singleton": false
+  "singleton": false,
+  "tags": ["workspace=analytics", "adhoc"]
 }
 ```
 
@@ -522,6 +523,7 @@ Creates and starts a DAG run with optional parameters.
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
+| tags | string[] | Additional tags for this DAG run. | No |
 
 > **Tip:** Overriding the DAG name changes the identifier used for queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
 
@@ -554,7 +556,8 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
   "params": "{\"env\": \"production\"}",
   "dagRunId": "custom-run-id",
   "dagName": "sync-execution",
-  "singleton": false
+  "singleton": false,
+  "tags": ["manual"]
 }
 ```
 
@@ -566,6 +569,7 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
+| tags | string[] | Additional tags for this DAG run. | No |
 
 **Response (200)** - DAG completed or reached waiting status:
 ```json
@@ -627,7 +631,9 @@ Adds a DAG run to the queue for later execution.
   "params": "{\"key\": \"value\"}",
   "dagRunId": "optional-custom-id",
   "dagName": "queued-ad-hoc-run",
-  "queue": "optional-queue-override"
+  "queue": "optional-queue-override",
+  "singleton": false,
+  "tags": ["queued"]
 }
 ```
 
@@ -638,6 +644,8 @@ Adds a DAG run to the queue for later execution.
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for the queued run (must satisfy DAG name validation) | No |
 | queue | string | Queue name override | No |
+| singleton | boolean | If true, prevent enqueuing if the DAG is already running or queued (returns 409) | No |
+| tags | string[] | Additional tags for this DAG run. | No |
 
 > **Tip:** When you override the DAG name, the queued run is tracked under the new identifier for both queue management and history records.
 
@@ -856,7 +864,7 @@ Retrieves the newest DAG runs with forward-only cursor pagination.
 | dagRunId | string | Filter by run ID | - |
 | limit | integer | Page size (max 500) | 100 |
 | cursor | string | Opaque cursor returned by the previous page | - |
-| labels | string | Filter by DAG labels. Comma-separated. Same syntax as DAG filtering. Supports `*` and `?` wildcards. AND logic. | - |
+| tags | string | Filter by DAG tags. Comma-separated. Same syntax as DAG filtering. Supports `*` and `?` wildcards. AND logic. | - |
 | remoteNode | string | Remote node name | "local" |
 
 The response includes `nextCursor` when older results are available. Repeat the same request with `cursor=<nextCursor>` to continue.
@@ -944,7 +952,8 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
   "name": "ad-hoc-extract",
   "params": "{\"env\":\"prod\"}",
   "dagRunId": "20241101_010203_custom",
-  "singleton": true
+  "singleton": true,
+  "tags": ["inline"]
 }
 ```
 
@@ -956,6 +965,7 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
 | params | string | JSON string persisted with the DAG-run and exposed to steps | No |
 | dagRunId | string | Explicit run identifier. If omitted, one is generated | No |
 | singleton | boolean | When true, aborts with `409` if the DAG already has active or queued runs | No |
+| tags | string[] | Additional tags for this DAG run. | No |
 
 **Response (200)**:
 ```json
@@ -1009,7 +1019,9 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
   "name": "queued-sleeper",
   "params": "{\"duration\":60}",
   "dagRunId": "queue_20241101_010203",
-  "queue": "low-priority"
+  "queue": "low-priority",
+  "singleton": false,
+  "tags": ["inline", "queued"]
 }
 ```
 
@@ -1021,6 +1033,8 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
 | params | string | JSON string saved with the queued run | No |
 | dagRunId | string | Explicit run ID. When omitted, one is generated | No |
 | queue | string | Queue name override for this run only | No |
+| singleton | boolean | When true, aborts with `409` if the DAG already has active or queued runs | No |
+| tags | string[] | Additional tags for this DAG run. | No |
 
 **Response (200)**:
 ```json
@@ -1599,7 +1613,7 @@ Performs full-text search across DAG definitions. This endpoint remains availabl
         "description": "Weekly database backup job",
         "params": ["target_db", "retention_days"],
         "defaultParams": "{\"retention_days\": 30}",
-        "labels": ["backup", "weekly", "critical"]
+        "tags": ["backup", "weekly", "critical"]
       },
       "matches": [
         {
@@ -1626,7 +1640,7 @@ Performs full-text search across DAG definitions. This endpoint remains availabl
         "description": "Daily data processing pipeline for warehouse ETL",
         "params": ["date", "env", "batch_size"],
         "defaultParams": "{\"batch_size\": 1000, \"env\": \"dev\"}",
-        "labels": ["production", "etl", "daily"]
+        "tags": ["production", "etl", "daily"]
       },
       "matches": [
         {
@@ -1654,7 +1668,6 @@ Returns lightweight cursor-based DAG search results for the global search page.
 | limit | integer | Number of results to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous response | No |
 | remoteNode | string | Remote node name | No |
-| workspace | `all`, `default`, or workspace name | Workspace to search. Omitted defaults to `all`. | No |
 
 Each result includes preview snippets plus `hasMoreMatches` and `nextMatchesCursor` for loading more snippets from that result.
 
@@ -1694,7 +1707,6 @@ Returns lightweight cursor-based document search results for the global search p
 | limit | integer | Number of results to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous response | No |
 | remoteNode | string | Remote node name | No |
-| workspace | `all`, `default`, or workspace name | Workspace to search. Omitted defaults to `all`. | No |
 
 This endpoint is available only when document management is enabled.
 
@@ -1732,7 +1744,6 @@ Loads additional cursor-based snippets for one DAG search result.
 | limit | integer | Number of snippets to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous snippet response | No |
 | remoteNode | string | Remote node name | No |
-| workspace | `default` or workspace name | Workspace for the selected DAG result. Omitted defaults to `default`. | No |
 
 **Response (200)**:
 ```json
@@ -1762,7 +1773,6 @@ Loads additional cursor-based snippets for one document search result.
 | limit | integer | Number of snippets to return (max 50) | No |
 | cursor | string | Opaque cursor returned by a previous snippet response | No |
 | remoteNode | string | Remote node name | No |
-| workspace | `default` or workspace name | Workspace for the selected document result. Omitted defaults to `default`. | No |
 
 ### Event Logs
 
@@ -1817,11 +1827,11 @@ If `cursor` is provided, cursor pagination is used automatically and `offset` mu
 }
 ```
 
-### Get All Labels
+### Get All Tags
 
-**Endpoint**: `GET /api/v1/dags/labels`
+**Endpoint**: `GET /api/v1/dags/tags`
 
-Retrieves all unique labels used across DAGs.
+Retrieves all unique tags used across DAGs.
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |
@@ -1831,7 +1841,7 @@ Retrieves all unique labels used across DAGs.
 **Response (200)**:
 ```json
 {
-  "labels": [
+  "tags": [
     "backup",
     "critical",
     "daily",
@@ -1855,7 +1865,7 @@ Retrieves all unique labels used across DAGs.
 **Response with Errors (200)**:
 ```json
 {
-  "labels": [
+  "tags": [
     "backup",
     "critical",
     "daily",
@@ -2453,7 +2463,7 @@ curl "http://localhost:8080/api/v1/dags/search?q=database" \
         "description": "Weekly database backup job",
         "params": ["target_db", "retention_days"],
         "defaultParams": "{\"retention_days\": 30}",
-        "labels": ["backup", "weekly", "critical"]
+        "tags": ["backup", "weekly", "critical"]
       },
       "matches": [
         {
@@ -2598,7 +2608,7 @@ curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
     "name": "data_processing_pipeline",
     "group": "ETL"
   },
-  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\nlabels:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
+  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\ntags:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
   "errors": []
 }
 ```
@@ -2613,8 +2623,8 @@ curl "http://localhost:8080/api/v1/dag-runs?status=2&fromDate=$(date -d '24 hour
 curl "http://localhost:8080/api/v1/dag-runs?name=data-processing-pipeline&limit=20" \
      -H "Authorization: Bearer your-token"
 
-# Search for DAGs with specific labels
-curl "http://localhost:8080/api/v1/dags?labels=production&page=1&perPage=50" \
+# Search for DAGs with specific tags
+curl "http://localhost:8080/api/v1/dags?tags=production&page=1&perPage=50" \
      -H "Authorization: Bearer your-token"
 
 # Get running DAG runs
@@ -3606,15 +3616,7 @@ curl -X POST "http://localhost:8080/api/v1/sync/cleanup"
 
 ## Workspace Endpoints
 
-Workspace-aware list and search APIs use one optional `workspace` query parameter:
-
-| Value | Meaning |
-|-------|---------|
-| `all` | All resources the current user or API key can access. |
-| `default` | Resources without a valid `workspace=<name>` label. |
-| `<workspace>` | One named workspace. |
-
-Mutation APIs use only `default` or a named workspace; `all` is an aggregate read value.
+Workspaces are managed through `/api/v1/workspaces`. DAG and DAG-run filtering uses tags such as `workspace=<name>`.
 
 ### List Workspaces
 

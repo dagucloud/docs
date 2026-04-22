@@ -34,25 +34,25 @@ In `all`, the API can return documents from all workspaces the current identity 
 
 The Documents page follows the global workspace selector:
 
-| UI label | API query | Behavior |
-|----------|-----------|----------|
-| `all` | `workspace=all` | Lists and searches all documents the current identity can access. |
-| `default` | `workspace=default` | Lists and edits documents outside known workspace folders. |
-| `<workspace>` | `workspace=<name>` | Lists and edits documents under `{docs_dir}/<workspace>/`. |
+| UI label | Behavior |
+|----------|----------|
+| `all` | Lists and searches all documents the current identity can access. |
+| `default` | Lists and edits documents outside known workspace folders. |
+| `<workspace>` | Lists and edits documents under `{docs_dir}/<workspace>/`. |
 
-Read/list/search endpoints accept all three values. Create, update, delete, and rename endpoints accept only `default` or a named workspace, because `all` is an aggregate view and is not a valid mutation target.
+`all` is an aggregate view and is not a valid mutation target.
 
 ## Generating Documents from DAG Steps
 
 Dagu sets `DAG_DOCS_DIR` for each run when `paths.docs_dir` is configured.
 
-For a DAG with no valid workspace label:
+For a DAG with no valid workspace tag:
 
 ```text
 DAG_DOCS_DIR=<paths.docs_dir>/<DAG name>
 ```
 
-For a DAG with exactly one valid `workspace=<name>` label:
+For a DAG with exactly one valid `workspace=<name>` tag:
 
 ```text
 DAG_DOCS_DIR=<paths.docs_dir>/<workspace>/<DAG name>
@@ -66,7 +66,7 @@ DAG_DOCS_DIR=/home/user/.config/dagu/dags/docs/ops/daily-report
 
 ```yaml
 name: daily-report
-labels:
+tags:
   - workspace=ops
 steps:
   - id: generate_report
@@ -85,7 +85,7 @@ steps:
 
 This writes `{docs_dir}/ops/daily-report/latest-run.md`. It appears in the `ops` workspace as document ID `daily-report/latest-run`.
 
-If the DAG has no workspace label, an invalid workspace label, or conflicting workspace labels, Dagu uses `<paths.docs_dir>/<DAG name>`, which appears under `default`.
+If the DAG has no workspace tag, an invalid workspace tag, or conflicting workspace tags, Dagu uses `<paths.docs_dir>/<DAG name>`, which appears under `default`.
 
 `DAG_DOCS_DIR` is not set when `paths.docs_dir` resolves to an empty string. See [Special Environment Variables](/writing-workflows/runtime-variables).
 
@@ -156,24 +156,10 @@ All endpoints are under `/api/v1`. All accept an optional `remoteNode` query par
 
 Single-document endpoints use `/docs/doc` with a `path` query parameter rather than embedding the path in the URL.
 
-### Workspace Query Parameter
-
-Read/list/search endpoints:
-
-| Parameter | Type | Description |
-|---|---|---|
-| `workspace` | `all`, `default`, or workspace name | Workspace to read. Omitted defaults to `all`. |
-
-Mutation endpoints:
-
-| Parameter | Type | Description |
-|---|---|---|
-| `workspace` | `default` or workspace name | Target workspace. Omitted defaults to `default`. |
-
 ### List Documents
 
 ```bash
-curl "http://localhost:8080/api/v1/docs?workspace=ops&perPage=50"
+curl "http://localhost:8080/api/v1/docs?perPage=50"
 ```
 
 Query parameters:
@@ -183,7 +169,6 @@ Query parameters:
 | `page` | integer | `1` | Page number, minimum 1 |
 | `perPage` | integer | `50` | Items per page, minimum 1 and maximum 1000 |
 | `flat` | boolean | `false` | If true, returns a flat list instead of a tree |
-| `workspace` | string | `all` | `all`, `default`, or a workspace name |
 
 Tree response:
 
@@ -242,7 +227,7 @@ Items in flat mode are sorted alphabetically by `id`.
 ### Get Document
 
 ```bash
-curl "http://localhost:8080/api/v1/docs/doc?path=daily-report/latest-run&workspace=ops"
+curl "http://localhost:8080/api/v1/docs/doc?path=daily-report/latest-run"
 ```
 
 Response:
@@ -260,15 +245,15 @@ Response:
 
 The `content` field contains the full file including frontmatter. `createdAt` is the file creation time when the platform exposes it. `updatedAt` is the file modification time.
 
-Returns `404` if the document does not exist or is outside the requested workspace.
+Returns `404` if the document does not exist.
 
 ### Search Documents
 
 ```bash
-curl "http://localhost:8080/api/v1/docs/search?q=deployment&workspace=all"
+curl "http://localhost:8080/api/v1/docs/search?q=deployment"
 ```
 
-The `q` parameter is required. Searches document content within the requested workspace.
+The `q` parameter is required.
 
 Response:
 
@@ -290,22 +275,22 @@ Response:
 ### Create Document
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/docs?workspace=ops" \
+curl -X POST "http://localhost:8080/api/v1/docs" \
   -H "Content-Type: application/json" \
   -d '{"id": "daily-report/latest-run", "content": "---\ntitle: Latest Run Results\n---\n\n## Results"}'
 ```
 
 Request body fields:
 
-- `id` (string, required): document ID relative to the target scope
+- `id` (string, required): document ID
 - `content` (string, required): full file content including optional frontmatter
 
-Returns `201` on success. Returns `409` if a document with that ID already exists in the target scope.
+Returns `201` on success. Returns `409` if a document with that ID already exists.
 
 ### Update Document
 
 ```bash
-curl -X PATCH "http://localhost:8080/api/v1/docs/doc?path=daily-report/latest-run&workspace=ops" \
+curl -X PATCH "http://localhost:8080/api/v1/docs/doc?path=daily-report/latest-run" \
   -H "Content-Type: application/json" \
   -d '{"content": "---\ntitle: Latest Run Results\n---\n\n## Updated Results"}'
 ```
@@ -314,29 +299,29 @@ Request body fields:
 
 - `content` (string, required): full file content including optional frontmatter
 
-Returns `404` if the document does not exist in the requested scope.
+Returns `404` if the document does not exist.
 
 ### Delete Document
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/docs/doc?path=daily-report/latest-run&workspace=ops"
+curl -X DELETE "http://localhost:8080/api/v1/docs/doc?path=daily-report/latest-run"
 ```
 
-Returns `204` with no response body on success. Returns `404` if the document does not exist in the requested scope.
+Returns `204` with no response body on success. Returns `404` if the document does not exist.
 
 Empty parent directories are automatically removed after deletion.
 
 ### Rename Document
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/docs/doc/rename?path=daily-report/latest-run&workspace=ops" \
+curl -X POST "http://localhost:8080/api/v1/docs/doc/rename?path=daily-report/latest-run" \
   -H "Content-Type: application/json" \
   -d '{"newPath": "daily-report/run-summary"}'
 ```
 
 Request body fields:
 
-- `newPath` (string, required): new document ID relative to the same target scope
+- `newPath` (string, required): new document ID
 
 Returns `404` if the source document does not exist. Returns `409` if a document already exists at the target path.
 

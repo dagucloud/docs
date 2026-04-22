@@ -1272,40 +1272,6 @@ steps:
 
 <div class="example-card">
 
-### Custom Step Type
-
-```yaml
-step_types:
-  say:
-    type: command
-    description: Print a reusable message
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [message]
-      properties:
-        message:
-          type: string
-    template:
-      exec:
-        command: echo
-        args:
-          - {$input: message}
-
-steps:
-  - type: say
-    config:
-      message: "build finished"
-```
-
-`config` is validated by `input_schema`; the rendered template runs as a builtin `command` step.
-
-<a href="/writing-workflows/custom-step-types" class="learn-more">Learn more →</a>
-
-</div>
-
-<div class="example-card">
-
 ### Harness Step Type
 
 > Requires the selected provider CLI (`codex` here) to be installed and available in `PATH`.
@@ -1319,42 +1285,6 @@ steps:
 ```
 
 The `command` field is the harness prompt; the harness executor invokes the provider when the step runs.
-
-<a href="/step-types/harness" class="learn-more">Learn more →</a>
-
-</div>
-
-<div class="example-card">
-
-### Custom Harness Step Type
-
-> Requires the selected provider CLI (`codex` here) to be installed and available in `PATH`.
-
-```yaml
-step_types:
-  codex_task:
-    type: harness
-    description: Run a Codex prompt
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [prompt]
-      properties:
-        prompt:
-          type: string
-    template:
-      command:
-        $input: prompt
-      config:
-        provider: codex
-
-steps:
-  - type: codex_task
-    config:
-      prompt: 'Review "quoted" text and list issues'
-```
-
-`$input` copies the prompt as a value, so quotes inside the prompt are not parsed as template syntax.
 
 <a href="/step-types/harness" class="learn-more">Learn more →</a>
 
@@ -2233,7 +2163,7 @@ description: Daily ETL pipeline for analytics
 schedule: "0 2 * * *"
 skip_if_successful: true
 group: DataPipelines
-labels: daily,critical
+tags: daily,critical
 queue: etl-queue          # Assign to global queue for concurrency control
 max_output_size: 5242880  # 5MB
 hist_retention_days: 90   # Keep history for 90 days

@@ -52,7 +52,7 @@ When authentication is enabled, `/openapi.json` requires the same auth as the re
 curl http://localhost:8080/api/v1/dags
 
 # With filtering and pagination
-curl "http://localhost:8080/api/v1/dags?page=1&perPage=10&name=example&labels=prod"
+curl "http://localhost:8080/api/v1/dags?page=1&perPage=10&name=example&tags=prod"
 
 # Sort alphabetically
 curl "http://localhost:8080/api/v1/dags?sort=name&order=desc"
@@ -143,6 +143,8 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag/start \
 ```
 
 `params` remains a JSON string payload. The server validates and coerces its values against the DAG's inline param definitions or external parameter schema before execution.
+
+Start, start-sync, enqueue, inline run, and inline enqueue requests can include `tags: ["key=value"]`.
 
 #### Enqueue DAG
 ```bash
@@ -245,6 +247,17 @@ curl -X POST http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/retry 
   -H "Content-Type: application/json" \
   -d '{"dagRunId": "new-run-id"}'
 ```
+
+#### Reschedule DAG Run
+```bash
+curl -X POST http://localhost:8080/api/v1/dag-runs/my-dag/20240101_120000/reschedule \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dagRunId": "new-run-id"
+  }'
+```
+
+Reschedule reuses the captured parameters and saved DAG snapshot from the previous run.
 
 ### Step Management
 
@@ -356,7 +369,7 @@ Common error codes:
         "name": "example_dag",
         "schedule": [{"expression": "0 * * * *"}],
         "description": "Example DAG",
-        "labels": ["example", "demo"]
+        "tags": ["example", "demo"]
       },
       "nextRun": "2026-03-29T09:30:00+09:00",
       "latestDAGRun": {

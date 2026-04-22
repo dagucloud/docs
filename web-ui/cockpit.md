@@ -20,7 +20,7 @@ Cockpit follows the global workspace selection:
 | UI label | Behavior |
 |----------|----------|
 | `all` | Shows DAG runs from every workspace the current identity can access, plus `default` runs. |
-| `default` | Shows DAG runs with no valid `workspace=<name>` label. |
+| `default` | Shows DAG runs with no valid `workspace=<name>` tag. |
 | `<workspace>` | Shows DAG runs for that named workspace. |
 
 The selected workspace is remembered in `localStorage` under `dagu-selected-workspace`. See [Workspaces](/web-ui/workspaces) for workspace behavior, storage, and permissions.
@@ -32,16 +32,15 @@ Switching workspace or remote node closes the open DAG preview and resets Cockpi
 A dropdown to browse and select a DAG definition. Selecting a DAG opens the preview side panel.
 
 - **Search**: text input with debounce, queries `GET /api/v1/dags`
-- **Label filter**: clickable label badges below the search input; `workspace=` labels are hidden from the filter row
+- **Tag filter**: clickable tag badges below the search input; `workspace=` tags are hidden from the filter row
 - **Grouping**: DAGs are grouped by their `group` field, sorted alphabetically; ungrouped DAGs appear last under `(ungrouped)`
-- **Workspace filtering**: the DAG list request includes the current `workspace` query parameter
 - **Keyboard**: `ArrowDown` and `ArrowUp` to navigate, `Enter` to select, `Escape` to close and reset filters
 
 Each item shows:
 
 - DAG name, with a warning icon when it has load errors
 - Description, truncated to one line
-- First three labels as badges, with a `+N` overflow indicator
+- First three tags as badges, with a `+N` overflow indicator
 - Parameter count, for example `3p`
 
 ## Kanban Board
@@ -86,9 +85,9 @@ When `paramDefs` is present, enqueue/start controls are rendered as typed inputs
 
 When enqueueing from Cockpit:
 
-- If a named workspace is selected, Cockpit adds `workspace=<name>` to the enqueue request labels.
-- If `all` or `default` is selected, Cockpit does not add a workspace label.
-- The server merges request labels with labels defined in the DAG spec.
+- If a named workspace is selected, Cockpit adds `workspace=<name>` to the enqueue request tags.
+- If `all` or `default` is selected, Cockpit does not add a workspace tag.
+- The server merges request tags with tags defined in the DAG spec.
 
 Cockpit only adds sanitized workspace names matching `^[A-Za-z0-9_-]+$`.
 
@@ -107,7 +106,6 @@ Shortcuts are ignored while focus is inside an input or textarea.
 ```text
 Global workspace selection
   -> localStorage: dagu-selected-workspace
-  -> Cockpit query: workspace=<all|default|name>
   -> GET /api/v1/dags for templates
   -> GET /api/v1/dag-runs for kanban columns
 ```

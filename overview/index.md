@@ -65,7 +65,7 @@ Understanding Dagu is easier once the main terms are clear.
 |------|---------|
 | **DAG** | A workflow file written in YAML. Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a command, container, SSH command, HTTP request, SQL query, sub-workflow, or AI agent task. |
-| **Step type** | The kind of work a step runs, such as `command`, `docker`, `kubernetes`, `ssh`, `http`, `postgres`, `s3`, or `agent`. You can also define custom step types with the `step_types` field. |
+| **Step type** | The kind of work a step runs, such as `command`, `docker`, `kubernetes`, `ssh`, `http`, `postgres`, `s3`, or `agent`. |
 | **Run** | One execution of a DAG. Runs keep status, logs, timing, outputs, and artifacts. |
 | **Schedule** | Cron-based automation for starting DAG runs, including timezone support. |
 | **Queue** | Concurrency control for workflows, useful when jobs must not overlap or when workers are shared. |

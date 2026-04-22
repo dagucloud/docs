@@ -25,7 +25,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is enabled | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Not set when `artifacts.enabled` is not `true`. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
-| `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>` for `default` DAGs, or `<paths.docs_dir>/<workspace>/<dag name>` when the DAG has one valid `workspace=<name>` label. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/ops/daily-backup` |
+| `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>` for `default` DAGs, or `<paths.docs_dir>/<workspace>/<dag name>` when the DAG has one valid `workspace=<name>` tag. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/ops/daily-backup` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
 
@@ -122,13 +122,13 @@ See [Artifacts](/writing-workflows/artifacts) for the full configuration, API, a
 
 Dagu sets `DAG_DOCS_DIR` from `paths.docs_dir`. The `paths.docs_dir` configuration defaults to `<paths.dags_dir>/docs` (see [Configuration Reference](/server-admin/reference)).
 
-For a DAG with no valid workspace label, Dagu sets:
+For a DAG with no valid workspace tag, Dagu sets:
 
 ```text
 DAG_DOCS_DIR=<paths.docs_dir>/<dag name>
 ```
 
-For a DAG with exactly one valid `workspace=<name>` label, Dagu sets:
+For a DAG with exactly one valid `workspace=<name>` tag, Dagu sets:
 
 ```text
 DAG_DOCS_DIR=<paths.docs_dir>/<workspace>/<dag name>
@@ -140,14 +140,14 @@ For example, a DAG named `daily-backup` with `workspace=ops` gets:
 /var/dagu/dags/docs/ops/daily-backup
 ```
 
-Invalid or conflicting workspace labels fall back to the `default` path, `<paths.docs_dir>/<dag name>`.
+Invalid or conflicting workspace tags fall back to the `default` path, `<paths.docs_dir>/<dag name>`.
 
 `DAG_DOCS_DIR` is **not set** when `paths.docs_dir` resolves to an empty string.
 
 Markdown files written under `DAG_DOCS_DIR` appear in the web UI's [Documents](/web-ui/documents) page automatically. Workspace-scoped files appear only when the matching workspace, or `all`, is selected.
 
 ```yaml
-labels:
+tags:
   - workspace=ops
 
 steps:

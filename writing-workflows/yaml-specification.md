@@ -9,7 +9,7 @@ Dagu workflows are defined using YAML files. Each file represents a DAG (Directe
 ```yaml
 # Workflow metadata
 description: "What this workflow does"
-labels: {env: prod, team: platform}  # Optional: key-value labels
+tags: {env: prod, team: platform}  # Optional: key-value tags
 
 # Scheduling
 schedule: "0 * * * *"      # Optional: cron expression or typed start/stop/restart schedule map
@@ -62,7 +62,7 @@ handler_on:
 |-------|------|-------------|---------|
 | `name` | string | Workflow name | Filename without extension |
 | `description` | string | Human-readable description | - |
-| `labels` | string/object/array | Labels for categorization. Supports key-value pairs. See [Labels](/writing-workflows/labels). | `[]` |
+| `tags` | string/object/array | Tags for categorization. Supports key-value pairs. See [Tags](/writing-workflows/tags). | `[]` |
 | `group` | string | Group name for organization | - |
 
 ### Execution Type
@@ -259,23 +259,6 @@ steps:
 ```
 
 See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation and examples.
-
-### Custom Step Types
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `step_types` | object | Reusable custom step type definitions for this YAML document. Merged with base-config `step_types` per document. Duplicate names across scopes are rejected. | - |
-
-Custom step types expand to builtin-backed steps during DAG load. They are not runtime plugins.
-
-Each definition accepts:
-
-- `type`: required builtin step type or builtin alias
-- `input_schema`: required inline JSON Schema object, which must resolve to an object schema
-- `template`: required step fragment expanded at build time
-- `description`: optional fallback description for the expanded step
-
-See [Custom Step Types](/writing-workflows/custom-step-types) for the full definition rules, template rendering behavior, and call-site restrictions.
 
 ### Data Fields
 
@@ -1259,8 +1242,8 @@ When using `container`, you cannot use `executor` or `script` fields on the same
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Builtin step type or custom step type name declared in `step_types` or base config | Inferred from other step fields when omitted |
-| `config` | object | Builtin executor configuration, or validated input for a custom step type definition | - |
+| `type` | string | Builtin step type | Inferred from other step fields when omitted |
+| `config` | object | Builtin executor configuration | - |
 
 ```yaml
 steps:
@@ -1270,14 +1253,6 @@ steps:
       destination: ./assets
     command: extract
 ```
-
-If `type` refers to a custom step type, schema defaults are applied to `config`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `config` as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `config`, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
-
-Custom step call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
-
-Custom-step precedence is `call site > template > defaults` for replacement fields. For additive fields, `env` and `preconditions` compose as `defaults -> template -> call site`.
-
-See [Custom Step Types](/writing-workflows/custom-step-types) for the exact allowed field set.
 
 ### Chat (LLM)
 
@@ -1499,7 +1474,7 @@ These variables are automatically available:
 ```yaml
 name: production-etl
 description: Daily ETL pipeline for production data
-labels:
+tags:
   env: production
   type: etl
   priority: critical

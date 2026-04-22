@@ -212,7 +212,7 @@ dagu history [flags] [DAG_NAME]
 - `--status` - Filter by status: `running`, `succeeded`, `failed`, `aborted`, `queued`, `waiting`, `rejected`, `not_started`, `partially_succeeded`
   - Aliases: `success` (succeeded), `failure` (failed), `canceled`/`cancelled`/`cancel` (aborted)
 - `--run-id` - Filter by run ID (partial match supported)
-- `--labels` - Filter by labels, comma-separated with AND logic (e.g., `prod,critical`)
+- `--tags` - Filter by tags, comma-separated with AND logic (e.g., `prod,critical`)
 - `--format`, `-f` - Output format: `table` (default), `json`, or `csv`
 - `--limit`, `-l` - Max results (default: `100`, max: `1000`)
 
@@ -244,8 +244,8 @@ dagu history --format json --limit 500 > history.json
 # CSV export for spreadsheets
 dagu history --format csv --limit 500 > history.csv
 
-# Label filtering (AND logic)
-dagu history --labels "prod,critical"
+# Tag filtering (AND logic)
+dagu history --tags "prod,critical"
 
 # Combined filters
 dagu history my-workflow --status failed --last 24h --limit 10
@@ -269,7 +269,7 @@ my-workflow   019c1ca3-f123-4567-89ab-cdef01234567  Failed     2026-02-01 14:22:
     "finishedAt": "2026-02-02T04:40:33Z",
     "duration": "2m30s",
     "params": "",
-    "labels": ["prod", "backend"],
+    "tags": ["prod", "backend"],
     "workerId": "",
     "error": ""
   }

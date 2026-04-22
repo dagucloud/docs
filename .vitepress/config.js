@@ -103,7 +103,6 @@ const fullSidebar = [
   {
     text: "Step Types",
     items: [
-      { text: "Custom Step Types", link: "/writing-workflows/custom-step-types" },
       { text: "Shell", link: "/step-types/shell" },
       { text: "Shell (macOS / Linux)", link: "/step-types/shell-unix" },
       { text: "Shell (Windows)", link: "/step-types/shell-windows" },

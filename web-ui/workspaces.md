@@ -1,8 +1,8 @@
 # Workspaces
 
-Workspaces group DAG definitions, DAG runs, documents, and design/search views by the canonical DAG label `workspace=<name>`.
+Workspaces group DAG definitions, DAG runs, documents, and search views by the canonical DAG tag `workspace=<name>`.
 
-The workspace selector is global. It appears in the Web UI navigation above the remote node selector and applies to Dashboard, DAG Definitions, DAG Runs, Search, Design, Cockpit, and Documents.
+The workspace selector is global. It appears in the Web UI navigation above the remote node selector and applies to Dashboard, DAG Definitions, DAG Runs, Search, Cockpit, and Documents.
 
 Workspaces are an organization and navigation scope inside one Dagu installation. They are not a multi-tenant isolation model and should not be treated as a hard security boundary between tenants. Use separate Dagu deployments and separate storage when you need tenant isolation.
 
@@ -10,26 +10,26 @@ Workspaces are an organization and navigation scope inside one Dagu installation
 
 The selector has three kinds of values:
 
-| UI label | API value | Meaning |
+| UI label | Tag filter | Meaning |
 |----------|-----------|---------|
-| `all` | `workspace=all` | Show all data the current user or API key can access. |
-| `default` | `workspace=default` | Show resources with no valid `workspace=<name>` label. This is not an automatically created workspace record. |
+| `all` | - | Show all data the current user or API key can access. |
+| `default` | `!workspace` | Show resources with no valid `workspace=<name>` tag. This is not an automatically created workspace record. |
 | `<workspace>` | `workspace=<name>` | Show one named workspace. |
 
 Missing or invalid workspace selection defaults to `all`.
 
 The selected workspace is persisted in browser `localStorage` under `dagu-selected-workspace`. Older keys, including `dagu-selected-workspace-scope` and `dagu_cockpit_workspace`, are migrated and removed automatically.
 
-## Labels
+## Tags
 
-A named workspace is represented on DAGs and DAG runs by this label:
+A named workspace is represented on DAGs and DAG runs by this tag:
 
 ```yaml
-labels:
+tags:
   - workspace=production
 ```
 
-Only one valid workspace label should be present. A missing workspace label belongs to `default`. Invalid or conflicting workspace labels are excluded from named workspace filters.
+Only one valid workspace tag should be present. A missing workspace tag belongs to `default`. Invalid or conflicting workspace tags are excluded from named workspace filters.
 
 Workspace names must match:
 
@@ -37,30 +37,17 @@ Workspace names must match:
 ^[A-Za-z0-9_-]+$
 ```
 
-The value can contain letters, numbers, underscores, and hyphens. It cannot be empty and cannot contain `/`, whitespace, dots, or other punctuation. This restriction lets the same name be used safely as a label value and filesystem path segment.
+The value can contain letters, numbers, underscores, and hyphens. It cannot be empty and cannot contain `/`, whitespace, dots, or other punctuation. This restriction lets the same name be used safely as a tag value and filesystem path segment.
 
 ## API Behavior
 
-List and search APIs use one optional `workspace` query parameter:
-
-- `workspace=all` for `all`
-- `workspace=default` for `default`
-- `workspace=<name>` for one named workspace
-
-When `workspace` is omitted, list and search APIs default to `all`.
-
-Single-resource and mutation APIs use only concrete workspace targets:
-
-- omit `workspace`, or set `workspace=default`, for resources without a workspace label
-- `workspace=<name>` for one named workspace
-
-`workspace=all` is an aggregate read value and cannot be used as the target for creating, updating, deleting, or renaming one resource.
+DAG and DAG-run list APIs use the `tags` query parameter for workspace filtering.
 
 ## Documents
 
 Documents are workspace-aware when `paths.docs_dir` is configured.
 
-For a DAG with no valid workspace label, Dagu sets:
+For a DAG with no valid workspace tag, Dagu sets:
 
 ```text
 DAG_DOCS_DIR=<paths.docs_dir>/<DAG name>
@@ -88,7 +75,7 @@ Workspace access limits which workspace-scoped data a user or API key sees in li
 
 - Users with `all: true` can access every workspace with their top-level role.
 - Users with selected workspace grants can access only those named workspaces with the grant role.
-- Resources with no workspace label remain visible through `default`; scoped users see them through their top-level role, which is `viewer` for selected-workspace users.
+- Resources with no workspace tag remain visible through `default`; scoped users see them through their top-level role, which is `viewer` for selected-workspace users.
 
 Existing users without a stored workspace access policy are treated as `all` for backward compatibility. New users created in the UI must explicitly choose `all` or selected workspaces.
 

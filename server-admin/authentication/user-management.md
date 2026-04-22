@@ -93,7 +93,7 @@ Rules:
 - Grant roles can be `manager`, `developer`, `operator`, or `viewer`.
 - `admin` cannot be scoped to a workspace; use `all` for admins.
 - Grant workspace names must reference existing workspace records when the user is created or updated.
-- Resources without a workspace label are shown as `default` and remain visible to authenticated users. For selected-workspace users, the top-level `viewer` role applies to `default`.
+- Resources without a workspace tag are shown as `default` and remain visible to authenticated users. For selected-workspace users, the top-level `viewer` role applies to `default`.
 
 If a workspace is deleted later, user records are not rewritten automatically. Remove or update stale grants before the next user update; validation requires selected grants to reference existing workspaces.
 
