@@ -7,7 +7,7 @@ layout: doc
 <div class="tagline" style="text-align: center;">
   <h2>Lightweight, Local-First, Declarative Workflow Engine</h2>
   <p>Dagu is a self-contained workflow engine. Workflows are defined in YAML and can run shell commands, scripts, containers, HTTP requests, SQL queries, SSH commands, sub-workflows, and AI agent steps.</p>
-  <p>Dagu runs as a single binary and stores state in local files by default. It does not require a database, message broker, or language-specific SDK. It includes scheduling, dependencies, retries, queues, logs, a Web UI, and optional distributed workers.</p>
+  <p>Dagu runs as a single binary and keeps workflows, history, and logs locally by default. It does not require a database, message broker, or language-specific SDK. It includes scheduling, dependencies, retries, queues, logs, a Web UI, and optional distributed workers.</p>
 </div>
 
 <div class="hero-section">
@@ -30,7 +30,7 @@ Credentials: `demouser` / `demouser`
 
 Dagu is a command-native workflow engine that runs as a single binary with no external databases or message brokers. It turns scripts, commands, containers, server tasks, and agent CLIs into DAGs (Directed Acyclic Graphs) defined in YAML. It supports local execution, cron scheduling, queue-based concurrency control, and distributed coordinator/worker execution across multiple machines over gRPC.
 
-All state is stored in local files by default. There is nothing to install besides the binary itself.
+By default, Dagu keeps workflows, run history, and logs on local disk, so there is very little to set up besides the binary itself.
 
 ## Real-World Use Cases
 
@@ -50,7 +50,7 @@ Dagu is useful when scripts, containers, server jobs, data tasks, or agent-drive
   <div class="real-world-usecase">
     <h3>Media Conversion</h3>
     <p><strong>Run:</strong> <code>ffmpeg</code>, thumbnail extraction, audio normalization, image processing, and other compute-heavy jobs.</p>
-    <p><strong>Why Dagu fits:</strong> conversion work can run across distributed workers while status, history, logs, and artifacts stay in one persistence layer for monitoring, debugging, and retries.</p>
+    <p><strong>Why Dagu fits:</strong> conversion work can run across distributed workers while status, history, logs, and artifacts stay visible in one place for monitoring, debugging, and retries.</p>
   </div>
   <div class="real-world-usecase">
     <h3>Infrastructure and Server Automation</h3>
@@ -70,7 +70,7 @@ Dagu is useful when scripts, containers, server jobs, data tasks, or agent-drive
   <div class="real-world-usecase">
     <h3>IoT and Edge Workflows</h3>
     <p><strong>Run:</strong> sensor polling, local cleanup, offline sync, health checks, and device maintenance jobs.</p>
-    <p><strong>Why Dagu fits:</strong> the single binary and file-backed state work well on small devices while still providing visibility through the Web UI.</p>
+    <p><strong>Why Dagu fits:</strong> the single binary and local-first storage work well on small devices while still providing visibility through the Web UI.</p>
   </div>
   <div class="real-world-usecase">
     <h3>AI Agent Workflows</h3>

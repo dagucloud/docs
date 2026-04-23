@@ -306,8 +306,6 @@ The scheduler replays from the **latest** of these three values:
 - The last global tick (when the scheduler last processed any tick)
 - The last time this specific DAG was scheduled (per-DAG watermark)
 
-Source: `ComputeReplayFrom()` in `internal/service/scheduler/catchup.go`.
-
 ### Duration syntax
 
 `catchup_window` accepts Go `time.ParseDuration` syntax plus `d` for days:

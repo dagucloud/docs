@@ -8,7 +8,7 @@ For the visual version on the website, see [Deployment models](https://dagu.clou
 
 | Term | Meaning |
 |------|---------|
-| **Dagu server** | The Web UI, REST API, scheduler, queues, run state, logs, and coordinator service when distributed execution is enabled. If the coordinator runs as a separate process, it must be configured with access to the same Dagu persistent storage as the server components. |
+| **Dagu server** | The Web UI, REST API, scheduler, queues, run history, logs, and coordinator service when distributed execution is enabled. If the coordinator runs as a separate process, it must be configured to use the same shared Dagu data as the other server components. |
 | **Worker** | A `dagu worker` process that connects to a coordinator and executes assigned DAG runs. Workers can be selected by labels. |
 | **Execution** | The place where workflow steps actually run: the Dagu server itself, a self-hosted worker, or a hybrid worker attached to a managed server. |
 | **Hybrid worker** | A worker you run inside your own infrastructure and connect to a managed Dagu Cloud server. Use it for Docker steps, private networks, custom runtimes, secrets, or data-local work. |
@@ -31,19 +31,19 @@ Each topology below uses its own diagram so the labels stay readable in the docs
 
 <img src="/deployment-models/local.gif" alt="Local single-server Dagu deployment with the Web UI, API, scheduler, executor, and persistent volume on one host." style="width: 100%; border-radius: 8px; border: 1px solid var(--vp-c-divider); margin: 16px 0 24px;" />
 
-Use this model when one machine is enough. `dagu start-all` runs the Web UI, scheduler, and execution engine in one process. State is file-backed by default, usually on local disk.
+Use this model when one machine is enough. `dagu start-all` runs the Web UI, scheduler, and execution engine in one process. History and logs stay on the same machine by default.
 
 ### Self-hosted with workers
 
 <img src="/deployment-models/self-hosted.gif" alt="Self-hosted Dagu deployment where the Web UI, scheduler, queue, coordinator, and workers run in your infrastructure and the server-side components share the same persistent volume." style="width: 100%; border-radius: 8px; border: 1px solid var(--vp-c-divider); margin: 16px 0 24px;" />
 
-Use this model when you want to keep the server, workers, secrets, logs, and workflow execution inside your own infrastructure. The server-side components, including the coordinator, use the same Dagu persistent storage. Workers either share that storage in shared-filesystem mode or report status and logs back to the coordinator in shared-nothing mode.
+Use this model when you want to keep the server, workers, secrets, logs, and workflow execution inside your own infrastructure. The server-side components, including the coordinator, share the same Dagu data. Workers either use that shared storage directly or report status and logs back through the coordinator in shared-nothing mode.
 
 ### Managed Dagu Cloud server
 
 <img src="/deployment-models/managed.gif" alt="Dagu Cloud managed server deployment with managed Web UI, API, scheduler, coordinator, runtime, and persistent storage in an isolated gVisor instance on GKE." style="width: 100%; border-radius: 8px; border: 1px solid var(--vp-c-divider); margin: 16px 0 24px;" />
 
-Dagu Cloud is a full managed Dagu server, not only a coordinator. Dagu Cloud operates the server components and their persistent storage. It can run workflows directly when they fit the managed runtime boundary. The managed server is provisioned as a dedicated isolated gVisor instance on GKE, and the managed license is included.
+Dagu Cloud is a full managed Dagu server, not only a coordinator. Dagu Cloud operates the server components and the backing storage for history, logs, and scheduling data. It can run workflows directly when they fit the managed runtime boundary. The managed server is provisioned as a dedicated isolated gVisor instance on GKE, and the managed license is included.
 
 ::: warning Docker steps in managed instances
 Dagu Cloud managed instances do not expose a Docker daemon or Docker socket. Docker step types do not run inside the managed instance. Use self-hosted Dagu or attach a hybrid worker when a workflow needs Docker step execution.
@@ -78,7 +78,7 @@ Use this model when you want Dagu Cloud to operate the server but need selected 
 - [Managed Dagu Cloud](https://dagu.cloud/pricing#managed): dedicated managed Dagu server with the managed license included.
 - [Contact](https://dagu.cloud/contact): sizing, deployment, or security review questions.
 
-For implementation details, use the deployment guides:
+For setup details and operating guides, use:
 
 - [Install Dagu](/getting-started/installation/)
 - [Deploy Dagu](/server-admin/deployment/)

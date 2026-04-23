@@ -71,8 +71,6 @@ Example:
 /var/lib/dagu/artifacts/daily-report/dag-run_20260412_031500Z_run-123/
 ```
 
-The resolved path for the current run is also stored in DAG run status as `archiveDir`.
-
 ## Runtime Variable
 
 When artifact storage is enabled, Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and lifecycle handlers.
@@ -91,7 +89,7 @@ Execution mode behavior:
 
 - Local execution writes directly into the final artifact directory.
 - Distributed execution with a shared filesystem also writes directly into the final artifact directory.
-- Distributed shared-nothing workers write into a worker-local staging directory first. Dagu uploads those files back to the coordinator, and the run's `archiveDir` points at the coordinator-side directory.
+- Distributed shared-nothing workers write into a worker-local staging directory first. Dagu uploads those files back to the coordinator before the run finishes.
 
 ## Web UI
 

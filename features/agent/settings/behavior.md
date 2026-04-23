@@ -6,16 +6,16 @@ This page covers the parts of `/agent-settings` that shape how the built-in agen
 
 If souls are configured, the settings page shows an **Agent Personality** selector.
 
-This selects the default soul for the built-in agent.
+This selects the default personality for the built-in agent.
 
-Souls define the agent's identity and communication style. They are stored separately and then chosen here as the default personality for new sessions.
+Use souls when you want different default styles for different teams or jobs, such as concise operations help, support-oriented replies, or a stricter code-review voice.
 
 In the current UI:
 
 - The selector only appears when at least one soul exists
 - You can choose `Default (no soul)` or a configured soul
 
-See [Souls](/features/agent/souls) for the file format, storage location, and API.
+See [Souls](/features/agent/souls) for how to create and manage personalities.
 
 ## When the Selected Soul Is Used
 
@@ -25,7 +25,7 @@ The selected soul becomes the default for the built-in agent. Users can still ov
 
 The settings page includes a **Web Search** toggle.
 
-This enables provider-native web search for agent sessions. It is not a separate callable tool in the chat tool list.
+This enables provider-native web search for agent sessions. It does not appear as a separate tool button in the built-in tool list.
 
 Whether it actually works depends on the selected provider and model.
 
@@ -50,7 +50,7 @@ Provider-native web search is different from exposing a generic "search the web"
 
 In Dagu's built-in agent:
 
-- Web search is configured as part of the model request path
+- Web search runs through the selected model/provider
 - Tool permissions do not show it as a standalone tool
 
 ## See Also

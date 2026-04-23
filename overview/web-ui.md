@@ -1,458 +1,269 @@
 # Web UI
 
-Monitor and manage workflows through Dagu's built-in web interface.
+Use Dagu's web UI to run workflows, inspect results, edit DAGs, review logs, and manage the server from a browser.
 
-## Overview
-
-Dagu includes a modern, responsive web UI that provides:
-- Real-time DAG execution monitoring
-- Visual DAG representation
-- Log viewing and search
-- Artifact browsing with preview and download
-- DAG execution history
-- DAG (YAML) editor with syntax highlighting and auto-completion
-- Interactive DAG management (start, stop, retry, etc.)
-- Global workspace selector for workspace-aware pages
-- Cockpit: kanban view of DAG runs
-- Web-based terminal (optional)
-- Audit logs and centralized event logs
-
-::: tip Configuration
-For Web UI configuration options, see [Configuration Reference](/server-admin/reference#ui-configuration).
-:::
-
-## Accessing the UI
+## Start the UI
 
 ```bash
-# Start Dagu with web UI
 dagu start-all
-
-# Open in browser
-# http://localhost:8080
 ```
 
-Custom host/port:
+Then open `http://localhost:8080`.
+
+To bind a different address or port:
+
 ```bash
 dagu start-all --host 0.0.0.0 --port 9000
-
-# Or via environment variables
-export DAGU_HOST=0.0.0.0
-export DAGU_PORT=9000
-dagu start-all
 ```
 
-## Global Workspace Selector
+## Main Areas
 
-The navigation includes a workspace selector above the remote node selector. It applies to Dashboard, DAG Definitions, DAG Runs, Search, Design, Cockpit, and Documents.
+Dagu's UI is organized around a few everyday jobs:
 
-The selector values are:
+- **Cockpit** for a live board of recent runs
+- **Dashboard** for recent activity and trends
+- **Definitions** for the list of workflows
+- **Run details** for outputs, artifacts, logs, and retries
+- **Docs** for markdown documents and runbooks
+- **Search** for finding workflows and documents quickly
+- **System Status** for scheduler, coordinator, worker, and resource health
 
-- `all`: all data the current user can access
-- `default`: data without a valid `workspace=<name>` label
-- Named workspace: data with the matching `workspace=<name>` label
+## Workspace Selector
 
-See [Workspaces](/web-ui/workspaces) for setup, API parameters, document layout, and access control behavior.
+The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, and Docs.
+
+![Workspace selector](/web-ui-workspace-selector-demo.png)
+
+You can switch between:
+
+- **all** to see everything your account can access
+- **default** to see items with no named workspace
+- **A named workspace** such as `ops`
+
+See [Workspaces](/web-ui/workspaces) for the full behavior and admin setup.
 
 ## Cockpit
 
-The Cockpit page (`/cockpit`) provides a kanban board for monitoring DAG runs across dates. DAG runs are grouped into status columns with date sections that load incrementally via infinite scroll. Today's section receives real-time updates.
+Cockpit is the quickest way to watch what is happening right now.
 
 ![Cockpit](/cockpit.png)
 
-Workspaces organize DAG runs using `workspace=<name>` labels. The global workspace selector in the navigation controls Cockpit and other workspace-aware pages:
+Use it when you want to:
 
-- `all` shows every resource the current user can access
-- `default` shows resources without a valid workspace label
-- A named workspace shows only that workspace
+- scan today’s runs by status
+- spot failures or stuck work quickly
+- open run details without leaving the board
+- start or enqueue workflows from the template picker
 
-Cockpit's template selector lets you browse DAG definitions, preview them in a side panel, and enqueue runs. When a named workspace is selected, Cockpit adds the matching `workspace=<name>` label to the enqueue request.
-
-See [Cockpit](/web-ui/cockpit) for full details.
+See [Cockpit](/web-ui/cockpit) for the dedicated guide.
 
 ## Agent
 
-The Dagu agent is an AI assistant that helps create, review, debug, and manage DAG workflows through a chat interface. 
-
-You can use any model including local LLMs, OpenAI Codex subscription, Open Router, etc. The agent can also operate on chat applications such as Slack and Telegram.
-
-You can also use the agent as a workflow step (`type: agent`) to perform dynamic operations during workflow execution.
+The built-in agent helps with workflow authoring, debugging, and day-to-day operations directly in the UI.
 
 ![Agent Chat](/agent-modal.png)
 
-### Accessing the Agent
+Typical uses:
 
-Click the **Agent** button at the bottom-left corner of any page.
+- draft or edit DAG YAML
+- explain failures and suggest fixes
+- navigate to related pages
+- work with local files when allowed by policy
 
-### Capabilities
+Configure it from `/agent-settings`.
 
-- Create and edit DAG YAML files
-- Execute shell commands subject to the configured bash policy
-- Read files and edit repository content
-- Navigate to UI pages
-- Delegate tasks to remote nodes when configured
-
-### Configuration
-
-Configure the agent at `/agent-settings` (requires admin role).
-
-See [Agent](/features/agent/) for complete documentation.
+See [AI Agent](/features/agent/) for the full setup and usage guide.
 
 ## Dashboard
 
-The main dashboard shows:
+The Dashboard gives you a broader operations view than Cockpit.
 
 ![Dashboard](/dashboard.png)
 
-### Recent Executions
-- Timeline of recent workflow runs
-- Quick status indicators
-- Click to view details
+Use it to review:
 
-### Filters
-- Filter by date range
-- Filter by status (success, failed, running)
-- Search by workflow name
+- recent workflow activity
+- success and failure patterns
+- filtered run lists by status, date, and name
 
-## DAG Definitions
+## Definitions
 
-The DAGs page shows all DAGs and their real-time status. This gives you an immediate overview of your workflows.
+The Definitions page lists every workflow you can access and shows its current state.
 
 ![Definitions](/dag-definitions.png)
 
-### DAG List Sorting
-The DAG list can be sorted by:
-- **Name**: Alphabetical order
-- **Status**: Current execution status  
-- **Last Run**: Most recent execution time
-- **Live / Schedule**: Scheduler-backed next run ordering plus schedule labels and live toggle state
+This is the best place to:
 
-The Web UI initializes this page with `name` / `asc` and sends explicit `sort` and `order` query parameters on requests. `ui.dags.sort_field` and `ui.dags.sort_order` are API fallback settings for clients that omit those parameters.
+- browse workflows by workspace
+- open a DAG for details or editing
+- start or enqueue a workflow from its detail view
+- see whether a workflow is scheduled, suspended, or recently failed
 
-::: info Backend Sorting
-`name` and `nextRun` are sorted server-side. `status` and `lastRun` are browser-side sorts on the current page only.
-:::
+## Workflow Details
 
-## DAG Details
-
-Click any DAG to see detailed information including real-time status, logs, and DAG configurations. You can edit DAG configurations directly in the browser.
+Open any workflow from **Definitions** to inspect its latest run, schedule, webhook settings, history, and YAML.
 
 ![DAG Details](/dag-status.png)
 
-### Controls
-- **Start**: Run the workflow
-- **Stop**: Cancel running execution
-- **Retry**: Retry failed execution
-- **Edit**: Modify workflow (if permitted)
+From this page you can usually:
 
-When a DAG exposes `paramDefs` metadata, the Start and Enqueue dialogs render typed controls automatically:
+- start, stop, or retry runs
+- review the latest graph or timeline
+- inspect step-level status
+- move between **Latest Run**, **Spec**, **Webhook**, and **History**
 
-- strings use text inputs
-- enums use selects
-- integers and numbers use numeric inputs with bounds
-- booleans use a toggle or checkbox
+## Run Details
 
-Descriptions are shown inline, client-side validation runs before submission, and the server still performs the authoritative validation. If a DAG does not expose typed parameter metadata, the UI falls back to the raw parameter editor.
-
-When a DAG uses `params[].eval`, computed defaults are resolved by the server when the run starts or is enqueued. The dialogs may not show those computed values ahead of time unless a literal `default` is also present.
-
-### Information Tabs
-
-- **Graph**: Visual representation
-  - **Drill-down**: Navigate to sub DAG executions by double-clicking steps
-  - **Update Status**: Change step status manually by right-clicking steps
-- **Artifacts**: File tree plus preview/download for DAG-run artifacts when the DAG enables artifact storage or the run already has artifacts
-- **Config**: YAML definition
-- **History**: Past executions
-- **Log**: Current execution logs
-
-## Execution Details
-
-The execution details page provides in-depth information about a specific workflow run, including real-time updates and logs.
+When you open a specific run, Dagu shows the full execution view.
 
 ![Execution Details](/status-details.png)
 
-### Real-time Updates
-- Live status changes
-- Streaming logs
-- Progress indicators
+This is where you troubleshoot and verify results:
 
-### Log Viewer
-- Combined workflow log
-- Per-step stdout/stderr
-- Search within logs
-- Download logs
+- **Status** for the graph and step table
+- **Timeline** for execution ordering and duration
+- **Outputs** for collected output values
+- **Artifacts** for generated files
+- **Logs** for the run and each step
 
-### Step Information
-- Start/end times
-- Duration
-- Exit code
-- Output variables
+The dedicated outputs view is also available inside the run screen:
 
-## Execution History
+![Outputs Tab](/outputs-tab.png)
 
-The execution history page shows past execution results and logs, providing a comprehensive view of workflow performance over time.
+## Run History And Logs
+
+Use workflow history when you want to compare multiple attempts of the same DAG:
 
 ![Execution History](/dag-history.png)
 
-### Execution List
-- Sortable by date, status, duration
-- Pagination for large histories
-- Quick actions (retry, view logs)
-
-### Execution Timeline
-- Visual timeline of executions
-- Identify patterns and issues
-- Performance trends
-
-::: tip CLI Alternative
-View execution history from the command line with `dagu history`:
-- Faster for scripting and automation
-- Export to JSON for analysis: `dagu history --format json`
-- Advanced filtering: `dagu history --status failed --last 7d --labels prod`
-- See [CLI Reference](/getting-started/cli#history) for details
-:::
-
-## Execution Log
-
-The execution log view shows detailed logs and standard output of each execution and step, helping you debug and monitor workflow behavior.
+Use the log view when you want the detailed text output for a run or a single step:
 
 ![Execution Log](/dag-logs.png)
 
 ## DAG Editor
 
-Edit workflows directly in the browser:
+You can edit workflow YAML directly in the browser when your role allows writes.
 
 ![DAG Editor](/dag-editor.png)
 
-### Features
-- Syntax highlighting
-- YAML validation
-- Auto-completion
-- Save with validation
+The editor includes:
 
-### Permissions
-Requires `write_dags` permission:
-```yaml
-permissions:
-  write_dags: true
-```
+- YAML editing with validation
+- schema-aware help and completion
+- save actions tied to normal DAG permissions
 
 ## Search
 
-The Search page (`/search`) provides cursor-based full-text search with two scopes:
-
-- **DAGs**: searches DAG definitions and returns lightweight results with preview snippets
-- **Docs**: searches managed markdown documents and returns lightweight results with preview snippets
-
-Each result can load additional snippets on demand through **Show more matches**, and the page supports infinite loading for more results.
+Search helps when you know roughly what you need but not exactly where it lives.
 
 ![Search](/search.png)
 
-The **Docs** scope is available only when document management is enabled on the server. When it is unavailable, the page returns a permission error instead of silently falling back.
+You can search:
+
+- **DAGs** for workflow definitions
+- **Docs** for markdown content when document management is enabled
+
+## Documents
+
+The Documents page is Dagu's built-in markdown workspace for runbooks, reports, and generated documents.
+
+![Documents](/docs.png)
+
+Common workflows:
+
+- maintain team runbooks
+- keep operating notes next to workflows
+- publish run-generated markdown with `DAG_DOCS_DIR`
+- browse and preview documents by workspace
+
+See [Documents](/web-ui/documents) for the dedicated guide.
+
+## API Docs
+
+The **API Docs** page exposes the REST API reference from inside the application.
+
+![API Docs](/web-ui-api-docs-demo.png)
+
+Use it when you need to:
+
+- inspect endpoints before automating a task
+- check request and response shapes
+- test ideas before wiring them into scripts or CI
+
+For the narrative API overview, see [API](/overview/api). For the full generated reference, see [Web UI API](/web-ui/api).
 
 ## System Status
 
-The System Status page provides real-time monitoring of system health and resource usage.
-
-### Service Status
-- **Scheduler Service**: Shows running scheduler instances with host, status, and uptime
-- **Coordinator Service**: Shows coordinator instances for distributed execution
-
-### Resource Monitoring
-Real-time charts display system resource usage:
-- **CPU Usage**: Overall CPU utilization percentage
-- **Memory Usage**: RAM utilization percentage
-- **Disk Usage**: Storage utilization for the data directory
-- **Load Average**: 1-minute system load average
-
-Charts auto-refresh every 5 seconds and display historical data based on the configured retention period (default: 24 hours).
-
-**Configuration:**
-```yaml
-# config.yaml
-monitoring:
-  retention: "24h"    # How long to keep history
-  interval: "5s"      # Collection frequency
-```
-
-## Workers
+System Status shows the health of the scheduler, coordinator, and the current machine.
 
 ![Workers](/workers.webp)
 
-The Workers page provides real-time monitoring of distributed execution workers connected to the coordinator service.
+This page helps you verify:
 
-### Worker List
-- **Worker ID**: Unique identifier for each worker
-- **Labels**: Capability labels (GPU, memory, region, etc.)
-- **Health Status**: Visual health indicators
-  - Green: Healthy (< 5s since last heartbeat)
-  - Yellow: Warning (5-15s since last heartbeat)
-  - Red: Unhealthy (> 15s since last heartbeat)
-- **Last Heartbeat**: Time since last communication
-- **Running Tasks**: Currently executing DAG runs
+- scheduler and coordinator availability
+- connected workers
+- current CPU, memory, disk, and load trends
 
-### Running Task Details
-For each running task, you can see:
-- **DAG Name**: The workflow being executed
-- **DAG Run ID**: Unique execution identifier
-- **Root DAG**: Top-level workflow (for nested DAGs)
-- **Parent DAG**: Immediate parent (for sub DAGs)
-- **Started At**: Task start time
+If you use distributed execution, this is the first place to look when workers appear missing or overloaded.
 
-### Navigating to Task Details
-Click on any running task to open the DAG run details modal:
-- For root tasks: Opens DAG run details directly
-- For child tasks: Opens parent DAG with child view and breadcrumb navigation
-- Ctrl/Cmd+Click: Opens task details in a new tab
+## Admin Pages
 
-### Worker Labels Display
-Each worker shows its capability labels as badges:
-```
-Worker: gpu-worker-01
-Labels: [gpu=true] [cuda=11.8] [memory=64G] [region=us-east-1]
-```
+Depending on your role and license, the navigation can also include pages such as:
 
-## Terminal
+- **Users**
+- **API Keys**
+- **Remote Nodes**
+- **Base Config**
+- **Events**
+- **Audit Logs**
+- **License**
 
-The web-based terminal allows executing shell commands directly from the Dagu UI.
+These pages are intended for administrators and operators rather than day-to-day workflow users.
 
-### Enabling Terminal
+## Optional Features
 
-Terminal is **disabled by default** for security reasons. Enable it in your configuration:
+### Terminal
+
+The browser terminal is disabled by default. Enable it only in environments where shell access through the UI is acceptable.
 
 ```yaml
-# config.yaml
 terminal:
   enabled: true
   max_sessions: 5
 ```
 
-Or via environment variable:
-```bash
-export DAGU_TERMINAL_ENABLED=true
-export DAGU_TERMINAL_MAX_SESSIONS=5
-```
+### Remote Nodes
 
-### Security Notes
-
-- Commands run with the same permissions as the Dagu server process
-- Only enable in trusted environments
-- Consider enabling authentication when using terminal
-- Terminal sessions are logged in the audit log
-
-## Documents
-
-The Documents page (`/docs`) is a built-in markdown document manager with a full REST API. Documents are `.md` files stored under `paths.docs_dir`, which defaults to `<paths.dags_dir>/docs`. They can be browsed, edited, and searched in the web UI, and created or updated programmatically through the `/api/v1/docs` endpoints.
-
-![Documents](/docs.png)
-
-The page uses a resizable split layout:
-
-- **Left panel**: a file tree showing documents organized in directories. Supports expand/collapse all, inline renaming (double-click or F2), drag-and-drop to move files, multi-select (Ctrl/Cmd+Click or Shift+Click) with batch delete, and full-text search across document content. A collapsible **Outline** section at the bottom lists headings extracted from the active document; clicking a heading scrolls to it in the preview.
-- **Right panel**: a tabbed editor. Multiple documents can be open simultaneously. Each tab shows an unsaved-changes indicator and provides close/close-others/close-all actions. The editor area toggles between **Edit** mode (Monaco editor with markdown syntax highlighting) and **Preview** mode (rendered markdown with GFM support and Mermaid diagram rendering). The mode preference persists across sessions.
-
-DAG steps can generate documents at runtime using the `DAG_DOCS_DIR` environment variable. For a DAG with `workspace=<name>`, Dagu sets `DAG_DOCS_DIR` to `<paths.docs_dir>/<workspace>/<DAG name>`. For `default` DAGs, it uses `<paths.docs_dir>/<DAG name>`. Files written there appear in the tree automatically for the selected workspace.
-
-## Audit Logs
-
-::: info Self-Host License
-On self-hosted Dagu, audit logs require an active self-host license. Hosted Dagu Cloud includes audit logging by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
-:::
-
-The Audit Logs page (under Settings) provides a searchable log of security-sensitive operations.
-
-### Logged Events
-
-- **Authentication**: Login attempts, password changes
-- **User Management**: User creation, updates, deletion
-- **API Keys**: Key creation, updates, deletion
-- **Webhooks**: Webhook management operations
-- **Terminal**: Shell command executions
-
-### Configuration
-
-Audit logging is **enabled by default**. To disable:
-
-```yaml
-# config.yaml
-audit:
-  enabled: false
-```
-
-Or via environment variable:
-```bash
-export DAGU_AUDIT_ENABLED=false
-```
-
-See [Audit Logging Configuration](/server-admin/server#audit-logging) for more details.
-
-## Event Logs
-
-The Event Logs page (`/event-logs`) shows centralized operational events recorded by the event store.
-
-The current page focuses on DAG-run events and supports filtering by:
-
-- outcome type
-- DAG name
-- DAG run ID
-- attempt ID
-- time range
-
-The feed uses cursor pagination. Newer entries auto-refresh while you are at the head of the feed; loading older entries switches the page into manual historical browsing.
-
-When builtin authentication is enabled, viewing event logs requires a `manager` or `admin` role.
-
-## UI Customization
-
-### Branding
-```yaml
-# config.yaml
-ui:
-  navbar_color: "#00D9FF"
-  navbar_title: "My Workflows"
-```
-
-### Display Options
-```yaml
-ui:
-  max_dashboard_page_limit: 100  # Items per page
-  log_encoding_charset: utf-8   # Log encoding
-  dags:
-    sort_field: "name"         # Default request sort field (`name` or `nextRun`)
-    sort_order: "asc"          # Default sort order
-```
-
-## Remote Nodes
-
-Monitor multiple Dagu instances:
+Remote nodes let one Dagu UI manage multiple Dagu servers.
 
 ```yaml
 remote_nodes:
-  - name: staging
-    api_base_url: https://staging.example.com/api/v1
-    auth_type: basic
-    basic_auth_username: admin
-    basic_auth_password: ${STAGING_PASSWORD}
-
   - name: production
     api_base_url: https://prod.example.com/api/v1
     auth_type: token
     auth_token: ${PROD_TOKEN}
 ```
 
-## Security Considerations
+### Branding
 
-### HTTPS Setup
+You can adjust the title and accent color shown in the navigation bar.
+
 ```yaml
-tls:
-  cert_file: /path/to/cert.pem
-  key_file: /path/to/key.pem
+ui:
+  navbar_title: "My Workflows"
+  navbar_color: "#00D9FF"
 ```
+
+## Security Notes
+
+- Enable authentication before exposing the UI outside a trusted network.
+- Use HTTPS for any remote or shared deployment.
+- Treat terminal access and write access as admin-level capabilities.
 
 ## See Also
 
-- [Learn the REST API](/overview/api) for automation
-- [Configure authentication](/server-admin/server#authentication) for security
-- [Configure terminal access](/server-admin/server#terminal) for shell access
-- [Configure audit logging](/server-admin/server#audit-logging) for security monitoring
-- [Set up monitoring](/server-admin/operations#monitoring) for production
+- [Workspaces](/web-ui/workspaces)
+- [Cockpit](/web-ui/cockpit)
+- [Documents](/web-ui/documents)
+- [Learn the REST API](/overview/api)
+- [Server Administration](/server-admin/)

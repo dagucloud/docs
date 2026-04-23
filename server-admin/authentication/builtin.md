@@ -285,7 +285,7 @@ curl -H "Authorization: Bearer dagu_your-api-key-here" \
 - **Role Assignment**: Each API key has its own role (admin, manager, developer, operator, viewer)
 - **Usage Tracking**: See when each key was last used
 - **Web UI Management**: Create and manage keys from Settings > API Keys
-- **Secure Storage**: Keys are hashed; the full key is only shown once at creation
+- **Secure Handling**: The full key is shown only once at creation
 
 For detailed documentation, see [API Keys](api-keys).
 

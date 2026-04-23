@@ -25,7 +25,7 @@ retry_policy:
 
 ## File Location
 
-Dagu looks for the base configuration file based on your directory structure:
+Dagu looks for the base configuration file based on where your Dagu files live:
 
 | Mode | Base Config Path |
 |------|------------------|

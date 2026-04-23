@@ -1,6 +1,6 @@
 # Workflow Operator on Discord
 
-Workflow Operator on Discord uses a Discord bot to map each Discord channel to a persistent Dagu AI agent session over Discord's gateway (WebSocket, no public HTTP endpoint required). Messages sent in Discord are forwarded to the built-in AI agent, and agent responses are posted back. When a DAG run completes, Workflow Operator can also send AI-generated notifications so follow-up stays in the same conversation.
+Workflow Operator on Discord connects Discord channels and DMs to the built-in Dagu agent over Discord's gateway. Each conversation keeps its own running context, so follow-up questions and DAG-run notifications stay in the same place.
 
 ## Prerequisites
 
@@ -137,23 +137,18 @@ Type these as plain messages (or after @mentioning the bot when `respond_to_all`
 
 | Text | Behavior |
 |------|----------|
-| `new` | Resets the channel's session state and clears the current agent session |
+| `new` | Starts a fresh conversation in the current channel |
 | `cancel` | Cancels the currently active agent session |
 
 Any text starting with `new` or `cancel` is treated as a command. All other text is forwarded to the agent.
 
 ## Session Rotation
 
-The bot tracks token usage across all messages in a session. When total tokens exceed 50% of the assumed context limit (200,000 tokens), the bot automatically:
-
-1. Collects the last 3 user/assistant exchanges from the old session (each truncated to 200/300 characters respectively).
-2. Resets the chat state.
-3. Creates a new session with the summary prepended to the user's message.
-4. Sends a notice: `(Session context limit reached — continuing with recent context carried forward)`
+When a conversation gets close to the model's context limit, Dagu automatically rolls it over to a fresh behind-the-scenes session and carries forward a short summary. Users can keep chatting in the same Discord channel or DM without doing anything manually.
 
 ## DAG Run Notifications
 
-When the centralized event store is available (the default in both `server` and `start-all` modes), the bot starts a DAG run monitor that reads persisted DAG-run events and sends notifications. If the event store is disabled or unavailable, Discord chat works normally but DAG-run notifications stay disabled.
+When event tracking is available (the default in both `server` and `start-all` modes), the bot can send DAG-run notifications into Discord. If event tracking is unavailable, Discord chat still works; only automatic run notifications are skipped.
 
 ### Monitored statuses
 
@@ -168,8 +163,8 @@ Notifications are sent for these DAG run statuses:
 
 ### How notifications work
 
-1. The monitor polls the event store every **10 seconds** and reads only new DAG-run events, using durable on-disk state so restarts do not lose pending notifications.
-2. On first startup, it seeds its cursor at the current event-store head, so existing channels only receive future events.
+1. Dagu checks for new run events every **10 seconds** and remembers what it has already delivered, so restarts do not resend old notifications or drop pending ones.
+2. On first startup, existing channels only receive future events.
 3. For each new completion, it creates a **dedicated agent session** per allowed channel, sends a structured prompt with the run details (DAG name, status, error, start/finish times, step results), and waits for the agent to generate a notification message (up to **10 minutes**).
 4. The notification session is **adopted** as the channel's active session, so users can send follow-up messages like "show me the logs" or "retry it".
 5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.

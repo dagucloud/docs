@@ -45,8 +45,8 @@ Workers send execution status to the coordinator via the `ReportStatus` gRPC cal
 
 1. Worker executes a DAG step
 2. Worker calls `ReportStatus` with full `DAGRunStatus`
-3. Coordinator persists status to its local `DAGRunStore`
-4. Web UI reads status from coordinator's local storage
+3. Coordinator records the updated run state locally
+4. The Web UI reads that coordinator-side state
 
 ### Log Streaming
 
@@ -333,15 +333,15 @@ Workers send `ReportStatusRequest` containing:
 - Error messages and timestamps
 
 The coordinator:
-1. Finds or opens the DAGRunAttempt for the run
-2. Writes status to the local `DAGRunStore`
+1. Finds the matching run attempt
+2. Updates the coordinator-side run state
 3. Returns acceptance confirmation
 
 ### Queue Dispatch with Previous Status
 
 When the scheduler dispatches queued DAGs to workers:
 
-1. Scheduler reads the current status from `DAGRunStore`
+1. Scheduler reads the current recorded run status
 2. Status is included in the task as `previous_status` field
 3. Worker receives status with the task (no local store access needed)
 4. Worker uses `previous_status` for retry operations

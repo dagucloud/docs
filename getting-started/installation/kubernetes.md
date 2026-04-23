@@ -6,7 +6,7 @@ The official Helm chart deploys Dagu to any Kubernetes 1.19+ cluster.
 
 - Kubernetes 1.19+
 - Helm 3.0+
-- **A `StorageClass` that supports `ReadWriteMany`** — Dagu persists state on a shared filesystem that must be readable/writable by multiple pods (scheduler, server). Examples: NFS (`nfs-client-provisioner`), AWS EFS, CephFS, Azure Files Premium, GlusterFS.
+- **A `StorageClass` that supports `ReadWriteMany`** — Dagu's server components need shared storage so the Web UI, scheduler, and run history stay in sync across pods. Examples: NFS (`nfs-client-provisioner`), AWS EFS, CephFS, Azure Files Premium, GlusterFS.
 
 ## Install
 

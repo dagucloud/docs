@@ -1,6 +1,6 @@
 # Workflow Operator on Telegram
 
-Workflow Operator on Telegram uses a Telegram bot to map each Telegram chat to a persistent Dagu AI agent session. Messages sent in Telegram are forwarded to the built-in AI agent, and agent responses are sent back to Telegram. When a DAG run completes, Workflow Operator can also send AI-generated notifications so follow-up stays in the same conversation.
+Workflow Operator on Telegram connects Telegram chats to the built-in Dagu agent. Each chat keeps its own running context, so follow-up questions and DAG-run notifications stay in the same conversation.
 
 ## Prerequisites
 
@@ -96,7 +96,7 @@ curl -s "https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates" | jq '.result[0].m
 | Command | Behavior |
 |---------|----------|
 | `/start` | Prints a welcome message listing available commands |
-| `/new` | Resets the chat state and clears the current agent session |
+| `/new` | Starts a fresh conversation in the current chat |
 | `/cancel` | Cancels the currently active agent session |
 
 Any non-command text message is forwarded to the agent. If no session exists, one is created. If a session already exists, the message is sent to it.
@@ -113,18 +113,11 @@ Only prompts that are currently pending in the session are shown. Prompts that w
 
 ## Session Rotation
 
-When the current session is idle and has no pending prompt, Dagu checks the latest assistant-reported prompt token count. If it reaches 80% of the model context window, Dagu compacts the session. If the model does not declare a context window, Dagu uses a fallback of 200,000 tokens.
-
-1. Builds a transcript from prior user, assistant, error, and prompt messages.
-2. Asks the model for a handoff summary.
-3. Creates a continuation session and stores that summary as an assistant message prefixed with `Session handoff summary:\n`.
-4. Switches the chat to the new session.
-
-The stored handoff summary is marked as already delivered for chat bridges, so Telegram does not replay it as a visible message.
+When a conversation gets close to the model's context limit, Dagu automatically rolls it over to a fresh behind-the-scenes session and carries forward a compact summary. Users can keep chatting in the same Telegram chat without doing anything manually.
 
 ## DAG Run Notifications
 
-When the centralized event store is available (the default in both `server` and `start-all` modes), the bot starts a **DAG run monitor** that reads persisted DAG-run events and sends notifications. If the event store is disabled or unavailable, Telegram chat works normally but DAG-run notifications stay disabled.
+When event tracking is available (the default in both `server` and `start-all` modes), the bot can send DAG-run notifications into Telegram. If event tracking is unavailable, Telegram chat still works; only automatic run notifications are skipped.
 
 ### Monitored statuses
 
@@ -139,8 +132,8 @@ Notifications are sent for these DAG run statuses:
 
 ### How notifications work
 
-1. The monitor polls the event store every **10 seconds** and reads only new DAG-run events, using durable on-disk state so restarts do not lose pending notifications.
-2. On first startup, it seeds its cursor at the current event-store head, so existing chats only receive future events.
+1. Dagu checks for new run events every **10 seconds** and remembers what it has already delivered, so restarts do not resend old notifications or drop pending ones.
+2. On first startup, existing chats only receive future events.
 3. For each destination, it batches pending DAG-run notifications. Urgent single-run batches try to generate the message with the agent; all other batches use deterministic formatting. Batch delivery uses a **30-second** flush timeout.
 4. The notification message is appended to the chat-scoped session. If the chat does not have an active session yet, Dagu creates an empty session first. Follow-up messages continue in that same chat session.
 5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.

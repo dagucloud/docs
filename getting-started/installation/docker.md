@@ -1,6 +1,6 @@
 # Install with Docker
 
-Run Dagu as a container with all state persisted to a host volume.
+Run Dagu in Docker and keep your workflows, history, logs, and settings on a host volume.
 
 ## One-off run
 

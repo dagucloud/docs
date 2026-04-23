@@ -1,73 +1,65 @@
 # Models & Providers
 
-This page covers the parts of `/agent-settings` that decide whether the built-in agent can run and which model it uses.
+This page covers the part of `/agent-settings` where you decide whether the built-in agent can run and which models it can use.
 
-## Enable Agent
+## Enable The Agent
 
 The **Enable Agent** toggle turns the built-in Web UI assistant on or off.
 
-This is also exposed through the environment variable:
+You can also enable it through configuration:
 
 ```bash
 export DAGU_AGENT_ENABLED=true
 ```
 
-When the agent is disabled, the built-in chat UI is off and the **Models** table is hidden in the current Web UI.
-
 ## Models Table
 
-When the built-in agent is enabled, the page shows a **Models** table and an **Add Model** action.
+When the agent is enabled, Dagu shows a models table where you can:
 
-The table shows:
+- add a model
+- edit an existing model
+- set the default model
+- delete a model
 
-- `Name`
-- `ID`
-- `Provider`
-- `Model`
-- Credential status
-- Which model is the default
+The table helps you compare:
 
-From the row menu, you can:
-
-- Edit a model
-- Set a model as the default
-- Delete a model
+- display name
+- provider
+- model ID
+- whether credentials are ready
+- which model is the default
 
 ## Default Model
 
-One model can be marked as the default. The Web UI agent uses that model unless the user overrides it in the chat UI.
+The default model is the one the Web UI agent uses unless you override it in a chat session.
 
-The workflow `type: agent` step also falls back to this default model unless the step explicitly sets `agent.model`.
+Workflow steps with `type: agent` also fall back to this default unless the step sets its own model.
 
-## Add / Edit Model Fields
+## Add Or Edit A Model
 
-The current Web UI form includes these fields:
+The form includes these common fields:
 
-| Field | Meaning |
-|---|---|
-| `Name` | Human-readable display name |
-| `ID` | Stable internal identifier used by Dagu |
-| `Provider` | Backend provider implementation |
-| `Model` | Provider-specific model identifier |
-| `API Key` | Credential for hosted providers; optional for `local` unless your proxy requires one |
-| `Base URL` | Custom endpoint override |
-| `Description` | Optional UI description |
-| `Context Window` | Optional model metadata |
-| `Max Output Tokens` | Optional model metadata |
+| Field | What It Means |
+|-------|----------------|
+| `Name` | Human-friendly label shown in the UI |
+| `ID` | Stable short name for this saved model, used in the UI, config, and API |
+| `Provider` | Which model service Dagu should call |
+| `Model` | The provider's actual model name or tag |
+| `API Key` | Credential for hosted providers; optional for `Local` unless your proxy requires it |
+| `Base URL` | Optional endpoint override |
+| `Description` | Optional note shown in the UI |
+| `Context Window` | Optional capacity metadata |
+| `Max Output Tokens` | Optional limit metadata |
 | `Input Cost / 1M tokens` | Optional pricing metadata |
 | `Output Cost / 1M tokens` | Optional pricing metadata |
-| `Supports Thinking` | Optional capability metadata |
-| `Reasoning Effort` | Optional default thinking depth. Shown only when `Supports Thinking` is enabled. Stored as `low`, `medium`, `high`, or `xhigh`; empty uses the provider default. |
+| `Supports Thinking` | Whether this model should expose reasoning controls in Dagu |
+| `Reasoning Effort` | Default reasoning depth when thinking is enabled |
 
-## ID Behavior
+On creation, Dagu can generate the `ID` from the `Name`. After a model exists, the `ID` is treated as stable.
 
-On model creation, the UI auto-generates the `ID` from the `Name` unless you override it.
+## Providers In The UI
 
-In the current edit form, the `ID` is read-only after the model is created.
-
-## Provider Choices in the Current UI
-
-The current Web UI provider dropdown offers:
+The provider list may include:
 
 - `Anthropic`
 - `OpenAI`
@@ -77,55 +69,34 @@ The current Web UI provider dropdown offers:
 - `Local`
 - `Z.AI`
 
-If presets are available, the create form also shows **Import from Preset**.
+Available providers can expand as Dagu adds support for more backends.
 
-## Credential Handling
+## Credential Patterns
 
-The model form currently supports two credential modes:
+Most providers use the **API Key** field.
 
-- **Direct credential providers**: `anthropic`, `openai`, `gemini`, `openrouter`, `local`, and `zai` use the `API Key` field. `local` keeps this optional.
-- **Subscription-backed provider**: `openai-codex` hides `API Key` and `Base URL` and instead shows a connection card for the OpenAI Codex login flow.
-
-For `openai-codex`, the current Web UI requires an active connection before the model can be saved. The table's **Credential** column shows `Subscription` when that provider is connected.
-
-For the subscription-backed `OpenAI Codex` path, see [OpenAI Subscription](/features/agent/settings/openai-subscription).
+The main exception is **OpenAI Codex**, which uses a ChatGPT Plus/Pro login flow instead of a raw API key. For that path, see [OpenAI Subscription](/features/agent/settings/openai-subscription).
 
 ## Local Models
 
-For Ollama and other local servers, choose the `Local` provider in the UI.
+For Ollama and other local servers:
 
-Important details:
+- choose **Provider** = `Local`
+- set **Model** to the exact local model tag
+- leave **Base URL** empty or set `http://localhost:11434/v1`
 
-- `Base URL` is a base prefix, not a full endpoint
-- If `Base URL` is left empty, Dagu defaults to `http://localhost:11434/v1`
-- Dagu's local provider appends `/chat/completions`
-- Dagu does not call Ollama's native `/api/generate` endpoint from this path
+See [Local AI](/features/chat/local-ai) for setup and troubleshooting.
 
-That means these values are correct for a typical local Ollama setup:
+## A Practical Rule
 
-- `Provider`: `Local`
-- `Model`: your installed model tag such as `qwen3.5` or `qwen3.5:latest`
-- `Base URL`: empty, or `http://localhost:11434/v1`
+Not every field matters equally for every provider. Focus on the fields your provider actually needs:
 
-See [Local AI](/features/chat/local-ai) for exact endpoint behavior and troubleshooting.
+- hosted models usually need provider, model, and API key
+- local models usually need provider, model, and sometimes base URL
+- pricing and context fields mostly help Dagu label and reason about the model in the UI
 
-## What These Fields Mean in Practice
+## Related Pages
 
-Not every saved field is guaranteed to become a provider request parameter in every runtime path.
-
-For example:
-
-- `Base URL` changes where requests are sent
-- Pricing fields are stored as model metadata used by Dagu
-- `Reasoning Effort` is stored as model metadata and used only when the request path enables thinking mode for that model
-- Some fields are capability or UI metadata rather than provider-native knobs
-
-When the exact runtime behavior matters, use the provider-specific documentation for that path. For local models, see [Local AI](/features/chat/local-ai).
-
-## See Also
-
-- [Agent Settings](/features/agent/settings/)
+- [Settings Overview](/features/agent/settings/)
 - [OpenAI Subscription](/features/agent/settings/openai-subscription)
-- [Tool Permissions & Bash Policy](/features/agent/settings/controls)
-- [Personality & Web Search](/features/agent/settings/behavior)
 - [Local AI](/features/chat/local-ai)

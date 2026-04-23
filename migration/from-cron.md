@@ -147,17 +147,7 @@ Names are truncated to 40 characters and sanitized to alphanumeric + hyphens.
 
 ### Run History
 
-Every execution creates a persistent record in `~/.local/share/dagu/data/dag-runs/<dag-name>/`:
-
-```
-exec-python/
-├── dag-run_20250102_143022_01JGHQR8K4/
-│   ├── status.json       # Execution metadata
-│   ├── dagu.log          # Step output
-│   └── spec.yaml         # Generated YAML snapshot
-```
-
-The Web UI displays these runs under the DAG name. The generated YAML is stored so you can see exactly what was executed.
+Every `dagu exec` run appears in Dagu's normal run history, so you can reopen it in the Web UI under the generated DAG name and review the logs, timing, and final result later.
 
 The command runs locally and the CLI waits for completion and shows progress.
 
@@ -200,11 +190,11 @@ steps:
     command: ["python", "script.py"]
 ```
 
-This YAML is stored in the run history but **not** written to the DAGs directory. It exists only as run metadata.
+Dagu keeps a snapshot of the generated workflow with the run so you can inspect what actually executed later. It does not add a new workflow file to your normal DAGs directory.
 
 ## Using Secrets (Avoiding Log Leakage)
 
-Environment variables passed via `--env` are stored in run history and visible in logs. For sensitive data, use the `secrets` block in `base.yaml`:
+Environment variables passed via `--env` can show up in run details and logs. For sensitive data, use the `secrets` block in `base.yaml` instead:
 
 ```yaml
 # ~/.config/dagu/base.yaml
@@ -263,11 +253,10 @@ Handlers receive the standard environment provided by Dagu, including variables 
 
 See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) for complete documentation.
 
-## Technical Details
+## What To Expect
 
-`dagu exec` generates an in-memory DAG from the command and flags, then executes it through the same runtime as `dagu start`. This means:
+`dagu exec` behaves like a quick way to run an ad-hoc workflow through Dagu's normal runtime. In practice:
 
-- Logs are stored in the same location as file-based DAGs
-- Run history appears in the Web UI
-- Base configuration (`~/.config/dagu/base.yaml`) is automatically applied
-- All lifecycle handlers, secrets, and environment variables are inherited
+- the run shows up in the Web UI
+- your base configuration still applies
+- lifecycle handlers, secrets, and environment settings are still honored

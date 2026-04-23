@@ -219,7 +219,7 @@ The `followup` step receives the full session history from `setup`, including th
 - **Transitive history**: Each step saves its complete session (inherited + own + response). When step C depends on B which depends on A, C receives all messages from A→B→C.
 - **Multiple dependencies**: Messages are merged in the order listed in `depends`. Example: `depends: [step1, step2]` merges step1's history first, then step2's.
 - **System message deduplication**: Only the **first** system message is kept. Later system messages from dependencies or the step itself are discarded.
-- **Retry persistence**: Messages are stored at the DAG run level (not per-attempt), so session history survives retries. If step A succeeds and step B fails, retrying will allow step B to access step A's messages.
+- **Retry-safe history**: Conversation history stays attached to the DAG run, so a retry can continue with the earlier context instead of starting from scratch.
 :::
 
 ### Local Model (Ollama)
@@ -518,31 +518,17 @@ llm:
   model: gpt-4o  # String format still supported
 ```
 
-## Saved Message Format
+## Message Metadata
 
-Sessions are persisted with metadata:
+Dagu keeps provider, model, and token-usage metadata for assistant responses so the UI and APIs can show what happened during a run.
 
-```json
-[
-  {"role": "user", "content": "What is 2+2?"},
-  {
-    "role": "assistant",
-    "content": "4",
-    "metadata": {
-      "provider": "openai",
-      "model": "gpt-4o",
-      "promptTokens": 12,
-      "completionTokens": 1,
-      "totalTokens": 13
-    }
-  }
-]
-```
+In practice, this means you can review:
 
-Metadata is only attached to assistant responses and includes:
-- `provider`: The LLM provider used
-- `model`: The model identifier
-- `promptTokens`, `completionTokens`, `totalTokens`: Token usage statistics
+- which provider answered
+- which model was used
+- how many tokens were consumed
+
+You normally do not need to manage that metadata yourself.
 
 ## Security
 

@@ -1,158 +1,129 @@
 # User Management
 
 ::: info Deployment Model
-This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users requires an active self-host license. Listing users, viewing user details, and password operations work with builtin auth. Hosted Dagu Cloud includes user management by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
+This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users requires an active self-host license. Hosted Dagu Cloud includes user management by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
-Requires `auth.mode: builtin` (default).
+User management is available when `auth.mode: builtin` is enabled.
 
-## Initial Setup
+## What This Page Is For
 
-On first launch with builtin auth and no existing users, an admin account must be created. There are four ways to do this:
+Use user management when you need to:
 
-**Via the guided installer** — the script installers can collect the first admin credentials for you and use the same bootstrap flow as `initial_admin`.
+- create accounts for teammates
+- assign roles such as `admin`, `manager`, `developer`, `operator`, or `viewer`
+- limit access to specific workspaces
+- reset passwords
+- disable or remove accounts
 
-**Via config or environment variables** — set `initial_admin` in the config file or `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` / `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` environment variables. The server creates the admin at startup. See [Builtin Authentication](./builtin#initial-setup) for details.
+Most teams do this from the Web UI at `/users`.
 
-**Via the setup page** — the web UI redirects to `/setup` automatically for manual installs that do not configure `initial_admin`.
+## First Admin Setup
 
-**Via API** — call the setup endpoint directly:
+On a fresh self-hosted installation with builtin auth, Dagu needs one admin account before anyone can sign in.
+
+You can create that first admin in four ways:
+
+1. **Installer**: the guided install scripts can collect the first admin credentials.
+2. **Config or environment variables**: set `initial_admin` before startup.
+3. **Setup page**: Dagu redirects a fresh install to `/setup`.
+4. **API**: call the setup endpoint directly.
+
+Example:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/setup \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "your-password"}'
+  -d '{"username":"admin","password":"your-password"}'
 ```
-
-Response:
-```json
-{
-  "token": "eyJhbG...",
-  "expiresAt": "2025-01-11T00:00:00Z",
-  "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "username": "admin",
-    "role": "admin",
-    "workspaceAccess": { "all": true },
-    "createdAt": "2025-01-10T12:00:00Z",
-    "updatedAt": "2025-01-10T12:00:00Z"
-  }
-}
-```
-
-The setup endpoint always creates an `admin` role user. It returns `403` if any user already exists.
 
 ## Roles
 
-| Role | DAGs (read) | DAGs (write) | DAGs (run/stop) | Audit Logs | User Management |
-|------|-------------|--------------|-----------------|------------|-----------------|
-| `admin` | yes | yes | yes | yes | yes |
-| `manager` | yes | yes | yes | yes | no |
-| `developer` | yes | yes | yes | no | no |
-| `operator` | yes | no | yes | no | no |
-| `viewer` | yes | no | no | no | no |
-
-Source: `internal/auth/role.go`
+| Role | What It Is Typically Used For |
+|------|-------------------------------|
+| `admin` | Full control, including users, API keys, and auth settings |
+| `manager` | Workflow administration plus audit/event visibility |
+| `developer` | Build, edit, run, and troubleshoot workflows |
+| `operator` | Run and monitor workflows without editing them |
+| `viewer` | Read-only access |
 
 ## Workspace Access
 
-Users can be granted access to all workspaces or to selected workspaces.
+User access can apply to every workspace or only selected ones.
 
-Workspace access is a scoping feature for one Dagu installation. It determines which workspace-scoped DAGs, DAG runs, documents, and search results are shown to the user, and which role applies in each named workspace. It is not a multi-tenant isolation mechanism or a replacement for separate deployments when tenants must be isolated.
+### All Workspaces
 
-The Web UI labels the aggregate scope as `all`. In the API, the user object stores this as `workspaceAccess.all: true`.
+Use this when the same role should apply everywhere.
 
-```json
-{
-  "workspaceAccess": {
-    "all": true
-  }
-}
-```
+Examples:
 
-Selected-workspace users must have top-level role `viewer`; each workspace grant carries its own role:
+- platform admins
+- operators who manage all environments
+- developers working across all teams
 
-```json
-{
-  "role": "viewer",
-  "workspaceAccess": {
-    "all": false,
-    "grants": [
-      { "workspace": "ops", "role": "developer" },
-      { "workspace": "prod", "role": "operator" }
-    ]
-  }
-}
-```
+### Selected Workspaces
 
-Rules:
+Use this when one person should see only specific workspaces or should have different roles in different workspaces.
 
-- Existing users with no stored `workspaceAccess` are treated as `all` for backward compatibility.
-- New users created in the Web UI must choose `all` or at least one selected workspace.
-- Selected-workspace users must have top-level role `viewer`.
-- Grant roles can be `manager`, `developer`, `operator`, or `viewer`.
-- `admin` cannot be scoped to a workspace; use `all` for admins.
-- Grant workspace names must reference existing workspace records when the user is created or updated.
-- Resources without a workspace label are shown as `default` and remain visible to authenticated users. For selected-workspace users, the top-level `viewer` role applies to `default`.
+Typical pattern:
 
-If a workspace is deleted later, user records are not rewritten automatically. Remove or update stale grants before the next user update; validation requires selected grants to reference existing workspaces.
+- set the user's top-level role to `viewer`
+- grant a role per workspace, such as `developer` in `ops` and `operator` in `prod`
 
-## User Object
+### What Users See
 
-Fields returned by the API:
+Workspace access affects workspace-aware pages such as:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | UUID, auto-generated |
-| `username` | string | 1–64 characters, must be unique |
-| `role` | string | `admin`, `manager`, `developer`, `operator`, `viewer` |
-| `workspaceAccess` | object | Workspace access policy; omitted legacy data is treated as `all` |
-| `authProvider` | string | `builtin` or `oidc` |
-| `isDisabled` | boolean | Disabled accounts cannot log in |
-| `createdAt` | string | ISO 8601 timestamp |
-| `updatedAt` | string | ISO 8601 timestamp |
+- Definitions
+- Runs
+- Cockpit
+- Search
+- Documents
 
-`workspaceAccess` fields:
+Items with no named workspace still appear in the **default** workspace view.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `all` | boolean | `true` means the top-level role applies in every workspace |
-| `grants` | array | Required when `all` is `false`; each item contains `workspace` and `role` |
+If you need strict tenant separation rather than scoped visibility inside one installation, run separate Dagu deployments.
 
-## API
+## Everyday Tasks In The Web UI
 
-All endpoints require admin role. On self-hosted Dagu, create, update, and delete operations return `403` when the required self-host license is not active.
+### Create A User
 
-### List Users
+1. Open **Admin > Users**
+2. Click **Create User**
+3. Enter username and password
+4. Choose a role
+5. Choose **All workspaces** or **Selected workspaces**
+6. Save
 
-`GET /api/v1/users`
+### Reset A Password
 
-```bash
-curl http://localhost:8080/api/v1/users \
-  -H "Authorization: Bearer $TOKEN"
-```
+1. Open the user in **Admin > Users**
+2. Choose **Reset Password**
+3. Enter the new password
 
-```json
-{
-  "users": [
-    {
-      "id": "...",
-      "username": "admin",
-      "role": "admin",
-      "workspaceAccess": { "all": true },
-      "authProvider": "builtin",
-      "createdAt": "2025-01-01T00:00:00Z",
-      "updatedAt": "2025-01-01T00:00:00Z"
-    }
-  ]
-}
-```
+### Disable A User
 
-### Create User
+Disable the account when you want to preserve history and ownership but block sign-in.
 
-`POST /api/v1/users`
+### Delete A User
 
-Create a user with access to all workspaces:
+Delete the account when it should be removed entirely. Dagu does not let you delete your own active admin account from the same session.
+
+## API For Automation
+
+All user-management endpoints require admin access. On self-hosted Dagu, create, update, and delete operations also require the needed self-host license.
+
+| Action | Endpoint |
+|--------|----------|
+| List users | `GET /api/v1/users` |
+| Create user | `POST /api/v1/users` |
+| Get one user | `GET /api/v1/users/{userId}` |
+| Update user | `PATCH /api/v1/users/{userId}` |
+| Delete user | `DELETE /api/v1/users/{userId}` |
+| Reset another user's password | `POST /api/v1/users/{userId}/reset-password` |
+| Change your own password | `POST /api/v1/auth/change-password` |
+
+### Create A User With Access Everywhere
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/users \
@@ -166,7 +137,7 @@ curl -X POST http://localhost:8080/api/v1/users \
   }'
 ```
 
-Create a user with selected workspace access:
+### Create A User For Selected Workspaces
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/users \
@@ -186,99 +157,17 @@ curl -X POST http://localhost:8080/api/v1/users \
   }'
 ```
 
-Returns `201` with `{"user": User}`. Returns `409` if username exists. Returns `400` for invalid role, weak password, invalid workspace access, duplicate workspace grants, or grants for unknown workspaces.
+## Password Rules
 
-### Get User
+- minimum length: **8 characters**
+- users can change their own password after signing in
+- admins can reset passwords for other users
 
-`GET /api/v1/users/{userId}`
+Use a password manager or SSO/OIDC for larger teams.
 
-```bash
-curl http://localhost:8080/api/v1/users/USER_ID \
-  -H "Authorization: Bearer $TOKEN"
-```
+## Related Pages
 
-Returns `200` with `{"user": User}`. Returns `404` if not found.
-
-### Update User
-
-`PATCH /api/v1/users/{userId}`
-
-All fields are optional. You cannot disable your own account. When changing selected workspace grants, include `role: "viewer"` unless the user is being changed back to `workspaceAccess.all: true`.
-
-```bash
-curl -X PATCH http://localhost:8080/api/v1/users/USER_ID \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "role": "viewer",
-    "workspaceAccess": {
-      "all": false,
-      "grants": [
-        { "workspace": "ops", "role": "manager" }
-      ]
-    },
-    "isDisabled": false
-  }'
-```
-
-Returns `200` with updated user. Returns `409` if new username conflicts.
-
-### Delete User
-
-`DELETE /api/v1/users/{userId}`
-
-You cannot delete your own account.
-
-```bash
-curl -X DELETE http://localhost:8080/api/v1/users/USER_ID \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-Returns `204` on success. Returns `403` if attempting self-deletion.
-
-### Reset Password
-
-`POST /api/v1/users/{userId}/reset-password`
-
-Admin resets another user's password. This works with builtin auth and does not require a self-host license.
-
-```bash
-curl -X POST http://localhost:8080/api/v1/users/USER_ID/reset-password \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"newPassword": "new-password"}'
-```
-
-### Change Own Password
-
-`POST /api/v1/auth/change-password`
-
-Any authenticated user can change their own password. Does not require admin role.
-
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/change-password \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"currentPassword": "old-password", "newPassword": "new-password"}'
-```
-
-Returns `401` if current password is wrong. Returns `400` if new password is too short.
-
-## Passwords
-
-- Minimum 8 characters
-- Hashed with bcrypt (cost factor 12)
-- Timing-attack safe: failed lookups compare against a dummy hash to prevent username enumeration
-
-## Storage
-
-Users are stored as individual JSON files:
-
-```
-~/.local/share/dagu/users/
-├── a1b2c3d4-....json
-├── e5f6g7h8-....json
-└── ...
-```
-
-Override with `paths.users_dir` in config or `DAGU_USERS_DIR` environment variable.
+- [Builtin Authentication](./builtin)
+- [API Keys](./api-keys)
+- [OIDC / SSO](./oidc)
+- [Workspaces](/web-ui/workspaces)

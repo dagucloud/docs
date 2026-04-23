@@ -1,63 +1,68 @@
 # Memory
 
-The agent maintains persistent memory across sessions using Markdown files. Memory is automatically loaded into the agent's context at the start of each session, allowing it to build on previous experience.
+Memory lets the agent keep useful long-lived context so you do not need to repeat the same background information in every conversation.
 
-## Scopes
+## What Memory Is Good For
 
-Memory operates at two levels:
+Use memory for information that stays true across sessions, such as:
 
-| Scope | File Path | Purpose |
-|-------|-----------|---------|
-| **Global** | `{DAGsDir}/memory/MEMORY.md` | Cross-DAG preferences, environment details, user-wide policies |
-| **Per-DAG** | `{DAGsDir}/memory/dags/{dagName}/MEMORY.md` | DAG-specific config, pitfalls, fixes, debugging playbooks |
+- team conventions
+- preferred workflow patterns
+- environment notes
+- repeated troubleshooting advice
+- per-DAG operating notes
 
-## Directory Structure
+Do not use memory for secrets, one-off instructions, or temporary session state.
 
-```
-{DAGsDir}/memory/
-├── MEMORY.md                          # Global memory
-└── dags/
-    ├── my-pipeline/MEMORY.md          # Per-DAG memory
-    └── etl-job/MEMORY.md
-```
+## Two Memory Scopes
 
-## How It Works
+| Scope | Best For |
+|-------|----------|
+| **Global memory** | Rules or preferences that apply across many workflows |
+| **Per-DAG memory** | Notes that matter only for one workflow |
 
-1. Memory files are plain Markdown (`MEMORY.md`)
-2. At session start, memory content is loaded into the system prompt
-3. Only the first 200 lines of each memory file are loaded into context. If a file exceeds 200 lines, a truncation notice is appended with the full file path so the agent can read the rest using the `read` tool
-4. The agent uses `read` and `patch` tools to manage memory files directly during conversation
+As a rule, keep information as close as possible to the workflow it belongs to.
 
-## DAG-First Routing
+## How Users Control Memory
 
-The agent follows a DAG-first routing strategy when deciding where to save information:
+You can tell the agent directly:
 
-- If DAG context is available, save to **per-DAG** memory by default (not global)
-- Per-DAG memory stores: DAG-specific config assumptions, pitfalls, fixes, and debugging playbooks
-- **Global** memory is reserved for cross-DAG or user-wide stable preferences and policies
-- If unsure whether knowledge is global or DAG-specific, default to per-DAG
-- If no DAG context is available, the agent asks before writing to global memory
+- **"remember this"** when something should be kept
+- **"forget this"** when it should be removed
 
-## What Gets Saved
+When the agent is working with a specific DAG, it will usually prefer that DAG's memory rather than global memory.
 
-**Save:**
-- Stable patterns and conventions
-- Environment details
-- User preferences
-- Debugging insights
+## What To Save
 
-**Do not save:**
-- Session-specific state or temporary context
-- Secrets, credentials, or API keys
-- Unverified or speculative information
+Good examples:
 
-Users can explicitly control memory:
-- Say **"remember this"** to save something immediately
-- Say **"forget this"** to remove it
+- stable naming conventions
+- common failure causes
+- deployment caveats
+- expectations for a particular workflow
 
-## Agent Step Integration
+Avoid saving:
 
-Memory can be enabled in `type: agent` DAG steps:
+- passwords, tokens, or credentials
+- short-lived incident details
+- guesses that have not been verified
+
+## Reviewing And Editing Memory
+
+Admins can review and edit agent memory from the Dagu UI and API.
+
+| Action | Endpoint |
+|--------|----------|
+| View global memory | `GET /api/v1/settings/agent/memory` |
+| Replace global memory | `PUT /api/v1/settings/agent/memory` |
+| Clear global memory | `DELETE /api/v1/settings/agent/memory` |
+| View one DAG's memory | `GET /api/v1/settings/agent/memory/dags/{dagName}` |
+| Replace one DAG's memory | `PUT /api/v1/settings/agent/memory/dags/{dagName}` |
+| Clear one DAG's memory | `DELETE /api/v1/settings/agent/memory/dags/{dagName}` |
+
+## Memory In Agent Steps
+
+You can also enable memory for workflow agent steps:
 
 ```yaml
 steps:
@@ -70,34 +75,14 @@ steps:
         content: "Analyze the logs and update findings"
 ```
 
-When `memory.enabled` is `true`, both global and per-DAG memory are loaded into the agent step's context. Memory is disabled by default in agent steps.
-
-## API Endpoints
-
-All memory endpoints require admin role.
-
-### Global Memory
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/settings/agent/memory` | Get global memory content and list of DAGs with memory |
-| PUT | `/api/v1/settings/agent/memory` | Update global MEMORY.md |
-| DELETE | `/api/v1/settings/agent/memory` | Clear global memory |
-
-### DAG-Specific Memory
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/settings/agent/memory/dags/{dagName}` | Get memory for a specific DAG |
-| PUT | `/api/v1/settings/agent/memory/dags/{dagName}` | Update DAG memory |
-| DELETE | `/api/v1/settings/agent/memory/dags/{dagName}` | Clear DAG memory |
+This is useful when a workflow should benefit from the same long-lived context as the interactive agent.
 
 ## Git Sync
 
-Memory files are synced via [Git Sync](/server-admin/git-sync) with kind `memory`. Full conflict detection, publish, and discard operations are supported.
+If you use [Git Sync](/server-admin/git-sync), memory files can move through the same review and publish flow as DAGs and documents.
 
-## See Also
+## Related Pages
 
-- [Agent Overview](/features/agent/) — Chat interface and configuration
-- [Agent Step](/features/agent/step) — Using memory in DAG agent steps
-- [Git Sync](/server-admin/git-sync) — Synchronizing memory files with Git
+- [AI Agent](/features/agent/)
+- [Agent Step](/features/agent/step)
+- [Git Sync](/server-admin/git-sync)

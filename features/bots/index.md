@@ -1,8 +1,8 @@
 # Workflow Operator (Chat Bot)
 
-Workflow Operator is Dagu's persistent chatbot/operator layer for Slack, Telegram, and Discord. These bots act as connectors that map conversations in those platforms to agent sessions, forward messages in both directions, and keep follow-up in the same context.
+Workflow Operator brings the built-in Dagu agent into Slack, Telegram, and Discord. Each channel, thread, or DM keeps its own ongoing conversation, so you can ask follow-up questions and receive run notifications in the same place.
 
-Only one messaging connector can be active at a time. Technically this is configured via `bots.provider` in the config file or the `DAGU_BOTS_PROVIDER` environment variable.
+Only one messaging connector can be active at a time. Choose it with `bots.provider` in the config file or `DAGU_BOTS_PROVIDER` in the environment.
 
 ::: tip Prerequisite
 Configure the AI agent first. Go to **Agent Settings** (`/agent-settings`) in the Web UI and set your model, tool policy, and related defaults. Start with [Agent Settings](/features/agent/settings/), then use [Models & Providers](/features/agent/settings/models) and [Tool Permissions & Bash Policy](/features/agent/settings/controls) as needed.

@@ -169,7 +169,7 @@ Task descriptions in the output are truncated to 60 characters.
 
 **Availability**: Interactive chat only. Not available in DAG agent steps (`type: agent`). Calling `delegate` in a DAG agent step returns `"Delegate capability is not available in this context"`.
 
-**Sub-sessions**: Each sub-agent creates a persisted session with a unique UUID. Sub-sessions are excluded from the main session list but can be retrieved individually via `GET /api/v1/agent/sessions/{delegateId}`. The tool result message includes a `delegate_ids` field referencing all sub-session IDs created by that call.
+**Sub-sessions**: Each delegated agent gets its own chat session so you can inspect its work separately when needed. The tool result includes `delegate_ids` for follow-up automation.
 
 **SSE streaming**: Sub-agent messages are forwarded through the parent session's SSE stream as `delegate_messages` events. The parent also receives `delegate_event` notifications with type `started` or `completed` for each sub-agent. The frontend renders a floating panel per active sub-agent.
 

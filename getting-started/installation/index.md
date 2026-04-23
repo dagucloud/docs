@@ -32,9 +32,9 @@ The `installer.sh` / `installer.ps1` / `installer.cmd` scripts open a guided wiz
 
 Homebrew, npm, Docker, Helm, and manual downloads install the binary only — no wizard, no service, no admin bootstrap.
 
-## Directory layout
+## Where Dagu Keeps Things
 
-After installation, Dagu reads and writes to these paths:
+After installation, Dagu uses these paths by default. These are the main locations to know when you want to back up workflows, move storage, or inspect logs:
 
 ```
 ~/.config/dagu/

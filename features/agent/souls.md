@@ -1,10 +1,30 @@
 # Souls
 
-Souls define the agent's identity, priorities, and communication style. Each soul is a Markdown file with YAML frontmatter that gets injected into the agent's system prompt. You can create multiple souls and switch between them from [Personality & Web Search](/features/agent/settings/behavior).
+Souls let you give the built-in agent a default personality. Use them when you want the assistant to behave differently for different teams or jobs, such as concise operations help, onboarding guidance, or code-review-focused responses.
 
-## File Format
+You can create multiple souls and switch between them from [Personality & Web Search](/features/agent/settings/behavior).
 
-Soul files use YAML frontmatter followed by a Markdown body:
+## Quick Start
+
+1. Create a Markdown file in `{DAGsDir}/souls/`.
+2. Add a `name` and optional `description` in the YAML frontmatter.
+3. Write the instructions you want the agent to follow in the Markdown body.
+4. Open **Agent Settings** and choose that soul as the default personality.
+
+## What A Soul Controls
+
+A soul is best for long-lived guidance such as:
+
+- tone and communication style
+- priorities and operating principles
+- domain focus, such as operations, support, or development
+- recurring house rules you want applied to new sessions
+
+Do not use souls for secrets, one-off tasks, or temporary instructions.
+
+## Example Soul
+
+Soul files are Markdown files with YAML frontmatter followed by the instructions for the agent:
 
 ```markdown
 ---
@@ -35,11 +55,11 @@ and DAG management for Dagu.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | string | yes | Display name shown in the soul selector |
-| `description` | string | no | Brief description of the soul's focus |
+| `description` | string | no | Short note shown in lists and selectors |
 
-The Markdown body after the frontmatter is the soul's content. This content is injected into the `<identity>` block of the agent's system prompt.
+The Markdown body becomes the soul's standing instructions for new sessions that use it.
 
-## Soul ID
+## Soul IDs
 
 The soul ID is derived from the filename without the `.md` extension:
 
@@ -48,7 +68,7 @@ The soul ID is derived from the filename without the `.md` extension:
 
 IDs must match the pattern `[a-z0-9]+(-[a-z0-9]+)*` with a maximum of 128 characters. Only lowercase alphanumeric characters and hyphens are allowed.
 
-## Directory Structure
+## Where To Put Soul Files
 
 ```
 {DAGsDir}/souls/
@@ -59,7 +79,7 @@ IDs must match the pattern `[a-z0-9]+(-[a-z0-9]+)*` with a maximum of 128 charac
 
 ## Default Soul
 
-A `default` soul ships embedded in the binary and is seeded on first startup. Seeding is skipped if the souls directory already contains `.md` files or if the `.examples-created` marker file exists.
+A `default` soul is included so the personality selector has a sensible starting point.
 
 When no soul is selected, or the selected soul cannot be found, the agent falls back to the `default` soul.
 
@@ -67,7 +87,7 @@ When no soul is selected, or the selected soul cannot be found, the agent falls 
 
 ### Via Web UI
 
-Navigate to **Agent Settings** (`/agent-settings`) and use the **Agent Personality** selector in the Web UI.
+Open **Agent Settings** (`/agent-settings`) and use the **Agent Personality** selector.
 
 The settings behavior is documented on [Personality & Web Search](/features/agent/settings/behavior).
 
@@ -83,7 +103,7 @@ The selected soul takes effect on the next session creation.
 
 ## Safety Boundary
 
-Soul content populates the `<identity>` block only. The system safety rules (in the `<rules>` section of the system prompt) are always present and cannot be overridden by souls. This means:
+Souls shape the assistant's identity and style, but they do not override Dagu's built-in safety rules. This means:
 
 - You **can** customize: identity, priorities, communication style, custom guidelines
 - You **cannot** override: safety rules, security policies, tool restrictions, data hygiene rules
@@ -112,7 +132,7 @@ All soul endpoints require admin role.
 
 Soul files are synced via [Git Sync](/server-admin/git-sync) with kind `soul`. Full conflict detection, publish, and discard operations are supported.
 
-## Example: Creating a Custom Soul
+## Example: Creating A Custom Soul
 
 Create a file `{DAGsDir}/souls/concise-ops.md`:
 

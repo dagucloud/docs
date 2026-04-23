@@ -8,7 +8,7 @@ Webhooks provide a way for external systems to trigger DAG executions via HTTP. 
 - **Token Management**: Create, regenerate, and delete webhook tokens through the web UI or API
 - **Enable/Disable**: Temporarily disable webhooks without regenerating tokens
 - **Usage Tracking**: Track when each webhook was last used
-- **Secure Storage**: Tokens are hashed with bcrypt before storage; the full token is only shown once at creation
+- **Secure Handling**: The full token is shown only once at creation time
 
 ## Requirements
 

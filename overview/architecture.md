@@ -63,8 +63,8 @@ For operating choices across local, self-hosted, managed, and hybrid setups, see
 - DAG-run Store: Tracks execution history and attempts
 - Proc Store: Process heartbeat tracking
 - Queue Store: Dual-priority queue system
-- By default, all state is stored in files under `~/.config/dagu/` and `~/.local/share/dagu/`
-- You can set a custom directory structure using the `DAGU_HOME` environment variable or configuration options
+- By default, Dagu keeps workflows, history, and logs under `~/.config/dagu/` and `~/.local/share/dagu/`
+- You can move those locations with the `DAGU_HOME` environment variable or configuration options
 
 ## Storage Architecture
 

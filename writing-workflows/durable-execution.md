@@ -186,11 +186,11 @@ If `max_interval_sec` is reached, later delays are capped.
 - default: `24h`
 - `0` disables DAG-level retry scanning
 
-The current implementation has one important limitation:
+One scheduling detail matters here:
 
-- the retry window is evaluated from the original DAG-run timestamp/day bucket, not from the latest failed attempt timestamp
+- the retry window is evaluated from the original DAG-run timestamp/day bucket, not from the most recent failed attempt
 
-That means a very old DAG run can age out of the scan window even if its most recent failed attempt is newer.
+In practice, a very old DAG run can fall out of the retry window even if its latest failure happened more recently.
 
 ## Auto-Created `base.yaml`
 

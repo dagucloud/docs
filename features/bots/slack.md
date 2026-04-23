@@ -1,6 +1,6 @@
 # Workflow Operator on Slack
 
-Workflow Operator on Slack uses a Slack bot to map each Slack channel to a persistent Dagu AI agent session using [Socket Mode](https://api.slack.com/apis/socket-mode) (WebSocket-based, no public HTTP endpoint required). Messages sent in Slack are forwarded to the built-in AI agent, and agent responses are posted back. When a DAG run completes, Workflow Operator can also send AI-generated notifications so follow-up stays in the same conversation.
+Workflow Operator on Slack connects Slack channels, threads, and DMs to the built-in Dagu agent using [Socket Mode](https://api.slack.com/apis/socket-mode). Each conversation keeps its own running context, so follow-up questions and DAG-run notifications stay in the same place.
 
 ## Prerequisites
 
@@ -197,7 +197,7 @@ If you registered `/dagu-new` and `/dagu-cancel` as slash commands in the Slack 
 
 | Command | Behavior |
 |---------|----------|
-| `/dagu-new` | Resets the channel's session state and clears the current agent session |
+| `/dagu-new` | Starts a fresh conversation in the current channel |
 | `/dagu-cancel` | Cancels the currently active agent session |
 
 ### Text Commands
@@ -223,18 +223,11 @@ If the prompt allows free text (`AllowFreeText: true`), the user can also reply 
 
 ## Session Rotation
 
-When the current session is idle and has no pending prompt, Dagu checks the latest assistant-reported prompt token count. If it reaches 80% of the model context window, Dagu compacts the session. If the model does not declare a context window, Dagu uses a fallback of 200,000 tokens.
-
-1. Builds a transcript from prior user, assistant, error, and prompt messages.
-2. Asks the model for a handoff summary.
-3. Creates a continuation session and stores that summary as an assistant message prefixed with `Session handoff summary:\n`.
-4. Switches the conversation to the new session.
-
-The stored handoff summary is marked as already delivered for chat bridges, so Slack does not replay it as a visible message.
+When a conversation gets close to the model's context limit, Dagu automatically rolls it over to a fresh behind-the-scenes session and carries forward a compact summary. Users can keep chatting in the same Slack thread or DM without doing anything manually.
 
 ## DAG Run Notifications
 
-When the centralized event store is available (the default in both `server` and `start-all` modes), the bot starts a DAG run monitor that reads persisted DAG-run events and sends notifications. If the event store is disabled or unavailable, Slack chat works normally but DAG-run notifications stay disabled.
+When event tracking is available (the default in both `server` and `start-all` modes), the bot can send DAG-run notifications into Slack. If event tracking is unavailable, Slack chat still works; only automatic run notifications are skipped.
 
 ### Monitored statuses
 
@@ -249,8 +242,8 @@ Notifications are sent for these DAG run statuses:
 
 ### How notifications work
 
-1. The monitor polls the event store every **10 seconds** and reads only new DAG-run events, using durable on-disk state so restarts do not lose pending notifications.
-2. On first startup, it seeds its cursor at the current event-store head, so existing channels only receive future events.
+1. Dagu checks for new run events every **10 seconds** and remembers what it has already delivered, so restarts do not resend old notifications or drop pending ones.
+2. On first startup, existing channels only receive future events.
 3. For each destination, it batches pending DAG-run notifications. Urgent single-run batches try to generate the message with the agent; all other batches use deterministic formatting. Batch delivery uses a **30-second** flush timeout.
 4. For direct-message destinations, the notification is appended to the DM-scoped session. For channel destinations, Slack posts a new thread root message and binds that thread to a session so follow-up replies continue there.
 5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.

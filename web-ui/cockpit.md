@@ -1,115 +1,84 @@
 # Cockpit
 
+Cockpit is a kanban-style view for monitoring workflow runs across days. It is the default Web UI landing page and is useful when you want a quick answer to "what is queued, running, waiting for review, done, or failed?"
+
+![Cockpit](/web-ui-cockpit-demo.png)
+
 <video src="/cockpit-demo.mp4" controls preload="metadata" playsinline aria-label="Cockpit demo" style="width: 100%; border-radius: 8px; margin: 16px 0 24px;"></video>
 
-A kanban view for monitoring DAG runs across dates. Available at `/cockpit` in the Web UI.
+## Opening Cockpit
 
-Cockpit uses the global workspace selector in the Web UI navigation. The selector is no longer part of the Cockpit toolbar.
+Open **Cockpit** from the left navigation or visit `/cockpit`.
 
-## Page Structure
+The page follows the global workspace selector:
 
-The page renders two areas:
+| Selection | What Cockpit Shows |
+| --- | --- |
+| **All workspaces** | Runs from every workspace you can access. |
+| **Default** | Runs from workflows without a workspace label. |
+| **Named workspace** | Runs from that workspace only. |
 
-1. **Toolbar**: template selector and DAG preview side panel
-2. **Kanban board**: DAG runs grouped by date and split into status columns
+Switching workspace refreshes the board so you can focus on one team, environment, or project.
 
-## Workspace Selection
+## Board Layout
 
-Cockpit follows the global workspace selection:
+Cockpit groups runs by date and status:
 
-| UI label | Behavior |
-|----------|----------|
-| `all` | Shows DAG runs from every workspace the current identity can access, plus `default` runs. |
-| `default` | Shows DAG runs with no valid `workspace=<name>` label. |
-| `<workspace>` | Shows DAG runs for that named workspace. |
+| Column | Meaning |
+| --- | --- |
+| **Queued** | Runs waiting to start. |
+| **Running** | Runs currently executing. |
+| **Review** | Runs paused for approval. |
+| **Done** | Successful or partially successful runs. |
+| **Failed** | Failed, aborted, or rejected runs. |
 
-The selected workspace is remembered in `localStorage` under `dagu-selected-workspace`. See [Workspaces](/web-ui/workspaces) for workspace behavior, storage, and permissions.
+Each card shows the workflow name, status, elapsed time, and a short parameter preview. Click a card to open the run details page.
 
-Switching workspace or remote node closes the open DAG preview and resets Cockpit's loaded date sections.
+## Browsing Older Runs
 
-## Template Selector
+Cockpit starts with recent days. Scroll down and click **Load older day** to inspect earlier activity. Today's runs update live while the page is open.
 
-A dropdown to browse and select a DAG definition. Selecting a DAG opens the preview side panel.
+## Starting a Workflow from Cockpit
 
-- **Search**: text input with debounce, queries `GET /api/v1/dags`
-- **Label filter**: clickable label badges below the search input; `workspace=` labels are hidden from the filter row
-- **Grouping**: DAGs are grouped by their `group` field, sorted alphabetically; ungrouped DAGs appear last under `(ungrouped)`
-- **Workspace filtering**: the DAG list request includes the current `workspace` query parameter
-- **Keyboard**: `ArrowDown` and `ArrowUp` to navigate, `Enter` to select, `Escape` to close and reset filters
+Use the template selector at the top of the page to find a workflow:
 
-Each item shows:
+1. Click **Select template**.
+2. Search by workflow name or browse grouped workflows.
+3. Select a workflow to open the preview panel.
+4. Review parameters and choose **Start** or **Enqueue**.
 
-- DAG name, with a warning icon when it has load errors
-- Description, truncated to one line
-- First three labels as badges, with a `+N` overflow indicator
-- Parameter count, for example `3p`
+When a named workspace is selected, Cockpit starts the run in that workspace. When **All workspaces** or **Default** is selected, Cockpit does not add a named workspace to the run.
 
-## Kanban Board
+## Preview Panel
 
-DAG runs for each date are grouped into columns:
+The preview panel shows the same workflow information you see on the workflow details page:
 
-| Column | Statuses |
-|--------|----------|
-| Queued | `queued`, `not_started` |
-| Running | `running` |
-| Review | `waiting` |
-| Done | `success`, `partial_success` |
-| Failed | `failed`, `aborted`, `rejected` |
+- workflow description and labels
+- schedule information
+- parameter inputs
+- start and enqueue controls
+- validation errors, if the workflow cannot be loaded
 
-### Date Sections
+Typed parameters render as friendly controls such as text inputs, selects, number fields, and toggles. Workflows without typed parameter metadata use the raw parameter editor.
 
-- **Initial load**: today and yesterday
-- **Infinite scroll**: scrolling to the bottom loads older days, up to 30 days back
-- **Real-time updates**: today's section uses live updates; past dates use one REST fetch without polling
-- **Reset**: switching workspace resets the board state
-
-### Kanban Cards
-
-Each card displays:
-
-| Field | Description |
-|-------|-------------|
-| Name | DAG run name, truncated |
-| Status | Color-coded status chip |
-| Elapsed time | Formatted as `Xs`, `Xm Ys`, or `Xh Ym`; running cards update once per second |
-| Parameters | First 60 characters, monospace, truncated with `...` |
-
-Clicking a card opens the DAG Run Details modal.
-
-## DAG Preview Side Panel
-
-The preview side panel renders the same DAG details component used on the DAG details page. It fetches the full DAG details before rendering the start/enqueue form, so `runConfig`, defaults, and `paramDefs` metadata match the full DAG view.
-
-When `paramDefs` is present, enqueue/start controls are rendered as typed inputs. When it is absent, the modal falls back to the raw parameter editor.
-
-### Enqueue Behavior
-
-When enqueueing from Cockpit:
-
-- If a named workspace is selected, Cockpit adds `workspace=<name>` to the enqueue request labels.
-- If `all` or `default` is selected, Cockpit does not add a workspace label.
-- The server merges request labels with labels defined in the DAG spec.
-
-Cockpit only adds sanitized workspace names matching `^[A-Za-z0-9_-]+$`.
-
-### Keyboard Shortcuts
+## Keyboard Shortcuts
 
 | Key | Action |
-|-----|--------|
-| `Escape` | Close the side panel |
-| `f` or `F` | Navigate to the DAG in fullscreen view (`/dags/{fileName}/spec`) |
-| `Cmd/Ctrl + Click` on fullscreen button | Open in a new tab |
+| --- | --- |
+| `Escape` | Close the preview panel. |
+| `f` | Open the workflow in the full details page. |
+| `Cmd/Ctrl + Click` on fullscreen | Open the workflow in a new tab. |
 
-Shortcuts are ignored while focus is inside an input or textarea.
+Shortcuts are ignored while you are typing in an input or textarea.
 
-## Data Flow
+## Tips
 
-```text
-Global workspace selection
-  -> localStorage: dagu-selected-workspace
-  -> Cockpit query: workspace=<all|default|name>
-  -> GET /api/v1/dags for templates
-  -> GET /api/v1/dag-runs for kanban columns
-```
+- Use workspaces to keep the board from mixing unrelated teams or environments.
+- Use labels on workflows to make the template selector easier to scan.
+- Click a run card when you need logs, step status, outputs, artifacts, or retry controls.
 
-Date bounds are sent as Unix timestamps using the configured server timezone offset.
+## Related
+
+- [Web UI Overview](/overview/web-ui)
+- [Workspaces](/web-ui/workspaces)
+- [DAG Run Details](/overview/web-ui#run-details)

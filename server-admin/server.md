@@ -601,17 +601,9 @@ When enabled, the following events are recorded:
 - **Webhooks**: Webhook creation, deletion, token regeneration
 - **Terminal**: Shell command executions
 
-### Storage
+### Retention
 
-Audit logs are stored as daily JSONL files in `{admin_logs_dir}/audit/`:
-```
-~/.local/share/dagu/logs/admin/audit/
-├── 2025-01-10.jsonl
-├── 2025-01-11.jsonl
-└── ...
-```
-
-Logs can be viewed through the web UI at Settings > Audit Logs.
+Audit logs are written as daily records and can be reviewed in the Web UI at **Settings > Audit Logs**. Keep the admin log directory on persistent storage if you want that history to survive restarts.
 
 ## Event Store
 
@@ -633,13 +625,13 @@ export DAGU_EVENT_STORE_ENABLED=true
 export DAGU_EVENT_STORE_RETENTION_DAYS=7
 ```
 
-### Storage
+### Retention
 
-Event log files are stored under `{admin_logs_dir}/events/`. The collector writes JSONL files and removes old data according to `event_store.retention_days`.
+The event store keeps recent operational history according to `event_store.retention_days`. Place the admin log directory on persistent storage if you want those records to survive restarts.
 
-## Session Storage
+## Session Limits
 
-Agent chat sessions are stored as JSON files per user. To prevent unbounded disk growth, sessions are automatically cleaned up when a per-user limit is exceeded.
+Dagu keeps agent chat history per user. To prevent unbounded growth, older sessions are cleaned up automatically when a per-user limit is exceeded.
 
 ### Configuration
 
