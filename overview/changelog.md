@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.6.1 (2026-04-23)
+
+### Fixed
+
+- fix: reduce start-all CPU usage and event-driven SSE ([#2031](https://github.com/dagu-org/dagu/pull/2031)) [@yottahmd](https://github.com/yottahmd)
+
 ## v2.6.0 (2026-04-23)
 
 ### Added
