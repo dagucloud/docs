@@ -195,7 +195,7 @@ flowchart LR
     class Coordinator,WorkerA,WorkerB distributed
 ```
 
-See [Architecture](/overview/architecture) for internals, storage, coordinator/worker execution, and deployment patterns.
+See [Architecture](/overview/architecture) for internals and storage, and [Deployment Models](/overview/deployment-models) for local, self-hosted, managed, and hybrid deployment options.
 
 ## How Dagu Is Different
 
