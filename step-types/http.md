@@ -32,7 +32,7 @@ steps:
 steps:
   - id: create_resource
     type: http
-    config:
+    with:
       body: '{"name": "New Resource"}'
       headers:
         Content-Type: application/json
@@ -45,7 +45,7 @@ If your body needs a literal `$`, use `\$` (non-shell contexts only):
 steps:
   - id: price_example
     type: http
-    config:
+    with:
       body: '{"price":"\$9.99"}'  # Becomes {"price":"$9.99"}
       headers:
         Content-Type: application/json
@@ -58,7 +58,7 @@ steps:
 steps:
   - id: bearer_auth
     type: http
-    config:
+    with:
       headers:
         Authorization: "Bearer ${API_TOKEN}"
     command: GET https://api.example.com/protected
@@ -70,7 +70,7 @@ steps:
 steps:
   - id: search
     type: http
-    config:
+    with:
       query:
         q: "search term"
         limit: "10"
@@ -83,7 +83,7 @@ steps:
 steps:
   - id: get_user
     type: http
-    config:
+    with:
       silent: true
     command: GET https://api.example.com/user
     output: USER_DATA
@@ -100,7 +100,7 @@ Use `format: "json"` to get structured JSON output including status code and hea
 steps:
   - id: api_call
     type: http
-    config:
+    with:
       format: "json"
       silent: true
     command: GET https://api.example.com/data
@@ -143,7 +143,7 @@ Without `silent` (or `silent: false`), the output also includes status code and 
 steps:
   - id: api_call
     type: http
-    config:
+    with:
       timeout: 30
     command: GET https://api.example.com/data
     retry_policy:
@@ -159,7 +159,7 @@ steps:
 handler_on:
   success:
     type: http
-    config:
+    with:
       body: '{"status": "completed", "dag": "${DAG_NAME}"}'
       headers:
         Content-Type: application/json
@@ -172,7 +172,7 @@ handler_on:
 steps:
   - id: internal_api
     type: http
-    config:
+    with:
       skip_tls_verify: true  # Allow self-signed certificates
       headers:
         Authorization: "Bearer ${INTERNAL_TOKEN}"

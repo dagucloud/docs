@@ -94,11 +94,11 @@ step_types:
 
 steps:
   - type: greet
-    config:
+    with:
       message: hello
 ```
 
-The most common pattern is a `type: command` custom step with a templated `script`. The step call site supplies typed `config`, the schema can apply defaults, and the template expands to a normal builtin step before execution. See [Custom Step Types](/writing-workflows/custom-step-types) for the exact rules.
+The most common pattern is a `type: command` custom step with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal builtin step before execution. See [Custom Step Types](/writing-workflows/custom-step-types) for the exact rules.
 
 ## Guide Sections
 

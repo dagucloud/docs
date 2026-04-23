@@ -20,7 +20,7 @@ secrets:
 steps:
   - id: query_users
     type: postgres
-    config:
+    with:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
     command: "SELECT id, name, email FROM users WHERE active = true"
     output: USERS  # Capture results to variable
@@ -99,7 +99,7 @@ secrets:
 steps:
   - id: import_csv
     type: postgres
-    config:
+    with:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
       import:
         input_file: /data/users.csv
@@ -136,7 +136,7 @@ Use named parameters for SQL injection prevention:
 steps:
   - id: safe_query
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       params:
         status: active
@@ -152,7 +152,7 @@ Or positional parameters:
 steps:
   - id: safe_query
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       params:
         - active
@@ -168,7 +168,7 @@ Wrap multiple statements in a transaction:
 steps:
   - id: transfer_funds
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       transaction: true
       isolation_level: serializable
@@ -187,7 +187,7 @@ One JSON object per line, ideal for streaming:
 steps:
   - id: export_jsonl
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       output_format: jsonl
     command: "SELECT * FROM orders"
@@ -207,7 +207,7 @@ Array of objects:
 steps:
   - id: export_json
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       output_format: json
     command: "SELECT * FROM orders"
@@ -225,7 +225,7 @@ Tabular format with optional headers:
 steps:
   - id: export_csv
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       output_format: csv
       headers: true
@@ -240,7 +240,7 @@ For large result sets, stream directly to a file:
 steps:
   - id: export_large_table
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       streaming: true
       output_file: /data/export.jsonl
@@ -261,7 +261,7 @@ steps:
 steps:
   - id: query_with_retry
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       timeout: 30
     command: "SELECT * FROM orders"

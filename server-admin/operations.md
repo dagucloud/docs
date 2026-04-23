@@ -323,7 +323,7 @@ steps:
 handler_on:
   failure:
     type: http
-    config:
+    with:
       url: "${SLACK_WEBHOOK_URL}"
       method: POST
       body: |
@@ -344,7 +344,7 @@ handler_on:
 handler_on:
   failure:
     type: http
-    config:
+    with:
       url: https://events.pagerduty.com/v2/enqueue
       body: |
         {

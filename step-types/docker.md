@@ -222,15 +222,15 @@ steps:
     command: gcloud app deploy
 ```
 
-## Executor Config Syntax
+## Executor `with` Syntax
 
-For advanced use cases, use `type: docker` with a `config` block. This provides access to Docker SDK options:
+For advanced use cases, use `type: docker` with a `with` block. This provides access to Docker SDK options:
 
 ```yaml
 steps:
   - id: run_in_docker
     type: docker
-    config:
+    with:
       image: alpine:3
       auto_remove: true
       working_dir: /app
@@ -247,7 +247,7 @@ Pass Docker SDK configuration directly via `container`, `host`, and `network` fi
 steps:
   - id: with_resource_limits
     type: docker
-    config:
+    with:
       image: alpine:3
       auto_remove: true
       host:
@@ -401,7 +401,7 @@ env:
 :::
 
 ::: tip Literal Dollar Signs
-To emit a literal `$` in non-shell container commands or config fields, escape it as `\$`.
+To emit a literal `$` in non-shell container commands or `with` fields, escape it as `\$`.
 If you configure `container.shell`, Dagu leaves `\$` intact and the shell handles the escape.
 :::
 

@@ -11,8 +11,8 @@ The selected attempt's CLI binary must either be available in `PATH` or be refer
 - `command` is the prompt. Harness steps accept a single command string; command arrays are rejected.
 - `script` is optional extra stdin content.
 - After DAG-level defaults are applied, the step needs a provider.
-- `config.provider` may be a built-in provider or a name defined under top-level `harnesses:`.
-- `config.provider` may contain `${VAR}` interpolation and is resolved after interpolation at runtime.
+- `with.provider` may be a built-in provider or a name defined under top-level `harnesses:`.
+- `with.provider` may contain `${VAR}` interpolation and is resolved after interpolation at runtime.
 
 Example:
 
@@ -21,7 +21,7 @@ steps:
   - name: review
     type: harness
     command: "Review the current branch and list problems"
-    config:
+    with:
       provider: claude
       model: sonnet
       bare: true
@@ -42,7 +42,7 @@ Built-in providers have fixed prompt placement:
 For built-in providers:
 
 - the prompt is always passed on the command line
-- additional config keys become CLI flags, with `snake_case` keys normalized to kebab-case
+- additional `with` keys become CLI flags, with `snake_case` keys normalized to kebab-case
 - `script`, if present, is piped to stdin unchanged
 
 ## Custom Harness Definitions
@@ -63,7 +63,7 @@ steps:
   - name: summarize
     type: harness
     command: "Summarize the repository status"
-    config:
+    with:
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -78,7 +78,7 @@ Custom harness definition fields:
 | `prompt_flag` | string | only for `flag` mode | - | Exact flag token used for the prompt |
 | `prompt_position` | `before_flags` \| `after_flags` | no | `before_flags` | Where prompt tokens go relative to generated flags |
 | `flag_style` | `gnu_long` \| `single_dash` | no | `gnu_long` | Default generated flag token style |
-| `option_flags` | object | no | - | Exact flag token overrides per config key |
+| `option_flags` | object | no | - | Exact flag token overrides per `with` key |
 
 Rules enforced by Dagu:
 
@@ -102,7 +102,7 @@ harnesses:
 steps:
   - type: harness
     command: "Review the auth module"
-    config:
+    with:
       provider: aider
       model: sonnet
 ```
@@ -128,7 +128,7 @@ harnesses:
 steps:
   - type: harness
     command: "Review the auth module"
-    config:
+    with:
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -154,7 +154,7 @@ steps:
     script: |
       diff --git a/main.go b/main.go
       ...
-    config:
+    with:
       provider: llm
       format: json
 ```
@@ -179,9 +179,9 @@ For `stdin` mode:
 - if `script` is empty, stdin is just the prompt
 - if both `command` and `script` are present, stdin is `prompt + "\n\n" + script`
 
-## Config-to-Flag Mapping
+## `with`-to-Flag Mapping
 
-After removing reserved keys, Dagu converts remaining config entries to CLI flags.
+After removing reserved keys, Dagu converts remaining `with` entries to CLI flags.
 
 | YAML value | Result |
 |------------|--------|
@@ -225,7 +225,7 @@ steps:
 
   - type: harness
     command: "Fix the flaky integration tests"
-    config:
+    with:
       model: opus
       effort: high
 ```
@@ -233,13 +233,13 @@ steps:
 Merge rules:
 
 - DAG-level `harness:` is the base config for every harness step
-- step-level `config:` overrides primary keys from DAG-level `harness:`
+- step-level `with:` overrides primary keys from DAG-level `harness:`
 - step-level `fallback:` replaces the DAG-level fallback list; it is not merged
 - if a DAG has `harness:` and a step omits `type:`, Dagu treats that step as `type: harness`
 
 ## Fallbacks
 
-`config.fallback` is an ordered list of alternative provider configs.
+`with.fallback` is an ordered list of alternative provider configs.
 
 ```yaml
 harnesses:
@@ -253,7 +253,7 @@ steps:
   - name: implement
     type: harness
     command: "Implement the feature and add tests"
-    config:
+    with:
       provider: claude
       fallback:
         - provider: codex
@@ -279,7 +279,7 @@ steps:
   - name: task
     type: harness
     command: "Analyze the repository layout"
-    config:
+    with:
       provider: "${PROVIDER}"
 ```
 

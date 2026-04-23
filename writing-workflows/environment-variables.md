@@ -254,7 +254,7 @@ These patterns work in all contexts:
 | `\$` | Literal dollar (non-shell only) | `\$9.99` → `$9.99` |
 
 **Notes:**
-- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and config fields).
+- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and `with` fields).
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
 - To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 
@@ -270,7 +270,7 @@ What happens when a variable is not defined depends on the execution context:
 
 For non-shell executors, OS-only variables not defined in the DAG scope pass through unchanged to the target environment (container, remote shell, etc.), which resolves them. DAG-scoped variables (env, params, secrets, step outputs) are still expanded normally.
 
-`template` steps are stricter: the `script` body is never expanded by Dagu, so `${VAR}` remains literal there. If you want expanded values in a template step, pass them through `config.data`.
+`template` steps are stricter: the `script` body is never expanded by Dagu, so `${VAR}` remains literal there. If you want expanded values in a template step, pass them through `with.data`.
 
 ### Shell Expansion Syntax (Local Execution Only)
 

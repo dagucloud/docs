@@ -319,13 +319,13 @@ Any DAG loaded with this base config can use:
 ```yaml
 steps:
   - type: greet
-    config:
+    with:
       message: hello from base
 ```
 
 Base-config and DAG-local `step_types` are merged per YAML document. If a DAG declares the same custom type name as the base config, Dagu fails the load with a duplicate-definition error.
 
-Schema defaults are applied to `config` at the call site, the result is validated against `input_schema`, and `template` expands to a builtin step before normal step validation runs.
+Schema defaults are applied to `with` at the call site, the result is validated against `input_schema`, and `template` expands to a builtin step before normal step validation runs.
 
 See [Custom Step Types](/writing-workflows/custom-step-types) for the exact field rules and template behavior.
 
@@ -421,9 +421,9 @@ kubernetes:
       memory: "128Mi"
 ```
 
-These defaults apply only to steps that explicitly use `type: k8s` or `type: kubernetes`. DAG-level or step-level Kubernetes config can override them.
+These defaults apply only to steps that explicitly use `type: k8s` or `type: kubernetes`. DAG-level `kubernetes:` or step-level `with` can override them.
 
-The base-level `kubernetes:` block accepts the same field surface as step-level Kubernetes `config`, except `image` is optional at the base level and must still be present in the effective step config after inheritance. That includes:
+The base-level `kubernetes:` block accepts the same field surface as step-level Kubernetes `with`, except `image` is optional at the base level and must still be present in the effective step configuration after inheritance. That includes:
 
 - cluster selection and runtime fields such as `kubeconfig`, `context`, `namespace`, `image_pull_policy`, and `working_dir`
 - env and env source fields such as `env` and `env_from`

@@ -97,7 +97,7 @@ handler_on:
 handler_on:
   failure:
     type: mail
-    config:
+    with:
       to: oncall@company.com
       from: dagu@company.com
       subject: "Failed: ${DAG_NAME}"
@@ -131,7 +131,7 @@ steps:
     
   # Send custom email
   - type: mail
-    config:
+    with:
       to: team@company.com
       from: dagu@company.com
       subject: "Report Ready"

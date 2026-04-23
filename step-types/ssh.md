@@ -30,11 +30,11 @@ steps:
 ```yaml
 steps:
   - type: ssh
-    config:
+    with:
       user: ubuntu
       ip: 192.168.1.100
       key: /home/user/.ssh/id_rsa
-      shell: "/bin/bash -o pipefail"  # Step-level config accepts string form
+      shell: "/bin/bash -o pipefail"  # Step-level `with.shell` accepts string form
     command: echo "Hello from remote server"
 ```
 
@@ -93,14 +93,14 @@ Without `shell`, commands are executed directly without shell interpretation. Us
 - Glob patterns (`*.txt`)
 
 **Shell Priority:**
-1. Step-level SSH executor config `shell` (string only)
+1. Step-level SSH `with.shell` (string only)
 2. DAG-level SSH config `shell` (string or array)
 3. Step-level `shell` field on the step (string or array, acts as fallback for UX)
 
 **Specifying Shell Arguments**
 
 - DAG-level `ssh.shell` or the step-level `shell` field accept either string or array syntax, which is parsed into the executable plus argument list.
-- Step-level SSH executor configs (`executor.config.shell`) currently accept **string form only** because the configuration map is decoded into a string. Use quoted strings such as `"/bin/bash -eo pipefail"` there.
+- Step-level SSH `with.shell` currently accepts **string form only** because the configuration map is decoded into a string. Use quoted strings such as `"/bin/bash -eo pipefail"` there.
 
 ### Variable Expansion Behavior
 
@@ -125,7 +125,7 @@ This allows you to write shell scripts that use remote variables without Dagu re
 ```yaml
 steps:
   - type: ssh
-    config:
+    with:
       user: deploy
       host: app.example.com
     command: |
@@ -134,7 +134,7 @@ steps:
       done
 ```
 
-To emit a literal `$` in SSH commands or config fields, escape it as `\$`. When `shell` is
+To emit a literal `$` in SSH commands or `with` fields, escape it as `\$`. When `shell` is
 configured, the remote shell handles the escape; without `shell`, Dagu unescapes it before
 sending.
 
@@ -146,13 +146,13 @@ env:
 
 steps:
   - type: ssh
-    config:
+    with:
       user: deploy
       host: app.example.com
     command: echo "Local home was ${LOCAL_HOME}, remote home is $HOME"
 ```
 
-The same rule applies to SSH **config fields** (`user`, `host`, `key`, `password`, etc.). A reference like `key: $HOME/.ssh/deploy_key` will not expand `$HOME` because it is not DAG-scoped. Import it first:
+The same rule applies to SSH **`with` fields** (`user`, `host`, `key`, `password`, etc.). A reference like `key: $HOME/.ssh/deploy_key` will not expand `$HOME` because it is not DAG-scoped. Import it first:
 
 ```yaml
 env:
@@ -196,7 +196,7 @@ Step-level bastion:
 ```yaml
 steps:
   - type: ssh
-    config:
+    with:
       user: deploy
       host: private-server.internal
       bastion:
@@ -224,7 +224,7 @@ Multiple commands share the same step configuration:
 steps:
   - id: remote_checks
     type: ssh
-    config:
+    with:
       user: deploy
       host: production.example.com
       key: ~/.ssh/deploy_key
@@ -237,7 +237,7 @@ steps:
         expected: "production"
 ```
 
-Instead of duplicating the SSH executor config, `preconditions`, `retry_policy`, `env`, etc. across multiple steps, combine commands into one step.
+Instead of duplicating the SSH executor `with` block, `preconditions`, `retry_policy`, `env`, etc. across multiple steps, combine commands into one step.
 
 **Important:** Each command runs in a **new SSH session**, so:
 - Working directory resets to the user's home directory for each command

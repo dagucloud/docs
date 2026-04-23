@@ -543,9 +543,9 @@ steps:
   - command: systemctl status myapp
   - command: systemctl restart myapp
 
-  # Step-level config overrides DAG-level
+  # Step-level with overrides DAG-level
   - type: ssh
-    config:
+    with:
       user: backup      # Override user
       host: db.example.com  # Override host
       key: ~/.ssh/backup_key  # Override key
@@ -561,7 +561,7 @@ steps:
 - Password authentication is supported but not recommended; prefer key-based auth
 - Default SSH keys are tried if no key is specified: `~/.ssh/id_rsa`, `~/.ssh/id_ecdsa`, `~/.ssh/id_ed25519`, `~/.ssh/id_dsa`
 - `ssh.shell` at the DAG level accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
-- For step-level SSH executor configs (`executor.config.shell`), use string form (e.g., `"/bin/bash -e"`). Array syntax is not supported when decoding the YAML map into the executor config.
+- For step-level SSH `with.shell`, use string form (e.g., `"/bin/bash -e"`). Array syntax is not supported when decoding the YAML map into the executor configuration.
 
 ### LLM Configuration
 
@@ -614,12 +614,12 @@ steps:
 
   - type: harness
     command: "Review the auth module"
-    config:
+    with:
       provider: claude
       bare: true
 ```
 
-`harnesses:` is a map from provider name to a custom harness definition. The name is referenced from `config.provider`.
+`harnesses:` is a map from provider name to a custom harness definition. The name is referenced from `with.provider`.
 
 Custom harness definition fields:
 
@@ -649,10 +649,10 @@ If a DAG is loaded with a base config:
 
 - Steps with `type: harness` inherit the DAG-level primary config.
 - Steps without an explicit `type:` are treated as `type: harness` when `harness:` is present.
-- Step-level `config:` overrides DAG-level primary keys on conflict.
+- Step-level `with:` overrides DAG-level primary keys on conflict.
 - Step-level `fallback:` replaces the DAG-level fallback list instead of merging with it.
 
-The `harness:` block accepts the same fields as step-level harness `config:`:
+The `harness:` block accepts the same fields as step-level harness `with:`:
 
 - `provider`, which may be a built-in provider or a custom name from `harnesses:`
 - arbitrary CLI flag keys passed through to the provider
@@ -695,13 +695,13 @@ redis:
 steps:
   - id: cache_lookup
     type: redis
-    config:
+    with:
       command: GET
       key: cache:user:${USER_ID}
     output: CACHED_DATA
 ```
 
-When configured at the DAG level, all redis steps inherit the connection settings. Step-level config values override DAG-level defaults (field-level merging).
+When configured at the DAG level, all redis steps inherit the connection settings. Step-level `with` values override DAG-level defaults (field-level merging).
 
 **Available fields:**
 - `url` - Redis URL (`redis://user:pass@host:port/db`)
@@ -737,20 +737,20 @@ kubernetes:
 steps:
   - id: report
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     command: echo hello
 ```
 
 When configured at the DAG level, only steps with `type: k8s` or `type: kubernetes` inherit these defaults. The root `kubernetes:` block does not change the executor type of plain command steps.
 
-Step-level `config` overrides DAG-level `kubernetes` using Kubernetes-specific merge rules:
+Step-level `with` overrides DAG-level `kubernetes` using Kubernetes-specific merge rules:
 - scalar values replace DAG defaults
 - nested objects merge by key with the step value winning
 - arrays replace the DAG value wholesale
 - empty objects and empty arrays can be used to clear inherited nested values
 
-The DAG-level block accepts the same fields as the step-level Kubernetes executor config, except `image` is optional at the DAG level and must still be provided by the effective step config.
+The DAG-level block accepts the same fields as the step-level Kubernetes executor `with` block, except `image` is optional at the DAG level and must still be provided by the effective step configuration.
 
 That includes cluster selection, image/runtime settings, env and env sources, resources, service account, scheduling controls, labels/annotations, volumes, lifecycle controls, and the typed Kubernetes additions:
 
@@ -1260,18 +1260,18 @@ When using `container`, you cannot use `executor` or `script` fields on the same
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `type` | string | Builtin step type or custom step type name declared in `step_types` or base config | Inferred from other step fields when omitted |
-| `config` | object | Builtin executor configuration, or validated input for a custom step type definition | - |
+| `with` | object | Builtin executor configuration, or validated input for a custom step type definition | - |
 
 ```yaml
 steps:
   - type: archive
-    config:
+    with:
       source: assets.tar.gz
       destination: ./assets
     command: extract
 ```
 
-If `type` refers to a custom step type, schema defaults are applied to `config`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `config` as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `config`, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
+If `type` refers to a custom step type, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
 
 Custom step call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
 
@@ -1572,7 +1572,7 @@ handler_on:
       ./scripts/notify-success.sh
   failure:
     type: mail
-    config:
+    with:
       to: data-team@example.com
       subject: "ETL Failed - ${DATE}"
       body: "Check logs at ${DAG_RUN_LOG_FILE}"

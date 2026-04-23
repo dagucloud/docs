@@ -386,7 +386,7 @@ steps:
 steps:
   - name: deploy
     type: ssh
-    config:
+    with:
       host: prod-server.example.com
       user: deploy
       key: ~/.ssh/id_rsa

@@ -13,7 +13,7 @@ smtp:
 
 steps:
   - type: mail
-    config:
+    with:
       to: recipient@example.com
       from: sender@example.com
       subject: "Workflow Completed"
@@ -72,7 +72,7 @@ smtp:
 ```yaml
 steps:
   - type: mail
-    config:
+    with:
       to:
         - team@example.com
         - manager@example.com
@@ -82,7 +82,7 @@ steps:
       message: "The daily report has been generated."
 
   - type: mail
-    config:
+    with:
       to: admin@example.com  # Single recipient still works
       from: system@example.com
       subject: "System Update"
@@ -97,7 +97,7 @@ params:
 
 steps:
   - type: mail
-    config:
+    with:
       to: devops@company.com
       from: deploy@company.com
       subject: "Deployed to ${ENVIRONMENT}"
@@ -114,7 +114,7 @@ steps:
 handler_on:
   success:
     type: mail
-    config:
+    with:
       to: team@company.com
       from: dagu@company.com
       subject: "✅ Pipeline Success - ${DAG_NAME}"
@@ -125,7 +125,7 @@ handler_on:
 
   failure:
     type: mail
-    config:
+    with:
       to: oncall@company.com
       from: alerts@company.com
       subject: "❌ Pipeline Failed - ${DAG_NAME}"
@@ -159,7 +159,7 @@ steps:
   - command: echo "Generating report..." > report.txt
 
   - type: mail
-    config:
+    with:
       to: management@company.com
       from: reports@company.com
       subject: "Weekly Report"
@@ -173,7 +173,7 @@ steps:
 ```yaml
 steps:
   - type: mail
-    config:
+    with:
       to: oncall@company.com
       from: alerts@company.com
       subject: "Critical Alert"

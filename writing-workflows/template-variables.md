@@ -79,7 +79,7 @@ Unknown variables become empty strings. This is standard POSIX shell behavior.
 OS-only variables not defined in the DAG scope are preserved as-is, letting the target environment resolve them. DAG-scoped variables (env, params, secrets, step outputs) are still expanded normally.
 
 **Template steps:**
-The `script` body is not expanded by Dagu at all, so `${VAR}` remains literal there. Pass values through `config.data` when you want Dagu to expand them before template rendering.
+The `script` body is not expanded by Dagu at all, so `${VAR}` remains literal there. Pass values through `with.data` when you want Dagu to expand them before template rendering.
 
 ```yaml
 # Example: Non-shell executor (SSH)
@@ -88,7 +88,7 @@ env:
 
 steps:
   - type: ssh
-    config:
+    with:
       user: deploy
       host: remote.example.com
     command: |
@@ -108,7 +108,7 @@ env:
 ```
 
 Notes:
-- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and config fields).
+- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and `with` fields).
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
 - To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 - In YAML, single quotes preserve backslashes; with double quotes, escape the backslash (e.g., `"\\$9.99"`).
@@ -183,7 +183,7 @@ steps:
     command: echo "Raw payload: ${DAG_PARAMS_JSON}"
   - id: batch_size
     type: jq
-    config:
+    with:
       raw: true
     script: ${DAG_PARAMS_JSON}
     command: '"Batch size: \(.batchSize // "n/a")"'
@@ -374,7 +374,7 @@ and when constructing the step process environment.
    only DAG-scoped sources (levels 1–5) are checked. OS-only variables pass
    through unchanged, letting the target environment resolve them. `template`
    step `script` bodies are a special case: Dagu does not interpolate them at
-   all, while `config.data` values still use DAG-scoped sources.
+   all, while `with.data` values still use DAG-scoped sources.
 
 ### Step process environment precedence (lowest to highest)
 

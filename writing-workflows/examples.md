@@ -1294,11 +1294,11 @@ step_types:
 
 steps:
   - type: say
-    config:
+    with:
       message: "build finished"
 ```
 
-`config` is validated by `input_schema`; the rendered template runs as a builtin `command` step.
+`with` is validated by `input_schema`; the rendered template runs as a builtin `command` step.
 
 <a href="/writing-workflows/custom-step-types" class="learn-more">Learn more →</a>
 
@@ -1314,7 +1314,7 @@ steps:
 steps:
   - type: harness
     command: 'Review "quoted" text and list issues'
-    config:
+    with:
       provider: codex
 ```
 
@@ -1345,12 +1345,12 @@ step_types:
     template:
       command:
         $input: prompt
-      config:
+      with:
         provider: codex
 
 steps:
   - type: codex_task
-    config:
+    with:
       prompt: 'Review "quoted" text and list issues'
 ```
 
@@ -1440,7 +1440,7 @@ kubernetes:
 steps:
   - id: report
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     command: [sh, -c, 'echo hello from kubernetes']
 ```
@@ -1562,7 +1562,7 @@ steps:
 steps:
   - command: POST https://api.example.com/webhook
     type: http
-    config:
+    with:
       headers:
         Content-Type: application/json
       body: '{"status": "started"}'
@@ -1582,7 +1582,7 @@ steps:
   # Fetch sample users from a public mock API
   - command: GET https://reqres.in/api/users
     type: http
-    config:
+    with:
       silent: true
     output: API_RESPONSE
 
@@ -1605,7 +1605,7 @@ working_dir: /tmp/data
 
 steps:
   - type: archive
-    config:
+    with:
       source: dataset.tar.zst
       destination: ./dataset
     command: extract
@@ -1747,7 +1747,7 @@ smtp:
 
 steps:
   - type: mail
-    config:
+    with:
       to: team@example.com
       from: noreply@example.com
       subject: "Weekly Report"

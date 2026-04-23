@@ -549,7 +549,7 @@ Thanks to our contributors for this release:
   |---------------|-------------|---------|
   | `run` | `call` | Step field for sub-DAG execution |
   | `dir` | `working_dir` | Step field for working directory |
-  | `executor` | `type` + `config` | Step field for executor configuration |
+  | `executor` | `type` + `with` | Step field for executor configuration |
   | `precondition` (singular) | `preconditions` (array) | Both DAG-level and step-level |
   | `container.workDir` | `container.working_dir` | Container working directory |
 
@@ -733,7 +733,7 @@ Thanks to our contributors for this release:
   steps:
     - id: upload_config
       type: sftp
-      config:
+      with:
         direction: upload
         source: /local/config.yaml
         destination: /remote/config.yaml
@@ -769,7 +769,7 @@ Thanks to our contributors for this release:
   steps:
     - id: upload_report
       type: s3
-      config:
+      with:
         key: reports/daily.csv
         source: /tmp/report.csv
       command: upload
@@ -792,7 +792,7 @@ Thanks to our contributors for this release:
   steps:
     - id: query_users
       type: postgres
-      config:
+      with:
         dsn: "postgres://user:pass@localhost:5432/mydb"
       command: "SELECT * FROM users WHERE active = true"
       output: USERS
@@ -820,7 +820,7 @@ Thanks to our contributors for this release:
   steps:
     - id: cache_lookup
       type: redis
-      config:
+      with:
         command: GET
         key: user:${USER_ID}
       output: CACHED_USER
@@ -1244,14 +1244,14 @@ Everyone who participated in discussions, reported feedback, or helped other use
 
   See [SSH](/step-types/ssh) for full documentation.
 
-- Simplified Executor Syntax: Added `type` and `config` fields at step level as a cleaner alternative to the `executor` block. Both syntaxes are fully supported. (#1525)
+- Simplified Executor Syntax: Added `type` and `with` fields at step level as a cleaner alternative to the `executor` block. Both syntaxes are fully supported. (#1525)
 
   ```yaml
   # New shorthand syntax
   steps:
     - id: deploy
       type: ssh
-      config:
+      with:
         host: prod.example.com
         user: deploy
       command: ./deploy.sh

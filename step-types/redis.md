@@ -8,7 +8,7 @@ Execute Redis commands and operations against Redis servers.
 steps:
   - id: ping
     type: redis
-    config:
+    with:
       host: localhost
       port: 6379
       command: PING
@@ -27,20 +27,20 @@ redis:
 steps:
   - id: set_value
     type: redis
-    config:
+    with:
       command: SET
       key: mykey
       value: "hello world"
 
   - id: get_value
     type: redis
-    config:
+    with:
       command: GET
       key: mykey
     output: RESULT
 ```
 
-Steps inherit connection settings from the DAG level. Step-level config overrides DAG-level defaults.
+Steps inherit connection settings from the DAG level. Step-level `with` values override DAG-level defaults.
 
 ## Configuration
 
@@ -118,21 +118,21 @@ Steps inherit connection settings from the DAG level. Step-level config override
 steps:
   - id: set_key
     type: redis
-    config:
+    with:
       command: SET
       key: user:1:name
       value: "John Doe"
 
   - id: get_key
     type: redis
-    config:
+    with:
       command: GET
       key: user:1:name
     output: USER_NAME
 
   - id: increment
     type: redis
-    config:
+    with:
       command: INCR
       key: counter
 ```
@@ -143,26 +143,26 @@ steps:
 steps:
   - id: check_exists
     type: redis
-    config:
+    with:
       command: EXISTS
       key: mykey
 
   - id: set_expiry
     type: redis
-    config:
+    with:
       command: EXPIRE
       key: session:123
       ttl: 3600  # 1 hour in seconds
 
   - id: get_ttl
     type: redis
-    config:
+    with:
       command: TTL
       key: session:123
 
   - id: delete_key
     type: redis
-    config:
+    with:
       command: DEL
       key: temp:data
 ```
@@ -173,7 +173,7 @@ steps:
 steps:
   - id: set_hash
     type: redis
-    config:
+    with:
       command: HSET
       key: user:1
       field: email
@@ -181,7 +181,7 @@ steps:
 
   - id: get_hash_field
     type: redis
-    config:
+    with:
       command: HGET
       key: user:1
       field: email
@@ -189,7 +189,7 @@ steps:
 
   - id: get_all_hash
     type: redis
-    config:
+    with:
       command: HGETALL
       key: user:1
     output: USER_DATA
@@ -201,7 +201,7 @@ steps:
 steps:
   - id: push_to_list
     type: redis
-    config:
+    with:
       command: RPUSH
       key: queue:tasks
       values:
@@ -209,7 +209,7 @@ steps:
 
   - id: get_list_range
     type: redis
-    config:
+    with:
       command: LRANGE
       key: queue:tasks
       start: 0
@@ -218,7 +218,7 @@ steps:
 
   - id: pop_from_list
     type: redis
-    config:
+    with:
       command: LPOP
       key: queue:tasks
     output: NEXT_TASK
@@ -230,7 +230,7 @@ steps:
 steps:
   - id: add_to_set
     type: redis
-    config:
+    with:
       command: SADD
       key: tags:article:1
       values:
@@ -240,14 +240,14 @@ steps:
 
   - id: get_members
     type: redis
-    config:
+    with:
       command: SMEMBERS
       key: tags:article:1
     output: TAGS
 
   - id: check_membership
     type: redis
-    config:
+    with:
       command: SISMEMBER
       key: tags:article:1
       value: "redis"
@@ -259,7 +259,7 @@ steps:
 steps:
   - id: add_score
     type: redis
-    config:
+    with:
       command: ZADD
       key: leaderboard
       score: 100
@@ -267,7 +267,7 @@ steps:
 
   - id: get_top_players
     type: redis
-    config:
+    with:
       command: ZRANGE
       key: leaderboard
       start: 0
@@ -284,7 +284,7 @@ Execute multiple commands in a single round-trip:
 steps:
   - id: batch_operations
     type: redis
-    config:
+    with:
       pipeline:
         - command: SET
           key: key1
@@ -306,7 +306,7 @@ Execute commands atomically with MULTI/EXEC:
 steps:
   - id: atomic_transfer
     type: redis
-    config:
+    with:
       multi: true
       pipeline:
         - command: DECR
@@ -323,7 +323,7 @@ Execute Lua scripts for complex operations:
 steps:
   - id: rate_limit
     type: redis
-    config:
+    with:
       script: |
         local key = KEYS[1]
         local limit = tonumber(ARGV[1])
@@ -350,7 +350,7 @@ Or load from a file:
 steps:
   - id: complex_operation
     type: redis
-    config:
+    with:
       script_file: ./scripts/process.lua
       script_keys:
         - "input:data"
@@ -366,7 +366,7 @@ Acquire a lock before executing critical operations:
 steps:
   - id: critical_section
     type: redis
-    config:
+    with:
       lock: "locks:resource:${RESOURCE_ID}"
       lock_timeout: 30      # Lock expires after 30 seconds
       lock_retry: 10        # Retry 10 times to acquire lock
@@ -382,7 +382,7 @@ steps:
 steps:
   - id: get_config
     type: redis
-    config:
+    with:
       command: HGETALL
       key: app:config
     output: CONFIG
@@ -495,7 +495,7 @@ value1,value2,value3
 steps:
   - id: redis_operation
     type: redis
-    config:
+    with:
       command: GET
       key: critical-data
       max_retries: 5

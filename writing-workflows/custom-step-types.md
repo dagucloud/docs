@@ -36,11 +36,11 @@ step_types:
 
 steps:
   - type: greet
-    config:
+    with:
       message: hello
 ```
 
-This expands to a builtin `command` step at load time. `config.repeat` defaults to `2`, and because the template uses a shebang with no `template.shell`, Bash runs the script. If `name` is omitted, the generated name uses the custom type prefix, such as `greet_1`.
+This expands to a builtin `command` step at load time. `with.repeat` defaults to `2`, and because the template uses a shebang with no `template.shell`, Bash runs the script. If `name` is omitted, the generated name uses the custom type prefix, such as `greet_1`.
 
 ## Definition Fields
 
@@ -82,7 +82,7 @@ step_types:
           type: string
     template:
       command: POST {{ .input.url }}
-      config:
+      with:
         headers:
           Content-Type: application/json
         body: |
@@ -93,18 +93,18 @@ Rules:
 
 - Missing template keys are errors.
 - Template functions are hermetic; functions for environment access, network lookup, time, randomness, and crypto key generation are not available.
-- Schema defaults are applied to `config`, then the result is validated, then the template is rendered during DAG load.
+- Schema defaults are applied to `with`, then the result is validated, then the template is rendered during DAG load.
 
 ### Typed Input Injection
 
-Use `$input` when a rendered field should be copied directly from custom-step `config` instead of rendered as a string template.
+Use `$input` when a rendered field should be copied directly from custom-step `with` instead of rendered as a string template.
 
-At the call site, `config` becomes the custom step input:
+At the call site, `with` becomes the custom step input:
 
 ```yaml
 steps:
   - type: say
-    config:
+    with:
       message: 'Review "quoted" text'
 ```
 
@@ -174,7 +174,7 @@ steps:
     output: OUT
 ```
 
-Runtime expressions can also come from custom-step `config` and be passed through the template:
+Runtime expressions can also come from custom-step `with` and be passed through the template:
 
 ```yaml
 type: graph
@@ -205,14 +205,14 @@ steps:
   - id: consume
     depends: [produce]
     type: repeat
-    config:
+    with:
       count: ${COUNT}
     output: OUT
 ```
 
-In this example, `config.count` is declared as an integer, but `${COUNT}` is accepted by load/save validation because it is a whole runtime expression. The template injects the literal string `${COUNT}` into the expanded builtin step. The command executor evaluates it when `consume` runs, after `produce` has written `COUNT`.
+In this example, `with.count` is declared as an integer, but `${COUNT}` is accepted by load/save validation because it is a whole runtime expression. The template injects the literal string `${COUNT}` into the expanded builtin step. The command executor evaluates it when `consume` runs, after `produce` has written `COUNT`.
 
-Validation rules for runtime expressions in custom `config` are intentionally narrow:
+Validation rules for runtime expressions in custom `with` input are intentionally narrow:
 
 - String schema fields can contain embedded runtime expressions, such as `prefix-${NAME}`.
 - Integer, number, boolean, and scalar enum fields can use a runtime expression only as the whole value, such as `${COUNT}`, `$COUNT`, or `` `cat count.txt` ``.
@@ -242,7 +242,7 @@ step_types:
 
 steps:
   - type: bash_snippet
-    config:
+    with:
       message: xxx
 ```
 
@@ -254,7 +254,7 @@ Rules:
 
 ## Call-Site Fields
 
-When a step uses a custom type, `config` is input to the custom definition. It is not merged directly into builtin executor config.
+When a step uses a custom type, `with` is input to the custom definition. It is not merged directly into builtin executor configuration.
 
 Allowed call-site fields:
 `name`, `id`, `description`, `depends`, `continue_on`, `retry_policy`, `repeat_policy`, `mail_on_error`, `preconditions`, `signal_on_stop`, `env`, `timeout_sec`, `stdout`, `stderr`, `log_output`, `worker_selector`, `output`, `approval`.
@@ -301,7 +301,7 @@ step_types:
 ```yaml
 steps:
   - type: greet
-    config:
+    with:
       message: hello from base
 ```
 
@@ -326,7 +326,7 @@ step_types:
           type: string
     template:
       command: POST {{ .input.url }}
-      config:
+      with:
         headers:
           Content-Type: application/json
         body: |
@@ -335,7 +335,7 @@ step_types:
 handler_on:
   success:
     type: notify
-    config:
+    with:
       url: https://hooks.example.com/workflow
       text: completed
 ```

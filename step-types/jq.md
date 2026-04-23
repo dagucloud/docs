@@ -36,7 +36,7 @@ steps:
     script: '{"name": "Alice"}'
 ```
 
-**File path via `config.input`**
+**File path via `with.input`**
 
 Read JSON from a file. The path is evaluated at runtime, so step references like `${step_id.stdout}` work:
 
@@ -49,7 +49,7 @@ steps:
   - id: filter
     depends: [producer]
     type: jq
-    config:
+    with:
       raw: true
       input: "${producer.stdout}"
     command: '.items[] | .name'
@@ -67,14 +67,14 @@ steps:
   - id: filter
     depends: [producer]
     type: jq
-    config:
+    with:
       raw: true
     script: "file://${producer.stdout}"
     command: '.items[] | .name'
     output: RESULT
 ```
 
-`config.input` and `script` are mutually exclusive. Setting both produces a validation error.
+`with.input` and `script` are mutually exclusive. Setting both produces a validation error.
 
 ### Raw Output
 
@@ -85,7 +85,7 @@ when you need jq's `-r` behavior (unquoted strings, numbers, booleans).
 steps:
   - id: list_addresses
     type: jq
-    config:
+    with:
       raw: true
     command: '.users[].email'
     script: |
@@ -139,7 +139,7 @@ steps:
 steps:
   - id: fetch_data
     type: http
-    config:
+    with:
       silent: true
     command: GET https://api.example.com/products
     output: API_RESPONSE

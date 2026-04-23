@@ -90,7 +90,7 @@ This isolation ensures that each workflow in a hierarchy has predictable, self-c
 handler_on:
   failure:
     type: mail
-    config:
+    with:
       to: oncall@company.com
       from: dagu@company.com
       subject: "${DAG_NAME} failed"

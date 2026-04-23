@@ -62,10 +62,10 @@ steps:
   - id: explicit_name              # Explicit name
     command: echo "Third step"
   - type: http                     # Auto-named: http_4
-    config:
+    with:
       url: https://api.example.com
   - type: template                 # Auto-named: template_5
-    config:
+    with:
       data:
         name: Dagu
     script: "Hello, {{ .name }}!"

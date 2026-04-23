@@ -172,7 +172,7 @@ steps:
     command: echo "Full payload: ${DAG_PARAMS_JSON}"
   - id: read_environment
     type: jq
-    config:
+    with:
       raw: true
     script: ${DAG_PARAMS_JSON}
     command: '"Environment: \(.ENVIRONMENT // "dev")"'

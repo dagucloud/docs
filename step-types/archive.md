@@ -53,21 +53,21 @@ The executor automatically detects archive format from:
 steps:
   - id: unpack
     type: archive
-    config:
+    with:
       source: logs.tar.gz
       destination: ./logs
     command: extract
 
   - id: package
     type: archive
-    config:
+    with:
       source: ./logs
       destination: logs-backup.tar.gz
     command: create
 
   - id: inspect
     type: archive
-    config:
+    with:
       source: logs-backup.tar.gz
     command: list
     output: ARCHIVE_INDEX
@@ -106,7 +106,7 @@ working_dir: /data/pipeline
 steps:
   - id: extract_csv
     type: archive
-    config:
+    with:
       source: dataset.tar.zst
       destination: ./data
       include:
@@ -123,7 +123,7 @@ working_dir: /deploy/release
 steps:
   - id: bundle_artifacts
     type: archive
-    config:
+    with:
       source: ./dist
       destination: dist.tar.gz
       format: tar.gz
@@ -144,7 +144,7 @@ secrets:
 steps:
   - id: unpack_secure
     type: archive
-    config:
+    with:
       source: secure-data.7z
       destination: ./decrypted
       password: ${ARCHIVE_PASSWORD}

@@ -8,7 +8,7 @@ Dagu provides multiple ways to handle data and variables in your DAGs, from simp
 
 Dagu filters the process environment before it builds the step execution environment and before it starts sub-DAG executions.
 
-System environment variables are still available for expansion (`${VAR}`) in DAG configuration. For non-shell executors, OS-only variables in executor config, step `env:`, and similar fields pass through unchanged when they are not resolved by Dagu. `template` steps are a special case: the `script` body is not expanded by Dagu, while `config.data` values are expanded before rendering.
+System environment variables are still available for expansion (`${VAR}`) in DAG configuration. For non-shell executors, OS-only variables in executor `with` fields, step `env:`, and similar fields pass through unchanged when they are not resolved by Dagu. `template` steps are a special case: the `script` body is not expanded by Dagu, while `with.data` values are expanded before rendering.
 
 The built-in forwarded environment is:
 
@@ -258,7 +258,7 @@ steps:
     command: echo "Full payload: ${DAG_PARAMS_JSON}"
   - id: region_lookup
     type: jq
-    config:
+    with:
       raw: true
     script: ${DAG_PARAMS_JSON}
     command: '"Region: \(.region // "us-east-1")"'

@@ -8,7 +8,7 @@ Execute queries and data operations against SQLite databases. Uses a pure Go SQL
 steps:
   - id: query_data
     type: sqlite
-    config:
+    with:
       dsn: "file:./data.db"
     command: "SELECT * FROM users"
     output: USERS  # Capture results to variable
@@ -25,14 +25,14 @@ SQLite supports file-based and in-memory databases:
 ### File Database
 
 ```yaml
-config:
+with:
   dsn: "file:./myapp.db"
 ```
 
 Or with options:
 
 ```yaml
-config:
+with:
   dsn: "file:./myapp.db?mode=rw&cache=shared"
 ```
 
@@ -44,7 +44,7 @@ config:
 ### In-Memory Database
 
 ```yaml
-config:
+with:
   dsn: ":memory:"
 ```
 
@@ -52,7 +52,7 @@ config:
 By default, `:memory:` databases are ephemeral and not shared between steps. To share an in-memory database across steps within the same DAG run, use `shared_memory: true`:
 
 ```yaml
-config:
+with:
   dsn: ":memory:"
   shared_memory: true  # Enables shared cache mode
 ```
@@ -66,7 +66,7 @@ This converts the DSN to `file::memory:?cache=shared` internally. For persistent
 steps:
   - id: query
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       timeout: 30           # Query timeout in seconds
       shared_memory: false   # Set true for :memory: databases to share across steps
@@ -95,7 +95,7 @@ Use `:name` syntax for named parameters:
 steps:
   - id: find_user
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       params:
         status: active
@@ -113,7 +113,7 @@ SQLite uses `?` for positional parameters:
 steps:
   - id: find_user
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       params:
         - active
@@ -127,7 +127,7 @@ steps:
 steps:
   - id: batch_update
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       transaction: true
     command: |
@@ -144,7 +144,7 @@ For exclusive access to the database file, use file locking:
 steps:
   - id: exclusive_operation
     type: sqlite
-    config:
+    with:
       dsn: "file:./shared.db"
       file_lock: true
     command: |
@@ -163,7 +163,7 @@ name: cache-cleanup
 steps:
   - id: cleanup_expired
     type: sqlite
-    config:
+    with:
       dsn: "file:/shared/cache.db"
       file_lock: true
       transaction: true
@@ -181,7 +181,7 @@ steps:
 steps:
   - id: import_products
     type: sqlite
-    config:
+    with:
       dsn: "file:./inventory.db"
       import:
         input_file: /data/products.csv
@@ -197,7 +197,7 @@ steps:
 steps:
   - id: import_events
     type: sqlite
-    config:
+    with:
       dsn: "file:./events.db"
       import:
         input_file: /data/events.jsonl
@@ -213,7 +213,7 @@ SQLite supports `INSERT OR IGNORE` and `INSERT OR REPLACE`:
 steps:
   - id: upsert_data
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       import:
         input_file: /data/updates.csv
@@ -239,7 +239,7 @@ Unlike PostgreSQL where `replace` uses `ON CONFLICT DO NOTHING`, SQLite's `repla
 steps:
   - id: export_jsonl
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       output_format: jsonl
     command: "SELECT * FROM products"
@@ -257,7 +257,7 @@ Output:
 steps:
   - id: export_json
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       output_format: json
     command: "SELECT * FROM products LIMIT 1000"
@@ -273,7 +273,7 @@ The `json` format buffers ALL rows in memory before writing. For large result se
 steps:
   - id: export_csv
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       output_format: csv
       headers: true
@@ -286,7 +286,7 @@ steps:
 steps:
   - id: export_logs
     type: sqlite
-    config:
+    with:
       dsn: "file:./logs.db"
       streaming: true
       output_file: /data/logs-export.jsonl
@@ -306,7 +306,7 @@ steps:
 steps:
   - id: setup_database
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
     command: |
       CREATE TABLE IF NOT EXISTS users (
@@ -333,7 +333,7 @@ SQLite provides many built-in functions:
 steps:
   - id: aggregate_data
     type: sqlite
-    config:
+    with:
       dsn: "file:./sales.db"
     command: |
       SELECT
@@ -354,7 +354,7 @@ steps:
 steps:
   - id: safe_query
     type: sqlite
-    config:
+    with:
       dsn: "file:./app.db"
       timeout: 30
     command: "SELECT * FROM large_table"
@@ -375,7 +375,7 @@ env:
 steps:
   - id: setup_schema
     type: sqlite
-    config:
+    with:
       dsn: "file:${DB_PATH}"
     command: |
       CREATE TABLE IF NOT EXISTS raw_events (
@@ -393,7 +393,7 @@ steps:
 
   - id: import_events
     type: sqlite
-    config:
+    with:
       dsn: "file:${DB_PATH}"
       import:
         input_file: /data/events-${TODAY}.jsonl
@@ -405,7 +405,7 @@ steps:
 
   - id: calculate_stats
     type: sqlite
-    config:
+    with:
       dsn: "file:${DB_PATH}"
       file_lock: true
       transaction: true
@@ -423,7 +423,7 @@ steps:
 
   - id: export_report
     type: sqlite
-    config:
+    with:
       dsn: "file:${DB_PATH}"
       streaming: true
       output_file: /reports/daily-stats.json

@@ -303,7 +303,7 @@ params: "data table"
 
 steps:
   - type: postgres
-    config:
+    with:
       dsn: ${DATABASE_URL}
     command: "INSERT INTO $2 (data) VALUES ('$1'::jsonb)"
 ```

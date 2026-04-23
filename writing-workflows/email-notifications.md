@@ -117,7 +117,7 @@ Send custom emails as workflow steps:
 steps:
   - id: send_report
     type: mail
-    config:
+    with:
       to:
         - reports@example.com
         - archive@example.com
@@ -150,7 +150,7 @@ steps:
 
   - id: email_report
     type: mail
-    config:
+    with:
       to: stakeholders@example.com
       subject: "Processing Report - ${DAG_NAME}"
       message: |
@@ -172,7 +172,7 @@ steps:
 handler_on:
   failure:
     type: mail
-    config:
+    with:
       to:
         - oncall@example.com
         - alerts@example.com
@@ -259,7 +259,7 @@ steps:
 
   - id: notify
     type: mail
-    config:
+    with:
       to: |
         `if [ "${ENV}" = "production" ]; then
           echo "prod-alerts@example.com"
@@ -276,7 +276,7 @@ steps:
 steps:
   - id: send_html_email
     type: mail
-    config:
+    with:
       to: reports@example.com
       subject: "HTML Report"
       message: |

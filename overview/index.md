@@ -38,7 +38,7 @@ title: What is Dagu?
       <span></span>
       <span>&nbsp;&nbsp;- id: load</span>
       <span>&nbsp;&nbsp;&nbsp;&nbsp;type: docker</span>
-      <span>&nbsp;&nbsp;&nbsp;&nbsp;config:</span>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;with:</span>
       <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image: acme/loader:v1</span>
       <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;auto_remove: true</span>
       <span>&nbsp;&nbsp;&nbsp;&nbsp;command: python load.py --bucket ${BUCKET}</span>
@@ -88,7 +88,7 @@ steps:
 
   - id: load_warehouse
     type: postgres
-    config:
+    with:
       dsn: "${WAREHOUSE_DSN}"
     command: "CALL load_daily_orders()"
 ```

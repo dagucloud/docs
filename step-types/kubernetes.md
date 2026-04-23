@@ -15,7 +15,7 @@ Dagu creates a single-container Kubernetes Job for the step, waits for the Job t
 steps:
   - id: hello
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     command: echo "hello from kubernetes"
 ```
@@ -26,7 +26,7 @@ If you omit `command`, Dagu leaves the container command unset, so the image def
 steps:
   - id: run_image_default
     type: kubernetes
-    config:
+    with:
       image: ghcr.io/example/app:latest
 ```
 
@@ -48,13 +48,13 @@ kubernetes:
 steps:
   - id: report
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     command: echo "generate report"
 
   - id: worker
     type: kubernetes
-    config:
+    with:
       image: ghcr.io/example/worker:1.2.3
       namespace: jobs
 ```
@@ -63,8 +63,8 @@ Important behavior:
 
 - The root `kubernetes:` block applies only to steps with `type: k8s` or `type: kubernetes`.
 - It does not change plain command steps into Kubernetes steps.
-- Step `config` overrides DAG-level `kubernetes`.
-- `image` is optional in DAG-level or `base.yaml` defaults, but it must be present in the effective step config after inheritance.
+- Step `with` overrides DAG-level `kubernetes`.
+- `image` is optional in DAG-level or `base.yaml` defaults, but it must be present in the effective step configuration after inheritance.
 
 Merge behavior is Kubernetes-specific:
 
@@ -77,7 +77,7 @@ The same `kubernetes:` block can also be set in `base.yaml`. Precedence is:
 
 1. `base.yaml` `kubernetes`
 2. DAG-level `kubernetes`
-3. Step-level `config`
+3. Step-level `with`
 
 See [Base Configuration](/server-admin/base-config#kubernetes-configuration) for the `base.yaml` form.
 
@@ -85,7 +85,7 @@ See [Base Configuration](/server-admin/base-config#kubernetes-configuration) for
 
 Dagu resolves Kubernetes client configuration in this order:
 
-1. Explicit `config.kubeconfig`
+1. Explicit `with.kubeconfig`
 2. Default kubeconfig loading rules (`KUBECONFIG`, then the standard local kubeconfig locations)
 3. In-cluster configuration
 
@@ -106,13 +106,13 @@ These are valid:
 steps:
   - id: string_command
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     command: echo "hello"
 
   - id: argv_command
     type: k8s
-    config:
+    with:
       image: python:3.12-alpine
     command: [python3, -c, 'print("hello")']
 ```
@@ -123,14 +123,14 @@ These are not supported:
 steps:
   - id: bad_script
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     script: |
       echo hello
 
   - id: bad_multi_command
     type: k8s
-    config:
+    with:
       image: alpine:3.20
     command:
       - echo one
@@ -151,7 +151,7 @@ steps:
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `image` | Container image for the Job | Required in effective step config |
+| `image` | Container image for the Job | Required in effective step configuration |
 | `namespace` | Kubernetes namespace | `default` |
 | `kubeconfig` | Explicit path to kubeconfig | - |
 | `context` | Kubeconfig context name | current context |
@@ -170,7 +170,7 @@ steps:
 `env` sets explicit environment variables:
 
 ```yaml
-config:
+with:
   env:
     - name: APP_ENV
       value: production
@@ -189,7 +189,7 @@ Supported `value_from` sources:
 `env_from` imports whole ConfigMaps or Secrets:
 
 ```yaml
-config:
+with:
   env_from:
     - config_map_ref:
         name: app-config
@@ -219,14 +219,14 @@ Rules enforced by Dagu:
 | `labels` | Labels applied to both the Job and Pod |
 | `annotations` | Annotations applied to both the Job and Pod |
 
-Resource quantities use Kubernetes quantity syntax such as `100m`, `128Mi`, or `1Gi`. Invalid or negative quantities are rejected during config validation.
+Resource quantities use Kubernetes quantity syntax such as `100m`, `128Mi`, or `1Gi`. Invalid or negative quantities are rejected during configuration validation.
 
 ### Security Context
 
 `security_context` configures container-level Linux security settings:
 
 ```yaml
-config:
+with:
   security_context:
     run_as_user: 1000
     run_as_group: 1000
@@ -265,7 +265,7 @@ Rules enforced by Dagu:
 `pod_security_context` configures Pod-level Linux defaults:
 
 ```yaml
-config:
+with:
   pod_security_context:
     run_as_user: 1000
     run_as_group: 1000
@@ -307,7 +307,7 @@ Container-level `security_context` and Pod-level `pod_security_context` can both
 `affinity` supports the typed subset implemented by the executor:
 
 ```yaml
-config:
+with:
   affinity:
     node_affinity:
       required_during_scheduling_ignored_during_execution:
@@ -363,7 +363,7 @@ Rules enforced by Dagu:
 At the DAG or base level, `affinity: {}` clears inherited affinity defaults. You can also clear only the required node-affinity block with:
 
 ```yaml
-config:
+with:
   affinity:
     node_affinity:
       required_during_scheduling_ignored_during_execution: {}
@@ -387,7 +387,7 @@ Notes:
 `pod_failure_policy` supports this typed subset:
 
 ```yaml
-config:
+with:
   pod_failure_policy:
     rules:
       - action: FailJob
@@ -436,7 +436,7 @@ Each volume entry must define exactly one source:
 Example:
 
 ```yaml
-config:
+with:
   volumes:
     - name: scratch
       empty_dir:
@@ -507,7 +507,7 @@ kubernetes:
 steps:
   - id: migrate
     type: k8s
-    config:
+    with:
       image: ghcr.io/example/migrator:2026-03-31
       cleanup_policy: keep
       ttl_after_finished: 3600
@@ -531,7 +531,7 @@ steps:
   - id: report
     type: kubernetes
     depends: [migrate]
-    config:
+    with:
       image: ghcr.io/example/report:2026-03-31
       termination_grace_period_seconds: 30
       annotations:

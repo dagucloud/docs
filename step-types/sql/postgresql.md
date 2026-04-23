@@ -13,7 +13,7 @@ secrets:
 steps:
   - id: query_users
     type: postgres
-    config:
+    with:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
     command: "SELECT id, name, email FROM users"
     output: USERS  # Capture results to variable
@@ -40,7 +40,7 @@ Common parameters:
 | `application_name` | Application identifier |
 
 ```yaml
-config:
+with:
   dsn: "postgres://user:pass@db.example.com:5432/mydb?sslmode=require&connect_timeout=10"
 ```
 
@@ -50,7 +50,7 @@ config:
 steps:
   - id: query
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       timeout: 30           # Query timeout in seconds
 ```
@@ -101,7 +101,7 @@ Use `:name` syntax for named parameters:
 steps:
   - id: find_user
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       params:
         email: "user@example.com"
@@ -119,7 +119,7 @@ PostgreSQL uses `$1`, `$2`, etc. for positional parameters:
 steps:
   - id: find_user
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       params:
         - "user@example.com"
@@ -135,7 +135,7 @@ steps:
 steps:
   - id: transfer
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       transaction: true
     command: |
@@ -151,7 +151,7 @@ Control transaction isolation for concurrent access:
 steps:
   - id: critical_update
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       transaction: true
       isolation_level: serializable
@@ -175,7 +175,7 @@ Execute multiple SQL statements in a single step:
 steps:
   - id: setup_tables
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
     command: |
       CREATE TABLE IF NOT EXISTS users (
@@ -198,7 +198,7 @@ steps:
 steps:
   - id: import_users
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       import:
         input_file: /data/users.csv
@@ -218,7 +218,7 @@ steps:
 steps:
   - id: import_events
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       import:
         input_file: /data/events.jsonl
@@ -248,7 +248,7 @@ import:
 steps:
   - id: import_with_nulls
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       import:
         input_file: /data/records.csv
@@ -268,7 +268,7 @@ Test import without writing data:
 steps:
   - id: validate_import
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       import:
         input_file: /data/users.csv
@@ -284,7 +284,7 @@ steps:
 steps:
   - id: export_orders
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       output_format: jsonl
     command: "SELECT * FROM orders"
@@ -303,7 +303,7 @@ Output:
 steps:
   - id: export_json
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       output_format: json
     command: "SELECT * FROM orders LIMIT 100"
@@ -319,7 +319,7 @@ The `json` format buffers ALL rows in memory before writing. For large result se
 steps:
   - id: export_csv
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       output_format: csv
       headers: true
@@ -334,7 +334,7 @@ For large datasets, stream directly to a file:
 steps:
   - id: export_all_orders
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       streaming: true
       output_file: /data/orders-export.jsonl
@@ -355,7 +355,7 @@ Prevent concurrent execution of critical operations across distributed workers:
 steps:
   - id: exclusive_job
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       advisory_lock: "daily-aggregation"
     command: |
@@ -377,7 +377,7 @@ name: distributed-etl
 steps:
   - id: aggregate_region_data
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       advisory_lock: "etl-${REGION}"
       transaction: true
@@ -394,7 +394,7 @@ steps:
 steps:
   - id: resilient_query
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       timeout: 60
     command: "SELECT * FROM large_table"
@@ -415,7 +415,7 @@ env:
 steps:
   - id: acquire_lock
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       advisory_lock: "daily-etl"
       transaction: true
@@ -425,7 +425,7 @@ steps:
 
   - id: import_new_data
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       import:
         input_file: /data/orders-${TODAY}.csv
@@ -437,7 +437,7 @@ steps:
 
   - id: transform_data
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       transaction: true
       isolation_level: repeatable_read
@@ -453,7 +453,7 @@ steps:
 
   - id: generate_report
     type: postgres
-    config:
+    with:
       dsn: "${DATABASE_URL}"
       streaming: true
       output_file: /reports/daily-summary.json
