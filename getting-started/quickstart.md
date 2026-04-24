@@ -59,12 +59,27 @@ dagu start hello.yaml
 Output:
 
 ```
-┌─ DAG: hello ─────────────────────────────────────────────────────┐
-│ Status: Success ✓           | Started: 23:34:57 | Elapsed: 471ms │
-└──────────────────────────────────────────────────────────────────┘
+Succeeded - 2026-04-24T15:23:07+09:00
 
-Progress: ████████████████████████████████████████ 100% (2/2 steps)
+dag: hello (0s)
+├─log: .../logs/hello/.../dag-run....log
+│
+├─cmd_1 (0s) [succeeded]
+│ ├─echo "Hello from Dagu!"
+│ │
+│ └─stdout: .../cmd_1....out
+│     Hello from Dagu!
+│
+└─cmd_2 (0s) [succeeded]
+  ├─echo "Running step 2"
+  │
+  └─stdout: .../cmd_2....out
+      Running step 2
+
+Result: Succeeded
 ```
+
+Timestamp, duration, and log paths vary by run.
 
 Other useful commands:
 
