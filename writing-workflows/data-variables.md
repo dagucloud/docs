@@ -196,7 +196,7 @@ Providers can expose additional configuration through the optional `options` map
 
 ### Resolution and masking
 
-Secrets are evaluated after DAG-level variables and system-provided runtime variables, so they override values defined in `env` or `.env` files unless a step sets its own value. Dagu masks exact non-empty secret values in managed step logs and in final collected outputs.
+Secrets are evaluated after DAG-level variables and system-provided runtime variables, so they override values defined in `env` or `.env` files unless a step sets its own value. Dagu masks exact non-empty secret values in managed step logs and in final collected `outputs.json` values.
 
 Read the dedicated [Secrets guide](/writing-workflows/secrets) for provider details, resolution order, and masking behavior.
 

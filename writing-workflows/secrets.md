@@ -119,7 +119,7 @@ The masker is applied to:
 
 - Step stdout and stderr log writers.
 - Step stdout and stderr redirect writers.
-- Final `outputs.json` values collected from declared step outputs.
+- Final `outputs.json` values collected from string-form `output: NAME` step outputs.
 - Chat step messages immediately before they are sent to the LLM provider.
 
 The matcher replaces exact secret values. It does not mask empty values. It also does not mask values loaded through `env:` or `dotenv:` unless those values are resolved through `secrets:`.

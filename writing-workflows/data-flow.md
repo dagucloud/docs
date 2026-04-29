@@ -13,7 +13,7 @@ Dagu provides multiple mechanisms for passing data through workflows:
 - JSON Path References - Access nested data structures
 - Step ID References - Reference step properties and files
 - Sub DAG Outputs - Capture results from sub-workflows
-- DAG Run Outputs - Collect all outputs into a structured file for viewing and API access
+- DAG Run Outputs - Collect string-form outputs into a structured file for viewing and API access
 
 ## Output Variables
 
@@ -33,7 +33,7 @@ steps:
 2. Stored in the variable name specified by `output`
 3. Available to all downstream steps via `${VARIABLE_NAME}`
 4. Trailing newlines are automatically trimmed
-5. Outputs are collected into `outputs.json` for the DAG run (see [DAG Run Outputs](#dag-run-outputs))
+5. String-form `output: NAME` values are collected into `outputs.json` for the DAG run (see [DAG Run Outputs](#dag-run-outputs))
 
 ### String vs Object Form
 
@@ -470,6 +470,6 @@ For detailed precedence rules including interpolation vs runtime environment, se
 
 ## DAG Run Outputs
 
-All step outputs are automatically collected into a structured `outputs.json` file when the DAG completes. This enables viewing outputs in the Web UI and accessing them via API.
+Only string-form `output: NAME` values are collected into `outputs.json` when the DAG completes. Object-form `output: {...}` stays step-scoped for `${step.output.*}` references and is not written to the run outputs file.
 
 See [Outputs](/writing-workflows/outputs) for complete documentation on output collection, access methods, and security features.

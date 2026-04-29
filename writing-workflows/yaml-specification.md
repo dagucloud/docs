@@ -1061,7 +1061,7 @@ steps:
 
 `shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
-Object-form `output:` entries can be literal values or long-form publishers with `from`, `path`, `decode`, and `select`. Only string-form `output: NAME` is collected into the run's `outputs.json`.
+Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Only string-form `output: NAME` is collected into the run's `outputs.json`.
 
 ### Parallel Execution
 

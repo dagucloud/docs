@@ -80,6 +80,9 @@ output:
 
 String leaves are expanded with normal `${...}` references. Backtick command substitution and shell expansion are not run in object-form output values.
 
+Plain objects stay literal unless they use one of the reserved long-form keys: `value`, `from`, `path`, `decode`, or `select`.
+If you need a literal object containing one of those keys, wrap it with `value:`.
+
 #### Source-backed value
 
 ```yaml
@@ -110,6 +113,8 @@ output:
 | `path` | File path used when `from: file` |
 | `decode` | `text`, `json`, or `yaml` |
 | `select` | jq-style path applied after `decode: json` or `decode: yaml` |
+
+`value` cannot be combined with `from`, `path`, `decode`, or `select`.
 
 ### Publish-Only Steps
 
