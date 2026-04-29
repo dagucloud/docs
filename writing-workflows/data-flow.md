@@ -35,7 +35,7 @@ steps:
 4. Trailing newlines are automatically trimmed
 5. Outputs are collected into `outputs.json` for the DAG run (see [DAG Run Outputs](#dag-run-outputs))
 
-### Advanced Output Syntax
+### String vs Object Form
 
 The `output` field supports both string and object forms:
 
@@ -46,29 +46,35 @@ steps:
     command: cat VERSION
     output: VERSION
 
-  # Object form with custom key
-  - id: get_count
-    command: echo "42"
+  # Object form publishes structured step-scoped output
+  - id: inspect_build
+    script: |
+      printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
     output:
-      name: TOTAL_COUNT
-      key: totalItems  # Custom key in outputs.json (default: camelCase)
-
-  # Object form with omit
-  - id: internal_step
-    command: echo "processing"
-    output:
-      name: TEMP
-      omit: true  # Usable in DAG, excluded from outputs.json
+      version:
+        from: stdout
+        decode: json
+        select: .version
+      artifact:
+        from: stdout
+        decode: json
+        select: .artifact
 ```
 
-Object form properties:
-- `name` (required): Variable name to capture (same as string form)
-- `key`: Custom key for `outputs.json`. Default: variable name converted to camelCase (e.g., `TOTAL_COUNT` → `totalCount`)
-- `omit`: When `true`, output is usable within the DAG but excluded from `outputs.json`
+String form captures stdout into one flat variable and includes it in `outputs.json`.
+
+Object form publishes structured step output for `${step_id.output.*}` references. Each entry can be:
+
+- a literal value
+- `from: stdout`
+- `from: stderr`
+- `from: file`
+
+with optional `decode: json|yaml|text` and `select: .path.to.value`.
 
 ### Multiple Outputs
 
-Each step can have one output variable:
+String-form `output: NAME` captures one flat variable per step. Use object-form output when one step should publish multiple structured values:
 
 ```yaml
 type: graph
@@ -234,13 +240,13 @@ Available properties:
 - `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file
-- `${id.output}` - Captured output value (requires `output:` on the referenced step)
+- `${id.output}` - Captured string output or structured object-form payload (requires `output:` on the referenced step)
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. To capture output content directly into a variable for use in subsequent steps, use the `output:` field instead.
 
 ### Step Output References
 
-When a step has an `output:` field, downstream steps can access the captured value directly via `${id.output}`:
+When a step has an `output:` field, downstream steps can access it via `${id.output}`:
 
 ```yaml
 type: graph
@@ -262,8 +268,25 @@ steps:
     output: REPORT
 ```
 
+String-form `${id.output}` returns the captured text value.
+
+Object-form `${id.output}` returns the full published object as compact JSON, and nested access works directly:
+
+```yaml
+steps:
+  - id: publish
+    output:
+      version: "v1.2.3"
+      artifact:
+        url: "https://example.test/app.tgz"
+
+  - command: |
+      echo "Version: ${publish.output.version}"
+      echo "Artifact: ${publish.output.artifact.url}"
+```
+
 `${id.output}` vs `${id.stdout}`:
-- `${id.output}` returns the **captured value** (the content that was written to stdout and stored via `output:`). It is the actual text.
+- `${id.output}` returns the captured value or published object payload.
 - `${id.stdout}` returns a **file path** to the stdout log. Use `cat ${id.stdout}` to read it.
 
 If the referenced step does not have `output:` configured, `${id.output}` is not expanded — it passes through as a literal string.

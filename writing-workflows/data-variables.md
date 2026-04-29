@@ -289,6 +289,26 @@ steps:
     output: CONTENT  # Will fail if file exceeds 5MB
 ```
 
+Object-form `output:` publishes structured step-scoped values instead of one flat variable:
+
+```yaml
+steps:
+  - id: inspect_build
+    script: |
+      printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
+    output:
+      version:
+        from: stdout
+        decode: json
+        select: .version
+      artifact:
+        from: stdout
+        decode: json
+        select: .artifact
+```
+
+Use `${inspect_build.output.version}` and `${inspect_build.output.artifact.url}` in downstream steps. Object-form output does not add a flat `${VAR}` name and is not collected into `outputs.json`.
+
 ### Redirect Output
 
 Send output to files:
@@ -354,9 +374,15 @@ Available step properties when using ID references:
 - `${id.stdout}`: Path to stdout file
 - `${id.stderr}`: Path to stderr file
 - `${id.exit_code}`: Exit code of the step (as a string)
-- `${id.output}`: Captured output value (requires `output:` on the referenced step)
+- `${id.output}`: Captured string output or structured object-form output payload
 
-> **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. `${id.output}` returns the actual captured text value. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal.
+> **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content.
+>
+> `${id.output}` returns:
+> - the captured text value for string-form `output: NAME`
+> - the full published object as compact JSON for object-form `output: {...}`
+>
+> Nested access works with `${id.output.foo}`. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal.
 
 ## Command Substitution
 

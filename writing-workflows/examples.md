@@ -1089,6 +1089,29 @@ steps:
 
 <div class="example-card">
 
+### Structured Step Output
+
+```yaml
+steps:
+  - id: build
+    command: |
+      echo '{"version":"v1.2.3"}'
+    output: BUILD_JSON
+
+  - id: publish
+    output:
+      version: "${build.output.version}"
+      versionLabel: "ver - ${build.output.version}"
+
+  - command: echo "${publish.output.versionLabel}"
+```
+
+<a href="/writing-workflows/outputs#object-form" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Step ID References
 
 ```yaml

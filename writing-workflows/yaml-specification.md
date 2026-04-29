@@ -1054,14 +1054,14 @@ steps:
 | `stdout` | string | Redirect stdout to file | - |
 | `stderr` | string | Redirect stderr to file | - |
 | `log_output` | string | Override DAG-level log output mode for this step | DAG's log_output |
-| `output` | string/object | Capture output to a variable. Object form supports `name`, `key`, `omit`, and `schema`. | - |
+| `output` | string/object | String form captures trimmed stdout into one variable. Object form publishes structured step output for `${step_id.output.*}` references. | - |
 | `env` | array/object | Step-specific environment variables (overrides DAG-level) | - |
 | `call` | string | Name of a DAG to execute as a sub DAG-run | - |
 | `params` | string/object | Parameters passed to sub DAGs | - |
 
 `shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
-When `output` uses object form, `schema` accepts a JSON Schema declaration as a string reference, inline object, or boolean schema. The captured stdout must be valid JSON for schema validation to pass.
+Object-form `output:` entries can be literal values or long-form publishers with `from`, `path`, `decode`, and `select`. Only string-form `output: NAME` is collected into the run's `outputs.json`.
 
 ### Parallel Execution
 

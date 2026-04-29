@@ -314,7 +314,7 @@ Available properties:
 - `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file
-- `${id.output}` - Captured output value (requires `output:` on the referenced step)
+- `${id.output}` - Captured string output or structured object-form payload (requires `output:` on the referenced step)
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content.
 >
@@ -322,7 +322,7 @@ Available properties:
 > - To capture output for later steps: use the `output:` field instead
 > - Substring slicing like `${id.stdout:0:5}` operates on the **file path string**, not file content
 >
-> `${id.output}` returns the actual captured text value. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal. Substring slicing works: `${id.output:0:5}` extracts the first 5 characters of the captured value.
+> `${id.output}` returns the captured text value for string-form output, or the full published payload as compact JSON for object-form output. Nested access such as `${id.output.version}` works when the output is structured JSON. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal. Substring slicing still works on the final string value: `${id.output:0:5}`.
 
 ## Variable Precedence
 
