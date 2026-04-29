@@ -1,5 +1,43 @@
 # Changelog
 
+## v2.6.2 (2026-04-29)
+
+### Added
+
+- feat: add approval rewind and push-back history ([#2038](https://github.com/dagu-org/dagu/pull/2038)) [@yottahmd](https://github.com/yottahmd)
+- feat: add schema-backed DAG param forms ([#2039](https://github.com/dagu-org/dagu/pull/2039)) [@yottahmd](https://github.com/yottahmd)
+- feat: add webhook HMAC authentication ([#2045](https://github.com/dagu-org/dagu/pull/2045)) [@yottahmd](https://github.com/yottahmd)
+- feat: forward selected webhook headers to DAG runs ([#2050](https://github.com/dagu-org/dagu/pull/2050)) [@yottahmd](https://github.com/yottahmd)
+- feat: expand DAG examples for template, harness, and custom step types ([#2051](https://github.com/dagu-org/dagu/pull/2051)) [@yottahmd](https://github.com/yottahmd)
+- feat: replace object output with structured step outputs ([#2052](https://github.com/dagu-org/dagu/pull/2052)) [@yottahmd](https://github.com/yottahmd)
+
+### Changed
+
+- refactor: simplify loader and execution boundaries ([#2034](https://github.com/dagu-org/dagu/pull/2034)) [@yottahmd](https://github.com/yottahmd)
+- refactor: isolate manifest decoding and standardize local transport ([#2035](https://github.com/dagu-org/dagu/pull/2035)) [@yottahmd](https://github.com/yottahmd)
+- Update sponsorship link in README.md ([#2044](https://github.com/dagu-org/dagu/pull/2044)) [@lukasMega](https://github.com/lukasMega)
+
+### Fixed
+
+- fix: corroborate stale distributed run repair with worker heartbeats ([#2041](https://github.com/dagu-org/dagu/pull/2041)) [@yottahmd](https://github.com/yottahmd)
+- fix: preserve edited schedules across suspension rewrites ([#2043](https://github.com/dagu-org/dagu/pull/2043)) [@yottahmd](https://github.com/yottahmd)
+- sec: harden workflow files against shell injection and over-privileged tokens ([#2046](https://github.com/dagu-org/dagu/pull/2046)) [@krlmlr](https://github.com/krlmlr)
+- fix: harden DAG param validation and artifact inference ([#2049](https://github.com/dagu-org/dagu/pull/2049)) [@yottahmd](https://github.com/yottahmd)
+- fix: suppress success digest bot notifications ([#2054](https://github.com/dagu-org/dagu/pull/2054)) [@yottahmd](https://github.com/yottahmd)
+- fix: refresh structured output examples ([#2055](https://github.com/dagu-org/dagu/pull/2055)) [@yottahmd](https://github.com/yottahmd)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| Feature Request: Add UI Parameter Controls (Radio Buttons & Dropdowns) for Workflow Input ([#2033](https://github.com/dagu-org/dagu/issues/2033)) | [@vit76](https://github.com/vit76) (report) |
+| Unable to stop/cancel running jobs after worker terminated by k8s ([#2040](https://github.com/dagu-org/dagu/issues/2040)) | [@pommetjehorlepiep](https://github.com/pommetjehorlepiep) (report) |
+| modify spec's schedule time but not execute ([#2042](https://github.com/dagu-org/dagu/issues/2042)) | [@zz111111](https://github.com/zz111111) (report) |
+| Update sponsorship link in README.md ([#2044](https://github.com/dagu-org/dagu/pull/2044)) | [@lukasMega](https://github.com/lukasMega) |
+| Native HMAC-SHA256 verification on webhook deliveries ([#2036](https://github.com/dagu-org/dagu/issues/2036)), sec: harden workflow files against shell injection and over-privileged tokens ([#2046](https://github.com/dagu-org/dagu/pull/2046)), Forward selected webhook request headers to triggered DAG runs ([#2037](https://github.com/dagu-org/dagu/issues/2037)) | [@krlmlr](https://github.com/krlmlr) (report) |
+
 ## v2.6.1 (2026-04-23)
 
 ### Fixed
