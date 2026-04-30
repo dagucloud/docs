@@ -72,6 +72,14 @@ When a DAG run is enqueued (via API, webhook, or scheduler), it always enters th
 
 Each sub-DAG independently evaluates the dispatch decision. A DAG running locally can dispatch a child to a worker (if the child has `worker_selector` labels), and a DAG running on a worker can force a child to run locally (if the child has `worker_selector: local`). Parent and child dispatch decisions are completely independent.
 
+## Transport Security
+
+The default peer transport is convenient for local evaluation, but it is not the right choice for untrusted networks.
+
+- If coordinator and workers communicate only on a single private host or an isolated development network, the default peer transport may be acceptable.
+- If coordinator and workers communicate across machines, clusters, VPN boundaries, or any network segment you do not fully trust, set `peer.insecure=false` and configure `peer.cert_file`, `peer.key_file`, and `peer.client_ca_file` so peer traffic uses TLS or mTLS.
+- Treat worker connectivity as a control plane. Anyone who can intercept or impersonate that channel can affect workflow execution.
+
 ## Setting Up Distributed Execution
 
 ### Step 1: Start the Coordinator

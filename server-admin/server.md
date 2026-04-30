@@ -249,6 +249,37 @@ tls:
   key_file: "/etc/ssl/key.pem"
 ```
 
+## Production Hardening Checklist
+
+Before exposing Dagu beyond a single-user localhost setup, review these controls:
+
+- **Use builtin auth for exposed instances.** `auth.mode: builtin` is the recommended self-hosted mode for browser access, API keys, and role-based access. Reserve `auth.mode: basic` for simple private deployments, and avoid `auth.mode: none` outside isolated local development.
+- **Keep metrics private by default.** Leave `metrics: "private"` unless Prometheus reaches Dagu only over a trusted private network.
+- **Minimize write access.** If operators should run reviewed DAGs but not modify them, set `permissions.write_dags: false`.
+- **Keep the web terminal disabled unless you need it.** `terminal.enabled: false` is the safest setting for shared environments.
+- **Use TLS or a trusted reverse proxy.** If Dagu binds to `0.0.0.0`, pair that with TLS termination and network-level controls rather than exposing the port broadly.
+- **Secure distributed traffic.** For coordinator and worker traffic that crosses host or network boundaries, set `peer.insecure: false` and configure `peer.cert_file`, `peer.key_file`, and `peer.client_ca_file` for peer TLS/mTLS.
+- **Treat host executors as privileged.** Docker socket mounts, root containers, host bind mounts, and shell-capable workflows should be treated as administrative access to the machine that runs Dagu.
+
+Example production-focused baseline:
+
+```yaml
+host: "0.0.0.0"
+port: 443
+metrics: "private"
+permissions:
+  write_dags: false
+auth:
+  mode: builtin
+terminal:
+  enabled: false
+peer:
+  insecure: false
+tls:
+  cert_file: "/etc/ssl/cert.pem"
+  key_file: "/etc/ssl/key.pem"
+```
+
 ### Docker
 ```bash
 docker run -d \

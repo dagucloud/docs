@@ -34,6 +34,8 @@ For Docker-in-Docker workflows, mount the host socket and run as root:
 docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu -v /var/run/docker.sock:/var/run/docker.sock --user 0:0 ghcr.io/dagucloud/dagu:latest
 ```
 
+This setup should be treated as privileged host access. A workflow that can reach the Docker socket can usually control the host through containers, mounts, or image execution. Use it only when Docker executor support is required and the instance is otherwise tightly controlled.
+
 ## Custom Images
 
 If your workflows require additional tools (Python, Perl, Ruby, etc.) not included in the standard images, build a custom image based on Dagu:
