@@ -4,9 +4,9 @@ title: What is Dagu?
 
 <div class="overview-hero">
   <div class="overview-hero-copy">
-    <h2>Self-Hosted Control Plane for Existing Ops Automation</h2>
+    <h2>The workflow engine that doesn't turn into an SRE project.</h2>
     <p>
-      Dagu is a self-contained workflow engine for teams that need to consolidate scripts, cron jobs, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and AI-assisted steps into a single workflow system.
+      Dagu turns scripts, cron jobs, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and AI-assisted steps into one visible workflow system without forcing a rewrite.
     </p>
     <p>
       Dagu runs as a single binary and keeps workflows, history, and logs locally by default. It does not require a database, message broker, or language-specific SDK. It adds scheduling, dependencies, retries, queues, logs, a Web UI, and optional distributed workers around existing operations automation.

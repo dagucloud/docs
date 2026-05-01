@@ -5,8 +5,8 @@ layout: doc
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Self-Hosted Control Plane for Existing Ops Automation</h2>
-  <p>Dagu is a self-contained workflow engine for consolidating scripts, cron jobs, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and agent-driven steps into one place to see and manage them.</p>
+  <h2>The workflow engine that doesn't turn into an SRE project.</h2>
+  <p>Dagu turns scripts, cron jobs, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and agent-driven steps into one visible workflow system without forcing a rewrite.</p>
   <p>Dagu runs as a single binary and keeps workflows, history, and logs locally by default. It does not require a database, message broker, or language-specific SDK. It adds scheduling, dependencies, retries, queues, logs, a Web UI, and optional distributed workers around the automation you already run.</p>
 </div>
 
