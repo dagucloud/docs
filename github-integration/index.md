@@ -117,7 +117,7 @@ Depending on the binding, Dagu Cloud can also write back to GitHub:
 
 - check runs, when `check_name` is set and a commit SHA is available
 - reactions on app-targeted comments
-- status comments on PRs or issues for comment-command flows
+- failure comments on PRs or issues for comment-command flows
 
 ## Main Runtime Variables
 
