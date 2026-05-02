@@ -99,8 +99,6 @@ For `comment_command` bindings, Dagu Cloud scans the comment body for the first 
 Supported forms include:
 
 - `@dagucloud <alias>`
-- `@dagucloud rerun <alias>`
-- `@dagucloud cancel <alias>`
 
 If the repository has a default comment binding, these also work:
 
@@ -133,7 +131,7 @@ Most workflows only need these variables:
 | `GITHUB_ACTOR` | GitHub sender login |
 | `GITHUB_PR_NUMBER` | PR number when applicable |
 | `GITHUB_ISSUE_NUMBER` | Issue number or PR conversation number when applicable |
-| `GITHUB_COMMAND` | Parsed comment command: `run`, `rerun`, or `cancel` |
+| `GITHUB_COMMAND` | Command name such as `run` for comment commands or `rerun` for `check_run.rerequested` |
 | `GITHUB_RELEASE_TAG` | Release or tag name when applicable |
 | `GITHUB_WORKFLOW` | Workflow name for `workflow_dispatch` |
 | `GITHUB_DISPATCH_EVENT_TYPE` | `event_type` for `repository_dispatch` |
