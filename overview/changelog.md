@@ -15,7 +15,6 @@
 
 ### Fixed
 
-- fix: dedupe builtin harness flag aliases ([#2071](https://github.com/dagucloud/dagu/pull/2071)) [@yottahmd](https://github.com/yottahmd)
 - fix: preserve literal code fences in template config ([#2072](https://github.com/dagucloud/dagu/pull/2072)) [@yottahmd](https://github.com/yottahmd)
 - fix: stop evaluating step backticks by default ([#2075](https://github.com/dagucloud/dagu/pull/2075)) [@yottahmd](https://github.com/yottahmd)
 - fix: align command condition expansion with shell commands ([#2076](https://github.com/dagucloud/dagu/pull/2076)) [@yottahmd](https://github.com/yottahmd)
@@ -41,7 +40,6 @@ Thanks to our contributors for this release:
 - feat: add schema-backed DAG param forms ([#2039](https://github.com/dagucloud/dagu/pull/2039)) [@yottahmd](https://github.com/yottahmd)
 - feat: add webhook HMAC authentication ([#2045](https://github.com/dagucloud/dagu/pull/2045)) [@yottahmd](https://github.com/yottahmd)
 - feat: forward selected webhook headers to DAG runs ([#2050](https://github.com/dagucloud/dagu/pull/2050)) [@yottahmd](https://github.com/yottahmd)
-- feat: expand DAG examples for template, harness, and custom step types ([#2051](https://github.com/dagucloud/dagu/pull/2051)) [@yottahmd](https://github.com/yottahmd)
 - feat: replace object output with structured step outputs ([#2052](https://github.com/dagucloud/dagu/pull/2052)) [@yottahmd](https://github.com/yottahmd)
 
 ### Changed
@@ -129,7 +127,6 @@ Thanks to our contributors for this release:
 ### Added
 
 - feat: add definition page link to DAG run details header ([#1977](https://github.com/dagucloud/dagu/pull/1977)) [@yottahmd](https://github.com/yottahmd)
-- feat: add harness executor for coding agent CLI orchestration ([#1978](https://github.com/dagucloud/dagu/pull/1978)) [@yottahmd](https://github.com/yottahmd)
 - feat: add DAG definition improvement flow from the spec editor ([#1980](https://github.com/dagucloud/dagu/pull/1980)) [@yottahmd](https://github.com/yottahmd)
 - feat(spec): add build-time custom step types ([#1987](https://github.com/dagucloud/dagu/pull/1987)) [@yottahmd](https://github.com/yottahmd)
 - feat(ui): add custom step editor autocomplete ([#1989](https://github.com/dagucloud/dagu/pull/1989)) [@yottahmd](https://github.com/yottahmd)
@@ -142,7 +139,6 @@ Thanks to our contributors for this release:
 - chore: remove experimental gha (GitHub Actions) executor ([#1983](https://github.com/dagucloud/dagu/pull/1983)) [@yottahmd](https://github.com/yottahmd)
 - chore(deps): bump go-jose and otel to fix Trivy HIGH CVEs ([#1984](https://github.com/dagucloud/dagu/pull/1984)) [@yottahmd](https://github.com/yottahmd)
 - chore: pin GitHub Actions to commit SHAs and update to latest versions ([#1985](https://github.com/dagucloud/dagu/pull/1985)) [@yottahmd](https://github.com/yottahmd)
-- test(e2e): add distributed stack Playwright harness ([#1996](https://github.com/dagucloud/dagu/pull/1996)) [@yottahmd](https://github.com/yottahmd)
 
 ### Fixed
 

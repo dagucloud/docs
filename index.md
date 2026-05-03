@@ -59,6 +59,11 @@ Dagu fits teams that already have operational work spread across scripts, cron j
     <p><strong>Why Dagu fits:</strong> remote operations get schedules, retries, notifications, and per-step logs without requiring operators to SSH into servers for every recovery.</p>
   </div>
   <div class="real-world-usecase">
+    <h3>GitHub-driven Workflows</h3>
+    <p><strong>Run:</strong> PR validation, preview deployments, release workflows, check reruns, and repository dispatches from GitHub.</p>
+    <p><strong>Why Dagu fits:</strong> GitHub stays the trigger source while Dagu executes the DAG on your licensed server and reports checks, reactions, and comments back to GitHub.</p>
+  </div>
+  <div class="real-world-usecase">
     <h3>Container and Kubernetes Workflows</h3>
     <p><strong>Run:</strong> Docker images, Kubernetes Jobs, shell glue, and follow-up validation steps.</p>
     <p><strong>Why Dagu fits:</strong> teams can compose image-based tasks and route them to the right workers without building a custom control plane.</p>
@@ -194,7 +199,6 @@ Common built-in step types include:
 | `command`, `shell` | Local shell commands and scripts |
 | `docker`, `container` | Run in a Docker container or exec into an existing container |
 | `kubernetes`, `k8s` | Run a step as a Kubernetes workload |
-| `harness` | Run CLI-based coding agents and custom harness adapters |
 | `ssh` | Remote command execution |
 | `sftp` | Remote file transfer |
 | `http` | HTTP requests |
@@ -407,6 +411,8 @@ See [Examples](/writing-workflows/examples) for more patterns.
 Dagu supports Git sync to keep DAG definitions, agent markdown files, and managed documents version-controlled. Enable `DAGU_GITSYNC_ENABLED=true` with a repository URL, and Dagu pulls tracked files from a Git branch. Optional auto-sync polls the repository at a configurable interval (default 300s). Supports token and SSH authentication.
 
 See [Git Sync](/server-admin/git-sync) for configuration.
+
+GitHub Integration is separate from Git Sync. Use it when GitHub events, PR comments, releases, check reruns, `workflow_dispatch`, or `repository_dispatch` should trigger a DAG that runs on your licensed Dagu server. See [GitHub Integration](/github-integration/) for setup and examples.
 
 ## CLI Reference
 

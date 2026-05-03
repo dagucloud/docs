@@ -110,7 +110,6 @@ const fullSidebar = [
       { text: "Shell (Windows)", link: "/step-types/shell-windows" },
       { text: "Docker", link: "/step-types/docker" },
       { text: "Kubernetes", link: "/step-types/kubernetes" },
-      { text: "Harness", link: "/step-types/harness" },
       { text: "Agent", link: "/features/agent/step" },
       { text: "Template", link: "/step-types/template" },
       { text: "Mail", link: "/step-types/mail" },

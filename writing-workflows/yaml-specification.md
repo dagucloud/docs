@@ -589,98 +589,6 @@ When configured at the DAG level, all chat steps inherit the LLM configuration. 
 
 See [Chat Executor](/features/chat/) for full documentation.
 
-### Harness Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `harnesses` | object | Named custom harness definitions available to harness steps | - |
-| `harness` | object | Default harness configuration inherited by harness steps | - |
-
-```yaml
-harnesses:
-  gemini:
-    binary: gemini
-    prefix_args: ["run"]
-    prompt_mode: flag
-    prompt_flag: --prompt
-
-harness:
-  provider: gemini
-  model: gemini-2.5-pro
-  fallback:
-    - provider: claude
-      model: sonnet
-
-steps:
-  - command: "Summarize the repository status" # inferred as type: harness
-
-  - type: harness
-    command: "Review the auth module"
-    with:
-      provider: claude
-      bare: true
-```
-
-`harnesses:` is a map from provider name to a custom harness definition. The name is referenced from `with.provider`.
-
-Custom harness definition fields:
-
-| Field | Type | Required | Default |
-|-------|------|----------|---------|
-| `binary` | string | yes | - |
-| `prefix_args` | string[] | no | `[]` |
-| `prompt_mode` | `arg` \| `flag` \| `stdin` | no | `arg` |
-| `prompt_flag` | string | only for `flag` mode | - |
-| `prompt_position` | `before_flags` \| `after_flags` | no | `before_flags` |
-| `flag_style` | `gnu_long` \| `single_dash` | no | `gnu_long` |
-| `option_flags` | object | no | - |
-
-Definition rules:
-
-- custom harness names cannot be `claude`, `codex`, `copilot`, `opencode`, or `pi`
-- `prompt_flag` is required and only valid when `prompt_mode: flag`
-- unknown keys in a harness definition are rejected
-
-If a DAG is loaded with a base config:
-
-- `harnesses` entries merge by name
-- redefining the same name replaces the entire inherited definition
-- `harnesses.<name>: null` deletes the inherited definition
-
-`harness:` is the DAG-level default config for harness steps.
-
-- Steps with `type: harness` inherit the DAG-level primary config.
-- Steps without an explicit `type:` are treated as `type: harness` when `harness:` is present.
-- Step-level `with:` overrides DAG-level primary keys on conflict.
-- Step-level `fallback:` replaces the DAG-level fallback list instead of merging with it.
-
-The `harness:` block accepts the same fields as step-level harness `with:`:
-
-- `provider`, which may be a built-in provider or a custom name from `harnesses:`
-- arbitrary CLI flag keys passed through to the provider
-- `fallback`, an ordered list of alternative provider configs
-
-Reserved keys `provider` and `fallback` are consumed by the harness executor and are not passed through as CLI flags.
-
-Flag generation rules:
-
-- strings and numbers become `flag value`
-- `true` becomes a bare flag
-- `false` and empty strings are omitted
-- arrays become repeated flags
-- built-in providers use `--key` and normalize `snake_case` keys to kebab-case flag names
-- custom definitions use `--key`, `-key`, or `option_flags` according to the selected harness definition
-- provider-specific flag names and values are not validated by Dagu
-
-`script` handling depends on the resolved provider:
-
-- built-in providers and custom `arg` / `flag` definitions pass `command` on argv and pipe `script` to stdin
-- custom `stdin` definitions put the prompt on stdin; if both `command` and `script` are present, stdin is `prompt + "\n\n" + script`
-
-Harness steps accept one prompt command. Multiple command arrays are rejected.
-
-See [Harness Step](/step-types/harness) for provider details, fallback behavior, and examples.
-
 ### Redis Configuration
 
 | Field | Type | Description | Default |
@@ -1003,7 +911,7 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 **Supported step types:** shell, command, docker, container, ssh
 
-**Not supported:** jq, http, archive, mail, dag, template, k8s, kubernetes, harness
+**Not supported:** jq, http, archive, mail, dag, template, k8s, kubernetes
 
 These step types do not support multi-command arrays. Use `script:` for `template` steps. Unsupported configurations are rejected at parse time.
 

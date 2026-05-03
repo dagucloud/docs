@@ -1329,62 +1329,6 @@ steps:
 
 <div class="example-card">
 
-### Harness Step Type
-
-> Requires the selected provider CLI (`codex` here) to be installed and available in `PATH`.
-
-```yaml
-steps:
-  - type: harness
-    command: 'Review "quoted" text and list issues'
-    with:
-      provider: codex
-```
-
-The `command` field is the harness prompt; the harness executor invokes the provider when the step runs.
-
-<a href="/step-types/harness" class="learn-more">Learn more →</a>
-
-</div>
-
-<div class="example-card">
-
-### Custom Harness Step Type
-
-> Requires the selected provider CLI (`codex` here) to be installed and available in `PATH`.
-
-```yaml
-step_types:
-  codex_task:
-    type: harness
-    description: Run a Codex prompt
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [prompt]
-      properties:
-        prompt:
-          type: string
-    template:
-      command:
-        $input: prompt
-      with:
-        provider: codex
-
-steps:
-  - type: codex_task
-    with:
-      prompt: 'Review "quoted" text and list issues'
-```
-
-`$input` copies the prompt as a value, so quotes inside the prompt are not parsed as template syntax.
-
-<a href="/step-types/harness" class="learn-more">Learn more →</a>
-
-</div>
-
-<div class="example-card">
-
 ### Container Workflow
 
 ```yaml
