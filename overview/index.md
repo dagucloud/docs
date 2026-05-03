@@ -4,12 +4,15 @@ title: What is Dagu?
 
 <div class="overview-hero">
   <div class="overview-hero-copy">
-    <h2>The workflow engine that doesn't turn into an SRE project.</h2>
+    <h2>Run scripts, cron jobs, and runbooks as workflows.</h2>
     <p>
-      Dagu turns scripts, cron jobs, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and AI-assisted steps into one visible workflow system without forcing a rewrite.
+      Dagu turns the commands your team already runs into scheduled, observable workflows that are safe to rerun: shell scripts, Python scripts, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and agent-driven steps.
     </p>
     <p>
-      Dagu runs as a single binary and keeps workflows, history, and logs locally by default. It does not require a database, message broker, or language-specific SDK. It adds scheduling, dependencies, retries, queues, logs, a Web UI, and optional distributed workers around existing operations automation.
+      Define the workflow in plain YAML, run it with one binary, and get the operational layer that cron and ad hoc scripts are missing: dependencies, retries, queues, logs, artifacts, approvals, API/webhooks, and optional distributed workers.
+    </p>
+    <p>
+      No database required. No message broker. No framework rewrite. No platform migration. State is file-backed by default, and a full local server starts with <code>dagu start-all</code>.
     </p>
     <div class="overview-actions">
       <a href="/getting-started/quickstart" class="overview-button overview-button-primary">Start in minutes</a>
@@ -48,15 +51,15 @@ title: What is Dagu?
 </div>
 
 <div class="overview-statement">
-  <strong>Dagu makes existing ops automation easy to inspect, rerun, and manage.</strong>
-  <span>Define the workflow in YAML, keep the underlying scripts and commands, inspect every step in the browser, and rerun or approve operational work without SSHing into servers or chasing crontabs.</span>
+  <strong>Dagu makes existing ops commands easy to inspect, rerun, and manage.</strong>
+  <span>Keep the underlying scripts and commands, define the workflow in YAML, inspect every step in the browser, and rerun or approve operational work without SSHing into servers or chasing crontabs.</span>
 </div>
 
 ## Motivation
 
 Many environments grow into hundreds of cron jobs and shell scripts on large servers. The jobs may be important, but their dependencies are hidden in crontabs, comments, filenames, and operator knowledge. When one job fails, it is hard to know which downstream jobs were affected, which script should be rerun, and where the relevant logs are.
 
-Dagu was built for teams that already have important automation but lack a practical way to manage it in one place. Instead of forcing application code into a workflow SDK, Dagu wraps existing operational work with scheduling, visible dependencies, execution status, logs, retries, approvals, and Web UI controls.
+Dagu was built for teams that already have important automation but lack a practical way to manage it in one place. Instead of asking teams to translate scripts and jobs into a platform-specific model, Dagu wraps existing commands with scheduling, visible dependencies, execution status, logs, retries, approvals, and Web UI controls.
 
 ## Core Terminology
 
@@ -77,7 +80,7 @@ See [Core Concepts](/getting-started/concepts) for the deeper model.
 
 ## How a Workflow Runs
 
-Dagu keeps the workflow definition separate from the code it executes. Your scripts, containers, or services stay the same. Dagu wraps them with orchestration.
+Dagu keeps the workflow definition separate from the code it executes. Your scripts, containers, or services stay the same. Dagu wraps them with scheduling, dependencies, logs, retries, and recovery controls.
 
 ```yaml
 steps:
@@ -107,7 +110,7 @@ During a run, Dagu resolves dependencies, starts ready steps, captures stdout an
 
 ## Why Teams Choose Dagu
 
-The main reason teams choose Dagu is that it modernizes existing operations automation without turning orchestration itself into another platform project.
+The main reason teams choose Dagu is that it modernizes existing operations automation without turning that work into a platform rollout.
 
 <div class="overview-card-grid overview-strengths-grid">
   <div class="overview-card">
@@ -120,7 +123,7 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/examples">Zero-invasive workflows</a></h3>
-    <p>Wrap existing <a href="/step-types/shell">scripts and commands</a>, <a href="/step-types/sql/">SQL</a>, <a href="/step-types/docker">containers</a>, and other <a href="/writing-workflows/examples">operational tasks</a> instead of rewriting application code around a workflow SDK.</p>
+    <p>Wrap existing <a href="/step-types/shell">scripts and commands</a>, <a href="/step-types/sql/">SQL</a>, <a href="/step-types/docker">containers</a>, and other <a href="/writing-workflows/examples">operational tasks</a> instead of converting them into framework-specific jobs.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/overview/web-ui">Observable by default</a></h3>
@@ -143,7 +146,7 @@ Dagu can run in a small local setup or scale out when workloads grow. The operat
 <div class="overview-mode-grid">
   <div class="overview-mode-card">
     <h3>Standalone</h3>
-    <p><code>dagu start-all</code> runs the Web UI, scheduler, and workflow engine in one process.</p>
+    <p><code>dagu start-all</code> runs the Web UI, scheduler, and workflow runtime in one process.</p>
     <p>Best for one server, a team utility box, a private automation host, or getting started quickly.</p>
   </div>
   <div class="overview-mode-card">
@@ -206,36 +209,30 @@ See [Architecture](/overview/architecture) for internals and storage, and [Deplo
   <table>
     <thead>
       <tr>
-        <th>Tool</th>
-        <th>Best For</th>
-        <th>Where Dagu Is Different</th>
+        <th>Existing problem</th>
+        <th>Dagu path</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Cron</td>
-        <td>Simple scheduled commands</td>
-        <td>Dagu makes dependencies visible and adds logs, history, retries, status, UI controls, notifications, and approval gates.</td>
+        <td>Cron jobs scattered across machines</td>
+        <td>Central schedules, dependencies, history, logs, retries, catch-up, and run controls.</td>
       </tr>
       <tr>
-        <td>Airflow</td>
-        <td>Large data platforms</td>
-        <td>Dagu has a smaller default footprint, does not require a DBMS server, and uses YAML instead of a Python platform model.</td>
+        <td>Important scripts that only one engineer knows how to rerun</td>
+        <td>Plain YAML workflows with parameters, approvals, artifacts, per-step logs, and browser-based recovery.</td>
       </tr>
       <tr>
-        <td>GitHub Actions</td>
-        <td>Repository CI/CD</td>
-        <td>Dagu runs inside your own infrastructure and can manage servers, containers, edge devices, and internal operations.</td>
+        <td>Runbooks that still require manual SSH sessions</td>
+        <td>Reviewed workflows that operators can run safely while engineers keep commands and results traceable.</td>
       </tr>
       <tr>
-        <td>Temporal</td>
-        <td>Durable application workflows</td>
-        <td>Dagu is simpler for command, script, and container orchestration when you do not want to write workflow code.</td>
+        <td>Mixed work across shell, Python, SQL, HTTP, SSH, Docker, and Kubernetes</td>
+        <td>One workflow definition model for command-first operations work, without rewriting the underlying tools.</td>
       </tr>
       <tr>
-        <td>Rundeck</td>
-        <td>Operations runbooks</td>
-        <td>Dagu focuses on DAG-based YAML workflows, explicit dependencies, local-first execution, and simple file-backed operation.</td>
+        <td>A small automation estate that does not justify a platform project</td>
+        <td>One binary, file-backed state by default, and optional workers when workloads need to grow.</td>
       </tr>
     </tbody>
   </table>
@@ -289,12 +286,12 @@ Dagu is useful anywhere existing scripts, containers, operational tasks, or agen
 </div>
 
 ::: tip
-If it can run from a <a href="/step-types/shell">shell command</a>, <a href="/step-types/docker">Docker image</a>, <a href="/step-types/kubernetes">Kubernetes Job</a>, <a href="/step-types/ssh">SSH session</a>, <a href="/step-types/http">HTTP call</a>, <a href="/step-types/sql/">SQL query</a>, or <a href="/step-types/harness">AI agent CLI</a>, Dagu can usually orchestrate it without changing the application code.
+If it can run from a <a href="/step-types/shell">shell command</a>, <a href="/step-types/docker">Docker image</a>, <a href="/step-types/kubernetes">Kubernetes Job</a>, <a href="/step-types/ssh">SSH session</a>, <a href="/step-types/http">HTTP call</a>, <a href="/step-types/sql/">SQL query</a>, or <a href="/step-types/harness">AI agent CLI</a>, Dagu can usually orchestrate it without rewriting the underlying tool.
 :::
 
 ## AI Agent Workflows and Workflow Operator
 
-Dagu includes AI features, but they build on the same command-native workflow engine. The agent can read, create, update, and debug DAGs. Agent steps and external agent CLIs can also run inside workflows, with the same scheduling, logs, retries, approvals, and run history as any other step.
+Dagu includes AI features, but they build on the same command-native workflow model. The agent can read, create, update, and debug DAGs. Agent steps and external agent CLIs can also run inside workflows, with the same scheduling, logs, retries, approvals, and run history as any other step.
 
 ```yaml
 steps:

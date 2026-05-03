@@ -1,6 +1,6 @@
 # REST API
 
-Dagu provides a comprehensive REST API for programmatic control over workflow orchestration. The API enables DAG management, execution control, monitoring, and system operations through standard HTTP endpoints.
+Dagu provides a comprehensive REST API for programmatic control over command workflows. The API enables DAG management, execution control, monitoring, and system operations through standard HTTP endpoints.
 
 ::: tip API Reference
 For the complete API documentation with all endpoints, see [REST API Reference](/web-ui/api).

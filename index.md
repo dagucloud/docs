@@ -5,9 +5,10 @@ layout: doc
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>The workflow engine that doesn't turn into an SRE project.</h2>
-  <p>Dagu turns scripts, cron jobs, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and agent-driven steps into one visible workflow system without forcing a rewrite.</p>
-  <p>Dagu runs as a single binary and keeps workflows, history, and logs locally by default. It does not require a database, message broker, or language-specific SDK. It adds scheduling, dependencies, retries, queues, logs, a Web UI, and optional distributed workers around the automation you already run.</p>
+  <h2>Run scripts, cron jobs, and runbooks as workflows.</h2>
+  <p>Dagu turns the commands your team already runs into scheduled, observable workflows that are safe to rerun: shell scripts, Python scripts, containers, HTTP tasks, SQL jobs, SSH operations, sub-workflows, and agent-driven steps.</p>
+  <p>Define the workflow in plain YAML, run it with one binary, and get the operational layer that cron and ad hoc scripts are missing: dependencies, retries, queues, logs, artifacts, approvals, API/webhooks, and optional distributed workers.</p>
+  <p>No database required. No message broker. No framework rewrite. No platform migration. State is file-backed by default, and a full local server starts with <code>dagu start-all</code>.</p>
 </div>
 
 <div class="hero-section">
@@ -28,9 +29,9 @@ Credentials: `demouser` / `demouser`
 
 ## What Dagu Does
 
-Dagu is a workflow engine that helps teams consolidate existing operations automation into one self-hosted control plane. It wraps scripts, commands, containers, server tasks, SQL jobs, HTTP calls, and agent CLIs in DAGs (Directed Acyclic Graphs) defined in YAML.
+Dagu is an operations automation engine that helps teams consolidate existing scripts, commands, containers, server tasks, SQL jobs, HTTP calls, SSH operations, and runbooks into one self-hosted workflow system.
 
-By default, Dagu keeps workflows, run history, and logs on local disk, so teams can move from fragmented cron and scattered scripts to visible, retryable workflows without introducing a heavyweight orchestration stack.
+By default, Dagu keeps workflows, run history, logs, and artifacts on local disk, so teams can move from fragmented cron and scattered scripts to visible, retryable workflows without introducing a large orchestration project.
 
 ## Real-World Use Cases
 
@@ -146,6 +147,10 @@ irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 
 docker run --rm -v ~/.dagu:/var/lib/dagu -p 8080:8080 ghcr.io/dagucloud/dagu:latest dagu start-all
 ```
 
+```bash [npm]
+npm install -g --ignore-scripts=false @dagucloud/dagu
+```
+
 ```bash [Homebrew]
 brew install dagu
 ```
@@ -158,7 +163,7 @@ helm install dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-cla
 
 :::
 
-The script installers run a guided wizard that installs Dagu, adds it to your PATH, sets up a background service, and creates the initial admin account. Homebrew, Docker, and Helm install without the wizard. See the [Installation Guide](/getting-started/installation/) for all options.
+The script installers run a guided wizard that installs Dagu, adds it to your PATH, sets up a background service, and creates the initial admin account. Homebrew, npm, Docker, and Helm install without the wizard. See the [Installation Guide](/getting-started/installation/) for all options.
 
 ### Create and Run a Workflow
 

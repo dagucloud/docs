@@ -1,6 +1,6 @@
 # Install on macOS
 
-Two supported paths: **Homebrew** (binary only) or the **guided script installer** (optional LaunchAgent service and admin bootstrap).
+Common paths: **Homebrew** (binary only), **npm** (binary only), or the **guided script installer** (optional LaunchAgent service and admin bootstrap).
 
 ## Homebrew
 
@@ -9,6 +9,14 @@ brew install dagu
 ```
 
 Upgrade later with `brew upgrade dagu`. Homebrew installs the binary only — no service, no admin account. Set those up yourself or use the script installer.
+
+## npm
+
+```bash
+npm install -g --ignore-scripts=false @dagucloud/dagu
+```
+
+The npm package downloads the Dagu binary during postinstall. Use the script installer if you want guided LaunchAgent service setup and admin bootstrap.
 
 ## Script installer
 
@@ -47,10 +55,6 @@ When the installer sets up a background service, it captures the `PATH` from the
 ## Manual binary
 
 Download from [GitHub Releases](https://github.com/dagucloud/dagu/releases), unpack, and put `dagu` on your `PATH`.
-
-## npm
-
-See [npm install](/getting-started/installation/npm).
 
 ## Verify
 

@@ -18,17 +18,17 @@ irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 
 docker pull ghcr.io/dagucloud/dagu:latest
 ```
 
-```bash [Homebrew]
-brew install dagu
-```
-
 ```bash [npm]
 npm install -g --ignore-scripts=false @dagucloud/dagu
 ```
 
+```bash [Homebrew]
+brew install dagu
+```
+
 :::
 
-The script installers run a guided wizard for PATH setup, background service setup, and the first admin account. Homebrew, npm, and Docker install the binary only.
+The script installers run a guided wizard for PATH setup, background service setup, and the first admin account. Homebrew, npm, and Docker install the binary or container only.
 
 Full options (specific versions, custom directories, service scope, uninstall, CI/non-interactive): [Installation Guide](/getting-started/installation/).
 

@@ -4,10 +4,10 @@ Pick the guide for your platform.
 
 - [**macOS**](/getting-started/installation/macos) — Homebrew or the guided script installer (LaunchAgent service)
 - [**Linux**](/getting-started/installation/linux) — Guided script installer with systemd service, or a manual binary
+- [**npm**](/getting-started/installation/npm) — Global package that downloads the Dagu binary during postinstall
 - [**Windows**](/getting-started/installation/windows) — PowerShell script installer with optional Windows service
 - [**Docker**](/getting-started/installation/docker) — `docker run`, Compose, and mounting the host Docker socket
 - [**Kubernetes**](/getting-started/installation/kubernetes) — Official Helm chart
-- [**npm**](/getting-started/installation/npm) — Global install via `npm install -g`
 - [**Build from source**](/getting-started/installation/source) — Go + Node toolchain
 
 ## Which one should I use?
@@ -18,7 +18,7 @@ Pick the guide for your platform.
 | Running a shared server | **Script installer** with `--service yes` |
 | Running in a container | **Docker** |
 | Running on a cluster | **Kubernetes (Helm)** |
-| CI / reproducible setups | **Manual binary download** or **npm** |
+| CI / reproducible setups | **npm**, **manual binary download**, or **Docker** |
 | Developing on Dagu itself | **Build from source** |
 
 ## What the script installers do
@@ -30,7 +30,7 @@ The `installer.sh` / `installer.ps1` / `installer.cmd` scripts open a guided wiz
 - Set it up as a background service (systemd on Linux, LaunchAgent on macOS, Windows service on Windows)
 - Create and verify the first admin account
 
-Homebrew, npm, Docker, Helm, and manual downloads install the binary only — no wizard, no service, no admin bootstrap.
+Homebrew, npm, Docker, Helm, and manual downloads install without the guided wizard, service setup, or admin bootstrap.
 
 ## Where Dagu Keeps Things
 

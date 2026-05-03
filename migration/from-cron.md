@@ -15,7 +15,7 @@ Run them through Dagu instead and get:
 - Run history and status tracking
 - No need to change your scripts
 
-**Dagu** is a self-contained workflow engine. Single binary, no external dependencies. Runs on Linux/macOS/Windows. [Install →](/getting-started/installation/)
+**Dagu** is a self-contained command workflow engine. Single binary, no external dependencies. Runs on Linux/macOS/Windows. [Install →](/getting-started/installation/)
 
 ## Basic Usage
 
