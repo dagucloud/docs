@@ -154,18 +154,18 @@ When event tracking is available (the default in both `server` and `start-all` m
 
 Notifications are sent for these DAG run statuses:
 
-- `succeeded`
 - `failed`
 - `aborted`
-- `partially_succeeded`
 - `rejected`
 - `waiting` (for human approval requests)
+
+Successful and partially successful completions are tracked only to suppress stale pending notifications. They do not post a Discord message.
 
 ### How notifications work
 
 1. Dagu checks for new run events every **10 seconds** and remembers what it has already delivered, so restarts do not resend old notifications or drop pending ones.
 2. On first startup, existing channels only receive future events.
-3. For each new completion, it creates a **dedicated agent session** per allowed channel, sends a structured prompt with the run details (DAG name, status, error, start/finish times, step results), and waits for the agent to generate a notification message (up to **10 minutes**).
+3. For each notification that should be delivered, it creates a **dedicated agent session** per allowed channel, sends a structured prompt with the run details (DAG name, status, error, start/finish times, step results), and waits for the agent to generate a notification message (up to **10 minutes**).
 4. The notification session is **adopted** as the channel's active session, so users can send follow-up messages like "show me the logs" or "retry it".
 5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.
 
@@ -178,7 +178,7 @@ If the agent API is unavailable or times out, the bot sends a plain text fallbac
 Error: <error message if any>
 ```
 
-Where the emoji is: `✅` succeeded/partial, `❌` failed/rejected, `⚠️` aborted, `⏳` waiting.
+The fallback uses status-appropriate text and emoji.
 
 ## Message Length
 

@@ -123,18 +123,18 @@ When event tracking is available (the default in both `server` and `start-all` m
 
 Notifications are sent for these DAG run statuses:
 
-- `succeeded`
 - `failed`
 - `aborted`
-- `partially_succeeded`
 - `rejected`
 - `waiting` (for human approval requests)
+
+Successful and partially successful completions are tracked only to suppress stale pending notifications. They do not post a Telegram message.
 
 ### How notifications work
 
 1. Dagu checks for new run events every **10 seconds** and remembers what it has already delivered, so restarts do not resend old notifications or drop pending ones.
 2. On first startup, existing chats only receive future events.
-3. For each destination, it batches pending DAG-run notifications. Urgent single-run batches try to generate the message with the agent; all other batches use deterministic formatting. Batch delivery uses a **30-second** flush timeout.
+3. For each destination, it batches pending DAG-run notifications. Urgent single-run batches try to generate the message with the agent; all other delivered batches use deterministic formatting. Successful completions are acknowledged silently so they can replace pending wait alerts without posting a digest. Batch delivery uses a **30-second** flush timeout.
 4. The notification message is appended to the chat-scoped session. If the chat does not have an active session yet, Dagu creates an empty session first. Follow-up messages continue in that same chat session.
 5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.
 
@@ -147,7 +147,7 @@ If the agent API is unavailable or times out, the bot sends a plain text fallbac
 Error: <error message if any>
 ```
 
-Where the emoji is: `✅` succeeded/partial, `❌` failed/rejected, `⚠️` aborted, `⏳` waiting.
+The fallback uses status-appropriate text and emoji.
 
 ## Polling Behavior
 

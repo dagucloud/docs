@@ -233,18 +233,18 @@ When event tracking is available (the default in both `server` and `start-all` m
 
 Notifications are sent for these DAG run statuses:
 
-- `succeeded`
 - `failed`
 - `aborted`
-- `partially_succeeded`
 - `rejected`
 - `waiting` (for human approval requests)
+
+Successful and partially successful completions are tracked only to suppress stale pending notifications. They do not post a Slack message.
 
 ### How notifications work
 
 1. Dagu checks for new run events every **10 seconds** and remembers what it has already delivered, so restarts do not resend old notifications or drop pending ones.
 2. On first startup, existing channels only receive future events.
-3. For each destination, it batches pending DAG-run notifications. Urgent single-run batches try to generate the message with the agent; all other batches use deterministic formatting. Batch delivery uses a **30-second** flush timeout.
+3. For each destination, it batches pending DAG-run notifications. Urgent single-run batches try to generate the message with the agent; all other delivered batches use deterministic formatting. Successful completions are acknowledged silently so they can replace pending wait alerts without posting a digest. Batch delivery uses a **30-second** flush timeout.
 4. For direct-message destinations, the notification is appended to the DM-scoped session. For channel destinations, Slack posts a new thread root message and binds that thread to a session so follow-up replies continue there.
 5. Delivered entries are retained for **2 hours** to suppress duplicate event replays, while failed deliveries remain pending and are retried.
 
@@ -257,7 +257,7 @@ If the agent API is unavailable or times out, the bot sends a plain text fallbac
 Error: <error message if any>
 ```
 
-Where the emoji is: `✅` succeeded/partial, `❌` failed/rejected, `⚠️` aborted, `⏳` waiting.
+The fallback uses status-appropriate text and emoji.
 
 ## Message Length
 
