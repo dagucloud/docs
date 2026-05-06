@@ -220,7 +220,14 @@ The `followup` step receives the full session history from `setup`, including th
 - **Multiple dependencies**: Messages are merged in the order listed in `depends`. Example: `depends: [step1, step2]` merges step1's history first, then step2's.
 - **System message deduplication**: Only the **first** system message is kept. Later system messages from dependencies or the step itself are discarded.
 - **Retry-safe history**: Conversation history stays attached to the DAG run, so a retry can continue with the earlier context instead of starting from scratch.
+- **Push-back history**: If approval push-back re-executes a chat step, Dagu restores the step's previous conversation and appends reviewer feedback as the next user message. This also applies when `approval.rewind_to` restarts an upstream chat step that does not declare its own `approval`.
 :::
+
+### Approval Push-back
+
+Chat steps automatically incorporate approval push-back feedback. On re-execution, Dagu keeps the prior conversation, adds the current push-back iteration and feedback inputs, and sends that as the next chat request. You do not need to wire `${FEEDBACK}` into `messages` manually.
+
+The same context is available through `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the individual feedback input environment variables. See [Approval](/writing-workflows/approval#push-back-environment) for details.
 
 ### Local Model (Ollama)
 

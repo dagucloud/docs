@@ -27,6 +27,30 @@ steps:
       bare: true
 ```
 
+## Approval Push-back
+
+Harness steps automatically receive approval push-back context when they are rewound and re-executed. Dagu appends a push-back context block to the prompt with:
+
+- the current push-back iteration
+- reviewer-provided feedback inputs, such as `FEEDBACK`
+- the previous stdout log path, when the step had stdout before reset
+
+Dagu passes the previous stdout as a file path only. It does not inline stdout into the prompt because harness output can be large. The path is also available as `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`; the current iteration is available as `DAG_PUSHBACK_ITERATION`.
+
+```yaml
+steps:
+  - id: implement
+    type: harness
+    command: "Implement the requested change and summarize what changed"
+    with:
+      provider: codex
+    approval:
+      prompt: "Review the implementation"
+      input: [FEEDBACK]
+```
+
+On the first run, `implement` receives only the original prompt. If the reviewer pushes back with `FEEDBACK`, Dagu reruns the harness step and augments the prompt with the feedback, iteration number, and previous stdout log path.
+
 ## Built-in Providers
 
 Built-in providers have fixed prompt placement:

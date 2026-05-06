@@ -5,7 +5,7 @@ Dagu injects a small set of read-only environment variables whenever it runs a w
 ## Availability
 
 - **Step execution** – Every step receives the run-level variables plus a step-specific name and log file paths while it executes.
-- **Push-back re-executions** – Steps re-executed because of approval push-back also receive the `DAG_PUSHBACK` JSON payload, and the provided push-back inputs are injected as individual environment variables.
+- **Push-back re-executions** – Steps re-executed because of approval push-back also receive `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the provided push-back inputs as individual environment variables. If the step had stdout before it was rewound, Dagu also provides `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`.
 - **Lifecycle handlers** – `onInit`, `onExit`, `onSuccess`, `onFailure`, `onAbort`, and `onWait` handlers inherit the same variables. They additionally receive the `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for approval.
 - **Nested contexts** – When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
 
@@ -29,6 +29,8 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>` for `default` DAGs, or `<paths.docs_dir>/<workspace>/<dag name>` when the DAG has one valid `workspace=<name>` label. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/ops/daily-backup` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
+| `DAG_PUSHBACK_ITERATION` | Steps re-executed after approval push-back only | Current push-back iteration as a plain integer string. Not set on the initial execution. | `2` |
+| `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` | Rewound steps that had stdout before reset | Absolute path to the previous stdout log for the current step. Dagu passes the path instead of inlining stdout because logs can be large. | `/var/log/dagu/report/draft.stdout.log` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
 | `WEBHOOK_HEADERS` | Webhook-triggered runs only | JSON object containing the allow-listed request headers configured by `webhook.forward_headers`. Header names are lowercase and values are arrays of strings. | `{"x-github-event":["push"]}` |
 
@@ -188,6 +190,8 @@ steps:
 - It is not set on the first execution before any push-back happens.
 - It is available to every step that was reset and later re-executed within the rewound scope.
 - Dagu also injects the provided push-back keys as individual environment variables on those steps.
+- `DAG_PUSHBACK_ITERATION` provides the same iteration count as a plain value for scripts that do not need the full JSON payload.
+- `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` points to the current step's previous stdout log when one exists. Dagu never inlines the previous stdout content into this variable.
 
 Example payload:
 
@@ -229,6 +233,7 @@ Notes:
 - `history` is ordered oldest to newest.
 - If the current step declares `approval.input`, the `inputs` object is filtered to that allowlist for that step.
 - If the current step does not declare `approval.input`, all provided push-back keys are exposed on that step.
+- For `agent`, `chat`, and `harness` steps, Dagu also passes this context to the executor so the step can incorporate reviewer feedback without wiring these variables into the DAG manually.
 
 For approval semantics and examples, see [Approval](/writing-workflows/approval).
 

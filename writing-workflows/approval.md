@@ -148,8 +148,14 @@ Every step re-executed because of push-back receives:
 
 - Each provided push-back input as an environment variable, such as `FEEDBACK` or `SINCE`
 - `DAG_PUSHBACK`, a JSON payload describing the latest push-back and the full history
+- `DAG_PUSHBACK_ITERATION`, the current push-back count as a plain integer string
+- `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`, when the current step had a stdout log before it was reset
 
 If the current step declares `approval.input`, only those declared keys are exposed on that step. Steps without an input allowlist receive all provided push-back keys.
+
+For `type: agent`, `type: chat`, and `type: harness`, Dagu also passes the push-back context directly to the executor. This means reviewer feedback is incorporated without adding DAG glue code that references `${FEEDBACK}` manually. If `approval.rewind_to` restarts an upstream AI step, that rewound AI step receives the context even if it does not declare its own `approval`.
+
+Harness steps receive the previous stdout as a log file path only. Dagu does not inline the previous stdout content into the prompt or environment because harness output can be large.
 
 `DAG_PUSHBACK` looks like this:
 
@@ -220,7 +226,7 @@ First run: `SINCE` and `GROUPING` are unset, so the script defaults to `7d` and 
 
 ### Example: Iterating on LLM Output
 
-Use `claude -p` in a command step to generate content, then push back with feedback to regenerate:
+Use `type: chat`, `type: agent`, or `type: harness` when you want Dagu to pass approval feedback to the AI step automatically. For shell commands that call an LLM CLI directly, wire the feedback environment variables into the command yourself:
 
 ```yaml
 steps:

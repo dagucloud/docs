@@ -244,6 +244,14 @@ The agent runs as a single-shot loop. It processes the user messages, calls tool
 - The agent finishes processing with no more tool calls (normal completion)
 - `max_iterations` is reached (the loop is cancelled)
 
+### Approval Push-back
+
+When an agent step is re-executed because of approval push-back, Dagu restores the step's previous conversation and appends reviewer feedback from the push-back inputs. You do not need to add `${FEEDBACK}` or `DAG_PUSHBACK` references to the step messages manually.
+
+If an approval step uses `approval.rewind_to` to restart an upstream agent step, that upstream step receives the push-back context even if it does not declare its own `approval`.
+
+The same context is also exposed through the standard push-back environment variables, including `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and any reviewer-provided input keys. See [Approval](/writing-workflows/approval#push-back-environment) for the full reference.
+
 ### Stderr Logging
 
 All agent activity is logged to stderr with `[agent]` prefix. This keeps stdout clean for output capture.
