@@ -320,6 +320,7 @@ Available metrics include:
 
 - **System Metrics**: Build info, uptime, scheduler status
 - **Execution Metrics**: Running DAGs, queued runs, execution totals by status
+- **Worker Metrics**: Registered workers, worker health, poller capacity, running tasks
 - **Performance Metrics**: Success rates, queue lengths
 
 ## Error Handling

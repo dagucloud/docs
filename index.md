@@ -266,7 +266,7 @@ API keys can be created with independent role assignments. Audit logging tracks 
 
 ### Prometheus Metrics
 
-Dagu exposes Prometheus-compatible metrics at the `/metrics` endpoint:
+Dagu exposes Prometheus-compatible metrics at the `/api/v1/metrics` endpoint:
 
 | Metric | Description |
 |--------|-------------|
@@ -275,7 +275,10 @@ Dagu exposes Prometheus-compatible metrics at the `/metrics` endpoint:
 | `dagu_dag_run_duration_seconds` | Histogram of run durations |
 | `dagu_dag_runs_currently_running` | Active DAG runs |
 | `dagu_dag_runs_queued_total` | Queued runs |
-| `dagu_queue_wait_time` | Queue wait time histogram |
+| `dagu_queue_wait_seconds` | Queue wait time histogram |
+| `dagu_workers_registered` | Registered distributed workers |
+| `dagu_worker_pollers` | Worker poller capacity by state |
+| `dagu_worker_running_tasks` | Running tasks per worker |
 | `dagu_uptime_seconds` | Server uptime |
 
 ### OpenTelemetry

@@ -212,6 +212,14 @@ Metrics available at `/api/v1/metrics`:
 - `dagu_dag_runs_queued_total` - Queued DAGs
 - `dagu_dag_runs_total` - DAG runs by status (24h)
 
+**Workers:**
+- `dagu_workers_registered` - Registered distributed workers
+- `dagu_worker_heartbeat_timestamp_seconds` - Last worker heartbeat timestamp
+- `dagu_worker_health_status` - Worker health by heartbeat freshness
+- `dagu_worker_pollers` - Worker poller capacity by state
+- `dagu_worker_running_tasks` - Running tasks per worker
+- `dagu_worker_oldest_running_task_age_seconds` - Oldest running task age per worker
+
 **Standard:**
 - Go runtime metrics
 - Process metrics

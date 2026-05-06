@@ -65,6 +65,27 @@ These metrics provide granular visibility into individual DAG performance:
 | `dagu_dag_run_duration_seconds` | Histogram | `dag` | Duration of completed DAG runs |
 | `dagu_queue_wait_seconds` | Histogram | `dag` | Time spent waiting in queue |
 
+### Worker Metrics
+
+These metrics expose distributed worker presence, capacity, and running task state. They are emitted from worker heartbeat records, so they are available from the server metrics endpoint when distributed worker heartbeats are configured.
+
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `dagu_workers_registered` | Gauge | - | Number of workers registered via heartbeat |
+| `dagu_worker_heartbeat_timestamp_seconds` | Gauge | `worker_id`, worker labels | Unix timestamp of the worker's last heartbeat |
+| `dagu_worker_health_status` | Gauge | `worker_id`, `status`, worker labels | Worker health as a one-hot gauge |
+| `dagu_worker_pollers` | Gauge | `worker_id`, `state`, worker labels | Poller capacity by state |
+| `dagu_worker_running_tasks` | Gauge | `worker_id`, worker labels | Number of tasks currently running on the worker |
+| `dagu_worker_oldest_running_task_age_seconds` | Gauge | `worker_id`, worker labels | Age of the oldest task currently running on the worker |
+
+**Worker health status values:** `healthy`, `warning`, `unhealthy`
+
+**Poller state values:** `total`, `busy`, `idle`
+
+Worker labels are exported as Prometheus labels on worker metrics. For example, a worker started with `--worker.labels pool=gpu,region=ap-northeast-1` produces labels such as `pool="gpu"` and `region="ap-northeast-1"`.
+
+Worker label keys are normalized to valid Prometheus label names. Characters outside `[a-zA-Z0-9_]` become `_`, keys starting with a digit are prefixed with `worker_label_`, and keys that collide with built-in labels such as `worker_id`, `status`, or `state` are also prefixed with `worker_label_`.
+
 ### Histogram Buckets
 
 **DAG Run Duration (`dagu_dag_run_duration_seconds`):**
@@ -210,6 +231,32 @@ dagu_dag_runs_queued_total
 dagu_dag_runs_currently_running
 ```
 
+### Registered Workers
+
+```txt
+dagu_workers_registered
+```
+
+### Worker Heartbeat Age
+
+```txt
+time() - dagu_worker_heartbeat_timestamp_seconds
+```
+
+### Worker Utilization by Pool
+
+```txt
+sum by (pool) (dagu_worker_pollers{state="busy"}) /
+sum by (pool) (dagu_worker_pollers{state="total"}) * 100
+```
+
+### Queued Runs With No Idle Worker Capacity
+
+```txt
+dagu_dag_runs_queued_total > 0
+and sum(dagu_worker_pollers{state="idle"}) == 0
+```
+
 ### Slowest DAGs (P95 Duration)
 
 ```txt
@@ -326,6 +373,19 @@ groups:
           severity: critical
         annotations:
           summary: "Dagu scheduler is not running"
+```
+
+### Worker Heartbeat Stale
+
+```yaml
+      - alert: DaguWorkerHeartbeatStale
+        expr: time() - dagu_worker_heartbeat_timestamp_seconds > 30
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Dagu worker heartbeat is stale"
+          description: "Worker {{ $labels.worker_id }} has not sent a fresh heartbeat"
 ```
 
 ### Cache Size Growing
