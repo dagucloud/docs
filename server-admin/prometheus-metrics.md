@@ -72,19 +72,18 @@ These metrics expose distributed worker presence, capacity, and running task sta
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
 | `dagu_workers_registered` | Gauge | - | Number of workers registered via heartbeat |
-| `dagu_worker_heartbeat_timestamp_seconds` | Gauge | `worker_id`, worker labels | Unix timestamp of the worker's last heartbeat |
-| `dagu_worker_health_status` | Gauge | `worker_id`, `status`, worker labels | Worker health as a one-hot gauge |
-| `dagu_worker_pollers` | Gauge | `worker_id`, `state`, worker labels | Poller capacity by state |
-| `dagu_worker_running_tasks` | Gauge | `worker_id`, worker labels | Number of tasks currently running on the worker |
-| `dagu_worker_oldest_running_task_age_seconds` | Gauge | `worker_id`, worker labels | Age of the oldest task currently running on the worker |
+| `dagu_worker_info` | Gauge | `worker_id`, `label_name`, `label_value` | Worker heartbeat labels as key/value metadata |
+| `dagu_worker_heartbeat_timestamp_seconds` | Gauge | `worker_id` | Unix timestamp of the worker's last heartbeat |
+| `dagu_worker_health_status` | Gauge | `worker_id`, `status` | Worker health as a one-hot gauge |
+| `dagu_worker_pollers` | Gauge | `worker_id`, `state` | Poller capacity by state |
+| `dagu_worker_running_tasks` | Gauge | `worker_id` | Number of tasks currently running on the worker |
+| `dagu_worker_oldest_running_task_age_seconds` | Gauge | `worker_id` | Age of the oldest task currently running on the worker |
 
 **Worker health status values:** `healthy`, `warning`, `unhealthy`
 
 **Poller state values:** `total`, `busy`, `idle`
 
-Worker labels are exported as Prometheus labels on worker metrics. For example, a worker started with `--worker.labels pool=gpu,region=ap-northeast-1` produces labels such as `pool="gpu"` and `region="ap-northeast-1"`.
-
-Worker label keys are normalized to valid Prometheus label names. Characters outside `[a-zA-Z0-9_]` become `_`, keys starting with a digit are prefixed with `worker_label_`, and keys that collide with built-in labels such as `worker_id`, `status`, or `state` are also prefixed with `worker_label_`.
+Worker labels are exported without an allow list through `dagu_worker_info`. For example, a worker started with `--worker.labels pool=gpu,region=ap-northeast-1` emits `dagu_worker_info{worker_id="...",label_name="pool",label_value="gpu"} 1` and `dagu_worker_info{worker_id="...",label_name="region",label_value="ap-northeast-1"} 1`.
 
 ### Histogram Buckets
 
@@ -246,8 +245,17 @@ time() - dagu_worker_heartbeat_timestamp_seconds
 ### Worker Utilization by Pool
 
 ```txt
-sum by (pool) (dagu_worker_pollers{state="busy"}) /
-sum by (pool) (dagu_worker_pollers{state="total"}) * 100
+sum by (label_value) (
+  dagu_worker_pollers{state="busy"}
+  * on (worker_id) group_left(label_value)
+    dagu_worker_info{label_name="pool"}
+)
+/
+sum by (label_value) (
+  dagu_worker_pollers{state="total"}
+  * on (worker_id) group_left(label_value)
+    dagu_worker_info{label_name="pool"}
+) * 100
 ```
 
 ### Queued Runs With No Idle Worker Capacity
