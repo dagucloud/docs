@@ -48,9 +48,65 @@ This expands to a builtin `command` step at load time. `with.repeat` defaults to
 - Custom names cannot reuse builtin step type names such as `command`, `http`, `kubernetes`, `s3`, `chat`, or `agent`.
 - `type` is required and must point to a builtin step type or builtin alias. Custom step types cannot target other custom step types.
 - `input_schema` is required. It must be an inline JSON Schema object that resolves to an object schema.
+- `output_schema` is optional. It must be an inline JSON Schema object that resolves to an object schema. When set, the expanded step's stdout must be valid JSON and match this schema when the step completes.
 - `template` is required. It must be a step fragment object.
 - `template.type` is rejected. The expanded builtin type always comes from `step_types.<name>.type`.
 - `description` is optional. It is applied only when the expanded step does not set its own description.
+
+## Output Contracts
+
+Use `output_schema` when a custom step type should behave like a typed workflow component: `input_schema` validates what the caller passes in, and `output_schema` validates what the step promises to emit.
+
+```yaml
+step_types:
+  classify_ticket:
+    type: command
+    input_schema:
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties:
+        text:
+          type: string
+    output_schema:
+      type: object
+      additionalProperties: false
+      required: [category, priority, confidence]
+      properties:
+        category:
+          type: string
+          enum: [bug, feature, question]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+    template:
+      script: |
+        #!/usr/bin/env python3
+        import json
+        print(json.dumps({"category": "bug", "priority": "high", "confidence": 0.91}))
+
+steps:
+  - id: classify
+    type: classify_ticket
+    with:
+      text: "App crashes on startup"
+
+  - id: route
+    depends: [classify]
+    command: echo "${classify.output.category}:${classify.output.priority}"
+```
+
+Rules:
+
+- `stdout` must contain machine-readable JSON. Write human-readable logs to `stderr`.
+- The decoded stdout JSON is validated against `output_schema`. Invalid JSON or a schema mismatch fails the step, so normal `retry_policy`, `continue_on`, and handlers apply.
+- If the step does not set `output:`, the validated decoded object is published as the step output and can be referenced with `${step_id.output.*}`.
+- If the step also sets object-form `output:`, Dagu validates stdout first, then applies the explicit output mapping.
+- String-form `output: NAME` still captures stdout into a flat variable after validation.
 
 ## Template Rendering
 

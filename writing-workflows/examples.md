@@ -1323,6 +1323,8 @@ steps:
 
 `with` is validated by `input_schema`; the rendered template runs as a builtin `command` step.
 
+Add `output_schema` when stdout should be a typed JSON contract. Invalid JSON or schema mismatches fail the step; without an explicit `output:` mapping, the validated object is available as `${step_id.output.*}`.
+
 <a href="/writing-workflows/custom-step-types" class="learn-more">Learn more →</a>
 
 </div>

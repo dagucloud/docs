@@ -272,6 +272,7 @@ Each definition accepts:
 
 - `type`: required builtin step type or builtin alias
 - `input_schema`: required inline JSON Schema object, which must resolve to an object schema
+- `output_schema`: optional inline JSON Schema object, which must resolve to an object schema and validates stdout JSON after execution
 - `template`: required step fragment expanded at build time
 - `description`: optional fallback description for the expanded step
 
@@ -972,6 +973,8 @@ steps:
 `shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
 Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Only string-form `output: NAME` is collected into the run's `outputs.json`.
+
+`output_schema:` is an inline JSON Schema object for stdout JSON contracts. When present, Dagu captures stdout, decodes it as JSON, and validates it before publishing output. Invalid JSON or a schema mismatch fails the step. If no `output:` mapping is set, the validated decoded object becomes `${step_id.output}` and can be accessed with `${step_id.output.field}`.
 
 ### Parallel Execution
 
