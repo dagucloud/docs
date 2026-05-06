@@ -44,9 +44,9 @@ dagu context use staging
 dagu --context staging status nightly-backup
 ```
 
-Only these commands are context-aware: `start`, `enqueue`, `status`, `history`, `stop`, `retry`, `restart`, and `dequeue`.
+Only these commands are context-aware: `agent`, `start`, `enqueue`, `status`, `history`, `stop`, `retry`, `restart`, and `dequeue`.
 
-Remote contexts only work with DAGs that already exist on the remote server. Local YAML paths are rejected.
+For DAG-oriented commands, remote contexts only work with DAGs that already exist on the remote server. Local YAML paths are rejected. `agent` targets the selected server's agent sessions directly.
 
 ## Essential Commands
 
@@ -251,6 +251,16 @@ Workers automatically register in the service registry system and poll the coord
 
 ### AI Coding Tool Integration
 
+#### Chat With The Dagu Agent
+
+```bash
+dagu agent -p "create a DAG that backs up /var/log every night"
+dagu agent history
+dagu agent resume <session-id>
+```
+
+`dagu agent` uses the active CLI context. Use `dagu context` to select a remote Dagu server.
+
 #### Install Dagu Skill
 Use GitHub CLI's skill installer:
 
@@ -258,7 +268,7 @@ Use GitHub CLI's skill installer:
 gh skill install dagucloud/dagu dagu
 ```
 
-See [CLI Commands](/getting-started/cli#ai) for more details.
+See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
 
 ## Advanced Usage
 

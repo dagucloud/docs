@@ -18,6 +18,20 @@ If you are using Ollama or another local model server, read [Local AI](/features
 
 For the full built-in steward configuration surface, start with [Steward Settings](/features/agent/settings/). The settings docs are split into focused pages for models, tool policy, personality, and web search.
 
+## CLI Agent
+
+Use `dagu agent` to chat with the same agent from a terminal.
+
+```bash
+dagu agent -p "create a DAG that backs up /var/log every night"
+dagu agent --model gpt-4.1 -p "review this workflow"
+dagu agent history
+dagu agent resume <session-id>
+dagu agent resume <session-id> -p "continue from here"
+```
+
+`dagu agent` uses the active CLI context. To connect to a remote Dagu server, configure it with `dagu context add` and then use `dagu context use <name>` or `dagu --context <name> agent ...`.
+
 ## Available Tools
 
 Steward can use these built-in tools. Some are only available when the corresponding feature is configured:
@@ -84,7 +98,7 @@ Use GitHub CLI's skill installer:
 gh skill install dagucloud/dagu dagu
 ```
 
-See [`ai` in CLI Commands](/getting-started/cli#ai) for more details.
+See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
 
 ## See Also
 

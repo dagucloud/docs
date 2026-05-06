@@ -26,6 +26,7 @@ CLI contexts let context-aware commands target a remote Dagu server instead of t
 
 Context-aware commands are:
 
+- `agent`
 - `start`
 - `enqueue`
 - `status`
@@ -53,7 +54,8 @@ dagu --context staging status nightly-backup
 
 Remote command rules:
 
-- Remote contexts only operate on DAGs that already exist on the remote server.
+- `agent` operates on the agent sessions of the selected server and does not take a DAG path.
+- DAG-oriented remote commands only operate on DAGs that already exist on the remote server.
 - For `start`, `enqueue`, `status`, `stop`, `retry`, and `restart`, pass the remote DAG `fileName` or a unique deployed DAG name. Local YAML paths such as `./job.yaml` are rejected.
 - For `history`, pass a deployed DAG name. Local YAML paths are rejected.
 - Commands that are not context-aware always run against the local instance and reject non-local contexts.
@@ -343,6 +345,20 @@ dagu context use local
 # Test connectivity
 dagu context test prod
 ```
+
+### `agent`
+
+Chat with the Dagu agent from the CLI using the current context.
+
+```bash
+dagu agent -p "create a DAG that backs up /var/log every night"
+dagu agent --model gpt-4.1 -p "review this workflow"
+dagu agent history
+dagu agent resume <session-id>
+dagu agent resume <session-id> -p "continue from here"
+```
+
+`dagu agent` uses the active CLI context, so use `dagu context use <name>` or `dagu --context <name> agent ...` to talk to a remote Dagu server. There is no `--server` flag on `dagu agent`.
 
 ### `server`
 
@@ -694,9 +710,7 @@ dagu sync mv old-dag new-dag --force -m "Move despite conflict"
 dagu sync mv old-dag new-dag --dry-run
 ```
 
-### `ai`
-
-AI coding tool integrations.
+### External AI Coding Tool Integration
 
 Install the Dagu skill for external AI coding tools with GitHub CLI:
 
