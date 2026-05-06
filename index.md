@@ -195,6 +195,7 @@ Common built-in step types include:
 | Step type | Purpose |
 |----------|---------|
 | `command`, `shell` | Local shell commands and scripts |
+| `log` | Write messages to stdout without running a shell command |
 | `docker`, `container` | Run in a Docker container or exec into an existing container |
 | `kubernetes`, `k8s` | Run a step as a Kubernetes workload |
 | `ssh` | Remote command execution |
@@ -457,7 +458,7 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
   </div>
   <div class="step-card">
     <h3><a href="/step-types/shell">Step Types</a></h3>
-    <p>All 18 executor types</p>
+    <p>Built-in executor types</p>
   </div>
   <div class="step-card">
     <h3><a href="/server-admin/distributed/">Distributed Execution</a></h3>

@@ -137,7 +137,7 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 **Supported step types:** shell, command, docker, container, ssh
 
-**Not supported:** jq, http, archive, mail, dag, template, k8s, kubernetes
+**Not supported:** jq, http, archive, mail, dag, template, log, k8s, kubernetes
 
 These step types do not support multi-command arrays. Use `script:` for `template` steps.
 
