@@ -102,8 +102,10 @@ Run options apply to a single `RunFile` or `RunYAML` call.
 | `WithDefaultWorkingDir(dir)` | Sets the default working directory while loading the DAG. |
 | `WithMode(mode)` | Overrides the engine default execution mode. |
 | `WithWorkerSelector(map[string]string)` | Sets the distributed worker selector for one run. |
-| `WithTags(tags...)` | Adds tags to one run. |
+| `WithLabels(labels...)` | Adds labels to one run. |
 | `WithDryRun(enabled)` | Enables or disables dry-run mode. |
+
+`WithTags(tags...)` remains available as a deprecated alias for `WithLabels`.
 
 ## Run Status And Cancellation
 
@@ -177,7 +179,7 @@ A custom executor is registered only in the current Go process. In distributed m
 
 ## Distributed Execution
 
-Embedded distributed execution dispatches a loaded DAG to an existing Dagu coordinator. The public embedded API does not start a coordinator; start one with Dagu server commands such as `dagu coord` or `dagu start-all` with coordinator settings.
+Embedded distributed execution dispatches a loaded DAG to an existing Dagu coordinator. The public embedded API does not start a coordinator; start one with Dagu server commands such as `dagu coordinator` or `dagu start-all` with coordinator settings.
 
 The embedded coordinator client requires TLS configuration unless plaintext is explicitly enabled. For a local plaintext coordinator:
 
