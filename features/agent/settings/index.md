@@ -8,8 +8,8 @@ It controls:
 
 - The Web UI assistant
 - The model registry used by the built-in steward
-- Tool permissions and bash command policy
-- Provider-native web search for agent sessions
+- Tool permissions and bash command policy from `/agent-tools`
+- Model-native web search and provider-backed web tools from `/agent-tools`
 - The default profile/personality
 - Prerequisites for Workflow Operator on Slack and Telegram
 
@@ -22,7 +22,8 @@ The settings surface is split into smaller pages:
 - [Models & Providers](/features/agent/settings/models) for enabling Steward, adding models, choosing a default model, and understanding model fields
 - [OpenAI Subscription](/features/agent/settings/openai-subscription) for connecting a ChatGPT subscription and using the `openai-codex` provider
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls) for deciding which tools Steward may use and how bash commands are filtered
-- [Personality & Web Search](/features/agent/settings/behavior) for selecting a default profile and enabling provider-native web search
+- [Web Search](/features/agent/web-search) for selecting model-native search, Tavily, or Firecrawl
+- [Personality](/features/agent/settings/behavior) for selecting a default profile
 
 ## What This Page Does Not Replace
 
@@ -39,7 +40,7 @@ Those are separate features with their own documentation.
 3. Set the default model
 4. Review tool permissions and bash command policy
 5. Optionally select a default profile
-6. Optionally enable provider-native web search
+6. Optionally enable web search
 7. Only then configure [Workflow Operator (Chat Bot)](/features/bots/)
 
 ## Relationship to Workflow Features
@@ -68,5 +69,6 @@ See:
 - [Models & Providers](/features/agent/settings/models)
 - [OpenAI Subscription](/features/agent/settings/openai-subscription)
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls)
-- [Personality & Web Search](/features/agent/settings/behavior)
+- [Web Search](/features/agent/web-search)
+- [Personality](/features/agent/settings/behavior)
 - [Local AI](/features/chat/local-ai)

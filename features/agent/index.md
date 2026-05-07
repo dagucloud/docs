@@ -61,7 +61,8 @@ Use these pages for detailed setup:
 - [Settings Overview](/features/agent/settings/)
 - [Models & Providers](/features/agent/settings/models)
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls)
-- [Personality & Web Search](/features/agent/settings/behavior)
+- [Web Search](/features/agent/web-search)
+- [Personality](/features/agent/settings/behavior)
 
 ## Tool Access
 
@@ -69,6 +70,7 @@ Depending on your settings, Steward can work with tools such as:
 
 - file read and edit tools
 - bash command execution
+- web search and page extraction
 - page navigation
 - user prompts
 - delegation to other agents or remote nodes
@@ -89,6 +91,7 @@ Typical examples:
 ## Related Pages
 
 - [Agent Step](/features/agent/step)
+- [Web Search](/features/agent/web-search)
 - [Memory](/features/agent/memory)
 - [Profiles](/features/agent/souls)
 - [Steward Tools Reference](/features/agent/tools)

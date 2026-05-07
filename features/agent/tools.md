@@ -2,7 +2,7 @@
 
 Reference for tools available to the interactive Dagu steward in the Web UI.
 
-Provider-native web search is configured in [Personality & Web Search](/features/agent/settings/behavior) and model requests; it is not exposed as a separate callable tool. Workflow agent steps also add a step-only `output` tool and omit `navigate`, `ask_user`, and `delegate`.
+Model-native web search is configured in [Web Search](/features/agent/web-search) and model requests; it is not exposed as a separate callable tool. Tavily and Firecrawl backends expose `web_search` and `web_extract` tools when configured. Workflow agent steps also add a step-only `output` tool and omit `navigate`, `ask_user`, and `delegate`.
 
 ## bash
 
@@ -86,6 +86,51 @@ Record reasoning without executing actions.
 
 ---
 
+## web_search
+
+Search the public web with the configured Tavily or Firecrawl backend.
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `query` | string | Yes | | Search query |
+| `limit` | integer | No | 5 | Maximum number of results to return |
+
+**Limits**:
+- Tavily: `limit` is capped by backend settings, up to `20`
+- Firecrawl: `limit` is capped by backend settings, up to `100`
+
+**Availability**:
+- Requires **Web Search Backend** enabled at `/agent-tools`
+- Requires backend `Tavily` or `Firecrawl`
+- Requires the selected backend to have an API key configured
+- Subject to the global tool policy
+
+See [Web Search](/features/agent/web-search) for backend setup.
+
+---
+
+## web_extract
+
+Extract readable text content from public web page URLs with the configured Tavily or Firecrawl backend.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `urls` | string[] | Yes | HTTP or HTTPS URLs to extract |
+
+**Limits**:
+- At least 1 URL
+- At most 10 URLs
+
+**Availability**:
+- Requires **Web Search Backend** enabled at `/agent-tools`
+- Requires backend `Tavily` or `Firecrawl`
+- Requires the selected backend to have an API key configured
+- Subject to the global tool policy
+
+See [Web Search](/features/agent/web-search) for backend setup.
+
+---
+
 ## navigate
 
 Navigate the user to a UI page.
@@ -111,6 +156,7 @@ Navigate the user to a UI page.
 - `/terminal`
 - `/git-sync`
 - `/agent-settings`
+- `/agent-tools`
 
 ---
 

@@ -2,7 +2,7 @@
 
 Profiles are the Web UI name for the built-in steward's default personality. In file paths, API fields, and workflow YAML this concept still uses `soul`.
 
-You can create multiple profiles and switch between them from [Personality & Web Search](/features/agent/settings/behavior).
+You can create multiple profiles and switch between them from [Personality](/features/agent/settings/behavior).
 
 ## Quick Start
 
@@ -89,7 +89,7 @@ When no profile is selected, or the selected profile cannot be found, Steward fa
 
 Open **Steward Settings** (`/agent-settings`) and use the **Default Profile** selector.
 
-The settings behavior is documented on [Personality & Web Search](/features/agent/settings/behavior).
+The settings behavior is documented on [Personality](/features/agent/settings/behavior).
 
 ### Via API
 
@@ -160,11 +160,11 @@ You focus on infrastructure, monitoring, and deployment workflows.
 - Include command examples when relevant.
 ```
 
-Then select it from [Personality & Web Search](/features/agent/settings/behavior) or via the API.
+Then select it from [Personality](/features/agent/settings/behavior) or via the API.
 
 ## See Also
 
 - [Steward Overview](/features/agent/) — Chat interface and configuration
-- [Personality & Web Search](/features/agent/settings/behavior) — Choose the default profile in the Web UI
+- [Personality](/features/agent/settings/behavior) — Choose the default profile in the Web UI
 - [Agent Step](/features/agent/step) — Using profiles (`soul`) in DAG agent steps
 - [Git Sync](/server-admin/git-sync) — Synchronizing profile files with Git
