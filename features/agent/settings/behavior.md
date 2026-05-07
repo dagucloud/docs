@@ -1,4 +1,4 @@
-# Personality & Web Search
+# Personality
 
 This page covers the parts of `/agent-settings` that shape how the built-in steward behaves by default.
 
@@ -21,41 +21,21 @@ See [Profiles](/features/agent/souls) for how to create and manage personalities
 
 The selected profile becomes the default for the built-in steward. Users can still override the profile in the chat UI for a message or session when that UI control is available.
 
-## Web Search
+## Web Search Moved To Agent Tools
 
-The settings page includes a **Web Search** toggle.
+Web access is configured from **Agent Tools** at `/agent-tools`.
 
-This enables provider-native web search for agent sessions. It does not appear as a separate tool button in the built-in tool list.
+Use [Web Search](/features/agent/web-search) for:
 
-Whether it actually works depends on the selected provider and model.
-
-## Max Uses per Request
-
-When web search is enabled, the current UI also shows **Max Uses per Request**.
-
-Behavior:
-
-- Empty means no UI-level limit is saved here
-- Values below `1` are not kept by the UI
-
-## Scope of This Setting
-
-This setting controls the built-in steward configuration.
-
-Workflow `type: agent` steps can also define their own `agent.web_search` settings in DAG YAML. Those are documented separately in [Agent Step](/features/agent/step).
-
-## Important Distinction
-
-Provider-native web search is different from exposing a generic "search the web" tool.
-
-In Dagu's built-in steward:
-
-- Web search runs through the selected model/provider
-- Tool permissions do not show it as a standalone tool
+- `Model Web Search`
+- Tavily-backed `web_search` and `web_extract`
+- Firecrawl-backed `web_search` and `web_extract`
+- workflow `type: agent` behavior
 
 ## See Also
 
 - [Steward Settings](/features/agent/settings/)
 - [Profiles](/features/agent/souls)
 - [Agent Step](/features/agent/step)
+- [Web Search](/features/agent/web-search)
 - [Models & Providers](/features/agent/settings/models)

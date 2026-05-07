@@ -1,6 +1,6 @@
 # Agent Step
 
-Run the AI agent as a workflow step. The agent executes a multi-turn tool-calling loop to accomplish the task described in `messages`. It can read files, run commands, edit code, and use provider-native web search when enabled.
+Run the AI agent as a workflow step. The agent executes a multi-turn tool-calling loop to accomplish the task described in `messages`. It can read files, run commands, edit code, and use web search when enabled.
 
 ## Basic Usage
 
@@ -50,7 +50,7 @@ steps:
 | `memory` | object | `{ enabled: false }` | When `enabled: true`, loads global and per-DAG memory into the agent context. See [Memory](/features/agent/memory). |
 | `prompt` | string | — | Additional instructions appended to the built-in system prompt. |
 | `max_iterations` | int | `50` | Maximum tool-call rounds before the agent stops. |
-| `web_search` | object | — | Provider-native web search configuration. Overrides the global agent web search setting. See [Web Search](#web-search). |
+| `web_search` | object | — | Provider-native model web search configuration. Overrides the global model web search setting. See [Model Web Search](#model-web-search). |
 | `safe_mode` | bool | `true` | Passed through to the agent loop for compatibility with interactive sessions. Agent steps do not show approval prompts; bash commands denied by policy are blocked. |
 
 ## Model Resolution
@@ -116,6 +116,8 @@ The agent step has access to these tools:
 | `read` | Read file contents with line numbers (max 1MB, 2000 lines default) |
 | `patch` | Create, edit, or delete files |
 | `think` | Record reasoning without executing actions |
+| `web_search` | Search the public web through Tavily or Firecrawl when a hosted web backend is configured |
+| `web_extract` | Extract readable content from web page URLs through Tavily or Firecrawl when a hosted web backend is configured |
 | `remote_agent` | Delegate tasks to agents through remote CLI contexts (available when contexts are configured) |
 | `list_contexts` | List available remote CLI contexts for `remote_agent` (available when contexts are configured) |
 | `output` | Write the final result to stdout (step-only, see [Output Capture](#output-capture)) |
@@ -189,7 +191,7 @@ agent:
 
 When a bash command is denied, the agent receives: `"Blocked by policy: bash command denied by policy: {reason}"`.
 
-## Web Search
+## Model Web Search
 
 Provider-native web search is configured via the `agent.web_search` field. This uses the LLM provider's built-in web search capability (e.g., Anthropic's web search) rather than a separate tool. When omitted, the step falls back to the global agent web search setting.
 
@@ -217,6 +219,24 @@ agent:
 | `allowed_domains` | string[] | Restricts results to these domains (Anthropic only). |
 | `blocked_domains` | string[] | Excludes results from these domains (Anthropic only). |
 | `user_location` | object | Localizes search results. Fields: `city`, `region`, `country`, `timezone` (all string). |
+
+## Provider-Backed Web Tools
+
+Tavily and Firecrawl web tools are configured globally from **Agent Tools** at `/agent-tools`. They are not configured in DAG YAML because the API keys live in the agent config store.
+
+When enabled, they add callable `web_search` and `web_extract` tools to agent steps. If the step sets `agent.tools.enabled`, list the web tools explicitly:
+
+```yaml
+agent:
+  tools:
+    enabled:
+      - web_search
+      - web_extract
+```
+
+The tools are still filtered by the global tool policy. If `web_search` or `web_extract` is disabled globally, a step cannot re-enable it.
+
+See [Web Search](/features/agent/web-search) for backend setup and provider limits.
 
 ## Messages
 

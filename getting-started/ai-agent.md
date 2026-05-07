@@ -45,10 +45,12 @@ Steward can use these built-in tools. Some are only available when the correspon
 | `navigate` | Open pages in the Dagu UI |
 | `ask_user` | Prompt the user with options or free-text input |
 | `delegate` | Spawn sub-agents for parallel tasks |
+| `web_search` | Search the web through Tavily or Firecrawl when a hosted web backend is configured |
+| `web_extract` | Extract readable content from web pages through Tavily or Firecrawl when a hosted web backend is configured |
 | `remote_agent` | Delegate tasks to agents on remote nodes (when remote nodes are configured) |
 | `list_contexts` | List available remote nodes for `remote_agent` (when remote nodes are configured) |
 
-Provider-native web search is configured in model and steward settings rather than exposed as a separate callable tool.
+Model-native web search is configured from [Web Search](/features/agent/web-search) and is not exposed as a separate callable tool.
 
 Tools can be individually enabled or disabled in [Tool Permissions & Bash Policy](/features/agent/settings/controls).
 
@@ -106,7 +108,8 @@ See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for
 - [Steward Settings](/features/agent/settings/) — Start here for the built-in Web UI steward settings
 - [Models & Providers](/features/agent/settings/models) — Add models and set the default model
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls) — Control tools and bash rules
-- [Personality & Web Search](/features/agent/settings/behavior) — Configure profiles and provider-native search
+- [Web Search](/features/agent/web-search) — Configure model-native search, Tavily, or Firecrawl
+- [Personality](/features/agent/settings/behavior) — Configure profiles
 - [Agent Step](/features/agent/step) — Using the agent as a workflow step
 - [Steward Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
 - [Workflow Operator](/features/bots/) — Use the built-in steward from Slack or Telegram
