@@ -2,10 +2,10 @@
 
 Run a workflow step as a Kubernetes Job.
 
-The Kubernetes executor has two equivalent type aliases:
+The Kubernetes executor has two equivalent action names:
 
-- `type: k8s`
-- `type: kubernetes`
+- `action: k8s.run`
+- `action: kubernetes.run`
 
 Dagu creates a single-container Kubernetes Job for the step, waits for the Job to finish, streams the Pod logs, and uses the terminated container exit code when available.
 
@@ -14,10 +14,10 @@ Dagu creates a single-container Kubernetes Job for the step, waits for the Job t
 ```yaml
 steps:
   - id: hello
-    type: k8s
+    action: k8s.run
     with:
       image: alpine:3.20
-    command: echo "hello from kubernetes"
+      command: echo "hello from kubernetes"
 ```
 
 If you omit `command`, Dagu leaves the container command unset, so the image default command/entrypoint runs instead:
@@ -25,7 +25,7 @@ If you omit `command`, Dagu leaves the container command unset, so the image def
 ```yaml
 steps:
   - id: run_image_default
-    type: kubernetes
+    action: kubernetes.run
     with:
       image: ghcr.io/example/app:latest
 ```
@@ -47,13 +47,13 @@ kubernetes:
 
 steps:
   - id: report
-    type: k8s
+    action: k8s.run
     with:
       image: alpine:3.20
-    command: echo "generate report"
 
+      command: echo "generate report"
   - id: worker
-    type: kubernetes
+    action: kubernetes.run
     with:
       image: ghcr.io/example/worker:1.2.3
       namespace: jobs
@@ -61,7 +61,7 @@ steps:
 
 Important behavior:
 
-- The root `kubernetes:` block applies only to steps with `type: k8s` or `type: kubernetes`.
+- The root `kubernetes:` block applies only to steps with `action: k8s.run` or `action: kubernetes.run`.
 - It does not change plain command steps into Kubernetes steps.
 - Step `with` overrides DAG-level `kubernetes`.
 - `image` is optional in DAG-level or `base.yaml` defaults, but it must be present in the effective step configuration after inheritance.
@@ -96,7 +96,7 @@ If you set `kubeconfig` or `context` explicitly and they are invalid, Dagu fails
 The Kubernetes executor is intentionally narrow:
 
 - Supports a single command only
-- Does not support `script:`
+- Does not support combining `action: k8s.run` with `run:`
 - Does not support step-level `shell:`
 - Does not support multi-command `command: [...]` lists where each item is a separate command
 
@@ -105,36 +105,29 @@ These are valid:
 ```yaml
 steps:
   - id: string_command
-    type: k8s
+    action: k8s.run
     with:
       image: alpine:3.20
-    command: echo "hello"
 
+      command: echo "hello"
   - id: argv_command
-    type: k8s
+    action: k8s.run
     with:
       image: python:3.12-alpine
-    command: [python3, -c, 'print("hello")']
+      command: [python3, -c, 'print("hello")']
 ```
 
 These are not supported:
 
 ```yaml
 steps:
-  - id: bad_script
-    type: k8s
-    with:
-      image: alpine:3.20
-    script: |
-      echo hello
-
   - id: bad_multi_command
-    type: k8s
+    action: k8s.run
     with:
       image: alpine:3.20
-    command:
-      - echo one
-      - echo two
+      command:
+        - echo one
+        - echo two
 ```
 
 ## Logging and Cleanup
@@ -506,7 +499,7 @@ kubernetes:
 
 steps:
   - id: migrate
-    type: k8s
+    action: k8s.run
     with:
       image: ghcr.io/example/migrator:2026-03-31
       cleanup_policy: keep
@@ -526,10 +519,10 @@ steps:
             secret_key_ref:
               name: app-secrets
               key: database_url
-    command: [app, migrate]
 
+      command: [app, migrate]
   - id: report
-    type: kubernetes
+    action: kubernetes.run
     depends: [migrate]
     with:
       image: ghcr.io/example/report:2026-03-31
@@ -542,7 +535,7 @@ steps:
             on_exit_codes:
               operator: In
               values: [42]
-    command: [app, report, --date, "${DATE}"]
+      command: [app, report, --date, "${DATE}"]
 ```
 
 ## Unsupported Fields

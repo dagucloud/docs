@@ -58,12 +58,12 @@ When `working_dir` **is** explicitly set (in the DAG YAML, base config, or via `
 # No working_dir set — steps run in DAG_RUN_WORK_DIR by default
 steps:
   - id: write_scratch_file
-    command: |
+    run: |
       # PWD is DAG_RUN_WORK_DIR (e.g., /data/dagu/dag-runs/my-dag/dag-run_.../work)
       echo "intermediate data" > scratch.txt
 
   - id: read_scratch_file
-    command: cat scratch.txt   # finds the file — same PWD
+    run: cat scratch.txt   # finds the file — same PWD
     depends:
       - write_scratch_file
 ```
@@ -74,10 +74,10 @@ working_dir: /app/project
 
 steps:
   - id: build
-    command: make build   # PWD is /app/project
+    run: make build   # PWD is /app/project
 
   - id: save_artifact
-    command: cp build/output.tar.gz "${DAG_RUN_WORK_DIR}/output.tar.gz"
+    run: cp build/output.tar.gz "${DAG_RUN_WORK_DIR}/output.tar.gz"
     depends:
       - build
 ```
@@ -116,7 +116,7 @@ artifacts:
 
 steps:
   - id: write-report
-    command: |
+    run: |
       mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/reports"
       printf '# Report\n' > "${DAG_RUN_ARTIFACTS_DIR}/reports/summary.md"
 ```
@@ -157,7 +157,7 @@ labels:
 
 steps:
   - id: generate_report
-    command: |
+    run: |
       mkdir -p "${DAG_DOCS_DIR}"
       python generate_report.py > "${DAG_DOCS_DIR}/report.md"
 ```
@@ -174,13 +174,13 @@ steps:
 ```yaml
 steps:
   - id: inspect_params
-    command: echo "Full payload: ${DAG_PARAMS_JSON}"
+    run: echo "Full payload: ${DAG_PARAMS_JSON}"
   - id: read_environment
-    type: jq
+    action: jq.filter
     with:
       raw: true
-    script: ${DAG_PARAMS_JSON}
-    command: '"Environment: \(.ENVIRONMENT // "dev")"'
+      data: ${DAG_PARAMS_JSON}
+    run: '"Environment: \(.ENVIRONMENT // "dev")"'
 ```
 
 ## Push-back Context (`DAG_PUSHBACK`)
@@ -250,13 +250,13 @@ name: webhook-triggered-dag
 type: graph
 steps:
   - id: deploy
-    command: |
+    run: |
       echo "Deploying branch ${WEBHOOK_PAYLOAD.branch}"
       echo "Commit: ${WEBHOOK_PAYLOAD.commit}"
       ./scripts/deploy.sh
 
   - id: notify
-    command: echo "Deployed by ${WEBHOOK_PAYLOAD.sender.login}"
+    run: echo "Deployed by ${WEBHOOK_PAYLOAD.sender.login}"
     depends:
       - deploy
 ```
@@ -266,7 +266,7 @@ For complex payloads with nested structures:
 ```yaml
 steps:
   - id: process_github_push
-    command: |
+    run: |
       echo "Repository: ${WEBHOOK_PAYLOAD.repository.full_name}"
       echo "Pusher: ${WEBHOOK_PAYLOAD.pusher.name}"
       echo "First commit message: ${WEBHOOK_PAYLOAD.commits.0.message}"
@@ -294,7 +294,7 @@ webhook:
 
 steps:
   - id: route
-    command: |
+    run: |
       echo "$WEBHOOK_HEADERS" | jq -r '."x-github-event"[0]'
       echo "$WEBHOOK_HEADERS" | jq -r '."x-github-delivery"[0]'
 ```
@@ -332,7 +332,7 @@ Example:
 ```yaml
 steps:
   - id: inspect_github_context
-    command: |
+    run: |
       echo "event=${GITHUB_EVENT_NAME}"
       echo "action=${GITHUB_EVENT_ACTION}"
       echo "repo=${GITHUB_REPOSITORY}"

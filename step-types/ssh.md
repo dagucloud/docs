@@ -21,21 +21,21 @@ ssh:
 
 steps:
   # All SSH steps inherit DAG-level configuration
-  - command: curl -f http://localhost:8080/health
-  - command: systemctl restart myapp
+  - run: curl -f http://localhost:8080/health
+  - run: systemctl restart myapp
 ```
 
 ## Step-Level Configuration
 
 ```yaml
 steps:
-  - type: ssh
+  - action: ssh.run
     with:
       user: ubuntu
       ip: 192.168.1.100
       key: /home/user/.ssh/id_rsa
       shell: "/bin/bash -o pipefail"  # Step-level `with.shell` accepts string form
-    command: echo "Hello from remote server"
+      command: echo "Hello from remote server"
 ```
 
 ## Configuration
@@ -83,7 +83,7 @@ ssh:
   shell: ["/bin/bash", "-e"]  # Commands wrapped as: /bin/bash -e -c 'command' (DAG-level example)
 
 steps:
-  - command: echo $HOME && ls -la  # Shell features like pipes, variables work
+  - run: echo $HOME && ls -la  # Shell features like pipes, variables work
 ```
 
 Without `shell`, commands are executed directly without shell interpretation. Use `shell` when you need:
@@ -115,7 +115,7 @@ env:
   - DEPLOY_BRANCH: main
 
 steps:
-  - command: |
+  - run: |
       cd $HOME/app              # $HOME NOT expanded — remote shell resolves it
       git checkout ${DEPLOY_BRANCH}  # Expanded by Dagu — defined in DAG env
 ```
@@ -124,14 +124,14 @@ This allows you to write shell scripts that use remote variables without Dagu re
 
 ```yaml
 steps:
-  - type: ssh
+  - action: ssh.run
     with:
       user: deploy
       host: app.example.com
-    command: |
-      for FILE in *.log; do
-        echo "Processing ${FILE}"  # ${FILE} preserved for remote shell
-      done
+      command: |
+        for FILE in *.log; do
+          echo "Processing ${FILE}"  # ${FILE} preserved for remote shell
+        done
 ```
 
 To emit a literal `$` in SSH commands or `with` fields, escape it as `\$`. When `shell` is
@@ -145,11 +145,11 @@ env:
   - LOCAL_HOME: ${HOME}  # Import local $HOME into DAG scope
 
 steps:
-  - type: ssh
+  - action: ssh.run
     with:
       user: deploy
       host: app.example.com
-    command: echo "Local home was ${LOCAL_HOME}, remote home is $HOME"
+      command: echo "Local home was ${LOCAL_HOME}, remote home is $HOME"
 ```
 
 The same rule applies to SSH **`with` fields** (`user`, `host`, `key`, `password`, etc.). A reference like `key: $HOME/.ssh/deploy_key` will not expand `$HOME` because it is not DAG-scoped. Import it first:
@@ -188,14 +188,14 @@ ssh:
     key: ~/.ssh/bastion_key
 
 steps:
-  - command: hostname
+  - run: hostname
 ```
 
 Step-level bastion:
 
 ```yaml
 steps:
-  - type: ssh
+  - action: ssh.run
     with:
       user: deploy
       host: private-server.internal
@@ -203,7 +203,7 @@ steps:
         host: bastion.example.com
         user: jump-user
         key: ~/.ssh/bastion_key
-    command: hostname
+      command: hostname
 ```
 
 ### Bastion Fields
@@ -223,15 +223,15 @@ Multiple commands share the same step configuration:
 ```yaml
 steps:
   - id: remote_checks
-    type: ssh
+    action: ssh.run
     with:
       user: deploy
       host: production.example.com
       key: ~/.ssh/deploy_key
-    command:
-      - systemctl status nginx
-      - systemctl status myapp
-      - df -h /var/log
+      command:
+        - systemctl status nginx
+        - systemctl status myapp
+        - df -h /var/log
     preconditions:
       - condition: "${ENV}"
         expected: "production"

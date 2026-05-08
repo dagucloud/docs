@@ -103,12 +103,12 @@ secrets:
 
 steps:
   - name: uses-secret
-    command: ./migrate.sh
+    run: ./migrate.sh
 
   - name: overrides-for-one-step
     env:
       - DB_PASSWORD: local-test-password
-    command: ./test.sh
+    run: ./test.sh
 ```
 
 ## Masking
@@ -163,7 +163,7 @@ secrets:
 
 steps:
   - name: deploy
-    command: ./deploy.sh
+    run: ./deploy.sh
     env:
       - DATABASE_URL: postgres://app:${DB_PASSWORD}@db/prod
       - AUTH_HEADER: "Bearer ${API_KEY}"

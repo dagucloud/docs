@@ -1,22 +1,114 @@
-# Custom Step Types
+# Custom Actions
 
-`step_types` defines reusable step types that expand to builtin-backed steps when a DAG is loaded. They are resolved during spec build, before normal step validation and execution. The runtime executes the expanded builtin step.
+`actions` defines reusable, typed actions that expand to builtin actions when a workflow is loaded. Use them when several DAGs should share the same validated call shape without copying executor-specific YAML everywhere.
 
-## Where You Can Declare Them
-
-- At the top level of a DAG document.
-- In `base.yaml`.
-- Base-config and DAG-local definitions are merged per YAML document.
-- A DAG-local definition that duplicates a base-config name is rejected.
-- A DAG-local definition is visible only inside the YAML document that declares it. Another document separated by `---` must redeclare it or inherit it from base config.
-
-## Definition Format
+## Basic Shape
 
 ```yaml
-step_types:
-  greet:
-    type: command
-    description: Print a greeting
+actions:
+  release.announce:
+    description: Print a reusable release announcement
+    input_schema:
+      type: object
+      additionalProperties: false
+      required: [channel, version]
+      properties:
+        channel:
+          type: string
+          enum: [changelog, email, slack]
+        version:
+          type: string
+        summary:
+          type: string
+          default: Ready for rollout
+    template:
+      run: echo {{ json .input.channel }} release {{ json .input.version }} - {{ json .input.summary }}
+
+steps:
+  - id: build
+    output:
+      version: "v1.2.3"
+
+  - id: announce
+    action: release.announce
+    with:
+      channel: changelog
+      version: ${build.output.version}
+    depends: [build]
+```
+
+The call site stays consistent:
+
+- `action` chooses the reusable action.
+- `with` is validated against the action's `input_schema`.
+- The rendered `template` becomes the actual step that Dagu executes.
+
+## Where To Declare Actions
+
+- At the top level of a DAG document.
+- In `base.yaml`, so every DAG can inherit the same action definitions.
+- DAG-local actions are visible only inside the YAML document that declares them.
+- Base-config and DAG-local actions are merged per YAML document.
+- A DAG-local action that duplicates a base-config action name is rejected.
+
+## Definition Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `description` | No | Human-readable description copied to expanded steps unless the call site overrides it. |
+| `input_schema` | Yes | Inline JSON Schema object for `with`. The schema must resolve to an object schema. |
+| `output_schema` | No | Inline JSON Schema object for JSON stdout validation. |
+| `template` | Yes | Canonical step fragment using `run` or `action` plus workflow-control fields. |
+
+Action names must match:
+
+```text
+^[A-Za-z][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*$
+```
+
+Custom action names cannot reuse builtin action names such as `http.request`, `dag.run`, `template.render`, or `agent.run`.
+
+## Template Rules
+
+String values inside `template` are rendered with Go `text/template` using `.input` as the validated input object. Custom action templates expose the same template functions as [Template](/step-types/template), plus `json`, which returns a JSON-safe encoding of a value.
+
+```yaml
+actions:
+  webhook.send:
+    input_schema:
+      type: object
+      additionalProperties: false
+      required: [url, text]
+      properties:
+        url:
+          type: string
+        text:
+          type: string
+    template:
+      action: http.request
+      with:
+        method: POST
+        url: "{{ .input.url }}"
+        headers:
+          Content-Type: application/json
+        body: |
+          {"text": {{ json .input.text }}}
+```
+
+Rules:
+
+- Missing template keys are errors.
+- Template functions are hermetic; environment, network, clock, random, and crypto helpers are not available.
+- `template` must use canonical execution fields such as `run` or `action`. Legacy fields such as `command`, `script`, `type`, `call`, `messages`, `agent`, `value`, and `routes` are rejected for custom action templates.
+- Runtime expressions such as `${BUILD_ID}` are ordinary text during template rendering and are evaluated later by the expanded step if they land in a runtime-evaluated field.
+
+## Typed Input Injection
+
+Use `$input` when a rendered field should keep the original JSON type instead of becoming a string template result.
+
+```yaml
+actions:
+  say.exec:
     input_schema:
       type: object
       additionalProperties: false
@@ -24,43 +116,28 @@ step_types:
       properties:
         message:
           type: string
-        repeat:
-          type: integer
-          default: 2
     template:
-      script: |
-        #!/bin/bash
-        for ((i=0; i<{{ .input.repeat }}; i++)); do
-          printf '%s\n' {{ json .input.message }}
-        done
+      action: exec
+      with:
+        command: /bin/echo
+        args:
+          - {$input: message}
 
 steps:
-  - type: greet
+  - action: say.exec
     with:
-      message: hello
+      message: 'Review "quoted" text'
 ```
 
-This expands to a builtin `command` step at load time. `with.repeat` defaults to `2`, and because the template uses a shebang with no `template.shell`, Bash runs the script. If `name` is omitted, the generated name uses the custom type prefix, such as `greet_1`.
-
-## Definition Fields
-
-- `step_types.<name>` must match `^[A-Za-z][A-Za-z0-9_-]*$`.
-- Custom names cannot reuse builtin step type names such as `command`, `http`, `kubernetes`, `s3`, `chat`, or `agent`.
-- `type` is required and must point to a builtin step type or builtin alias. Custom step types cannot target other custom step types.
-- `input_schema` is required. It must be an inline JSON Schema object that resolves to an object schema.
-- `output_schema` is optional. It must be an inline JSON Schema object that resolves to an object schema. When set, the expanded step's stdout must be valid JSON and match this schema when the step completes.
-- `template` is required. It must be a step fragment object.
-- `template.type` is rejected. The expanded builtin type always comes from `step_types.<name>.type`.
-- `description` is optional. It is applied only when the expanded step does not set its own description.
+`$input` paths are relative to the validated input object after schema defaults are applied. They support dotted object fields and numeric array indexes such as `items.0.name`.
 
 ## Output Contracts
 
-Use `output_schema` when a custom step type should behave like a typed workflow component: `input_schema` validates what the caller passes in, and `output_schema` validates what the step promises to emit.
+Use `output_schema` when a custom action emits machine-readable JSON:
 
 ```yaml
-step_types:
-  classify_ticket:
-    type: command
+actions:
+  ticket.classify:
     input_schema:
       type: object
       additionalProperties: false
@@ -71,7 +148,7 @@ step_types:
     output_schema:
       type: object
       additionalProperties: false
-      required: [category, priority, confidence]
+      required: [category, priority]
       properties:
         category:
           type: string
@@ -79,267 +156,58 @@ step_types:
         priority:
           type: string
           enum: [low, medium, high]
-        confidence:
-          type: number
-          minimum: 0
-          maximum: 1
     template:
-      script: |
-        #!/usr/bin/env python3
+      run: |
+        python3 - <<'PY'
         import json
-        print(json.dumps({"category": "bug", "priority": "high", "confidence": 0.91}))
+        print(json.dumps({"category": "bug", "priority": "high"}))
+        PY
 
 steps:
   - id: classify
-    type: classify_ticket
+    action: ticket.classify
     with:
       text: "App crashes on startup"
 
   - id: route
     depends: [classify]
-    command: echo "${classify.output.category}:${classify.output.priority}"
+    run: echo "${classify.output.category}:${classify.output.priority}"
 ```
 
 Rules:
 
-- `stdout` must contain machine-readable JSON. Write human-readable logs to `stderr`.
-- The decoded stdout JSON is validated against `output_schema`. Invalid JSON or a schema mismatch fails the step, so normal `retry_policy`, `continue_on`, and handlers apply.
-- If the step does not set `output:`, the validated decoded object is published as the step output and can be referenced with `${step_id.output.*}`.
-- If the step also sets object-form `output:`, Dagu validates stdout first, then applies the explicit output mapping.
-- String-form `output: NAME` still captures stdout into a flat variable after validation.
-
-## Template Rendering
-
-String values inside `template` are rendered with Go `text/template` using `.input` as the template data.
-Custom step templates expose the same template functions as the [Template step](/step-types/template#template-functions), plus a `json` helper that returns the JSON encoding of a value.
-
-### Available Functions
-
-Custom step templates can use:
-
-- Dagu pipeline-friendly functions documented for the template executor: `split`, `join`, `count`, `add`, `empty`, `upper`, `lower`, `trim`, and `default`
-- The exact slim-sprig-derived function names listed on the [Template step](/step-types/template#available-slim-sprig-functions)
-- `json`, which is specific to custom step templates and returns the JSON encoding of a value. This helper is useful when embedding user input inside a string field such as `script` or an HTTP body.
-
-Functions that read environment variables, perform network lookups, use current time, generate random values, or generate crypto keys are not available. The exact blocked names are listed on the [Template step](/step-types/template#blocked-functions).
-
-```yaml
-step_types:
-  webhook:
-    type: http
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [url, text]
-      properties:
-        url:
-          type: string
-        text:
-          type: string
-    template:
-      command: POST {{ .input.url }}
-      with:
-        headers:
-          Content-Type: application/json
-        body: |
-          {"text": {{ json .input.text }}}
-```
-
-Rules:
-
-- Missing template keys are errors.
-- Template functions are hermetic; functions for environment access, network lookup, time, randomness, and crypto key generation are not available.
-- Schema defaults are applied to `with`, then the result is validated, then the template is rendered during DAG load.
-
-### Typed Input Injection
-
-Use `$input` when a rendered field should be copied directly from custom-step `with` instead of rendered as a string template.
-
-At the call site, `with` becomes the custom step input:
-
-```yaml
-steps:
-  - type: say
-    with:
-      message: 'Review "quoted" text'
-```
-
-Inside `template`, this copies the validated `message` value into the rendered step:
-
-```yaml
-template:
-  exec:
-    command: /bin/echo
-    args:
-      - {$input: message}
-```
-
-The expanded builtin step receives:
-
-```yaml
-exec:
-  command: /bin/echo
-  args:
-    - 'Review "quoted" text'
-```
-
-`$input` path resolution is relative to the validated input object after schema defaults are applied. It supports dotted object fields and numeric array indexes such as `items.0.name`.
-
-Use `$input` for whole-field values such as argv entries, prompts, booleans, numbers, arrays, or objects. The copied value keeps its type and is not parsed as Go template text. For embedded text, use normal Go template syntax inside a string field.
-
-## Runtime Expressions
-
-Custom step templates are rendered while the DAG is loaded, before a step starts running. They are not rendered again when the step executes. This means runtime values cannot change Go template control flow and cannot change the static step graph.
-
-Rule of thumb:
-
-- Go template actions are custom-step template rendering at DAG load time.
-- `${...}` and `$VAR` are Dagu runtime expressions evaluated later by the expanded builtin step.
-- Backticks survive custom-step expansion unchanged. What happens later depends on the destination field: runtime-evaluated fields still process backticks, while command-step `script` leaves them for the shell.
-- Runtime expressions can be passed through custom step templates, but they cannot control Go template `if`, `range`, or other load-time template logic.
-
-Runtime expressions are still valid when they end up in fields that Dagu evaluates at execution time. `${...}` and `$VAR` work in command strings, command arguments, scripts, and executor config strings. Backticks also continue to work in the fields that use normal runtime evaluation.
-
-If a runtime expression is written directly in `template`, it is ordinary text during custom template rendering. For example, `${COUNT}` is not Go template syntax, so it stays `${COUNT}` in the expanded builtin step. It expands later when that builtin step executes, provided it is in a runtime-evaluated field.
-
-```yaml
-type: graph
-
-step_types:
-  echo_count:
-    type: command
-    input_schema:
-      type: object
-      additionalProperties: false
-      properties: {}
-    template:
-      exec:
-        command: /bin/echo
-        args:
-          - ${COUNT}
-
-steps:
-  - id: produce
-    exec:
-      command: /bin/echo
-      args: [7]
-    output: COUNT
-
-  - id: consume
-    depends: [produce]
-    type: echo_count
-    output: OUT
-```
-
-Runtime expressions can also come from custom-step `with` and be passed through the template:
-
-```yaml
-type: graph
-
-step_types:
-  repeat:
-    type: command
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [count]
-      properties:
-        count:
-          type: integer
-    template:
-      exec:
-        command: /bin/echo
-        args:
-          - {$input: count}
-
-steps:
-  - id: produce
-    exec:
-      command: /bin/echo
-      args: [3]
-    output: COUNT
-
-  - id: consume
-    depends: [produce]
-    type: repeat
-    with:
-      count: ${COUNT}
-    output: OUT
-```
-
-In this example, `with.count` is declared as an integer, but `${COUNT}` is accepted by load/save validation because it is a whole runtime expression. The template injects the literal string `${COUNT}` into the expanded builtin step. The command executor evaluates it when `consume` runs, after `produce` has written `COUNT`.
-
-Validation rules for runtime expressions in custom `with` input are intentionally narrow:
-
-- String schema fields can contain embedded runtime expressions, such as `prefix-${NAME}`.
-- Integer, number, boolean, and scalar enum fields can use a runtime expression only as the whole value, such as `${COUNT}`, `$COUNT`, or `` `cat count.txt` ``.
-- Nested object properties and array items follow the same rule when their schema declares one of those scalar forms.
-- Unknown fields, missing required fields, invalid additional properties, and non-runtime invalid values are still rejected.
-- Custom input schema validation is not repeated after the runtime expression expands. The expanded builtin step and executor handle the final runtime value.
-
-## Script Templates
-
-For `command`-backed or `shell`-backed custom step types, `template.script` is usually the simplest and most common option.
-
-```yaml
-step_types:
-  bash_snippet:
-    type: command
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [message]
-      properties:
-        message:
-          type: string
-    template:
-      script: |
-        #!/bin/bash
-        printf '%s\n' {{ json .input.message }}
-
-steps:
-  - type: bash_snippet
-    with:
-      message: xxx
-```
-
-Rules:
-
-- Put `script` in the custom step `template`, not at the custom-step call site.
-- If `template.script` has a shebang and you do not set `template.shell`, the shebang interpreter is used.
-- If you set `template.shell`, that shell runs the script instead, so the shebang is not used for interpreter selection.
+- `stdout` must contain valid JSON that matches `output_schema`.
+- Human-readable logs should go to `stderr`.
+- If the call site does not set `output:`, the decoded JSON object is published as `${step_id.output.*}`.
+- If the call site sets object-form `output:`, Dagu validates stdout first, then applies the explicit output mapping.
 
 ## Call-Site Fields
 
-When a step uses a custom type, `with` is input to the custom definition. It is not merged directly into builtin executor configuration.
+Allowed call-site fields are workflow-control fields:
 
-Allowed call-site fields:
-`name`, `id`, `description`, `depends`, `continue_on`, `retry_policy`, `repeat_policy`, `mail_on_error`, `preconditions`, `signal_on_stop`, `env`, `timeout_sec`, `stdout`, `stderr`, `log_output`, `worker_selector`, `output`, `approval`.
+```text
+id, name, description, depends, continue_on, retry_policy, repeat_policy,
+mail_on_error, preconditions, signal_on_stop, env, timeout_sec, stdout,
+stderr, log_output, worker_selector, output, approval
+```
 
-Rejected call-site fields:
-`command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, `routes`.
+Execution fields belong in the action template, not at the call site. A custom action call uses only:
 
-If you need one of the rejected fields, put it in `template`.
-
-Precedence for custom step expansion is:
-
-- Explicit allowed call-site fields override the rendered template.
-- Explicit fields in the rendered template override DAG or base-config `defaults`.
-- Additive fields compose in this order: `defaults`, then `template`, then explicit call-site values.
-
-For additive fields, this means:
-
-- `env` entries from `defaults` are prepended before `template.env`, and explicit call-site `env` entries are appended last.
-- `preconditions` from `defaults` run before `template.preconditions`, and explicit call-site `preconditions` run last.
+```yaml
+steps:
+  - action: release.announce
+    with:
+      channel: slack
+      version: v1.2.3
+```
 
 ## Base Config Example
 
 `base.yaml`
 
 ```yaml
-step_types:
-  greet:
-    type: command
+actions:
+  notify.success:
     input_schema:
       type: object
       additionalProperties: false
@@ -348,74 +216,26 @@ step_types:
         message:
           type: string
     template:
-      script: |
-        #!/bin/bash
-        printf '%s\n' {{ json .input.message }}
+      action: log.write
+      with:
+        message: {$input: message}
 ```
 
 `hello.yaml`
 
 ```yaml
 steps:
-  - type: greet
+  - action: notify.success
     with:
       message: hello from base
 ```
 
-Every DAG loaded with that base config can use `type: greet`.
+## Legacy `step_types`
 
-## Handlers
-
-Custom step types can be used in `steps` and in `handler_on`.
-
-```yaml
-step_types:
-  notify:
-    type: http
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [url, text]
-      properties:
-        url:
-          type: string
-        text:
-          type: string
-    template:
-      command: POST {{ .input.url }}
-      with:
-        headers:
-          Content-Type: application/json
-        body: |
-          {"text": {{ json .input.text }}}
-
-handler_on:
-  success:
-    type: notify
-    with:
-      url: https://hooks.example.com/workflow
-      text: completed
-```
-
-## Direct Exec
-
-For `command`-backed or `shell`-backed custom step templates, use `exec` when you want explicit argv with no shell parsing.
-
-```yaml
-steps:
-  - exec:
-      command: /usr/bin/python3
-      args:
-        - -u
-        - script.py
-        - --limit
-        - 10
-```
-
-For custom step types whose `type` is `command` or `shell`, `template.exec` is valid. It is mutually exclusive with `command` and `script`, and it cannot be combined with `shell` or `shell_packages`.
+`step_types` remains loadable for backward compatibility, but it is deprecated. `dagu validate` reports a deprecation warning for legacy definitions while still returning success when there are no real validation errors. New workflows should use `actions`.
 
 ## Related
 
 - [YAML Specification](/writing-workflows/yaml-specification)
 - [Base Configuration](/server-admin/base-config)
-- [Shell](/step-types/shell)
+- [Actions](/step-types/shell)

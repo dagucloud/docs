@@ -7,8 +7,10 @@ Execute HTTP requests to web services and APIs.
 ```yaml
 steps:
   - id: get_data
-    type: http
-    command: GET https://jsonplaceholder.typicode.com/todos/1
+    action: http.request
+    with:
+      method: GET
+      url: https://jsonplaceholder.typicode.com/todos/1
 ```
 
 ## Configuration
@@ -31,12 +33,13 @@ steps:
 ```yaml
 steps:
   - id: create_resource
-    type: http
+    action: http.request
     with:
+      method: POST
+      url: https://api.example.com/resources
       body: '{"name": "New Resource"}'
       headers:
         Content-Type: application/json
-    command: POST https://api.example.com/resources
 ```
 
 If your body needs a literal `$`, use `\$` (non-shell contexts only):
@@ -44,12 +47,13 @@ If your body needs a literal `$`, use `\$` (non-shell contexts only):
 ```yaml
 steps:
   - id: price_example
-    type: http
+    action: http.request
     with:
+      method: POST
+      url: https://api.example.com/prices
       body: '{"price":"\$9.99"}'  # Becomes {"price":"$9.99"}
       headers:
         Content-Type: application/json
-    command: POST https://api.example.com/prices
 ```
 
 ### Authentication
@@ -57,11 +61,12 @@ steps:
 ```yaml
 steps:
   - id: bearer_auth
-    type: http
+    action: http.request
     with:
+      method: GET
+      url: https://api.example.com/protected
       headers:
         Authorization: "Bearer ${API_TOKEN}"
-    command: GET https://api.example.com/protected
 ```
 
 ### Query Parameters
@@ -69,12 +74,13 @@ steps:
 ```yaml
 steps:
   - id: search
-    type: http
+    action: http.request
     with:
+      method: GET
+      url: https://api.example.com/search
       query:
         q: "search term"
         limit: "10"
-    command: GET https://api.example.com/search
 ```
 
 ### Capture Response
@@ -82,14 +88,15 @@ steps:
 ```yaml
 steps:
   - id: get_user
-    type: http
+    action: http.request
     with:
+      method: GET
+      url: https://api.example.com/user
       silent: true
-    command: GET https://api.example.com/user
     output: USER_DATA
 
   - id: process
-    command: echo "${USER_DATA}" | jq '.email'
+    run: echo "${USER_DATA}" | jq '.email'
 ```
 
 ### JSON Output Mode
@@ -99,11 +106,12 @@ Use `format: "json"` to get structured JSON output including status code and hea
 ```yaml
 steps:
   - id: api_call
-    type: http
+    action: http.request
     with:
+      method: GET
+      url: https://api.example.com/data
       format: "json"
       silent: true
-    command: GET https://api.example.com/data
     output: RESPONSE
 ```
 
@@ -142,10 +150,11 @@ Without `silent` (or `silent: false`), the output also includes status code and 
 ```yaml
 steps:
   - id: api_call
-    type: http
+    action: http.request
     with:
+      method: GET
+      url: https://api.example.com/data
       timeout: 30
-    command: GET https://api.example.com/data
     retry_policy:
       limit: 3
       interval_sec: 5
@@ -158,12 +167,13 @@ steps:
 ```yaml
 handler_on:
   success:
-    type: http
+    action: http.request
     with:
+      method: POST
+      url: https://hooks.example.com/workflow-complete
       body: '{"status": "completed", "dag": "${DAG_NAME}"}'
       headers:
         Content-Type: application/json
-    command: POST https://hooks.example.com/workflow-complete
 ```
 
 ### Self-Signed Certificates
@@ -171,10 +181,11 @@ handler_on:
 ```yaml
 steps:
   - id: internal_api
-    type: http
+    action: http.request
     with:
+      method: GET
+      url: https://internal-api.company.local/data
       skip_tls_verify: true  # Allow self-signed certificates
       headers:
         Authorization: "Bearer ${INTERNAL_TOKEN}"
-    command: GET https://internal-api.company.local/data
 ```

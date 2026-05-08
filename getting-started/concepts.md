@@ -27,8 +27,8 @@ The basic unit of execution. Each step runs a command:
 
 ```yaml
 steps:
-  - command: curl -O https://example.com/data.csv  # Download data
-  - command: python analyze.py data.csv           # Process data
+  - run: curl -O https://example.com/data.csv  # Download data
+  - run: python analyze.py data.csv           # Process data
 ```
 
 Steps can execute multiple commands that share the same configuration:
@@ -36,10 +36,10 @@ Steps can execute multiple commands that share the same configuration:
 ```yaml
 steps:
   - id: build_and_test
-    command:
-      - npm install
-      - npm run build
-      - npm test
+    run: |
+      npm install
+      npm run build
+      npm test
     env:
       - NODE_ENV: production
 ```
@@ -52,18 +52,18 @@ By default, steps run sequentially. Use `depends` for parallel execution:
 type: graph
 steps:
   - id: A
-    command: echo "First"
+    run: echo "First"
 
   - id: B
-    command: echo "Second (after A)"
+    run: echo "Second (after A)"
     depends: A
 
   - id: C
-    command: echo "Parallel with B"
+    run: echo "Parallel with B"
     depends: A  # Only depends on A, runs parallel to B
 
   - id: D
-    command: echo "After both B and C"
+    run: echo "After both B and C"
     depends: [B, C]
 ```
 
@@ -81,7 +81,7 @@ params:
     description: Deployment region
 
 steps:
-  - command: echo "Deploying to ${env} in ${region}"
+  - run: echo "Deploying to ${env} in ${region}"
 ```
 
 Override at runtime:
@@ -97,9 +97,9 @@ Pass data between steps using `output`:
 
 ```yaml
 steps:
-  - command: date +%Y%m%d
+  - run: date +%Y%m%d
     output: TODAY
-  - command: tar -czf backup_${TODAY}.tar.gz /data
+  - run: tar -czf backup_${TODAY}.tar.gz /data
 ```
 
 ## Status Management
@@ -141,14 +141,14 @@ graph LR
 ```yaml
 handler_on:
   success:
-    command: notify-team.sh "Workflow succeeded"
+    run: notify-team.sh "Workflow succeeded"
   failure:
-    command: alert-oncall.sh "Workflow failed"
+    run: alert-oncall.sh "Workflow failed"
   partial_success:
-    command: log-partial.sh "Some steps partially succeeded"
+    run: log-partial.sh "Some steps partially succeeded"
 ```
 
-## Step Types
+## Actions
 
 ### Shell (Default)
 
@@ -157,9 +157,9 @@ Runs commands in the system shell. Set it once per DAG or override per step:
 ```yaml
 shell: [bash, -e]  # Default shell + args for all steps
 steps:
-  - command: echo "Hello"   # Uses DAG shell
+  - run: echo "Hello"   # Uses DAG shell
   - shell: /usr/bin/zsh     # Per-step override
-    command: echo "Using zsh"
+    run: echo "Using zsh"
 ```
 
 See [Shell](/step-types/shell) for more details.
@@ -175,7 +175,7 @@ container:
   volumes:
     - /app/data:/data
 steps:
-  - command: python script.py
+  - run: python script.py
 ```
 
 See [Docker](/step-types/docker) for more details.
@@ -191,7 +191,7 @@ ssh:
   key: ~/.ssh/id_rsa
 
 steps:
-  - command: echo "Running remote script"
+  - run: echo "Running remote script"
 ```
 
 See [SSH](/step-types/ssh) for more details.
@@ -202,7 +202,7 @@ Make API calls:
 
 ```yaml
 steps:
-  - type: http
+  - action: http.request
     with:
       method: POST
       url: https://api.example.com/trigger
@@ -212,14 +212,13 @@ steps:
 
 See [HTTP](/step-types/http) for more details.
 
-### Custom Step Types
+### Custom Actions
 
-Define reusable step types in `step_types` when you want a typed wrapper around a builtin step type:
+Define reusable actions in `actions` when you want a typed wrapper around a builtin action:
 
 ```yaml
-step_types:
+actions:
   greet:
-    type: command
     input_schema:
       type: object
       additionalProperties: false
@@ -228,17 +227,17 @@ step_types:
         message:
           type: string
     template:
-      script: |
+      run: |
         #!/bin/bash
         printf '%s\n' {{ json .input.message }}
 
 steps:
-  - type: greet
+  - action: greet
     with:
       message: hello
 ```
 
-The common case is a `type: command` custom step with a templated `script`. Schema defaults can be applied to the `with` object, the result is validated against `input_schema`, and then the template expands to a builtin step before execution. See [Custom Step Types](/writing-workflows/custom-step-types) for the full rules.
+The common case is a `run` custom action with a templated `script`. Schema defaults can be applied to the `with` object, the result is validated against `input_schema`, and then the template expands to a builtin step before execution. See [Custom Actions](/writing-workflows/custom-step-types) for the full rules.
 
 ## Scheduling
 
@@ -273,20 +272,20 @@ Execute commands on workflow events:
 ```yaml
 handler_on:
   init:
-    command: echo "Setting up environment"  # Runs before any steps
+    run: echo "Setting up environment"  # Runs before any steps
 
   success:
-    command: echo "Workflow succeeded"
+    run: echo "Workflow succeeded"
 
   failure:
-    command: |
+    run: |
       echo "Workflow failed" | mail -s "Alert" admin@example.com
 
   abort:
-    command: echo "Cleaning up resources"
+    run: echo "Cleaning up resources"
 
   exit:
-    command: echo "Always runs"
+    run: echo "Always runs"
 ```
 
 ## See Also

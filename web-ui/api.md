@@ -139,7 +139,7 @@ Creates a new DAG file with the specified name. Optionally initializes it with a
 ```json
 {
   "name": "my-new-dag",
-  "spec": "steps:\n  - command: echo hello"  // Optional - YAML spec to initialize the DAG
+  "spec": "steps:\n  - run: echo hello"  // Optional - YAML spec to initialize the DAG
 }
 ```
 
@@ -389,7 +389,7 @@ Fetches the YAML specification of a DAG.
   "dag": {
     "name": "example_dag"
   },
-  "spec": "name: example_dag\nsteps:\n  - name: hello\n    command: echo Hello",
+  "spec": "name: example_dag\nsteps:\n  - name: hello\n    run: echo Hello",
   "errors": []
 }
 ```
@@ -403,7 +403,7 @@ Updates the YAML specification of a DAG.
 **Request Body**:
 ```json
 {
-  "spec": "name: example_dag\nsteps:\n  - name: hello\n    command: echo Hello World"
+  "spec": "name: example_dag\nsteps:\n  - name: hello\n    run: echo Hello World"
 }
 ```
 
@@ -441,7 +441,7 @@ Validates a DAG YAML specification without persisting any changes. Returns a lis
 **Request Body**:
 ```json
 {
-  "spec": "type: graph\nsteps:\n  - name: step1\n    command: echo hello\n  - name: step2\n    command: echo world\n    depends: [step1]",
+  "spec": "type: graph\nsteps:\n  - name: step1\n    run: echo hello\n  - name: step2\n    run: echo world\n    depends: [step1]",
   "name": "optional-dag-name"  // Optional - name to use when spec omits a name
 }
 ```
@@ -958,7 +958,7 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
 **Request Body**:
 ```json
 {
-  "spec": "steps:\n  - name: extract\n    command: ./extract.sh",
+  "spec": "steps:\n  - name: extract\n    run: ./extract.sh",
   "name": "ad-hoc-extract",
   "params": "{\"env\":\"prod\"}",
   "dagRunId": "20241101_010203_custom",
@@ -1003,7 +1003,7 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
 curl -X POST "http://localhost:8080/api/v1/dag-runs?remoteNode=local" \
   -H "Content-Type: application/json" \
   -d '{
-        "spec": "steps:\n  - name: echo\n    command: echo \"hello\"",
+        "spec": "steps:\n  - name: echo\n    run: echo \"hello\"",
         "name": "adhoc-hello",
         "params": "{\"requestedBy\":\"cli\"}"
       }'
@@ -1023,7 +1023,7 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
 **Request Body**:
 ```json
 {
-  "spec": "steps:\n  - name: sleep\n    command: sleep 60",
+  "spec": "steps:\n  - name: sleep\n    run: sleep 60",
   "name": "queued-sleeper",
   "params": "{\"duration\":60}",
   "dagRunId": "queue_20241101_010203",
@@ -1060,7 +1060,7 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
 curl -X POST "http://localhost:8080/api/v1/dag-runs/enqueue" \
   -H "Content-Type: application/json" \
   -d '{
-        "spec": "steps:\n  - name: notify\n    command: ./notify.sh",
+        "spec": "steps:\n  - name: notify\n    run: ./notify.sh",
         "name": "queued-notify",
         "queue": "alerts"
       }'

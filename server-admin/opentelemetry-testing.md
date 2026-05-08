@@ -31,22 +31,22 @@ otel:
 type: graph
 steps:
   - id: fetch_data
-    command: echo "Fetching data..." && sleep 1
+    run: echo "Fetching data..." && sleep 1
 
   - id: process_data
-    command: echo "Processing data..." && sleep 2
+    run: echo "Processing data..." && sleep 2
     depends: fetch_data
 
   - id: analyze_batch_1
-    command: echo "Analyzing batch 1..." && sleep 1
+    run: echo "Analyzing batch 1..." && sleep 1
     depends: process_data
 
   - id: analyze_batch_2
-    command: echo "Analyzing batch 2..." && sleep 1
+    run: echo "Analyzing batch 2..." && sleep 1
     depends: process_data
 
   - id: aggregate_results
-    command: echo "Aggregating results..."
+    run: echo "Aggregating results..."
     depends: [analyze_batch_1, analyze_batch_2]
 ```
 
@@ -74,7 +74,7 @@ otel:
   endpoint: "http://localhost:4318/v1/traces"
   insecure: true
 steps:
-  - command: echo "Testing HTTP endpoint"
+  - run: echo "Testing HTTP endpoint"
 ```
 
 ### With Authentication
@@ -89,7 +89,7 @@ otel:
   headers:
     Authorization: "Bearer ${OTEL_TOKEN}"
 steps:
-  - command: echo "Testing with auth"
+  - run: echo "Testing with auth"
 ```
 
 ### Custom Resource Attributes
@@ -107,7 +107,7 @@ otel:
     team: "platform"
     region: "us-east-1"
 steps:
-  - command: echo "Testing resource attributes"
+  - run: echo "Testing resource attributes"
 ```
 
 ## Testing Nested DAGs
@@ -122,13 +122,23 @@ otel:
   insecure: true
 
 steps:
-  - command: echo "Starting parent workflow"
-  - call: child-etl.yaml
-    params: "SOURCE=production DATE=2024-01-01"
-  - call: child-analytics.yaml
-    params: "INPUT=${run-etl.output}"
-  - command: echo "Parent workflow complete"
-    
+  - run: echo "Starting parent workflow"
+
+  - id: run-etl
+    action: dag.run
+    with:
+      dag: child-etl.yaml
+      params: "SOURCE=production DATE=2024-01-01"
+
+  - id: run-analytics
+    action: dag.run
+    with:
+      dag: child-analytics.yaml
+      params: "INPUT=${run-etl.output}"
+    depends: [run-etl]
+
+  - run: echo "Parent workflow complete"
+    depends: [run-analytics]
 ```
 
 ### 2. Create Sub DAGs
@@ -145,9 +155,9 @@ otel:
   insecure: true
 
 steps:
-  - command: echo "Extracting from ${SOURCE}"
+  - run: echo "Extracting from ${SOURCE}"
     output: EXTRACTED_DATA
-  - command: echo "Transforming data" && echo "/tmp/data.csv"
+  - run: echo "Transforming data" && echo "/tmp/data.csv"
 ```
 
 ```yaml
@@ -161,7 +171,7 @@ otel:
   insecure: true
 
 steps:
-  - command: echo "Analyzing ${INPUT}"
+  - run: echo "Analyzing ${INPUT}"
 ```
 
 ### 3. Run and Verify
@@ -371,7 +381,7 @@ otel:
     service.version: "${APP_VERSION}"
     deployment.environment: "${ENVIRONMENT}"
 steps:
-  - command: echo "Testing production setup"
+  - run: echo "Testing production setup"
 ```
 
 Run with environment variables:

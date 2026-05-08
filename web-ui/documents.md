@@ -67,7 +67,7 @@ labels:
   - workspace=ops
 steps:
   - id: write_report
-    command: |
+    run: |
       mkdir -p "$DAG_DOCS_DIR"
       cat > "$DAG_DOCS_DIR/latest-run.md" <<'DOC'
       ---

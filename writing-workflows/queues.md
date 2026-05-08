@@ -12,7 +12,7 @@ schedule: "*/10 * * * *"
 
 steps:
   - id: process
-    command: echo "Processing batch"
+    run: echo "Processing batch"
 ```
 
 The scheduler places this DAG into the `batch` queue. The queue's `max_concurrency` (defined in `config.yaml`) determines how many DAGs in this queue can run at the same time.

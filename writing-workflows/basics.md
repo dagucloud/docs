@@ -8,7 +8,7 @@ Create `hello.yaml`:
 
 ```yaml
 steps:
-  - command: echo "Hello from Dagu!"
+  - run: echo "Hello from Dagu!"
 ```
 
 Run it:
@@ -37,12 +37,12 @@ env:
 # Steps
 steps:
   - id: process
-    command: python process.py ${DATE} ${RUN_DATE}
+    run: python process.py ${DATE} ${RUN_DATE}
 
 # Handlers
 handler_on:
   failure:
-    command: notify-error.sh
+    run: notify-error.sh
 ```
 
 ## Steps
@@ -51,25 +51,28 @@ The basic unit of execution.
 
 ### Step Names
 
-Step names are optional. When omitted, Dagu automatically generates names based on the step type:
+Step names are optional. When omitted, Dagu automatically generates names based on the action:
 
 ```yaml
 steps:
-  - command: echo "First step"              # Auto-named: cmd_1
-  - script: |                      # Auto-named: script_2
+  - run: echo "First step"                  # Auto-named: cmd_1
+  - run: |                                  # Auto-named: cmd_2
       echo "Multi-line"
       echo "Script"
   - id: explicit_name              # Explicit name
-    command: echo "Third step"
-  - type: http                     # Auto-named: http_4
+    run: echo "Third step"
+  - action: http.request           # Auto-named: http_4
     with:
+      method: GET
       url: https://api.example.com
-  - type: template                 # Auto-named: template_5
+  - action: template.render        # Auto-named: template_5
     with:
+      template: "Hello, {{ .name }}!"
       data:
         name: Dagu
-    script: "Hello, {{ .name }}!"
-  - call: child-workflow           # Auto-named: dag_6
+  - action: dag.run                # Auto-named: dag_6
+    with:
+      dag: child-workflow
 ```
 
 Auto-generated names follow the pattern `{type}_{number}`:
@@ -85,15 +88,15 @@ Auto-generated names follow the pattern `{type}_{number}`:
 
 For parallel steps (see below), the pattern is `parallel_{group}_{type}_{index}`.
 
-### Shorthand Command Syntax
+### Shell Commands
 
-For simple commands, you can use an even more concise syntax:
+Use `run` for shell commands and scripts:
 
 ```yaml
 steps:
-  - command: echo "Hello World"
-  - command: ls -la
-  - command: python script.py
+  - run: echo "Hello World"
+  - run: ls -la
+  - run: python script.py
 ```
 
 This is equivalent to:
@@ -102,12 +105,12 @@ This is equivalent to:
 type: graph
 steps:
   - id: step_1
-    command: echo "Hello World"
+    run: echo "Hello World"
   - id: step_2
-    command: ls -la
+    run: ls -la
     depends: step_1
   - id: step_3
-    command: python script.py
+    run: python script.py
     depends: step_2
 ```
 
@@ -118,10 +121,10 @@ Multiple commands share the same step configuration:
 ```yaml
 steps:
   - id: build_and_test
-    command:
-      - npm install
-      - npm run build
-      - npm test
+    run: |
+      npm install
+      npm run build
+      npm test
     env:
       - NODE_ENV: production
     working_dir: /app
@@ -135,17 +138,13 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 **Trade-off:** You lose the ability to retry or resume from the middle of the command list. If you need granular control over individual command retries, use separate steps.
 
-**Supported step types:** shell, command, docker, container, ssh
-
-**Not supported:** jq, http, archive, mail, dag, template, log, k8s, kubernetes
-
-These step types do not support multi-command arrays. Use `script:` for `template` steps.
+For non-shell work, use an explicit `action` and put action-specific inputs under `with`.
 
 ### Multi-line Scripts
 
 ```yaml
 steps:
-  - script: |
+  - run: |
       #!/bin/bash
       set -e
 
@@ -164,11 +163,11 @@ Set a default shell for every step at the DAG level, and override it per step wh
 shell: ["/bin/bash", "-e", "-u"]  # Default shell + args for the whole workflow
 steps:
   - id: bash_task
-    command: echo "Runs with bash -e -u"
+    run: echo "Runs with bash -e -u"
 
   - id: zsh_override
     shell: /bin/zsh                # Step-level override
-    command: echo "Uses zsh instead"
+    run: echo "Uses zsh instead"
 ```
 
 The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Arrays avoid quoting issues when you need multiple flags.
@@ -178,7 +177,7 @@ When you omit a step-level `shell`, Dagu runs through the DAG shell (or system d
 ```yaml
 steps:
   - shell: python3
-    script: |
+    run: |
       import pandas as pd
       df = pd.read_csv('data.csv')
       print(df.head())
@@ -191,13 +190,13 @@ Steps run sequentially by default. Use `depends` for parallel execution or to co
 ```yaml
 steps:
   - id: download
-    command: wget data.csv
+    run: wget data.csv
 
   - id: process
-    command: python process.py
+    run: python process.py
 
   - id: upload
-    command: aws s3 cp output.csv s3://bucket/
+    run: aws s3 cp output.csv s3://bucket/
 ```
 
 ### Parallel Execution
@@ -208,18 +207,18 @@ You can run steps in parallel using explicit dependencies:
 type: graph
 steps:
   - id: setup
-    command: echo "Setup"
+    run: echo "Setup"
 
   - id: task1
-    command: echo "Task 1"
+    run: echo "Task 1"
     depends: setup
 
   - id: task2
-    command: echo "Task 2"
+    run: echo "Task 2"
     depends: setup
 
   - id: finish
-    command: echo "All tasks complete"
+    run: echo "All tasks complete"
     depends: [task1, task2]
 ```
 
@@ -231,11 +230,11 @@ Set where commands execute:
 steps:
   - id: in_project
     working_dir: /home/user/project
-    command: python main.py
+    run: python main.py
 
   - id: in_data
     working_dir: /data/input
-    command: ls -la
+    run: ls -la
 ```
 
 ## Environment Variables
@@ -249,7 +248,7 @@ env:
 
 steps:
   - id: dev_test
-    command: echo "Running in $ENV"
+    run: echo "Running in $ENV"
     env:
       - ENV: development  # Overrides DAG-level
 ```
@@ -265,11 +264,11 @@ Store command output in variables:
 ```yaml
 steps:
   - id: get_version
-    command: git rev-parse --short HEAD
+    run: git rev-parse --short HEAD
     output: VERSION
 
   - id: build
-    command: docker build -t app:${VERSION} .
+    run: docker build -t app:${VERSION} .
 ```
 
 ## Basic Error Handling
@@ -279,12 +278,12 @@ steps:
 ```yaml
 steps:
   - id: optional_step
-    command: maybe-fails.sh
+    run: maybe-fails.sh
     continue_on:
       failure: true
 
   - id: always_runs
-    command: cleanup.sh
+    run: cleanup.sh
 ```
 
 ### Simple Retry
@@ -292,7 +291,7 @@ steps:
 ```yaml
 steps:
   - id: flaky_api
-    command: curl https://unstable-api.com
+    run: curl https://unstable-api.com
     retry_policy:
       limit: 3
 ```
@@ -304,7 +303,7 @@ Prevent steps from running forever:
 ```yaml
 steps:
   - id: long_task
-    command: echo "Processing data"
+    run: echo "Processing data"
     timeout_sec: 300  # 5 minutes
 ```
 
@@ -318,7 +317,7 @@ steps:
     description: |
       Extract data from API, transform to CSV,
       and load into data warehouse
-    command: python etl.py
+    run: python etl.py
 ```
 
 ## Labels and Organization

@@ -168,7 +168,7 @@ params:
     default: 3
 
 steps:
-  - command: echo "Launching ${instance_count} instances"
+  - run: echo "Launching ${instance_count} instances"
 ```
 
 The shell sees `"3"`, not a typed integer object.
@@ -201,7 +201,7 @@ params:
     minimum: 1
 
 steps:
-  - command: echo "${output_dir} ${today} ${workers}"
+  - run: echo "${output_dir} ${today} ${workers}"
 ```
 
 Behavior:
@@ -250,7 +250,7 @@ params:
   - SOURCE_REF: "${HOME}/data"
 
 steps:
-  - command: echo "${DATE} ${MESSAGE} ${SOURCE_REF}"
+  - run: echo "${DATE} ${MESSAGE} ${SOURCE_REF}"
 ```
 
 If you want dynamic values without using param `eval`, compute them in `env:`:
@@ -268,7 +268,7 @@ params:
     minimum: 1
 
 steps:
-  - command: python processor.py --input "${INPUT_FILE}" --threads "${THREADS}" --date "${DATE}" --home "${HOME_DIR}"
+  - run: python processor.py --input "${INPUT_FILE}" --threads "${THREADS}" --date "${DATE}" --home "${HOME_DIR}"
 ```
 
 `env:` values can also reference `params:` values using `${param_name}`, since parameters are resolved before environment variables:
@@ -281,7 +281,7 @@ env:
   - FULL_PATH: "${data_dir}/output"
 
 steps:
-  - command: echo "${FULL_PATH}"  # Outputs: /tmp/foo/output
+  - run: echo "${FULL_PATH}"  # Outputs: /tmp/foo/output
 ```
 
 ## Runtime Overrides Stay Literal
@@ -429,5 +429,5 @@ params:
     default: enabled
 
 steps:
-  - command: echo "Deploying to ${environment} with safety mode ${safety_mode}"
+  - run: echo "Deploying to ${environment} with safety mode ${safety_mode}"
 ```

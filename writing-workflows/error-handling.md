@@ -18,16 +18,16 @@ Control workflow execution flow when steps encounter errors or specific conditio
 ```yaml
 steps:
   # Continue on any failure (shorthand)
-  - command: rm -f /tmp/cache/*
+  - run: rm -f /tmp/cache/*
     continue_on: failed
 
   # Continue on specific exit codes
-  - command: echo "Checking status"
+  - run: echo "Checking status"
     continue_on:
       exit_code: [0, 1, 2]  # 0=success, 1=warning, 2=info
 
   # Continue on output patterns
-  - command: validate.sh
+  - run: validate.sh
     continue_on:
       output:
         - "WARNING"
@@ -36,7 +36,7 @@ steps:
         - "re:WARN-[0-9]+"   # Another regex
 
   # Mark as success when continuing
-  - command: optimize.sh
+  - run: optimize.sh
     continue_on:
       failure: true
       mark_success: true  # Shows as successful in UI
@@ -47,7 +47,7 @@ steps:
 ```yaml
 steps:
   # Database migration with known warnings
-  - command: echo "Running migration"
+  - run: echo "Running migration"
     continue_on:
       output:
         - "re:WARNING:.*already exists"
@@ -55,18 +55,18 @@ steps:
       exit_code: [0, 1]
       
   # Service health check with fallback
-  - command: curl -f https://primary.example.com/health
+  - run: curl -f https://primary.example.com/health
     continue_on:
       exit_code: [0, 22, 7]  # 22=HTTP error, 7=connection failed
       
   # Conditional cleanup
-  - command: find /tmp -name "*.tmp" -mtime +7 -delete
+  - run: find /tmp -name "*.tmp" -mtime +7 -delete
     continue_on:
       failure: true       # Continue even if cleanup fails
       exit_code: [0, 1]   # find returns 1 if no files found
       
   # Tool with non-standard exit codes
-  - command: security-scanner --strict
+  - run: security-scanner --strict
     continue_on:
       exit_code: [0, 4, 8]  # 0=clean, 4=warnings, 8=info
       output:
@@ -83,20 +83,20 @@ Lifecycle handlers fire after the main steps complete and let you add notificati
 ```yaml
 handler_on:
   init:
-    command: setup-environment.sh  # Runs before any steps
+    run: setup-environment.sh  # Runs before any steps
   success:
-    command: notify-success.sh
+    run: notify-success.sh
   failure:
-    command: alert-oncall.sh "${DAG_NAME} failed"
+    run: alert-oncall.sh "${DAG_NAME} failed"
   abort:
-    command: cleanup.sh
+    run: cleanup.sh
   exit:
-    command: rm -rf /tmp/dag-${DAG_RUN_ID}  # Always runs
+    run: rm -rf /tmp/dag-${DAG_RUN_ID}  # Always runs
 
 # With email
 handler_on:
   failure:
-    type: mail
+    action: mail.send
     with:
       to: oncall@company.com
       from: dagu@company.com
@@ -126,11 +126,11 @@ error_mail:
 
 # Step-level
 steps:
-  - command: backup.sh
+  - run: backup.sh
     mail_on_error: true
     
   # Send custom email
-  - type: mail
+  - action: mail.send
     with:
       to: team@company.com
       from: dagu@company.com
@@ -151,12 +151,12 @@ max_clean_up_time_sec: 300  # 5 minutes
 
 steps:
   # Step with graceful shutdown
-  - command: server.sh
+  - run: server.sh
     signal_on_stop: SIGTERM  # Default
 
   # Always cleanup
-  - command: analyze.sh
+  - run: analyze.sh
     continue_on: failed
 
-  - command: cleanup.sh  # Runs even if process fails
+  - run: cleanup.sh  # Runs even if process fails
 ```

@@ -1,16 +1,16 @@
 # Nested Agents
 
-Use the `call` field to invoke child DAGs that contain `type: agent` steps. This lets you compose agent workflows hierarchically — break complex agent tasks into focused child agents, chain their outputs, and run them in parallel.
+Use the `call` field to invoke child DAGs that contain `action: agent.run` steps. This lets you compose agent workflows hierarchically — break complex agent tasks into focused child agents, chain their outputs, and run them in parallel.
 
 ## How It Works
 
-1. A parent step uses `call: child-dag` to invoke a child DAG (a regular [sub-DAG call](/writing-workflows/control-flow#nested-workflows))
-2. The child DAG contains one or more `type: agent` steps
+1. A parent step uses `action: dag.run` with `with.dag: child-dag` to invoke a child DAG (a regular [sub-DAG call](/writing-workflows/control-flow#nested-workflows))
+2. The child DAG contains one or more `action: agent.run` steps
 3. Each agent calls the `output` tool → captured by the step's `output` field → included in the child DAG's output JSON
 4. The parent accesses agent results via `${VAR.outputs.AGENT_OUTPUT}`
 
 ::: warning
-`call` and `type: agent` cannot be on the **same** step. The `call` field sets the executor type to `dag`; adding `type: agent` on the same step will cause a validation error. Use `call` on a parent step to invoke a child DAG that *contains* agent steps.
+`action: dag.run` and `action: agent.run` cannot be on the **same** step. Use `action: dag.run` on a parent step to invoke a child DAG that *contains* agent steps.
 :::
 
 ## Prerequisites
@@ -26,11 +26,13 @@ A parent DAG calls a child DAG that contains a single agent step. The agent's ou
 ```yaml
 # parent.yaml
 steps:
-  - call: agent-child
-    params: "TARGET_FILE=src/main.go"
+  - action: dag.run
+    with:
+      dag: agent-child
+      params: "TARGET_FILE=src/main.go"
     output: CHILD_RESULT
 
-  - command: echo "Agent said - ${CHILD_RESULT.outputs.REVIEW}"
+  - run: echo "Agent said - ${CHILD_RESULT.outputs.REVIEW}"
 ```
 
 ```yaml
@@ -39,10 +41,11 @@ params:
   - TARGET_FILE
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Review the code in ${TARGET_FILE} for bugs and suggest fixes."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Review the code in ${TARGET_FILE} for bugs and suggest fixes."
     output: REVIEW
 ```
 
@@ -68,11 +71,13 @@ Define both parent and child in a single file using the `---` separator. The par
 
 ```yaml
 steps:
-  - call: code-reviewer
-    params: "FILE=README.md"
+  - action: dag.run
+    with:
+      dag: code-reviewer
+      params: "FILE=README.md"
     output: RESULT
 
-  - command: echo "Review - ${RESULT.outputs.SUMMARY}"
+  - run: echo "Review - ${RESULT.outputs.SUMMARY}"
 
 ---
 
@@ -81,10 +86,11 @@ params:
   - FILE
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Summarize the contents of ${FILE} in one paragraph."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Summarize the contents of ${FILE} in one paragraph."
     output: SUMMARY
 ```
 
@@ -94,8 +100,10 @@ Use `params` on the `call` step to pass values into the child DAG. The child DAG
 
 ```yaml
 steps:
-  - call: service-analyzer
-    params: "SERVICE_NAME=auth LOG_DIR=/var/log/auth"
+  - action: dag.run
+    with:
+      dag: service-analyzer
+      params: "SERVICE_NAME=auth LOG_DIR=/var/log/auth"
     output: ANALYSIS
 
 ---
@@ -106,13 +114,14 @@ params:
   - LOG_DIR
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Analyze the ${SERVICE_NAME} service.
-          Check logs in ${LOG_DIR} for errors from the last hour.
-          Summarize root causes and suggest fixes.
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Analyze the ${SERVICE_NAME} service.
+            Check logs in ${LOG_DIR} for errors from the last hour.
+            Summarize root causes and suggest fixes.
     output: FINDINGS
 ```
 
@@ -124,22 +133,34 @@ Run multiple child agent DAGs in sequence, passing each agent's output to the ne
 
 ```yaml
 steps:
-  - call: analyzer-agent
-    params: "REPO_PATH=/app/src"
+  - id: analyze
+    action: dag.run
+    with:
+      dag: analyzer-agent
+      params: "REPO_PATH=/app/src"
     output: FIRST
 
-  - call: implementer-agent
-    params: "ANALYSIS=${FIRST.outputs.FINDINGS} REPO_PATH=/app/src"
+  - id: implement
+    action: dag.run
+    with:
+      dag: implementer-agent
+      params: "ANALYSIS=${FIRST.outputs.FINDINGS} REPO_PATH=/app/src"
+    depends: [analyze]
     output: SECOND
 
-  - call: verifier-agent
-    params: "CHANGES=${SECOND.outputs.CHANGES} REPO_PATH=/app/src"
+  - id: verify
+    action: dag.run
+    with:
+      dag: verifier-agent
+      params: "CHANGES=${SECOND.outputs.CHANGES} REPO_PATH=/app/src"
+    depends: [implement]
     output: THIRD
 
-  - command: echo "Verification - ${THIRD.outputs.VERDICT}"
+  - run: echo "Verification - ${THIRD.outputs.VERDICT}"
+    depends: [verify]
 ```
 
-Each child DAG contains its own `type: agent` step focused on a specific task — analysis, implementation, or verification.
+Each child DAG contains its own `action: agent.run` step focused on a specific task — analysis, implementation, or verification.
 
 ## Parallel Agent Sub-DAGs
 
@@ -147,14 +168,16 @@ Use `parallel.items` and `parallel.max_concurrent` to run the same agent child D
 
 ```yaml
 steps:
-  - call: file-reviewer
+  - action: dag.run
+    with:
+      dag: file-reviewer
+      params: "FILE=${ITEM}"
     parallel:
       items: ["src/auth.go", "src/api.go", "src/db.go"]
       max_concurrent: 3
-    params: "FILE=${ITEM}"
     output: REVIEWS
 
-  - command: |
+  - run: |
       echo "Total: ${REVIEWS.summary.total}"
       echo "Succeeded: ${REVIEWS.summary.succeeded}"
 
@@ -165,10 +188,11 @@ params:
   - FILE
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Review ${FILE} for security issues. Be concise."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Review ${FILE} for security issues. Be concise."
     output: RESULT
 ```
 
@@ -213,28 +237,37 @@ Access individual results with `${REVIEWS.outputs[0].RESULT}`, `${REVIEWS.output
 
 ## Mixing Agent Steps and Sub-DAG Calls
 
-A parent DAG can have both `type: agent` steps and `call` steps. An agent step's output can feed into a sub-DAG call, or vice versa.
+A parent DAG can have both `action: agent.run` steps and `action: dag.run` steps. An agent step's output can feed into a sub-DAG call, or vice versa.
 
 ```yaml
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "List the top 3 files to refactor in /app/src. Output just the file paths, one per line."
+  - id: plan
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "List the top 3 files to refactor in /app/src. Output just the file paths, one per line."
     output: FILE_LIST
 
-  - call: refactor-agent
-    params: "FILES=${FILE_LIST}"
+  - id: refactor
+    action: dag.run
+    with:
+      dag: refactor-agent
+      params: "FILES=${FILE_LIST}"
+    depends: [plan]
     output: REFACTOR_RESULT
 
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          The refactoring agent reported:
-          ${REFACTOR_RESULT.outputs.CHANGES}
+  - id: summarize
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            The refactoring agent reported:
+            ${REFACTOR_RESULT.outputs.CHANGES}
 
-          Write a brief summary of what was changed and why.
+            Write a brief summary of what was changed and why.
+    depends: [refactor]
     output: SUMMARY
 ```
 
@@ -251,29 +284,36 @@ type: graph
 
 steps:
   - id: lint_review
-    call: lint-agent
-    params: "REPO_PATH=/app"
+    action: dag.run
+    with:
+      dag: lint-agent
+      params: "REPO_PATH=/app"
     output: LINT
 
   - id: security_review
-    call: security-agent
-    params: "REPO_PATH=/app"
+    action: dag.run
+    with:
+      dag: security-agent
+      params: "REPO_PATH=/app"
     output: SECURITY
 
   - id: docs_review
-    call: docs-agent
-    params: "REPO_PATH=/app"
+    action: dag.run
+    with:
+      dag: docs-agent
+      params: "REPO_PATH=/app"
     output: DOCS
 
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Combine these review results into a single report:
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Combine these review results into a single report:
 
-          Lint: ${LINT.outputs.FINDINGS}
-          Security: ${SECURITY.outputs.FINDINGS}
-          Docs: ${DOCS.outputs.FINDINGS}
+            Lint: ${LINT.outputs.FINDINGS}
+            Security: ${SECURITY.outputs.FINDINGS}
+            Docs: ${DOCS.outputs.FINDINGS}
     depends: [lint_review, security_review, docs_review]
     output: FINAL_REPORT
 ```
@@ -286,11 +326,13 @@ A single-file parent + child agent DAG.
 
 ```yaml
 steps:
-  - call: log-analyzer
-    params: "LOG_PATH=/var/log/app.log"
+  - action: dag.run
+    with:
+      dag: log-analyzer
+      params: "LOG_PATH=/var/log/app.log"
     output: RESULT
 
-  - command: echo "${RESULT.outputs.ANALYSIS}"
+  - run: echo "${RESULT.outputs.ANALYSIS}"
 
 ---
 
@@ -299,10 +341,11 @@ params:
   - LOG_PATH
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Read ${LOG_PATH} and identify the most frequent error patterns."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Read ${LOG_PATH} and identify the most frequent error patterns."
     output: ANALYSIS
 ```
 
@@ -312,14 +355,16 @@ Run the same agent child DAG across multiple inputs concurrently.
 
 ```yaml
 steps:
-  - call: service-health-check
+  - action: dag.run
+    with:
+      dag: service-health-check
+      params: "SERVICE=${ITEM}"
     parallel:
       items: ["auth", "payments", "notifications"]
       max_concurrent: 3
-    params: "SERVICE=${ITEM}"
     output: HEALTH
 
-  - command: |
+  - run: |
       echo "Health check complete: ${HEALTH.summary.succeeded}/${HEALTH.summary.total} passed"
 
 ---
@@ -329,10 +374,11 @@ params:
   - SERVICE
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Check the health of the ${SERVICE} service. Report status and any issues found."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Check the health of the ${SERVICE} service. Report status and any issues found."
     output: STATUS
 ```
 
@@ -342,24 +388,33 @@ An agent produces a plan, a sub-DAG executes it, and another agent summarizes th
 
 ```yaml
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Analyze /app/src and create a test plan. List files that need tests."
+  - id: plan
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Analyze /app/src and create a test plan. List files that need tests."
     output: TEST_PLAN
 
-  - call: test-writer
-    params: "PLAN=${TEST_PLAN}"
+  - id: write_tests
+    action: dag.run
+    with:
+      dag: test-writer
+      params: "PLAN=${TEST_PLAN}"
+    depends: [plan]
     output: EXECUTION
 
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Test writing results:
-          ${EXECUTION.outputs.RESULTS}
+  - id: summarize
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Test writing results:
+            ${EXECUTION.outputs.RESULTS}
 
-          Summarize what was accomplished and any remaining gaps.
+            Summarize what was accomplished and any remaining gaps.
+    depends: [write_tests]
     output: SUMMARY
 ```
 

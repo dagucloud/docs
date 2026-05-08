@@ -6,12 +6,13 @@ Run the AI agent as a workflow step. The agent executes a multi-turn tool-callin
 
 ```yaml
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Analyze the error logs at /var/log/app/errors.log from the last hour.
-          Summarize the root causes and suggest fixes.
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Analyze the error logs at /var/log/app/errors.log from the last hour.
+            Summarize the root causes and suggest fixes.
     output: ANALYSIS_RESULT
 ```
 
@@ -19,12 +20,12 @@ The agent uses the default model configured in Steward Settings (`/agent-setting
 
 ## Configuration
 
-The `agent` block is optional. When omitted, the step uses defaults from global Steward Settings.
+The `with` block is optional. When omitted, the action uses defaults from global Steward Settings.
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       model: claude-sonnet
       tools:
         enabled:
@@ -34,9 +35,9 @@ steps:
       prompt: |
         Focus only on files in /etc/app/.
       max_iterations: 30
-    messages:
-      - role: user
-        content: "Fix the invalid database_url in /etc/app/config.yaml"
+      messages:
+        - role: user
+          content: "Fix the invalid database_url in /etc/app/config.yaml"
     output: RESULT
 ```
 
@@ -57,15 +58,15 @@ steps:
 
 The agent step resolves its model from global Steward Settings (configured at `/agent-settings`):
 
-1. If `agent.model` is set in the step, look up that model ID in the global `ModelStore`
-2. If `agent.model` is omitted, use the global default model (`DefaultModelID` from Steward Settings)
-3. If no default model is configured, the step fails with: `"no model configured; set a default model in Steward Settings or specify agent.model in the step"`
+1. If `with.model` is set in the step, look up that model ID in the global `ModelStore`
+2. If `with.model` is omitted, use the global default model (`DefaultModelID` from Steward Settings)
+3. If no default model is configured, the step fails with: `"no model configured; set a default model in Steward Settings or specify with.model in the step"`
 
 Model configuration (provider, API key, base URL) is managed entirely through Steward Settings. This avoids duplicating credentials in DAG files.
 
 ## DAG-Level Defaults
 
-Use `defaults.agent` to set default agent configuration for all agent-type steps in the DAG. Each field is applied only when the step does not set its own value.
+Use `defaults.agent` to set default agent configuration for all `action: agent.run` steps in the DAG. Each field is applied only when the step does not set its own value.
 
 ```yaml
 defaults:
@@ -75,22 +76,23 @@ defaults:
     max_iterations: 30
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Analyze the logs"
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Analyze the logs"
     # Uses defaults: model=claude-opus, soul=tsumugi, max_iterations=30
 
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       model: claude-sonnet   # overrides defaults.agent.model
-    messages:
-      - role: user
-        content: "Review the analysis"
+      messages:
+        - role: user
+          content: "Review the analysis"
     # Uses model=claude-sonnet (override), soul=tsumugi (default), etc.
 ```
 
-**Resolution order (per field):** `step.agent.<field>` → `defaults.agent.<field>` → built-in default
+**Resolution order (per field):** `step.with.<field>` → `defaults.agent.<field>` → built-in default
 
 ### Supported Default Fields
 
@@ -250,10 +252,11 @@ params:
   - OUTPUT_DIR
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Analyze ${INPUT_FILE} and write results to ${OUTPUT_DIR}"
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Analyze ${INPUT_FILE} and write results to ${OUTPUT_DIR}"
     output: RESULT
 ```
 
@@ -294,13 +297,14 @@ The step's `output` field captures whatever the agent writes to stdout via the `
 
 ```yaml
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Count the number of .go files in this directory"
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Count the number of .go files in this directory"
     output: FILE_COUNT
 
-  - command: echo "Found ${FILE_COUNT} Go files"
+  - run: echo "Found ${FILE_COUNT} Go files"
 ```
 
 The agent is instructed (via system prompt) to call the `output` tool with its final result. The content is written directly to stdout and captured by the `output` field.
@@ -313,10 +317,11 @@ If the agent never calls the `output` tool, the output variable will be empty.
 
 ```yaml
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Summarize the README.md in this repository"
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Summarize the README.md in this repository"
     output: SUMMARY
 ```
 
@@ -324,12 +329,12 @@ steps:
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       model: claude-opus
-    messages:
-      - role: user
-        content: "Review the code in src/main.go for bugs and security issues"
+      messages:
+        - role: user
+          content: "Review the code in src/main.go for bugs and security issues"
     output: REVIEW
 ```
 
@@ -337,15 +342,15 @@ steps:
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       tools:
         enabled:
           - read
           - think
-    messages:
-      - role: user
-        content: "Analyze the architecture of this codebase without modifying anything"
+      messages:
+        - role: user
+          content: "Analyze the architecture of this codebase without modifying anything"
     output: ANALYSIS
 ```
 
@@ -353,8 +358,8 @@ steps:
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       tools:
         bash_policy:
           default_behavior: deny
@@ -367,9 +372,9 @@ steps:
         Check the deployment status of the staging environment.
         Only use read-only kubectl and helm commands.
       max_iterations: 20
-    messages:
-      - role: user
-        content: "Report the health of all pods in the staging namespace"
+      messages:
+        - role: user
+          content: "Report the health of all pods in the staging namespace"
     output: HEALTH_REPORT
 ```
 
@@ -380,23 +385,24 @@ params:
   - REPO_PATH
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Analyze the test coverage of ${REPO_PATH} and identify untested code paths"
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Analyze the test coverage of ${REPO_PATH} and identify untested code paths"
     output: COVERAGE_ANALYSIS
 
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       model: claude-opus
       max_iterations: 100
-    messages:
-      - role: user
-        content: |
-          Based on this analysis:
-          ${COVERAGE_ANALYSIS}
+      messages:
+        - role: user
+          content: |
+            Based on this analysis:
+            ${COVERAGE_ANALYSIS}
 
-          Write unit tests for the untested code paths in ${REPO_PATH}.
+            Write unit tests for the untested code paths in ${REPO_PATH}.
     output: TEST_RESULT
 ```
 
@@ -407,19 +413,21 @@ type: graph
 
 steps:
   - id: draft
-    type: agent
-    messages:
-      - role: user
-        content: "Draft a migration plan for upgrading the database from v3 to v4"
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Draft a migration plan for upgrading the database from v3 to v4"
     output: MIGRATION_PLAN
     approval:
       prompt: "Review the migration plan and approve if acceptable"
 
   - id: execute
-    type: agent
-    messages:
-      - role: user
-        content: "Execute the approved migration plan: ${MIGRATION_PLAN}"
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Execute the approved migration plan: ${MIGRATION_PLAN}"
     depends: [draft]
 ```
 
@@ -427,7 +435,7 @@ steps:
 
 - [Steward Overview](/features/agent/) — Web UI steward with sessions and interactive tools
 - [Steward Tools Reference](/features/agent/tools) — Full parameter documentation for each tool
-- [Chat & AI Agents](/features/chat/) — `type: chat` for simple LLM calls with DAG-based tools
+- [Chat & AI Agents](/features/chat/) — `action: chat.completion` for simple LLM calls with DAG-based tools
 - [Approval](/writing-workflows/approval) — Human approval gates
 - [Scheduled Agents](/features/agent/scheduling) — Running agent steps on a cron schedule
 - [Nested Agents](/features/agent/nesting) — Compose agent workflows hierarchically via sub-DAGs

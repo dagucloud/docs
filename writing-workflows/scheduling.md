@@ -113,7 +113,7 @@ Schedule workflows with cron expressions:
 ```yaml
 schedule: "0 2 * * *"  # Daily at 2 AM
 steps:
-  - command: echo "Processing scheduled task"
+  - run: echo "Processing scheduled task"
 ```
 
 ## Multiple Schedules
@@ -125,7 +125,7 @@ schedule:
   - "0 9 * * MON-FRI"   # Weekdays at 9 AM
   - "0 14 * * SAT,SUN"  # Weekends at 2 PM
 steps:
-  - command: echo "Running job"
+  - run: echo "Running job"
 ```
 
 ## Timezone Support
@@ -146,7 +146,7 @@ Use `at` entries when a DAG should run exactly once at a specific timestamp. Dag
 schedule:
   - at: "2026-03-29T09:30:00+09:00"
 steps:
-  - command: echo "Run once"
+  - run: echo "Run once"
 ```
 
 Or under `schedule.start`:
@@ -156,7 +156,7 @@ schedule:
   start:
     - at: "2026-03-29T09:30:00+09:00"
 steps:
-  - command: echo "Run once"
+  - run: echo "Run once"
 ```
 
 The explicit form is also accepted:
@@ -192,7 +192,7 @@ schedule:
   start: "0 8 * * *"   # Start at 8 AM
   stop: "0 18 * * *"   # Stop at 6 PM
 steps:
-  - command: echo "Running service"
+  - run: echo "Running service"
 ```
 
 `stop` and `restart` schedules remain cron-only. One-off `at` entries are rejected there.
@@ -231,7 +231,7 @@ schedule: "*/5 * * * *"  # Every 5 minutes
 skip_if_successful: true   # Skip if last run succeeded
 
 steps:
-  - command: echo "Checking status"
+  - run: echo "Checking status"
 ```
 
 ## Catchup (Missed Run Replay)
@@ -253,7 +253,7 @@ schedule: "0 * * * *"
 catchup_window: "6h"
 
 steps:
-  - command: ./hourly-job.sh
+  - run: ./hourly-job.sh
 ```
 
 If the scheduler was down from 10:00 to 14:00 and restarts at 14:00, it replays the 10:00, 11:00, 12:00, 13:00, and 14:00 runs in chronological order, one per scheduler tick (one tick per minute).
@@ -329,7 +329,7 @@ catchup_window: "6h"
 overlap_policy: "skip"
 
 steps:
-  - command: ./slow-job.sh
+  - run: ./slow-job.sh
 ```
 
 | Value | Behavior |
@@ -365,7 +365,7 @@ queue: batch-jobs  # Assign to queue for concurrency control
 
 schedule: "*/10 * * * *"
 steps:
-  - command: echo "Running batch process"
+  - run: echo "Running batch process"
 ```
 
 When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).

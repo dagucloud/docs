@@ -1,6 +1,6 @@
 # Log
 
-Write a message to stdout without running a shell command. Use `log` for progress markers, status messages, and values you want to expose in the DAG run log without wrapping `echo` in a `command` step.
+Write a message to stdout without running a shell command. Use `action: log.write` for progress markers, status messages, and values you want to expose in the DAG run log without wrapping `echo` in a shell step.
 
 ## Basic Usage
 
@@ -10,7 +10,7 @@ params:
 
 steps:
   - id: announce
-    type: log
+    action: log.write
     with:
       message: "Deploying to ${ENVIRONMENT}"
 ```
@@ -29,7 +29,7 @@ If `message` does not end with a newline, Dagu appends one.
 |-------|------|----------|-------------|
 | `message` | string | Yes | Message to write to stdout. Supports Dagu variable substitution. |
 
-`log` only accepts `with.message`. Other `with` fields are rejected during validation.
+`log.write` only accepts `with.message`. Other `with` fields are rejected during validation.
 
 ## Variables
 
@@ -43,12 +43,12 @@ params:
 
 steps:
   - id: version
-    command: git rev-parse --short HEAD
+    run: git rev-parse --short HEAD
     output: VERSION
 
   - id: announce
     depends: version
-    type: log
+    action: log.write
     with:
       message: "Deploying ${VERSION} to ${ENVIRONMENT}"
 ```
@@ -65,18 +65,18 @@ params:
 
 steps:
   - id: release_line
-    type: log
+    action: log.write
     with:
       message: "release=${VERSION}"
     output: RELEASE_LINE
 
   - id: use_release_line
     depends: release_line
-    command: printf '%s\n' "${RELEASE_LINE}"
+    run: printf '%s\n' "${RELEASE_LINE}"
 ```
 
 ## When to Use `log`
 
-Use `log` when the step only needs to emit text. Use a shell `command` or `script` step when you need shell features such as pipelines, redirects, command substitution, or conditional logic.
+Use `log.write` when the step only needs to emit text. Use `run` when you need shell features such as pipelines, redirects, command substitution, or conditional logic.
 
-`log` does not support `command`, `script`, or multi-command arrays.
+`log.write` does not support shell commands or scripts.

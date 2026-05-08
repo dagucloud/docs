@@ -21,11 +21,11 @@ Capture stdout into a variable and include it in the DAG run's `outputs.json`:
 ```yaml
 steps:
   - id: get_version
-    command: cat VERSION
+    run: cat VERSION
     output: VERSION
 
   - id: build_image
-    command: docker build -t myapp:${VERSION} .
+    run: docker build -t myapp:${VERSION} .
 ```
 
 The captured stdout is trimmed and becomes:
@@ -47,7 +47,7 @@ Object form publishes structured step output instead of a flat variable:
 ```yaml
 steps:
   - id: inspect_build
-    script: |
+    run: |
       printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
     output:
       version:
@@ -61,7 +61,7 @@ steps:
 
   - id: deploy
     depends: [inspect_build]
-    command: |
+    run: |
       echo "Deploying ${inspect_build.output.version}"
       echo "Artifact: ${inspect_build.output.artifact.url}"
 ```
@@ -144,10 +144,10 @@ Nested access works when the output value is structured JSON:
 ```yaml
 steps:
   - id: build
-    command: echo '{"version":"v1.2.3"}'
+    run: echo '{"version":"v1.2.3"}'
     output: BUILD_JSON
 
-  - command: echo "Version: ${build.output.version}"
+  - run: echo "Version: ${build.output.version}"
 ```
 
 For object-form output, nested access is the primary pattern:
@@ -176,11 +176,11 @@ Example:
 ```yaml
 steps:
   - id: build
-    command: cat VERSION
+    run: cat VERSION
     output: BUILD_VERSION
 
   - id: test
-    command: pytest --collect-only -q | tail -1
+    run: pytest --collect-only -q | tail -1
     output: TEST_COUNT
     depends: [build]
 ```

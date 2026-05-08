@@ -16,13 +16,13 @@ Execute Large Language Model (LLM) requests and build AI agents that can use too
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "What is 2+2?"
+      messages:
+        - role: user
+          content: "What is 2+2?"
     output: ANSWER
 ```
 
@@ -31,15 +31,15 @@ steps:
 ```yaml
 # Main DAG that uses tools
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       tools:
         - calculator
-    messages:
-      - role: user
-        content: "What is 15 times 23?"
+      messages:
+        - role: user
+          content: "What is 15 times 23?"
 
 ---
 # Tool DAG definition
@@ -49,7 +49,7 @@ params: "operation a b"
 
 steps:
   - id: calculate
-    script: |
+    run: |
       case "$1" in
         multiply) echo $(($2 * $3)) ;;
         *) echo "Unknown operation" ;;
@@ -106,24 +106,24 @@ type: graph
 
 steps:
   - id: setup
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       system: "You are a math tutor."
-    messages:
-      - role: user
-        content: "What is 2+2?"
+      messages:
+        - role: user
+          content: "What is 2+2?"
 
   - id: followup
     depends: [setup]
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Now multiply that by 3."
+      messages:
+        - role: user
+          content: "Now multiply that by 3."
 ```
 
 The `followup` step automatically inherits session history from `setup`.
@@ -138,15 +138,17 @@ llm:
   temperature: 0.7
 
 steps:
-  - type: chat
-    messages:
-      - role: user
-        content: "Explain quantum computing"
+  - action: chat.completion
+    with:
+      messages:
+        - role: user
+          content: "Explain quantum computing"
 
-  - type: chat
-    messages:
-      - role: user
-        content: "Now explain it to a 5-year-old"
+  - action: chat.completion
+    with:
+      messages:
+        - role: user
+          content: "Now explain it to a 5-year-old"
 ```
 
 Both steps inherit the DAG-level LLM configuration.

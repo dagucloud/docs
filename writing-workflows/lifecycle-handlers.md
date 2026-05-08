@@ -21,21 +21,21 @@ Only the handlers you define are executed. The `init` handler runs first (before
 # dag.yaml
 handler_on:
   init:
-    command: acquire-lock.sh ${LOCK_NAME}   # runs before any steps
+    run: acquire-lock.sh ${LOCK_NAME}   # runs before any steps
   success:
-    command: notify.sh "${DAG_NAME} (${DAG_RUN_ID}) succeeded" # runs after a clean finish
+    run: notify.sh "${DAG_NAME} (${DAG_RUN_ID}) succeeded" # runs after a clean finish
   failure:
-    command: alert.sh "${DAG_NAME} failed" "logs=${DAG_RUN_LOG_FILE}"
+    run: alert.sh "${DAG_NAME} failed" "logs=${DAG_RUN_LOG_FILE}"
   abort:
-    command: rollback.sh --lock ${LOCK_NAME}
+    run: rollback.sh --lock ${LOCK_NAME}
   wait:
-    command: notify-approvers.sh "${DAG_WAITING_STEPS}" # runs when waiting for approval
+    run: notify-approvers.sh "${DAG_WAITING_STEPS}" # runs when waiting for approval
   exit:
-    command: rm -rf /tmp/${DAG_RUN_ID} # always runs
+    run: rm -rf /tmp/${DAG_RUN_ID} # always runs
 
 steps:
-  - command: ./extract.sh
-  - command: ./load.sh
+  - run: ./extract.sh
+  - run: ./load.sh
 ```
 
 Each handler is a normal step definition. You can use `command`, `script`, `call` (or the legacy `run`), `executor`, containers, timeouts, or any other step field that makes sense for a single task.
@@ -64,32 +64,33 @@ Each sub-DAG should define its own handlers explicitly if lifecycle handling is 
 # parent.yaml
 handler_on:
   failure:
-    command: notify.sh "Parent DAG failed"  # Only runs for parent
+    run: notify.sh "Parent DAG failed"  # Only runs for parent
 
 steps:
-  - call: child-workflow
-
+  - action: dag.run
+    with:
+      dag: child-workflow
 ---
 # child-workflow (in same file or separate file)
 name: child-workflow
 handler_on:
   failure:
-    command: notify.sh "Child DAG failed"  # Define explicitly if needed
+    run: notify.sh "Child DAG failed"  # Define explicitly if needed
 
 steps:
-  - command: process-data.sh
+  - run: process-data.sh
 ```
 
 This isolation ensures that each workflow in a hierarchy has predictable, self-contained lifecycle behavior.
 
 ## Patterns and Integrations
 
-### Send Email with the Mail Step Type
+### Send Email with the Mail Action
 
 ```yaml
 handler_on:
   failure:
-    type: mail
+    action: mail.send
     with:
       to: oncall@company.com
       from: dagu@company.com
@@ -104,9 +105,11 @@ handler_on:
 ```yaml
 handler_on:
   success:
-    call: sync-reporting
-    params: |
-      parent_run_id: ${DAG_RUN_ID}
+    action: dag.run
+    with:
+      dag: sync-reporting
+      params: |
+        parent_run_id: ${DAG_RUN_ID}
 ```
 
 ### Guaranteed Cleanup
@@ -114,7 +117,7 @@ handler_on:
 ```yaml
 handler_on:
   exit:
-    command: |
+    run: |
       find /tmp/${DAG_RUN_ID} -maxdepth 1 -type f -delete
 ```
 
@@ -125,15 +128,15 @@ When using [approval steps](/writing-workflows/approval), notify stakeholders:
 ```yaml
 handler_on:
   wait:
-    command: notify-slack.sh "Approval needed: ${DAG_WAITING_STEPS}"
+    run: notify-slack.sh "Approval needed: ${DAG_WAITING_STEPS}"
 
 steps:
   - id: deploy_staging
-    command: ./deploy.sh staging
+    run: ./deploy.sh staging
     approval:
       prompt: "Approve production?"
   - id: deploy_prod
-    command: ./deploy.sh production
+    run: ./deploy.sh production
 ```
 
 The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of step names currently waiting for approval.

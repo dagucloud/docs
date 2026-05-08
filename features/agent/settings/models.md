@@ -33,7 +33,7 @@ The table helps you compare:
 
 The default model is the one the Web UI steward uses unless you override it in a chat session.
 
-Workflow steps with `type: agent` also fall back to this default unless the step sets its own model.
+Workflow steps with `action: agent.run` also fall back to this default unless the step sets its own model.
 
 ## Add Or Edit A Model
 

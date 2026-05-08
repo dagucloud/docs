@@ -6,13 +6,13 @@ Execute Large Language Model (LLM) requests to AI providers like OpenAI, Anthrop
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "What is 2+2?"
+      messages:
+        - role: user
+          content: "What is 2+2?"
     output: ANSWER
 ```
 
@@ -35,7 +35,7 @@ For detailed setup and troubleshooting, especially for Ollama base URLs and Web 
 
 ## Configuration
 
-### LLM Configuration (`llm` field)
+### LLM Configuration (`with` fields)
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -88,7 +88,7 @@ When thinking is enabled for OpenAI reasoning models, `temperature` and `top_p` 
 
 ### Messages (`messages` field)
 
-The `messages` field is a step-level field (not inside `llm`) containing the session messages.
+The `messages` field lives under step `with` and contains the session messages.
 
 | Field | Description |
 |-------|-------------|
@@ -112,23 +112,24 @@ llm:
 
 steps:
   # This step inherits the DAG-level llm config (including thinking)
-  - type: chat
-    messages:
-      - role: user
-        content: "What is 2+2?"
+  - action: chat.completion
+    with:
+      messages:
+        - role: user
+          content: "What is 2+2?"
 
   # This step overrides DAG-level config
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Different provider and model (no thinking)"
+      messages:
+        - role: user
+          content: "Different provider and model (no thinking)"
 ```
 
 ::: warning Full Override Pattern
-When a step specifies `llm:`, it **completely replaces** the DAG-level configuration. There is no field-level merging - the step must provide all required fields (provider, model).
+When a step specifies LLM fields under `with:`, it **completely replaces** the DAG-level configuration. There is no field-level merging - the step must provide all required fields (provider, model).
 :::
 
 ### Inheritance with Base DAG
@@ -156,13 +157,13 @@ secrets:
     key: OPENAI_API_KEY
 
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Explain quantum computing briefly."
+      messages:
+        - role: user
+          content: "Explain quantum computing briefly."
 ```
 
 ### Variable Substitution
@@ -175,13 +176,13 @@ params:
   - LANGUAGE: "Spanish"
 
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
-    messages:
-      - role: user
-        content: "Explain ${TOPIC} in ${LANGUAGE}."
+      messages:
+        - role: user
+          content: "Explain ${TOPIC} in ${LANGUAGE}."
 ```
 
 ### Multi-turn Session
@@ -193,24 +194,24 @@ type: graph
 
 steps:
   - id: setup
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       system: "You are a math tutor."
-    messages:
-      - role: user
-        content: "What is 2+2?"
+      messages:
+        - role: user
+          content: "What is 2+2?"
 
   - id: followup
     depends: [setup]
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Now multiply that by 3."
+      messages:
+        - role: user
+          content: "Now multiply that by 3."
 ```
 
 The `followup` step receives the full session history from `setup`, including the assistant's response.
@@ -233,13 +234,13 @@ The same context is available through `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, 
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: local
       model: llama3
-    messages:
-      - role: user
-        content: "Hello!"
+      messages:
+        - role: user
+          content: "Hello!"
 ```
 
 See [Local AI](/features/chat/local-ai) for the correct Ollama `base_url`, current limitations, and common `404` causes.
@@ -248,29 +249,29 @@ See [Local AI](/features/chat/local-ai) for the correct Ollama `base_url`, curre
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       base_url: "https://my-proxy.example.com/v1"
       api_key_name: CUSTOM_API_KEY
-    messages:
-      - role: user
-        content: "Hello!"
+      messages:
+        - role: user
+          content: "Hello!"
 ```
 
 ### Disable Streaming
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       stream: false
-    messages:
-      - role: user
-        content: "Generate a haiku."
+      messages:
+        - role: user
+          content: "Generate a haiku."
 ```
 
 ### Capture Output
@@ -279,39 +280,39 @@ The response is written to stdout and can be captured with `output`:
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Generate a JSON object with name and age fields."
+      messages:
+        - role: user
+          content: "Generate a JSON object with name and age fields."
     output: CHAT_RESPONSE
 
-  - command: echo "${CHAT_RESPONSE}" | jq '.name'
+  - run: echo "${CHAT_RESPONSE}" | jq '.name'
 ```
 
 ### Temperature Control
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       temperature: 1.5
-    messages:
-      - role: user
-        content: "Write a creative story opening."
+      messages:
+        - role: user
+          content: "Write a creative story opening."
 
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       temperature: 0.1
-    messages:
-      - role: user
-        content: "What is the capital of France?"
+      messages:
+        - role: user
+          content: "What is the capital of France?"
 ```
 
 ### Extended Thinking Mode
@@ -321,40 +322,40 @@ Enable deeper reasoning for complex tasks:
 ```yaml
 steps:
   # Using effort level (recommended)
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       thinking:
         enabled: true
         effort: high
-    messages:
-      - role: user
-        content: "Analyze the security implications of this code..."
+      messages:
+        - role: user
+          content: "Analyze the security implications of this code..."
 
   # Using explicit token budget
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       thinking:
         enabled: true
         budget_tokens: 16384
-    messages:
-      - role: user
-        content: "Solve this complex optimization problem..."
+      messages:
+        - role: user
+          content: "Solve this complex optimization problem..."
 
   # OpenAI reasoning model
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: o3
       thinking:
         enabled: true
         effort: high
-    messages:
-      - role: user
-        content: "Prove this mathematical theorem..."
+      messages:
+        - role: user
+          content: "Prove this mathematical theorem..."
 ```
 
 ### Conditional Routing
@@ -366,54 +367,55 @@ type: graph
 
 steps:
   - id: classify
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       system: "Classify the request. Reply with exactly: bug, feature, or question"
-    messages:
-      - role: user
-        content: "${USER_REQUEST}"
+      messages:
+        - role: user
+          content: "${USER_REQUEST}"
     output: TYPE
 
   - id: route
-    type: router
-    depends: [classify]
-    value: ${TYPE}
-    routes:
-      "bug": [handle_bug]
-      "feature": [handle_feature]
-      "question": [handle_question]
+    action: router.route
+    with:
+      value: ${TYPE}
+      routes:
+        "bug": [handle_bug]
+        "feature": [handle_feature]
+        "question": [handle_question]
 
+    depends: [classify]
   - id: handle_bug
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       system: "You are a debugging expert."
-    messages:
-      - role: user
-        content: "${USER_REQUEST}"
+      messages:
+        - role: user
+          content: "${USER_REQUEST}"
 
   - id: handle_feature
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       system: "You are a product designer."
-    messages:
-      - role: user
-        content: "${USER_REQUEST}"
+      messages:
+        - role: user
+          content: "${USER_REQUEST}"
 
   - id: handle_question
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       system: "You are a helpful assistant."
-    messages:
-      - role: user
-        content: "${USER_REQUEST}"
+      messages:
+        - role: user
+          content: "${USER_REQUEST}"
 ```
 
 The `classify` step analyzes the request and outputs a category. The router then executes only the matching handler.
@@ -448,10 +450,11 @@ llm:
       base_url: http://localhost:11434/v1
 
 steps:
-  - type: chat
-    messages:
-      - role: user
-        content: "What is the capital of France?"
+  - action: chat.completion
+    with:
+      messages:
+        - role: user
+          content: "What is the capital of France?"
 ```
 
 First model is primary, rest are fallbacks tried in order on any error. Shared config (`temperature`, `max_tokens`, `top_p`) applies to all models.
@@ -550,20 +553,20 @@ secrets:
     key: PROD_API_TOKEN
 
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Check if this token is valid: ${API_TOKEN}"
+      messages:
+        - role: user
+          content: "Check if this token is valid: ${API_TOKEN}"
 ```
 
 The `${API_TOKEN}` value is substituted in the message content, but the actual secret is replaced with `*******` before being sent to the LLM provider. The saved session history retains the original content for debugging.
 
 ## Notes
 
-- Use `type: chat` explicitly with LLM configuration in the `llm` field
+- Use `action: chat.completion` with LLM configuration under `with`
 - The `llm` field is designed to be reusable for future executor types like `agent`
 - API keys are read from environment variables by default
 - Response tokens are streamed to stdout by default

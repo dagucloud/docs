@@ -30,7 +30,7 @@ Understanding Dagu is easier once the main terms are clear.
 |------|---------|
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
-| **Step type** | The kind of work a step runs, such as [`command`](/step-types/shell), [`docker`](/step-types/docker), [`kubernetes`](/step-types/kubernetes), [`ssh`](/step-types/ssh), [`http`](/step-types/http), [`postgres`](/step-types/sql/postgresql), [`s3`](/step-types/s3), or [`agent`](/features/agent/step). You can also define custom step types with the [`step_types`](/writing-workflows/custom-step-types) field. |
+| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define custom actions with the [`actions`](/writing-workflows/custom-step-types) field. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
 | **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
 | **Queue** | [Concurrency control](/server-admin/queues) for workflows, useful when jobs must not overlap or when workers are shared. |
@@ -46,16 +46,16 @@ Dagu keeps the workflow definition separate from the code it executes. Your scri
 ```yaml
 steps:
   - id: fetch_orders
-    command: python scripts/fetch_orders.py
+    run: python scripts/fetch_orders.py
 
   - id: normalize
-    command: python scripts/normalize.py
+    run: python scripts/normalize.py
 
   - id: load_warehouse
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${WAREHOUSE_DSN}"
-    command: "CALL load_daily_orders()"
+      query: "CALL load_daily_orders()"
 ```
 
 <div class="overview-lifecycle" aria-label="Dagu workflow lifecycle">
@@ -262,12 +262,11 @@ Dagu includes AI features, but they build on the same command-native workflow mo
 ```yaml
 steps:
   - id: analyze_logs
-    type: agent
-    messages:
-      - role: user
-        content: |
-          Analyze /var/log/app/errors.log from the last hour.
-          Summarize likely causes and suggest a safe recovery plan.
+    action: agent.run
+    with:
+      task: |
+        Analyze /var/log/app/errors.log from the last hour.
+        Summarize likely causes and suggest a safe recovery plan.
     output: ANALYSIS_RESULT
 ```
 
@@ -289,7 +288,7 @@ Workflow Operator connects Slack or Telegram to the built-in steward, so teams c
     <p>Learn workflows, steps, dependencies, parameters, and execution behavior.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/step-types/shell">Step Types</a></h3>
+    <h3><a href="/step-types/shell">Actions</a></h3>
     <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, S3, and agent execution.</p>
   </div>
   <div class="step-card">

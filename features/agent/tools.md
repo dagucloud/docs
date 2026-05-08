@@ -213,7 +213,7 @@ If tasks were truncated:
 
 Task descriptions in the output are truncated to 60 characters.
 
-**Availability**: Interactive chat only. Not available in DAG agent steps (`type: agent`). Calling `delegate` in a DAG agent step returns `"Delegate capability is not available in this context"`.
+**Availability**: Interactive chat only. Not available in DAG agent steps (`action: agent.run`). Calling `delegate` in a DAG agent step returns `"Delegate capability is not available in this context"`.
 
 **Sub-sessions**: Each delegated agent gets its own chat session so you can inspect its work separately when needed. The tool result includes `delegate_ids` for follow-up automation.
 

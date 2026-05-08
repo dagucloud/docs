@@ -22,10 +22,10 @@ For simple cases, use a string value:
 
 ```yaml
 steps:
-  - command: rm -rf /tmp/cache/*
+  - run: rm -rf /tmp/cache/*
     continue_on: failed    # Continue if step fails
 
-  - command: echo "Optional"
+  - run: echo "Optional"
     continue_on: skipped   # Continue if step is skipped
 ```
 
@@ -35,7 +35,7 @@ For advanced configuration with multiple options:
 
 ```yaml
 steps:
-  - command: echo "Complex case"
+  - run: echo "Complex case"
     continue_on:
       failure: true
       exit_code: [0, 1, 2]
@@ -65,12 +65,12 @@ When set to `true`, the workflow continues even if the step fails with any non-z
 steps:
   # Shorthand syntax
   - id: optional_cleanup
-    command: rm -rf /tmp/cache/*
+    run: rm -rf /tmp/cache/*
     continue_on: failed
 
   # Object syntax (equivalent)
   - id: optional_cleanup
-    command: rm -rf /tmp/cache/*
+    run: rm -rf /tmp/cache/*
     continue_on:
       failure: true
 ```
@@ -83,7 +83,7 @@ When set to `true`, the workflow continues when a step is skipped due to unmet p
 steps:
   # Shorthand syntax
   - id: conditional_task
-    command: echo "Processing"
+    run: echo "Processing"
     preconditions:
       - condition: "${ENABLE_FEATURE}"
         expected: "true"
@@ -91,7 +91,7 @@ steps:
 
   # Object syntax (equivalent)
   - id: conditional_task
-    command: echo "Processing"
+    run: echo "Processing"
     preconditions:
       - condition: "${ENABLE_FEATURE}"
         expected: "true"
@@ -106,7 +106,7 @@ An array of specific exit codes that should not stop the workflow. This is usefu
 ```yaml
 steps:
   - id: check_service
-    command: echo "Health check OK"
+    run: echo "Health check OK"
     continue_on:
       exit_code: [0, 1, 2]  # 0=healthy, 1=warning, 2=maintenance
 ```
@@ -118,7 +118,7 @@ An array of patterns to match against the command's stdout output. Supports both
 ```yaml
 steps:
   - id: validate_data
-    command: echo "Validating"
+    run: echo "Validating"
     continue_on:
       output:
         - "WARNING"                    # Literal string match (substring)
@@ -140,7 +140,7 @@ When set to `true`, the step is marked as successful if any of the continue cond
 ```yaml
 steps:
   - id: best_effort_optimization
-    command: echo "Optimizing"
+    run: echo "Optimizing"
     continue_on:
       failure: true
       mark_success: true  # Step shows as successful in UI/logs
@@ -155,11 +155,11 @@ For steps that are nice-to-have but not critical:
 ```yaml
 steps:
   - id: cache_warmup
-    command: echo "Warming cache"
+    run: echo "Warming cache"
     continue_on: failed
 
   - id: main_process
-    command: echo "Processing"
+    run: echo "Processing"
 ```
 
 ### Handling Known Exit Codes
@@ -169,12 +169,12 @@ When working with tools that use exit codes for non-error states:
 ```yaml
 steps:
   - id: git_diff
-    command: git diff --exit-code
+    run: git diff --exit-code
     continue_on:
       exit_code: [0, 1]  # 0=no changes, 1=changes exist
 
   - id: process_changes
-    command: echo "Handling changes"
+    run: echo "Handling changes"
 ```
 
 ### Warning Detection
@@ -184,13 +184,13 @@ Continue execution but handle warnings differently:
 ```yaml
 steps:
   - id: lint_code
-    command: eslint .
+    run: eslint .
     continue_on:
       output: ["WARNING", "re:.*warning.*"]
       exit_code: [0, 1]  # 0=no issues, 1=warnings only
 
   - id: strict_lint
-    command: eslint . --max-warnings 0
+    run: eslint . --max-warnings 0
     continue_on:
       failure: false  # This one must pass
 ```
@@ -202,11 +202,11 @@ Build workflows that degrade gracefully:
 ```yaml
 steps:
   - id: try_optimal_method
-    command: echo "Processing with optimal settings"
+    run: echo "Processing with optimal settings"
     continue_on: failed
 
   - id: fallback_method
-    command: echo "Processing with fallback settings"
+    run: echo "Processing with fallback settings"
     preconditions:
       - condition: "${TRY_OPTIMAL_METHOD_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"  # Only run if previous failed
@@ -219,7 +219,7 @@ React to specific output patterns:
 ```yaml
 steps:
   - id: deployment_check
-    command: kubectl rollout status deployment/app
+    run: kubectl rollout status deployment/app
     continue_on:
       output:
         - "re:Waiting for.*replicas"
@@ -228,7 +228,7 @@ steps:
       exit_code: [1]
 
   - id: handle_deployment_issue
-    command: echo "Fixing deployment"
+    run: echo "Fixing deployment"
 ```
 
 ## Interaction with Other Features
@@ -240,7 +240,7 @@ steps:
 ```yaml
 steps:
   - id: flaky_service
-    command: echo "Calling service"
+    run: echo "Calling service"
     retry_policy:
       limit: 3
       interval_sec: 5
@@ -255,11 +255,11 @@ When a step with `continue_on` fails but the DAG continues, the final status is 
 ```yaml
 handler_on:
   success:
-    command: echo "DAG completed (status: ${DAG_RUN_STATUS})"  # partially_succeeded
+    run: echo "DAG completed (status: ${DAG_RUN_STATUS})"  # partially_succeeded
 
 steps:
   - id: optional_step
-    command: exit 1
+    run: exit 1
     continue_on: failed  # Continues, DAG ends as partially_succeeded
 ```
 
@@ -271,23 +271,23 @@ Dependent steps see the actual status unless `mark_success` is used:
 type: graph
 steps:
   - id: step_a
-    command: exit 1
+    run: exit 1
     continue_on:
       failure: true
       mark_success: false  # Default
 
   - id: step_b
-    command: echo "Step A status: failed"
+    run: echo "Step A status: failed"
     depends: [step_a]  # Runs because of continue_on
 
   - id: step_c
-    command: exit 1
+    run: exit 1
     continue_on:
       failure: true
       mark_success: true  # Override status
 
   - id: step_d
-    command: echo "Step C status: success"
+    run: echo "Step C status: success"
     depends: [step_c]  # Sees step-c as successful
 ```
 
@@ -298,7 +298,7 @@ steps:
 ```yaml
 steps:
   - id: run_migration
-    command: echo "Running migration"
+    run: echo "Running migration"
     continue_on:
       output:
         - "re:WARNING:.*already exists"
@@ -306,7 +306,7 @@ steps:
       exit_code: [0, 1]  # 1 might indicate warnings
 
   - id: verify_migration
-    command: echo "Verifying database"
+    run: echo "Verifying database"
 ```
 
 ### Multi-Cloud Deployment
@@ -314,15 +314,15 @@ steps:
 ```yaml
 steps:
   - id: deploy_aws
-    command: echo "Deploying to AWS"
+    run: echo "Deploying to AWS"
     continue_on: failed  # Continue even if AWS fails
 
   - id: deploy_gcp
-    command: echo "Deploying to GCP"
+    run: echo "Deploying to GCP"
     continue_on: failed  # Continue even if GCP fails
 
   - id: verify_deployment
-    command: echo "Verifying cloud deployment"
+    run: echo "Verifying cloud deployment"
     # No continue_on - at least one cloud must be working
 ```
 
@@ -331,12 +331,12 @@ steps:
 ```yaml
 steps:
   - id: check_primary
-    command: curl -f https://primary.example.com/health
+    run: curl -f https://primary.example.com/health
     continue_on:
       exit_code: [0, 22, 7]  # 22=HTTP error, 7=connection failed
 
   - id: check_secondary
-    command: curl -f https://secondary.example.com/health
+    run: curl -f https://secondary.example.com/health
     preconditions:
       - condition: "${CHECK_PRIMARY_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"  # Only if primary failed

@@ -47,7 +47,7 @@ worker_selector:
   gpu: "true"
 
 steps:
-  - command: python train.py
+  - run: python train.py
 ```
 
 When the coordinator dispatches this DAG, it selects a worker whose labels include `gpu=true`.
@@ -58,25 +58,27 @@ Set `worker_selector` on a step to dispatch that step's sub-DAG to a different w
 
 ```yaml
 steps:
-  - call: train-model
+  - action: dag.run
+    with:
+      dag: train-model
     worker_selector:
       gpu: "true"
 
-  - call: generate-report
+  - action: dag.run
+    with:
+      dag: generate-report
     worker_selector:
       region: "us-east-1"
 ```
 
-Step-level `worker_selector` is only valid on executor types that launch sub-DAGs:
+Step-level `worker_selector` is only valid on actions that launch sub-DAGs:
 
-| Executor Type | Supports `worker_selector` |
-|---------------|--------------------------|
-| `dag` | Yes |
-| `subworkflow` | Yes |
-| `parallel` | Yes |
-| All others (`shell`, `http`, `docker`, etc.) | No — validation error |
+| Action | Supports `worker_selector` |
+|--------|----------------------------|
+| `dag.run` | Yes |
+| All others (`run`, `http.request`, `docker.run`, etc.) | No — validation error |
 
-Setting `worker_selector` on an unsupported step type produces a validation error: `executor type "shell" does not support worker_selector field`.
+Setting `worker_selector` on an unsupported action produces a validation error.
 
 ## `worker_selector: local`
 
@@ -86,7 +88,7 @@ Setting `worker_selector` to the string `"local"` (case-insensitive) forces the 
 worker_selector: local
 
 steps:
-  - command: curl -f http://localhost:8080/health
+  - run: curl -f http://localhost:8080/health
 ```
 
 The string `"local"` is the only allowed string value for `worker_selector`. Any other string value produces a validation error.
@@ -109,28 +111,31 @@ DAG with both DAG-level and step-level selectors:
 # Parent DAG — runs on any worker (or locally)
 steps:
   # Dispatched to a GPU worker
-  - call: train-model
+  - action: dag.run
+    with:
+      dag: train-model
     worker_selector:
       gpu: "true"
 
   # Dispatched to a CPU worker
-  - call: aggregate-results
+  - action: dag.run
+    with:
+      dag: aggregate-results
     worker_selector:
       cpu-optimized: "true"
-
 ---
 name: train-model
 worker_selector:
   gpu: "true"
 steps:
-  - command: python train.py
+  - run: python train.py
 
 ---
 name: aggregate-results
 worker_selector:
   cpu-optimized: "true"
 steps:
-  - command: python aggregate.py
+  - run: python aggregate.py
 ```
 
 The parent DAG's dispatch decision and each child's dispatch decision are evaluated independently. See [Distributed Execution — Sub-DAG Dispatch](/server-admin/distributed/#sub-dag-dispatch) for details.

@@ -8,13 +8,13 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
   ```yaml
   shell: powershell -NoProfile
   steps:
-    - command: Write-Host "Runs with PowerShell"
+    - run: Write-Host "Runs with PowerShell"
   ```
 - **Step override** (evaluated at runtime so params/secrets/outputs are allowed):
   ```yaml
   steps:
     - shell: ${SHELL_OVERRIDE:-pwsh -NoProfile}
-      command: Write-Host "Runs in the step shell"
+      run: Write-Host "Runs in the step shell"
   ```
 - **Fallback**: If no shell is set, Dagu prefers PowerShell, then `pwsh`, then `cmd.exe`.
 - **String or array**: `shell` accepts either `"powershell -NoProfile"` or `["powershell", "-NoProfile"]`; arrays avoid quoting issues.
@@ -24,11 +24,11 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 - **Inline command string**:
   ```yaml
   steps:
-    - command: Write-Host "Hello from PowerShell"
+    - run: Write-Host "Hello from PowerShell"
     - shell: cmd
-      command: echo Hello from cmd
+      run: echo Hello from cmd
     - shell: cmd
-      command: |
+      run: |
         @echo off
         echo Multi-line command block
         echo Runs as a script (not split into args)
@@ -36,7 +36,8 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 - **Structured direct exec**:
   ```yaml
   steps:
-    - exec:
+    - action: exec
+      with:
         command: C:\Windows\System32\cmd.exe
         args:
           - /c
@@ -47,7 +48,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
   ```yaml
   steps:
     - shell: powershell
-      script: |
+      run: |
         Write-Host "Multi-line script"
         Get-Date
   ```
@@ -55,17 +56,17 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 - **Interpreter + inline script**:
   ```yaml
   steps:
-    - command: powershell
-      script: |
+    - shell: powershell
+      run: |
         Write-Host "Inline ps1 body"
   ```
 - **Working directory and env**: Use `working_dir` and `env` on the step (or DAG defaults) to control context.
 
 ## Script Behavior (Windows)
 
-- A `script:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
+- A `run:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
 - With PowerShell/pwsh, the script is stored as `.ps1` and executed by the selected shell. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` and `$PSNativeCommandUseErrorActionPreference = $true` so cmdlet errors and native command failures stop execution. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
-- When both `command` and `script` are set, `command` is treated as the interpreter and receives the script path directly (no shell wrapper) — useful for `command: powershell` with inline code.
+- When both `shell` and a multi-line `run` block are set, the shell value is used as the interpreter.
 
 ## Shell Options
 
@@ -77,7 +78,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
   ```yaml
   steps:
     - shell: cmd
-      command: |
+      run: |
         @echo off
         rem Command || (What to do if it fails)
         copy file.txt destination_folder\ || exit /b 1
@@ -86,16 +87,17 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
   ```
 
 - **Direct execution (no shell parsing)**  
-  Use `exec:` for explicit argv:
+  Use `action: exec` for explicit argv:
   ```yaml
   steps:
-    - exec:
+    - action: exec
+      with:
         command: "C:\\Program Files\\Git\\bin\\bash.exe"
         args:
           - -c
           - echo from bash in direct mode
   ```
-  `exec` cannot be combined with `command`, `script`, `shell`, or `shell_packages`.
+  `action: exec` bypasses shell parsing and uses explicit `with.command` / `with.args`.
 
 ## Tips
 

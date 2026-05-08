@@ -39,7 +39,7 @@ secrets:
     key: PROD_SLACK_TOKEN
 
 steps:
-  - command: ./notify.sh
+  - run: ./notify.sh
 ```
 
 The step process receives `SLACK_TOKEN`, not only `PROD_SLACK_TOKEN`.
@@ -61,7 +61,7 @@ secrets:
     key: PROD_API_TOKEN
 
 steps:
-  - command: ./deploy.sh
+  - run: ./deploy.sh
 ```
 
 Because the value is resolved through `secrets:`, `API_TOKEN` is tracked as a secret. The original dotenv variable `PROD_API_TOKEN` is not tracked as a secret unless it is also declared in `secrets:`.

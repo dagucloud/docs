@@ -7,10 +7,11 @@ Process and transform JSON data using jq.
 ```yaml
 steps:
   - id: extract_field
-    type: jq
-    command: '.name'
-    script: |
-      {"name": "John Doe", "age": 30, "city": "New York"}
+    action: jq.filter
+    with:
+      filter: '.name'
+      data: |
+        {"name": "John Doe", "age": 30, "city": "New York"}
 ```
 
 Output: `"John Doe"`
@@ -20,23 +21,25 @@ Output: `"John Doe"`
 | Field | Description |
 |-------|-------------|
 | `raw` | Output raw strings without JSON encoding (like `jq -r`). Default: `false`. |
-| `input` | File path to read JSON input from. Mutually exclusive with `script`. |
+| `input` | File path to read JSON input from. Mutually exclusive with `data`. |
+| `data` | Inline JSON value or file URL string to provide as jq input. Mutually exclusive with `input`. |
 
 ### Input Sources
 
 The JQ executor accepts JSON input from one of three sources. Exactly one must be provided.
 
-**Inline JSON via `script:`**
+**Inline JSON via `with.data`**
 
 ```yaml
 steps:
   - id: inline
-    type: jq
-    command: '.name'
-    script: '{"name": "Alice"}'
+    action: jq.filter
+    with:
+      filter: '.name'
+      data: '{"name": "Alice"}'
 ```
 
-**File path via `with.input`**
+**File URL via `with.data`**
 
 Read JSON from a file. The path is evaluated at runtime, so step references like `${step_id.stdout}` work:
 
@@ -44,37 +47,37 @@ Read JSON from a file. The path is evaluated at runtime, so step references like
 type: graph
 steps:
   - id: producer
-    command: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
+    run: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
 
   - id: filter
     depends: [producer]
-    type: jq
+    action: jq.filter
     with:
       raw: true
       input: "${producer.stdout}"
-    command: '.items[] | .name'
+      filter: '.items[] | .name'
     output: RESULT
 ```
 
-**File path via `file://` prefix on `script:`**
+**File path via `with.input`**
 
 ```yaml
 type: graph
 steps:
   - id: producer
-    command: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
+    run: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
 
   - id: filter
     depends: [producer]
-    type: jq
+    action: jq.filter
     with:
       raw: true
-    script: "file://${producer.stdout}"
-    command: '.items[] | .name'
+      filter: '.items[] | .name'
+      data: "file://${producer.stdout}"
     output: RESULT
 ```
 
-`with.input` and `script` are mutually exclusive. Setting both produces a validation error.
+`with.input` and `with.data` are mutually exclusive. Setting both produces a validation error.
 
 ### Raw Output
 
@@ -84,17 +87,17 @@ when you need jq's `-r` behavior (unquoted strings, numbers, booleans).
 ```yaml
 steps:
   - id: list_addresses
-    type: jq
+    action: jq.filter
     with:
       raw: true
-    command: '.users[].email'
-    script: |
-      {
-        "users": [
-          {"email": "alice@example.com"},
-          {"email": "bob@example.com"}
-        ]
-      }
+      filter: '.users[].email'
+      data: |
+        {
+          "users": [
+            {"email": "alice@example.com"},
+            {"email": "bob@example.com"}
+          ]
+        }
 ```
 
 Output:
@@ -110,10 +113,11 @@ bob@example.com
 ```yaml
 steps:
   - id: transform
-    type: jq
-    command: '{id: .user_id, name: (.first + " " + .last)}'
-    script: |
-      {"user_id": 123, "first": "John", "last": "Doe"}
+    action: jq.filter
+    with:
+      filter: '{id: .user_id, name: (.first + " " + .last)}'
+      data: |
+        {"user_id": 123, "first": "John", "last": "Doe"}
 ```
 
 ### Filter Arrays
@@ -121,16 +125,17 @@ steps:
 ```yaml
 steps:
   - id: filter_active
-    type: jq
-    command: '.users[] | select(.active) | .email'
-    script: |
-      {
-        "users": [
-          {"email": "alice@example.com", "active": true},
-          {"email": "bob@example.com", "active": false},
-          {"email": "carol@example.com", "active": true}
-        ]
-      }
+    action: jq.filter
+    with:
+      filter: '.users[] | select(.active) | .email'
+      data: |
+        {
+          "users": [
+            {"email": "alice@example.com", "active": true},
+            {"email": "bob@example.com", "active": false},
+            {"email": "carol@example.com", "active": true}
+          ]
+        }
 ```
 
 ### Process API Response
@@ -138,16 +143,18 @@ steps:
 ```yaml
 steps:
   - id: fetch_data
-    type: http
+    action: http.request
     with:
       silent: true
-    command: GET https://api.example.com/products
+      method: GET
+      url: https://api.example.com/products
     output: API_RESPONSE
 
   - id: extract_in_stock
-    type: jq
-    command: '.products | map(select(.inventory > 0) | {id, name, price})'
-    script: ${API_RESPONSE}
+    action: jq.filter
+    with:
+      filter: '.products | map(select(.inventory > 0) | {id, name, price})'
+      data: ${API_RESPONSE}
     output: IN_STOCK
 ```
 
@@ -156,18 +163,19 @@ steps:
 ```yaml
 steps:
   - id: sales_by_category
-    type: jq
-    command: |
-      group_by(.category) |
-      map({
-        category: .[0].category,
-        total: map(.amount) | add,
-        count: length
-      })
-    script: |
-      [
-        {"category": "Electronics", "amount": 299.99},
-        {"category": "Clothing", "amount": 49.99},
-        {"category": "Electronics", "amount": 199.99}
-      ]
+    action: jq.filter
+    with:
+      filter: |
+        group_by(.category) |
+        map({
+          category: .[0].category,
+          total: map(.amount) | add,
+          count: length
+        })
+      data: |
+        [
+          {"category": "Electronics", "amount": 299.99},
+          {"category": "Clothing", "amount": 49.99},
+          {"category": "Electronics", "amount": 199.99}
+        ]
 ```

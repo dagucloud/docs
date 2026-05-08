@@ -9,7 +9,7 @@ Values loaded from dotenv files are normal DAG environment values. They are not 
 ```yaml
 # Load .env automatically by default when dotenv is omitted
 steps:
-  - command: ./run.sh
+  - run: ./run.sh
 ```
 
 ```yaml
@@ -72,7 +72,7 @@ dotenv:
   - .env.production
 
 steps:
-  - command: printenv API_HOST LOG_LEVEL
+  - run: printenv API_HOST LOG_LEVEL
 ```
 
 The effective values are:
@@ -100,7 +100,7 @@ secrets:
     key: PROD_DB_PASSWORD
 
 steps:
-  - command: ./migrate.sh
+  - run: ./migrate.sh
 ```
 
 `DB_PASSWORD` is marked as a secret and is masked in Dagu-managed log writers. `PROD_DB_PASSWORD` remains a normal DAG environment value because it came from dotenv.

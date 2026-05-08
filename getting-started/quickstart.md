@@ -116,15 +116,15 @@ On first launch against an empty DAGs directory (`~/.config/dagu/dags/`), Dagu c
 type: graph
 steps:
   - id: extract
-    command: ./extract.sh
+    run: ./extract.sh
   - id: transform_a
-    command: ./transform_a.sh
+    run: ./transform_a.sh
     depends: extract
   - id: transform_b
-    command: ./transform_b.sh
+    run: ./transform_b.sh
     depends: extract
   - id: load
-    command: ./load.sh
+    run: ./load.sh
     depends: [transform_a, transform_b]
 ```
 
@@ -138,7 +138,7 @@ params:
   - DEST: /backup
 
 steps:
-  - command: tar -czf ${DEST}/backup.tar.gz ${SOURCE}
+  - run: tar -czf ${DEST}/backup.tar.gz ${SOURCE}
 ```
 
 ```bash
@@ -149,20 +149,20 @@ dagu start backup.yaml -- SOURCE=/important DEST=/backups
 
 ```yaml
 steps:
-  - command: curl -f https://example.com/data.zip -o data.zip
+  - run: curl -f https://example.com/data.zip -o data.zip
     retry_policy:
       limit: 3
       interval_sec: 30
 
-  - command: ./process.sh data.zip
+  - run: ./process.sh data.zip
     continue_on:
       failure: true
 
 handler_on:
   failure:
-    command: echo "run failed" | mail -s "alert" admin@example.com
+    run: echo "run failed" | mail -s "alert" admin@example.com
   exit:
-    command: rm -f data.zip
+    run: rm -f data.zip
 ```
 
 ### Containers
@@ -175,8 +175,8 @@ container:
   volumes:
     - ./data:/data
 steps:
-  - command: python -c "open('/data/out.txt','w').write('hi')"
-  - command: python -c "print(open('/data/out.txt').read())"
+  - run: python -c "open('/data/out.txt','w').write('hi')"
+  - run: python -c "print(open('/data/out.txt').read())"
 ```
 
 Or run a single step in its own container:
@@ -186,7 +186,7 @@ steps:
   - name: build
     container:
       image: node:20-alpine
-    command: npm run build
+    run: npm run build
 ```
 
 ### Scheduling
@@ -196,7 +196,7 @@ schedule: "0 2 * * *"      # 2 AM daily
 overlap_policy: skip        # drop new runs while one is active
 timeout_sec: 3600
 steps:
-  - command: ./nightly.sh
+  - run: ./nightly.sh
 ```
 
 ### Working directory
@@ -207,7 +207,7 @@ DAGs execute in the directory of the YAML file by default. Override with `workin
 working_dir: /app/project
 dotenv: .env                 # resolved from working_dir
 steps:
-  - command: ls -la
+  - run: ls -la
 ```
 
 ## Next steps
@@ -215,6 +215,6 @@ steps:
 - [Core Concepts](/getting-started/concepts) — steps, dependencies, execution model
 - [Deployment Models](/overview/deployment-models) — local, self-hosted, managed, and hybrid options
 - [Writing Workflows](/writing-workflows/) — full YAML surface
-- [Step Types](/step-types/shell) — built-in executors (docker, ssh, http, sql, s3, sub-DAG, ...)
+- [Actions](/step-types/shell) — built-in executors (docker, ssh, http, sql, s3, sub-DAG, ...)
 - [Examples](/writing-workflows/examples) — ready-to-adapt patterns
 - [CLI Reference](/getting-started/cli) — every command and flag

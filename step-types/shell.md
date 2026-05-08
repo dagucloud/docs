@@ -1,6 +1,6 @@
 # Shell
 
-Run system commands and scripts with the default step type.
+Run system commands and scripts with the default action.
 
 ## Configure the Shell
 
@@ -8,13 +8,13 @@ Run system commands and scripts with the default step type.
   ```yaml
   shell: ["/bin/bash", "-e", "-u"]
   steps:
-    - command: echo "Runs with bash -e -u"
+    - run: echo "Runs with bash -e -u"
   ```
 - **Step override** (evaluated at runtime, can reference params/secrets/outputs):
   ```yaml
   steps:
     - shell: ${CUSTOM_SHELL:-/bin/zsh}
-      command: echo "Runs in the step shell"
+      run: echo "Runs in the step shell"
   ```
 - **Fallback**: if you set nothing, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh` on Unix; on Windows it prefers PowerShell, then `pwsh`, then `cmd.exe`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
@@ -24,19 +24,19 @@ Run system commands and scripts with the default step type.
 - **Inline command string** for quick one-liners or pipelines:
   ```yaml
   steps:
-    - echo "Hello"
-    - command: echo "Hello with key"
-    - |
+    - run: echo "Hello"
+    - run: echo "Hello with key"
+    - run: |
         echo "Multi-line command block"
         echo "Runs as a script (not split into args)"
   ```
-- **Multiple commands** share the same step configuration:
+- **Multiple commands** can share one shell step:
   ```yaml
   steps:
-    - command:
-        - echo "step 1"
-        - echo "step 2"
-        - echo "step 3"
+    - run: |
+        echo "step 1"
+        echo "step 2"
+        echo "step 3"
       env:
         - MY_VAR: value
       working_dir: /app
@@ -46,7 +46,8 @@ Run system commands and scripts with the default step type.
 - **Structured direct exec** when you want unambiguous arguments and no shell parsing:
   ```yaml
   steps:
-    - exec:
+    - action: exec
+      with:
         command: /usr/bin/python3
         args:
           - -u
@@ -57,7 +58,7 @@ Run system commands and scripts with the default step type.
 - **Script block** for multi-line scripts:
   ```yaml
   steps:
-    - script: |
+    - run: |
         #!/usr/bin/env bash
         set -e
         echo "Multi-line script"
@@ -66,8 +67,8 @@ Run system commands and scripts with the default step type.
 - **Interpreter + inline script**:
   ```yaml
   steps:
-    - command: python3
-      script: |
+    - shell: python3
+      run: |
         import sys
         print("Args:", sys.argv)
   ```
@@ -75,12 +76,11 @@ Run system commands and scripts with the default step type.
 
 ## Script Behavior
 
-- A `script:` block is written to a temp file in the working directory when possible, then removed after the step finishes.
+- A multi-line `run:` block is written to a temp file in the working directory when possible, then removed after the step finishes.
 - If you omit a step-level `shell` and the script starts with a shebang (`#!/usr/bin/env python3`, `#!/bin/bash`, etc.), that interpreter runs the script.
 - Without a shebang, the resolved shell runs the script file. When Dagu provides the default Unix shell, it appends `-e` so the script stops on the first failing command (step-level shells are left unchanged).
-- When you set both `command` and `script`, the `command` acts as the interpreter and receives the script path (no shell wrapper) — ideal for `command: python3` with inline code.
-- Multi-line `command` strings (using YAML `|` block) are treated the same as `script:`: they are saved to a temp file and executed as a script rather than split into args.
-- `exec:` bypasses shell parsing entirely. It cannot be combined with `command`, `script`, `shell`, or `shell_packages`.
+- Multi-line `run` strings (using a YAML `|` block) are saved to a temp file and executed as a script rather than split into args.
+- `action: exec` bypasses shell parsing entirely and accepts explicit `with.command` and `with.args`.
 
 ## Built-in Safety Defaults
 

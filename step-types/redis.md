@@ -7,11 +7,10 @@ Execute Redis commands and operations against Redis servers.
 ```yaml
 steps:
   - id: ping
-    type: redis
+    action: redis.ping
     with:
       host: localhost
       port: 6379
-      command: PING
 ```
 
 ## DAG-Level Configuration
@@ -26,16 +25,14 @@ redis:
 
 steps:
   - id: set_value
-    type: redis
+    action: redis.set
     with:
-      command: SET
       key: mykey
       value: "hello world"
 
   - id: get_value
-    type: redis
+    action: redis.get
     with:
-      command: GET
       key: mykey
     output: RESULT
 ```
@@ -117,23 +114,20 @@ Steps inherit connection settings from the DAG level. Step-level `with` values o
 ```yaml
 steps:
   - id: set_key
-    type: redis
+    action: redis.set
     with:
-      command: SET
       key: user:1:name
       value: "John Doe"
 
   - id: get_key
-    type: redis
+    action: redis.get
     with:
-      command: GET
       key: user:1:name
     output: USER_NAME
 
   - id: increment
-    type: redis
+    action: redis.incr
     with:
-      command: INCR
       key: counter
 ```
 
@@ -142,28 +136,24 @@ steps:
 ```yaml
 steps:
   - id: check_exists
-    type: redis
+    action: redis.exists
     with:
-      command: EXISTS
       key: mykey
 
   - id: set_expiry
-    type: redis
+    action: redis.expire
     with:
-      command: EXPIRE
       key: session:123
       ttl: 3600  # 1 hour in seconds
 
   - id: get_ttl
-    type: redis
+    action: redis.ttl
     with:
-      command: TTL
       key: session:123
 
   - id: delete_key
-    type: redis
+    action: redis.del
     with:
-      command: DEL
       key: temp:data
 ```
 
@@ -172,25 +162,22 @@ steps:
 ```yaml
 steps:
   - id: set_hash
-    type: redis
+    action: redis.hset
     with:
-      command: HSET
       key: user:1
       field: email
       value: "john@example.com"
 
   - id: get_hash_field
-    type: redis
+    action: redis.hget
     with:
-      command: HGET
       key: user:1
       field: email
     output: EMAIL
 
   - id: get_all_hash
-    type: redis
+    action: redis.hgetall
     with:
-      command: HGETALL
       key: user:1
     output: USER_DATA
 ```
@@ -200,26 +187,23 @@ steps:
 ```yaml
 steps:
   - id: push_to_list
-    type: redis
+    action: redis.rpush
     with:
-      command: RPUSH
       key: queue:tasks
       values:
         - '{"task": "process-order", "id": 123}'
 
   - id: get_list_range
-    type: redis
+    action: redis.lrange
     with:
-      command: LRANGE
       key: queue:tasks
       start: 0
       stop: -1  # all elements
     output: TASKS
 
   - id: pop_from_list
-    type: redis
+    action: redis.lpop
     with:
-      command: LPOP
       key: queue:tasks
     output: NEXT_TASK
 ```
@@ -229,9 +213,8 @@ steps:
 ```yaml
 steps:
   - id: add_to_set
-    type: redis
+    action: redis.sadd
     with:
-      command: SADD
       key: tags:article:1
       values:
         - "redis"
@@ -239,16 +222,14 @@ steps:
         - "cache"
 
   - id: get_members
-    type: redis
+    action: redis.smembers
     with:
-      command: SMEMBERS
       key: tags:article:1
     output: TAGS
 
   - id: check_membership
-    type: redis
+    action: redis.sismember
     with:
-      command: SISMEMBER
       key: tags:article:1
       value: "redis"
 ```
@@ -258,17 +239,15 @@ steps:
 ```yaml
 steps:
   - id: add_score
-    type: redis
+    action: redis.zadd
     with:
-      command: ZADD
       key: leaderboard
       score: 100
       value: "player1"
 
   - id: get_top_players
-    type: redis
+    action: redis.zrange
     with:
-      command: ZRANGE
       key: leaderboard
       start: 0
       stop: 9
@@ -283,7 +262,7 @@ Execute multiple commands in a single round-trip:
 ```yaml
 steps:
   - id: batch_operations
-    type: redis
+    action: redis.command
     with:
       pipeline:
         - command: SET
@@ -305,7 +284,7 @@ Execute commands atomically with MULTI/EXEC:
 ```yaml
 steps:
   - id: atomic_transfer
-    type: redis
+    action: redis.command
     with:
       multi: true
       pipeline:
@@ -322,7 +301,7 @@ Execute Lua scripts for complex operations:
 ```yaml
 steps:
   - id: rate_limit
-    type: redis
+    action: redis.eval
     with:
       script: |
         local key = KEYS[1]
@@ -349,7 +328,7 @@ Or load from a file:
 ```yaml
 steps:
   - id: complex_operation
-    type: redis
+    action: redis.command
     with:
       script_file: ./scripts/process.lua
       script_keys:
@@ -365,13 +344,12 @@ Acquire a lock before executing critical operations:
 ```yaml
 steps:
   - id: critical_section
-    type: redis
+    action: redis.set
     with:
       lock: "locks:resource:${RESOURCE_ID}"
       lock_timeout: 30      # Lock expires after 30 seconds
       lock_retry: 10        # Retry 10 times to acquire lock
       lock_wait: 100        # Wait 100ms between retries
-      command: SET
       key: resource:${RESOURCE_ID}
       value: '{"status": "processing"}'
 ```
@@ -381,14 +359,13 @@ steps:
 ```yaml
 steps:
   - id: get_config
-    type: redis
+    action: redis.hgetall
     with:
-      command: HGETALL
       key: app:config
     output: CONFIG
 
   - id: use_config
-    command: echo "Database host is ${CONFIG}"
+    run: echo "Database host is ${CONFIG}"
     depends:
       - get_config
 ```
@@ -494,9 +471,8 @@ value1,value2,value3
 ```yaml
 steps:
   - id: redis_operation
-    type: redis
+    action: redis.get
     with:
-      command: GET
       key: critical-data
       max_retries: 5
       timeout: 10

@@ -23,7 +23,7 @@ env:                       # Environment variables
   - DATA_DIR: /tmp/data
 
 steps:                     # Workflow steps
-  - command: echo "Processing ${ENVIRONMENT} for date ${DATE} with batch ${BATCH_SIZE}"
+  - run: echo "Processing ${ENVIRONMENT} for date ${DATE} with batch ${BATCH_SIZE}"
 ```
 
 Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
@@ -65,21 +65,20 @@ env:
   - CUSTOM_VAR: value # Addition
 
 steps:
-  - command: echo "Processing"
+  - run: echo "Processing"
 ```
 
 Configuration precedence: System defaults → Base config → DAG config
 
 See [Base Configuration](/server-admin/base-config) for complete documentation on all available fields.
 
-## Custom Step Types
+## Custom Actions
 
-Define reusable step types in `step_types` when you want a typed wrapper around a builtin step type.
+Define reusable actions in `actions` when you want a typed wrapper around a builtin action.
 
 ```yaml
-step_types:
+actions:
   greet:
-    type: command
     input_schema:
       type: object
       additionalProperties: false
@@ -88,17 +87,17 @@ step_types:
         message:
           type: string
     template:
-      script: |
+      run: |
         #!/bin/bash
         printf '%s\n' {{ json .input.message }}
 
 steps:
-  - type: greet
+  - action: greet
     with:
       message: hello
 ```
 
-The most common pattern is a `type: command` custom step with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal builtin step before execution. See [Custom Step Types](/writing-workflows/custom-step-types) for the exact rules.
+The most common pattern is a `run` custom action with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal builtin step before execution. See [Custom Actions](/writing-workflows/custom-step-types) for the exact rules.
 
 ## Guide Sections
 
@@ -109,7 +108,7 @@ The most common pattern is a `type: command` custom step with a templated `scrip
 5. **[Durable Execution](/writing-workflows/durable-execution)** - Step retries, default step retries, DAG retries
 6. **[Error Handling](/writing-workflows/error-handling)** - Continue-on behavior, handlers, notifications
 7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
-8. **[Custom Step Types](/writing-workflows/custom-step-types)** - Reusable typed wrappers around builtin step types
+8. **[Custom Actions](/writing-workflows/custom-step-types)** - Reusable typed wrappers around builtin actions
 9. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
 10. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
 11. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
@@ -135,24 +134,24 @@ env:
   - DATA_DIR: /tmp/data/${DATE}
 
 steps:
-  - command: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
+  - run: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
     retry_policy:
       limit: 3
       interval_sec: 60
 
-  - command: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
+  - run: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
     continue_on:
       failure: false
 
   - parallel: [users, orders, products]
-    command: python process.py --type=$ITEM --date=${DATE}
+    run: python process.py --type=$ITEM --date=${DATE}
     output: RESULT_${ITEM}
 
-  - command: python report.py --date=${DATE}
+  - run: python report.py --date=${DATE}
 
 handler_on:
   failure:
-    command: echo "Notifying failure for ${DATE}"
+    run: echo "Notifying failure for ${DATE}"
 ```
 
 ## Common Patterns
@@ -160,22 +159,24 @@ handler_on:
 ### Sequential Pipeline
 ```yaml
 steps:
-  - command: echo "Extracting data"
-  - command: echo "Transforming data"
-  - command: echo "Loading data"
+  - run: echo "Extracting data"
+  - run: echo "Transforming data"
+  - run: echo "Loading data"
 ```
 
 ### Parallel Processing
 ```yaml
 steps:
   - parallel: [file1, file2, file3]
-    call: process-file
-    params: "FILE=${ITEM}"
+    action: dag.run
+    with:
+      dag: process-file
 
+      params: "FILE=${ITEM}"
 ---
 # A child workflow for processing each file
 # This can be in a same file separated by `---` or in a separate file
 name: process-file
 steps:
-  - command: echo "Processing" --file ${FILE}
+  - run: echo "Processing" --file ${FILE}
 ```

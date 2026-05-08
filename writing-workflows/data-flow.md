@@ -21,10 +21,10 @@ Capture command output and use it in subsequent steps:
 
 ```yaml
 steps:
-  - command: cat VERSION
+  - run: cat VERSION
     output: VERSION
 
-  - command: docker build -t myapp:${VERSION} .
+  - run: docker build -t myapp:${VERSION} .
 ```
 
 ### How It Works
@@ -43,12 +43,12 @@ The `output` field supports both string and object forms:
 steps:
   # Simple string form
   - id: get_version
-    command: cat VERSION
+    run: cat VERSION
     output: VERSION
 
   # Object form publishes structured step-scoped output
   - id: inspect_build
-    script: |
+    run: |
       printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
     output:
       version:
@@ -80,15 +80,15 @@ String-form `output: NAME` captures one flat variable per step. Use object-form 
 type: graph
 steps:
   - id: count_users
-    command: wc -l < users.txt
+    run: wc -l < users.txt
     output: USER_COUNT
 
   - id: count_orders
-    command: wc -l < orders.txt
+    run: wc -l < orders.txt
     output: ORDER_COUNT
 
   - id: report
-    command: |
+    run: |
       echo "Users: ${USER_COUNT}"
       echo "Orders: ${ORDER_COUNT}"
     depends:
@@ -102,7 +102,7 @@ Access nested values in JSON output using dot notation:
 
 ```yaml
 steps:
-  - command: |
+  - run: |
       echo '{
         "database": {
           "host": "localhost",
@@ -114,7 +114,7 @@ steps:
       }'
     output: CONFIG
     
-  - command: |
+  - run: |
       psql -h ${CONFIG.database.host} \
            -p ${CONFIG.database.port} \
            -U ${CONFIG.database.credentials.username}
@@ -126,14 +126,14 @@ Access array elements by index:
 
 ```yaml
 steps:
-  - command: |
+  - run: |
       echo '[
         {"name": "web1", "ip": "10.0.1.1"},
         {"name": "web2", "ip": "10.0.1.2"}
       ]'
     output: SERVERS
     
-  - command: ping -c 1 ${SERVERS[0].ip}
+  - run: ping -c 1 ${SERVERS[0].ip}
 ```
 
 ## Environment Variables
@@ -149,7 +149,7 @@ env:
   - API_URL: https://api.example.com
 
 steps:
-  - command: python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
+  - run: python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
 ```
 
 ### Variable Expansion
@@ -175,7 +175,7 @@ env:
   - HOSTNAME: "`hostname -f`"
 
 steps:
-  - command: tar -czf backup-${TODAY}-${GIT_COMMIT}.tar.gz data/
+  - run: tar -czf backup-${TODAY}-${GIT_COMMIT}.tar.gz data/
 ```
 
 ## Parameters
@@ -191,7 +191,7 @@ params:
   - DRY_RUN: false
 
 steps:
-  - command: |
+  - run: |
       echo "Processing data" \
         --env=${ENVIRONMENT} \
         --batch=${BATCH_SIZE} \
@@ -221,11 +221,11 @@ Reference step properties using the `id` field:
 ```yaml
 steps:
   - id: risky
-    command: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
+    run: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
     continue_on:
       failure: true
 
-  - command: |
+  - run: |
       if [ "${risky.exit_code}" = "0" ]; then
         echo "Success! Checking output..."
         cat ${risky.stdout}  # Read content from the file
@@ -253,17 +253,17 @@ type: graph
 steps:
   - id: extract_title
     output: RESULT
-    script: |
+    run: |
       printf 'Quarterly Revenue'
 
   - id: extract_summary
     output: RESULT
-    script: |
+    run: |
       printf 'Revenue grew 18 percent year over year.'
 
   - id: report
     depends: [extract_title, extract_summary]
-    script: |
+    run: |
       printf 'Title: %s\nSummary: %s' "${extract_title.output}" "${extract_summary.output}"
     output: REPORT
 ```
@@ -280,7 +280,7 @@ steps:
       artifact:
         url: "https://example.test/app.tgz"
 
-  - command: |
+  - run: |
       echo "Version: ${publish.output.version}"
       echo "Artifact: ${publish.output.artifact.url}"
 ```
@@ -302,11 +302,13 @@ Capture outputs from nested workflows:
 ```yaml
 # parent.yaml
 steps:
-  - call: etl-workflow
-    params: "DATE=${TODAY}"
+  - action: dag.run
+    with:
+      dag: etl-workflow
+      params: "DATE=${TODAY}"
     output: ETL_RESULT
     
-  - command: |
+  - run: |
       echo "Status: ${ETL_RESULT.status}"
       echo "Records: ${ETL_RESULT.outputs.record_count}"
       echo "Duration: ${ETL_RESULT.outputs.duration}"
@@ -333,10 +335,11 @@ Access outputs from deeply nested workflows:
 
 ```yaml
 steps:
-  - call: main-pipeline
     output: PIPELINE
-    
-  - command: |
+    action: dag.run
+    with:
+      dag: main-pipeline
+  - run: |
       # Access nested outputs
       echo "ETL Status: ${PIPELINE.outputs.ETL_OUTPUT.status}"
       echo "ML Score: ${PIPELINE.outputs.ML_OUTPUT.outputs.accuracy}"
@@ -348,12 +351,14 @@ When running parallel executions, outputs are aggregated:
 
 ```yaml
 steps:
-  - call: region-processor
+  - action: dag.run
+    with:
+      dag: region-processor
     parallel:
       items: ["us-east", "us-west", "eu-central"]
     output: RESULTS
-    
-  - command: |
+
+  - run: |
       echo "Total regions: ${RESULTS.summary.total}"
       echo "Succeeded: ${RESULTS.summary.succeeded}"
       echo "Failed: ${RESULTS.summary.failed}"
@@ -398,21 +403,21 @@ Redirect output to files for large data:
 
 ```yaml
 steps:
-  - command: python generate_report.py
+  - run: python generate_report.py
     stdout: /tmp/report.txt
     
-  - command: mail -s "Report" user@example.com < /tmp/report.txt
+  - run: mail -s "Report" user@example.com < /tmp/report.txt
 ```
 
 ### Working with Files
 
 ```yaml
 steps:
-  - command: |
+  - run: |
       tar -xzf data.tar.gz -C /tmp/
       ls /tmp/data/ > /tmp/filelist.txt
     
-  - command: |
+  - run: |
       while read file; do
         process.sh "/tmp/data/$file"
       done < /tmp/filelist.txt
@@ -425,7 +430,7 @@ Dagu automatically injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_STEP_NAME
 Example usage:
 ```yaml
 steps:
-  - command: |
+  - run: |
       echo "Backing up logs for ${DAG_NAME} run ${DAG_RUN_ID}"
       cp ${DAG_RUN_LOG_FILE} /backup/
 ```
@@ -439,10 +444,10 @@ Control maximum output size to prevent memory issues:
 max_output_size: 5242880
 
 steps:
-  - command: cat large-file.json
+  - run: cat large-file.json
     output: DATA  # Fails if output > 5MB
     
-  - command: generate-huge-file.sh
+  - run: generate-huge-file.sh
     stdout: /tmp/huge.txt  # No size limit with file redirection
 ```
 
@@ -463,7 +468,7 @@ env:
 steps:
   - env:
       - MESSAGE: "Step level"  # This wins
-    command: echo "${MESSAGE}"
+    run: echo "${MESSAGE}"
 ```
 
 For detailed precedence rules including interpolation vs runtime environment, see [Variables Reference](/writing-workflows/template-variables#variable-precedence).

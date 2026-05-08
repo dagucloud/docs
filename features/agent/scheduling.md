@@ -1,6 +1,6 @@
 # Scheduled Agents
 
-Agent steps work with `schedule` like any other step type. Add a `schedule` field to a DAG containing `type: agent` steps to run them on a cron schedule.
+Agent steps work with `schedule` like any other action. Add a `schedule` field to a DAG containing `action: agent.run` steps to run them on a cron schedule.
 
 ## Prerequisites
 
@@ -17,12 +17,13 @@ A daily agent that summarizes system health:
 schedule: "0 8 * * *"  # Every day at 8 AM
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Check the system health by reviewing /var/log/syslog and
-          report any errors or warnings from the last 24 hours.
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Check the system health by reviewing /var/log/syslog and
+            report any errors or warnings from the last 24 hours.
     output: HEALTH_REPORT
 ```
 
@@ -38,12 +39,13 @@ params:
   - THRESHOLD=100
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Scan all log files in ${LOG_DIR} for error counts.
-          Flag any file with more than ${THRESHOLD} errors in the last 24 hours.
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Scan all log files in ${LOG_DIR} for error counts.
+            Flag any file with more than ${THRESHOLD} errors in the last 24 hours.
     output: ERROR_REPORT
 ```
 
@@ -57,13 +59,14 @@ The agent writes its result via the `output` tool, which is captured by the step
 schedule: "0 6 * * *"
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Analyze yesterday's deployment logs and summarize any issues."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Analyze yesterday's deployment logs and summarize any issues."
     output: ANALYSIS
 
-  - command: |
+  - run: |
       echo "${ANALYSIS}" | mail -s "Daily Deployment Report" team@example.com
 ```
 
@@ -79,10 +82,11 @@ catchup_window: "6h"           # Replay up to 6 hours of missed runs
 overlap_policy: "skip"         # Skip if previous catchup run is still active
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Check application metrics for the last hour and flag anomalies."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Check application metrics for the last hour and flag anomalies."
     output: MONITOR_RESULT
 ```
 
@@ -101,10 +105,11 @@ schedule: "*/30 * * * *"
 queue: agent-tasks
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Review open pull requests and summarize their status."
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Review open pull requests and summarize their status."
     output: PR_SUMMARY
 ```
 
@@ -127,13 +132,14 @@ queues:
 schedule: "0 7 * * *"
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Analyze /var/log/app/errors.log from the last 24 hours.
-          Categorize errors by type and severity.
-          Suggest fixes for the top 3 most frequent errors.
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Analyze /var/log/app/errors.log from the last 24 hours.
+            Categorize errors by type and severity.
+            Suggest fixes for the top 3 most frequent errors.
     output: LOG_ANALYSIS
 ```
 
@@ -143,15 +149,16 @@ steps:
 schedule: "0 9 * * MON"
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Review the Git commit history for the past week.
-          Write a concise weekly summary in Markdown format.
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Review the Git commit history for the past week.
+            Write a concise weekly summary in Markdown format.
     output: WEEKLY_SUMMARY
 
-  - command: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
+  - run: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
 ```
 
 ### Scheduled Agent with Restricted Tools and Bash Policy
@@ -160,8 +167,8 @@ steps:
 schedule: "0 */6 * * *"
 
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       tools:
         enabled:
           - bash
@@ -178,13 +185,13 @@ steps:
               pattern: "^(curl -s|ping -c|nslookup|dig)\\b"
               action: allow
       max_iterations: 30
-    messages:
-      - role: user
-        content: |
-          Run a security check:
-          1. Check for world-readable files in /etc
-          2. Verify no unexpected ports are open
-          3. Check for failed SSH login attempts
+      messages:
+        - role: user
+          content: |
+            Run a security check:
+            1. Check for world-readable files in /etc
+            2. Verify no unexpected ports are open
+            3. Check for failed SSH login attempts
     output: SECURITY_REPORT
 ```
 
@@ -196,27 +203,30 @@ type: graph
 
 steps:
   - id: check_infra
-    type: agent
-    messages:
-      - role: user
-        content: "Check disk usage, memory, and CPU across all servers."
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Check disk usage, memory, and CPU across all servers."
     output: INFRA_STATUS
 
   - id: check_app
-    type: agent
-    messages:
-      - role: user
-        content: "Review application health endpoints and response times."
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Review application health endpoints and response times."
     output: APP_STATUS
 
-  - type: agent
-    messages:
-      - role: user
-        content: |
-          Combine these reports into a single morning briefing:
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Combine these reports into a single morning briefing:
 
-          Infrastructure: ${INFRA_STATUS}
-          Application: ${APP_STATUS}
+            Infrastructure: ${INFRA_STATUS}
+            Application: ${APP_STATUS}
     depends: [check_infra, check_app]
     output: MORNING_BRIEF
 ```

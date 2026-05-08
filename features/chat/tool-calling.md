@@ -32,15 +32,15 @@ Both scenarios result in successful step completion. The step only fails if the 
 ```yaml
 # Main DAG that uses the tool
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       tools:
         - calculator
-    messages:
-      - role: user
-        content: "What is 15 times 23?"
+      messages:
+        - role: user
+          content: "What is 15 times 23?"
 
 ---
 # Tool DAG definition
@@ -50,7 +50,7 @@ params: "operation a b"
 
 steps:
   - id: calculate
-    script: |
+    run: |
       case "$1" in
         add) echo $(($2 + $3)) ;;
         multiply) echo $(($2 * $3)) ;;
@@ -110,16 +110,16 @@ Tools are discovered in this order:
 ```yaml
 # Main DAG
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       tools:
         - local_tool      # Found in local DAGs
         - database_tool   # Loaded from DAG directory
-    messages:
-      - role: user
-        content: "Use the tools as needed."
+      messages:
+        - role: user
+          content: "Use the tools as needed."
 
 ---
 # Local tool (inline definition)
@@ -128,7 +128,7 @@ description: "A tool defined locally"
 params: "input"
 
 steps:
-  - command: echo "Processing: $1"
+  - run: echo "Processing: $1"
     output: RESULT
 ```
 
@@ -141,8 +141,8 @@ steps:
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       tools:
@@ -150,9 +150,9 @@ steps:
         - calculator
         - database_query
       max_tool_iterations: 15  # Allow more iterations for complex tasks
-    messages:
-      - role: user
-        content: "Research and analyze..."
+      messages:
+        - role: user
+          content: "Research and analyze..."
 ```
 
 ## Multi-Tool Example
@@ -160,16 +160,16 @@ steps:
 ```yaml
 # Main workflow
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       tools:
         - web_search
         - analyze_data
-    messages:
-      - role: user
-        content: "Search for AI trends and analyze them"
+      messages:
+        - role: user
+          content: "Search for AI trends and analyze them"
 
 ---
 # Search tool
@@ -178,7 +178,7 @@ description: "Search the web for current information"
 params: "query"
 
 steps:
-  - command: curl "https://api.example.com/search?q=$1"
+  - run: curl "https://api.example.com/search?q=$1"
     output: SEARCH_RESULTS
 
 ---
@@ -188,7 +188,7 @@ description: "Analyze data and generate insights"
 params: "data"
 
 steps:
-  - command: echo "$1" | python analyze.py
+  - run: echo "$1" | python analyze.py
     output: INSIGHTS
 ```
 
@@ -261,8 +261,8 @@ All major providers support tool calling with automatic API mapping:
 ```yaml
 # Main agent workflow
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: anthropic
       model: claude-sonnet-4-20250514
       tools:
@@ -270,9 +270,9 @@ steps:
         - transform_data
         - store_data
       max_tool_iterations: 20
-    messages:
-      - role: user
-        content: "Fetch user data, transform it to standard format, and store in database"
+      messages:
+        - role: user
+          content: "Fetch user data, transform it to standard format, and store in database"
 
 ---
 # Fetch data tool
@@ -281,7 +281,7 @@ description: "Fetch data from external API"
 params: "endpoint"
 
 steps:
-  - command: curl "https://api.example.com/$1"
+  - run: curl "https://api.example.com/$1"
     output: RAW_DATA
 
 ---
@@ -291,8 +291,8 @@ description: "Transform and clean data"
 params: "data format=json"
 
 steps:
-  - command: echo "$1" | jq '.' > /tmp/transformed.json
-  - command: cat /tmp/transformed.json
+  - run: echo "$1" | jq '.' > /tmp/transformed.json
+  - run: cat /tmp/transformed.json
     output: TRANSFORMED_DATA
 
 ---
@@ -302,10 +302,10 @@ description: "Store data in database"
 params: "data table"
 
 steps:
-  - type: postgres
+  - action: postgres.query
     with:
       dsn: ${DATABASE_URL}
-    command: "INSERT INTO $2 (data) VALUES ('$1'::jsonb)"
+      query: "INSERT INTO $2 (data) VALUES ('$1'::jsonb)"
 ```
 
 The LLM orchestrates the multi-step data pipeline by calling tools in sequence.

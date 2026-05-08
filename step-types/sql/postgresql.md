@@ -12,10 +12,10 @@ secrets:
 
 steps:
   - id: query_users
-    type: postgres
+    action: postgres.query
     with:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
-    command: "SELECT id, name, email FROM users"
+      query: "SELECT id, name, email FROM users"
     output: USERS  # Capture results to variable
 ```
 
@@ -49,7 +49,7 @@ with:
 ```yaml
 steps:
   - id: query
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       timeout: 30           # Query timeout in seconds
@@ -100,15 +100,15 @@ Use `:name` syntax for named parameters:
 ```yaml
 steps:
   - id: find_user
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       params:
         email: "user@example.com"
         status: active
-    command: |
-      SELECT * FROM users
-      WHERE email = :email AND status = :status
+      query: |
+        SELECT * FROM users
+        WHERE email = :email AND status = :status
 ```
 
 ### Positional Parameters
@@ -118,13 +118,13 @@ PostgreSQL uses `$1`, `$2`, etc. for positional parameters:
 ```yaml
 steps:
   - id: find_user
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       params:
         - "user@example.com"
         - active
-    command: "SELECT * FROM users WHERE email = $1 AND status = $2"
+      query: "SELECT * FROM users WHERE email = $1 AND status = $2"
 ```
 
 ## Transactions
@@ -134,13 +134,13 @@ steps:
 ```yaml
 steps:
   - id: transfer
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       transaction: true
-    command: |
-      UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-      UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+      query: |
+        UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+        UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 ```
 
 ### Isolation Levels
@@ -150,14 +150,14 @@ Control transaction isolation for concurrent access:
 ```yaml
 steps:
   - id: critical_update
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       transaction: true
       isolation_level: serializable
-    command: |
-      SELECT balance FROM accounts WHERE id = 1 FOR UPDATE;
-      UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+      query: |
+        SELECT balance FROM accounts WHERE id = 1 FOR UPDATE;
+        UPDATE accounts SET balance = balance - 100 WHERE id = 1;
 ```
 
 | Level | Description |
@@ -174,20 +174,20 @@ Execute multiple SQL statements in a single step:
 ```yaml
 steps:
   - id: setup_tables
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
-    command: |
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE
-      );
+      query: |
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          name TEXT NOT NULL,
+          email TEXT UNIQUE
+        );
 
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+        CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
-      INSERT INTO users (name, email) VALUES ('Admin', 'admin@example.com')
-      ON CONFLICT (email) DO NOTHING;
+        INSERT INTO users (name, email) VALUES ('Admin', 'admin@example.com')
+        ON CONFLICT (email) DO NOTHING;
 ```
 
 ## Data Import
@@ -197,7 +197,7 @@ steps:
 ```yaml
 steps:
   - id: import_users
-    type: postgres
+    action: postgres.import
     with:
       dsn: "${DATABASE_URL}"
       import:
@@ -217,7 +217,7 @@ steps:
 ```yaml
 steps:
   - id: import_events
-    type: postgres
+    action: postgres.import
     with:
       dsn: "${DATABASE_URL}"
       import:
@@ -247,7 +247,7 @@ import:
 ```yaml
 steps:
   - id: import_with_nulls
-    type: postgres
+    action: postgres.import
     with:
       dsn: "${DATABASE_URL}"
       import:
@@ -267,7 +267,7 @@ Test import without writing data:
 ```yaml
 steps:
   - id: validate_import
-    type: postgres
+    action: postgres.import
     with:
       dsn: "${DATABASE_URL}"
       import:
@@ -283,11 +283,11 @@ steps:
 ```yaml
 steps:
   - id: export_orders
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       output_format: jsonl
-    command: "SELECT * FROM orders"
+      query: "SELECT * FROM orders"
     output: ORDERS
 ```
 
@@ -302,11 +302,11 @@ Output:
 ```yaml
 steps:
   - id: export_json
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       output_format: json
-    command: "SELECT * FROM orders LIMIT 100"
+      query: "SELECT * FROM orders LIMIT 100"
 ```
 
 ::: warning Memory Usage
@@ -318,12 +318,12 @@ The `json` format buffers ALL rows in memory before writing. For large result se
 ```yaml
 steps:
   - id: export_csv
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       output_format: csv
       headers: true
-    command: "SELECT id, name, email FROM users"
+      query: "SELECT id, name, email FROM users"
 ```
 
 ## Streaming Large Results
@@ -333,16 +333,16 @@ For large datasets, stream directly to a file:
 ```yaml
 steps:
   - id: export_all_orders
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       streaming: true
       output_file: /data/orders-export.jsonl
       output_format: jsonl    # Use jsonl or csv for large results
-    command: "SELECT * FROM orders"
 
+      query: "SELECT * FROM orders"
   - id: process_export
-    command: wc -l /data/orders-export.jsonl
+    run: wc -l /data/orders-export.jsonl
     depends:
       - export_all_orders
 ```
@@ -354,16 +354,16 @@ Prevent concurrent execution of critical operations across distributed workers:
 ```yaml
 steps:
   - id: exclusive_job
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       advisory_lock: "daily-aggregation"
-    command: |
-      DELETE FROM daily_stats WHERE date = CURRENT_DATE;
-      INSERT INTO daily_stats (date, total_orders, revenue)
-      SELECT CURRENT_DATE, COUNT(*), SUM(total)
-      FROM orders
-      WHERE created_at >= CURRENT_DATE;
+      query: |
+        DELETE FROM daily_stats WHERE date = CURRENT_DATE;
+        INSERT INTO daily_stats (date, total_orders, revenue)
+        SELECT CURRENT_DATE, COUNT(*), SUM(total)
+        FROM orders
+        WHERE created_at >= CURRENT_DATE;
 ```
 
 ::: tip
@@ -376,16 +376,16 @@ Advisory locks are session-level and automatically released when the step comple
 name: distributed-etl
 steps:
   - id: aggregate_region_data
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       advisory_lock: "etl-${REGION}"
       transaction: true
-    command: |
-      -- Only one worker per region can run this
-      TRUNCATE TABLE region_summary_${REGION};
-      INSERT INTO region_summary_${REGION}
-      SELECT * FROM calculate_region_metrics('${REGION}');
+      query: |
+        -- Only one worker per region can run this
+        TRUNCATE TABLE region_summary_${REGION};
+        INSERT INTO region_summary_${REGION}
+        SELECT * FROM calculate_region_metrics('${REGION}');
 ```
 
 ## Error Handling
@@ -393,11 +393,11 @@ steps:
 ```yaml
 steps:
   - id: resilient_query
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       timeout: 60
-    command: "SELECT * FROM large_table"
+      query: "SELECT * FROM large_table"
     retry_policy:
       limit: 3
       interval_sec: 10
@@ -414,17 +414,17 @@ env:
 
 steps:
   - id: acquire_lock
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       advisory_lock: "daily-etl"
       transaction: true
-    command: |
-      -- Clear staging table
-      TRUNCATE TABLE staging_orders;
+      query: |
+        -- Clear staging table
+        TRUNCATE TABLE staging_orders;
 
   - id: import_new_data
-    type: postgres
+    action: postgres.import
     with:
       dsn: "${DATABASE_URL}"
       import:
@@ -436,37 +436,37 @@ steps:
       - acquire_lock
 
   - id: transform_data
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       transaction: true
       isolation_level: repeatable_read
-    command: |
-      INSERT INTO orders (id, customer_id, total, created_at)
-      SELECT id, customer_id, total, created_at
-      FROM staging_orders
-      ON CONFLICT (id) DO UPDATE
-      SET total = EXCLUDED.total,
-          updated_at = NOW();
+      query: |
+        INSERT INTO orders (id, customer_id, total, created_at)
+        SELECT id, customer_id, total, created_at
+        FROM staging_orders
+        ON CONFLICT (id) DO UPDATE
+        SET total = EXCLUDED.total,
+            updated_at = NOW();
     depends:
       - import_new_data
 
   - id: generate_report
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       streaming: true
       output_file: /reports/daily-summary.json
       output_format: json
-    command: |
-      SELECT
-        DATE(created_at) as date,
-        COUNT(*) as order_count,
-        SUM(total) as revenue
-      FROM orders
-      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY DATE(created_at)
-      ORDER BY date DESC
+      query: |
+        SELECT
+          DATE(created_at) as date,
+          COUNT(*) as order_count,
+          SUM(total) as revenue
+        FROM orders
+        WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
     depends:
       - transform_data
 ```

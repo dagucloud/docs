@@ -66,13 +66,13 @@ You can also enable memory for workflow agent steps:
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       memory:
         enabled: true
-    messages:
-      - role: user
-        content: "Analyze the logs and update findings"
+      messages:
+        - role: user
+          content: "Analyze the logs and update findings"
 ```
 
 This is useful when a workflow should benefit from the same long-lived context as the interactive steward.

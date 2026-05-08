@@ -10,55 +10,64 @@ Execute the same workflow with different parameters in parallel.
 
 ```yaml
 steps:
-  - call: file-processor
+  - action: dag.run
+    with:
+      dag: file-processor
+      params: "FILE=${ITEM}"
     parallel:
       items:
-        - command: "file1.csv"
-        - command: "file2.csv"
-        - command: "file3.csv"
-    params: "FILE=${ITEM}"
-
+        - file1.csv
+        - file2.csv
+        - file3.csv
 ---
 name: file-processor
 params:
   - FILE: ""
 steps:
-  - command: python process.py --file ${FILE}
+  - run: python process.py --file ${FILE}
 ```
 
 ### With Concurrency Control
 
 ```yaml
 steps:
-  - call: file-processor
+  - action: dag.run
+    with:
+      dag: file-processor
+      params: "FILE=${ITEM}"
     parallel:
       items: ${FILE_LIST}
       max_concurrent: 2  # Process max 2 files at a time
-    params: "FILE=${ITEM}"
 ```
 
 ### Dynamic Items
 
 ```yaml
 steps:
-  - command: find /data -name "*.csv" -type f
+  - id: list_files
+    run: find /data -name "*.csv" -type f
     output: CSV_FILES
-  
-  - call: file-processor
+
+  - action: dag.run
+    with:
+      dag: file-processor
+      params: "FILE=${ITEM}"
     parallel: ${CSV_FILES}
-    params: "FILE=${ITEM}"
+    depends: [list_files]
 ```
 
 ### Capturing Output
 
 ```yaml
 steps:
-  - call: task-processor
+  - action: dag.run
+    with:
+      dag: task-processor
     parallel:
       items: [1, 2, 3]
     output: RESULTS
-  
-  - command: |
+
+  - run: |
       echo "Total: ${RESULTS.summary.total}"
       echo "Succeeded: ${RESULTS.summary.succeeded}"
       echo "Failed: ${RESULTS.summary.failed}"
@@ -89,13 +98,13 @@ type: graph
 max_active_steps: 2  # Run up to 2 steps in parallel
 
 steps:
-  - command: echo "Running task 1"
+  - run: echo "Running task 1"
     depends: [] # Explicitly declare no dependency
-  - command: echo "Running task 2"
+  - run: echo "Running task 2"
     depends: []
-  - command: echo "Running task 3"
+  - run: echo "Running task 3"
     depends: []
-  - command: echo "Running task 4"
+  - run: echo "Running task 4"
     depends: []
   # All start in parallel, limited by max_active_steps
 ```
@@ -140,7 +149,7 @@ Set execution time limits:
 timeout_sec: 3600  # 1 hour timeout
 
 steps:
-  - command: echo "Processing"
+  - run: echo "Processing"
 ```
 
 ### Step Timeout (timeout_sec)
@@ -152,14 +161,14 @@ timeout_sec: 1800  # Overall DAG timeout (30m)
 
 steps:
   - id: fast_check
-    command: curl -sf https://example.com/health
+    run: curl -sf https://example.com/health
     timeout_sec: 20    # This step fails if still running after 20s
 
   - id: bulk_import
-    command: python import.py   # Inherits 30m DAG timeout
+    run: python import.py   # Inherits 30m DAG timeout
 
   - id: guarded_external
-    command: bash -c 'long_unstable_call'
+    run: bash -c 'long_unstable_call'
     timeout_sec: 300   # Give 5m max even though DAG allows 30m
 ```
 
@@ -186,7 +195,7 @@ max_clean_up_time_sec: 300  # allow 5 minutes for cleanup (default timeout: 5s)
 
 handler_on:
   exit:
-    command: echo "Cleaning up"  # Must finish within 5 minutes
+    run: echo "Cleaning up"  # Must finish within 5 minutes
 ```
 
 ## Initial Delay
@@ -197,7 +206,7 @@ Delay workflow start:
 delay_sec: 60  # Wait 60 seconds before starting
 
 steps:
-  - command: echo "Running task"
+  - run: echo "Running task"
 ```
 
 ## Execution Order
@@ -206,9 +215,9 @@ steps:
 
 ```yaml
 steps:
-  - command: echo "1"
-  - command: echo "2"  # Runs after step 1
-  - command: echo "3"  # Runs after step 2
+  - run: echo "1"
+  - run: echo "2"  # Runs after step 1
+  - run: echo "3"  # Runs after step 2
 ```
 
 ### Parallel with Dependencies
@@ -217,17 +226,17 @@ steps:
 type: graph
 steps:
   - id: setup
-    command: echo "Setting up"
+    run: echo "Setting up"
 
   - id: task_a
-    command: echo "Running task A"
+    run: echo "Running task A"
     depends: setup
 
   - id: task_b
-    command: echo "Running task B"
+    run: echo "Running task B"
     depends: setup
 
-  - command: echo "Finalizing"
+  - run: echo "Finalizing"
     depends:
       - task_a
       - task_b
@@ -246,7 +255,7 @@ Control retry and repeat intervals with exponential backoff to avoid overwhelmin
 ```yaml
 steps:
   # API call with exponential backoff
-  - command: curl https://api.example.com/data
+  - run: curl https://api.example.com/data
     retry_policy:
       limit: 6
       interval_sec: 1
@@ -261,7 +270,7 @@ steps:
 ```yaml
 steps:
   # Service health check with backoff
-  - command: echo "Health check OK"
+  - run: echo "Health check OK"
     output: STATUS
     repeat_policy:
       repeat: until
@@ -280,7 +289,7 @@ The `interval_sec`, `limit`, and `max_interval_sec` fields accept variable refer
 
 ```yaml
 steps:
-  - command: echo "repeating"
+  - run: echo "repeating"
     repeat_policy:
       repeat: true
       limit: $REPEAT_LIMIT

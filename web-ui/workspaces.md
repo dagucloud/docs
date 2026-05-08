@@ -49,7 +49,7 @@ labels:
   - team=platform
 steps:
   - id: run
-    command: ./daily-report.sh
+    run: ./daily-report.sh
 ```
 
 After saving the DAG, select `ops` in the Web UI to see it with the matching runs and documents. A workflow with no workspace label appears under **Default**.

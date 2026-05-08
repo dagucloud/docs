@@ -8,13 +8,13 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
   ```yaml
   shell: ["/bin/bash", "-e", "-u"]
   steps:
-    - command: echo "Runs with bash -e -u"
+    - run: echo "Runs with bash -e -u"
   ```
 - **Step override** (evaluated at runtime so params/secrets/outputs are allowed):
   ```yaml
   steps:
     - shell: ${CUSTOM_SHELL:-/bin/zsh}
-      command: echo "Runs in the step shell"
+      run: echo "Runs in the step shell"
   ```
 - **Fallback**: If no shell is set, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
@@ -24,16 +24,17 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 - **Inline command string**:
   ```yaml
   steps:
-    - echo "Hello"
-    - command: echo "Hello with key"
-    - |
+    - run: echo "Hello"
+    - run: echo "Hello with key"
+    - run: |
         echo "Multi-line command block"
         echo "Runs as a script (not split into args)"
   ```
 - **Structured direct exec**:
   ```yaml
   steps:
-    - exec:
+    - action: exec
+      with:
         command: /usr/bin/python3
         args:
           - -u
@@ -44,7 +45,7 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 - **Script block**:
   ```yaml
   steps:
-    - script: |
+    - run: |
         #!/usr/bin/env bash
         set -e
         echo "Multi-line script"
@@ -53,8 +54,8 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 - **Interpreter + inline script**:
   ```yaml
   steps:
-    - command: python3
-      script: |
+    - shell: python3
+      run: |
         import sys
         print("Args:", sys.argv)
   ```
@@ -62,9 +63,9 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 
 ## Script Behavior (Unix)
 
-- A `script:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
+- A `run:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
 - If there is no step-level `shell` and the script has a shebang, that interpreter runs the script. Without a shebang, the resolved shell runs it (Dagu appends `-e` for sh/bash/zsh/ksh/ash/dash when using the default/DAG-level shell; step-level shells are left unchanged).
-- When both `command` and `script` are set, `command` is treated as the interpreter and receives the script path directly (no shell wrapper) — useful for `command: python3` with inline code.
+- When both `shell` and a multi-line `run` block are set, the shell value is used as the interpreter.
 
 ## Shell Options
 
@@ -77,23 +78,24 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
   steps:
     - shell: nix-shell
       shell_packages: [python3, jq]
-      command: |
+      run: |
         python3 --version
         jq --version
   ```
   nix-shell must be installed separately. Dagu runs inside `nix-shell --run ...`; it defaults to `--pure` if you do not supply purity flags. Include any flags you need (such as `--impure`) in the `shell` array. When Dagu supplies the shell, it prepends `set -e;` to the command string unless you already provided it.
 
 - **Direct execution (no shell parsing)**  
-  Use `exec:` for explicit argv:
+  Use `action: exec` for explicit argv:
   ```yaml
   steps:
-    - exec:
+    - action: exec
+      with:
         command: /usr/bin/python3
         args:
           - -u
           - script.py
   ```
-  `exec` cannot be combined with `command`, `script`, `shell`, or `shell_packages`.
+  `action: exec` bypasses shell parsing and uses explicit `with.command` / `with.args`.
 
 ## Tips
 

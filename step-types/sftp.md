@@ -12,16 +12,14 @@ ssh:
 
 steps:
   - id: upload_config
-    type: sftp
+    action: sftp.upload
     with:
-      direction: upload
       source: /local/config.yaml
       destination: /remote/config.yaml
 
   - id: download_logs
-    type: sftp
+    action: sftp.download
     with:
-      direction: download
       source: /var/log/app.log
       destination: /local/app.log
 ```
@@ -31,12 +29,11 @@ steps:
 ```yaml
 steps:
   - id: upload_file
-    type: sftp
+    action: sftp.upload
     with:
       user: deploy
       host: server.example.com
       key: ~/.ssh/deploy_key
-      direction: upload
       source: /local/file.txt
       destination: /remote/file.txt
 ```
@@ -65,16 +62,14 @@ Directories are transferred recursively:
 ```yaml
 steps:
   - id: upload_dir
-    type: sftp
+    action: sftp.upload
     with:
-      direction: upload
       source: /local/project/
       destination: /remote/project/
 
   - id: download_dir
-    type: sftp
+    action: sftp.download
     with:
-      direction: download
       source: /remote/backup/
       destination: /local/backup/
 ```

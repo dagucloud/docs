@@ -22,7 +22,7 @@ steps:
   - id: deploy
     env:
       - APP_ENV: staging     # Overrides DAG-level for this step only
-    command: ./deploy.sh
+    run: ./deploy.sh
 ```
 
 ## Base Configuration Inheritance
@@ -82,7 +82,7 @@ env:
   - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
 
 steps:
-  - command: python process.py --output ${OUTPUT_DIR}
+  - run: python process.py --output ${OUTPUT_DIR}
 ```
 
 ### Supported Formats
@@ -149,7 +149,7 @@ env:
   - FULL_PATH: "${data_dir}/output"
 
 steps:
-  - command: echo "${FULL_PATH}"  # Outputs: /tmp/foo/output
+  - run: echo "${FULL_PATH}"  # Outputs: /tmp/foo/output
 ```
 
 Chained references work too. An env variable can reference a param, and a later env variable can reference that env variable:
@@ -163,7 +163,7 @@ env:
   - FULL: "${DIR}/file.txt"
 
 steps:
-  - command: echo "${FULL}"  # Outputs: /data/subdir/file.txt
+  - run: echo "${FULL}"  # Outputs: /data/subdir/file.txt
 ```
 
 ### Command Substitution
@@ -217,16 +217,16 @@ env:
 
 steps:
   - id: normal_processing
-    command: ./process.sh
+    run: ./process.sh
     # Uses LOG_LEVEL=info from DAG-level
 
   - id: debug_processing
     env:
       - LOG_LEVEL: debug    # Overrides for this step only
-    command: ./process.sh
+    run: ./process.sh
 
   - id: final_step
-    command: ./cleanup.sh
+    run: ./cleanup.sh
     # Uses LOG_LEVEL=info again (step-level doesn't persist)
 ```
 
@@ -239,7 +239,7 @@ steps:
       - INPUT_PATH: ${DATA_DIR}/input
       - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
       - WORKER_ID: worker_${HOSTNAME}
-    command: python process.py
+    run: python process.py
 ```
 
 ## Variable Expansion Syntax
@@ -367,7 +367,7 @@ secrets:
     key: PROD_AWS_SECRET_ACCESS_KEY
 
 steps:
-  - command: ./deploy.sh
+  - run: ./deploy.sh
     # AWS_SECRET_ACCESS_KEY is available but masked in logs
 ```
 

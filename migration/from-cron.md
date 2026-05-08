@@ -166,7 +166,7 @@ type: chain
 working_dir: /current/directory
 steps:
   - id: main
-    command: ["python", "script.py", "--arg=value"]
+    run: ["python", "script.py", "--arg=value"]
 ```
 
 With flags:
@@ -187,7 +187,7 @@ env:
   - FOO=bar
 steps:
   - id: main
-    command: ["python", "script.py"]
+    run: ["python", "script.py"]
 ```
 
 Dagu keeps a snapshot of the generated workflow with the run so you can inspect what actually executed later. It does not add a new workflow file to your normal DAGs directory.
@@ -234,11 +234,11 @@ While `dagu exec` doesn't support lifecycle hook flags, you can define handlers 
 # ~/.config/dagu/base.yaml
 handler_on:
   failure:
-    command: 'curl -X POST https://alerts.example.com/webhook -d "dag ${DAG_NAME} failed"'
+    run: 'curl -X POST https://alerts.example.com/webhook -d "dag ${DAG_NAME} failed"'
   success:
-    command: 'echo "Success: ${DAG_NAME}" >> /var/log/dagu-exec.log'
+    run: 'echo "Success: ${DAG_NAME}" >> /var/log/dagu-exec.log'
   exit:
-    command: 'rm -f /tmp/${DAG_RUN_ID}.lock'
+    run: 'rm -f /tmp/${DAG_RUN_ID}.lock'
 ```
 
 Every `dagu exec` command inherits these handlers automatically:

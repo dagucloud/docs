@@ -5,7 +5,7 @@ Use Dagu with local model servers such as Ollama, vLLM, or LM Studio when they e
 This applies to both:
 
 - the Web UI steward
-- workflow steps that use `type: chat`
+- workflow steps that use `action: chat.completion`
 
 ## What Dagu Expects
 
@@ -53,14 +53,14 @@ Enter the **base URL**, not a full endpoint. Do not paste vendor-native endpoint
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: local
       model: llama3.2
       base_url: http://localhost:11434/v1
-    messages:
-      - role: user
-        content: "Summarize this repository in one paragraph."
+      messages:
+        - role: user
+          content: "Summarize this repository in one paragraph."
     output: RESULT
 ```
 

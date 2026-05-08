@@ -8,12 +8,12 @@ Manage workflow execution with concurrency limits.
 max_active_steps: 1       # Max 1 step running concurrently within the DAG
 
 steps:
-  - command: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
-  - command: echo "Processing large dataset"
+  - run: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
+  - run: echo "Processing large dataset"
   - parallel:
       items: ${FILE_LIST}
       max_concurrent: 3  # Limit parallel I/O
-    command: echo "Processing file ${ITEM}"
+    run: echo "Processing file ${ITEM}"
 ```
 
 For controlling concurrent DAG instances, use global queues (see below).
@@ -27,10 +27,10 @@ timeout_sec: 600         # (Optional) Overall DAG timeout in seconds
 
 steps:
   - id: quick_check
-    command: curl -sf https://example.com/health
+    run: curl -sf https://example.com/health
     timeout_sec: 30      # Kills this step after 30s (overrides DAG-level 600s)
   - id: long_task
-    command: python long_task.py   # Inherits DAG-level 600s since no step timeout
+    run: python long_task.py   # Inherits DAG-level 600s since no step timeout
 ```
 
 Behavior:
@@ -65,8 +65,8 @@ queues:
 queue: heavy-jobs       # Assign to queue for concurrency control
 
 steps:
-  - command: sh -c "echo Starting intensive task; sleep 10; echo Done"
-  - command: echo "Quick task"
+  - run: sh -c "echo Starting intensive task; sleep 10; echo Done"
+  - run: echo "Quick task"
 ```
 
 When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).

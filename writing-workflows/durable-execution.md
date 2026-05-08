@@ -47,7 +47,7 @@ Example:
 ```yaml
 steps:
   - id: fetch
-    command: curl -fsS https://api.example.com/data
+    run: curl -fsS https://api.example.com/data
     retry_policy:
       limit: 5
       interval_sec: 2
@@ -88,23 +88,23 @@ defaults:
 
 steps:
   - id: fetch
-    command: curl -fsS https://api.example.com/data
+    run: curl -fsS https://api.example.com/data
 
   - id: deploy
-    command: ./deploy.sh
+    run: ./deploy.sh
     retry_policy:
       limit: 5
       interval_sec: 10
 
   - id: notify
-    command: ./notify.sh
+    run: ./notify.sh
     retry_policy:
       limit: 0
       interval_sec: 0
 
 handler_on:
   failure:
-    command: ./alert.sh
+    run: ./alert.sh
 ```
 
 Result:
@@ -169,7 +169,7 @@ retry_policy:
 
 steps:
   - id: job
-    command: ./job.sh
+    run: ./job.sh
 ```
 
 This allows at most two scheduler-issued retries for the DAG:
@@ -219,11 +219,11 @@ defaults:
 
 steps:
   - id: fetch
-    command: curl -fsS https://api.example.com/data
+    run: curl -fsS https://api.example.com/data
 
   - id: deploy
     depends: [fetch]
-    command: ./deploy.sh
+    run: ./deploy.sh
     retry_policy:
       limit: 0
       interval_sec: 0

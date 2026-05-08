@@ -9,7 +9,7 @@ Dagu Steward is the assistant built into the Web UI. It helps create workflows, 
 The same assistant foundation appears in three places:
 
 - the **Web UI assistant**
-- workflow steps with `type: agent`
+- workflow steps with `action: agent.run`
 - **Workflow Operator** integrations such as Slack and Telegram
 
 ## Quick Start
@@ -79,7 +79,7 @@ You control this from [Tool Permissions & Bash Policy](/features/agent/settings/
 
 ## Use The Agent In Workflows
 
-When you want the assistant to run as part of a DAG, use [`type: agent`](/features/agent/step).
+When you want the assistant to run as part of a DAG, use [`action: agent.run`](/features/agent/step).
 
 Typical examples:
 

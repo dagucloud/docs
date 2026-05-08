@@ -87,11 +87,11 @@ env:
   - DEPLOY_BRANCH: main
 
 steps:
-  - type: ssh
+  - action: ssh.run
     with:
       user: deploy
       host: remote.example.com
-    command: |
+    run: |
       cd $HOME/app                    # $HOME preserved — remote shell resolves it
       git checkout ${DEPLOY_BRANCH}   # Expanded by Dagu — defined in DAG env
 ```
@@ -146,7 +146,7 @@ Define default positional parameters:
 params: first second third
 
 steps:
-  - command: echo "Args: $1 $2 $3"
+  - run: echo "Args: $1 $2 $3"
 ```
 
 Run with custom values:
@@ -165,7 +165,7 @@ params:
   - DEBUG: false
 
 steps:
-  - command: ./server --env=${ENVIRONMENT} --port=${PORT} --debug=${DEBUG}
+  - run: ./server --env=${ENVIRONMENT} --port=${PORT} --debug=${DEBUG}
 ```
 
 Override at runtime:
@@ -180,13 +180,13 @@ Every step receives the full parameter map encoded as JSON via `DAG_PARAMS_JSON`
 ```yaml
 steps:
   - id: print_params
-    command: echo "Raw payload: ${DAG_PARAMS_JSON}"
+    run: echo "Raw payload: ${DAG_PARAMS_JSON}"
   - id: batch_size
-    type: jq
+    action: jq.filter
     with:
       raw: true
-    script: ${DAG_PARAMS_JSON}
-    command: '"Batch size: \(.batchSize // "n/a")"'
+      data: ${DAG_PARAMS_JSON}
+    run: '"Batch size: \(.batchSize // "n/a")"'
 ```
 
 Use this when downstream scripts prefer structured data or when you need access to parameters that were provided as nested JSON.
@@ -201,7 +201,7 @@ params:
   - VERSION: latest
 
 steps:
-  - command: echo "Deploying $1 to ${ENVIRONMENT} version ${VERSION}"
+  - run: echo "Deploying $1 to ${ENVIRONMENT} version ${VERSION}"
 ```
 
 Run with:
@@ -220,7 +220,7 @@ env:
   - GIT_COMMIT: "`git rev-parse HEAD`"
 
 steps:
-  - command: echo "Deploy on ${TODAY} from ${HOSTNAME}"
+  - run: echo "Deploy on ${TODAY} from ${HOSTNAME}"
 ```
 
 **Note:** Command substitution is always supported in `env:` blocks. For DAG-level `params:`, use `eval:` on an inline rich param definition when you want `$VAR` expansion or backtick command substitution. Literal `default` values and runtime overrides from the CLI, API, and sub-DAG calls remain literal.
@@ -235,9 +235,9 @@ Capture command output to use in later steps:
 
 ```yaml
 steps:
-  - command: cat VERSION
+  - run: cat VERSION
     output: VERSION
-  - command: docker build -t myapp:${VERSION} .
+  - run: docker build -t myapp:${VERSION} .
 ```
 
 ### Output Size Limits
@@ -249,7 +249,7 @@ Control maximum output size:
 max_output_size: 5242880  # 5MB
 
 steps:
-  - command: cat large-file.json
+  - run: cat large-file.json
     output: FILE_CONTENT  # Fails if > 5MB
 ```
 
@@ -259,7 +259,7 @@ Redirect to files instead of capturing:
 
 ```yaml
 steps:
-  - command: python report.py
+  - run: python report.py
     stdout: /tmp/report.txt
     stderr: /tmp/errors.log
 ```
@@ -270,11 +270,11 @@ Access nested values in JSON output:
 
 ```yaml
 steps:
-  - command: |
+  - run: |
       echo '{"db": {"host": "localhost", "port": 5432}}'
     output: CONFIG
     
-  - command: psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
+  - run: psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
 ```
 
 ### Sub-workflow Output
@@ -283,11 +283,13 @@ Access outputs from nested workflows:
 
 ```yaml
 steps:
-  - call: etl-workflow
-    params: "DATE=${TODAY}"
+  - action: dag.run
+    with:
+      dag: etl-workflow
+      params: "DATE=${TODAY}"
     output: ETL_RESULT
     
-  - command: |
+  - run: |
       echo "Records processed: ${ETL_RESULT.outputs.record_count}"
       echo "Status: ${ETL_RESULT.outputs.status}"
 ```
@@ -299,10 +301,10 @@ Reference step properties using IDs:
 ```yaml
 steps:
   - id: risky
-    command: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
+    run: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
     continue_on: failed
 
-  - command: |
+  - run: |
       if [ "${risky.exit_code}" = "0" ]; then
         echo "Success! Output was:"
         cat ${risky.stdout}  # Read content from file path
@@ -343,7 +345,7 @@ and when constructing the step process environment.
 2. **Output variables from earlier steps**
    ```yaml
    steps:
-     - command: echo 42
+     - run: echo 42
        output: VAR
    ```
 

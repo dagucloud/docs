@@ -16,7 +16,7 @@ artifacts:
 
 steps:
   - id: generate-report
-    command: |
+    run: |
       mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/reports"
       cat > "${DAG_RUN_ARTIFACTS_DIR}/reports/summary.md" <<'EOF'
       # Daily Report
@@ -78,7 +78,7 @@ When artifact storage is enabled, Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps an
 ```yaml
 steps:
   - id: write-files
-    command: |
+    run: |
       test -n "${DAG_RUN_ARTIFACTS_DIR}"
       mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/images"
       printf 'hello\n' > "${DAG_RUN_ARTIFACTS_DIR}/hello.txt"
@@ -103,7 +103,7 @@ artifacts:
 
 steps:
   - id: build-audit-artifacts
-    command: |
+    run: |
       set -eu
       mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/reports" "${DAG_RUN_ARTIFACTS_DIR}/images"
 

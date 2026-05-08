@@ -143,14 +143,16 @@ worker_selector:
   gpu: "true"
 
 steps:
-  - command: python train_model.py
+  - run: python train_model.py
 ```
 
 Or at the step level for sub-DAG steps:
 
 ```yaml
 steps:
-  - call: train-model
+  - action: dag.run
+    with:
+      dag: train-model
     worker_selector:
       gpu: "true"
 ```
@@ -183,7 +185,7 @@ If `default_execution_mode` is `distributed` but you need a specific DAG to alwa
 worker_selector: local
 
 steps:
-  - command: curl -f http://localhost:8080/health
+  - run: curl -f http://localhost:8080/health
 ```
 
 Setting `worker_selector` to the string `"local"` overrides both the server default and any label-based routing, forcing the DAG to execute on the main instance.

@@ -87,7 +87,7 @@ mail_on:
 ```yaml
 steps:
   - id: critical_step
-    command: process_critical_data.sh
+    run: process_critical_data.sh
     mail_on_error: true  # Email if this step fails
 ```
 
@@ -109,14 +109,14 @@ wait_mail:
 
 This is useful for workflows that require human approval before continuing execution. The email will include details about the DAG and which steps are waiting.
 
-## Mail Step Type
+## Mail Action
 
 Send custom emails as workflow steps:
 
 ```yaml
 steps:
   - id: send_report
-    type: mail
+    action: mail.send
     with:
       to:
         - reports@example.com
@@ -145,11 +145,11 @@ steps:
 ```yaml
 steps:
   - id: generate_report
-    command: generate_report.py
+    run: generate_report.py
     output: REPORT_PATH
 
   - id: email_report
-    type: mail
+    action: mail.send
     with:
       to: stakeholders@example.com
       subject: "Processing Report - ${DAG_NAME}"
@@ -163,7 +163,7 @@ steps:
 
         Report available at: ${REPORT_PATH}
       attachments:
-        - command: ${REPORT_PATH}
+        - run: ${REPORT_PATH}
 ```
 
 ### Error Notification
@@ -171,7 +171,7 @@ steps:
 ```yaml
 handler_on:
   failure:
-    type: mail
+    action: mail.send
     with:
       to:
         - oncall@example.com
@@ -254,11 +254,11 @@ error_mail:
 ```yaml
 steps:
   - id: check_environment
-    command: echo $ENVIRONMENT
+    run: echo $ENVIRONMENT
     output: ENV
 
   - id: notify
-    type: mail
+    action: mail.send
     with:
       to: |
         `if [ "${ENV}" = "production" ]; then
@@ -275,7 +275,7 @@ steps:
 ```yaml
 steps:
   - id: send_html_email
-    type: mail
+    action: mail.send
     with:
       to: reports@example.com
       subject: "HTML Report"

@@ -38,7 +38,7 @@ secrets:
     key: secrets/db-password
 
 steps:
-  - command: ./migrate.sh
+  - run: ./migrate.sh
 ```
 
 This checks `/srv/app/secrets/db-password` before the DAG file directory.
@@ -74,7 +74,7 @@ secrets:
 
 steps:
   - name: import
-    command: ./import.sh
+    run: ./import.sh
     env:
       - DATABASE_URL: postgres://etl:${POSTGRES_PASSWORD}@db/warehouse
 ```

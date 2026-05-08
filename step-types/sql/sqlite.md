@@ -7,10 +7,10 @@ Execute queries and data operations against SQLite databases. Uses a pure Go SQL
 ```yaml
 steps:
   - id: query_data
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./data.db"
-    command: "SELECT * FROM users"
+      query: "SELECT * FROM users"
     output: USERS  # Capture results to variable
 ```
 
@@ -65,7 +65,7 @@ This converts the DSN to `file::memory:?cache=shared` internally. For persistent
 ```yaml
 steps:
   - id: query
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       timeout: 30           # Query timeout in seconds
@@ -94,15 +94,15 @@ Use `:name` syntax for named parameters:
 ```yaml
 steps:
   - id: find_user
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       params:
         status: active
         role: admin
-    command: |
-      SELECT * FROM users
-      WHERE status = :status AND role = :role
+      query: |
+        SELECT * FROM users
+        WHERE status = :status AND role = :role
 ```
 
 ### Positional Parameters
@@ -112,13 +112,13 @@ SQLite uses `?` for positional parameters:
 ```yaml
 steps:
   - id: find_user
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       params:
         - active
         - admin
-    command: "SELECT * FROM users WHERE status = ? AND role = ?"
+      query: "SELECT * FROM users WHERE status = ? AND role = ?"
 ```
 
 ## Transactions
@@ -126,14 +126,14 @@ steps:
 ```yaml
 steps:
   - id: batch_update
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       transaction: true
-    command: |
-      UPDATE users SET last_seen = datetime('now') WHERE id = 1;
-      UPDATE users SET login_count = login_count + 1 WHERE id = 1;
-      INSERT INTO activity_log (user_id, action) VALUES (1, 'login');
+      query: |
+        UPDATE users SET last_seen = datetime('now') WHERE id = 1;
+        UPDATE users SET login_count = login_count + 1 WHERE id = 1;
+        INSERT INTO activity_log (user_id, action) VALUES (1, 'login');
 ```
 
 ## File Locking
@@ -143,13 +143,13 @@ For exclusive access to the database file, use file locking:
 ```yaml
 steps:
   - id: exclusive_operation
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./shared.db"
       file_lock: true
-    command: |
-      DELETE FROM cache WHERE expires_at < datetime('now');
-      VACUUM;
+      query: |
+        DELETE FROM cache WHERE expires_at < datetime('now');
+        VACUUM;
 ```
 
 ::: tip
@@ -162,15 +162,15 @@ File locking creates a `.lock` file next to the database (e.g., `shared.db.lock`
 name: cache-cleanup
 steps:
   - id: cleanup_expired
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:/shared/cache.db"
       file_lock: true
       transaction: true
-    command: |
-      -- Safe to run from multiple workers
-      DELETE FROM cache WHERE expires_at < datetime('now');
-      DELETE FROM sessions WHERE last_activity < datetime('now', '-1 day');
+      query: |
+        -- Safe to run from multiple workers
+        DELETE FROM cache WHERE expires_at < datetime('now');
+        DELETE FROM sessions WHERE last_activity < datetime('now', '-1 day');
 ```
 
 ## Data Import
@@ -180,7 +180,7 @@ steps:
 ```yaml
 steps:
   - id: import_products
-    type: sqlite
+    action: sqlite.import
     with:
       dsn: "file:./inventory.db"
       import:
@@ -196,7 +196,7 @@ steps:
 ```yaml
 steps:
   - id: import_events
-    type: sqlite
+    action: sqlite.import
     with:
       dsn: "file:./events.db"
       import:
@@ -212,7 +212,7 @@ SQLite supports `INSERT OR IGNORE` and `INSERT OR REPLACE`:
 ```yaml
 steps:
   - id: upsert_data
-    type: sqlite
+    action: sqlite.import
     with:
       dsn: "file:./app.db"
       import:
@@ -238,11 +238,11 @@ Unlike PostgreSQL where `replace` uses `ON CONFLICT DO NOTHING`, SQLite's `repla
 ```yaml
 steps:
   - id: export_jsonl
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       output_format: jsonl
-    command: "SELECT * FROM products"
+      query: "SELECT * FROM products"
 ```
 
 Output:
@@ -256,11 +256,11 @@ Output:
 ```yaml
 steps:
   - id: export_json
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       output_format: json
-    command: "SELECT * FROM products LIMIT 1000"
+      query: "SELECT * FROM products LIMIT 1000"
 ```
 
 ::: warning Memory Usage
@@ -272,12 +272,12 @@ The `json` format buffers ALL rows in memory before writing. For large result se
 ```yaml
 steps:
   - id: export_csv
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       output_format: csv
       headers: true
-    command: "SELECT id, name, price FROM products"
+      query: "SELECT id, name, price FROM products"
 ```
 
 ## Streaming Large Results
@@ -285,13 +285,13 @@ steps:
 ```yaml
 steps:
   - id: export_logs
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./logs.db"
       streaming: true
       output_file: /data/logs-export.jsonl
       output_format: jsonl    # Use jsonl or csv for large results
-    command: "SELECT * FROM logs WHERE date >= date('now', '-7 days')"
+      query: "SELECT * FROM logs WHERE date >= date('now', '-7 days')"
 ```
 
 ::: tip Best Practices for Large Results
@@ -305,24 +305,24 @@ steps:
 ```yaml
 steps:
   - id: setup_database
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
-    command: |
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
+      query: |
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          email TEXT UNIQUE,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
 
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+        CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
-      CREATE TABLE IF NOT EXISTS sessions (
-        id TEXT PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id),
-        expires_at DATETIME NOT NULL
-      );
+        CREATE TABLE IF NOT EXISTS sessions (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id),
+          expires_at DATETIME NOT NULL
+        );
 ```
 
 ## SQLite Functions
@@ -332,20 +332,20 @@ SQLite provides many built-in functions:
 ```yaml
 steps:
   - id: aggregate_data
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./sales.db"
-    command: |
-      SELECT
-        date(created_at) as sale_date,
-        count(*) as order_count,
-        sum(total) as revenue,
-        avg(total) as avg_order,
-        group_concat(product_name, ', ') as products
-      FROM orders
-      WHERE created_at >= date('now', '-30 days')
-      GROUP BY date(created_at)
-      ORDER BY sale_date DESC
+      query: |
+        SELECT
+          date(created_at) as sale_date,
+          count(*) as order_count,
+          sum(total) as revenue,
+          avg(total) as avg_order,
+          group_concat(product_name, ', ') as products
+        FROM orders
+        WHERE created_at >= date('now', '-30 days')
+        GROUP BY date(created_at)
+        ORDER BY sale_date DESC
 ```
 
 ## Error Handling
@@ -353,11 +353,11 @@ steps:
 ```yaml
 steps:
   - id: safe_query
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       timeout: 30
-    command: "SELECT * FROM large_table"
+      query: "SELECT * FROM large_table"
     retry_policy:
       limit: 3
       interval_sec: 2
@@ -374,25 +374,25 @@ env:
 
 steps:
   - id: setup_schema
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:${DB_PATH}"
-    command: |
-      CREATE TABLE IF NOT EXISTS raw_events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        event_type TEXT NOT NULL,
-        payload TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
+      query: |
+        CREATE TABLE IF NOT EXISTS raw_events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          event_type TEXT NOT NULL,
+          payload TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
 
-      CREATE TABLE IF NOT EXISTS daily_stats (
-        date TEXT PRIMARY KEY,
-        event_count INTEGER,
-        unique_types INTEGER
-      );
+        CREATE TABLE IF NOT EXISTS daily_stats (
+          date TEXT PRIMARY KEY,
+          event_count INTEGER,
+          unique_types INTEGER
+        );
 
   - id: import_events
-    type: sqlite
+    action: sqlite.import
     with:
       dsn: "file:${DB_PATH}"
       import:
@@ -404,34 +404,34 @@ steps:
       - setup_schema
 
   - id: calculate_stats
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:${DB_PATH}"
       file_lock: true
       transaction: true
-    command: |
-      INSERT OR REPLACE INTO daily_stats (date, event_count, unique_types)
-      SELECT
-        date(created_at) as date,
-        count(*) as event_count,
-        count(DISTINCT event_type) as unique_types
-      FROM raw_events
-      WHERE date(created_at) = date('now')
-      GROUP BY date(created_at);
+      query: |
+        INSERT OR REPLACE INTO daily_stats (date, event_count, unique_types)
+        SELECT
+          date(created_at) as date,
+          count(*) as event_count,
+          count(DISTINCT event_type) as unique_types
+        FROM raw_events
+        WHERE date(created_at) = date('now')
+        GROUP BY date(created_at);
     depends:
       - import_events
 
   - id: export_report
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:${DB_PATH}"
       streaming: true
       output_file: /reports/daily-stats.json
       output_format: json
-    command: |
-      SELECT * FROM daily_stats
-      ORDER BY date DESC
-      LIMIT 30
+      query: |
+        SELECT * FROM daily_stats
+        ORDER BY date DESC
+        LIMIT 30
     depends:
       - calculate_stats
 ```

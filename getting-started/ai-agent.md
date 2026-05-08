@@ -58,35 +58,36 @@ Tools can be individually enabled or disabled in [Tool Permissions & Bash Policy
 
 You can use AI capabilities directly in your DAG steps in two ways.
 
-### Agent Step (`type: agent`)
+### Agent Action (`action: agent.run`)
 
 A multi-turn tool-calling loop — the agent reads files, runs commands, edits code, and iterates until the task is complete:
 
 ```yaml
 steps:
   - id: fix_config
-    type: agent
-    messages:
-      - role: user
-        content: |
-          Fix the invalid database_url in /etc/app/config.yaml
+    action: agent.run
+    with:
+      messages:
+        - role: user
+          content: |
+            Fix the invalid database_url in /etc/app/config.yaml
     output: RESULT
 ```
 
-### Chat Step (`type: chat`)
+### Chat Action (`action: chat.completion`)
 
 A single-shot LLM call — send a prompt and get a response, no tool use:
 
 ```yaml
 steps:
   - id: summarize
-    type: chat
-    llm:
+    action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
-    messages:
-      - role: user
-        content: "Summarize today's error logs."
+      messages:
+        - role: user
+          content: "Summarize today's error logs."
     output: SUMMARY
 ```
 

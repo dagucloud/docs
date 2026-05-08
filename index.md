@@ -173,8 +173,8 @@ The script installers run a guided wizard that installs Dagu, adds it to your PA
 ```bash
 cat > hello.yaml << 'EOF'
 steps:
-  - command: echo "Hello from Dagu!"
-  - command: echo "Step 2"
+  - run: echo "Hello from Dagu!"
+  - run: echo "Step 2"
 EOF
 
 dagu start hello.yaml
@@ -188,32 +188,32 @@ dagu start-all
 
 Visit [http://localhost:8080](http://localhost:8080)
 
-## Built-in Step Types
+## Built-in Actions
 
-Common built-in step types include:
+Common built-in actions include:
 
-| Step type | Purpose |
+| Action | Purpose |
 |----------|---------|
-| `command`, `shell` | Local shell commands and scripts |
-| `log` | Write messages to stdout without running a shell command |
-| `docker`, `container` | Run in a Docker container or exec into an existing container |
-| `kubernetes`, `k8s` | Run a step as a Kubernetes workload |
-| `ssh` | Remote command execution |
-| `sftp` | Remote file transfer |
-| `http` | HTTP requests |
-| `postgres`, `sqlite` | SQL queries |
-| `redis` | Redis commands and scripts |
-| `s3` | S3 object operations |
-| `jq` | JSON transformation |
-| `mail` | Email delivery |
-| `archive` | Archive create/extract |
-| `dag` | Sub-DAG execution |
-| `router` | Route execution to downstream steps by value |
-| `template` | Template rendering |
-| `chat` | LLM chat completion |
-| `agent` | Tool-using agent step |
+| `run` | Local shell commands and scripts |
+| `log.write` | Write messages to stdout without running a shell command |
+| `docker.run`, `container.run` | Run in a Docker container or exec into an existing container |
+| `kubernetes.run`, `k8s.run` | Run a step as a Kubernetes workload |
+| `ssh.run` | Remote command execution |
+| `sftp.upload`, `sftp.download` | Remote file transfer |
+| `http.request` | HTTP requests |
+| `postgres.query`, `sqlite.query` | SQL queries |
+| `redis.<operation>` | Redis commands and scripts |
+| `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 object operations |
+| `jq.filter` | JSON transformation |
+| `mail.send` | Email delivery |
+| `archive.create`, `archive.extract`, `archive.list` | Archive create/extract |
+| `dag.run` | Sub-DAG execution |
+| `router.route` | Route execution to downstream steps by value |
+| `template.render` | Template rendering |
+| `chat.completion` | LLM chat completion |
+| `agent.run` | Tool-using agent step |
 
-DAGs can also declare reusable `step_types` that expand to builtin step types at load time. See [Custom Step Types](/writing-workflows/custom-step-types) and [Step Types](/step-types/shell) for the exact configuration surface.
+DAGs can also declare reusable `actions` that expand to builtin actions at load time. See [Custom Actions](/writing-workflows/custom-step-types) and [Actions](/step-types/shell) for the exact configuration surface.
 
 ## Scheduling and Reliability
 
@@ -320,18 +320,18 @@ See the [Distributed Execution documentation](/server-admin/distributed/) for se
 type: graph
 steps:
   - id: extract
-    command: ./extract.sh
+    run: ./extract.sh
 
   - id: transform_a
-    command: ./transform_a.sh
+    run: ./transform_a.sh
     depends: [extract]
 
   - id: transform_b
-    command: ./transform_b.sh
+    run: ./transform_b.sh
     depends: [extract]
 
   - id: load
-    command: ./load.sh
+    run: ./load.sh
     depends: [transform_a, transform_b]
 ```
 
@@ -342,7 +342,7 @@ steps:
   - name: build
     container:
       image: node:20-alpine
-    command: npm run build
+    run: npm run build
 ```
 
 ### Retry with Exponential Backoff
@@ -350,7 +350,7 @@ steps:
 ```yaml
 steps:
   - name: flaky-api-call
-    command: curl -f https://api.example.com/data
+    run: curl -f https://api.example.com/data
     retry_policy:
       limit: 3
       interval_sec: 10
@@ -369,9 +369,9 @@ overlap_policy: skip
 timeout_sec: 3600
 handler_on:
   failure:
-    command: notify-team.sh
+    run: notify-team.sh
   exit:
-    command: cleanup.sh
+    run: cleanup.sh
 ```
 
 ### Sub-DAG Composition
@@ -379,17 +379,26 @@ handler_on:
 ```yaml
 steps:
   - name: extract
-    call: etl/extract
-    params: "SOURCE=s3://bucket/data.csv"
+    action: dag.run
+    with:
+      dag: etl/extract
+      params:
+        SOURCE: s3://bucket/data.csv
 
   - name: transform
-    call: etl/transform
-    params: "INPUT=${extract.outputs.result}"
+    action: dag.run
+    with:
+      dag: etl/transform
+      params:
+        INPUT: ${extract.outputs.result}
     depends: [extract]
 
   - name: load
-    call: etl/load
-    params: "DATA=${transform.outputs.result}"
+    action: dag.run
+    with:
+      dag: etl/load
+      params:
+        DATA: ${transform.outputs.result}
     depends: [transform]
 ```
 
@@ -398,12 +407,12 @@ steps:
 ```yaml
 steps:
   - name: deploy
-    type: ssh
+    action: ssh.run
     with:
       host: prod-server.example.com
       user: deploy
       key: ~/.ssh/id_rsa
-    command: cd /var/www && git pull && systemctl restart app
+      command: cd /var/www && git pull && systemctl restart app
 ```
 
 See [Examples](/writing-workflows/examples) for more patterns.
@@ -460,7 +469,7 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
     <p>All configuration options</p>
   </div>
   <div class="step-card">
-    <h3><a href="/step-types/shell">Step Types</a></h3>
+    <h3><a href="/step-types/shell">Actions</a></h3>
     <p>Built-in executor types</p>
   </div>
   <div class="step-card">

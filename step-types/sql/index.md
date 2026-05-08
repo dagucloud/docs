@@ -19,10 +19,10 @@ secrets:
 
 steps:
   - id: query_users
-    type: postgres
+    action: postgres.query
     with:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
-    command: "SELECT id, name, email FROM users WHERE active = true"
+      query: "SELECT id, name, email FROM users WHERE active = true"
     output: USERS  # Capture results to variable
 ```
 
@@ -98,7 +98,7 @@ secrets:
 
 steps:
   - id: import_csv
-    type: postgres
+    action: postgres.import
     with:
       dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
       import:
@@ -135,15 +135,15 @@ Use named parameters for SQL injection prevention:
 ```yaml
 steps:
   - id: safe_query
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       params:
         status: active
         min_age: 18
-    command: |
-      SELECT * FROM users
-      WHERE status = :status AND age >= :min_age
+      query: |
+        SELECT * FROM users
+        WHERE status = :status AND age >= :min_age
 ```
 
 Or positional parameters:
@@ -151,13 +151,13 @@ Or positional parameters:
 ```yaml
 steps:
   - id: safe_query
-    type: sqlite
+    action: sqlite.query
     with:
       dsn: "file:./app.db"
       params:
         - active
         - 18
-    command: "SELECT * FROM users WHERE status = ? AND age >= ?"
+      query: "SELECT * FROM users WHERE status = ? AND age >= ?"
 ```
 
 ## Transactions
@@ -167,14 +167,14 @@ Wrap multiple statements in a transaction:
 ```yaml
 steps:
   - id: transfer_funds
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       transaction: true
       isolation_level: serializable
-    command: |
-      UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-      UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+      query: |
+        UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+        UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 ```
 
 ## Output Formats
@@ -186,11 +186,11 @@ One JSON object per line, ideal for streaming:
 ```yaml
 steps:
   - id: export_jsonl
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       output_format: jsonl
-    command: "SELECT * FROM orders"
+      query: "SELECT * FROM orders"
 ```
 
 Output:
@@ -206,11 +206,11 @@ Array of objects:
 ```yaml
 steps:
   - id: export_json
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       output_format: json
-    command: "SELECT * FROM orders"
+      query: "SELECT * FROM orders"
 ```
 
 ::: warning Memory Usage
@@ -224,12 +224,12 @@ Tabular format with optional headers:
 ```yaml
 steps:
   - id: export_csv
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       output_format: csv
       headers: true
-    command: "SELECT * FROM orders"
+      query: "SELECT * FROM orders"
 ```
 
 ## Streaming Large Results
@@ -239,13 +239,13 @@ For large result sets, stream directly to a file:
 ```yaml
 steps:
   - id: export_large_table
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       streaming: true
       output_file: /data/export.jsonl
       output_format: jsonl    # Use jsonl or csv for streaming
-    command: "SELECT * FROM large_table"
+      query: "SELECT * FROM large_table"
 ```
 
 ::: tip Best Practices for Large Results
@@ -260,11 +260,11 @@ steps:
 ```yaml
 steps:
   - id: query_with_retry
-    type: postgres
+    action: postgres.query
     with:
       dsn: "${DATABASE_URL}"
       timeout: 30
-    command: "SELECT * FROM orders"
+      query: "SELECT * FROM orders"
     retry_policy:
       limit: 3
       interval_sec: 5

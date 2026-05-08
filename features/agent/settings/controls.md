@@ -96,7 +96,7 @@ When a bash command is denied:
 - `On Deny = Ask User` triggers approval only when safe mode is on and an approval UI is available
 - If safe mode is off, `Ask User` behaves like allow in interactive sessions
 
-For workflow `type: agent` steps, there is no approval UI, so denied bash commands fail instead of prompting.
+For workflow `action: agent.run` steps, there is no approval UI, so denied bash commands fail instead of prompting.
 
 ## Practical Guidance
 

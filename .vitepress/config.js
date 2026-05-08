@@ -102,9 +102,9 @@ const fullSidebar = [
     ],
   },
   {
-    text: "Step Types",
+    text: "Actions",
     items: [
-      { text: "Custom Step Types", link: "/writing-workflows/custom-step-types" },
+      { text: "Custom Actions", link: "/writing-workflows/custom-step-types" },
       { text: "Shell", link: "/step-types/shell" },
       { text: "Shell (macOS / Linux)", link: "/step-types/shell-unix" },
       { text: "Shell (Windows)", link: "/step-types/shell-windows" },
@@ -354,7 +354,7 @@ export default withMermaid(
         { text: "Overview", link: "/overview/", activeMatch: "/overview/" },
         { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "/getting-started" },
         { text: "Writing Workflows", link: "/writing-workflows/", activeMatch: "/writing-workflows/" },
-        { text: "Step Types", link: "/step-types/shell", activeMatch: "/step-types/" },
+        { text: "Actions", link: "/step-types/shell", activeMatch: "/step-types/" },
         { text: "GitHub Integration", link: "/github-integration/", activeMatch: "/github-integration/" },
         { text: "AI Agent", link: "/features/agent/", activeMatch: "/features/agent/" },
         { text: "Server Admin", link: "/server-admin/", activeMatch: "/server-admin/" },

@@ -43,15 +43,15 @@ artifacts:
 type: graph
 steps:
   - id: step_name          # Optional
-    command: echo "Hello"
+    run: echo "Hello"
     depends: previous_step # Optional
 
 # Lifecycle handlers
 handler_on:
   success:
-    command: notify-success.sh
+    run: notify-success.sh
   failure:
-    command: cleanup-on-failure.sh
+    run: cleanup-on-failure.sh
 ```
 
 ## Root Fields
@@ -77,9 +77,9 @@ handler_on:
 ```yaml
 # Chain mode (default) - sequential execution
 steps:
-  - command: echo "First"
-  - command: echo "Second"   # Waits for First
-  - command: echo "Third"    # Waits for Second
+  - run: echo "First"
+  - run: echo "Second"   # Waits for First
+  - run: echo "Third"    # Waits for Second
 
 ---
 
@@ -87,11 +87,11 @@ steps:
 type: graph
 steps:
   - id: fetch_a
-    command: curl https://api.example.com/a
+    run: curl https://api.example.com/a
   - id: fetch_b
-    command: curl https://api.example.com/b
+    run: curl https://api.example.com/b
   - id: merge
-    command: ./merge.sh
+    run: ./merge.sh
     depends: [fetch_a, fetch_b]  # Runs after both complete
 ```
 
@@ -226,10 +226,10 @@ defaults:
 
 steps:
   - id: fetch_data
-    command: curl https://api.example.com/data
+    run: curl https://api.example.com/data
 
   - id: process_data
-    command: ./process.sh
+    run: ./process.sh
 ```
 
 ```yaml
@@ -244,12 +244,12 @@ defaults:
 steps:
   # Inherits retry_policy (limit: 5) and gets LOG_LEVEL from defaults
   - id: step_a
-    command: ./run.sh
+    run: ./run.sh
 
   # Overrides retry_policy with its own; still gets LOG_LEVEL from defaults
   # plus its own TIMEOUT env var
   - id: step_b
-    command: ./run-critical.sh
+    run: ./run-critical.sh
     retry_policy:
       limit: 1
       interval_sec: 0
@@ -260,23 +260,23 @@ steps:
 
 See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation and examples.
 
-### Custom Step Types
+### Custom Actions
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `step_types` | object | Reusable custom step type definitions for this YAML document. Merged with base-config `step_types` per document. Duplicate names across scopes are rejected. | - |
+| `actions` | object | Reusable custom action definitions for this YAML document. Merged with base-config `actions` per document. Duplicate names across scopes are rejected. | - |
 
-Custom step types expand to builtin-backed steps during DAG load. They are not runtime plugins.
+Custom actions expand to builtin-backed steps during DAG load. They are not runtime plugins.
 
 Each definition accepts:
 
-- `type`: required builtin step type or builtin alias
+- `type`: required builtin action or builtin alias
 - `input_schema`: required inline JSON Schema object, which must resolve to an object schema
 - `output_schema`: optional inline JSON Schema object, which must resolve to an object schema and validates stdout JSON after execution
 - `template`: required step fragment expanded at build time
 - `description`: optional fallback description for the expanded step
 
-See [Custom Step Types](/writing-workflows/custom-step-types) for the full definition rules, template rendering behavior, and call-site restrictions.
+See [Custom Actions](/writing-workflows/custom-step-types) for the full definition rules, template rendering behavior, and call-site restrictions.
 
 ### Data Fields
 
@@ -543,11 +543,11 @@ ssh:
 
 steps:
   # These steps inherit the DAG-level SSH configuration
-  - command: systemctl status myapp
-  - command: systemctl restart myapp
+  - run: systemctl status myapp
+  - run: systemctl restart myapp
 
   # Step-level with overrides DAG-level
-  - type: ssh
+  - action: ssh.run
     with:
       user: backup      # Override user
       host: db.example.com  # Override host
@@ -555,7 +555,7 @@ steps:
       shell:
         - /bin/sh        # Override shell with explicit flags
         - -e
-    command: mysqldump mydb > backup.sql
+    run: mysqldump mydb > backup.sql
 ```
 
 **Important Notes:**
@@ -580,10 +580,11 @@ llm:
   temperature: 0.7
 
 steps:
-  - type: chat
-    messages:
-      - role: user
-        content: "What is 2+2?"
+  - action: chat.completion
+    with:
+      messages:
+        - role: user
+          content: "What is 2+2?"
 ```
 
 When configured at the DAG level, all chat steps inherit the LLM configuration. Step-level `llm:` completely overrides DAG-level configuration (no field-level merging).
@@ -605,9 +606,8 @@ redis:
 
 steps:
   - id: cache_lookup
-    type: redis
+    action: redis.get
     with:
-      command: GET
       key: cache:user:${USER_ID}
     output: CACHED_DATA
 ```
@@ -647,13 +647,13 @@ kubernetes:
 
 steps:
   - id: report
-    type: k8s
+    action: k8s.run
     with:
       image: alpine:3.20
-    command: echo hello
+    run: echo hello
 ```
 
-When configured at the DAG level, only steps with `type: k8s` or `type: kubernetes` inherit these defaults. The root `kubernetes:` block does not change the executor type of plain command steps.
+When configured at the DAG level, only steps with `action: k8s.run` or `action: kubernetes.run` inherit these defaults. The root `kubernetes:` block does not change the executor type of plain command steps.
 
 Step-level `with` overrides DAG-level `kubernetes` using Kubernetes-specific merge rules:
 - scalar values replace DAG defaults
@@ -689,7 +689,7 @@ container:
     - /abs/path:/other   # Absolute paths are unchanged
 
 steps:
-  - command: python process.py
+  - run: python process.py
 ```
 
 **Default Working Directory:**
@@ -706,34 +706,35 @@ steps:
 working_dir: /project          # DAG-level working directory
 
 steps:
-  - command: pwd                   # Outputs: /project
+  - run: pwd                   # Outputs: /project
   - working_dir: /custom   # Override DAG working_dir
-    command: pwd          # Outputs: /custom
+    run: pwd          # Outputs: /custom
 ```
 
 **Sub-DAG Working Directory Inheritance:**
 
-When a parent DAG calls a child DAG using `call:`, the child inherits the parent's working directory for local execution:
+When a parent DAG calls a child DAG using `action: dag.run`, the child inherits the parent's working directory for local execution:
 
 ```yaml
 # Parent DAG with working_dir
 working_dir: /app/project
 
 steps:
-  - call: child-workflow    # Child inherits /app/project as working_dir
-
+  - action: dag.run
+    with:
+      dag: child-workflow    # Child inherits /app/project as working_dir
 ---
 # Child DAG without explicit working_dir
 name: child-workflow
 steps:
-  - command: pwd                     # Outputs: /app/project (inherited from parent)
+  - run: pwd                     # Outputs: /app/project (inherited from parent)
 
 ---
 # Child DAG with explicit working_dir (overrides inheritance)
 name: child-with-custom-wd
 working_dir: /custom/path
 steps:
-  - command: pwd                     # Outputs: /custom/path
+  - run: pwd                     # Outputs: /custom/path
 ```
 
 > **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `worker_selector`), sub-DAGs use their own context on the worker node.
@@ -826,17 +827,17 @@ smtp:
 ```yaml
 handler_on:
   init:
-    command: echo "Setting up"      # Runs before any steps
+    run: echo "Setting up"      # Runs before any steps
   success:
-    command: echo "Workflow succeeded"
+    run: echo "Workflow succeeded"
   failure:
-    command: echo "Notifying failure"
+    run: echo "Notifying failure"
   abort:
-    command: echo "Cleaning up"
+    run: echo "Cleaning up"
   wait:
-    command: echo "Waiting for approval: ${DAG_WAITING_STEPS}"
+    run: echo "Waiting for approval: ${DAG_WAITING_STEPS}"
   exit:
-    command: echo "Always running"
+    run: echo "Always running"
 ```
 
 > **Note**: Sub-DAGs (invoked via `call`) do **not** inherit `handler_on` from base configuration. Each sub-DAG must define its own handlers explicitly. See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
@@ -883,22 +884,22 @@ Each step in the `steps` array can have these fields:
 |-------|------|-------------|---------|
 | `name` | string | Step name (optional - auto-generated if not provided) | Auto-generated |
 | `id` | string | Optional stable identifier for references and dependencies | - |
-| `command` | string/array | Command to execute. Can be a string (single command), array of strings (multiple commands executed sequentially), or multi-line string (runs as inline script). | - |
-| `exec` | object | Direct binary execution with explicit argv and no shell parsing | - |
-| `script` | string | Inline script (alternative to command). Honors shebang when no shell is set. | - |
+| `run` | string | Shell command or multi-line shell script. | - |
+| `action` | string | Builtin or custom action name. Action-specific settings go under `with`. | - |
+| `with` | object | Action-specific settings. | - |
 | `depends` | string/array | Step dependencies | - |
 
 #### Multiple Commands
 
-The `command` field accepts an array of strings. Multiple commands share the same step configuration:
+Use a multi-line `run` block when multiple shell commands should share the same step configuration:
 
 ```yaml
 steps:
   - id: build_and_test
-    command:
-      - npm install
-      - npm run build
-      - npm test
+    run: |
+      npm install
+      npm run build
+      npm test
     env:
       - NODE_ENV: production
     working_dir: /app
@@ -910,19 +911,14 @@ Commands run in order and stop on first failure. Retries restart from the first 
 
 **Trade-off:** You lose the ability to retry or resume from the middle of the command list.
 
-**Supported step types:** shell, command, docker, container, ssh
-
-**Not supported:** jq, http, archive, mail, dag, template, log, k8s, kubernetes
-
-These step types do not support multi-command arrays. Use `script:` for `template` steps. Unsupported configurations are rejected at parse time.
-
 #### Direct Exec
 
-For direct command execution steps, `exec` runs a binary with explicit argv and no shell parsing.
+For direct command execution steps, `action: exec` runs a binary with explicit argv and no shell parsing.
 
 ```yaml
 steps:
-  - exec:
+  - action: exec
+    with:
       command: /usr/bin/python3
       args:
         - -u
@@ -935,7 +931,7 @@ Rules:
 
 - `exec.command` is required.
 - `exec.args` accepts strings, numbers, and booleans.
-- `exec` is supported only for direct command execution (`command`, `shell`, or the default command step type).
+- `exec` is supported only for direct command execution (`command`, `shell`, or the default command action).
 - `exec` cannot be combined with `command`, `script`, `shell`, or `shell_packages`.
 - `working_dir`, `env`, `stdout`, `stderr`, `retry_policy`, `output`, and other normal orchestration fields still apply.
 
@@ -946,14 +942,14 @@ Steps can be defined in multiple formats:
 #### Standard Format
 ```yaml
 steps:
-  - command: echo "Hello"
+  - run: echo "Hello"
 ```
 
 #### Shorthand String Format
 ```yaml
 steps:
-  - command: echo "Hello"     # Equivalent to: {command: echo "Hello"}
-  - command: ls -la          # Equivalent to: {command: ls -la}
+  - run: echo "Hello"
+  - run: ls -la
 ```
 
 ### Execution Fields
@@ -985,11 +981,13 @@ Object-form `output:` entries can be literal values or long-form publishers with
 
 ```yaml
 steps:
-  - call: file-processor
+  - action: dag.run
+    with:
+      dag: file-processor
+      params: "FILE=${ITEM}"
     parallel:
       items: [file1.csv, file2.csv, file3.csv]
       max_concurrent: 2
-    params: "FILE=${ITEM}"
 ```
 
 ### Conditional Execution
@@ -1019,7 +1017,7 @@ steps:
 
 ```yaml
 steps:
-  - command: echo "Deploying"
+  - run: echo "Deploying"
     shell: bash
     preconditions:
       - condition: "${ENVIRONMENT}"
@@ -1031,13 +1029,13 @@ steps:
       - condition: "test ${DEPLOY_READY} = yes"
 
   # With negate: run only when NOT in production
-  - command: echo "Running dev task"
+  - run: echo "Running dev task"
     preconditions:
       - condition: "${ENVIRONMENT}"
         expected: "production"
         negate: true  # Runs when condition does NOT match
 
-  - command: echo "Running optional task"
+  - run: echo "Running optional task"
     continue_on:
       failure: true
       skipped: true
@@ -1097,13 +1095,13 @@ For iterating over a list of items, use [`parallel`](#parallel-execution) instea
 `interval * (backoff ^ attemptCount)`
 ```yaml
 steps:
-  - command: curl https://api.example.com
+  - run: curl https://api.example.com
     retry_policy:
       limit: 3
       interval_sec: 30
       exit_code: [1, 255]  # Retry only on specific codes
       
-  - command: curl https://api.example.com
+  - run: curl https://api.example.com
     retry_policy:
       limit: 5
       interval_sec: 2
@@ -1111,14 +1109,14 @@ steps:
       max_interval_sec: 60   # Cap at 60 seconds
       exit_code: [429, 503] # Rate limit or unavailable
     
-  - command: check-process.sh
+  - run: check-process.sh
     repeat_policy:
       repeat: while        # Repeat WHILE process is running
       exit_code: [0]        # Exit code 0 means process found
       interval_sec: 60
       limit: 30
       
-  - command: echo "Checking status"
+  - run: echo "Checking status"
     output: STATUS
     repeat_policy:
       repeat: until        # Repeat UNTIL status is ready
@@ -1148,12 +1146,12 @@ steps:
         - /data:/data:ro
       env:
         - API_KEY=${API_KEY}
-    command: python process.py
+    run: python process.py
 
   # Exec mode - string form
   - id: run_migration
     container: my-app-container
-    command: php artisan migrate
+    run: php artisan migrate
 
   # Exec mode - object form with overrides
   - id: admin_task
@@ -1161,7 +1159,7 @@ steps:
       exec: my-app-container
       user: root
       working_dir: /app
-    command: chown -R app:app /data
+    run: chown -R app:app /data
 ```
 
 ::: tip
@@ -1172,29 +1170,29 @@ The step-level `container` field uses the same format as DAG-level container con
 When using `container`, you cannot use `executor` or `script` fields on the same step.
 :::
 
-### Step Type Configuration
+### Action Configuration
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Builtin step type or custom step type name declared in `step_types` or base config | Inferred from other step fields when omitted |
-| `with` | object | Builtin executor configuration, or validated input for a custom step type definition | - |
+| `type` | string | Builtin action or custom action name declared in `actions` or base config | Inferred from other step fields when omitted |
+| `with` | object | Builtin executor configuration, or validated input for a custom action definition | - |
 
 ```yaml
 steps:
-  - type: archive
+  - action: archive.run
     with:
       source: assets.tar.gz
       destination: ./assets
-    command: extract
+    run: extract
 ```
 
-If `type` refers to a custom step type, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
+If `type` refers to a custom action, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
 
 Custom step call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
 
 Custom-step precedence is `call site > template > defaults` for replacement fields. For additive fields, `env` and `preconditions` compose as `defaults -> template -> call site`.
 
-See [Custom Step Types](/writing-workflows/custom-step-types) for the exact allowed field set.
+See [Custom Actions](/writing-workflows/custom-step-types) for the exact allowed field set.
 
 ### Chat (LLM)
 
@@ -1206,14 +1204,14 @@ See [Custom Step Types](/writing-workflows/custom-step-types) for the exact allo
 
 ```yaml
 steps:
-  - type: chat
-    llm:
+  - action: chat.completion
+    with:
       provider: openai
       model: gpt-4o
       system: "You are a helpful assistant."
-    messages:
-      - role: user
-        content: "What is 2+2?"
+      messages:
+        - role: user
+          content: "What is 2+2?"
     output: ANSWER
 ```
 
@@ -1246,13 +1244,13 @@ See [Chat Executor](/features/chat/) for full documentation.
 ```yaml
 steps:
   - id: deploy_staging
-    command: ./deploy.sh staging
+    run: ./deploy.sh staging
     approval:
       prompt: "Approve production?"
       input: [APPROVED_BY]
       required: [APPROVED_BY]
   - id: deploy_prod
-    command: ./deploy.sh production
+    run: ./deploy.sh production
 ```
 
 The step executes normally, then enters `Waiting` status until approved. Collected inputs become environment variables in subsequent steps.
@@ -1269,7 +1267,9 @@ When using distributed execution, specify `worker_selector` to route tasks to wo
 
 ```yaml
 steps:
-  - call: gpu-training
+  - action: dag.run
+    with:
+      dag: gpu-training
 ---
 # Run on a worker with gpu
 name: gpu-training
@@ -1277,7 +1277,7 @@ worker_selector:
   gpu: "true"
   memory: "64G"
 steps:
-  - command: python train_model.py
+  - run: python train_model.py
 ```
 
 To force a DAG to run locally even when `default_execution_mode` is `distributed`, use the string `"local"`:
@@ -1286,7 +1286,7 @@ To force a DAG to run locally even when `default_execution_mode` is `distributed
 # Always runs on the main instance
 worker_selector: local
 steps:
-  - command: curl -f http://localhost:8080/health
+  - run: curl -f http://localhost:8080/health
 ```
 
 **Worker Selection Rules:**
@@ -1308,7 +1308,7 @@ params:
   - DOMAIN: example.com
 
 steps:
-  - command: echo "Hello ${USER} from ${DOMAIN}"
+  - run: echo "Hello ${USER} from ${DOMAIN}"
 ```
 
 ### Environment Variables
@@ -1319,7 +1319,7 @@ env:
   - API_KEY: ${SECRET_API_KEY}  # From system env
 
 steps:
-  - command: curl -H "X-API-Key: ${API_KEY}" ${API_URL}
+  - run: curl -H "X-API-Key: ${API_KEY}" ${API_URL}
 ```
 
 ### Loading Environment from .env Files
@@ -1363,17 +1363,17 @@ working_dir: /app
 dotenv: .env          # Optional, this is the default
 
 steps:
-  - command: psql ${DATABASE_URL}
-  - command: echo "Debug is ${DEBUG}"
+  - run: psql ${DATABASE_URL}
+  - run: echo "Debug is ${DEBUG}"
 ```
 
 ### Command Substitution
 
 ```yaml
 steps:
-  - command: echo "Today is `date +%Y-%m-%d`"
+  - run: echo "Today is `date +%Y-%m-%d`"
     
-  - command: deploy.sh
+  - run: deploy.sh
     preconditions:
       - condition: "`git branch --show-current`"
         expected: "main"
@@ -1383,18 +1383,18 @@ steps:
 
 ```yaml
 steps:
-  - command: cat VERSION
+  - run: cat VERSION
     output: VERSION
-  - command: docker build -t app:${VERSION} .
+  - run: docker build -t app:${VERSION} .
 ```
 
 ### JSON Path Access
 
 ```yaml
 steps:
-  - command: cat config.json
+  - run: cat config.json
     output: CONFIG
-  - command: echo "Port is ${CONFIG.server.port}"
+  - run: echo "Port is ${CONFIG.server.port}"
 ```
 
 ## Special Variables
@@ -1454,20 +1454,24 @@ preconditions:
 
 type: graph
 steps:
-  - command: ./scripts/validate.sh
+  - run: ./scripts/validate.sh
 
-  - command: python extract.py --date=${DATE}
+  - id: extract-data
+    run: python extract.py --date=${DATE}
     depends: validate-environment
     output: RAW_DATA_PATH
     retry_policy:
       limit: 3
       interval_sec: 300
-    
-  - call: transform-module
+
+  - action: dag.run
+    with:
+      dag: transform-module
+      params: "TYPE=${ITEM} INPUT=${RAW_DATA_PATH}"
     parallel:
       items: [customers, orders, products]
       max_concurrent: 2
-    params: "TYPE=${ITEM} INPUT=${RAW_DATA_PATH}"
+    depends: [extract-data]
     continue_on:
       failure: false
 
@@ -1477,26 +1481,26 @@ steps:
       image: postgres:16
       env:
         - PGPASSWORD=${DB_PASSWORD}
-    command: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
+    run: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
 
-  - command: python validate_results.py --date=${DATE}
+  - run: python validate_results.py --date=${DATE}
     depends: load_data
     mail_on_error: true
 
 handler_on:
   success:
-    command: |
+    run: |
       echo "ETL completed successfully for ${DATE}"
       ./scripts/notify-success.sh
   failure:
-    type: mail
+    action: mail.send
     with:
       to: data-team@example.com
       subject: "ETL Failed - ${DATE}"
       body: "Check logs at ${DAG_RUN_LOG_FILE}"
       attach_logs: true
   exit:
-    command: ./scripts/cleanup.sh ${DATE}
+    run: ./scripts/cleanup.sh ${DATE}
 
 mail_on:
   failure: true

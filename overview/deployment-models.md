@@ -21,7 +21,7 @@ For the visual version on the website, see [Deployment models](https://dagu.sh/o
 | **Self-hosted** | Your infrastructure, using the open-source Dagu server. | On the server or on workers you operate. | Teams that want Dagu inside their own network and security boundary. | [Deployment](/server-admin/deployment/), [Distributed Execution](/server-admin/distributed/) |
 | **Licensed self-hosted** | Your infrastructure, with a paid self-host license when enterprise features are needed. | On the server or on self-hosted workers. Workers are not licensed separately. | Teams that need enterprise controls such as SSO, RBAC, audit logging, and support while keeping Dagu self-hosted. | [Self-host pricing](https://dagu.sh/pricing#self-host), [Dagu Pro](https://dagu.sh/pro) |
 | **Dagu Cloud managed server** | A dedicated managed Dagu server operated by Dagu Cloud in an isolated gVisor instance on GKE. The managed license is included. | Directly in the managed Dagu server when the workflow fits the managed runtime boundary. | Teams that want Dagu as a full managed server instead of operating the server themselves. | [Managed pricing](https://dagu.sh/pricing#managed), [Dagu Cloud](https://dagu.sh/cloud) |
-| **Hybrid managed server + hybrid workers** | Dagu Cloud operates the managed Dagu server. | Hybrid workers run inside your infrastructure and connect to the managed server. | Workflows that need managed operations but must execute Docker steps, private-network jobs, custom runtime work, or data-local processing inside your environment. | [Workers](/server-admin/distributed/workers/), [Docker step type](/step-types/docker), [Deployment options](https://dagu.sh/cloud#deployment-model) |
+| **Hybrid managed server + hybrid workers** | Dagu Cloud operates the managed Dagu server. | Hybrid workers run inside your infrastructure and connect to the managed server. | Workflows that need managed operations but must execute Docker steps, private-network jobs, custom runtime work, or data-local processing inside your environment. | [Workers](/server-admin/distributed/workers/), [Docker action](/step-types/docker), [Deployment options](https://dagu.sh/cloud#deployment-model) |
 
 ## Common Topologies
 
@@ -46,7 +46,7 @@ Use this model when you want to keep the server, workers, secrets, logs, and wor
 Dagu Cloud is a full managed Dagu server, not only a coordinator. Dagu Cloud operates the server components and the backing storage for history, logs, and scheduling data. It can run workflows directly when they fit the managed runtime boundary. The managed server is provisioned as a dedicated isolated gVisor instance on GKE, and the managed license is included.
 
 ::: warning Docker steps in managed instances
-Dagu Cloud managed instances do not expose a Docker daemon or Docker socket. Docker step types do not run inside the managed instance. Use self-hosted Dagu or attach a hybrid worker when a workflow needs Docker step execution.
+Dagu Cloud managed instances do not expose a Docker daemon or Docker socket. Docker actions do not run inside the managed instance. Use self-hosted Dagu or attach a hybrid worker when a workflow needs Docker step execution.
 :::
 
 ### Hybrid execution
@@ -84,4 +84,4 @@ For setup details and operating guides, use:
 - [Deploy Dagu](/server-admin/deployment/)
 - [Distributed Execution](/server-admin/distributed/)
 - [Workers](/server-admin/distributed/workers/)
-- [Docker step type](/step-types/docker)
+- [Docker action](/step-types/docker)

@@ -52,24 +52,21 @@ The executor automatically detects archive format from:
 ```yaml
 steps:
   - id: unpack
-    type: archive
+    action: archive.extract
     with:
       source: logs.tar.gz
       destination: ./logs
-    command: extract
 
   - id: package
-    type: archive
+    action: archive.create
     with:
       source: ./logs
       destination: logs-backup.tar.gz
-    command: create
 
   - id: inspect
-    type: archive
+    action: archive.list
     with:
       source: logs-backup.tar.gz
-    command: list
     output: ARCHIVE_INDEX
 ```
 
@@ -105,14 +102,13 @@ working_dir: /data/pipeline
 
 steps:
   - id: extract_csv
-    type: archive
+    action: archive.extract
     with:
       source: dataset.tar.zst
       destination: ./data
       include:
         - "**/*.csv"
       strip_components: 1
-    command: extract
 ```
 
 ### Create Archive With Verification
@@ -122,13 +118,12 @@ working_dir: /deploy/release
 
 steps:
   - id: bundle_artifacts
-    type: archive
+    action: archive.create
     with:
       source: ./dist
       destination: dist.tar.gz
       format: tar.gz
       verify_integrity: true
-    command: create
 ```
 
 ### Extract Password-Protected 7z (Read-Only)
@@ -143,7 +138,7 @@ secrets:
 
 steps:
   - id: unpack_secure
-    type: archive
+    action: archive.extract
     with:
       source: secure-data.7z
       destination: ./decrypted
@@ -151,7 +146,6 @@ steps:
       include:
         - "**/*.csv"
       overwrite: true
-    command: extract
 ```
 
 > **Important:** Password protection is **read-only**. You can extract password-protected `7z` and `rar` archives, but creating encrypted archives is not supported.

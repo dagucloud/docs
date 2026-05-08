@@ -49,7 +49,7 @@ Start with `docker compose up -d`.
 
 ## Giving DAGs access to the host Docker daemon
 
-Use this layout when workflows run the `docker` / `container` step type and should reuse the host's Docker engine:
+Use this layout when workflows run the `docker` / `container` action and should reuse the host's Docker engine:
 
 ```yaml
 services:

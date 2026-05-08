@@ -2,7 +2,7 @@
 
 The **Steward Settings** page in the Web UI (`/agent-settings`) configures the built-in steward itself.
 
-This is broader than workflow `type: agent` or workflow `type: chat` configuration.
+This is broader than workflow `action: agent.run` or workflow `action: chat.completion` configuration.
 
 It controls:
 
@@ -27,8 +27,8 @@ The settings surface is split into smaller pages:
 
 ## What This Page Does Not Replace
 
-- It does not replace workflow `type: agent` settings in DAG YAML
-- It does not replace workflow `type: chat` settings in DAG YAML
+- It does not replace workflow `action: agent.run` settings in DAG YAML
+- It does not replace workflow `action: chat.completion` settings in DAG YAML
 - It does not configure chat-bot platform tokens for Slack or Telegram
 
 Those are separate features with their own documentation.
@@ -45,13 +45,13 @@ Those are separate features with their own documentation.
 
 ## Relationship to Workflow Features
 
-### Workflow `type: agent`
+### Workflow `action: agent.run`
 
 The settings page does not replace the `agent` workflow step. The `agent` step is a separate DAG feature for running a multi-turn tool-calling loop inside a workflow. See [Agent Step](/features/agent/step).
 
-### Workflow `type: chat`
+### Workflow `action: chat.completion`
 
-The settings page also does not replace the `chat` workflow step. `type: chat` is a workflow feature for direct LLM calls in DAGs. See [Chat & LLM](/features/chat/).
+The settings page also does not replace the `chat` workflow step. `action: chat.completion` is a workflow feature for direct LLM calls in DAGs. See [Chat & LLM](/features/chat/).
 
 ### Workflow Operator (Chat Bot)
 

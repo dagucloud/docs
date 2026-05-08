@@ -141,7 +141,7 @@ Minimal example:
 ```yaml
 steps:
   - id: inspect-github-context
-    command: |
+    run: |
       echo "event=${GITHUB_EVENT_NAME}"
       echo "action=${GITHUB_EVENT_ACTION}"
       echo "repo=${GITHUB_REPOSITORY}"

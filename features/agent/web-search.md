@@ -81,23 +81,23 @@ The tools are available only when:
 - the selected backend has an API key configured
 - the tool is allowed by the global tool policy
 
-If a workflow `type: agent` step sets `agent.tools.enabled`, include `web_search` or `web_extract` there when the step should use them.
+If a workflow `action: agent.run` step sets `agent.tools.enabled`, include `web_search` or `web_extract` there when the step should use them.
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       tools:
         enabled:
           - web_search
           - web_extract
           - think
       max_iterations: 20
-    messages:
-      - role: user
-        content: |
-          Find the latest release notes for the service dependency.
-          Extract the most relevant source page and summarize breaking changes.
+      messages:
+        - role: user
+          content: |
+            Find the latest release notes for the service dependency.
+            Extract the most relevant source page and summarize breaking changes.
     output: RELEASE_SUMMARY
 ```
 
@@ -114,14 +114,14 @@ Provider-native search can be overridden in YAML:
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       web_search:
         enabled: true
         max_uses: 5
-    messages:
-      - role: user
-        content: "Summarize current incident reports for this vendor."
+      messages:
+        - role: user
+          content: "Summarize current incident reports for this vendor."
     output: INCIDENT_SUMMARY
 ```
 
@@ -129,21 +129,21 @@ Provider-backed tools are configured globally, then selected like other tools:
 
 ```yaml
 steps:
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       tools:
         enabled:
           - web_search
           - web_extract
-    messages:
-      - role: user
-        content: "Find and extract the current API changelog."
+      messages:
+        - role: user
+          content: "Find and extract the current API changelog."
     output: CHANGELOG_SUMMARY
 ```
 
 ## Distributed Workers
 
-Agent web settings are part of the agent configuration. In shared-nothing distributed execution, Dagu sends the execution snapshot to the worker, including the agent config needed by `type: agent` steps.
+Agent web settings are part of the agent configuration. In shared-nothing distributed execution, Dagu sends the execution snapshot to the worker, including the agent config needed by `action: agent.run` steps.
 
 Workers still need outbound network access to the selected search provider. If a worker cannot reach Tavily, Firecrawl, or the model provider, the tool call fails in that worker process.
 

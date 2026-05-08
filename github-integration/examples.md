@@ -39,11 +39,11 @@ env:
 
 steps:
   - id: migrate
-    command: |
+    run: |
       ./scripts/migrate-test-db.sh "${DATABASE_URL}"
 
   - id: integration-test
-    command: |
+    run: |
       ./scripts/run-integration-tests.sh
 ```
 
@@ -91,11 +91,11 @@ env:
 
 steps:
   - id: build-image
-    command: |
+    run: |
       ./scripts/build-preview-image.sh "${IMAGE_TAG}"
 
   - id: deploy-preview
-    command: |
+    run: |
       ./scripts/deploy-preview-env.sh "${PR_NUMBER}" "${IMAGE_TAG}"
 ```
 
@@ -158,11 +158,11 @@ After a normal build or unit test workflow succeeds, GitHub Actions can hand off
 ```yaml
 steps:
   - id: prepare
-    command: |
+    run: |
       ./scripts/checkout-target.sh "${GITHUB_SHA}"
 
   - id: soak-test
-    command: |
+    run: |
       ./scripts/run-soak-test.sh full
 ```
 
@@ -211,7 +211,7 @@ env:
 
 steps:
   - id: deploy
-    command: |
+    run: |
       helm upgrade --install api ./deploy/chart \
         --namespace production \
         --set image.tag="${IMAGE_TAG}"
@@ -264,11 +264,11 @@ worker_selector:
 
 steps:
   - id: prepare
-    command: |
+    run: |
       ./scripts/setup-gpu-runner.sh
 
   - id: validate
-    command: |
+    run: |
       ./scripts/run-hardware-validation.sh
 ```
 

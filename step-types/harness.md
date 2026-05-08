@@ -8,8 +8,8 @@ The selected attempt's CLI binary must either be available in `PATH` or be refer
 
 ## Step Contract
 
-- `command` is the prompt. Harness steps accept a single command string; command arrays are rejected.
-- `script` is optional extra stdin content.
+- `with.prompt` is the prompt. Harness steps accept a single command string; command arrays are rejected.
+- `with.stdin` is optional extra stdin content.
 - After DAG-level defaults are applied, the step needs a provider.
 - `with.provider` may be a built-in provider or a name defined under top-level `harnesses:`.
 - `with.provider` may contain `${VAR}` interpolation and is resolved after interpolation at runtime.
@@ -19,9 +19,9 @@ Example:
 ```yaml
 steps:
   - name: review
-    type: harness
-    command: "Review the current branch and list problems"
+    action: harness.run
     with:
+      prompt: "Review the current branch and list problems"
       provider: claude
       model: sonnet
       bare: true
@@ -40,9 +40,9 @@ Dagu passes the previous stdout as a file path only. It does not inline stdout i
 ```yaml
 steps:
   - id: implement
-    type: harness
-    command: "Implement the requested change and summarize what changed"
+    action: harness.run
     with:
+      prompt: "Implement the requested change and summarize what changed"
       provider: codex
     approval:
       prompt: "Review the implementation"
@@ -67,7 +67,7 @@ For built-in providers:
 
 - the prompt is always passed on the command line
 - additional `with` keys become CLI flags, with `snake_case` keys normalized to kebab-case
-- `script`, if present, is piped to stdin unchanged
+- `with.stdin`, if present, is piped to stdin unchanged
 
 ## Custom Harness Definitions
 
@@ -85,9 +85,9 @@ harnesses:
 
 steps:
   - name: summarize
-    type: harness
-    command: "Summarize the repository status"
+    action: harness.run
     with:
+      prompt: "Summarize the repository status"
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -124,9 +124,9 @@ harnesses:
     flag_style: single_dash
 
 steps:
-  - type: harness
-    command: "Review the auth module"
+  - action: harness.run
     with:
+      prompt: "Review the auth module"
       provider: aider
       model: sonnet
 ```
@@ -150,9 +150,9 @@ harnesses:
       model: --model
 
 steps:
-  - type: harness
-    command: "Review the auth module"
+  - action: harness.run
     with:
+      prompt: "Review the auth module"
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -173,12 +173,12 @@ harnesses:
     prompt_mode: stdin
 
 steps:
-  - type: harness
-    command: "Review this patch"
-    script: |
-      diff --git a/main.go b/main.go
-      ...
+  - action: harness.run
     with:
+      prompt: "Review this patch"
+      stdin: |
+        diff --git a/main.go b/main.go
+        ...
       provider: llm
       format: json
 ```
@@ -245,11 +245,13 @@ harness:
       full-auto: true
 
 steps:
-  - command: "Write tests for the auth module"
-
-  - type: harness
-    command: "Fix the flaky integration tests"
+  - action: harness.run
     with:
+      prompt: "Write tests for the auth module"
+
+  - action: harness.run
+    with:
+      prompt: "Fix the flaky integration tests"
       model: opus
       effort: high
 ```
@@ -259,7 +261,6 @@ Merge rules:
 - DAG-level `harness:` is the base config for every harness step
 - step-level `with:` overrides primary keys from DAG-level `harness:`
 - step-level `fallback:` replaces the DAG-level fallback list; it is not merged
-- if a DAG has `harness:` and a step omits `type:`, Dagu treats that step as `type: harness`
 
 ## Fallbacks
 
@@ -275,9 +276,9 @@ harnesses:
 
 steps:
   - name: implement
-    type: harness
-    command: "Implement the feature and add tests"
+    action: harness.run
     with:
+      prompt: "Implement the feature and add tests"
       provider: claude
       fallback:
         - provider: codex
@@ -301,9 +302,9 @@ params:
 
 steps:
   - name: task
-    type: harness
-    command: "Analyze the repository layout"
+    action: harness.run
     with:
+      prompt: "Analyze the repository layout"
       provider: "${PROVIDER}"
 ```
 

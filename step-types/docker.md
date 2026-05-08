@@ -7,7 +7,7 @@ Docker-based step execution requires access to a Docker daemon through a local
 Docker socket or a remote daemon such as `DOCKER_HOST`.
 
 Dagu Cloud managed instances run on GKE with gVisor isolation and do not expose
-a Docker daemon or Docker socket. Docker step types are not supported inside
+a Docker daemon or Docker socket. Docker actions are not supported inside
 managed instances. Use self-hosted Dagu, or route the workflow to a self-hosted
 worker, when a workflow needs Docker step execution.
 :::
@@ -32,8 +32,8 @@ container:
     - PYTHONPATH=/app
 
 steps:
-  - command: pip install -r requirements.txt
-  - command: python process.py /data/input.csv
+  - run: pip install -r requirements.txt
+  - run: python process.py /data/input.csv
 ```
 
 ### Exec Mode (Use Existing Container)
@@ -45,8 +45,8 @@ Execute commands in a container that's already running (e.g., started by Docker 
 container: my-app-container
 
 steps:
-  - command: php artisan migrate
-  - command: php artisan cache:clear
+  - run: php artisan migrate
+  - run: php artisan cache:clear
 ```
 
 ```yaml
@@ -59,8 +59,8 @@ container:
     - APP_DEBUG=true
 
 steps:
-  - command: composer install
-  - command: php artisan optimize
+  - run: composer install
+  - run: php artisan optimize
 ```
 
 Exec mode is useful when:
@@ -82,7 +82,7 @@ steps:
       working_dir: /app
       volumes:
         - ./src:/app
-    command: go build -o /app/bin/myapp
+    run: go build -o /app/bin/myapp
 
   - id: test
     container:
@@ -90,7 +90,7 @@ steps:
       working_dir: /app
       volumes:
         - ./src:/app
-    command: go test ./...
+    run: go test ./...
     depends:
       - build
 ```
@@ -104,14 +104,14 @@ steps:
   # String form
   - id: run_migration
     container: my-database-container
-    command: psql -c "SELECT 1"
+    run: psql -c "SELECT 1"
 
   # Object form with overrides
   - id: admin_task
     container:
       exec: my-app-container
       user: root
-    command: chown -R app:app /data
+    run: chown -R app:app /data
 ```
 
 ### Mixed Mode Example
@@ -123,7 +123,7 @@ steps:
   # Exec into existing app container
   - id: prepare_app
     container: my-app
-    command: php artisan down
+    run: php artisan down
 
   # Run migrations in a fresh container
   - id: migrate
@@ -131,12 +131,12 @@ steps:
       image: my-app:latest
       volumes:
         - ./migrations:/migrations
-    command: php artisan migrate --force
+    run: php artisan migrate --force
 
   # Exec back into the app container
   - id: restart_app
     container: my-app
-    command: php artisan up
+    run: php artisan up
 ```
 
 ### Configuration Options
@@ -211,7 +211,7 @@ container:
 
 steps:
   - id: install
-    command: npm install
+    run: npm install
     # Uses DAG-level node:20 container
 
   - id: deploy
@@ -219,24 +219,24 @@ steps:
       image: google/cloud-sdk:latest  # Uses its own container
       env:
         - GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp.json
-    command: gcloud app deploy
+    run: gcloud app deploy
 ```
 
 ## Executor `with` Syntax
 
-For advanced use cases, use `type: docker` with a `with` block. This provides access to Docker SDK options:
+For advanced use cases, use `action: docker.run` with a `with` block. This provides access to Docker SDK options:
 
 ```yaml
 steps:
   - id: run_in_docker
-    type: docker
+    action: docker.run
     with:
       image: alpine:3
       auto_remove: true
       working_dir: /app
       volumes:
         - /host:/container
-    command: pwd
+      command: pwd
 ```
 
 ### Advanced Docker SDK Options
@@ -246,14 +246,14 @@ Pass Docker SDK configuration directly via `container`, `host`, and `network` fi
 ```yaml
 steps:
   - id: with_resource_limits
-    type: docker
+    action: docker.run
     with:
       image: alpine:3
       auto_remove: true
       host:
         Memory: 536870912    # 512MB in bytes
         CPUShares: 512
-    command: echo "limited resources"
+      command: echo "limited resources"
 ```
 
 ## Validation and Errors
@@ -297,7 +297,7 @@ container:
   wait_for: healthy
 
 steps:
-  - command: curl localhost
+  - run: curl localhost
 ```
 
 ```yaml
@@ -308,7 +308,7 @@ container:
   command: ["sh", "-c", "while true; do sleep 3600; done"]
 
 steps:
-  - command: echo "container running with custom command"
+  - run: echo "container running with custom command"
 ```
 
 ```yaml
@@ -321,7 +321,7 @@ container:
     - POSTGRES_PASSWORD=secret
 
 steps:
-  - command: psql -U postgres -c "SELECT 1"
+  - run: psql -U postgres -c "SELECT 1"
 ```
 
 ## How Commands Execute
@@ -340,7 +340,7 @@ container:
 
 steps:
   # Runs inside the already-running container via `docker exec`
-  - command: my-entrypoint sendConfirmationEmails
+  - run: my-entrypoint sendConfirmationEmails
 ```
 
 ### Step-Level Container
@@ -363,7 +363,7 @@ steps:
       volumes:
         - ./src:/app
       working_dir: /app
-    command:
+    run:
       - npm install
       - npm run build
       - npm test
@@ -386,7 +386,7 @@ container:
     - ${VOLUME_PATH}:/mnt
 
 steps:
-  - command: cat /etc/alpine-release
+  - run: cat /etc/alpine-release
 ```
 
 ::: tip OS Variables
@@ -415,14 +415,14 @@ steps:
   - id: get_version
     container:
       image: alpine:3
-    command: cat /etc/alpine-release
+    run: cat /etc/alpine-release
     output: ALPINE_VERSION
 
   # Redirect large output to file
   - id: process_data
     container:
       image: alpine:3
-    command: tar -tvf /data/archive.tar
+    run: tar -tvf /data/archive.tar
     stdout: /tmp/archive-listing.txt
 ```
 
@@ -445,7 +445,7 @@ container:
   image: ghcr.io/myorg/private-app:latest
 
 steps:
-  - command: python process.py
+  - run: python process.py
 ```
 
 ### Authentication Methods
@@ -496,12 +496,12 @@ steps:
   - id: process
     container:
       image: myorg/processor:latest  # from Docker Hub
-    command: process-data
+    run: process-data
 
   - id: analyze
     container:
       image: ghcr.io/myorg/analyzer:v2  # from GitHub
-    command: analyze-results
+    run: analyze-results
 ```
 
 ## Remote Docker Daemon
@@ -515,7 +515,7 @@ This means Docker steps connect to the correct daemon when these variables are s
 DOCKER_HOST=tcp://build-server:2375 dagu start-all
 ```
 
-All `container:` steps and `type: docker` steps will use the remote daemon automatically.
+All `container:` steps and `action: docker.run` steps will use the remote daemon automatically.
 
 > **Note:** `DOCKER_AUTH_CONFIG` is **not** whitelisted — it may contain credentials. Use `registry_auths:` in the DAG file or reference it explicitly via `env:` or `secrets:` if needed.
 
@@ -559,11 +559,11 @@ steps:
     container:
       image: golang:1.22
       platform: linux/amd64
-    command: go build -o app-amd64
+    run: go build -o app-amd64
 
   - id: build_arm64
     container:
       image: golang:1.22
       platform: linux/arm64
-    command: go build -o app-arm64
+    run: go build -o app-arm64
 ```

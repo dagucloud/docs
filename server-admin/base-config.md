@@ -175,20 +175,20 @@ Define handlers that run on specific events for all DAGs:
 # base.yaml
 handler_on:
   init:
-    command: echo "Starting DAG ${DAG_NAME}"
+    run: echo "Starting DAG ${DAG_NAME}"
 
   success:
-    command: |
+    run: |
       curl -X POST ${SLACK_WEBHOOK} \
         -d '{"text":"✅ ${DAG_NAME} completed successfully"}'
 
   failure:
-    command: |
+    run: |
       curl -X POST ${SLACK_WEBHOOK} \
         -d '{"text":"❌ ${DAG_NAME} failed! Run ID: ${DAG_RUN_ID}"}'
 
   exit:
-    command: echo "Cleanup complete"
+    run: echo "Cleanup complete"
 ```
 
 **Available handler types:**
@@ -290,14 +290,13 @@ max_output_size: 1048576
 
 `hist_retention_days` defaults to `30`. Setting it to `0` also uses the default `30`-day retention. Negative values disable automatic cleanup.
 
-### Custom Step Types
+### Custom Actions
 
-Define reusable step types in `base.yaml` when you want every DAG to share the same abstraction:
+Define reusable actions in `base.yaml` when you want every DAG to share the same abstraction:
 
 ```yaml
-step_types:
+actions:
   greet:
-    type: command
     input_schema:
       type: object
       additionalProperties: false
@@ -309,7 +308,7 @@ step_types:
           type: integer
           default: 2
     template:
-      script: |
+      run: |
         #!/bin/bash
         for ((i=0; i<{{ .input.repeat }}; i++)); do
           printf '%s\n' {{ json .input.message }}
@@ -320,16 +319,16 @@ Any DAG loaded with this base config can use:
 
 ```yaml
 steps:
-  - type: greet
+  - action: greet
     with:
       message: hello from base
 ```
 
-Base-config and DAG-local `step_types` are merged per YAML document. If a DAG declares the same custom type name as the base config, Dagu fails the load with a duplicate-definition error.
+Base-config and DAG-local `actions` are merged per YAML document. If a DAG declares the same custom action name as the base config, Dagu fails the load with a duplicate-definition error.
 
 Schema defaults are applied to `with` at the call site, the result is validated against `input_schema`, and `template` expands to a builtin step before normal step validation runs.
 
-See [Custom Step Types](/writing-workflows/custom-step-types) for the exact field rules and template behavior.
+See [Custom Actions](/writing-workflows/custom-step-types) for the exact field rules and template behavior.
 
 ### Logging and Artifacts
 
@@ -423,7 +422,7 @@ kubernetes:
       memory: "128Mi"
 ```
 
-These defaults apply only to steps that explicitly use `type: k8s` or `type: kubernetes`. DAG-level `kubernetes:` or step-level `with` can override them.
+These defaults apply only to steps that explicitly use `action: k8s.run` or `action: kubernetes.run`. DAG-level `kubernetes:` or step-level `with` can override them.
 
 The base-level `kubernetes:` block accepts the same field surface as step-level Kubernetes `with`, except `image` is optional at the base level and must still be present in the effective step configuration after inheritance. That includes:
 
@@ -483,7 +482,7 @@ To force local execution for a specific DAG (overriding `default_execution_mode:
 # my-local-dag.yaml
 worker_selector: local
 steps:
-  - command: echo "Always runs locally"
+  - run: echo "Always runs locally"
 ```
 
 ### Preconditions
@@ -566,7 +565,7 @@ shell: ["bash", "-e", "-o", "pipefail"]
 # Lifecycle handlers for alerting
 handler_on:
   failure:
-    command: |
+    run: |
       curl -s -X POST "${SLACK_WEBHOOK}" \
         -H "Content-Type: application/json" \
         -d '{
@@ -583,7 +582,7 @@ handler_on:
         }'
 
   exit:
-    command: |
+    run: |
       # Cleanup temp files
       rm -rf /tmp/dagu-${DAG_RUN_ID}-* 2>/dev/null || true
 
@@ -636,7 +635,7 @@ env:
 
 handler_on:
   failure:
-    command: |
+    run: |
       curl -X POST https://events.pagerduty.com/v2/enqueue \
         -H "Content-Type: application/json" \
         -d '{
@@ -692,11 +691,11 @@ To define handlers for a sub-DAG, add them explicitly in the sub-DAG file:
 # sub-dag.yaml
 handler_on:
   failure:
-    command: echo "Sub-DAG specific failure handling"
+    run: echo "Sub-DAG specific failure handling"
 
 steps:
   - id: process
-    command: ./process.sh
+    run: ./process.sh
 ```
 
 ## See Also

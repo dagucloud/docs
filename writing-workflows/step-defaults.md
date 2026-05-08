@@ -58,10 +58,10 @@ defaults:
 
 steps:
   - id: fetch_data
-    command: curl https://api.example.com/data
+    run: curl https://api.example.com/data
 
   - id: process_data
-    command: ./process.sh
+    run: ./process.sh
 ```
 
 ### Shared Continue On
@@ -74,13 +74,13 @@ defaults:
 
 steps:
   - id: cleanup_cache
-    command: rm -rf /tmp/cache/*
+    run: rm -rf /tmp/cache/*
 
   - id: cleanup_logs
-    command: find /var/log -name "*.old" -delete
+    run: find /var/log -name "*.old" -delete
 
   - id: report
-    command: echo "cleanup done"
+    run: echo "cleanup done"
 ```
 
 ### Step Override or Disable
@@ -97,18 +97,18 @@ defaults:
 steps:
   # Inherits retry_policy from defaults (limit: 5)
   - id: fetch_data
-    command: curl https://api.example.com/data
+    run: curl https://api.example.com/data
 
   # Uses its own retry_policy (limit: 1), default is ignored
   - id: send_notification
-    command: ./notify.sh
+    run: ./notify.sh
     retry_policy:
       limit: 1
       interval_sec: 0
 
   # Disables the inherited retry policy for this step
   - id: run_once
-    command: ./run-once.sh
+    run: ./run-once.sh
     retry_policy:
       limit: 0
       interval_sec: 0
@@ -126,7 +126,7 @@ defaults:
 
 steps:
   - id: deploy
-    command: echo "${LOG_LEVEL} ${REGION} ${SERVICE}"
+    run: echo "${LOG_LEVEL} ${REGION} ${SERVICE}"
     env:
       - SERVICE: web-api
     # Effective env: [LOG_LEVEL=info, REGION=us-east-1, SERVICE=web-api]
@@ -144,7 +144,7 @@ defaults:
 
 steps:
   - id: deploy
-    command: ./deploy.sh
+    run: ./deploy.sh
     preconditions:
       - condition: "`git branch --show-current`"
         expected: "main"
@@ -161,15 +161,15 @@ defaults:
 
 steps:
   - id: process
-    command: ./run.sh
+    run: ./run.sh
     # timeout_sec: 300 (inherited)
 
 handler_on:
   failure:
-    command: ./alert.sh
+    run: ./alert.sh
     # timeout_sec: 300 (inherited)
   exit:
-    command: ./cleanup.sh
+    run: ./cleanup.sh
     # timeout_sec: 300 (inherited)
 ```
 
@@ -185,18 +185,19 @@ defaults:
     max_iterations: 30
 
 steps:
-  - type: agent
-    messages:
-      - role: user
-        content: "Review the failing workflow"
+  - action: agent.run
+    with:
+      messages:
+        - role: user
+          content: "Review the failing workflow"
     # Inherits model, soul, and max_iterations
 
-  - type: agent
-    agent:
+  - action: agent.run
+    with:
       model: claude-opus
-    messages:
-      - role: user
-        content: "Summarize the review"
+      messages:
+        - role: user
+          content: "Summarize the review"
     # Overrides only model; still inherits soul and max_iterations
 ```
 
@@ -217,15 +218,15 @@ defaults:
 
 steps:
   - id: fetch_users
-    command: curl https://api.example.com/users
+    run: curl https://api.example.com/users
     output: USERS
 
   - id: fetch_orders
-    command: curl https://api.example.com/orders
+    run: curl https://api.example.com/orders
     output: ORDERS
 
   - id: generate_report
-    command: ./report.sh
+    run: ./report.sh
     # Overrides retry_policy — this step must not retry
     retry_policy:
       limit: 0

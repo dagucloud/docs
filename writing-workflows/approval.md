@@ -7,12 +7,12 @@ Add `approval` to any step to pause execution after the step completes and wait 
 ```yaml
 steps:
   - id: deploy_staging
-    command: ./deploy.sh staging
+    run: ./deploy.sh staging
     approval:
       prompt: "Verify staging deployment before production"
   - id: deploy_prod
     depends: [deploy_staging]
-    command: ./deploy.sh production
+    run: ./deploy.sh production
 ```
 
 The `deploy_staging` step runs `./deploy.sh staging`, then enters `Waiting` status. The `deploy_prod` step remains `Not Started` until the approval is resolved.
@@ -53,14 +53,14 @@ Approved inputs become environment variables in subsequent steps:
 type: graph
 steps:
   - id: generate_plan
-    command: ./generate-migration-plan.sh
+    run: ./generate-migration-plan.sh
     approval:
       prompt: "Review migration plan"
       input: [APPROVED_BY, MAINTENANCE_WINDOW]
       required: [APPROVED_BY]
   - id: execute_migration
     depends: [generate_plan]
-    command: ./migrate.sh --approver "${APPROVED_BY}" --window "${MAINTENANCE_WINDOW}"
+    run: ./migrate.sh --approver "${APPROVED_BY}" --window "${MAINTENANCE_WINDOW}"
 ```
 
 `APPROVED_BY` must be provided (it's in `required`). `MAINTENANCE_WINDOW` is optional. Both are injected as environment variables into `execute_migration` after approval.
@@ -73,12 +73,14 @@ Use `call` with `approval` to gate a multi-step workflow behind a single approva
 type: graph
 steps:
   - id: run_integration_tests
-    call: integration-test-suite
+    action: dag.run
+    with:
+      dag: integration-test-suite
     approval:
       prompt: "Review test results before deploying"
   - id: deploy
     depends: [run_integration_tests]
-    command: ./deploy.sh production
+    run: ./deploy.sh production
 ```
 
 The `integration-test-suite` DAG (which may contain many steps internally) executes fully. Once finished, `run_integration_tests` enters `Waiting`. The approver reviews the sub-DAG's results before `deploy` proceeds.
@@ -93,15 +95,17 @@ The reverse pattern: approve first, then trigger multi-step execution. Place app
 type: graph
 steps:
   - id: review_config
-    command: ./validate-deploy-config.sh production
+    run: ./validate-deploy-config.sh production
     approval:
       prompt: "Config validated. Approve production deployment?"
       input: [DEPLOY_VERSION]
       required: [DEPLOY_VERSION]
   - id: deploy_pipeline
+    action: dag.run
+    with:
+      dag: production-deploy
+      params: "deploy_version=${DEPLOY_VERSION}"
     depends: [review_config]
-    call: production-deploy
-    params: "deploy_version=${DEPLOY_VERSION}"
 ```
 
 `validate-deploy-config.sh` runs and shows the configuration diff. The approver reviews it, provides `DEPLOY_VERSION`, and approves. Then `production-deploy` (a full deployment pipeline with its own steps) executes with the approved version.
@@ -127,17 +131,17 @@ Push-back is only available on steps with the `approval` field.
 ```yaml
 steps:
   - id: prepare_report
-    command: ./prepare-report.sh
+    run: ./prepare-report.sh
   - id: draft_report
     depends: [prepare_report]
-    command: ./draft-report.sh
+    run: ./draft-report.sh
     approval:
       prompt: "Review the draft report"
       input: [FEEDBACK]
       rewind_to: prepare_report
   - id: publish_report
     depends: [draft_report]
-    command: ./publish-report.sh
+    run: ./publish-report.sh
 ```
 
 If the reviewer pushes `draft_report` back, Dagu resets `prepare_report`, `draft_report`, and `publish_report` to `Not Started`. `prepare_report` reruns immediately, `draft_report` reruns and waits for approval again, and `publish_report` runs later after approval is granted. Each rewound step receives the push-back context when it executes.
@@ -153,7 +157,7 @@ Every step re-executed because of push-back receives:
 
 If the current step declares `approval.input`, only those declared keys are exposed on that step. Steps without an input allowlist receive all provided push-back keys.
 
-For `type: agent`, `type: chat`, and `type: harness`, Dagu also passes the push-back context directly to the executor. This means reviewer feedback is incorporated without adding DAG glue code that references `${FEEDBACK}` manually. If `approval.rewind_to` restarts an upstream AI step, that rewound AI step receives the context even if it does not declare its own `approval`.
+For `action: agent.run`, `action: chat.completion`, and `action: harness.run`, Dagu also passes the push-back context directly to the executor. This means reviewer feedback is incorporated without adding DAG glue code that references `${FEEDBACK}` manually. If `approval.rewind_to` restarts an upstream AI step, that rewound AI step receives the context even if it does not declare its own `approval`.
 
 Harness steps receive the previous stdout as a log file path only. Dagu does not inline the previous stdout content into the prompt or environment because harness output can be large.
 
@@ -208,7 +212,7 @@ A step queries metrics and outputs a summary. The approver can push back with di
 ```yaml
 steps:
   - id: query_metrics
-    script: |
+    run: |
       SINCE="${SINCE:-7d}"
       GROUPING="${GROUPING:-daily}"
       echo "Querying error rates (since=$SINCE, grouping=$GROUPING)"
@@ -219,19 +223,19 @@ steps:
       input: [SINCE, GROUPING]
   - id: send_report
     depends: [query_metrics]
-    command: ./send-to-slack.sh
+    run: ./send-to-slack.sh
 ```
 
 First run: `SINCE` and `GROUPING` are unset, so the script defaults to `7d` and `daily`. The approver reviews the output and pushes back with `SINCE=30d` and `GROUPING=weekly`. The step re-runs with those values, producing a different summary. The approver can push back again or approve.
 
 ### Example: Iterating on LLM Output
 
-Use `type: chat`, `type: agent`, or `type: harness` when you want Dagu to pass approval feedback to the AI step automatically. For shell commands that call an LLM CLI directly, wire the feedback environment variables into the command yourself:
+Use `action: chat.completion`, `action: agent.run`, or `action: harness.run` when you want Dagu to pass approval feedback to the AI step automatically. For shell commands that call an LLM CLI directly, wire the feedback environment variables into the command yourself:
 
 ```yaml
 steps:
   - id: draft_changelog
-    script: |
+    run: |
       PROMPT="Generate a changelog from these git commits for a public release blog post."
       if [ -n "$FEEDBACK" ]; then
         PROMPT="$PROMPT Incorporate this feedback: $FEEDBACK"
@@ -242,7 +246,7 @@ steps:
       input: [FEEDBACK]
   - id: publish
     depends: [draft_changelog]
-    command: ./publish-changelog.sh
+    run: ./publish-changelog.sh
 ```
 
 First run: Claude generates a changelog from the git log. The reviewer reads the output in the Approval tab and pushes back with `FEEDBACK="Make it more concise and group by feature area"`. The step re-runs, this time passing the feedback into the prompt. This loop continues until the reviewer approves.
@@ -353,14 +357,14 @@ Execute custom logic when the workflow enters wait status:
 ```yaml
 handler_on:
   wait:
-    command: |
+    run: |
       echo "Waiting steps: ${DAG_WAITING_STEPS}"
       curl -X POST https://slack.com/webhook \
         -d '{"text": "Approval required for ${DAG_NAME}"}'
 
 steps:
   - id: deploy
-    command: ./deploy.sh
+    run: ./deploy.sh
     approval:
       prompt: "Approve deployment"
 ```
@@ -394,4 +398,4 @@ The following information is recorded:
 
 - [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) — Execute handlers on wait status
 - [Email Notifications](/writing-workflows/email-notifications) — Configure wait status emails
-- [Step Types Reference](/step-types/shell) — All available step types
+- [Actions Reference](/step-types/shell) — All available actions

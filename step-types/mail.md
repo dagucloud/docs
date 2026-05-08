@@ -12,7 +12,7 @@ smtp:
   password: "${SMTP_PASS}"
 
 steps:
-  - type: mail
+  - action: mail.send
     with:
       to: recipient@example.com
       from: sender@example.com
@@ -71,7 +71,7 @@ smtp:
 
 ```yaml
 steps:
-  - type: mail
+  - action: mail.send
     with:
       to:
         - team@example.com
@@ -81,7 +81,7 @@ steps:
       subject: "Daily Report Ready"
       message: "The daily report has been generated."
 
-  - type: mail
+  - action: mail.send
     with:
       to: admin@example.com  # Single recipient still works
       from: system@example.com
@@ -96,7 +96,7 @@ params:
   - ENVIRONMENT: production
 
 steps:
-  - type: mail
+  - action: mail.send
     with:
       to: devops@company.com
       from: deploy@company.com
@@ -113,7 +113,7 @@ steps:
 ```yaml
 handler_on:
   success:
-    type: mail
+    action: mail.send
     with:
       to: team@company.com
       from: dagu@company.com
@@ -124,7 +124,7 @@ handler_on:
         Logs: ${DAG_RUN_LOG_FILE}
 
   failure:
-    type: mail
+    action: mail.send
     with:
       to: oncall@company.com
       from: alerts@company.com
@@ -135,7 +135,7 @@ handler_on:
         Check logs: ${DAG_RUN_LOG_FILE}
 
 steps:
-  - command: echo "Run your main tasks here"
+  - run: echo "Run your main tasks here"
 ```
 
 ### Error Alerts
@@ -148,7 +148,7 @@ error_mail:
   attach_logs: true
 
 steps:
-  - command: echo "Run some critical task"
+  - run: echo "Run some critical task"
     mail_on_error: true
 ```
 
@@ -156,9 +156,9 @@ steps:
 
 ```yaml
 steps:
-  - command: echo "Generating report..." > report.txt
+  - run: echo "Generating report..." > report.txt
 
-  - type: mail
+  - action: mail.send
     with:
       to: management@company.com
       from: reports@company.com
@@ -172,7 +172,7 @@ steps:
 
 ```yaml
 steps:
-  - type: mail
+  - action: mail.send
     with:
       to: oncall@company.com
       from: alerts@company.com

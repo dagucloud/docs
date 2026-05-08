@@ -65,7 +65,7 @@ env:
   - SOME_FILE: ${SOME_DIR}/some_file
 steps:
   - working_dir: ${SOME_DIR}
-    command: python main.py ${SOME_FILE}
+    run: python main.py ${SOME_FILE}
 ```
 
 ### Step-Level Environment Variables
@@ -78,13 +78,13 @@ env:
   - DAG_ONLY: dag_only_value
 
 steps:
-  - command: echo $SHARED_VAR
+  - run: echo $SHARED_VAR
     env:
       - SHARED_VAR: step_value  # Overrides the DAG-level value
       - STEP_ONLY: step_only_value
     # Output: step_value
   
-  - command: echo $SHARED_VAR $DAG_ONLY
+  - run: echo $SHARED_VAR $DAG_ONLY
     # Output: dag_value dag_only_value
 ```
 
@@ -96,7 +96,7 @@ env:
 
 steps:
   - id: process_data
-    command: python process.py
+    run: python process.py
     env:
       - INPUT_PATH: ${BASE_PATH}/input
       - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
@@ -180,7 +180,7 @@ secrets:
 
 steps:
   - id: migrate
-    command: ./migrate.sh
+    run: ./migrate.sh
     env:
       - STRICT_MODE: "1"   # Step-level env still overrides secrets if needed
 ```
@@ -209,7 +209,7 @@ Define default positional parameters that can be overridden:
 ```yaml
 params: param1 param2     # Default values for $1 and $2
 steps:
-  - command: python main.py $1 $2  # Will use command-line args or defaults
+  - run: python main.py $1 $2  # Will use command-line args or defaults
 ```
 
 ### Named Parameters
@@ -221,7 +221,7 @@ params:
   - FOO: 1           # Default value for ${FOO}
   - BAR: hello       # Default value for ${BAR}
 steps:
-  - command: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
+  - run: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
 ```
 
 Parameter defaults are literal by default. If you need `$VAR` expansion or backtick command substitution for a DAG param, use `eval:` on an inline rich param definition (`- name: ...`). Runtime overrides from the CLI, API, and sub-DAG calls remain literal. See [Parameters](/writing-workflows/parameters) for precedence, fallback, and validation rules.
@@ -241,7 +241,7 @@ params:
     minimum: 1
     maximum: 1000
 steps:
-  - command: python main.py --env "${environment}" --batch "${batch_size}"
+  - run: python main.py --env "${environment}" --batch "${batch_size}"
 ```
 
 CLI/API/sub-DAG inputs are coerced to the declared type before validation, but step commands still receive strings.
@@ -255,13 +255,13 @@ Every step automatically receives the merged parameter payload as JSON through t
 ```yaml
 steps:
   - id: inspect_params
-    command: echo "Full payload: ${DAG_PARAMS_JSON}"
+    run: echo "Full payload: ${DAG_PARAMS_JSON}"
   - id: region_lookup
-    type: jq
+    action: jq.filter
     with:
       raw: true
-    script: ${DAG_PARAMS_JSON}
-    command: '"Region: \(.region // "us-east-1")"'
+      data: ${DAG_PARAMS_JSON}
+    run: '"Region: \(.region // "us-east-1")"'
 ```
 
 If the run was started with raw JSON parameters, the original payload is preserved verbatim; otherwise, Dagu serializes the resolved key/value pairs from your `params` block plus any overrides as a string-only JSON object. Raw JSON may be an object or an array, but named params should use an object. Inline typed params do not change this behavior.
@@ -272,7 +272,7 @@ Store command output in variables:
 
 ```yaml
 steps:
-  - command: "echo foo"
+  - run: "echo foo"
     output: FOO  # Will contain "foo"
 ```
 
@@ -285,7 +285,7 @@ You can configure the maximum output size at the DAG level:
 max_output_size: 5242880  # 5MB in bytes
 
 steps:
-  - command: "cat large-file.txt"
+  - run: "cat large-file.txt"
     output: CONTENT  # Will fail if file exceeds 5MB
 ```
 
@@ -294,7 +294,7 @@ Object-form `output:` publishes structured step-scoped values instead of one fla
 ```yaml
 steps:
   - id: inspect_build
-    script: |
+    run: |
       printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
     output:
       version:
@@ -315,9 +315,9 @@ Send output to files:
 
 ```yaml
 steps:
-  - command: "echo hello"
+  - run: "echo hello"
     stdout: "/tmp/hello"
-  - command: "echo error message >&2"
+  - run: "echo error message >&2"
     stderr: "/tmp/error.txt"
 ```
 
@@ -329,9 +329,11 @@ Examples:
 
 ```yaml
 steps:
-  - call: sub_workflow
     output: SUB_RESULT
-  - command: echo "The result is ${SUB_RESULT.outputs.finalValue}"
+    action: dag.run
+    with:
+      dag: sub_workflow
+  - run: echo "The result is ${SUB_RESULT.outputs.finalValue}"
 ```
 
 If `SUB_RESULT` contains:
@@ -354,15 +356,15 @@ You can assign short identifiers to steps and use them to reference step propert
 type: graph
 steps:
   - id: extract  # Short identifier
-    command: python extract.py
+    run: python extract.py
     output: DATA  # Captures stdout content into DATA variable
 
   - id: validate
-    command: python validate.py
+    run: python validate.py
     depends:
-      - command: extract  # Can use ID in dependencies
+      - run: extract  # Can use ID in dependencies
 
-  - command: |
+  - run: |
       # Reference step properties using IDs
       echo "Exit code: ${extract.exit_code}"
       echo "Stdout file: ${extract.stdout}"
@@ -392,7 +394,7 @@ Use command output in configurations:
 env:
   TODAY: "`date '+%Y%m%d'`"
 steps:
-  - command: "echo hello, today is ${TODAY}"
+  - run: "echo hello, today is ${TODAY}"
 ```
 
 ## Sub-workflow Data
@@ -401,10 +403,12 @@ The result of the sub workflow will be available from the standard output of the
 
 ```yaml
 steps:
-  - call: sub_workflow
-    params: "FOO=BAR"
+  - action: dag.run
+    with:
+      dag: sub_workflow
+      params: "FOO=BAR"
     output: SUB_RESULT
-  - command: echo $SUB_RESULT
+  - run: echo $SUB_RESULT
 ```
 
 Example output format:
@@ -427,15 +431,15 @@ Example output format:
 type: graph
 steps:
   - id: get_config
-    command: |
+    run: |
       echo '{"env": "prod", "replicas": 3, "region": "us-east-1"}'
     output: CONFIG
 
   - id: get_secrets
-    command: vault read -format=json secret/app
+    run: vault read -format=json secret/app
     output: SECRETS
 
-  - command: |
+  - run: |
       kubectl set env deployment/app \
         REGION=${CONFIG.region} \
         API_KEY=${SECRETS.data.api_key}
@@ -447,10 +451,10 @@ steps:
 
 ```yaml
 steps:
-  - command: python generate.py
+  - run: python generate.py
     stdout: /tmp/data.json
   
-  - command: python process.py < /tmp/data.json
+  - run: python process.py < /tmp/data.json
 ```
 
 ## Global Configuration

@@ -110,7 +110,7 @@ Example DAG step that reads the payload:
 ```yaml
 steps:
   - id: inspect_webhook
-    command: |
+    run: |
       echo "$WEBHOOK_PAYLOAD" | jq .
       echo "$WEBHOOK_PAYLOAD" | jq -r '.branch'
 ```

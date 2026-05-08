@@ -322,7 +322,7 @@ Per-step notification:
 ```yaml
 steps:
   - id: critical_task
-    command: echo "Processing"
+    run: echo "Processing"
     mail_on_error: true
 ```
 
@@ -332,7 +332,7 @@ steps:
 ```yaml
 handler_on:
   failure:
-    type: http
+    action: http.request
     with:
       url: "${SLACK_WEBHOOK_URL}"
       method: POST
@@ -353,7 +353,7 @@ handler_on:
 ```yaml
 handler_on:
   failure:
-    type: http
+    action: http.request
     with:
       url: https://events.pagerduty.com/v2/enqueue
       body: |
@@ -428,7 +428,7 @@ secrets:
 
 steps:
   - id: deploy
-    command: aws s3 sync ./build s3://my-bucket
+    run: aws s3 sync ./build s3://my-bucket
 ```
 
 ```bash
@@ -447,7 +447,7 @@ env:
 
 steps:
   - id: deploy
-    command: aws s3 sync ./build s3://${S3_BUCKET}
+    run: aws s3 sync ./build s3://${S3_BUCKET}
 ```
 
 See [Secrets](/writing-workflows/secrets) for provider details and masking behavior.

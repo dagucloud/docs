@@ -30,7 +30,7 @@ Use [Web Search](/features/agent/web-search) for:
 - `Model Web Search`
 - Tavily-backed `web_search` and `web_extract`
 - Firecrawl-backed `web_search` and `web_extract`
-- workflow `type: agent` behavior
+- workflow `action: agent.run` behavior
 
 ## See Also
 
