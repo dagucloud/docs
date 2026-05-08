@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.6.7 (2026-05-08)
+
+Hotfix release to fix agent tool issues in v2.6.6.
+
+### Fixed
+
+- fix: tolerate extra agent tool fields ([#2128](https://github.com/dagu-org/dagu/pull/2128)) [@yottahmd](https://github.com/yottahmd)
+- fix: support old powershell in generated scripts ([#2129](https://github.com/dagu-org/dagu/pull/2129)) [@yottahmd](https://github.com/yottahmd)
+
 ## v2.6.6 (2026-05-08)
 
 ### Added
