@@ -87,6 +87,19 @@ For Ollama and other local servers:
 
 See [Local AI](/features/chat/local-ai) for setup and troubleshooting.
 
+## OpenCode
+
+For Kimi, DeepSeek, GLM, Qwen, and other models via an OpenCode subscription:
+
+- choose **Provider** = `OpenCode`
+- set **Model** to the model ID (e.g. `kimi-k2.6`, `deepseek-v4-pro`, `glm-5.1`)
+- leave **Base URL** empty (defaults to `https://opencode.ai/zen/go/v1`)
+- set **API Key** to your OpenCode API key
+
+Models that support reasoning (Kimi K2, DeepSeek V4 Pro, GLM-5, Qwen3) work with **Supports Thinking** enabled.
+
+See [OpenCode](/features/chat/opencode) for available models and workflow YAML examples.
+
 ## A Practical Rule
 
 Not every field matters equally for every provider. Focus on the fields your provider actually needs:

@@ -153,6 +153,7 @@ const fullSidebar = [
           { text: "Overview", link: "/features/agent/settings/" },
           { text: "Models & Providers", link: "/features/agent/settings/models" },
           { text: "OpenAI Subscription", link: "/features/agent/settings/openai-subscription" },
+          { text: "OpenCode", link: "/features/chat/opencode" },
           { text: "Tool Permissions", link: "/features/agent/settings/controls" },
           { text: "Personality", link: "/features/agent/settings/behavior" },
         ],
