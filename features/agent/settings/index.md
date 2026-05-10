@@ -21,6 +21,7 @@ The settings surface is split into smaller pages:
 
 - [Models & Providers](/features/agent/settings/models) for enabling Steward, adding models, choosing a default model, and understanding model fields
 - [OpenAI Subscription](/features/agent/settings/openai-subscription) for connecting a ChatGPT subscription and using the `openai-codex` provider
+- [OpenCode](/features/chat/opencode) for Kimi, DeepSeek, GLM, Qwen, and other models via an OpenCode subscription
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls) for deciding which tools Steward may use and how bash commands are filtered
 - [Web Search](/features/agent/web-search) for selecting model-native search, Tavily, or Firecrawl
 - [Personality](/features/agent/settings/behavior) for selecting a default profile
@@ -72,3 +73,4 @@ See:
 - [Web Search](/features/agent/web-search)
 - [Personality](/features/agent/settings/behavior)
 - [Local AI](/features/chat/local-ai)
+- [OpenCode](/features/chat/opencode)

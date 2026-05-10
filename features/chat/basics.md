@@ -25,13 +25,14 @@ steps:
 | `gemini` | `GOOGLE_API_KEY` | `https://generativelanguage.googleapis.com/v1beta` |
 | `openrouter` | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` |
 | `zai` | `ZAI_API_KEY` | `https://api.z.ai/api/paas/v4` |
+| `opencode` | `OPENCODE_API_KEY` | `https://opencode.ai/zen/go/v1` |
 | `local` | (none) | `http://localhost:11434/v1` |
 
 ::: tip
 The `local` provider works with any OpenAI-compatible API including Ollama, vLLM, and LM Studio. Provider aliases `ollama`, `vllm`, and `llama` also map to `local`.
 :::
 
-For detailed setup and troubleshooting, especially for Ollama base URLs and Web UI agent configuration, see [Local AI](/features/chat/local-ai).
+For detailed setup and troubleshooting, especially for Ollama base URLs and Web UI agent configuration, see [Local AI](/features/chat/local-ai). For OpenCode subscription setup and available models, see [OpenCode](/features/chat/opencode).
 
 ## Configuration
 

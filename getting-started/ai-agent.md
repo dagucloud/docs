@@ -6,7 +6,7 @@ Dagu Steward is an LLM-powered assistant integrated into the Web UI. It can read
 
 1. **Enable Steward** — Toggle it on in the Web UI at `/agent-settings`, or set the environment variable `DAGU_AGENT_ENABLED=true`.
 
-2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `openai-codex`, `gemini`, `openrouter`, `zai`, `local` (Ollama, vLLM, etc.).
+2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `openai-codex`, `gemini`, `openrouter`, `zai`, `opencode`, `local` (Ollama, vLLM, etc.).
 
    For `openai-codex`, connect the ChatGPT Plus/Pro subscription in the model form before saving the model.
 
@@ -115,3 +115,5 @@ See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for
 - [Steward Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
 - [Workflow Operator](/features/bots/) — Use the built-in steward from Slack or Telegram
 - [Basic Chat](/features/chat/basics) — Single-shot LLM calls in workflows
+- [OpenCode](/features/chat/opencode) — Kimi, DeepSeek, GLM, Qwen via OpenCode subscription
+- [Local AI](/features/chat/local-ai) — Ollama, vLLM, and other local OpenAI-compatible servers
