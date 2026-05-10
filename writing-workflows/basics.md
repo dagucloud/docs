@@ -75,18 +75,18 @@ steps:
       dag: child-workflow
 ```
 
-Auto-generated names follow the pattern `{type}_{number}`:
-- `cmd_N` - Command steps
-- `script_N` - Script steps
-- `http_N` - HTTP steps
-- `template_N` - Template steps
-- `dag_N` - DAG steps
-- `container_N` - Docker/container steps
-- `ssh_N` - SSH steps
-- `mail_N` - Mail steps
-- `jq_N` - JQ steps
+Auto-generated names follow the pattern `{executor}_{number}`:
+- `cmd_N` - single-line `run` steps
+- `script_N` - multi-line `run` steps
+- `http_N` - `http.request` actions
+- `template_N` - `template.render` actions
+- `dag_N` - `dag.run` actions
+- `container_N` - Docker/container actions
+- `ssh_N` - `ssh.run` actions
+- `mail_N` - `mail.send` actions
+- `jq_N` - `jq.filter` actions
 
-For parallel steps (see below), the pattern is `parallel_{group}_{type}_{index}`.
+For parallel steps (see below), the pattern is `parallel_{group}_{executor}_{index}`.
 
 ### Shell Commands
 
@@ -166,8 +166,9 @@ steps:
     run: echo "Runs with bash -e -u"
 
   - id: zsh_override
-    shell: /bin/zsh                # Step-level override
     run: echo "Uses zsh instead"
+    with:
+      shell: /bin/zsh              # Step-level override
 ```
 
 The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Arrays avoid quoting issues when you need multiple flags.
@@ -176,11 +177,12 @@ When you omit a step-level `shell`, Dagu runs through the DAG shell (or system d
 
 ```yaml
 steps:
-  - shell: python3
-    run: |
+  - run: |
       import pandas as pd
       df = pd.read_csv('data.csv')
       print(df.head())
+    with:
+      shell: python3
 ```
 
 ## Dependencies

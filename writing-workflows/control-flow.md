@@ -30,10 +30,9 @@ steps:
   - id: download_b
     run: wget https://example.com/b.zip
 
-  - run: echo "Merging a.zip and b.zip"
-    depends:
-      - run: download_a
-      - run: download_b
+  - id: merge
+    run: echo "Merging a.zip and b.zip"
+    depends: [download_a, download_b]
 ```
 
 ## Modular Workflows and Iteration Patterns
@@ -187,13 +186,14 @@ steps:
 
 When `expected` is omitted, Dagu treats `condition` as a command check. Dagu first replaces variables in the condition string. If a shell is configured, the result runs through that shell. Without a shell, Dagu executes the resulting string directly, so shell syntax requires an active shell.
 
-```yaml
-steps:
-  - run: echo "Threshold reached"
-    shell: bash
-    preconditions:
-      - condition: "test ${DEV_PCENT} -ge ${DEV_ALERT}"
-```
+  ```yaml
+  steps:
+    - run: echo "Threshold reached"
+      with:
+        shell: bash
+      preconditions:
+        - condition: "test ${DEV_PCENT} -ge ${DEV_ALERT}"
+  ```
 
 ### Command Output Conditions
 

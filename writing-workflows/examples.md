@@ -1285,8 +1285,9 @@ steps:
 shell: ["/bin/bash", "-e"]   # Default shell for all steps
 steps:
   - run: echo hello world | xargs echo
-  - shell: /bin/zsh          # Override for a single step
-    run: echo "from zsh"
+  - run: echo "from zsh"     # Override for a single step
+    with:
+      shell: /bin/zsh
 ```
 
 <a href="/writing-workflows/basics#shell" class="learn-more">Learn more →</a>
@@ -1301,12 +1302,13 @@ steps:
 
 ```yaml
 steps:
-  - shell: nix-shell
-    shell_packages: [python3, curl, jq]
-    run: |
+  - run: |
       python3 --version
       curl --version
       jq --version
+    with:
+      shell: nix-shell
+      shell_packages: [python3, curl, jq]
 ```
 
 <a href="/step-types/shell#nix-shell" class="learn-more">Learn more →</a>
@@ -1347,7 +1349,7 @@ steps:
       message: "build finished"
 ```
 
-`with` is validated by `input_schema`; the rendered template runs as a builtin `command` step.
+`with` is validated by `input_schema`; the rendered template runs as a builtin `exec` action.
 
 Add `output_schema` when stdout should be a typed JSON contract. Invalid JSON or schema mismatches fail the step; without an explicit `output:` mapping, the validated object is available as `${step_id.output.*}`.
 
@@ -1437,7 +1439,7 @@ steps:
     action: k8s.run
     with:
       image: alpine:3.20
-    run: [sh, -c, 'echo hello from kubernetes']
+      command: [sh, -c, 'echo hello from kubernetes']
 ```
 
 <a href="/step-types/kubernetes" class="learn-more">Learn more →</a>
@@ -1601,11 +1603,10 @@ steps:
 working_dir: /tmp/data
 
 steps:
-  - action: archive.run
+  - action: archive.extract
     with:
       source: dataset.tar.zst
       destination: ./dataset
-    run: extract
 ```
 
 <a href="/step-types/archive" class="learn-more">Learn more →</a>

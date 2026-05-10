@@ -178,9 +178,9 @@ steps:
   - id: read_environment
     action: jq.filter
     with:
+      filter: '"Environment: \(.ENVIRONMENT // "dev")"'
       raw: true
       data: ${DAG_PARAMS_JSON}
-    run: '"Environment: \(.ENVIRONMENT // "dev")"'
 ```
 
 ## Push-back Context (`DAG_PUSHBACK`)

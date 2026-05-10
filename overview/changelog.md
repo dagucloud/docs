@@ -571,8 +571,8 @@ Thanks to our contributors for this release:
 
 ### Added
 
-- Generic Approval Field for Human-in-the-Loop: Any step type now supports a top-level `approval` field for human-in-the-loop workflows. The dedicated `hitl` executor has been removed — use `approval: true` (or `approval: "custom message"`) on any step instead. Steps with approval enabled pause execution and wait for manual approval before running. ([#1743](https://github.com/dagucloud/dagu/pull/1743))
-- `DAG_RUN_WORK_DIR` Special Environment Variable: New built-in variable exposing the working directory for the current DAG run attempt. Available in all step types and automatically set by the runtime. ([#1735](https://github.com/dagucloud/dagu/pull/1735))
+- Generic Approval Field for Human-in-the-Loop: Any action or `run` step now supports a top-level `approval` field for human-in-the-loop workflows. The dedicated `hitl` executor has been removed — use `approval: true` (or `approval: "custom message"`) on any step instead. Steps with approval enabled pause execution and wait for manual approval before running. ([#1743](https://github.com/dagucloud/dagu/pull/1743))
+- `DAG_RUN_WORK_DIR` Special Environment Variable: New built-in variable exposing the working directory for the current DAG run attempt. Available in all actions and `run` steps, and automatically set by the runtime. ([#1735](https://github.com/dagucloud/dagu/pull/1735))
 - `DAG_DOCS_DIR` and `DAG_PARAMS_JSON` Special Environment Variables: `DAG_DOCS_DIR` provides the path to the docs directory. `DAG_PARAMS_JSON` provides all DAG parameters as a JSON object. ([#1731](https://github.com/dagucloud/dagu/pull/1731))
 - Tags Parameter for Start and Enqueue APIs: The start and enqueue API endpoints now accept a `tags` parameter for tagging DAG runs at creation time. ([#1730](https://github.com/dagucloud/dagu/pull/1730))
 - Auto-Create Default `base.yaml` on First Run: A default `base.yaml` with comprehensive field reference comments is automatically generated when the base config file does not exist. ([#1737](https://github.com/dagucloud/dagu/pull/1737))
@@ -692,8 +692,8 @@ Thanks to our contributors for this release:
     shell: ["/bin/sh", "-c"]
 
   steps:
-    - command: cat file.txt | grep error | wc -l
-    - command: npm install && npm test
+    - run: cat file.txt | grep error | wc -l
+    - run: npm install && npm test
   ```
 
   Format: array where first element is the shell path, remaining elements are flags, and the step command is appended as the final argument. See [Container Field](/writing-workflows/container#shell-wrapper) for details.
@@ -710,11 +710,11 @@ Thanks to our contributors for this release:
 
   steps:
     - id: fetch_data
-      command: curl https://api.example.com/data
+      run: curl https://api.example.com/data
       # Inherits retry_policy and LOG_LEVEL from defaults
 
     - id: custom_step
-      command: ./run.sh
+      run: ./run.sh
       retry_policy:
         limit: 1
         interval_sec: 0
@@ -730,16 +730,16 @@ Thanks to our contributors for this release:
   ```yaml
   # Main DAG that uses the tool
   steps:
-    - type: chat
-      llm:
+    - action: chat.completion
+      with:
         provider: anthropic
         model: claude-sonnet-4-20250514
         tools:
           - search_tool
         max_tool_iterations: 10
-      messages:
-        - role: user
-          content: "What's the latest news about AI?"
+        messages:
+          - role: user
+            content: "What's the latest news about AI?"
 
   ---
   # Define tool DAG
@@ -748,8 +748,8 @@ Thanks to our contributors for this release:
   defaultParams: "query max_results=10"
 
   steps:
-    - command: echo "Searching for: $1"
-    - command: curl "https://api.example.com/search?q=$1&limit=$2"
+    - run: echo "Searching for: $1"
+    - run: curl "https://api.example.com/search?q=$1&limit=$2"
       output: SEARCH_RESULT
   ```
 
@@ -833,7 +833,7 @@ Thanks to our contributors for this release:
 
   See [REST API Reference](/web-ui/api#start-dag-synchronous) for full documentation.
 
-- SFTP Executor: New step type for transferring files between local and remote servers via SFTP. Supports upload and download of files and directories, with atomic uploads using temporary files to prevent partial transfers.
+- SFTP Executor: New action for transferring files between local and remote servers via SFTP. Supports upload and download of files and directories, with atomic uploads using temporary files to prevent partial transfers.
 
   ```yaml
   ssh:
@@ -867,7 +867,7 @@ Thanks to our contributors for this release:
 
 - SSH Connection Timeout: Added `timeout` field to SSH configuration (default: 30s) for controlling connection timeouts.
 
-- S3 Executor: New step type for S3 operations with support for AWS S3 and S3-compatible services (MinIO, Google Cloud Storage, DigitalOcean Spaces, Backblaze B2).
+- S3 Executor: New actions for S3 operations with support for AWS S3 and S3-compatible services (MinIO, Google Cloud Storage, DigitalOcean Spaces, Backblaze B2).
 
   ```yaml
   s3:
@@ -878,11 +878,10 @@ Thanks to our contributors for this release:
 
   steps:
     - id: upload_report
-      type: s3
+      action: s3.upload
       with:
         key: reports/daily.csv
         source: /tmp/report.csv
-      command: upload
   ```
 
   **Key Features:**
@@ -896,15 +895,15 @@ Thanks to our contributors for this release:
 
   See [S3](/step-types/s3) for full documentation.
 
-- SQL Executor: New step types for database operations with PostgreSQL and SQLite support. Execute queries, import data from CSV/TSV/JSONL, and export results in multiple formats.
+- SQL Executor: New actions for database operations with PostgreSQL and SQLite support. Execute queries, import data from CSV/TSV/JSONL, and export results in multiple formats.
 
   ```yaml
   steps:
     - id: query_users
-      type: postgres
+      action: postgres.query
       with:
         dsn: "postgres://user:pass@localhost:5432/mydb"
-      command: "SELECT * FROM users WHERE active = true"
+        query: "SELECT * FROM users WHERE active = true"
       output: USERS
   ```
 
@@ -919,7 +918,7 @@ Thanks to our contributors for this release:
 
   See [ETL](/step-types/sql/) for full documentation.
 
-- Redis Executor: New step type for Redis operations with support for all major Redis commands, pipelines, transactions, Lua scripts, and distributed locking.
+- Redis Executor: New actions for Redis operations with support for all major Redis commands, pipelines, transactions, Lua scripts, and distributed locking.
 
   ```yaml
   redis:
@@ -929,9 +928,8 @@ Thanks to our contributors for this release:
 
   steps:
     - id: cache_lookup
-      type: redis
+      action: redis.get
       with:
-        command: GET
         key: user:${USER_ID}
       output: CACHED_USER
   ```
@@ -1349,45 +1347,36 @@ Everyone who participated in discussions, reported feedback, or helped other use
     # Or array syntax: shell: ["/bin/bash", "-e"]
 
   steps:
-    - command: echo $HOME && ls -la  # Shell features now work
+    - action: ssh.run
+      with:
+        command: echo $HOME && ls -la  # Shell features now work
   ```
 
   See [SSH](/step-types/ssh) for full documentation.
 
-- Simplified Executor Syntax: Added `type` and `with` fields at step level as a cleaner alternative to the `executor` block. Both syntaxes are fully supported. (#1525)
+- Simplified Executor Syntax: The current canonical form uses `action` and `with` as the cleaner replacement for older executor/type-based blocks. (#1525)
 
   ```yaml
-  # New shorthand syntax
   steps:
     - id: deploy
-      type: ssh
+      action: ssh.run
       with:
         host: prod.example.com
         user: deploy
-      command: ./deploy.sh
-
-  # Legacy syntax (removed in v1.31.0)
-  steps:
-    - id: deploy
-      executor:
-        type: ssh
-        config:
-          host: prod.example.com
-          user: deploy
-      command: ./deploy.sh
+        command: ./deploy.sh
   ```
 
-- Chat Step Type: Added a new step type for integrating Large Language Models into workflows. Execute LLM requests to OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM). (#1548)
+- Chat Action: Added a new action for integrating Large Language Models into workflows. Execute LLM requests to OpenAI, Anthropic, Google Gemini, OpenRouter, and local models (Ollama, vLLM). (#1548)
 
   ```yaml
   steps:
-    - type: chat
-      llm:
+    - action: chat.completion
+      with:
         provider: openai
         model: gpt-4o
-      messages:
-        - role: user
-          content: "What is 2+2?"
+        messages:
+          - role: user
+            content: "What is 2+2?"
       output: ANSWER
   ```
 
@@ -1418,8 +1407,8 @@ Everyone who participated in discussions, reported feedback, or helped other use
   container: my-running-container
 
   steps:
-    - command: php artisan migrate
-    - command: php artisan cache:clear
+    - run: php artisan migrate
+    - run: php artisan cache:clear
   ```
 
   **Object form** - with user, working_dir, and env overrides:
@@ -1433,7 +1422,7 @@ Everyone who participated in discussions, reported feedback, or helped other use
       - APP_DEBUG=true
 
   steps:
-    - command: composer install
+    - run: composer install
   ```
 
   Exec mode works at both DAG-level and step-level. The container must be running; Dagu waits up to 120 seconds for the container to be in running state.
@@ -1482,13 +1471,13 @@ Everyone who participated in discussions, reported feedback, or helped other use
 
   ```yaml
   steps:
-    - command: ./deploy.sh staging
-    - type: hitl
-      config:
+    - run: ./deploy.sh staging
+    - action: noop
+      approval:
         prompt: "Approve production?"
         input: [APPROVED_BY]
         required: [APPROVED_BY]
-    - command: ./deploy.sh production
+    - run: ./deploy.sh production
   ```
 
   Key features:
@@ -1504,10 +1493,11 @@ Everyone who participated in discussions, reported feedback, or helped other use
   ```yaml
   handler_on:
     wait:
-      command: notify-slack.sh "${DAG_WAITING_STEPS}"
+      run: notify-slack.sh "${DAG_WAITING_STEPS}"
 
   steps:
-    - type: hitl
+    - action: noop
+      approval: true
   ```
 
   See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) for full documentation.
@@ -1516,13 +1506,13 @@ Everyone who participated in discussions, reported feedback, or helped other use
 
   ```yaml
   steps:
-    - type: chat
-      llm:
+    - action: chat.completion
+      with:
         provider: openai
         model: gpt-4o
-      messages:
-        - role: user
-          content: "What is 2+2?"
+        messages:
+          - role: user
+            content: "What is 2+2?"
       output: ANSWER
   ```
 
@@ -1579,19 +1569,19 @@ Everyone who participated in discussions, reported feedback, or helped other use
 steps:
   # Simple string form (existing behavior)
   - id: get_count
-    command: echo "42"
+    run: echo "42"
     output: COUNT
 
   # Object form with custom key
   - id: get_version
-    command: cat VERSION
+    run: cat VERSION
     output:
       name: VERSION
       key: appVersion  # Custom key in outputs.json (default: camelCase of name)
 
   # Object form with omit
   - id: internal_step
-    command: echo "processing"
+    run: echo "processing"
     output:
       name: TEMP
       omit: true  # Exclude from outputs.json but still usable in DAG
@@ -1651,10 +1641,10 @@ Requires builtin authentication mode (`auth.mode: builtin`). See [Webhooks docum
 ```yaml
 steps:
   - id: build_and_test
-    command:
-      - npm install
-      - npm run build
-      - npm test
+    run: |
+      npm install
+      npm run build
+      npm test
     env:
       - NODE_ENV: production
     working_dir: /app
@@ -1683,14 +1673,14 @@ steps:
       volumes:
         - ./src:/app
       working_dir: /app
-    command: npm run build
+    run: npm run build
 
   - id: test
     container:
       image: python:3.11
       env:
         - PYTHONPATH=/app
-    command: pytest
+    run: pytest
 ```
 
 ### Changed
@@ -2164,7 +2154,7 @@ Thanks to our contributors for this release:
   ```yaml
   steps:
     - id: step_1
-      command: echo "hello"
+      run: echo "hello"
   ```
 
 - Working Directory Support: Added DAG-level and step-level working directory configuration with inheritance for better file path management
@@ -2528,12 +2518,14 @@ Execute nested DAGs with full parameter passing and output bubbling:
 ```yaml
 steps:
   - id: run_sub_dag
-    run: sub-dag
+    action: dag.run
+    with:
+      dag: sub-dag
+      params: "INPUT=${DATA_PATH}"
     output: OUT
-    params: "INPUT=${DATA_PATH}"
 
   - id: use_output
-    command: echo ${OUT.outputs.RESULT}
+    run: echo ${OUT.outputs.RESULT}
 ```
 
 #### Multiple DAGs in Single File
@@ -2544,14 +2536,16 @@ Define multiple DAGs in one YAML file using `---` separator:
 name: main-workflow
 steps:
   - id: process
-    run: sub-workflow  # Defined below
+    action: dag.run
+    with:
+      dag: sub-workflow  # Defined below
 
 ---
 
 name: sub-workflow
 steps:
   - id: task
-    command: echo "Hello from sub-workflow"
+    run: echo "Hello from sub-workflow"
 ```
 
 #### Parallel Execution with Parameters
@@ -2561,14 +2555,17 @@ Execute commands or sub-DAGs in parallel with different parameters for batch pro
 ```yaml
 steps:
   - id: get_files
-    command: find /data -name "*.csv"
+    run: find /data -name "*.csv"
     output: FILES
 
   - id: process_files
-    run: process-file
-    parallel: ${FILES}
-    params:
-      - FILE_NAME: ${ITEM}
+    action: dag.run
+    with:
+      dag: process-file
+      params:
+        FILE_NAME: ${ITEM}
+    parallel:
+      items: ${FILES}
 ```
 
 #### Enhanced Web UI
@@ -2647,7 +2644,7 @@ Thanks to @thefishhat:
 ```yaml
 steps:
   - id: wait_for_service
-    command: check_service.sh
+    run: check_service.sh
     repeat_policy:
       repeat: until        # NEW: Explicit mode (while/until)
       condition: "${STATUS}"
@@ -2656,7 +2653,7 @@ steps:
       limit: 60           # Maximum attempts
 
   - id: monitor_process
-    command: pgrep myapp
+    run: pgrep myapp
     repeat_policy:
       repeat: while       # Repeat WHILE process exists
       exit_code: [0]       # Exit code 0 means found
@@ -2686,9 +2683,9 @@ To maintain the previous behavior, add `type: graph` to your DAG configuration:
 type: graph
 steps:
   - id: task1
-    command: echo "runs in parallel"
+    run: echo "runs in parallel"
   - id: task2
-    command: echo "runs in parallel"
+    run: echo "runs in parallel"
 ```
 
 Alternatively, you can explicitly set empty dependencies for parallel steps:
@@ -2697,10 +2694,10 @@ Alternatively, you can explicitly set empty dependencies for parallel steps:
 type: graph
 steps:
   - id: task1
-    command: echo "runs in parallel"
+    run: echo "runs in parallel"
     depends: []
   - id: task2
-    command: echo "runs in parallel"
+    run: echo "runs in parallel"
     depends: []
 ```
 
@@ -2771,10 +2768,12 @@ Access nested JSON values with path syntax:
 ```yaml
 steps:
   - id: sub_workflow
-    run: sub_workflow
+    action: dag.run
+    with:
+      dag: sub_workflow
     output: SUB_RESULT
   - id: use_output
-    command: echo "The result is ${SUB_RESULT.outputs.finalValue}"
+    run: echo "The result is ${SUB_RESULT.outputs.finalValue}"
 ```
 
 If `SUB_RESULT` contains:
@@ -2796,7 +2795,7 @@ Then `${SUB_RESULT.outputs.finalValue}` expands to `success`.
 ```yaml
 steps:
   - id: some_step
-    command: some_command
+    run: some_command
     preconditions:
       - condition: "`date '+%d'`"
         expected: "re:0[1-9]"  # Run only on days 01-09
@@ -2807,9 +2806,9 @@ steps:
 ```yaml
 steps:
   - id: some_step
-    command: some_command
+    run: some_command
     preconditions:
-      - command: "test -f /tmp/some_file"
+      - condition: "test -f /tmp/some_file"
 ```
 
 #### Enhanced Parameter Support
@@ -2842,7 +2841,7 @@ dagu start my_dag -- param1 param2 --param3 value3
 ```yaml
 steps:
   - id: some_step
-    command: some_command
+    run: some_command
     continue_on:
       exit_code: [1, 2]  # Continue if exit code is 1 or 2
 ```
@@ -2852,7 +2851,7 @@ steps:
 ```yaml
 steps:
   - id: some_step
-    command: some_command
+    run: some_command
     continue_on:
       exit_code: 1
       mark_success: true  # Mark successful even if failed
@@ -2863,13 +2862,13 @@ steps:
 ```yaml
 steps:
   - id: some_step
-    command: some_command
+    run: some_command
     continue_on:
       output: "WARNING"  # Continue if output contains "WARNING"
       
   # With regex
   - id: another_step
-    command: another_command
+    run: another_command
     continue_on:
       output: "re:^ERROR: [0-9]+"  # Regex pattern matching
 ```
@@ -2881,7 +2880,7 @@ steps:
 ```yaml
 steps:
   - id: pipe_example
-    command: "cat file.txt | grep pattern | wc -l"
+    run: "cat file.txt | grep pattern | wc -l"
 ```
 
 **Custom Shell Selection**:
@@ -2889,12 +2888,14 @@ steps:
 ```yaml
 steps:
   - id: bash_specific
-    command: "echo ${BASH_VERSION}"
-    shell: bash
+    run: "echo ${BASH_VERSION}"
+    with:
+      shell: bash
 
   - id: python_shell
-    command: "print('Hello from Python')"
-    shell: python3
+    run: "print('Hello from Python')"
+    with:
+      shell: python3
 ```
 
 #### Sub-workflow Output
@@ -2920,9 +2921,9 @@ String format now supported:
 type: graph
 steps:
   - id: first
-    command: echo "First"
+    run: echo "First"
   - id: second
-    command: echo "Second"
+    run: echo "Second"
     depends: first  # Simple string instead of array
 ```
 

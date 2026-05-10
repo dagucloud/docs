@@ -272,6 +272,80 @@ steps:
       failure: true
 ```
 
+## Fan-Out: Running Across Multiple Databases
+
+To run the same query or migration across multiple databases in parallel, use `parallel.items` with a sub-DAG. Each database gets its own run with separate logs, status, and retry tracking.
+
+```yaml
+# migrate-tenants.yaml
+steps:
+  - name: migrate-all-tenants
+    parallel:
+      items:
+        - tenant_a
+        - tenant_b
+        - tenant_c
+      max_concurrent: 2
+    action: dag.run
+    with:
+      dag: run-migration
+      params:
+        SCHEMA: ${ITEM}
+---
+name: run-migration
+
+params:
+  - SCHEMA: ""
+
+steps:
+  - name: migrate
+    action: postgres.query
+    with:
+      dsn: "${DATABASE_URL}"
+      transaction: true
+      query: |
+        SET search_path TO ${SCHEMA};
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ;
+```
+
+For object items (e.g., different DSN per tenant), use `${ITEM.field}` references:
+
+```yaml
+steps:
+  - name: migrate-all-tenants
+    parallel:
+      items:
+        - schema: tenant_a
+          dsn: "${TENANT_A_DSN}"
+        - schema: tenant_b
+          dsn: "${TENANT_B_DSN}"
+      max_concurrent: 2
+    action: dag.run
+    with:
+      dag: run-migration
+      params:
+        SCHEMA: ${ITEM.schema}
+        DSN: ${ITEM.dsn}
+---
+name: run-migration
+
+params:
+  - SCHEMA: ""
+  - DSN: ""
+
+steps:
+  - name: migrate
+    action: postgres.query
+    with:
+      dsn: "${DSN}"
+      transaction: true
+      query: |
+        SET search_path TO ${SCHEMA};
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ;
+```
+
+See [parallel.items](/writing-workflows/parallel) for full fan-out options.
+
 ## See Also
 
 - [PostgreSQL](/step-types/sql/postgresql) - PostgreSQL-specific features

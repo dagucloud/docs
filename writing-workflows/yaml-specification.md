@@ -543,8 +543,12 @@ ssh:
 
 steps:
   # These steps inherit the DAG-level SSH configuration
-  - run: systemctl status myapp
-  - run: systemctl restart myapp
+  - action: ssh.run
+    with:
+      command: systemctl status myapp
+  - action: ssh.run
+    with:
+      command: systemctl restart myapp
 
   # Step-level with overrides DAG-level
   - action: ssh.run
@@ -555,7 +559,7 @@ steps:
       shell:
         - /bin/sh        # Override shell with explicit flags
         - -e
-    run: mysqldump mydb > backup.sql
+      command: mysqldump mydb > backup.sql
 ```
 
 **Important Notes:**
@@ -650,7 +654,7 @@ steps:
     action: k8s.run
     with:
       image: alpine:3.20
-    run: echo hello
+      command: echo hello
 ```
 
 When configured at the DAG level, only steps with `action: k8s.run` or `action: kubernetes.run` inherit these defaults. The root `kubernetes:` block does not change the executor type of plain command steps.
@@ -957,16 +961,16 @@ steps:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `working_dir` | string | Working directory (inherits from DAG-level working_dir) | DAG's working_dir |
-| `shell` | string/array | Shell program and args for this step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
+| `with.shell` | string/array | Shell program and args for this `run` step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
+| `with.shell_args` | array | Arguments appended to the shell for this `run` step | - |
+| `with.shell_packages` | array | Packages available to `nix-shell` steps | - |
 | `stdout` | string | Redirect stdout to file | - |
 | `stderr` | string | Redirect stderr to file | - |
 | `log_output` | string | Override DAG-level log output mode for this step | DAG's log_output |
 | `output` | string/object | String form captures trimmed stdout into one variable. Object form publishes structured step output for `${step_id.output.*}` references. | - |
 | `env` | array/object | Step-specific environment variables (overrides DAG-level) | - |
-| `call` | string | Name of a DAG to execute as a sub DAG-run | - |
-| `params` | string/object | Parameters passed to sub DAGs | - |
 
-`shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
+`shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level `with.shell` values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
 Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Only string-form `output: NAME` is collected into the run's `outputs.json`.
 
@@ -1018,7 +1022,8 @@ steps:
 ```yaml
 steps:
   - run: echo "Deploying"
-    shell: bash
+    with:
+      shell: bash
     preconditions:
       - condition: "${ENVIRONMENT}"
         expected: "production"
@@ -1174,23 +1179,22 @@ When using `container`, you cannot use `executor` or `script` fields on the same
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Builtin action or custom action name declared in `actions` or base config | Inferred from other step fields when omitted |
+| `action` | string | Builtin action or custom action name declared in `actions` or base config | - |
 | `with` | object | Builtin executor configuration, or validated input for a custom action definition | - |
 
 ```yaml
 steps:
-  - action: archive.run
+  - action: archive.extract
     with:
       source: assets.tar.gz
       destination: ./assets
-    run: extract
 ```
 
-If `type` refers to a custom action, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
+If `action` refers to a custom action, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
 
-Custom step call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
+Custom action call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `run`, `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
 
-Custom-step precedence is `call site > template > defaults` for replacement fields. For additive fields, `env` and `preconditions` compose as `defaults -> template -> call site`.
+Custom action precedence is `call site > template > defaults` for replacement fields. For additive fields, `env` and `preconditions` compose as `defaults -> template -> call site`.
 
 See [Custom Actions](/writing-workflows/custom-step-types) for the exact allowed field set.
 
@@ -1198,9 +1202,8 @@ See [Custom Actions](/writing-workflows/custom-step-types) for the exact allowed
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Set to `chat` for LLM-based steps | - |
-| `llm` | object | LLM configuration (provider, model, system prompt) | - |
-| `messages` | array | Session messages for chat steps | - |
+| `action` | string | Set to `chat.completion` for LLM-based steps | - |
+| `with` | object | LLM configuration and session messages for chat steps | - |
 
 ```yaml
 steps:

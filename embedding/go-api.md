@@ -46,7 +46,7 @@ params:
   - MESSAGE
 steps:
   - name: hello
-    command: echo "${MESSAGE}"
+    run: echo "${MESSAGE}"
 `), dagu.WithParams(map[string]string{
 		"MESSAGE": "hello from the host app",
 	}))

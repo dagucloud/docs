@@ -1,6 +1,6 @@
 # Agent Step
 
-Run the AI agent as a workflow step. The agent executes a multi-turn tool-calling loop to accomplish the task described in `messages`. It can read files, run commands, edit code, and use web search when enabled.
+Run the AI agent as a workflow step. The agent executes a multi-turn tool-calling loop to accomplish the task described in `with.messages`, `with.prompt`, or `with.task`. It can read files, run commands, edit code, and use web search when enabled.
 
 ## Basic Usage
 
@@ -20,7 +20,7 @@ The agent uses the default model configured in Steward Settings (`/agent-setting
 
 ## Configuration
 
-The `with` block is optional. When omitted, the action uses defaults from global Steward Settings.
+The `with` block provides the task through `task`, `prompt`, or `messages`. Other fields fall back to defaults from global Steward Settings when omitted.
 
 ```yaml
 steps:
@@ -195,23 +195,26 @@ When a bash command is denied, the agent receives: `"Blocked by policy: bash com
 
 ## Model Web Search
 
-Provider-native web search is configured via the `agent.web_search` field. This uses the LLM provider's built-in web search capability (e.g., Anthropic's web search) rather than a separate tool. When omitted, the step falls back to the global agent web search setting.
+Provider-native web search is configured via the `with.web_search` field. This uses the LLM provider's built-in web search capability (e.g., Anthropic's web search) rather than a separate tool. When omitted, the step falls back to the global agent web search setting.
 
 ```yaml
-agent:
-  web_search:
-    enabled: true
-    max_uses: 10
-    allowed_domains:
-      - docs.example.com
-      - github.com
-    blocked_domains:
-      - reddit.com
-    user_location:
-      city: San Francisco
-      region: California
-      country: US
-      timezone: America/Los_Angeles
+steps:
+  - action: agent.run
+    with:
+      web_search:
+        enabled: true
+        max_uses: 10
+        allowed_domains:
+          - docs.example.com
+          - github.com
+        blocked_domains:
+          - reddit.com
+        user_location:
+          city: San Francisco
+          region: California
+          country: US
+          timezone: America/Los_Angeles
+      task: "Research recent dependency changes"
 ```
 
 | Field | Type | Description |
@@ -226,14 +229,17 @@ agent:
 
 Tavily and Firecrawl web tools are configured globally from **Agent Tools** at `/agent-tools`. They are not configured in DAG YAML because the API keys live in the agent config store.
 
-When enabled, they add callable `web_search` and `web_extract` tools to agent steps. If the step sets `agent.tools.enabled`, list the web tools explicitly:
+When enabled, they add callable `web_search` and `web_extract` tools to agent steps. If the step sets `with.tools.enabled`, list the web tools explicitly:
 
 ```yaml
-agent:
-  tools:
-    enabled:
-      - web_search
-      - web_extract
+steps:
+  - action: agent.run
+    with:
+      tools:
+        enabled:
+          - web_search
+          - web_extract
+      task: "Summarize the latest API changelog"
 ```
 
 The tools are still filtered by the global tool policy. If `web_search` or `web_extract` is disabled globally, a step cannot re-enable it.
@@ -242,7 +248,7 @@ See [Web Search](/features/agent/web-search) for backend setup and provider limi
 
 ## Messages
 
-At least one message is required. Validation fails with `"agent step requires at least one message"` if `messages` is empty.
+At least one of `with.task`, `with.prompt`, or `with.messages` is required. Validation fails if the action does not describe a task.
 
 Message content supports variable substitution with `${VAR}` syntax. Variables are evaluated at runtime via `runtime.EvalString`:
 

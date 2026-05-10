@@ -293,7 +293,7 @@ These patterns do **not** work for non-shell executors (docker, http, ssh, jq, m
 To use literal backticks without command substitution:
 
 ```yaml
-command: echo "Literal backtick: \`not a command\`"
+run: echo "Literal backtick: \`not a command\`"
 ```
 
 For JSON path access and step output references, see [Variables Reference](/writing-workflows/template-variables).

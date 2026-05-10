@@ -91,9 +91,9 @@ steps:
     with:
       user: deploy
       host: remote.example.com
-    run: |
-      cd $HOME/app                    # $HOME preserved — remote shell resolves it
-      git checkout ${DEPLOY_BRANCH}   # Expanded by Dagu — defined in DAG env
+      command: |
+        cd $HOME/app                    # $HOME preserved — remote shell resolves it
+        git checkout ${DEPLOY_BRANCH}   # Expanded by Dagu — defined in DAG env
 ```
 
 In this example, `$HOME` is not defined in the DAG scope, so it passes through unchanged to the remote shell. `${DEPLOY_BRANCH}` is defined in the DAG `env:`, so Dagu expands it before sending.
@@ -184,9 +184,9 @@ steps:
   - id: batch_size
     action: jq.filter
     with:
+      filter: '"Batch size: \(.batchSize // "n/a")"'
       raw: true
       data: ${DAG_PARAMS_JSON}
-    run: '"Batch size: \(.batchSize // "n/a")"'
 ```
 
 Use this when downstream scripts prefer structured data or when you need access to parameters that were provided as nested JSON.

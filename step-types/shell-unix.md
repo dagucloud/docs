@@ -13,8 +13,9 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 - **Step override** (evaluated at runtime so params/secrets/outputs are allowed):
   ```yaml
   steps:
-    - shell: ${CUSTOM_SHELL:-/bin/zsh}
-      run: echo "Runs in the step shell"
+    - run: echo "Runs in the step shell"
+      with:
+        shell: ${CUSTOM_SHELL:-/bin/zsh}
   ```
 - **Fallback**: If no shell is set, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
@@ -54,10 +55,11 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 - **Interpreter + inline script**:
   ```yaml
   steps:
-    - shell: python3
-      run: |
+    - run: |
         import sys
         print("Args:", sys.argv)
+      with:
+        shell: python3
   ```
 - **Working directory and env**: Use `working_dir` and `env` on the step (or DAG defaults) to control context.
 
@@ -73,14 +75,15 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
   With the default or DAG-level shell, Dagu appends `-e` so the shell stops on the first failing command. If you set a step-level shell, add `-e` yourself when you want errexit.
 
 - **nix-shell**  
-  Pin tools per step with `shell: nix-shell` and `shell_packages`:
+  Pin tools per step with `with.shell: nix-shell` and `with.shell_packages`:
   ```yaml
   steps:
-    - shell: nix-shell
-      shell_packages: [python3, jq]
-      run: |
+    - run: |
         python3 --version
         jq --version
+      with:
+        shell: nix-shell
+        shell_packages: [python3, jq]
   ```
   nix-shell must be installed separately. Dagu runs inside `nix-shell --run ...`; it defaults to `--pure` if you do not supply purity flags. Include any flags you need (such as `--impure`) in the `shell` array. When Dagu supplies the shell, it prepends `set -e;` to the command string unless you already provided it.
 
@@ -99,7 +102,7 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 
 ## Tips
 
-- Prefer `exec.args` when you need explicit argv with flags.
+- Prefer `action: exec` when you need explicit argv with flags.
 - Keep DAG-level shells stable; override per-step only when you need a different interpreter.
 - Use shebangs in multi-line scripts when you want a specific interpreter without repeating `shell`.
-- When using nix-shell, list every tool your step needs in `shell_packages` for reproducibility.
+- When using nix-shell, list every tool your step needs in `with.shell_packages` for reproducibility.

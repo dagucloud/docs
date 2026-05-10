@@ -13,8 +13,9 @@ Run system commands and scripts with the default action.
 - **Step override** (evaluated at runtime, can reference params/secrets/outputs):
   ```yaml
   steps:
-    - shell: ${CUSTOM_SHELL:-/bin/zsh}
-      run: echo "Runs in the step shell"
+    - run: echo "Runs in the step shell"
+      with:
+        shell: ${CUSTOM_SHELL:-/bin/zsh}
   ```
 - **Fallback**: if you set nothing, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh` on Unix; on Windows it prefers PowerShell, then `pwsh`, then `cmd.exe`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
@@ -67,10 +68,11 @@ Run system commands and scripts with the default action.
 - **Interpreter + inline script**:
   ```yaml
   steps:
-    - shell: python3
-      run: |
+    - run: |
         import sys
         print("Args:", sys.argv)
+      with:
+        shell: python3
   ```
 - **Working directory and env**: set `working_dir` and `env` on the step (or DAG defaults) to control context.
 

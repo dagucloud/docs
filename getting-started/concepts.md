@@ -158,8 +158,9 @@ Runs commands in the system shell. Set it once per DAG or override per step:
 shell: [bash, -e]  # Default shell + args for all steps
 steps:
   - run: echo "Hello"   # Uses DAG shell
-  - shell: /usr/bin/zsh     # Per-step override
-    run: echo "Using zsh"
+  - run: echo "Using zsh"
+    with:
+      shell: /usr/bin/zsh  # Per-step override
 ```
 
 See [Shell](/step-types/shell) for more details.

@@ -81,7 +81,7 @@ The tools are available only when:
 - the selected backend has an API key configured
 - the tool is allowed by the global tool policy
 
-If a workflow `action: agent.run` step sets `agent.tools.enabled`, include `web_search` or `web_extract` there when the step should use them.
+If a workflow `action: agent.run` step sets `with.tools.enabled`, include `web_search` or `web_extract` there when the step should use them.
 
 ```yaml
 steps:
@@ -107,7 +107,7 @@ The step still inherits the backend credentials and provider choice from the glo
 
 Workflow agent steps can use both web access styles:
 
-- `Model Web Search`: inherited from the global agent setting, or overridden with `agent.web_search`
+- `Model Web Search`: inherited from the global agent setting, or overridden with `with.web_search`
 - `Tavily` / `Firecrawl`: inherited from the global agent web tool setting and filtered by tool policy
 
 Provider-native search can be overridden in YAML:

@@ -189,3 +189,75 @@ steps:
       headers:
         Authorization: "Bearer ${INTERNAL_TOKEN}"
 ```
+
+## Fan-Out: Calling Multiple Endpoints
+
+To send the same request to multiple endpoints in parallel, use `parallel.items` with a sub-DAG. Each endpoint gets its own run with separate logs, status, and retry tracking.
+
+```yaml
+# health-check.yaml
+steps:
+  - name: check-services
+    parallel:
+      items:
+        - https://api.example.com/health
+        - https://auth.example.com/health
+        - https://billing.example.com/health
+      max_concurrent: 3
+    action: dag.run
+    with:
+      dag: http-check
+      params:
+        URL: ${ITEM}
+---
+name: http-check
+
+params:
+  - URL: ""
+
+steps:
+  - name: check
+    action: http.request
+    with:
+      method: GET
+      url: ${URL}
+```
+
+For object items (e.g., different method or headers per endpoint), use `${ITEM.field}` references:
+
+```yaml
+steps:
+  - name: notify-webhooks
+    parallel:
+      items:
+        - url: https://hooks.example.com/deploy
+          token: ${DEPLOY_TOKEN}
+        - url: https://hooks.example.com/audit
+          token: ${AUDIT_TOKEN}
+      max_concurrent: 2
+    action: dag.run
+    with:
+      dag: send-webhook
+      params:
+        URL: ${ITEM.url}
+        TOKEN: ${ITEM.token}
+---
+name: send-webhook
+
+params:
+  - URL: ""
+  - TOKEN: ""
+
+steps:
+  - name: post
+    action: http.request
+    with:
+      method: POST
+      url: ${URL}
+      headers:
+        Authorization: "Bearer ${TOKEN}"
+        Content-Type: application/json
+      body: '{"status": "deployed"}'
+```
+
+See [parallel.items](/writing-workflows/parallel) for full fan-out options.

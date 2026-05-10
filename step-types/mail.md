@@ -165,7 +165,7 @@ steps:
       subject: "Weekly Report"
       message: "Please find the weekly report attached."
       attachments:
-        - command: report.txt
+        - report.txt
 ```
 
 ### With Retry
