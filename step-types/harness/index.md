@@ -6,13 +6,28 @@ The harness executor starts a subprocess, captures stdout and stderr, and uses t
 
 The selected attempt's CLI binary must either be available in `PATH` or be referenced by path. Dagu resolves each provider binary when that attempt runs, so a missing fallback binary does not fail a successful primary attempt.
 
+## Supported Providers
+
+Dagu has built-in support for the following CLI agents. Each provider is pre-configured with the correct invocation pattern:
+
+| Provider | Page |
+|----------|------|
+| [Claude Code](./claude) | `claude` |
+| [Codex](./codex) | `codex` |
+| [Copilot](./copilot) | `copilot` |
+| [Hermes Agent](./hermes) | `hermes` |
+| [OpenCode](./opencode) | `opencode` |
+| [Pi](./pi) | `pi` |
+
+You can also define [custom harness definitions](#custom-harness-definitions) for any CLI agent.
+
 ## Step Contract
 
 - `command` is the prompt. Harness steps accept a single command string; command arrays are rejected.
 - `script` is optional extra stdin content.
 - After DAG-level defaults are applied, the step needs a provider.
-- `with.provider` may be a built-in provider or a name defined under top-level `harnesses:`.
-- `with.provider` may contain `${VAR}` interpolation and is resolved after interpolation at runtime.
+- `config.provider` may be a built-in provider or a name defined under top-level `harnesses:`.
+- `config.provider` may contain `${VAR}` interpolation and is resolved after interpolation at runtime.
 
 Example:
 
@@ -21,7 +36,7 @@ steps:
   - name: review
     type: harness
     command: "Review the current branch and list problems"
-    with:
+    config:
       provider: claude
       model: sonnet
       bare: true
@@ -42,7 +57,7 @@ steps:
   - id: implement
     type: harness
     command: "Implement the requested change and summarize what changed"
-    with:
+    config:
       provider: codex
     approval:
       prompt: "Review the implementation"
@@ -50,24 +65,6 @@ steps:
 ```
 
 On the first run, `implement` receives only the original prompt. If the reviewer pushes back with `FEEDBACK`, Dagu reruns the harness step and augments the prompt with the feedback, iteration number, and previous stdout log path.
-
-## Built-in Providers
-
-Built-in providers have fixed prompt placement:
-
-| Provider | Binary | Base invocation |
-|----------|--------|-----------------|
-| `claude` | `claude` | `claude -p "<prompt>"` |
-| `codex` | `codex` | `codex exec "<prompt>"` |
-| `copilot` | `copilot` | `copilot -p "<prompt>"` |
-| `opencode` | `opencode` | `opencode run "<prompt>"` |
-| `pi` | `pi` | `pi -p "<prompt>"` |
-
-For built-in providers:
-
-- the prompt is always passed on the command line
-- additional `with` keys become CLI flags, with `snake_case` keys normalized to kebab-case
-- `script`, if present, is piped to stdin unchanged
 
 ## Custom Harness Definitions
 
@@ -87,7 +84,7 @@ steps:
   - name: summarize
     type: harness
     command: "Summarize the repository status"
-    with:
+    config:
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -102,11 +99,11 @@ Custom harness definition fields:
 | `prompt_flag` | string | only for `flag` mode | - | Exact flag token used for the prompt |
 | `prompt_position` | `before_flags` \| `after_flags` | no | `before_flags` | Where prompt tokens go relative to generated flags |
 | `flag_style` | `gnu_long` \| `single_dash` | no | `gnu_long` | Default generated flag token style |
-| `option_flags` | object | no | - | Exact flag token overrides per `with` key |
+| `option_flags` | object | no | - | Exact flag token overrides per `config` key |
 
 Rules enforced by Dagu:
 
-- custom harness names cannot be `claude`, `codex`, `copilot`, `opencode`, or `pi`
+- custom harness names cannot conflict with [built-in providers](#supported-providers)
 - `prompt_flag` is valid only when `prompt_mode: flag`
 - unknown keys inside a harness definition are rejected
 
@@ -126,7 +123,7 @@ harnesses:
 steps:
   - type: harness
     command: "Review the auth module"
-    with:
+    config:
       provider: aider
       model: sonnet
 ```
@@ -152,7 +149,7 @@ harnesses:
 steps:
   - type: harness
     command: "Review the auth module"
-    with:
+    config:
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -178,7 +175,7 @@ steps:
     script: |
       diff --git a/main.go b/main.go
       ...
-    with:
+    config:
       provider: llm
       format: json
 ```
@@ -203,9 +200,9 @@ For `stdin` mode:
 - if `script` is empty, stdin is just the prompt
 - if both `command` and `script` are present, stdin is `prompt + "\n\n" + script`
 
-## `with`-to-Flag Mapping
+## `config`-to-Flag Mapping
 
-After removing reserved keys, Dagu converts remaining `with` entries to CLI flags.
+After removing reserved keys, Dagu converts remaining `config` entries to CLI flags.
 
 | YAML value | Result |
 |------------|--------|
@@ -249,7 +246,7 @@ steps:
 
   - type: harness
     command: "Fix the flaky integration tests"
-    with:
+    config:
       model: opus
       effort: high
 ```
@@ -257,13 +254,13 @@ steps:
 Merge rules:
 
 - DAG-level `harness:` is the base config for every harness step
-- step-level `with:` overrides primary keys from DAG-level `harness:`
+- step-level `config:` overrides primary keys from DAG-level `harness:`
 - step-level `fallback:` replaces the DAG-level fallback list; it is not merged
 - if a DAG has `harness:` and a step omits `type:`, Dagu treats that step as `type: harness`
 
 ## Fallbacks
 
-`with.fallback` is an ordered list of alternative provider configs.
+`config.fallback` is an ordered list of alternative provider configs.
 
 ```yaml
 harnesses:
@@ -277,7 +274,7 @@ steps:
   - name: implement
     type: harness
     command: "Implement the feature and add tests"
-    with:
+    config:
       provider: claude
       fallback:
         - provider: codex
@@ -303,7 +300,7 @@ steps:
   - name: task
     type: harness
     command: "Analyze the repository layout"
-    with:
+    config:
       provider: "${PROVIDER}"
 ```
 
