@@ -567,3 +567,74 @@ steps:
       platform: linux/arm64
     command: go build -o app-arm64
 ```
+
+## Fan-Out: Running Across Multiple Configurations
+
+To run the same container task across multiple images or configurations in parallel, use `parallel.items` with a sub-DAG. Each item gets its own run with separate logs, status, and retry tracking.
+
+```yaml
+# test-matrix.yaml
+steps:
+  - name: test-all-versions
+    parallel:
+      items:
+        - python:3.10
+        - python:3.11
+        - python:3.12
+      max_concurrent: 2
+    type: dag
+    with:
+      dag: run-tests
+      params:
+        IMAGE: ${ITEM}
+---
+name: run-tests
+
+params:
+  - IMAGE: ""
+
+steps:
+  - name: test
+    container:
+      image: ${IMAGE}
+    command: python -m pytest tests/
+```
+
+For object items (e.g., different image and environment per run), use `${ITEM.field}` references:
+
+```yaml
+steps:
+  - name: build-targets
+    parallel:
+      items:
+        - image: golang:1.22
+          platform: linux/amd64
+          output: app-amd64
+        - image: golang:1.22
+          platform: linux/arm64
+          output: app-arm64
+      max_concurrent: 2
+    type: dag
+    with:
+      dag: build-target
+      params:
+        IMAGE: ${ITEM.image}
+        PLATFORM: ${ITEM.platform}
+        OUTPUT: ${ITEM.output}
+---
+name: build-target
+
+params:
+  - IMAGE: ""
+  - PLATFORM: ""
+  - OUTPUT: ""
+
+steps:
+  - name: build
+    container:
+      image: ${IMAGE}
+      platform: ${PLATFORM}
+    command: go build -o ${OUTPUT}
+```
+
+See [parallel.items](/writing-workflows/parallel) for full fan-out options.
