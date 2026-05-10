@@ -182,6 +182,7 @@ const fullSidebar = [
       { text: "Overview", link: "/features/chat/" },
       { text: "Basic Chat", link: "/features/chat/basics" },
       { text: "Local AI", link: "/features/chat/local-ai" },
+      { text: "OpenCode", link: "/features/chat/opencode" },
       { text: "Tool Calling", link: "/features/chat/tool-calling" },
     ],
   },
