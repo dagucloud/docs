@@ -24,10 +24,10 @@ copilot -p "<prompt>"
 ```yaml
 steps:
   - name: explain-code
-    type: harness
-    command: "Explain what this function does and suggest improvements"
-    config:
+    action: harness.run
+    with:
       provider: copilot
+      prompt: "Explain what this function does and suggest improvements"
       model: gpt-4o
 ```
 
@@ -46,10 +46,10 @@ However, if you want to ensure fully autonomous execution, use the `--auto` flag
 ```yaml
 steps:
   - name: auto-review
-    type: harness
-    command: "Review this PR for security issues"
-    config:
+    action: harness.run
+    with:
       provider: copilot
+      prompt: "Review this PR for security issues"
       auto: true
 ```
 

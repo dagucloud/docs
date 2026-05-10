@@ -20,7 +20,7 @@ Codex is the only built-in provider that ships with a default config. When you u
 skip_git_repo_check: true
 ```
 
-This becomes `--skip-git-repo-check` on the CLI. You can override it by explicitly setting `skip_git_repo_check: false` in your step config.
+This becomes `--skip-git-repo-check` on the CLI. You can override it by explicitly setting `skip_git_repo_check: false` in your step `with`.
 
 ## Common Flags
 
@@ -35,10 +35,10 @@ This becomes `--skip-git-repo-check` on the CLI. You can override it by explicit
 ```yaml
 steps:
   - name: generate-tests
-    type: harness
-    command: "Write unit tests for the auth module"
-    config:
+    action: harness.run
+    with:
       provider: codex
+      prompt: "Write unit tests for the auth module"
       model: gpt-5.5
       full-auto: true
 ```
@@ -56,10 +56,10 @@ Codex supports a `--yolo` flag that bypasses all approval prompts and sandboxing
 ```yaml
 steps:
   - name: auto-fix
-    type: harness
-    command: "Fix all lint errors"
-    config:
+    action: harness.run
+    with:
       provider: codex
+      prompt: "Fix all lint errors"
       yolo: true
       sandbox: workspace-write
 ```
@@ -84,7 +84,9 @@ harness:
 
 steps:
   - name: refactor
-    command: "Refactor the database layer to use interfaces"
+    action: harness.run
+    with:
+      prompt: "Refactor the database layer to use interfaces"
 ```
 
 ## See Also

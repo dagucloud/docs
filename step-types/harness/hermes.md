@@ -40,10 +40,10 @@ Hermes supports a `--yolo` flag that bypasses dangerous-command approval prompts
 ```yaml
 steps:
   - name: auto-refactor
-    type: harness
-    command: "Refactor the auth module to use interfaces"
-    config:
+    action: harness.run
+    with:
       provider: hermes
+      prompt: "Refactor the auth module to use interfaces"
       yolo: true
       toolsets: "terminal,skills"
 ```
@@ -61,10 +61,10 @@ hermes -z "Refactor the auth module to use interfaces" --toolsets terminal,skill
 ```yaml
 steps:
   - name: refactor-auth
-    type: harness
-    command: "Refactor the auth module to use interfaces"
-    config:
+    action: harness.run
+    with:
       provider: hermes
+      prompt: "Refactor the auth module to use interfaces"
       yolo: true
       toolsets: "terminal,skills"
 ```
@@ -87,7 +87,9 @@ harness:
 
 steps:
   - name: analyze
-    command: "Analyze the codebase for security issues"
+    action: harness.run
+    with:
+      prompt: "Analyze the codebase for security issues"
 ```
 
 ## Notes

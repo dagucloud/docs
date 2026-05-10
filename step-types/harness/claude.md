@@ -14,7 +14,7 @@ claude -p "<prompt>"
 
 ## Common Flags
 
-Any `config` key other than `provider` and `fallback` is passed as a CLI flag. Snake-case keys are normalized to kebab-case.
+Any `with` key other than `provider` and `fallback` is passed as a CLI flag. Snake-case keys are normalized to kebab-case.
 
 | Flag | Type | Description |
 |------|------|-------------|
@@ -27,10 +27,10 @@ Any `config` key other than `provider` and `fallback` is passed as a CLI flag. S
 ```yaml
 steps:
   - name: review-pr
-    type: harness
-    command: "Review the current branch for bugs and style issues"
-    config:
+    action: harness.run
+    with:
       provider: claude
+      prompt: "Review the current branch for bugs and style issues"
       model: sonnet
       bare: true
 ```
@@ -48,10 +48,10 @@ By default, Claude Code asks for approval before running commands. In a Dagu wor
 ```yaml
 steps:
   - name: auto-refactor
-    type: harness
-    command: "Refactor the auth module"
-    config:
+    action: harness.run
+    with:
       provider: claude
+      prompt: "Refactor the auth module"
       dangerously_skip_permissions: true
 ```
 
@@ -70,10 +70,10 @@ When combined with Dagu's approval gates, Claude Code steps can be reviewed and 
 ```yaml
 steps:
   - id: implement
-    type: harness
-    command: "Implement the requested feature"
-    config:
+    action: harness.run
+    with:
       provider: claude
+      prompt: "Implement the requested feature"
       model: opus
     approval:
       prompt: "Review the implementation"

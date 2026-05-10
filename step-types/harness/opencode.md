@@ -24,10 +24,10 @@ opencode run "<prompt>"
 ```yaml
 steps:
   - name: review
-    type: harness
-    command: "Review the current branch and list problems"
-    config:
+    action: harness.run
+    with:
       provider: opencode
+      prompt: "Review the current branch and list problems"
       model: claude-sonnet-4
 ```
 
@@ -44,10 +44,10 @@ OpenCode runs non-interactively by default when using `run` mode. For fully auto
 ```yaml
 steps:
   - name: auto-implement
-    type: harness
-    command: "Implement the feature described in the issue"
-    config:
+    action: harness.run
+    with:
       provider: opencode
+      prompt: "Implement the feature described in the issue"
       auto: true
 ```
 

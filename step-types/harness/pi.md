@@ -23,10 +23,10 @@ pi -p "<prompt>"
 ```yaml
 steps:
   - name: summarize
-    type: harness
-    command: "Summarize the README in one paragraph"
-    config:
+    action: harness.run
+    with:
       provider: pi
+      prompt: "Summarize the README in one paragraph"
 ```
 
 Generated invocation:
@@ -44,10 +44,10 @@ If you want to ensure fully autonomous execution without any confirmation prompt
 ```yaml
 steps:
   - name: auto-summarize
-    type: harness
-    command: "Summarize the README in one paragraph"
-    config:
+    action: harness.run
+    with:
       provider: pi
+      prompt: "Summarize the README in one paragraph"
       auto: true
 ```
 
