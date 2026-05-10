@@ -262,6 +262,80 @@ Instead of duplicating the SSH executor `with` block, `preconditions`, `retry_po
    ssh-keyscan -H production.example.com >> ~/.ssh/known_hosts
    ```
 
+## Running Commands on Multiple Hosts
+
+To execute the same command across multiple hosts in parallel, use `parallel.items` with a sub-DAG. Each host gets its own DAG run with separate logs, status, and retry tracking.
+
+Define both DAGs in a single file using `---` as a document separator. The second document becomes a local DAG, resolved by name when `dag` references it.
+
+```yaml
+# deploy.yaml
+steps:
+  - name: run-on-servers
+    parallel:
+      items:
+        - server1.example.com
+        - server2.example.com
+        - server3.example.com
+      max_concurrent: 2
+    type: dag
+    with:
+      dag: ssh-command
+      params:
+        HOST: ${ITEM}
+---
+name: ssh-command
+
+params:
+  - HOST: ""
+
+steps:
+  - name: run
+    type: ssh
+    with:
+      host: ${HOST}
+      user: deploy
+      key: ~/.ssh/id_rsa
+    command: uptime
+```
+
+For object items (e.g., different user per host), use `${ITEM.field}` references:
+
+```yaml
+steps:
+  - name: run-on-servers
+    parallel:
+      items:
+        - host: server1.example.com
+          user: admin
+        - host: server2.example.com
+          user: deploy
+      max_concurrent: 2
+    type: dag
+    with:
+      dag: ssh-command
+      params:
+        HOST: ${ITEM.host}
+        USER: ${ITEM.user}
+---
+name: ssh-command
+
+params:
+  - HOST: ""
+  - USER: ""
+
+steps:
+  - name: run
+    type: ssh
+    with:
+      host: ${HOST}
+      user: ${USER}
+      key: ~/.ssh/id_rsa
+    command: uptime
+```
+
+See [parallel.items](/writing-workflows/parallel) for full fan-out options.
+
 ## See Also
 
 - [SFTP](/step-types/sftp) - File transfer via SFTP
