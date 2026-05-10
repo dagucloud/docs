@@ -6,6 +6,21 @@ The harness executor starts a subprocess, captures stdout and stderr, and uses t
 
 The selected attempt's CLI binary must either be available in `PATH` or be referenced by path. Dagu resolves each provider binary when that attempt runs, so a missing fallback binary does not fail a successful primary attempt.
 
+## Supported Providers
+
+Dagu has built-in support for the following CLI agents. Each provider is pre-configured with the correct invocation pattern:
+
+| Provider | Page |
+|----------|------|
+| [Claude Code](./claude) | `claude` |
+| [Codex](./codex) | `codex` |
+| [Copilot](./copilot) | `copilot` |
+| [Hermes Agent](./hermes) | `hermes` |
+| [OpenCode](./opencode) | `opencode` |
+| [Pi](./pi) | `pi` |
+
+You can also define [custom harness definitions](#custom-harness-definitions) for any CLI agent.
+
 ## Step Contract
 
 - `with.prompt` is the prompt. Harness steps accept a single command string; command arrays are rejected.
@@ -106,7 +121,7 @@ Custom harness definition fields:
 
 Rules enforced by Dagu:
 
-- custom harness names cannot be `claude`, `codex`, `copilot`, `opencode`, or `pi`
+- custom harness names cannot conflict with [built-in providers](#supported-providers)
 - `prompt_flag` is valid only when `prompt_mode: flag`
 - unknown keys inside a harness definition are rejected
 
@@ -200,8 +215,8 @@ diff --git a/main.go b/main.go
 
 For `stdin` mode:
 
-- if `script` is empty, stdin is just the prompt
-- if both `command` and `script` are present, stdin is `prompt + "\n\n" + script`
+- if `with.stdin` is empty, stdin is just the prompt
+- if both `with.prompt` and `with.stdin` are present, stdin is `prompt + "\n\n" + stdin`
 
 ## `with`-to-Flag Mapping
 
