@@ -1,5 +1,81 @@
 # Changelog
 
+## v2.6.8 (2026-05-10)
+
+### Added
+
+- fix: add opencode provider and fix reasoning content echo in tool call turns ([#2134](https://github.com/dagucloud/dagu/pull/2134)) [@yottahmd](https://github.com/yottahmd)
+
+### Fixed
+
+- fix: avoid recursive lock cleanup on old windows ([#2130](https://github.com/dagucloud/dagu/pull/2130)) [@yottahmd](https://github.com/yottahmd)
+- fix: resolve runtime env references in DAG env ([#2131](https://github.com/dagucloud/dagu/pull/2131)) [@yottahmd](https://github.com/yottahmd)
+
+## v2.6.7 (2026-05-08)
+
+Hotfix release to fix agent tool issues in v2.6.6.
+
+### Fixed
+
+- fix: tolerate extra agent tool fields ([#2128](https://github.com/dagu-org/dagu/pull/2128)) [@yottahmd](https://github.com/yottahmd)
+- fix: support old powershell in generated scripts ([#2129](https://github.com/dagu-org/dagu/pull/2129)) [@yottahmd](https://github.com/yottahmd)
+
+## v2.6.6 (2026-05-08)
+
+### Added
+
+- feat: show parallel sub-dag runs in timeline ([#2093](https://github.com/dagu-org/dagu/pull/2093)) [@yottahmd](https://github.com/yottahmd)
+- feat: add agent session search tool ([#2097](https://github.com/dagu-org/dagu/pull/2097)) [@yottahmd](https://github.com/yottahmd)
+- feat: add log step type ([#2101](https://github.com/dagu-org/dagu/pull/2101)) [@yottahmd](https://github.com/yottahmd)
+- feat: improve agent content navigation ([#2102](https://github.com/dagu-org/dagu/pull/2102)) [@yottahmd](https://github.com/yottahmd)
+- feat: add worker prometheus metrics ([#2104](https://github.com/dagu-org/dagu/pull/2104)) [@yottahmd](https://github.com/yottahmd)
+- feat: validate step output contracts ([#2105](https://github.com/dagu-org/dagu/pull/2105)) [@yottahmd](https://github.com/yottahmd)
+- feat(docs): expose description frontmatter metadata ([#2106](https://github.com/dagu-org/dagu/pull/2106)) [@yottahmd](https://github.com/yottahmd)
+- feat: add dagu agent command ([#2107](https://github.com/dagu-org/dagu/pull/2107)) [@yottahmd](https://github.com/yottahmd)
+- feat: add workspace base config ([#2108](https://github.com/dagu-org/dagu/pull/2108)) [@yottahmd](https://github.com/yottahmd)
+- feat: carry push-back context into AI steps ([#2109](https://github.com/dagu-org/dagu/pull/2109)) [@yottahmd](https://github.com/yottahmd)
+- feat: add agent runbook management tool ([#2112](https://github.com/dagu-org/dagu/pull/2112)) [@yottahmd](https://github.com/yottahmd)
+- Add agent DAG management tools and run watches ([#2113](https://github.com/dagu-org/dagu/pull/2113)) [@yottahmd](https://github.com/yottahmd)
+- feat: add agent web search backends ([#2119](https://github.com/dagu-org/dagu/pull/2119)) [@yottahmd](https://github.com/yottahmd)
+- feat: improve agent session list pagination ([#2126](https://github.com/dagu-org/dagu/pull/2126)) [@yottahmd](https://github.com/yottahmd)
+
+### Changed
+
+- chore(deps): bump ajv from 6.12.6 to 6.15.0 in /ui in the ui-security group across 1 directory ([#2088](https://github.com/dagu-org/dagu/pull/2088)) [@dependabot](https://github.com/dependabot)
+- docs: add GitHub issue templates and PR template ([#2124](https://github.com/dagu-org/dagu/pull/2124)) [@zichen0116](https://github.com/zichen0116)
+
+### Fixed
+
+- fix: preserve dag-run artifact paths in index ([#2087](https://github.com/dagu-org/dagu/pull/2087)) [@yottahmd](https://github.com/yottahmd)
+- fix: load base config during validation ([#2089](https://github.com/dagu-org/dagu/pull/2089)) [@yottahmd](https://github.com/yottahmd)
+- fix: support multiline schema parameter input ([#2094](https://github.com/dagu-org/dagu/pull/2094)) [@yottahmd](https://github.com/yottahmd)
+- fix: support underscored docs and md URLs ([#2095](https://github.com/dagu-org/dagu/pull/2095)) [@yottahmd](https://github.com/yottahmd)
+- fix: preserve workspace label when creating DAGs ([#2096](https://github.com/dagu-org/dagu/pull/2096)) [@yottahmd](https://github.com/yottahmd)
+- fix: clean up step validation errors ([#2098](https://github.com/dagu-org/dagu/pull/2098)) [@yottahmd](https://github.com/yottahmd)
+- fix: keep agent modal inside viewport ([#2099](https://github.com/dagu-org/dagu/pull/2099)) [@yottahmd](https://github.com/yottahmd)
+- fix: preserve working_dir on retry restore ([#2111](https://github.com/dagu-org/dagu/pull/2111)) [@yottahmd](https://github.com/yottahmd)
+- fix: prevent duplicate runbook tab activation ([#2115](https://github.com/dagu-org/dagu/pull/2115)) [@yottahmd](https://github.com/yottahmd)
+- fix: tolerate unsupported unix socket transport ([#2117](https://github.com/dagu-org/dagu/pull/2117)) [@yottahmd](https://github.com/yottahmd)
+- fix: harden agent patch tool ([#2118](https://github.com/dagu-org/dagu/pull/2118)) [@yottahmd](https://github.com/yottahmd)
+- fix: improve built-in agent chat tooling ([#2120](https://github.com/dagu-org/dagu/pull/2120)) [@yottahmd](https://github.com/yottahmd)
+- fix: harden mermaid graph rendering ([#2123](https://github.com/dagu-org/dagu/pull/2123)) [@yottahmd](https://github.com/yottahmd)
+- fix: clean command process groups on parent death ([#2125](https://github.com/dagu-org/dagu/pull/2125)) [@yottahmd](https://github.com/yottahmd)
+- fix: keep history JSON output valid for empty results ([#2127](https://github.com/dagu-org/dagu/pull/2127)) [@yottahmd](https://github.com/yottahmd)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| chore(deps): bump ajv from 6.12.6 to 6.15.0 in /ui in the ui-security group across 1 directory ([#2088](https://github.com/dagu-org/dagu/pull/2088)) | [@dependabot](https://github.com/dependabot) |
+| feat: make timeline show sub graph execution (when using parallel) ([#2048](https://github.com/dagu-org/dagu/issues/2048)) | [@privat-eco](https://github.com/privat-eco) (report) |
+| Bug: When I retry a step , the " working_dir" was lost and the command script can not found ([#2110](https://github.com/dagu-org/dagu/issues/2110)), Bug: In the Runbooks , It will open two tabs when you click a file name menu ([#2114](https://github.com/dagu-org/dagu/issues/2114)) | [@aigeling](https://github.com/aigeling) (report) |
+| 401 Client Error ([#2116](https://github.com/dagu-org/dagu/issues/2116)) | [@zz111111](https://github.com/zz111111) (report) |
+| Graphs not rendered ([#2121](https://github.com/dagu-org/dagu/issues/2121)) | [@frafra](https://github.com/frafra) (report) |
+| docs: add GitHub issue templates and PR template ([#2124](https://github.com/dagu-org/dagu/pull/2124)) | [@zichen0116](https://github.com/zichen0116) |
+| `dagu history` should output its error messages to `STDERR` instead of `STDOUT`, especially when using `--format json` ([#2092](https://github.com/dagu-org/dagu/issues/2092)) | [@struffel](https://github.com/struffel) (report) |
+
 ## v2.6.5 (2026-05-05)
 
 ### Added
