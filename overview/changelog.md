@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.6.8 (2026-05-10)
+
+### Added
+
+- fix: add opencode provider and fix reasoning content echo in tool call turns ([#2134](https://github.com/dagucloud/dagu/pull/2134)) [@yottahmd](https://github.com/yottahmd)
+
+### Fixed
+
+- fix: avoid recursive lock cleanup on old windows ([#2130](https://github.com/dagucloud/dagu/pull/2130)) [@yottahmd](https://github.com/yottahmd)
+- fix: resolve runtime env references in DAG env ([#2131](https://github.com/dagucloud/dagu/pull/2131)) [@yottahmd](https://github.com/yottahmd)
+
 ## v2.6.7 (2026-05-08)
 
 Hotfix release to fix agent tool issues in v2.6.6.
