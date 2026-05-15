@@ -148,12 +148,13 @@ The cache layout is:
 
 ```text
 <data-dir>/tools/aqua/root/
+<data-dir>/tools/aqua/locks/
 <data-dir>/tools/aqua/envs/<os>-<arch>/<toolset-hash>/
 ```
 
 In distributed shared-nothing mode, each worker uses its own local data directory. A worker installs the toolset the first time it runs a DAG requiring it, then reuses the cache for later runs with the same platform and toolset hash.
 
-Concurrent runs that need the same toolset on the same worker are serialized with a worker-local install lock, so they do not corrupt the shared cache.
+Cache hits reuse the manifest and command shims without taking an install lock. When a toolset must be prepared, Dagu uses worker-local locks for the toolset environment, missing registry cache entries, cold aqua-proxy bootstrap, and overlapping package/version/platform installs. Independent toolsets with disjoint packages can prepare in parallel on the same worker.
 
 ## Sub-DAGs
 
