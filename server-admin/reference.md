@@ -35,6 +35,10 @@ event_store:
   enabled: true           # Enable centralized event logging (default: true)
   retention_days: 3        # Days to keep event log files (default: 3, 0 = keep forever)
 
+# Webhook Trigger Limits
+webhooks:
+  max_payload_size: 1048576 # Max accepted webhook payload size in bytes (default: 1MiB)
+
 # Session Storage
 session:
   max_per_user: 100        # Max sessions per user (default: 100, 0 = unlimited)
@@ -637,6 +641,7 @@ peer:
 - `audit.enabled`: `true`
 - `event_store.enabled`: `true`
 - `event_store.retention_days`: `3`
+- `webhooks.max_payload_size`: `1048576`
 
 ### Auto-generated Paths
 When not specified, these paths are automatically derived:

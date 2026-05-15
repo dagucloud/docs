@@ -130,6 +130,10 @@ event_store:
   enabled: true               # Enable centralized event logging (default: true)
   retention_days: 3            # Days to keep event log files (default: 3, 0 = keep forever)
 
+# Webhook Trigger Limits
+webhooks:
+  max_payload_size: 1048576     # Max accepted webhook payload size in bytes (default: 1MiB)
+
 # Session Storage
 session:
   max_per_user: 100            # Max sessions per user (default: 100, 0 = unlimited)
@@ -659,6 +663,24 @@ export DAGU_EVENT_STORE_RETENTION_DAYS=7
 ### Retention
 
 The event store keeps recent operational history according to `event_store.retention_days`. Place the admin log directory on persistent storage if you want those records to survive restarts.
+
+## Webhook Payload Limits
+
+Webhook trigger requests are limited before authentication to protect server memory on public trigger endpoints. The default limit is `1048576` bytes.
+
+### Configuration
+
+```yaml
+webhooks:
+  max_payload_size: 1048576
+```
+
+Or via environment variable:
+```bash
+export DAGU_WEBHOOKS_MAX_PAYLOAD_SIZE=2097152
+```
+
+This controls the maximum accepted webhook request body and the serialized payload passed to the DAG as `WEBHOOK_PAYLOAD`. Very large values may still exceed operating-system limits when the payload is passed to executed steps as environment data.
 
 ## Session Limits
 

@@ -276,7 +276,7 @@ steps:
 
 - Dagu automatically parses the JSON payload and allows direct field access using dot notation.
 - For arrays, use numeric indices (e.g., `${WEBHOOK_PAYLOAD.commits.0}` for the first element).
-- Maximum payload size is 1MB.
+- Maximum payload size defaults to 1MB and can be changed with `webhooks.max_payload_size` in the server configuration.
 - The variable is empty when the DAG is triggered by other means (scheduler, API, CLI).
 - Always validate the payload contents in your DAG before processing.
 

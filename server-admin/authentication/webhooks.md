@@ -93,6 +93,15 @@ Dagu injects `WEBHOOK_PAYLOAD` for webhook-triggered runs.
 - Otherwise, if the raw request body is valid JSON, Dagu serializes the entire raw body into `WEBHOOK_PAYLOAD`
 - If no JSON body is available, `WEBHOOK_PAYLOAD` is `{}`
 
+Webhook request bodies are limited to `1048576` bytes by default. Self-hosted operators can change this in `config.yaml`:
+
+```yaml
+webhooks:
+  max_payload_size: 2097152
+```
+
+Or with `DAGU_WEBHOOKS_MAX_PAYLOAD_SIZE`. Very large payloads may still exceed operating-system limits because Dagu exposes the payload to steps as environment data.
+
 If you want to set `dagRunId` without mixing it into `WEBHOOK_PAYLOAD`, use the wrapper form:
 
 ```json
@@ -161,4 +170,4 @@ curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook \
 - `403 Forbidden`: webhook is disabled
 - `404 Not Found`: no webhook is configured for the DAG, the DAG was not found, or webhook triggering is not configured on the server
 - `409 Conflict`: the supplied `dagRunId` already exists
-- `413 Payload Too Large`: request body exceeded `1048576` bytes
+- `413 Payload Too Large`: request body exceeded `webhooks.max_payload_size`

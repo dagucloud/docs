@@ -2928,6 +2928,7 @@ Payload behavior is slightly broader than the schema shape:
 - Otherwise, if the raw request body is valid JSON, Dagu serializes the entire raw body into `WEBHOOK_PAYLOAD`.
 - Otherwise `WEBHOOK_PAYLOAD` is `{}`.
 - If you want a custom `dagRunId` without mixing it into `WEBHOOK_PAYLOAD`, use the wrapper form shown above.
+- The maximum accepted request body is controlled by `webhooks.max_payload_size` in `config.yaml` and defaults to `1048576` bytes.
 
 **Response (200)**:
 ```json
