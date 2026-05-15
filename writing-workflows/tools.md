@@ -4,7 +4,7 @@ title: Tools
 
 # Tools
 
-Use top-level `tools` when a workflow depends on portable command-line binaries whose versions matter. Dagu installs the declared tools before the DAG run starts, prepends the resolved tool directory to `PATH`, and then runs your steps.
+Use top-level `tools` when a workflow depends on portable command-line binaries whose versions matter. Dagu installs the declared tools before the DAG run starts, prepends the resolved tool directory to `PATH` for that DAG run, and then runs your steps.
 
 This keeps the workflow definition reproducible: the DAG records the tools it needs instead of relying on whatever happens to be installed on a worker.
 
@@ -142,7 +142,7 @@ Before the DAG starts, Dagu:
 2. Computes a toolset hash from the tool declaration and worker platform.
 3. Installs the tools into the worker-local data directory.
 4. Writes a manifest of resolved commands.
-5. Prepends the toolset `bin` directory to `PATH` for the run.
+5. Prepends the toolset `bin` directory to `PATH` for that DAG run.
 
 The cache layout is:
 
@@ -154,6 +154,32 @@ The cache layout is:
 In distributed shared-nothing mode, each worker uses its own local data directory. A worker installs the toolset the first time it runs a DAG requiring it, then reuses the cache for later runs with the same platform and toolset hash.
 
 Concurrent runs that need the same toolset on the same worker are serialized with a worker-local install lock, so they do not corrupt the shared cache.
+
+## Sub-DAGs
+
+`tools` is scoped to one DAG run. A sub-DAG is a separate DAG run, so it does not inherit the parent DAG's managed tool environment.
+
+If a child DAG uses a managed command, declare `tools` in the child DAG too:
+
+```yaml
+steps:
+  - action: dag.run
+    with:
+      dag: child_parse
+---
+name: child_parse
+tools:
+  - jqlang/jq@jq-1.7.1
+steps:
+  - id: parse
+    run: jq '.items[]' input.json
+```
+
+If the parent also runs `jq` in its own steps, declare the same tool in the parent as well. This is not a runtime duplication problem: the worker cache is keyed by platform and toolset hash, so the same package is reused on the same worker after installation.
+
+This rule also applies to inline sub-DAGs in the same YAML file. Each YAML document is its own DAG definition for tool declarations.
+
+In distributed shared-nothing mode, the worker that executes the child DAG prepares the child DAG's tools in that worker's local data directory. Different workers maintain independent caches, and later runs on the same worker reuse the local cache.
 
 ## Current Limitations
 

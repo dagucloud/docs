@@ -61,6 +61,8 @@ steps:
 
 > **Note**: Sub-DAGs do not inherit `handler_on` from the base configuration. Each nested workflow should define its own lifecycle handlers if needed. See [Sub-DAG Handler Isolation](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
 
+> **Note**: Sub-DAGs also do not inherit parent DAG `tools`. If a child workflow uses a managed external command, declare `tools` in the child workflow. See [Tools: Sub-DAGs](/writing-workflows/tools#sub-dags).
+
 **Working Directory Inheritance:**
 
 When calling sub-DAGs locally, the child inherits the parent's `working_dir` if it doesn't define its own:

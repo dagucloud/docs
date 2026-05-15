@@ -43,9 +43,9 @@ steps:
     run: jq '.items[] | .id' input.json
 ```
 
-Dagu installs the tools before the DAG starts, exposes them on `PATH`, and caches them under the worker-local data directory. Use this for portable CLIs such as `jq`, `yq`, linters, formatters, converters, and release helpers. Do not use it for commands that require user-managed login state or profiles, such as `gcloud` or AI agent CLIs.
+Dagu installs the tools before the DAG starts, exposes them on `PATH` for that DAG run, and caches them under the worker-local data directory. Use this for portable CLIs such as `jq`, `yq`, linters, formatters, converters, and release helpers. Do not use it for commands that require user-managed login state or profiles, such as `gcloud` or AI agent CLIs.
 
-See [Tools](/writing-workflows/tools) for syntax, registry behavior, distributed worker behavior, and current limitations.
+See [Tools](/writing-workflows/tools) for syntax, registry behavior, sub-DAG behavior, distributed worker behavior, and current limitations.
 
 ## Base Configuration
 
