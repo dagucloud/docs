@@ -48,6 +48,7 @@ paths:
   docs_dir: ""                                       # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"                # Log files
   data_dir: "~/.local/share/dagu/data"               # Application data
+  tools_dir: ""                                      # Auto: {data_dir}/tools
   suspend_flags_dir: "~/.local/share/dagu/suspend"    # Suspend flags
   admin_logs_dir: "~/.local/share/dagu/logs/admin"    # Admin logs
   event_store_dir: ""                                 # Auto: {admin_logs_dir}/events
@@ -182,6 +183,7 @@ All options support `DAGU_` prefix:
 - `DAGU_DAGS_DIR` - DAGs directory
 - `DAGU_LOG_DIR` - Logs
 - `DAGU_DATA_DIR` - Data
+- `DAGU_TOOLS_DIR` - Managed DAG tool cache
 - `DAGU_EVENT_STORE_DIR` - Centralized event log directory
 - `DAGU_CONTEXTS_DIR` - CLI contexts directory
 

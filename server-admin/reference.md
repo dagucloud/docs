@@ -49,6 +49,7 @@ paths:
   docs_dir: ""                # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
+  tools_dir: ""              # Auto: {data_dir}/tools
   artifact_dir: ""           # Auto: {data_dir}/artifacts
   suspend_flags_dir: "~/.local/share/dagu/suspend"
   admin_logs_dir: "~/.local/share/dagu/logs/admin"
@@ -268,6 +269,7 @@ All options support `DAGU_` prefix.
 - `DAGU_DOCS_DIR` - Documents directory (default: `{dags_dir}/docs`)
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
+- `DAGU_TOOLS_DIR` - Managed DAG tool cache (default: `{data_dir}/tools`)
 - `DAGU_ARTIFACT_DIR` - DAG run artifact directory (default: `{data_dir}/artifacts`)
 - `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags
 - `DAGU_ADMIN_LOG_DIR` - Admin logs
@@ -646,6 +648,7 @@ peer:
 ### Auto-generated Paths
 When not specified, these paths are automatically derived:
 - `paths.artifact_dir`: `{paths.data_dir}/artifacts` - Stores DAG run artifacts
+- `paths.tools_dir`: `{paths.data_dir}/tools` - Stores managed DAG tool cache, locks, manifests, and shims
 - `paths.dag_runs_dir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
 - `paths.queue_dir`: `{paths.data_dir}/queue` - Stores queue data
 - `paths.proc_dir`: `{paths.data_dir}/proc` - Stores process data
