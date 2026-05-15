@@ -89,6 +89,25 @@ Share step config (`env`, `working_dir`, `retry_policy`, etc.) across commands i
 
 <div class="example-card">
 
+### Reproducible CLI Tools
+
+```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
+steps:
+  - id: transform
+    run: jq '.items[] | .name' input.json
+```
+
+Pin portable command-line dependencies in the DAG so workers install the expected binary before running host command steps.
+
+<a href="/writing-workflows/tools" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Execution Mode: Chain vs Graph
 
 ```yaml

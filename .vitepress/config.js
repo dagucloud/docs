@@ -58,6 +58,7 @@ const fullSidebar = [
       { text: "Base Configuration", link: "/server-admin/base-config" },
       { text: "Parameters", link: "/writing-workflows/parameters" },
       { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
+      { text: "Tools", link: "/writing-workflows/tools" },
       {
         text: "Secrets",
         link: "/writing-workflows/secrets",

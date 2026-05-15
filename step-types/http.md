@@ -260,4 +260,4 @@ steps:
       body: '{"status": "deployed"}'
 ```
 
-See [parallel.items](/writing-workflows/parallel) for full fan-out options.
+See [parallel.items](/writing-workflows/execution-control#parallel-execution) for full fan-out options.

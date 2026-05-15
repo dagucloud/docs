@@ -6,6 +6,8 @@
 description: "Process daily data"
 schedule: "0 2 * * *"      # Optional: cron schedule
 queue: "daily-jobs"        # Optional: assign to global queue for concurrency control
+tools:                     # Optional: install portable CLIs before the run
+  - jqlang/jq@jq-1.7.1
 
 params:                    # Runtime parameters
   - name: ENVIRONMENT
@@ -27,6 +29,23 @@ steps:                     # Workflow steps
 ```
 
 Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
+
+## Tool Dependencies
+
+Declare external CLI dependencies with top-level `tools` when a host command step needs a reproducible binary version:
+
+```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
+steps:
+  - id: filter
+    run: jq '.items[] | .id' input.json
+```
+
+Dagu installs the tools before the DAG starts, exposes them on `PATH`, and caches them under the worker-local data directory. Use this for portable CLIs such as `jq`, `yq`, linters, formatters, converters, and release helpers. Do not use it for commands that require user-managed login state or profiles, such as `gcloud` or AI agent CLIs.
+
+See [Tools](/writing-workflows/tools) for syntax, registry behavior, distributed worker behavior, and current limitations.
 
 ## Base Configuration
 
@@ -110,8 +129,9 @@ The most common pattern is a `run` custom action with a templated `script`. The 
 7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
 8. **[Custom Actions](/writing-workflows/custom-step-types)** - Reusable typed wrappers around builtin actions
 9. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
-10. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
-11. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
+10. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
+11. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
+12. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
 
 If your workflows are triggered from GitHub through Dagu Cloud, see the dedicated [GitHub Integration](/github-integration/) section.
 

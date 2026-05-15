@@ -29,6 +29,8 @@ Credentials: `demouser` / `demouser`
 
 Dagu is an operations automation engine that helps teams consolidate existing scripts, commands, containers, server tasks, SQL jobs, HTTP calls, SSH operations, and runbooks into one self-hosted workflow system.
 
+Workflows can also declare pinned external [CLI tools](/writing-workflows/tools), so portable binaries such as `jq`, `yq`, linters, formatters, and release utilities are installed automatically before a run.
+
 By default, Dagu keeps workflows, run history, logs, and artifacts on local disk, so teams can move from fragmented cron and scattered scripts to visible, retryable workflows without introducing a large orchestration project.
 
 ## Real-World Use Cases
@@ -43,13 +45,13 @@ Dagu fits teams that already have operational work spread across scripts, cron j
   </div>
   <div class="real-world-usecase">
     <h3>ETL and Data Operations</h3>
-    <p><strong>Run:</strong> PostgreSQL or SQLite queries, S3 transfers, <code>jq</code> transforms, validation steps, and reusable sub-workflows.</p>
+    <p><strong>Run:</strong> PostgreSQL or SQLite queries, S3 transfers, pinned <code>jq</code> or <code>yq</code> transforms, validation steps, and reusable sub-workflows.</p>
     <p><strong>Why Dagu fits:</strong> daily data workflows stay declarative, observable, and easy to retry when one step fails.</p>
   </div>
   <div class="real-world-usecase">
     <h3>Media Conversion</h3>
     <p><strong>Run:</strong> <code>ffmpeg</code>, thumbnail extraction, audio normalization, image processing, and other compute-heavy jobs.</p>
-    <p><strong>Why Dagu fits:</strong> conversion work can run across distributed workers while status, history, logs, and artifacts stay visible in one place for monitoring, debugging, and retries.</p>
+    <p><strong>Why Dagu fits:</strong> conversion work can run across distributed workers while pinned tool versions, status, history, logs, and artifacts stay visible in one place for monitoring, debugging, and retries.</p>
   </div>
   <div class="real-world-usecase">
     <h3>Infrastructure and Server Automation</h3>
@@ -226,6 +228,7 @@ DAGs can also declare reusable `actions` that expand to builtin actions at load 
 | **Retry policies** | Per-step retry with configurable limits, intervals, exit code filtering, exponential/linear/constant backoff |
 | **Lifecycle hooks** | `onInit`, `onSuccess`, `onFailure`, `onAbort`, `onExit`, `onWait` |
 | **Preconditions** | Gate DAG or step execution on shell command results |
+| **DAG-level tools** | Pin external CLI packages in the DAG and install them automatically before host command steps |
 | **Queue system** | File-based persistent queue with configurable concurrency limits per queue |
 | **Scheduler HA** | Lock with stale detection for failover across multiple scheduler instances |
 
@@ -467,6 +470,10 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
   <div class="step-card">
     <h3><a href="/writing-workflows/yaml-specification">YAML Reference</a></h3>
     <p>All configuration options</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/writing-workflows/tools">Tools</a></h3>
+    <p>Reproducible CLI dependencies</p>
   </div>
   <div class="step-card">
     <h3><a href="/step-types/shell">Actions</a></h3>

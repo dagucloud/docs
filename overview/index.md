@@ -31,6 +31,7 @@ Understanding Dagu is easier once the main terms are clear.
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
 | **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define custom actions with the [`actions`](/writing-workflows/custom-step-types) field. |
+| **Tool** | A pinned external CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
 | **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
 | **Queue** | [Concurrency control](/server-admin/queues) for workflows, useful when jobs must not overlap or when workers are shared. |
@@ -85,6 +86,10 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   <div class="overview-card">
     <h3><a href="/writing-workflows/examples">Zero-invasive workflows</a></h3>
     <p>Wrap existing <a href="/step-types/shell">scripts and commands</a>, <a href="/step-types/sql/">SQL</a>, <a href="/step-types/docker">containers</a>, and other <a href="/writing-workflows/examples">operational tasks</a> instead of converting them into framework-specific jobs.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/tools">Reproducible CLI tools</a></h3>
+    <p>Declare pinned <a href="/writing-workflows/tools">external tool packages</a> in the DAG so portable CLIs are installed automatically and every worker runs the same binary version.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/overview/web-ui">Observable by default</a></h3>
@@ -211,7 +216,7 @@ Dagu is useful anywhere existing scripts, containers, operational tasks, or agen
   </div>
   <div class="overview-card overview-usecase-card">
     <h3>ETL and Data Operations</h3>
-    <p><strong>Run:</strong> <a href="/step-types/sql/postgresql">PostgreSQL</a> or <a href="/step-types/sql/sqlite">SQLite</a> queries, <a href="/step-types/s3">S3 transfers</a>, <a href="/step-types/jq"><code>jq</code> transforms</a>, validation steps, and <a href="/writing-workflows/control-flow">sub-workflows</a>.</p>
+    <p><strong>Run:</strong> <a href="/step-types/sql/postgresql">PostgreSQL</a> or <a href="/step-types/sql/sqlite">SQLite</a> queries, <a href="/step-types/s3">S3 transfers</a>, pinned <a href="/writing-workflows/tools"><code>jq</code> or <code>yq</code> tools</a>, validation steps, and <a href="/writing-workflows/control-flow">sub-workflows</a>.</p>
     <p><strong>Why Dagu fits:</strong> daily data workflows stay declarative, remain easy to inspect in the <a href="/overview/web-ui">Web UI</a>, and are straightforward to <a href="/writing-workflows/durable-execution">retry</a> when one step fails.</p>
   </div>
   <div class="overview-card overview-usecase-card">
@@ -252,7 +257,7 @@ Dagu is useful anywhere existing scripts, containers, operational tasks, or agen
 </div>
 
 ::: tip
-If it can run from a <a href="/step-types/shell">shell command</a>, <a href="/step-types/docker">Docker image</a>, <a href="/step-types/kubernetes">Kubernetes Job</a>, <a href="/step-types/ssh">SSH session</a>, <a href="/step-types/http">HTTP call</a>, or <a href="/step-types/sql/">SQL query</a>, Dagu can usually orchestrate it without rewriting the underlying tool.
+If it can run from a <a href="/step-types/shell">shell command</a>, <a href="/step-types/docker">Docker image</a>, <a href="/step-types/kubernetes">Kubernetes Job</a>, <a href="/step-types/ssh">SSH session</a>, <a href="/step-types/http">HTTP call</a>, or <a href="/step-types/sql/">SQL query</a>, Dagu can usually orchestrate it without rewriting the underlying tool. For portable host CLIs, add <a href="/writing-workflows/tools"><code>tools</code></a> so the DAG controls the binary version too.
 :::
 
 ## AI Agent Workflows and Workflow Operator
@@ -290,6 +295,10 @@ Workflow Operator connects Slack or Telegram to the built-in steward, so teams c
   <div class="step-card">
     <h3><a href="/step-types/shell">Actions</a></h3>
     <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, S3, and agent execution.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/writing-workflows/tools">Tools</a></h3>
+    <p>Pin external CLI binaries directly in workflow YAML.</p>
   </div>
   <div class="step-card">
     <h3><a href="/overview/architecture">Architecture</a></h3>

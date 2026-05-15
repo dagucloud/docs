@@ -35,6 +35,10 @@ env:
   - VAR_NAME: value
   - PATH: ${PATH}:/custom/path
 
+# External CLI tools installed before the run
+tools:
+  - jqlang/jq@jq-1.7.1
+
 # DAG run artifacts
 artifacts:
   enabled: true
@@ -286,6 +290,7 @@ See [Custom Actions](/writing-workflows/custom-step-types) for the full definiti
 | `env` | array | Environment variables | `[]` |
 | `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
 | `dotenv` | string/array | .env files to load | `[".env"]` |
+| `tools` | array/object | External CLI tools installed before the DAG runs. See [Tools](/writing-workflows/tools). | - |
 | `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. When not set, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. | Per-run work directory (or inherited from parent for sub-DAGs) |
 | `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
 | `log_dir` | string | Custom log directory | System default |
@@ -374,6 +379,31 @@ For backward compatibility:
 - `params: { schema: prod }` remains a legacy named param unless `schema` looks like a file path or URL or `values` is also present.
 - `params: { schema: true }` remains a legacy named param unless `values` is also present.
 - `params: { properties: { foo: bar } }` remains a legacy named param map unless the same object also has `type: object`.
+
+#### `tools`
+
+Top-level `tools` declares portable CLI packages that Dagu installs before the DAG starts:
+
+```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+  - google/pprof@d04f2422c8a17569c14e84da0fae252d9529826b
+```
+
+The object form accepts `provider`, `registry`, and `packages`:
+
+```yaml
+tools:
+  provider: aqua
+  packages:
+    - package: jqlang/jq
+      version: jq-1.7.1
+      commands: [jq]
+```
+
+`provider` defaults to `aqua`. Package versions must be pinned; `latest` is rejected. `commands` is optional and is usually inferred from the aqua registry.
+
+See [Tools](/writing-workflows/tools) for registry configuration, immutable refs, distributed worker cache behavior, and current limitations.
 
 #### `params[].eval`
 

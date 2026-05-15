@@ -102,6 +102,20 @@ steps:
   - run: tar -czf backup_${TODAY}.tar.gz /data
 ```
 
+### Tools
+
+Declare portable CLI dependencies at the DAG level when the workflow needs a reproducible binary version:
+
+```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
+steps:
+  - run: jq --version
+```
+
+Dagu installs these tools before the run and exposes them to host command steps through `PATH`. See [Tools](/writing-workflows/tools) for syntax and limitations.
+
 ## Status Management
 
 ### Execution States
