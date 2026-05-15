@@ -498,14 +498,13 @@ preconditions:
 
 ### Secrets
 
-Reference external secrets. Built-in providers are `env`, `file`, `kubernetes`, and `vault`; provider-specific behavior is documented in [Secrets](/writing-workflows/secrets).
+Reference secrets from Dagu's registry or from direct providers. Registry refs resolve in the workspace of the DAG that inherits the base config. Direct providers are `env`, `file`, `kubernetes`, and `vault`; provider-specific behavior is documented in [Secrets](/writing-workflows/secrets).
 
 ```yaml
 # base.yaml
 secrets:
   - name: DB_PASSWORD
-    provider: env
-    key: SECRET_DB_PASSWORD
+    ref: shared/db-password
 
   - name: API_KEY
     provider: file

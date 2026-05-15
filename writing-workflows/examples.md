@@ -941,16 +941,15 @@ steps:
 
 <div class="example-card">
 
-### Secrets from Providers
+### Secrets
 
 ```yaml
 secrets:
+  - name: DB_PASSWORD
+    ref: prod/db-password
   - name: API_TOKEN
     provider: env
     key: PROD_API_TOKEN
-  - name: DB_PASSWORD
-    provider: file
-    key: secrets/db-password
 
 steps:
   - run: ./sync.sh

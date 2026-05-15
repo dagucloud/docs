@@ -11,6 +11,7 @@ Use workspaces when you want to:
 - keep the DAG list focused on one team or environment
 - review only the runs that belong to a project
 - keep generated documents grouped with the workflows that produced them
+- keep Web UI-managed secrets scoped to the workflows that use them
 - give a user or API key access to a selected set of workflows
 
 Workspaces are a navigation and access-control feature inside one Dagu installation. If you need hard tenant isolation, run separate Dagu deployments with separate storage and credentials.
@@ -62,6 +63,25 @@ The Docs page follows the same workspace selector. When a workflow in `ops` writ
 
 See [Documents](/web-ui/documents) for the Web UI workflow for browsing, editing, searching, and linking documents.
 
+## Secrets in Workspaces
+
+The Secrets page is workspace-local. A Dagu-managed secret with ref `prod/db-password` in `ops` is different from a secret with the same ref in `production`.
+
+DAGs resolve registry refs from their own workspace:
+
+```yaml
+labels:
+  - workspace=ops
+
+secrets:
+  - name: DB_PASSWORD
+    ref: prod/db-password
+```
+
+Do not include the workspace name in the ref. Select the workspace in the Web UI, create `prod/db-password` there, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Default** secret scope.
+
+See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
+
 ## Access Rules
 
 Admins can give users and API keys access to all workspaces or selected workspaces.
@@ -102,5 +122,6 @@ For an interactive reference, open **API Docs** in the Web UI or visit `/api-doc
 ## Related
 
 - [Cockpit](/web-ui/cockpit)
+- [Secrets](/web-ui/secrets)
 - [Documents](/web-ui/documents)
 - [User Management](/server-admin/authentication/user-management)

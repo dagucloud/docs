@@ -25,6 +25,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Definitions** for the list of workflows
 - **Run details** for outputs, artifacts, logs, and retries
 - **Docs** for markdown documents and runbooks
+- **Secrets** for workspace-local Dagu-managed secret values
 - **Search** for finding workflows and documents quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
@@ -184,6 +185,29 @@ Common workflows:
 
 See [Documents](/web-ui/documents) for the dedicated guide.
 
+## Secrets
+
+The Secrets page manages encrypted Dagu-managed secret values for the selected workspace.
+
+Use it to:
+
+- create a ref such as `prod/db-password`
+- rotate the value without editing DAG YAML
+- disable or enable a secret for future runs
+- keep the plaintext value out of API responses and workflow files
+
+DAGs reference Web UI-managed secrets with `ref`:
+
+```yaml
+secrets:
+  - name: DB_PASSWORD
+    ref: prod/db-password
+```
+
+Refs are workspace-local. A DAG in `workspace=ops` resolves the ref from the `ops` secret scope. A DAG without a workspace label resolves it from **Default**.
+
+See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
+
 ## API Docs
 
 The **API Docs** page exposes the REST API reference from inside the application.
@@ -220,6 +244,7 @@ Depending on your role and license, the navigation can also include pages such a
 - **API Keys**
 - **Remote Nodes**
 - **Base Config**
+- **Secrets**
 - **Events**
 - **Audit Logs**
 - **License**
@@ -270,6 +295,7 @@ ui:
 
 - [Workspaces](/web-ui/workspaces)
 - [Cockpit](/web-ui/cockpit)
+- [Secrets](/web-ui/secrets)
 - [Documents](/web-ui/documents)
 - [Learn the REST API](/overview/api)
 - [Server Administration](/server-admin/)

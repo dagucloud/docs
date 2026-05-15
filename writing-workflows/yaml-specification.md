@@ -513,28 +513,53 @@ container:
 
 ### Secrets
 
-The `secrets` block defines environment variables whose values are fetched at runtime from a provider. Each item is an object with the following fields:
+The `secrets` block defines environment variables whose values are resolved at runtime. Each item uses exactly one of two shapes:
+
+```yaml
+# Dagu-managed registry ref
+secrets:
+  - name: DB_PASSWORD
+    ref: prod/db-password
+```
+
+```yaml
+# Direct provider ref
+secrets:
+  - name: DB_PASSWORD
+    provider: env
+    key: PROD_DB_PASSWORD
+```
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | string | Environment variable name exposed to steps (required) |
-| `provider` | string | Secret provider identifier (required). Built-in providers are `env`, `file`, `kubernetes`, and `vault`. |
-| `key` | string | Provider-specific key (required). For `env` this is the source variable name. For `file` this is a path. For `kubernetes` this is a `secret-name/data-key` pair unless `options.secret_name` is set. For `vault` this is a Vault path or a `path/field` pair, depending on `options.field`. |
-| `options` | object | Provider-specific options (optional). Values must be strings. |
+| `ref` | string | Workspace-local Dagu-managed registry ref. Must be lowercase slug segments separated by `/`, for example `prod/db-password`. Cannot be combined with `provider`, `key`, or `options`. |
+| `provider` | string | Direct provider identifier. Built-in providers are `env`, `file`, `kubernetes`, and `vault`. Required with `key` when `ref` is not used. |
+| `key` | string | Provider-specific key. For `env` this is the source variable name. For `file` this is a path. For `kubernetes` this is a `secret-name/data-key` pair unless `options.secret_name` is set. For `vault` this is a Vault path or a `path/field` pair, depending on `options.field`. |
+| `options` | object | Provider-specific options for direct provider refs. Values must be strings. |
 
-`key` and `options` are literal provider inputs. Dagu does not expand `${...}` expressions inside them.
+`name` must be a valid environment variable name, must be unique inside the DAG, and must not start with `DAGU_`.
+
+Registry refs are workspace-local. A DAG with `labels: [workspace=ops]` resolves `ref: prod/db-password` from the `ops` secret scope. A DAG without a workspace label resolves it from the default scope. Do not include the workspace name in `ref`.
+
+For direct provider refs, `key` and `options` are literal provider inputs. Dagu does not expand `${...}` expressions inside them.
 
 Example:
 
 ```yaml
+labels:
+  - workspace=payments
+
 secrets:
   - name: DB_PASSWORD
-    provider: env
-    key: PROD_DB_PASSWORD        # Read from process environment
+    ref: prod/db-password       # Dagu-managed registry secret in the payments workspace
   - name: API_TOKEN
+    provider: env
+    key: PROD_API_TOKEN         # Read from process environment
+  - name: FILE_TOKEN
     provider: file
     key: ../secrets/api-token    # Relative paths resolve using working_dir then DAG file directory
-  - name: DB_PASSWORD
+  - name: K8S_PASSWORD
     provider: kubernetes
     key: app-secrets/db-password
     options:
