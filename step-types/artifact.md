@@ -1,8 +1,27 @@
 # Artifact
 
-Write, read, and list DAG-run artifacts without referencing `DAG_RUN_ARTIFACTS_DIR` directly. Use `artifact.write` for reports, JSON snapshots, Markdown summaries, and handoff files that should appear in the run's Artifacts tab.
+Write, read, and list DAG-run artifacts without referencing `DAG_RUN_ARTIFACTS_DIR` directly. Use `artifact.write` for explicit artifact content, and use `stdout.artifact` / `stderr.artifact` on command steps when the command stream itself should become the artifact.
 
-Using an `artifact.*` action automatically enables artifact storage for the DAG unless `artifacts.enabled: false` is set explicitly.
+Using an `artifact.*` action or artifact stream output automatically enables artifact storage for the DAG. If `artifacts.enabled: false` is set explicitly, artifact actions and artifact stream outputs are invalid. References to `DAG_RUN_ARTIFACTS_DIR` also auto-enable artifact storage, but command streams are usually clearer with `stdout.artifact` or `stderr.artifact`.
+
+## Command Stream Output
+
+When a command produces large report, JSON, Markdown, or log content, attach stdout or stderr directly to an artifact instead of capturing it with `output:` or redirecting through shell:
+
+```yaml
+steps:
+  - id: report
+    run: ./generate-report --format markdown
+    stdout:
+      artifact: reports/report.md
+
+  - id: diagnostics
+    run: ./collect-diagnostics
+    stderr:
+      artifact: logs/diagnostics.err
+```
+
+Artifact stream paths are relative to the DAG-run artifact directory. Parent directories are created automatically. Absolute paths, Windows drive paths, and paths containing `..` are rejected.
 
 ## Actions
 

@@ -253,15 +253,33 @@ steps:
     output: FILE_CONTENT  # Fails if > 5MB
 ```
 
+For large content that should be retained with the run, stream it to an artifact instead of capturing it in `output:`:
+
+```yaml
+steps:
+  - run: ./generate-report
+    stdout:
+      artifact: reports/report.md
+```
+
 ### Redirecting Output
 
-Redirect to files instead of capturing:
+Redirect to local files instead of capturing:
 
 ```yaml
 steps:
   - run: python report.py
     stdout: /tmp/report.txt
     stderr: /tmp/errors.log
+```
+
+Use artifact-relative stream output when the redirected content should appear in the DAG run's Artifacts tab:
+
+```yaml
+steps:
+  - run: python report.py
+    stdout:
+      artifact: reports/report.txt
 ```
 
 ## JSON Path References
@@ -324,6 +342,7 @@ Available properties:
 >
 > - To read content: use `cat ${id.stdout}`
 > - To capture output for later steps: use the `output:` field instead
+> - To store large command output as a run artifact: use `stdout.artifact` or `stderr.artifact`
 > - Substring slicing like `${id.stdout:0:5}` operates on the **file path string**, not file content
 >
 > `${id.output}` returns the captured text value for string-form output, or the full published payload as compact JSON for object-form output. Nested access such as `${id.output.version}` works when the output is structured JSON. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal. Substring slicing still works on the final string value: `${id.output:0:5}`.

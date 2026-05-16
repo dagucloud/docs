@@ -350,7 +350,7 @@ artifacts:
   dir: /var/lib/dagu/artifacts
 ```
 
-`artifacts.dir` uses the same per-run directory pattern as `log_dir`. `artifacts.dir` alone does not enable artifact storage; set `artifacts.enabled: true`.
+`artifacts.dir` uses the same per-run directory pattern as `log_dir`. `artifacts.dir` alone does not enable artifact storage unless the DAG references `DAG_RUN_ARTIFACTS_DIR`, uses an artifact action, or uses `stdout.artifact` / `stderr.artifact`. Set `artifacts.enabled: true` to force artifact storage on.
 
 ### External Service Defaults
 

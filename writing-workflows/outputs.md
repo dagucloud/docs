@@ -14,6 +14,16 @@ These modes solve different problems:
 - Use **string form** when you want a flat variable and a final `outputs.json` entry.
 - Use **object form** when you want structured downstream data without brittle `echo` glue.
 
+Use `output:` for small values. If a step produces a large report, JSON dump, Markdown document, or log that users should inspect later, write the stream directly to an artifact with `stdout.artifact` or `stderr.artifact` instead:
+
+```yaml
+steps:
+  - id: report
+    run: ./generate-report --format markdown
+    stdout:
+      artifact: reports/report.md
+```
+
 ## String Form
 
 Capture stdout into a variable and include it in the DAG run's `outputs.json`:
@@ -231,7 +241,7 @@ Use `latest` as the run ID to fetch the most recent run's outputs.
 
 ## Size Limits and Safety
 
-- Captured stdout is limited by `max_output_size` (default 1MB).
+- Captured stdout is limited by `max_output_size` (default 1MB). Use `stdout.artifact` for large command output that should be stored as a run artifact instead of a variable.
 - Object-form `from: stdout`, `from: stderr`, and `from: file` use the same limit.
 - For large or untrusted data, write to a file and pass the path downstream instead of capturing the content.
 

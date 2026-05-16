@@ -289,6 +289,16 @@ steps:
     output: CONTENT  # Will fail if file exceeds 5MB
 ```
 
+For large content that should be kept with the run, write the stream directly to an artifact:
+
+```yaml
+steps:
+  - id: export-report
+    run: ./export-report --format markdown
+    stdout:
+      artifact: reports/report.md
+```
+
 Object-form `output:` publishes structured step-scoped values instead of one flat variable:
 
 ```yaml
@@ -311,7 +321,7 @@ Use `${inspect_build.output.version}` and `${inspect_build.output.artifact.url}`
 
 ### Redirect Output
 
-Send output to files:
+Send output to local files:
 
 ```yaml
 steps:
@@ -319,6 +329,15 @@ steps:
     stdout: "/tmp/hello"
   - run: "echo error message >&2"
     stderr: "/tmp/error.txt"
+```
+
+To make redirected output a DAG-run artifact, use artifact stream syntax with an artifact-relative path:
+
+```yaml
+steps:
+  - run: ./generate-report
+    stdout:
+      artifact: reports/report.md
 ```
 
 ### JSON References
@@ -455,6 +474,15 @@ steps:
     stdout: /tmp/data.json
   
   - run: python process.py < /tmp/data.json
+```
+
+For run-scoped files that users should preview or download, prefer an artifact stream instead of a local temporary path:
+
+```yaml
+steps:
+  - run: python generate.py
+    stdout:
+      artifact: data/data.json
 ```
 
 ## Global Configuration

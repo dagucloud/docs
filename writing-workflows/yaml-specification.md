@@ -294,7 +294,7 @@ See [Custom Actions](/writing-workflows/custom-step-types) for the full definiti
 | `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. When not set, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. | Per-run work directory (or inherited from parent for sub-DAGs) |
 | `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
 | `log_dir` | string | Custom log directory | System default |
-| `artifacts` | object | Per-run artifact storage configuration. Storage stays disabled unless `artifacts.enabled` is `true`. | - |
+| `artifacts` | object | Per-run artifact storage configuration. Storage can be enabled explicitly or auto-enabled by `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, and artifact stream outputs. | - |
 | `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
 | `hist_retention_days` | integer | History retention days | `30` |
 | `max_output_size` | integer | Max output size per step (bytes) | `1048576` |
@@ -346,10 +346,12 @@ artifacts:
 
 Rules:
 
-- `enabled: true` is required to turn artifact storage on.
+- `enabled: true` turns artifact storage on explicitly.
 - `dir` changes the base directory for this DAG only.
-- `dir` without `enabled: true` does not enable artifact storage.
-- Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and handlers when artifact storage is enabled.
+- `dir` without `enabled: true` does not enable artifact storage unless the DAG references `DAG_RUN_ARTIFACTS_DIR` or uses `artifact.*`, `stdout.artifact`, or `stderr.artifact`.
+- `DAG_RUN_ARTIFACTS_DIR` references, `artifact.*`, `stdout.artifact`, and `stderr.artifact` auto-enable artifact storage.
+- `artifacts.enabled: false` explicitly disables artifacts; using artifact actions or artifact stream outputs in that case is invalid, and `DAG_RUN_ARTIFACTS_DIR` is not set.
+- Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and handlers when artifact storage is active.
 - The resolved per-run path is recorded in DAG run status as `archiveDir`.
 
 See [Artifacts](/writing-workflows/artifacts) for directory layout, Web UI, and API details.
@@ -1102,8 +1104,8 @@ steps:
 | `with.shell` | string/array | Shell program and args for this `run` step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
 | `with.shell_args` | array | Arguments appended to the shell for this `run` step | - |
 | `with.shell_packages` | array | Packages available to `nix-shell` steps | - |
-| `stdout` | string | Redirect stdout to file | - |
-| `stderr` | string | Redirect stderr to file | - |
+| `stdout` | string/object | Redirect stdout to a file, or use `{ artifact: path }` to write stdout directly to a DAG-run artifact | - |
+| `stderr` | string/object | Redirect stderr to a file, or use `{ artifact: path }` to write stderr directly to a DAG-run artifact | - |
 | `log_output` | string | Override DAG-level log output mode for this step | DAG's log_output |
 | `output` | string/object | String form captures trimmed stdout into one variable. Object form publishes structured step output for `${step_id.output.*}` references. | - |
 | `env` | array/object | Step-specific environment variables (overrides DAG-level) | - |
@@ -1113,6 +1115,18 @@ steps:
 Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Only string-form `output: NAME` is collected into the run's `outputs.json`.
 
 `output_schema:` is an inline JSON Schema object for stdout JSON contracts. When present, Dagu captures stdout, decodes it as JSON, and validates it before publishing output. Invalid JSON or a schema mismatch fails the step. If no `output:` mapping is set, the validated decoded object becomes `${step_id.output}` and can be accessed with `${step_id.output.field}`.
+
+Use `stdout.artifact` or `stderr.artifact` when command output should become a run artifact:
+
+```yaml
+steps:
+  - id: report
+    run: ./generate-report --format markdown
+    stdout:
+      artifact: reports/report.md
+```
+
+Artifact stream paths are relative to the run artifact directory. Parent directories are created automatically. Absolute paths, Windows drive paths, and paths containing `..` are rejected. Artifact stream outputs auto-enable artifact storage. If `artifacts.enabled: false` is set explicitly, artifact stream outputs are invalid.
 
 ### Parallel Execution
 
@@ -1340,7 +1354,7 @@ See [Custom Actions](/writing-workflows/custom-step-types) for the exact allowed
 
 ### Artifact Actions
 
-Use `artifact.write`, `artifact.read`, and `artifact.list` to work with files in the current DAG-run artifact directory.
+Use `artifact.write`, `artifact.read`, and `artifact.list` to work with files in the current DAG-run artifact directory. When a command naturally emits the artifact content to stdout or stderr, prefer `stdout.artifact` or `stderr.artifact` on that step.
 
 ```yaml
 steps:

@@ -1099,18 +1099,20 @@ Control output size limits to prevent memory issues.
 
 <div class="example-card">
 
-### Redirect Output to Files
+### Stream Output to Artifacts
 
 ```yaml
 steps:
   - run: "echo hello"
-    stdout: "/tmp/hello"
+    stdout:
+      artifact: hello.txt
   
   - run: "echo error message >&2"
-    stderr: "/tmp/error.txt"
+    stderr:
+      artifact: error.txt
 ```
 
-<a href="/writing-workflows/data-variables#redirect" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/artifacts#stream-output-to-artifacts" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -2081,9 +2083,9 @@ Control how long execution history is retained.
 ```yaml
 max_output_size: 10485760   # 10MB max output per step
 steps:
-  - run: echo "Analyzing logs"
-    stdout: /logs/analysis.out
-  - run: tail -n 1000 /logs/analysis.out
+  - run: ./analyze-logs --format markdown
+    stdout:
+      artifact: reports/analysis.md
 ```
 
 <a href="/writing-workflows/yaml-specification#data-fields" class="learn-more">Learn more →</a>

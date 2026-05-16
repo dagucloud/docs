@@ -41,9 +41,10 @@ Run system commands and scripts with the default action.
       env:
         - MY_VAR: value
       working_dir: /app
-      stdout: /tmp/output.log
+      stdout:
+        artifact: reports/output.log
   ```
-  Instead of duplicating `env`, `working_dir`, `stdout`, `retry_policy`, `preconditions`, etc. across multiple steps, combine commands into one step.
+  Instead of duplicating `env`, `working_dir`, `stdout`, `retry_policy`, `preconditions`, etc. across multiple steps, combine commands into one step. Use `stdout.artifact` / `stderr.artifact` when command output should appear in the run's Artifacts tab.
 - **Structured direct exec** when you want unambiguous arguments and no shell parsing:
   ```yaml
   steps:

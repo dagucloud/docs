@@ -9,7 +9,8 @@ Dagu provides multiple mechanisms for passing data through workflows:
 - Output Variables - Capture command output for use in later steps
 - Environment Variables - Define variables accessible to all steps
 - Parameters - Pass runtime values into workflows
-- File-based Passing - Redirect output to files
+- File-based Passing - Redirect output to local files within the step environment
+- Artifacts - Persist large run files for preview and download
 - JSON Path References - Access nested data structures
 - Step ID References - Reference step properties and files
 - Sub DAG Outputs - Capture results from sub-workflows
@@ -62,6 +63,16 @@ steps:
 ```
 
 String form captures stdout into one flat variable and includes it in `outputs.json`.
+
+Use `output:` for small values that downstream steps need as variables. If stdout is a large report, JSON dump, Markdown document, or log file that should be visible in the run artifacts, use `stdout.artifact` instead:
+
+```yaml
+steps:
+  - id: report
+    run: ./generate-report --format markdown
+    stdout:
+      artifact: reports/report.md
+```
 
 Object form publishes structured step output for `${step_id.output.*}` references. Each entry can be:
 
@@ -399,7 +410,7 @@ steps:
 
 ### Output Redirection
 
-Redirect output to files for large data:
+Redirect output to local files when another step reads the file from the same filesystem:
 
 ```yaml
 steps:
@@ -407,6 +418,15 @@ steps:
     stdout: /tmp/report.txt
     
   - run: mail -s "Report" user@example.com < /tmp/report.txt
+```
+
+If the file is a run result that users should preview or download, stream the command output to an artifact instead:
+
+```yaml
+steps:
+  - run: python generate_report.py
+    stdout:
+      artifact: reports/report.txt
 ```
 
 ### Working with Files
@@ -446,9 +466,10 @@ max_output_size: 5242880
 steps:
   - run: cat large-file.json
     output: DATA  # Fails if output > 5MB
-    
-  - run: generate-huge-file.sh
-    stdout: /tmp/huge.txt  # No size limit with file redirection
+
+  - run: generate-huge-report.sh
+    stdout:
+      artifact: reports/huge-report.md  # Stream directly to a run artifact
 ```
 
 ## Variable Resolution Order

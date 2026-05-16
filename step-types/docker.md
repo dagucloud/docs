@@ -418,12 +418,13 @@ steps:
     run: cat /etc/alpine-release
     output: ALPINE_VERSION
 
-  # Redirect large output to file
+  # Stream large output to a run artifact
   - id: process_data
     container:
       image: alpine:3
     run: tar -tvf /data/archive.tar
-    stdout: /tmp/archive-listing.txt
+    stdout:
+      artifact: reports/archive-listing.txt
 ```
 
 ## Registry Authentication

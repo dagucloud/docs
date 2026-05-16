@@ -28,7 +28,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file.
+Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture small results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file. When `output_file` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the file appears as a run artifact.
 :::
 
 Use `postgres.query`, `sqlite.query`, or `duckdb.query` for queries. Use `postgres.import`, `sqlite.import`, or `duckdb.import` to load CSV, TSV, or JSONL files into a table.
@@ -256,7 +256,7 @@ steps:
 - Avoid `output_format: json` - it buffers all rows in memory before writing
 - Set `max_rows` as a safety limit for unbounded queries
 - Use `streaming: true` with `output_file` to write directly to disk
-- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/export.jsonl`.
+- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/export.jsonl`; this reference auto-enables artifact storage.
 :::
 
 ## Error Handling

@@ -20,7 +20,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default (JSONL format). Use `output: VAR_NAME` to capture results into an environment variable. For large results, use `streaming: true` with `output_file`.
+Query results are written to **stdout** by default (JSONL format). Use `output: VAR_NAME` to capture small results into an environment variable. For large results, use `streaming: true` with `output_file`. When `output_file` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the file appears as a run artifact.
 :::
 
 ## Connection String

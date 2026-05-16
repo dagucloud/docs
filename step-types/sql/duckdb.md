@@ -19,7 +19,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default in JSONL format. Use `output: VAR_NAME` for small results that need to become an environment variable. For large results, use `streaming: true` with an explicit `output_file`.
+Query results are written to **stdout** by default in JSONL format. Use `output: VAR_NAME` for small results that need to become an environment variable. For large results, use `streaming: true` with an explicit `output_file`. When `output_file` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the file appears as a run artifact.
 :::
 
 ## Database Path
@@ -279,7 +279,7 @@ steps:
 - Use `output_format: jsonl` or `csv`; these formats write rows as they are read.
 - Avoid `output_format: json` for large exports because it buffers the full result.
 - Set `max_rows` as a safety limit for broad queries.
-- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/orders.jsonl`.
+- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/orders.jsonl`; this reference auto-enables artifact storage.
 :::
 
 ## Complete Example
