@@ -212,6 +212,7 @@ Common built-in actions include:
 | `wait.duration`, `wait.until`, `wait.file`, `wait.http` | Time, file, and HTTP readiness waits |
 | `mail.send` | Email delivery |
 | `archive.create`, `archive.extract`, `archive.list` | Archive create/extract |
+| `artifact.write`, `artifact.read`, `artifact.list` | DAG-run artifact files |
 | `dag.run` | Sub-DAG execution |
 | `router.route` | Route execution to downstream steps by value |
 | `template.render` | Template rendering |

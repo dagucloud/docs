@@ -1338,6 +1338,24 @@ Custom action precedence is `call site > template > defaults` for replacement fi
 
 See [Custom Actions](/writing-workflows/custom-step-types) for the exact allowed field set.
 
+### Artifact Actions
+
+Use `artifact.write`, `artifact.read`, and `artifact.list` to work with files in the current DAG-run artifact directory.
+
+```yaml
+steps:
+  - id: save_summary
+    action: artifact.write
+    with:
+      path: reports/summary.md
+      content: |
+        # Summary
+        status: ok
+      overwrite: true
+```
+
+Artifact paths are relative to the run artifact directory. Absolute paths and paths containing `..` are rejected. See [Artifact](/step-types/artifact) for the full field list.
+
 ### Chat (LLM)
 
 | Field | Type | Description | Default |
