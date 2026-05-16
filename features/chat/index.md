@@ -9,6 +9,7 @@ Execute Large Language Model (LLM) requests and build AI agents that can use too
 | [Basic Chat](/features/chat/basics) | Simple LLM sessions with OpenAI, Anthropic, Gemini, Z.AI, and more |
 | [Local AI](/features/chat/local-ai) | Code-backed setup and troubleshooting for Ollama and other OpenAI-compatible local servers |
 | [Tool Calling](/features/chat/tool-calling) | AI agents that execute DAG workflows as tools during sessions |
+| [Dagu MCP Server](/server-admin/mcp) | External chat and agent clients can read, create, run, retry, stop, and monitor Dagu workflows over MCP |
 
 ## Quick Start
 
@@ -156,5 +157,6 @@ Both steps inherit the DAG-level LLM configuration.
 - [Basic Chat](/features/chat/basics) - Complete reference for simple LLM sessions
 - [Local AI](/features/chat/local-ai) - Detailed setup notes for Ollama and other local OpenAI-compatible servers
 - [Tool Calling](/features/chat/tool-calling) - Build AI agents with DAG-based tools
+- [MCP Server](/server-admin/mcp) - Connect external chat and agent clients to Dagu
 - [Secrets](/writing-workflows/secrets) - Secure handling of API keys
 - [Variables](/writing-workflows/template-variables) - Dynamic content in messages

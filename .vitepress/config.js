@@ -199,6 +199,7 @@ const fullSidebar = [
     items: [
       { text: "Overview", link: "/server-admin/" },
       { text: "Server Configuration", link: "/server-admin/server" },
+      { text: "MCP Server", link: "/server-admin/mcp" },
       { text: "Reference", link: "/server-admin/reference" },
       { text: "Operations", link: "/server-admin/operations" },
       { text: "Queue Configuration", link: "/server-admin/queues" },

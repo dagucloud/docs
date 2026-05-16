@@ -14,6 +14,16 @@ For the complete API documentation with all endpoints, see [REST API Reference](
 
 Mounted deployments can change both the server base path and the API base path. The live OpenAPI document advertises the mounted API path in `servers[0].url` so generated clients can target `/api/v1`, `/dagu/api/v1`, `/dagu/rest`, or any other configured mount point correctly.
 
+## MCP Endpoint
+
+Dagu also exposes a Streamable HTTP [MCP Server](/server-admin/mcp) for chat and agent clients. Use MCP when a client should discover Dagu tools, read reference resources, create or edit DAGs, start or enqueue runs, retry or stop runs, and subscribe to run completion updates.
+
+- **Endpoint**: `http://localhost:8080/mcp`
+- **Mounted endpoint**: `https://dagu.example.com/<base_path>/mcp`
+- **Authentication**: Same Dagu server auth as protected streaming endpoints. API keys are recommended for external clients.
+
+The MCP endpoint is separate from the REST API base path. Changing `api_base_path` does not move `/mcp`.
+
 ## Authentication
 
 The REST API supports three authentication methods:

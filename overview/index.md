@@ -96,7 +96,7 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/yaml-specification">Plain YAML</a></h3>
-      <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/writing-workflows/custom-step-types">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
+      <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/writing-workflows/custom-step-types">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a> or <a href="/server-admin/mcp">MCP clients</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
   </div>
 </div>
 
@@ -246,8 +246,8 @@ Dagu is useful anywhere existing scripts, containers, operational tasks, or agen
   </div>
   <div class="overview-card overview-usecase-card">
     <h3>AI Agent Workflows</h3>
-    <p><strong>Run:</strong> <a href="/features/agent/step">AI agent steps</a>, agent-authored <a href="/writing-workflows/yaml-specification">YAML workflows</a>, log analysis, repair steps, and <a href="/writing-workflows/approval">human-reviewed automation</a>.</p>
-    <p><strong>Why Dagu fits:</strong> workflows stay in <a href="/writing-workflows/yaml-specification">plain YAML</a>, so agents can create and debug them while humans keep <a href="/overview/web-ui#run-history-and-logs">logs</a>, <a href="/writing-workflows/approval">approvals</a>, and <a href="/getting-started/cli#history">run history</a> in one place.</p>
+    <p><strong>Run:</strong> <a href="/features/agent/step">AI agent steps</a>, MCP-connected chat apps, agent-authored <a href="/writing-workflows/yaml-specification">YAML workflows</a>, log analysis, repair steps, and <a href="/writing-workflows/approval">human-reviewed automation</a>.</p>
+    <p><strong>Why Dagu fits:</strong> workflows stay in <a href="/writing-workflows/yaml-specification">plain YAML</a>, so agents can create and debug them through the <a href="/server-admin/mcp">MCP server</a> while humans keep <a href="/overview/web-ui#run-history-and-logs">logs</a>, <a href="/writing-workflows/approval">approvals</a>, and <a href="/getting-started/cli#history">run history</a> in one place.</p>
   </div>
 </div>
 
@@ -271,11 +271,12 @@ steps:
     output: ANALYSIS_RESULT
 ```
 
-Workflow Operator connects Slack or Telegram to the built-in steward, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat.
+Workflow Operator connects Slack or Telegram to the built-in steward, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat. External chat and agent clients can also connect through the [Dagu MCP Server](/server-admin/mcp) to read, create, edit, run, retry, stop, and monitor workflows.
 
 - [Steward Overview](/features/agent/) explains interactive workflow generation and debugging.
 - [Agent Step](/features/agent/step) explains how to run agent tasks inside DAGs.
 - [Workflow Operator](/features/bots/) explains Slack and Telegram operation.
+- [MCP Server](/server-admin/mcp) explains external MCP client access.
 
 ## Learn More
 

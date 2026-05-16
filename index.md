@@ -78,8 +78,8 @@ Dagu fits teams that already have operational work spread across scripts, cron j
   </div>
   <div class="real-world-usecase">
     <h3>AI Agent Workflows</h3>
-    <p><strong>Run:</strong> AI coding agents, agent CLIs, agent-authored YAML workflows, log analysis, repair steps, and human-reviewed automation.</p>
-    <p><strong>Why Dagu fits:</strong> workflows are commands plus plain YAML, so agents can create and debug them while humans keep dependencies, logs, approvals, and run history in one place.</p>
+    <p><strong>Run:</strong> AI coding agents, agent CLIs, MCP-connected chat apps, agent-authored YAML workflows, log analysis, repair steps, and human-reviewed automation.</p>
+    <p><strong>Why Dagu fits:</strong> workflows are commands plus plain YAML, so agents can create and debug them through the <a href="/server-admin/mcp">MCP server</a> while humans keep dependencies, logs, approvals, and run history in one place.</p>
   </div>
 </div>
 
@@ -92,6 +92,8 @@ Dagu runs in three configurations:
 **Coordinator/Worker.** The scheduler enqueues jobs to a file-based queue, then dispatches them to a coordinator over gRPC. Workers long-poll the coordinator for tasks, execute DAGs locally, and report status back. Workers can run on separate machines and are routed tasks based on labels. Mutual TLS secures gRPC communication between coordinator and workers.
 
 **Headless.** Run without the web UI (`DAGU_HEADLESS=true`). Useful for CI/CD environments or when Dagu is managed through the CLI or API only.
+
+**MCP Server.** External chat and agent clients can connect to the Dagu HTTP server at `/mcp` to read, create, edit, run, retry, stop, and monitor workflows. See [MCP Server](/server-admin/mcp).
 
 ```
 Standalone:

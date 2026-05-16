@@ -66,6 +66,11 @@ docker run -d \
 - TLS/HTTPS setup
 - UI customization
 
+**[MCP Server](/server-admin/mcp)**
+- Connect external chat and agent clients
+- Read, create, edit, run, retry, and stop DAGs through MCP
+- Subscribe to run resources for completion updates
+
 **[Base Configuration](/server-admin/base-config)**
 - Shared DAG defaults
 - Lifecycle handlers

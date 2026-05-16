@@ -11,6 +11,7 @@ The same assistant foundation appears in three places:
 - the **Web UI assistant**
 - workflow steps with `type: agent`
 - **Workflow Operator** integrations such as Slack and Telegram
+- external chat and agent clients through the [Dagu MCP Server](/server-admin/mcp)
 
 ## Quick Start
 
@@ -96,4 +97,5 @@ Typical examples:
 - [Profiles](/features/agent/souls)
 - [Steward Tools Reference](/features/agent/tools)
 - [Workflow Operator](/features/bots/)
+- [MCP Server](/server-admin/mcp)
 - [Chat & AI Agents](/features/chat/)
