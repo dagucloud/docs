@@ -1036,12 +1036,15 @@ Current builtin action names:
 | `mail.send` | Email sending | mail executor config |
 | `archive.create`, `archive.extract`, `archive.list` | Archive operations | archive config |
 | `file.stat`, `file.read`, `file.write`, `file.copy`, `file.move`, `file.delete`, `file.mkdir`, `file.list` | File operations | path/source/destination/content config |
+| `git.checkout` | Clone or update Git repositories | `repository`, `path`, optional `ref`, `depth`, auth config |
 | `wait.duration`, `wait.until`, `wait.file`, `wait.http` | Wait or poll for time, files, or HTTP readiness | `duration`, `until`, `path`, `url`, optional polling config |
 | `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 operations | S3 config |
 | `sftp.upload`, `sftp.download` | SFTP transfers | SFTP config |
 | `noop` | Output-only or approval-only placeholder step | no `with`, or empty `with` |
 
 For wait-specific fields and examples, see [Wait](/step-types/wait). Use step-level `timeout_sec` to cap the total wait time for `wait.file` and `wait.http`.
+
+For Git checkout fields and examples, see [Git](/step-types/git). Use `git.checkout` when a step needs to clone or refresh a source repository during the DAG run.
 
 #### Child DAG Actions
 

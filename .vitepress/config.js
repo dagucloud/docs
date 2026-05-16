@@ -131,6 +131,7 @@ const fullSidebar = [
       { text: "HTTP", link: "/step-types/http" },
       { text: "SSH", link: "/step-types/ssh" },
       { text: "SFTP", link: "/step-types/sftp" },
+      { text: "Git", link: "/step-types/git" },
       { text: "Router", link: "/step-types/router" },
       { text: "JQ", link: "/step-types/jq" },
       { text: "Wait", link: "/step-types/wait" },
