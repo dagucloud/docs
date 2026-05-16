@@ -212,6 +212,22 @@ steps:
 
 See [HTTP](/step-types/http) for more details.
 
+### Git
+
+Clone or update a repository during a workflow run:
+
+```yaml
+steps:
+  - id: checkout_source
+    action: git.checkout
+    with:
+      repository: https://github.com/example/app.git
+      ref: main
+      path: ./workspace/app
+```
+
+See [Git](/step-types/git) for more details.
+
 ### Custom Step Types
 
 Define reusable step types in `step_types` when you want a typed wrapper around a builtin step type:

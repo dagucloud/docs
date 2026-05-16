@@ -344,7 +344,7 @@ steps:
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ;
 ```
 
-See [parallel.items](/writing-workflows/parallel) for full fan-out options.
+See [Parallel Execution](/writing-workflows/execution-control#parallel-execution) for full fan-out options.
 
 ## See Also
 

@@ -58,7 +58,7 @@ Dagu fits teams that already have operational work spread across scripts, cron j
   </div>
   <div class="real-world-usecase">
     <h3>GitHub-driven Workflows</h3>
-    <p><strong>Run:</strong> PR validation, preview deployments, release workflows, check reruns, and repository dispatches from GitHub.</p>
+    <p><strong>Run:</strong> PR validation, preview deployments, release workflows, source checkouts, check reruns, and repository dispatches from GitHub.</p>
     <p><strong>Why Dagu fits:</strong> GitHub stays the trigger source while Dagu executes the DAG on your licensed server and reports checks, reactions, and comments back to GitHub.</p>
   </div>
   <div class="real-world-usecase">
@@ -200,6 +200,7 @@ Common built-in step types include:
 | `kubernetes`, `k8s` | Run a step as a Kubernetes workload |
 | `ssh` | Remote command execution |
 | `sftp` | Remote file transfer |
+| `git` | Clone or update Git repositories |
 | `http` | HTTP requests |
 | `postgres`, `sqlite` | SQL queries |
 | `redis` | Redis commands and scripts |
@@ -413,6 +414,8 @@ See [Examples](/writing-workflows/examples) for more patterns.
 Dagu supports Git sync to keep DAG definitions, agent markdown files, and managed documents version-controlled. Enable `DAGU_GITSYNC_ENABLED=true` with a repository URL, and Dagu pulls tracked files from a Git branch. Optional auto-sync polls the repository at a configurable interval (default 300s). Supports token and SSH authentication.
 
 See [Git Sync](/server-admin/git-sync) for configuration.
+
+Use `action: git.checkout` inside a workflow when a DAG step needs to clone or update an arbitrary source repository during execution. See [Git](/step-types/git) for the action reference.
 
 GitHub Integration is separate from Git Sync. Use it when GitHub events, PR comments, releases, check reruns, `workflow_dispatch`, or `repository_dispatch` should trigger a DAG that runs on your licensed Dagu server. See [GitHub Integration](/github-integration/) for setup and examples.
 

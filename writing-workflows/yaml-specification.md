@@ -939,6 +939,8 @@ Rules:
 - `exec` cannot be combined with `command`, `script`, `shell`, or `shell_packages`.
 - `working_dir`, `env`, `stdout`, `stderr`, `retry_policy`, `output`, and other normal orchestration fields still apply.
 
+For source repository checkouts, use `action: git.checkout` with `with.repository`, `with.path`, and optional `with.ref`, `with.depth`, or authentication fields. See [Git](/step-types/git) for the full reference.
+
 ### Step Definition Formats
 
 Steps can be defined in multiple formats:

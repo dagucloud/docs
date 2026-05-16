@@ -246,4 +246,4 @@ steps:
     command: POST ${URL}
 ```
 
-See [parallel.items](/writing-workflows/parallel) for full fan-out options.
+See [Parallel Execution](/writing-workflows/execution-control#parallel-execution) for full fan-out options.
