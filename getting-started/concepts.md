@@ -23,7 +23,7 @@ graph LR
 
 ### Steps
 
-The basic unit of execution. Each step runs a command:
+The basic unit of execution. Each step runs a command or action:
 
 ```yaml
 steps:
@@ -227,6 +227,23 @@ steps:
 
 See [HTTP](/step-types/http) for more details.
 
+### Wait
+
+Wait for time, file state, or HTTP readiness:
+
+```yaml
+steps:
+  - id: wait_for_api
+    action: wait.http
+    with:
+      url: https://api.example.com/health
+      status: 200
+      poll_interval: 5s
+    timeout_sec: 300
+```
+
+See [Wait](/step-types/wait) for more details.
+
 ### Custom Actions
 
 Define reusable actions in `actions` when you want a typed wrapper around a builtin action:
@@ -252,7 +269,7 @@ steps:
       message: hello
 ```
 
-The common case is a `run` custom action with a templated `script`. Schema defaults can be applied to the `with` object, the result is validated against `input_schema`, and then the template expands to a builtin step before execution. See [Custom Actions](/writing-workflows/custom-step-types) for the full rules.
+The common case is a custom action with a templated `run` step. Schema defaults can be applied to the `with` object, the result is validated against `input_schema`, and then the template expands to a builtin step before execution. See [Custom Actions](/writing-workflows/custom-step-types) for the full rules.
 
 ## Scheduling
 

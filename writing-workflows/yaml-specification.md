@@ -990,11 +990,59 @@ steps:
 
 Rules:
 
-- `exec.command` is required.
-- `exec.args` accepts strings, numbers, and booleans.
-- `exec` is supported only for direct command execution (`command`, `shell`, or the default command action).
-- `exec` cannot be combined with `command`, `script`, `shell`, or `shell_packages`.
+- `with.command` is required.
+- `with.args` accepts strings, numbers, and booleans.
+- Use `action: exec` for direct process execution.
+- `action: exec` cannot be combined with `run` or legacy execution fields such as `command`, `script`, `shell`, or `shell_packages`.
 - `working_dir`, `env`, `stdout`, `stderr`, `retry_policy`, `output`, and other normal orchestration fields still apply.
+
+#### Named Actions
+
+Use `action:` for builtin or custom actions. Action inputs go under `with:`.
+
+```yaml
+steps:
+  - id: wait_for_api
+    action: wait.http
+    with:
+      url: https://api.example.com/health
+      status: 200
+      poll_interval: 5s
+    timeout_sec: 300
+```
+
+Current builtin action names:
+
+| Action | Use for | Key inputs |
+|--------|---------|------------|
+| `http.request` | HTTP calls | `method`, `url`, headers/body config |
+| `ssh.run` | Remote shell over SSH | `command`, SSH connection config |
+| `exec` | Direct process execution without shell parsing | `command`, optional `args` |
+| `docker.run` | Docker executor | optional `command`, Docker config |
+| `container.run` | Container executor | optional `command`, container config |
+| `k8s.run`, `kubernetes.run` | Kubernetes job execution | optional `command`, Kubernetes config |
+| `postgres.query`, `sqlite.query`, `duckdb.query` | SQL queries | `query`, database config |
+| `postgres.import`, `sqlite.import`, `duckdb.import` | SQL imports | `import`, database config |
+| `redis.<operation>` | Redis operations | Redis config; operation comes from the action suffix |
+| `jq.filter` | jq transforms | `filter`, plus `data` or `input` |
+| `dag.run` | Child DAG execution | `dag`, optional `params` |
+| `router.route` | Conditional routing | `value`, `routes` |
+| `chat.completion` | LLM chat completion | `prompt` or `messages`, model config |
+| `agent.run` | Agent step execution | `task`, `prompt`, or `messages`, agent config |
+| `harness.run` | CLI coding-agent harnesses | `prompt`, provider config, optional `stdin` |
+| `template.render` | Text/template rendering | `template`, optional data/config |
+| `log.write` | Log messages | `message` |
+| `mail.send` | Email sending | mail executor config |
+| `archive.create`, `archive.extract`, `archive.list` | Archive operations | archive config |
+| `file.stat`, `file.read`, `file.write`, `file.copy`, `file.move`, `file.delete`, `file.mkdir`, `file.list` | File operations | path/source/destination/content config |
+| `wait.duration`, `wait.until`, `wait.file`, `wait.http` | Wait or poll for time, files, or HTTP readiness | `duration`, `until`, `path`, `url`, optional polling config |
+| `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 operations | S3 config |
+| `sftp.upload`, `sftp.download` | SFTP transfers | SFTP config |
+| `noop` | Output-only or approval-only placeholder step | no `with`, or empty `with` |
+
+For wait-specific fields and examples, see [Wait](/step-types/wait). Use step-level `timeout_sec` to cap the total wait time for `wait.file` and `wait.http`.
+
+`run:` and `action:` are mutually exclusive. Do not combine `action:` with legacy execution fields such as `command:`, `script:`, step-level `type:`, `call:`, `messages:`, `agent:`, `llm:`, `value:`, or `routes:`.
 
 ### Step Definition Formats
 

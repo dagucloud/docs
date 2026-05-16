@@ -1590,6 +1590,29 @@ steps:
 
 <div class="example-card">
 
+### Wait for Readiness
+
+```yaml
+steps:
+  - id: wait_for_api
+    action: wait.http
+    with:
+      url: https://api.example.com/health
+      status: 200
+      poll_interval: 5s
+    timeout_sec: 300
+
+  - id: continue_after_ready
+    depends: wait_for_api
+    run: ./run-after-ready.sh
+```
+
+<a href="/step-types/wait" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### JSON Processing
 
 ```yaml

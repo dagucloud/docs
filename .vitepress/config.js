@@ -133,6 +133,7 @@ const fullSidebar = [
       { text: "SFTP", link: "/step-types/sftp" },
       { text: "Router", link: "/step-types/router" },
       { text: "JQ", link: "/step-types/jq" },
+      { text: "Wait", link: "/step-types/wait" },
       { text: "S3", link: "/step-types/s3" },
       { text: "Redis", link: "/step-types/redis" },
       { text: "Archive", link: "/step-types/archive" },
