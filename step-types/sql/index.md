@@ -8,6 +8,7 @@ Execute SQL queries and data operations directly in your workflows.
 |----------|---------------|-------------|
 | [PostgreSQL](/step-types/sql/postgresql) | `postgres` | Full-featured PostgreSQL support with advisory locks |
 | [SQLite](/step-types/sql/sqlite) | `sqlite` | Lightweight embedded database with file locking |
+| [DuckDB](/step-types/sql/duckdb) | `duckdb` | Embedded analytical database for local OLAP workflows |
 
 ## Basic Usage
 
@@ -30,6 +31,8 @@ steps:
 Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file.
 :::
 
+Use `postgres.query`, `sqlite.query`, or `duckdb.query` for queries. Use `postgres.import`, `sqlite.import`, or `duckdb.import` to load CSV, TSV, or JSONL files into a table.
+
 ::: info Secrets
 Secrets are automatically masked in logs. Use `provider: file` for Kubernetes/Docker secrets. See [Secrets](/writing-workflows/secrets) for details.
 :::
@@ -40,7 +43,7 @@ Secrets are automatically masked in logs. Use `provider: file` for Kubernetes/Do
 - **Transactions** - Wrap operations in transactions with configurable isolation levels
 - **Data import** - Import CSV, TSV, or JSONL files into database tables
 - **Output formats** - Export results as JSONL, JSON, or CSV
-- **Streaming** - Handle large result sets by streaming to files
+- **Streaming** - Handle large result sets by streaming to explicit files
 - **Locking** - Advisory locks (PostgreSQL) and file locks (SQLite) for distributed workflows
 
 ## Configuration Reference
@@ -77,7 +80,7 @@ For distributed workers running multiple concurrent DAGs, configure PostgreSQL c
 | `null_string` | string | null | NULL representation |
 | `max_rows` | int | 0 | Limit rows (0 = unlimited) |
 | `streaming` | bool | false | Stream to file |
-| `output_file` | string | - | Output file path |
+| `output_file` | string | - | Explicit output path for streaming results |
 
 ### Locking
 
@@ -243,7 +246,7 @@ steps:
     with:
       dsn: "${DATABASE_URL}"
       streaming: true
-      output_file: /data/export.jsonl
+      output_file: "${DAG_RUN_ARTIFACTS_DIR}/export.jsonl"
       output_format: jsonl    # Use jsonl or csv for streaming
       query: "SELECT * FROM large_table"
 ```
@@ -253,6 +256,7 @@ steps:
 - Avoid `output_format: json` - it buffers all rows in memory before writing
 - Set `max_rows` as a safety limit for unbounded queries
 - Use `streaming: true` with `output_file` to write directly to disk
+- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/export.jsonl`.
 :::
 
 ## Error Handling
@@ -350,3 +354,4 @@ See [parallel.items](/writing-workflows/execution-control#parallel-execution) fo
 
 - [PostgreSQL](/step-types/sql/postgresql) - PostgreSQL-specific features
 - [SQLite](/step-types/sql/sqlite) - SQLite-specific features
+- [DuckDB](/step-types/sql/duckdb) - DuckDB-specific features

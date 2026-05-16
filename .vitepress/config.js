@@ -143,6 +143,7 @@ const fullSidebar = [
           { text: "Overview", link: "/step-types/sql/" },
           { text: "PostgreSQL", link: "/step-types/sql/postgresql" },
           { text: "SQLite", link: "/step-types/sql/sqlite" },
+          { text: "DuckDB", link: "/step-types/sql/duckdb" },
         ],
       },
     ],

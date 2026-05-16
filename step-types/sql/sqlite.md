@@ -440,3 +440,4 @@ steps:
 
 - [ETL Overview](/step-types/sql/) - Common configuration and features
 - [PostgreSQL](/step-types/sql/postgresql) - PostgreSQL-specific documentation
+- [DuckDB](/step-types/sql/duckdb) - DuckDB-specific documentation

@@ -45,7 +45,7 @@ Dagu fits teams that already have operational work spread across scripts, cron j
   </div>
   <div class="real-world-usecase">
     <h3>ETL and Data Operations</h3>
-    <p><strong>Run:</strong> PostgreSQL or SQLite queries, S3 transfers, pinned <code>jq</code> or <code>yq</code> transforms, validation steps, and reusable sub-workflows.</p>
+    <p><strong>Run:</strong> PostgreSQL, SQLite, or DuckDB queries, S3 transfers, pinned <code>jq</code> or <code>yq</code> transforms, validation steps, and reusable sub-workflows.</p>
     <p><strong>Why Dagu fits:</strong> daily data workflows stay declarative, observable, and easy to retry when one step fails.</p>
   </div>
   <div class="real-world-usecase">
@@ -203,7 +203,7 @@ Common built-in actions include:
 | `ssh.run` | Remote command execution |
 | `sftp.upload`, `sftp.download` | Remote file transfer |
 | `http.request` | HTTP requests |
-| `postgres.query`, `sqlite.query` | SQL queries |
+| `postgres.query`, `sqlite.query`, `duckdb.query` | SQL queries |
 | `redis.<operation>` | Redis commands and scripts |
 | `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 object operations |
 | `jq.filter` | JSON transformation |

@@ -475,3 +475,4 @@ steps:
 
 - [ETL Overview](/step-types/sql/) - Common configuration and features
 - [SQLite](/step-types/sql/sqlite) - SQLite-specific documentation
+- [DuckDB](/step-types/sql/duckdb) - DuckDB-specific documentation
