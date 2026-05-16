@@ -203,6 +203,7 @@ Common built-in actions include:
 | `ssh.run` | Remote command execution |
 | `sftp.upload`, `sftp.download` | Remote file transfer |
 | `http.request` | HTTP requests |
+| `data.convert`, `data.pick` | Convert and select JSON, YAML, CSV, TSV, and text |
 | `postgres.query`, `sqlite.query`, `duckdb.query` | SQL queries |
 | `redis.<operation>` | Redis commands and scripts |
 | `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 object operations |
