@@ -63,6 +63,30 @@ steps:
 
 > **Note**: Sub-DAGs also do not inherit parent DAG `tools`. If a child workflow uses a managed external command, declare `tools` in the child workflow. See [Tools: Sub-DAGs](/writing-workflows/tools#sub-dags).
 
+### Synchronous vs Asynchronous Child Workflows
+
+Use `action: dag.run` when the parent must wait for the child DAG to finish before continuing. The child runs as a sub-DAG of the parent, and the parent step reflects the child result.
+
+Use `action: dag.enqueue` when the parent only needs to queue another DAG and continue once the queue item is created. The child becomes its own top-level DAG run with status `queued`, while the parent keeps a reference to it in the sub-DAG run list for traceability.
+
+```yaml
+type: graph
+steps:
+  - id: fanout_report
+    action: dag.enqueue
+    with:
+      dag: workflows/report.yaml
+      params:
+        DATE: ${DATE}
+      queue: background
+
+  - id: continue_parent
+    depends: [fanout_report]
+    run: echo "Report workflow was queued"
+```
+
+If `with.queue` is omitted, the child DAG uses its own `queue` setting, base-config default, or local DAG queue. Use `dag.run` instead when later parent steps need the child output or success/failure result before they execute.
+
 **Working Directory Inheritance:**
 
 When calling sub-DAGs locally, the child inherits the parent's `working_dir` if it doesn't define its own:

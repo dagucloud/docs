@@ -1026,6 +1026,7 @@ Current builtin action names:
 | `redis.<operation>` | Redis operations | Redis config; operation comes from the action suffix |
 | `jq.filter` | jq transforms | `filter`, plus `data` or `input` |
 | `dag.run` | Child DAG execution | `dag`, optional `params` |
+| `dag.enqueue` | Asynchronous child DAG enqueue | `dag`, optional `params`, optional `queue` |
 | `router.route` | Conditional routing | `value`, `routes` |
 | `chat.completion` | LLM chat completion | `prompt` or `messages`, model config |
 | `agent.run` | Agent step execution | `task`, `prompt`, or `messages`, agent config |
@@ -1041,6 +1042,35 @@ Current builtin action names:
 | `noop` | Output-only or approval-only placeholder step | no `with`, or empty `with` |
 
 For wait-specific fields and examples, see [Wait](/step-types/wait). Use step-level `timeout_sec` to cap the total wait time for `wait.file` and `wait.http`.
+
+#### Child DAG Actions
+
+Use `dag.run` for synchronous child DAG execution. The parent waits for the child run to finish and the parent step reflects the child result.
+
+```yaml
+steps:
+  - id: run_child
+    action: dag.run
+    with:
+      dag: child-workflow
+      params:
+        MODE: blocking
+```
+
+Use `dag.enqueue` for asynchronous child DAG dispatch. The parent waits only until the child run is persisted and queued.
+
+```yaml
+steps:
+  - id: enqueue_child
+    action: dag.enqueue
+    with:
+      dag: child-workflow
+      params:
+        MODE: background
+      queue: background
+```
+
+`dag.enqueue` accepts the same `with.dag` and `with.params` inputs as `dag.run`, plus `with.queue` to override the queue for the enqueued child run. If `with.queue` is omitted, Dagu uses the child DAG's own queue selection.
 
 `run:` and `action:` are mutually exclusive. Do not combine `action:` with legacy execution fields such as `command:`, `script:`, step-level `type:`, `call:`, `messages:`, `agent:`, `llm:`, `value:`, or `routes:`.
 
@@ -1087,6 +1117,8 @@ Object-form `output:` entries can be literal values or long-form publishers with
 |-------|------|-------------|---------|
 | `parallel` | array | Items to process in parallel | - |
 | `max_concurrent` | integer | Max parallel executions | No limit |
+
+`parallel` can fan out `dag.run` or `dag.enqueue`. With `dag.run`, each child is executed as a blocking sub-DAG. With `dag.enqueue`, each child is added to a queue and the parent step completes after enqueueing the generated child runs.
 
 ```yaml
 steps:

@@ -43,3 +43,23 @@ dagu enqueue --queue=high-priority workflow.yaml
 ```
 
 See [Queue Configuration](/server-admin/queues) for the full `enqueue` and `dequeue` CLI reference.
+
+## Enqueueing from a Workflow
+
+Use `action: dag.enqueue` to queue another DAG from a running workflow without waiting for that child DAG to finish:
+
+```yaml
+type: graph
+steps:
+  - id: queue_customer_rollup
+    action: dag.enqueue
+    with:
+      dag: customer-rollup
+      params:
+        CUSTOMER_ID: ${CUSTOMER_ID}
+      queue: background
+```
+
+`with.queue` overrides the child DAG's queue for that enqueued run. If it is omitted, Dagu uses the child DAG's top-level `queue`, the base-config default, or the child's local queue. The parent step succeeds after the child run is persisted and added to the queue.
+
+Use `action: dag.run` instead when the parent workflow must wait for the child DAG result before continuing.

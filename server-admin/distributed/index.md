@@ -70,7 +70,7 @@ When a DAG run is enqueued (via API, webhook, or scheduler), it always enters th
 
 ### Sub-DAG Dispatch
 
-Each sub-DAG independently evaluates the dispatch decision. A DAG running locally can dispatch a child to a worker (if the child has `worker_selector` labels), and a DAG running on a worker can force a child to run locally (if the child has `worker_selector: local`). Parent and child dispatch decisions are completely independent.
+Each sub-DAG independently evaluates the dispatch decision. A DAG running locally can dispatch a child to a worker (if the child has `worker_selector` labels), and a DAG running on a worker can force a child to run locally (if the child has `worker_selector: local`). Parent and child dispatch decisions are completely independent, whether the child is started synchronously with `action: dag.run` or queued asynchronously with `action: dag.enqueue`.
 
 ## Transport Security
 

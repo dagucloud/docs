@@ -162,6 +162,8 @@ Cache hits reuse the manifest and command shims without taking an install lock. 
 
 `tools` is scoped to one DAG run. A sub-DAG is a separate DAG run, so it does not inherit the parent DAG's managed tool environment.
 
+This applies to child DAGs started with `action: dag.run` and child DAGs queued with `action: dag.enqueue`.
+
 If a child DAG uses a managed command, declare `tools` in the child DAG too:
 
 ```yaml

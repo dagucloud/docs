@@ -66,7 +66,7 @@ Action names must match:
 ^[A-Za-z][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*$
 ```
 
-Custom action names cannot reuse builtin action names such as `http.request`, `dag.run`, `template.render`, or `agent.run`.
+Custom action names cannot reuse builtin action names such as `http.request`, `dag.run`, `dag.enqueue`, `template.render`, or `agent.run`.
 
 ## Template Rules
 
