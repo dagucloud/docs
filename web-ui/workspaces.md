@@ -65,7 +65,7 @@ See [Documents](/web-ui/documents) for the Web UI workflow for browsing, editing
 
 ## Secrets in Workspaces
 
-The Secrets page is workspace-local. A Dagu-managed secret with ref `prod/db-password` in `ops` is different from a secret with the same ref in `production`.
+The Secrets page supports global and workspace scopes. A Dagu-managed secret with ref `prod/db-password` in `ops` is different from a secret with the same ref in `production`.
 
 DAGs resolve registry refs from their own workspace:
 
@@ -78,7 +78,9 @@ secrets:
     ref: prod/db-password
 ```
 
-Do not include the workspace name in the ref. Select the workspace in the Web UI, create `prod/db-password` there, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Default** secret scope.
+Do not include the workspace name in the ref. Select the workspace in the Web UI, create `prod/db-password` there, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Global** secret scope.
+
+Global secrets are workspace-less values. A workflow in `ops` checks `ops` first, then **Global**. It never reads another named workspace.
 
 See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
 

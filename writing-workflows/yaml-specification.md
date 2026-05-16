@@ -533,14 +533,14 @@ secrets:
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | string | Environment variable name exposed to steps (required) |
-| `ref` | string | Workspace-local Dagu-managed registry ref. Must be lowercase slug segments separated by `/`, for example `prod/db-password`. Cannot be combined with `provider`, `key`, or `options`. |
+| `ref` | string | Dagu-managed registry ref. Must be lowercase slug segments separated by `/`, for example `prod/db-password`. Cannot be combined with `provider`, `key`, or `options`. |
 | `provider` | string | Direct provider identifier. Built-in providers are `env`, `file`, `kubernetes`, and `vault`. Required with `key` when `ref` is not used. |
 | `key` | string | Provider-specific key. For `env` this is the source variable name. For `file` this is a path. For `kubernetes` this is a `secret-name/data-key` pair unless `options.secret_name` is set. For `vault` this is a Vault path or a `path/field` pair, depending on `options.field`. |
 | `options` | object | Provider-specific options for direct provider refs. Values must be strings. |
 
 `name` must be a valid environment variable name, must be unique inside the DAG, and must not start with `DAGU_`.
 
-Registry refs are workspace-local. A DAG with `labels: [workspace=ops]` resolves `ref: prod/db-password` from the `ops` secret scope. A DAG without a workspace label resolves it from the default scope. Do not include the workspace name in `ref`.
+Registry refs resolve from the DAG's own scope first, then the global scope. A DAG with `labels: [workspace=ops]` checks `ops` before global. A DAG without a workspace label uses the global scope directly. Named workspaces never read another named workspace. Do not include the scope or workspace name in `ref`.
 
 For direct provider refs, `key` and `options` are literal provider inputs. Dagu does not expand `${...}` expressions inside them.
 

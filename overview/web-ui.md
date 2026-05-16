@@ -25,7 +25,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Definitions** for the list of workflows
 - **Run details** for outputs, artifacts, logs, and retries
 - **Docs** for markdown documents and runbooks
-- **Secrets** for workspace-local Dagu-managed secret values
+- **Secrets** for global and workspace-scoped Dagu-managed secret values
 - **Search** for finding workflows and documents quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
@@ -187,7 +187,7 @@ See [Documents](/web-ui/documents) for the dedicated guide.
 
 ## Secrets
 
-The Secrets page manages encrypted Dagu-managed secret values for the selected workspace.
+The Secrets page manages encrypted Dagu-managed secret values for a selected scope.
 
 Use it to:
 
@@ -204,7 +204,7 @@ secrets:
     ref: prod/db-password
 ```
 
-Refs are workspace-local. A DAG in `workspace=ops` resolves the ref from the `ops` secret scope. A DAG without a workspace label resolves it from **Default**.
+Registry refs resolve from the DAG's own scope first, then **Global**. A DAG in `workspace=ops` checks `ops` before global. A DAG without a workspace label uses **Global** directly.
 
 See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
 

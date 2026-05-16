@@ -19,13 +19,13 @@ secrets:
     ref: prod/db-password
 ```
 
-`name` is the environment variable exposed to steps. `ref` is the workspace-local registry key. The DAG does not store the plaintext value or provider details.
+`name` is the environment variable exposed to steps. `ref` is the registry key. The DAG does not store the plaintext value or provider details.
 
 Create or rotate the value in the Web UI under **Secrets**:
 
-1. Select **Default** or a named workspace.
+1. Select **Global** or a named workspace.
 2. Create a Dagu-managed secret with ref `prod/db-password`.
-3. Use `ref: prod/db-password` in DAGs that belong to that same workspace.
+3. Use `ref: prod/db-password` in DAGs.
 
 ```yaml
 labels:
@@ -40,7 +40,16 @@ steps:
     run: ./migrate.sh
 ```
 
-Refs are **workspace-local**. A DAG in `workspace=payments` can resolve only secrets stored in the `payments` workspace. A DAG without a workspace label uses the default workspace. Do not include the workspace name in `ref`; use `ref: prod/db-password`, not `ref: payments/prod/db-password`.
+Registry refs are resolved by scope:
+
+| Secret scope | Resolution behavior |
+| --- | --- |
+| **Global** | Workspace-less secret available to all DAGs unless a more specific scope has the same ref |
+| **Named workspace** | Secret for DAGs with the matching `workspace=<name>` label |
+
+A DAG in `workspace=payments` first checks the `payments` secret scope, then the **Global** scope. It never reads another named workspace. A DAG without a workspace label uses **Global** directly.
+
+Do not include the scope or workspace name in `ref`; use `ref: prod/db-password`, not `ref: payments/prod/db-password`. If a more specific scoped secret exists but is disabled, Dagu fails the run instead of falling back to a global secret with the same ref.
 
 Registry refs currently resolve Dagu-managed secrets. External registry providers such as Vault, cloud secret managers, and Kubernetes-backed registry records are request-based and are not creatable through the secret management API yet. Use [Request access](https://dagu.sh/contact) to contact the Dagu team. Existing direct provider refs still work as described below.
 
@@ -102,7 +111,7 @@ secrets:
 | Field | Required | Meaning |
 | --- | --- | --- |
 | `name` | Yes | Target environment variable injected into the run |
-| `ref` | Required for registry refs | Workspace-local registry ref, for example `prod/db-password` |
+| `ref` | Required for registry refs | Registry ref, for example `prod/db-password` |
 | `provider` | Required for direct provider refs | Resolver name. Built-in values are `env`, `file`, `kubernetes`, and `vault` |
 | `key` | Required for direct provider refs | Provider-specific lookup key |
 | `options` | Direct provider refs only | Provider-specific string map |

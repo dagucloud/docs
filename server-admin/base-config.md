@@ -498,7 +498,7 @@ preconditions:
 
 ### Secrets
 
-Reference secrets from Dagu's registry or from direct providers. Registry refs resolve in the workspace of the DAG that inherits the base config. Direct providers are `env`, `file`, `kubernetes`, and `vault`; provider-specific behavior is documented in [Secrets](/writing-workflows/secrets).
+Reference secrets from Dagu's registry or from direct providers. Registry refs resolve in the DAG's own scope first, then the global scope. Direct providers are `env`, `file`, `kubernetes`, and `vault`; provider-specific behavior is documented in [Secrets](/writing-workflows/secrets).
 
 ```yaml
 # base.yaml

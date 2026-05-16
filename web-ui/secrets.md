@@ -12,15 +12,14 @@ secrets:
 
 The DAG receives `DB_PASSWORD` as an environment variable when the run starts. The plaintext value is not stored in the DAG file.
 
-## Workspace Scope
+## Secret Scopes
 
-Secrets are workspace-local. The same ref can exist in different workspaces with different values.
+Secrets can be global or workspace-scoped. The same ref can exist globally and in multiple workspace scopes with different values.
 
-| Workspace selector | Secrets page behavior |
+| Secret scope | Secrets page behavior |
 | --- | --- |
-| **Default** | Manage secrets for DAGs without a workspace label |
+| **Global** | Manage workspace-less secrets available to all DAGs as a fallback |
 | **Named workspace** | Manage secrets for DAGs with `labels: [workspace=<name>]` |
-| **All workspaces** | Not an aggregate secrets view; switch to **Default** or a named workspace when managing secrets |
 
 When writing DAG YAML, use only the ref value:
 
@@ -28,12 +27,12 @@ When writing DAG YAML, use only the ref value:
 ref: prod/db-password
 ```
 
-Do not include the workspace name in the ref. A DAG in `workspace=payments` resolves `prod/db-password` from the `payments` workspace. A DAG without a workspace label resolves it from the default workspace.
+Do not include the scope or workspace name in the ref. A DAG in `workspace=payments` first resolves `prod/db-password` from the `payments` workspace, then from **Global** if no workspace-specific secret exists. A DAG without a workspace label resolves it from **Global**.
 
 ## Create A Secret
 
 1. Open **Secrets** from the Web UI.
-2. Select **Default** or a named workspace.
+2. Select **Global** or a named workspace.
 3. Click **Add Secret**.
 4. Keep provider set to **Dagu Managed**.
 5. Enter a ref such as `prod/db-password`. Refs use lowercase slug segments separated by `/`.
@@ -78,7 +77,7 @@ Values are encrypted at rest and versioned. The encryption key is resolved from 
 
 ## Permissions
 
-Secret management is intended for administrative users. A user needs permission to manage the selected workspace before creating, rotating, enabling, disabling, or deleting secrets.
+Secret management is intended for administrative users. A user needs manager or admin permission for the selected scope before creating, rotating, enabling, disabling, or deleting secrets.
 
 ## Related
 
