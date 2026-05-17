@@ -52,17 +52,19 @@ A remote action package is a directory or Git repository containing `dagu-action
 ```text
 dagu-action-notify/
 ├── dagu-action.yaml
-├── action.yaml
+├── workflow.yaml
 └── scripts/
     └── notify.sh
 ```
+
+This page uses `workflow.yaml` as the recommended entrypoint DAG filename to keep it visually distinct from the `dagu-action.yaml` manifest. The `dag` field can point to any safe relative file path inside the package.
 
 `dagu-action.yaml` describes the action entrypoint and input/output contracts:
 
 ```yaml
 apiVersion: v1alpha1
 name: notify
-dag: action.yaml
+dag: workflow.yaml
 inputs:
   type: object
   additionalProperties: false
