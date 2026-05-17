@@ -215,6 +215,6 @@ steps:
 - [Core Concepts](/getting-started/concepts) — steps, dependencies, execution model
 - [Deployment Models](/overview/deployment-models) — local, self-hosted, managed, and hybrid options
 - [Writing Workflows](/writing-workflows/) — full YAML surface
-- [Actions](/step-types/) — built-in executors (docker, ssh, http, wait, sql, s3, sub-DAG, ...)
+- [Actions](/writing-workflows/yaml-specification#named-actions) — built-in executors (docker, ssh, http, wait, sql, s3, sub-DAG, ...)
 - [Examples](/writing-workflows/examples) — ready-to-adapt patterns
 - [CLI Reference](/getting-started/cli) — every command and flag
