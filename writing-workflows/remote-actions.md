@@ -1,0 +1,168 @@
+# Remote Actions
+
+Remote actions package a DAG as a reusable action that another workflow can call by version. Use them when the reusable logic needs its own files, scripts, schemas, or sub-DAG structure instead of a small inline wrapper.
+
+For inline wrappers around built-in actions, use [Custom Actions](/writing-workflows/custom-step-types). For package-style reuse across repositories and workers, use remote actions.
+
+## Call a Remote Action
+
+Call a GitHub action package with `owner/repo@version`:
+
+```yaml
+steps:
+  - id: notify
+    action: acme/dagu-action-slack@v1.2.0
+    with:
+      channel: "#ops"
+      text: "Deployment finished for ${ENVIRONMENT}"
+```
+
+Official Dagu actions use the short form `name@version`. This resolves to `dagucloud/action-name`:
+
+```yaml
+steps:
+  - id: notify
+    action: slack@v1.2.0
+    with:
+      channel: "#ops"
+      text: "Workflow ${DAG_NAME} finished"
+```
+
+Use `source:` when you need an explicit source location:
+
+```yaml
+steps:
+  - id: local_action
+    action: source:./actions/notify@local
+    with:
+      text: "Local development run"
+
+  - id: git_action
+    action: source:https://github.com/acme/dagu-action-notify.git@v1.2.0
+    with:
+      text: "Pinned Git source run"
+```
+
+`with:` is the input object passed to the action. The action manifest can validate it with JSON Schema before the action DAG starts.
+
+## Action Package Layout
+
+A remote action package is a directory or Git repository containing `dagu-action.yaml`:
+
+```text
+dagu-action-notify/
+├── dagu-action.yaml
+├── action.yaml
+└── scripts/
+    └── notify.sh
+```
+
+`dagu-action.yaml` describes the action entrypoint and input/output contracts:
+
+```yaml
+apiVersion: v1alpha1
+name: notify
+dag: action.yaml
+inputs:
+  type: object
+  additionalProperties: false
+  required: [text]
+  properties:
+    text:
+      type: string
+    channel:
+      type: string
+      default: "#ops"
+outputs:
+  type: object
+  additionalProperties: false
+  required: [RESULT]
+  properties:
+    RESULT:
+      type: string
+```
+
+The action DAG is a normal Dagu workflow, but it must not set `working_dir`. Dagu runs it inside the materialized action workspace so relative files in the package are available.
+
+```yaml
+name: notify-action
+params:
+  - text
+  - channel
+steps:
+  - id: send
+    run: ./scripts/notify.sh "${channel}" "${text}"
+    output: RESULT
+```
+
+The `inputs` schema validates the caller's `with:` object. The input values are passed to the action DAG as run parameters, so the action DAG can read them with normal parameter syntax such as `${text}`.
+
+The `outputs` schema validates the child DAG outputs after the action finishes. Remote action outputs come from string-form `output:` values in the child DAG and are written as JSON to the action step's stdout.
+
+## Use Outputs in the Caller
+
+Use normal structured output capture on the action step when later steps need fields from the action result:
+
+```yaml
+steps:
+  - id: notify
+    action: acme/dagu-action-notify@v1.2.0
+    with:
+      text: "Build ${BUILD_ID} finished"
+    output:
+      result:
+        from: stdout
+        decode: json
+        select: .RESULT
+
+  - id: audit
+    depends: [notify]
+    run: echo "Action result: ${notify.output.result}"
+```
+
+See [Outputs](/writing-workflows/outputs) for the full `output:` reference.
+
+## Reference Formats
+
+| Format | Meaning | Example |
+|--------|---------|---------|
+| `name@version` | Official Dagu action, resolved as `dagucloud/action-name` | `slack@v1.2.0` |
+| `owner/repo@version` | GitHub repository | `acme/dagu-action-notify@v1.2.0` |
+| `source:target@version` | Explicit local path, `file://` path, or Git source | `source:./actions/notify@local` |
+
+Versions are required. Use immutable tags or commit SHAs for production workflows. Dagu rejects unsafe Git ref syntax such as whitespace, `..`, `@{`, shell metacharacters, hidden path segments, and `.lock` suffixes.
+
+## Execution Modes
+
+Remote actions work in standalone runs and distributed worker runs, but the source reference determines what each worker must be able to access.
+
+| Mode | Behavior |
+|------|----------|
+| Standalone or local sub-DAG | The process running the action resolves the ref, validates the manifest, packages the action workspace, and runs the action DAG locally. |
+| Shared-filesystem workers | The worker executing the action resolves the ref. Local `source:` paths can be used only if that path is mounted and readable by that worker. |
+| Shared-nothing workers | Prefer GitHub or explicit Git `source:` refs. Local `source:` paths work only if the same path exists on the worker executing the action step. |
+
+After an action is resolved, Dagu packages the action workspace as an immutable content-addressed bundle. When the action sub-DAG runs on a distributed worker, the bundle is uploaded through the coordinator and materialized on the worker, so the child worker does not need the action repository checked out in its DAG directory.
+
+Workspace bundles are bounded by the default limits: 64 MiB compressed, 256 MiB uncompressed, and 8192 files. `.git` directories are not included in the bundle.
+
+## When To Use Remote Actions
+
+Use a remote action when:
+
+- The reusable unit has scripts, templates, or helper files.
+- The reusable unit should be versioned independently of the caller workflow.
+- Multiple repositories or teams should call the same action contract.
+- The action should run as a sub-DAG with its own run metadata.
+
+Use a custom action when:
+
+- The reusable unit is only a small wrapper around `run:` or a built-in action.
+- The action should live in `base.yaml` or inside one DAG file.
+- You do not need a separate package, Git ref, or action manifest.
+
+## Related
+
+- [Custom Actions](/writing-workflows/custom-step-types)
+- [Outputs](/writing-workflows/outputs)
+- [Distributed Workers](/server-admin/distributed/workers/)

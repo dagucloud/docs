@@ -105,6 +105,7 @@ const fullSidebar = [
   {
     text: "Actions",
     items: [
+      { text: "Remote Actions", link: "/writing-workflows/remote-actions" },
       { text: "Custom Actions", link: "/writing-workflows/custom-step-types" },
       { text: "Shell", link: "/step-types/shell" },
       { text: "Shell (macOS / Linux)", link: "/step-types/shell-unix" },

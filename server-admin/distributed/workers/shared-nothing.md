@@ -59,6 +59,21 @@ Workers stream stdout/stderr to the coordinator via the `StreamLogs` gRPC call:
 
 Log streaming is best-effort: failures don't fail the step execution. Some logs may be lost if network issues occur during streaming.
 
+### Remote Actions
+
+Remote actions are supported in shared-nothing mode. The worker executing the action step resolves the action reference, validates the `dagu-action.yaml` manifest, and packages the resolved action workspace. When the action sub-DAG is dispatched, the workspace bundle is transferred through the coordinator and materialized on the worker that runs the child DAG.
+
+Use GitHub or explicit Git `source:` references for portable shared-nothing deployments:
+
+```yaml
+steps:
+  - action: acme/dagu-action-notify@v1.2.0
+    with:
+      text: "shared-nothing worker run"
+```
+
+Local `source:` references such as `source:./actions/notify@local` work only when that path exists on the worker executing the action step. See [Remote Actions](/writing-workflows/remote-actions) for the reference formats and packaging rules.
+
 ### Zombie Detection
 
 The coordinator monitors worker heartbeats and marks tasks as failed when workers become unresponsive:
