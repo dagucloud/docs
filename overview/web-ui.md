@@ -25,6 +25,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Definitions** for the list of workflows
 - **Run details** for outputs, artifacts, logs, and retries
 - **Docs** for markdown documents and runbooks
+- **Notifications** for Slack, email, Telegram, and webhook routing
 - **Secrets** for global and workspace-scoped Dagu-managed secret values
 - **Search** for finding workflows and documents quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
@@ -111,7 +112,23 @@ From this page you can usually:
 - start, stop, or retry runs
 - review the latest graph or timeline
 - inspect step-level status
-- move between **Latest Run**, **Spec**, **Webhook**, and **History**
+- move between **Latest Run**, **Spec**, **Webhook**, **Notifications**, and **History**
+
+## Notifications
+
+The Notifications section manages team alerting from the Web UI.
+
+![Notification rules](/notification-rules-light.png)
+
+Use it to:
+
+- create reusable Slack, email, Telegram, and webhook channels
+- set Global notification defaults for all DAGs
+- override Global rules for one workspace
+- configure per-DAG exceptions from the DAG detail page
+- test channels before relying on them in production
+
+Notification channels and Global/workspace rules require an active Dagu license or trial on self-hosted deployments. See [Notifications](/web-ui/notifications) for the full model.
 
 ## Run Details
 
@@ -245,6 +262,7 @@ Depending on your role and license, the navigation can also include pages such a
 - **Remote Nodes**
 - **Base Config**
 - **Secrets**
+- **Notifications**
 - **Events**
 - **Audit Logs**
 - **License**
@@ -295,6 +313,7 @@ ui:
 
 - [Workspaces](/web-ui/workspaces)
 - [Cockpit](/web-ui/cockpit)
+- [Notifications](/web-ui/notifications)
 - [Secrets](/web-ui/secrets)
 - [Documents](/web-ui/documents)
 - [Learn the REST API](/overview/api)

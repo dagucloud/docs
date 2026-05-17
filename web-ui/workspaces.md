@@ -12,13 +12,14 @@ Use workspaces when you want to:
 - review only the runs that belong to a project
 - keep generated documents grouped with the workflows that produced them
 - keep Web UI-managed secrets scoped to the workflows that use them
+- route notifications to team- or environment-specific channels
 - give a user or API key access to a selected set of workflows
 
 Workspaces are a navigation and access-control feature inside one Dagu installation. If you need hard tenant isolation, run separate Dagu deployments with separate storage and credentials.
 
 ## Selecting a Workspace
 
-The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, and Docs.
+The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, Docs, and Notifications.
 
 | Selection | What You See |
 | --- | --- |
@@ -84,6 +85,18 @@ Global secrets are workspace-less values. A workflow in `ops` checks `ops` first
 
 See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
 
+## Notifications in Workspaces
+
+Notification rules can be Global or workspace-scoped.
+
+- **Global** rules are the default for every DAG.
+- A named workspace can either inherit Global rules or configure its own routes.
+- A DAG can still override the workspace when it needs a one-off destination.
+
+Use workspace notification rules when each team or environment has its own Slack channel, email list, Telegram chat, or webhook endpoint. A workflow with `labels: [workspace=ops]` uses the `ops` workspace rules when they are configured; otherwise it falls back to Global.
+
+See [Notifications](/web-ui/notifications) for the full routing model and license requirements.
+
 ## Access Rules
 
 Admins can give users and API keys access to all workspaces or selected workspaces.
@@ -124,6 +137,7 @@ For an interactive reference, open **API Docs** in the Web UI or visit `/api-doc
 ## Related
 
 - [Cockpit](/web-ui/cockpit)
+- [Notifications](/web-ui/notifications)
 - [Secrets](/web-ui/secrets)
 - [Documents](/web-ui/documents)
 - [User Management](/server-admin/authentication/user-management)

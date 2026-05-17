@@ -297,6 +297,8 @@ See [`history` CLI reference](/getting-started/cli#history) and [`cleanup` comma
 
 ### Alerting
 
+For team-managed notification routes, use [Notifications](/web-ui/notifications) in the Web UI. It supports reusable Slack, email, Telegram, and webhook channels with Global and workspace rules. On self-hosted Dagu, this Web UI routing requires an active license or trial.
+
 #### Email
 
 ```yaml

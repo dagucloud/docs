@@ -120,6 +120,7 @@ The chart writes the following `dagu.yaml` to `<fullname>-config`:
 ```yaml
 host: "0.0.0.0"
 port: 8080
+public_url: "https://dagu.example.com" # only written when config.publicUrl is set
 api_base_path: "/api/v1"
 default_execution_mode: "distributed"
 
@@ -226,6 +227,7 @@ persistence:
   skipValidation: false
 
 config:
+  publicUrl: ""
   envPassthrough: []
   envPassthroughPrefixes: []
 
@@ -233,6 +235,8 @@ extraEnv: []
 ```
 
 `image.pullPolicy` is the actual key used by the chart. `pull_policy` is not used.
+
+Set `config.publicUrl` to the externally reachable Web UI URL when notification messages should include absolute DAG-run links.
 
 ## Step Environment Passthrough
 

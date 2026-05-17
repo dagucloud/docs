@@ -71,6 +71,11 @@ docker run -d \
 - Lifecycle handlers
 - Email notifications
 
+**[Notifications](/web-ui/notifications)**
+- Reusable Slack, email, Telegram, and webhook channels
+- Global and workspace notification rules
+- License requirements for team notification routing
+
 **[Operations](/server-admin/operations)**
 - Running as a service
 - Monitoring and metrics

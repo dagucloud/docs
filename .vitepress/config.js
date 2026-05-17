@@ -210,6 +210,7 @@ const fullSidebar = [
     items: [
       { text: "Cockpit", link: "/web-ui/cockpit" },
       { text: "Workspaces", link: "/web-ui/workspaces" },
+      { text: "Notifications", link: "/web-ui/notifications" },
       { text: "Secrets", link: "/web-ui/secrets" },
       { text: "Documents", link: "/web-ui/documents" },
       { text: "REST API", link: "/web-ui/api" },

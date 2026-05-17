@@ -93,7 +93,7 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   </div>
   <div class="overview-card">
     <h3><a href="/overview/web-ui">Observable by default</a></h3>
-    <p>Every run has <a href="/web-ui/cockpit">status</a>, <a href="/overview/web-ui#run-history-and-logs">per-step logs</a>, <a href="/overview/web-ui#run-details">timing and history</a>, <a href="/writing-workflows/artifacts">artifacts</a>, <a href="/writing-workflows/approval">approvals</a>, and <a href="/overview/web-ui">UI controls</a> for debugging, recovery, and operator handoff.</p>
+    <p>Every run has <a href="/web-ui/cockpit">status</a>, <a href="/overview/web-ui#run-history-and-logs">per-step logs</a>, <a href="/overview/web-ui#run-details">timing and history</a>, <a href="/writing-workflows/artifacts">artifacts</a>, <a href="/writing-workflows/approval">approvals</a>, <a href="/web-ui/notifications">notifications</a>, and <a href="/overview/web-ui">UI controls</a> for debugging, recovery, and operator handoff.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/server-admin/distributed/">Scales gradually</a></h3>

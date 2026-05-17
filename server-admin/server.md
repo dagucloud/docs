@@ -32,6 +32,7 @@ Location: `~/.config/dagu/config.yaml`
 # Server Configuration
 host: "127.0.0.1"         # Web UI binding host
 port: 8080                # Web UI binding port
+public_url: ""            # External Web UI URL for generated links (e.g., "https://dagu.example.com")
 base_path: ""              # Base path for reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
 tz: "Asia/Tokyo"          # Server timezone
@@ -171,6 +172,7 @@ All options support `DAGU_` prefix:
 **Server:**
 - `DAGU_HOST` - Host (default: `127.0.0.1`)
 - `DAGU_PORT` - Port (default: `8080`)
+- `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification DAG-run links
 - `DAGU_TZ` - Timezone
 - `DAGU_DEBUG` - Debug mode
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)

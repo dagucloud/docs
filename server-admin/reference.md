@@ -10,6 +10,7 @@ Default: `~/.config/dagu/config.yaml`
 # Server
 host: "127.0.0.1"
 port: 8080
+public_url: ""            # External Web UI URL for generated links
 base_path: ""              # For reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
 tz: "America/New_York"
@@ -234,6 +235,7 @@ All options support `DAGU_` prefix.
 ### Server
 - `DAGU_HOST` - Server host (default: `127.0.0.1`)
 - `DAGU_PORT` - Server port (default: `8080`)
+- `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification DAG-run links
 - `DAGU_BASE_PATH` - Base path for reverse proxy
 - `DAGU_API_BASE_URL` - **DEPRECATED** - Use `api_base_path` config instead
 - `DAGU_TZ` - Server timezone
@@ -634,6 +636,7 @@ peer:
 - `log_format`: `text`
 - `host`: `127.0.0.1`
 - `port`: `8080`
+- `public_url`: empty
 - `check_updates`: `true`
 - `metrics`: `private`
 - `default_execution_mode`: `local`
