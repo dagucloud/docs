@@ -485,6 +485,10 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
     <p>Reproducible CLI dependencies</p>
   </div>
   <div class="step-card">
+    <h3><a href="/writing-workflows/remote-actions">Remote Actions</a></h3>
+    <p>Versioned action packages with input and output schemas</p>
+  </div>
+  <div class="step-card">
     <h3><a href="/step-types/shell">Actions</a></h3>
     <p>Built-in executor types</p>
   </div>

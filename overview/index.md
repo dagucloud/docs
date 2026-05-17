@@ -301,6 +301,10 @@ Workflow Operator connects Slack or Telegram to the built-in steward, so teams c
     <p>Pin external CLI binaries directly in workflow YAML.</p>
   </div>
   <div class="step-card">
+    <h3><a href="/writing-workflows/remote-actions">Remote Actions</a></h3>
+    <p>Create versioned DAG-backed action packages with input and output schemas.</p>
+  </div>
+  <div class="step-card">
     <h3><a href="/overview/architecture">Architecture</a></h3>
     <p>Understand standalone mode, distributed workers, storage, queues, and service layout.</p>
   </div>

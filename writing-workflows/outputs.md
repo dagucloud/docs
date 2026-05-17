@@ -235,6 +235,8 @@ steps:
 
 Remote action callers read these values with `${notify.outputs.messageId}`. This is intentionally separate from `${notify.output.*}`, which is for step-scoped `output:` values.
 
+When these values are produced inside a remote action DAG, Dagu validates the final action output object against the `outputs` schema in `dagu-action.yaml` after the action DAG returns a run result. `stdout.outputs` and `outputs.write` publish values; the manifest schema is what validates the action boundary. If validation fails, the parent action step fails.
+
 ## Run Output Collection
 
 When a DAG run completes, Dagu writes collected outputs to `outputs.json` for the Web UI and Outputs API.

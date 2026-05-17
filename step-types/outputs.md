@@ -43,6 +43,8 @@ steps:
 
 Values should be small JSON-compatible values. Use [Artifacts](/writing-workflows/artifacts) for files, reports, logs, screenshots, or large JSON payloads.
 
+`outputs.write` does not validate a remote action manifest by itself. When the step runs inside a remote action DAG, Dagu validates the final collected action output object against the `outputs` schema in `dagu-action.yaml` after the action DAG returns.
+
 ## Stdout Outputs
 
 If a command already writes the boundary result to stdout, use `stdout.outputs` instead of adding a separate `outputs.write` step:

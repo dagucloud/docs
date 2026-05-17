@@ -70,9 +70,6 @@ inputs:
   properties:
     text:
       type: string
-    channel:
-      type: string
-      default: "#ops"
 outputs:
   type: object
   additionalProperties: false
@@ -84,16 +81,16 @@ outputs:
       type: string
 ```
 
+Supported manifest keys are exactly `apiVersion`, `name`, `dag`, `inputs`, and `outputs`. Unknown keys are rejected. `inputs` and `outputs` are JSON Schema objects.
+
 The action DAG is a normal Dagu workflow, but it must not set `working_dir`. Dagu runs it inside the materialized action workspace so relative files in the package are available.
 
 ```yaml
-name: notify-action
 params:
   - text
-  - channel
 steps:
   - id: send
-    run: ./scripts/notify.sh "${channel}" "${text}"
+    run: ./scripts/notify.sh "${text}"
     stdout:
       outputs:
         fields:
@@ -105,9 +102,9 @@ steps:
             select: .status
 ```
 
-The `inputs` schema validates the caller's `with:` object. The input values are passed to the action DAG as run parameters, so the action DAG can read them with normal parameter syntax such as `${text}`.
+The `inputs` schema validates the caller's `with:` object before the action DAG starts. Input values are passed to the action DAG as runtime parameters, so scalar fields can be read with normal parameter syntax such as `${text}`. For structured input, pass an explicit JSON string and decode it inside the action DAG. JSON Schema `default` values in `inputs` are validated as schema defaults, but they are not applied to the caller's `with:` object before parameters are passed.
 
-The `outputs` schema validates the child DAG outputs after the action finishes. Remote action outputs come from `stdout.outputs` or `action: outputs.write` in the action DAG. Dagu also writes the compact outputs JSON to the action step's stdout for compatibility, but callers should read the structured boundary with `${step.outputs.*}`.
+The `outputs` schema validates the collected action output object after the action DAG returns a run result. New action packages should publish that object with `stdout.outputs` or `action: outputs.write` in the action DAG. If no typed outputs are published, legacy string-form run outputs can still be carried for compatibility. If `outputs` validation fails, the action step fails. Dagu also writes the compact outputs JSON to the action step's stdout for compatibility, but callers should read the structured boundary with `${step.outputs.*}`.
 
 ## Use Outputs in the Caller
 
@@ -140,13 +137,23 @@ Use `outputs.write` when the action DAG needs to assemble the result from parame
 
 ```yaml
 steps:
+  - id: send
+    run: ./scripts/notify.sh "${text}"
+    output:
+      response:
+        from: stdout
+        decode: json
+
   - id: publish
+    depends: [send]
     action: outputs.write
     with:
       values:
-        messageId: ${send.output.id}
+        messageId: ${send.output.response.id}
         status: sent
 ```
+
+Do not use object-form `output:` to return action results to the parent DAG. Object-form `output:` is step-scoped inside the action DAG and remains available as `${step.output.*}` there; publish caller-visible action results through `stdout.outputs` or `outputs.write`.
 
 See [Outputs](/writing-workflows/outputs) for the full output reference.
 
