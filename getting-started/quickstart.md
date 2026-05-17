@@ -44,11 +44,12 @@ A DAG is a YAML file. Save the following as `hello.yaml`:
 
 ```yaml
 steps:
-  - echo "Hello from Dagu!"
-  - echo "Running step 2"
+  - id: hello
+    run: echo "Hello from Dagu!"
+  - id: step_2
+    run: echo "Running step 2"
+    depends: [hello]
 ```
-
-Steps run sequentially by default. Each step is a shell command.
 
 ## 3. Run it
 
@@ -127,8 +128,6 @@ steps:
     run: ./load.sh
     depends: [transform_a, transform_b]
 ```
-
-`type: graph` enables parallel execution via `depends`. `type: chain` (the default) runs steps in the order they appear.
 
 ### Parameters
 

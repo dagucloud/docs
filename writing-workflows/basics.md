@@ -187,8 +187,6 @@ steps:
 
 ## Dependencies
 
-Steps run sequentially by default. Use `depends` for parallel execution or to control order.
-
 ```yaml
 steps:
   - id: download

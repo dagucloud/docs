@@ -162,7 +162,6 @@ For `dagu exec -- python script.py --arg=value`:
 
 ```yaml
 name: exec-python
-type: chain
 working_dir: /current/directory
 steps:
   - id: main
@@ -181,7 +180,6 @@ Generates:
 
 ```yaml
 name: exec-python
-type: chain
 working_dir: /current/directory
 env:
   - FOO=bar

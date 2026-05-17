@@ -719,7 +719,7 @@ Thanks to our contributors for this release:
   ```
 
 - Auth by Default: The default authentication mode changed from `none` to `builtin`. New installations require creating an admin account via the `/setup` page on first visit. The JWT token secret is auto-generated and persisted to `{dataDir}/auth/token_secret` if not explicitly configured. See [RFC 018](https://github.com/dagucloud/dagu/blob/main/rfcs/draft/018-auth-by-default.md).
-- DAG Type Validation: DAGs with `type: chain` (the default) no longer allow the `depends` field on steps. Chain execution runs steps sequentially in definition order, making explicit dependencies redundant. To use the `depends` field for custom execution order, set `type: graph` explicitly. This change prevents confusion between chain's implicit sequential ordering and graph's explicit dependency-based execution.
+- DAG Type Validation: DAGs with `type: chain` no longer allow the `depends` field on steps. Chain execution runs steps sequentially in definition order, making explicit dependencies redundant. Use the default graph execution model with explicit `depends` for custom execution order.
 
 ### Removed
 
@@ -2217,20 +2217,15 @@ Thanks to our contributors for this release:
 
 ### New Features
 
-- Shorthand Step Syntax: Added simplified step definition without requiring explicit name and command fields (#1206)
-
-  ```yaml
-  steps:
-    - echo "hello"
-  ```
-
-  Equivalent to:
+- Shorthand Step Syntax: Added simplified step definition without requiring explicit name and command fields (#1206). This shorthand is now deprecated; prefer explicit step objects.
 
   ```yaml
   steps:
     - id: step_1
       run: echo "hello"
   ```
+
+  The older scalar form, such as `steps: ["echo \"hello\""]`, should not be used in new workflows.
 
 - Working Directory Support: Added DAG-level and step-level working directory configuration with inheritance for better file path management
 - Load Environment Support: Enhanced environment variable loading capabilities with improved dotenv support
@@ -2749,13 +2744,12 @@ steps:
 
 Starting from v1.17.0-beta.13, DAGs now have a `type` field that controls step execution behavior:
 
-- **`type: chain`** (new default): Steps are automatically connected in sequence, even if no dependencies are specified
-- **`type: graph`** (previous behavior): Steps only depend on explicitly defined dependencies
+- **`type: chain`**: Steps are automatically connected in sequence, even if no dependencies are specified
+- **default graph execution**: Steps only depend on explicitly defined dependencies
 
-To maintain the previous behavior, add `type: graph` to your DAG configuration:
+To use graph execution, omit `type` and define dependencies explicitly:
 
 ```yaml
-type: graph
 steps:
   - id: task1
     run: echo "runs in parallel"
@@ -2763,17 +2757,14 @@ steps:
     run: echo "runs in parallel"
 ```
 
-Alternatively, you can explicitly set empty dependencies for parallel steps:
+Root steps without `depends` run in parallel by default:
 
 ```yaml
-type: graph
 steps:
   - id: task1
     run: echo "runs in parallel"
-    depends: []
   - id: task2
     run: echo "runs in parallel"
-    depends: []
 ```
 
 ### Migration Required

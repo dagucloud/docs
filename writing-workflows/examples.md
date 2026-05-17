@@ -108,25 +108,24 @@ Pin portable command-line dependencies in the DAG so workers install the expecte
 
 <div class="example-card">
 
-### Execution Mode: Chain vs Graph
+### Dependency Modes
 
 ```yaml
-# Default (chain): steps run in order
-type: chain
+# Default graph mode: explicit dependencies define order
 steps:
-  - run: echo "step 1"
-  - run: echo "step 2"  # Automatically depends on previous
+  - id: step_1
+    run: echo "step 1"
+  - id: step_2
+    depends: [step_1]
+    run: echo "step 2"
 
-# Graph mode: only explicit dependencies
+# Independent steps can run in parallel
 ---
-type: graph
 steps:
   - id: a
     run: echo A
-    depends: []   # Explicitly independent
   - id: b
     run: echo B
-    depends: []
 ```
 
 ```mermaid

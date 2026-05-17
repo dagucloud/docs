@@ -10,19 +10,21 @@ Define execution order with step dependencies.
 
 ```yaml
 steps:
-  - run: wget https://example.com/data.zip  # Download archive
-  - run: unzip data.zip                     # Extract files
-  - run: python process.py                  # Process data
+  - id: download
+    run: wget https://example.com/data.zip  # Download archive
+  - id: extract
+    run: unzip data.zip                     # Extract files
+    depends: download
+  - id: process
+    run: python process.py                  # Process data
+    depends: extract
 ```
 
-> **Note**: The above example uses the default `type: chain`, where steps run sequentially in order. To use explicit `depends` declarations for parallel or custom execution order, set `type: graph` at the DAG level.
+### Explicit Dependencies
 
-### Explicit Dependencies (Graph Mode)
-
-Use `type: graph` when you need parallel execution or custom dependency relationships:
+Use `depends` when you need parallel execution or custom dependency relationships:
 
 ```yaml
-type: graph
 steps:
   - id: download_a
     run: wget https://example.com/a.zip

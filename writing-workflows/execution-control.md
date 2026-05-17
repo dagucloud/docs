@@ -99,13 +99,9 @@ max_active_steps: 2  # Run up to 2 steps in parallel
 
 steps:
   - run: echo "Running task 1"
-    depends: [] # Explicitly declare no dependency
   - run: echo "Running task 2"
-    depends: []
   - run: echo "Running task 3"
-    depends: []
   - run: echo "Running task 4"
-    depends: []
   # All start in parallel, limited by max_active_steps
 ```
 
