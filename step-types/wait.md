@@ -32,7 +32,7 @@ steps:
   - id: maintenance_window
     action: wait.until
     with:
-      until: "2026-01-02T03:04:05Z"
+      until: "2030-01-02T03:04:05Z"  # Example future timestamp
 ```
 
 ## Wait for a File

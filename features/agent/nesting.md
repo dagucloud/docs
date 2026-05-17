@@ -1,6 +1,6 @@
 # Nested Agents
 
-Use the `call` field to invoke child DAGs that contain `action: agent.run` steps. This lets you compose agent workflows hierarchically — break complex agent tasks into focused child agents, chain their outputs, and run them in parallel.
+Use `action: dag.run` with `with.dag` to invoke child DAGs that contain `action: agent.run` steps. This lets you compose agent workflows hierarchically — break complex agent tasks into focused child agents, chain their outputs, and run them in parallel.
 
 ## How It Works
 

@@ -157,7 +157,7 @@ steps:
     output: CHECKOUT
 
   - id: print_commit
-    run: echo "Checked out ${checkout_source.output.commit}"
+    run: echo "Checked out ${CHECKOUT.commit}"
 ```
 
 Example output:

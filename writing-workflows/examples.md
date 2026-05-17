@@ -1122,7 +1122,7 @@ steps:
 
 ```yaml
 steps:
-    output: SUB_RESULT
+  - output: SUB_RESULT
     action: dag.run
     with:
       dag: sub_workflow
@@ -1241,13 +1241,14 @@ Runs with the interpreter declared in the shebang.
 
 ```yaml
 steps:
-  - run: python
-    run: |
+  - run: |
       import os
       import datetime
       
       print(f"Current directory: {os.getcwd()}")
       print(f"Current time: {datetime.datetime.now()}")
+    with:
+      shell: python3
 ```
 
 Execute script with specific interpreter.

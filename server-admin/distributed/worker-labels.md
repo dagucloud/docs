@@ -77,7 +77,7 @@ Step-level `worker_selector` is only valid on actions that launch sub-DAGs:
 |--------|----------------------------|
 | `dag.run` | Yes |
 | `dag.enqueue` | Yes |
-| All others (`run`, `http.request`, `docker.run`, etc.) | No — validation error |
+| All other actions (`http.request`, `docker.run`, etc.) and inline `run:` steps | No — validation error |
 
 Setting `worker_selector` on an unsupported action produces a validation error.
 

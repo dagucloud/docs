@@ -4,7 +4,7 @@ GitHub Copilot CLI brings GitHub Copilot to your terminal.
 
 ## Installation
 
-Requires the [GitHub Copilot CLI extension](https://github.com/cli/cli#installation).
+Requires the [GitHub Copilot CLI extension](https://github.com/github/gh-copilot).
 
 ## Base Invocation
 

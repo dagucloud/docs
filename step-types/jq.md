@@ -39,9 +39,9 @@ steps:
       data: '{"name": "Alice"}'
 ```
 
-**File URL via `with.data`**
+**File path via `with.input`**
 
-Read JSON from a file. The path is evaluated at runtime, so step references like `${step_id.stdout}` work:
+Read JSON from a file path. The path is evaluated at runtime, so step references like `${step_id.stdout}` work:
 
 ```yaml
 type: graph
@@ -59,7 +59,7 @@ steps:
     output: RESULT
 ```
 
-**File path via `with.input`**
+**File URL via `with.data`**
 
 ```yaml
 type: graph

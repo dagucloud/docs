@@ -224,7 +224,7 @@ steps:
 
 Output:
 
-```
+```json
 {"order_id":1,"customer_id":42,"total":99.99}
 {"order_id":2,"customer_id":43,"total":149.99}
 ```

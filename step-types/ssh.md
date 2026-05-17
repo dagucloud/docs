@@ -32,7 +32,7 @@ steps:
   - action: ssh.run
     with:
       user: ubuntu
-      ip: 192.168.1.100
+      host: 192.168.1.100
       key: /home/user/.ssh/id_rsa
       shell: "/bin/bash -o pipefail"  # Step-level `with.shell` accepts string form
       command: echo "Hello from remote server"

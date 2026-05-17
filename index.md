@@ -219,7 +219,7 @@ Common built-in actions include:
 | `chat.completion` | LLM chat completion |
 | `agent.run` | Tool-using agent step |
 
-DAGs can also declare reusable `actions` that expand to builtin actions at load time. See [Custom Actions](/writing-workflows/custom-step-types) and [Actions](/step-types/shell) for the exact configuration surface.
+DAGs can also declare reusable `actions` that expand to built-in actions at load time. See [Custom Actions](/writing-workflows/custom-step-types) and [Actions](/step-types/shell) for the exact configuration surface.
 
 ## Scheduling and Reliability
 

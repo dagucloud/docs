@@ -20,7 +20,7 @@ The agent uses the default model configured in Steward Settings (`/agent-setting
 
 ## Configuration
 
-The `with` block provides the task through `task`, `prompt`, or `messages`. Other fields fall back to defaults from global Steward Settings when omitted.
+The `with` block provides the task through `task`, `prompt`, or `messages`. Other fields fall back to `defaults.agent` and then global Steward Settings when omitted.
 
 ```yaml
 steps:
@@ -56,11 +56,12 @@ steps:
 
 ## Model Resolution
 
-The agent step resolves its model from global Steward Settings (configured at `/agent-settings`):
+The agent step resolves its model after DAG-level defaults are applied:
 
 1. If `with.model` is set in the step, look up that model ID in the global `ModelStore`
-2. If `with.model` is omitted, use the global default model (`DefaultModelID` from Steward Settings)
-3. If no default model is configured, the step fails with: `"no model configured; set a default model in Steward Settings or specify with.model in the step"`
+2. If `defaults.agent.model` is set, use that model ID
+3. Otherwise use the global default model (`DefaultModelID` from Steward Settings)
+4. If no model is configured, the step fails with: `"no model configured; set a default model in Agent Settings or specify agent.model in the step"`
 
 Model configuration (provider, API key, base URL) is managed entirely through Steward Settings. This avoids duplicating credentials in DAG files.
 
@@ -92,7 +93,7 @@ steps:
     # Uses model=claude-sonnet (override), soul=tsumugi (default), etc.
 ```
 
-**Resolution order (per field):** `step.with.<field>` → `defaults.agent.<field>` → built-in default
+**Resolution order (per field):** `step.with.<field>` → `defaults.agent.<field>` → global default when one exists for that field → built-in default
 
 ### Supported Default Fields
 

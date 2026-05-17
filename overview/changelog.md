@@ -918,9 +918,8 @@ Thanks to our contributors for this release:
 
   steps:
     - id: upload_config
-      type: sftp
+      action: sftp.upload
       with:
-        direction: upload
         source: /local/config.yaml
         destination: /remote/config.yaml
   ```

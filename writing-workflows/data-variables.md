@@ -348,7 +348,7 @@ Examples:
 
 ```yaml
 steps:
-    output: SUB_RESULT
+  - output: SUB_RESULT
     action: dag.run
     with:
       dag: sub_workflow
@@ -381,7 +381,7 @@ steps:
   - id: validate
     run: python validate.py
     depends:
-      - run: extract  # Can use ID in dependencies
+      - extract  # Can use ID in dependencies
 
   - run: |
       # Reference step properties using IDs

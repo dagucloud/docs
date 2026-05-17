@@ -66,6 +66,7 @@ The provider list may include:
 - `OpenAI Codex`
 - `Google Gemini`
 - `OpenRouter`
+- `OpenCode`
 - `Local`
 - `Z.AI`
 
