@@ -172,20 +172,27 @@ env:
   - DATA_DIR: /tmp/data/${DATE}
 
 steps:
-  - run: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
+  - id: download
+    run: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
     retry_policy:
       limit: 3
       interval_sec: 60
 
-  - run: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
+  - id: validate
+    run: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
+    depends: download
     continue_on:
       failure: false
 
-  - parallel: [users, orders, products]
+  - id: process
+    parallel: [users, orders, products]
     run: python process.py --type=$ITEM --date=${DATE}
+    depends: validate
     output: RESULT_${ITEM}
 
-  - run: python report.py --date=${DATE}
+  - id: report
+    run: python report.py --date=${DATE}
+    depends: process
 
 handler_on:
   failure:
@@ -197,9 +204,14 @@ handler_on:
 ### Sequential Pipeline
 ```yaml
 steps:
-  - run: echo "Extracting data"
-  - run: echo "Transforming data"
-  - run: echo "Loading data"
+  - id: extract
+    run: echo "Extracting data"
+  - id: transform
+    run: echo "Transforming data"
+    depends: extract
+  - id: load
+    run: echo "Loading data"
+    depends: transform
 ```
 
 ### Parallel Processing

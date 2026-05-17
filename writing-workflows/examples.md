@@ -12,8 +12,11 @@ Quick reference for all Dagu features. Each example is minimal and copy-paste re
 
 ```yaml
 steps:
-  - run: echo "Step 1"
-  - run: echo "Step 2"
+  - id: first
+    run: echo "Step 1"
+  - id: second
+    run: echo "Step 2"
+    depends: first
 ```
 
 ```mermaid

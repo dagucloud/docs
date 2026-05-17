@@ -73,22 +73,26 @@ handler_on:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Execution type: `chain` or `graph` | `chain` |
+| `type` | string | Execution type: `graph` or `chain` | `graph` |
 
-- **`chain`** (default): Steps execute sequentially in the order defined. Each step implicitly depends on the previous step. The `depends` field is **not allowed** in chain mode.
-- **`graph`**: Steps execute based on explicit dependencies defined by the `depends` field. Steps without dependencies can run in parallel (up to `max_active_steps`).
+- **`graph`**: Steps are scheduled from their declared `depends` relationships.
+- **`chain`**: Steps execute sequentially in definition order. The `depends` field is not allowed in chain mode.
 
 ```yaml
-# Chain mode (default) - sequential execution
+# Sequential execution with the default graph mode
 steps:
-  - run: echo "First"
-  - run: echo "Second"   # Waits for First
-  - run: echo "Third"    # Waits for Second
+  - id: first
+    run: echo "First"
+  - id: second
+    run: echo "Second"
+    depends: first
+  - id: third
+    run: echo "Third"
+    depends: second
 
 ---
 
-# Graph mode - dependency-based execution
-type: graph
+# Fan-out and fan-in with the default graph mode
 steps:
   - id: fetch_a
     run: curl https://api.example.com/a
@@ -1089,12 +1093,14 @@ steps:
   - run: echo "Hello"
 ```
 
-#### Shorthand String Format
+#### Run-only Step Objects
 ```yaml
 steps:
   - run: echo "Hello"
   - run: ls -la
 ```
+
+Plain string step entries are legacy syntax; write step objects with `run` instead.
 
 ### Execution Fields
 

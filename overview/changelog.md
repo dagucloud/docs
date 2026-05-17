@@ -719,7 +719,7 @@ Thanks to our contributors for this release:
   ```
 
 - Auth by Default: The default authentication mode changed from `none` to `builtin`. New installations require creating an admin account via the `/setup` page on first visit. The JWT token secret is auto-generated and persisted to `{dataDir}/auth/token_secret` if not explicitly configured. See [RFC 018](https://github.com/dagucloud/dagu/blob/main/rfcs/draft/018-auth-by-default.md).
-- DAG Type Validation: DAGs with `type: chain` no longer allow the `depends` field on steps. Chain execution runs steps sequentially in definition order, making explicit dependencies redundant. Use the default graph execution model with explicit `depends` for custom execution order.
+- DAG Type Validation: Explicit chain-mode DAGs no longer allow the `depends` field on steps. Chain execution runs steps sequentially in definition order, making explicit dependencies redundant. Use graph execution with explicit `depends` for custom execution order.
 
 ### Removed
 
@@ -2744,7 +2744,7 @@ steps:
 
 Starting from v1.17.0-beta.13, DAGs now have a `type` field that controls step execution behavior:
 
-- **`type: chain`**: Steps are automatically connected in sequence, even if no dependencies are specified
+- **Explicit chain mode**: Steps are automatically connected in sequence, even if no dependencies are specified
 - **default graph execution**: Steps only depend on explicitly defined dependencies
 
 To use graph execution, omit `type` and define dependencies explicitly:

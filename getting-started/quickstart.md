@@ -148,12 +148,15 @@ dagu start backup.yaml -- SOURCE=/important DEST=/backups
 
 ```yaml
 steps:
-  - run: curl -f https://example.com/data.zip -o data.zip
+  - id: download
+    run: curl -f https://example.com/data.zip -o data.zip
     retry_policy:
       limit: 3
       interval_sec: 30
 
-  - run: ./process.sh data.zip
+  - id: process
+    run: ./process.sh data.zip
+    depends: download
     continue_on:
       failure: true
 
@@ -174,8 +177,11 @@ container:
   volumes:
     - ./data:/data
 steps:
-  - run: python -c "open('/data/out.txt','w').write('hi')"
-  - run: python -c "print(open('/data/out.txt').read())"
+  - id: write_file
+    run: python -c "open('/data/out.txt','w').write('hi')"
+  - id: read_file
+    run: python -c "print(open('/data/out.txt').read())"
+    depends: write_file
 ```
 
 Or run a single step in its own container:

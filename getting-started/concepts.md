@@ -27,8 +27,11 @@ The basic unit of execution. Each step runs a command or action:
 
 ```yaml
 steps:
-  - run: curl -O https://example.com/data.csv  # Download data
-  - run: python analyze.py data.csv           # Process data
+  - id: download
+    run: curl -O https://example.com/data.csv
+  - id: analyze
+    run: python analyze.py data.csv
+    depends: download
 ```
 
 Steps can execute multiple commands that share the same configuration:
@@ -46,10 +49,9 @@ steps:
 
 ### Dependencies
 
-By default, steps run sequentially. Use `depends` for parallel execution:
+Declare step relationships with `depends`:
 
 ```yaml
-type: graph
 steps:
   - id: A
     run: echo "First"
@@ -97,9 +99,12 @@ Pass data between steps using `output`:
 
 ```yaml
 steps:
-  - run: date +%Y%m%d
+  - id: date_stamp
+    run: date +%Y%m%d
     output: TODAY
-  - run: tar -czf backup_${TODAY}.tar.gz /data
+  - id: backup
+    run: tar -czf backup_${TODAY}.tar.gz /data
+    depends: date_stamp
 ```
 
 ### Tools

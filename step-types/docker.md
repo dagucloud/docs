@@ -32,8 +32,11 @@ container:
     - PYTHONPATH=/app
 
 steps:
-  - run: pip install -r requirements.txt
-  - run: python process.py /data/input.csv
+  - id: install
+    run: pip install -r requirements.txt
+  - id: process
+    run: python process.py /data/input.csv
+    depends: install
 ```
 
 ### Exec Mode (Use Existing Container)
@@ -45,8 +48,11 @@ Execute commands in a container that's already running (e.g., started by Docker 
 container: my-app-container
 
 steps:
-  - run: php artisan migrate
-  - run: php artisan cache:clear
+  - id: migrate
+    run: php artisan migrate
+  - id: clear_cache
+    run: php artisan cache:clear
+    depends: migrate
 ```
 
 ```yaml
@@ -59,8 +65,11 @@ container:
     - APP_DEBUG=true
 
 steps:
-  - run: composer install
-  - run: php artisan optimize
+  - id: install
+    run: composer install
+  - id: optimize
+    run: php artisan optimize
+    depends: install
 ```
 
 Exec mode is useful when:

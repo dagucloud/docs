@@ -175,8 +175,11 @@ The script installers run a guided wizard that installs Dagu, adds it to your PA
 ```bash
 cat > hello.yaml << 'EOF'
 steps:
-  - run: echo "Hello from Dagu!"
-  - run: echo "Step 2"
+  - id: hello
+    run: echo "Hello from Dagu!"
+  - id: next
+    run: echo "Step 2"
+    depends: hello
 EOF
 
 dagu start hello.yaml
