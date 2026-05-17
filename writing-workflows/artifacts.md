@@ -212,5 +212,5 @@ Artifact directories are deleted together with the corresponding DAG run during 
 | Feature | Stored As | Scope | UI |
 |---------|-----------|-------|----|
 | Artifacts | Arbitrary files | Per DAG run | DAG run **Artifacts** tab |
-| Outputs | Key/value strings in `outputs.json` | Per DAG run | DAG run **Outputs** tab |
+| Outputs | Small key/value results in `outputs.json` | Per DAG run or action boundary | DAG run **Outputs** tab |
 | Documents | Markdown files under `DAG_DOCS_DIR` | Persistent across runs | **Documents** page |

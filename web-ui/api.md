@@ -1352,7 +1352,7 @@ Fetches the log for a specific step.
 
 **Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/outputs`
 
-Retrieves the collected outputs from a completed DAG run. This endpoint reads the run's `outputs.json`, which is populated only by steps using string-form `output: NAME`.
+Retrieves the collected outputs from a completed DAG run. This endpoint reads the run's `outputs.json`, which is populated by string-form `output: NAME`, `stdout.outputs`, and `action: outputs.write`.
 
 **Path Parameters**:
 | Parameter | Type | Description |
@@ -1393,8 +1393,8 @@ Retrieves the collected outputs from a completed DAG run. This endpoint reads th
   - `completedAt`: RFC3339 timestamp when execution completed
   - `params`: JSON-serialized parameters passed to the DAG
 - `outputs`: Key-value pairs of collected outputs
-  - Only string-form `output: NAME` values appear here
-  - Keys are converted from `SCREAMING_SNAKE_CASE` to `camelCase`
+  - String-form `output: NAME`, `stdout.outputs`, and `outputs.write` values appear here
+  - String-form `output: NAME` keys are converted from `SCREAMING_SNAKE_CASE` to `camelCase`; `stdout.outputs` and `outputs.write` keys are preserved
   - Object-form `output: {...}` values are step-scoped only and are not returned by this endpoint
 
 **Response when no outputs (200)**:
@@ -1422,7 +1422,7 @@ Retrieves the collected outputs from a completed DAG run. This endpoint reads th
 **Notes**:
 - Outputs are only available for completed DAG runs (succeeded, partially_succeeded, failed, rejected, or aborted)
 - Secret values in outputs are automatically masked with `*******`
-- Object-form `output: {...}` does not participate in run-level outputs
+- Object-form `output: {...}` does not participate in run-level outputs unless values are republished through `stdout.outputs` or `outputs.write`
 
 **Example**:
 ```bash

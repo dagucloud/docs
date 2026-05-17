@@ -128,6 +128,7 @@ const fullSidebar = [
       { text: "Agent", link: "/features/agent/step" },
       { text: "Template", link: "/step-types/template" },
       { text: "Log", link: "/step-types/log" },
+      { text: "Outputs", link: "/step-types/outputs" },
       { text: "Mail", link: "/step-types/mail" },
       { text: "HTTP", link: "/step-types/http" },
       { text: "SSH", link: "/step-types/ssh" },

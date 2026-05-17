@@ -317,7 +317,7 @@ steps:
         select: .artifact
 ```
 
-Use `${inspect_build.output.version}` and `${inspect_build.output.artifact.url}` in downstream steps. Object-form output does not add a flat `${VAR}` name and is not collected into `outputs.json`.
+Use `${inspect_build.output.version}` and `${inspect_build.output.artifact.url}` in downstream steps. Object-form output does not add a flat `${VAR}` name and is not collected into `outputs.json`; republish selected values through `stdout.outputs` or `outputs.write` when they should become DAG/action outputs.
 
 ### Redirect Output
 
@@ -396,6 +396,8 @@ Available step properties when using ID references:
 - `${id.stderr}`: Path to stderr file
 - `${id.exit_code}`: Exit code of the step (as a string)
 - `${id.output}`: Captured string output or structured object-form output payload
+- `${id.outputs}`: DAG/action outputs published by that step as compact JSON
+- `${id.outputs.field}`: One field from the published DAG/action outputs
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content.
 >
@@ -404,6 +406,8 @@ Available step properties when using ID references:
 > - the full published object as compact JSON for object-form `output: {...}`
 >
 > Nested access works with `${id.output.foo}`. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal.
+>
+> Use `${id.outputs.foo}` for values published through `stdout.outputs` or `outputs.write`.
 
 ## Command Substitution
 

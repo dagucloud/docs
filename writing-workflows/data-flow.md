@@ -34,7 +34,7 @@ steps:
 2. Stored in the variable name specified by `output`
 3. Available to all downstream steps via `${VARIABLE_NAME}`
 4. Trailing newlines are automatically trimmed
-5. String-form `output: NAME` values are collected into `outputs.json` for the DAG run (see [DAG Run Outputs](#dag-run-outputs))
+5. String-form `output: NAME` values are collected into `outputs.json`; use `stdout.outputs` or `outputs.write` for explicit DAG/action outputs (see [DAG Run Outputs](#dag-run-outputs))
 
 ### String vs Object Form
 
@@ -496,6 +496,6 @@ For detailed precedence rules including interpolation vs runtime environment, se
 
 ## DAG Run Outputs
 
-Only string-form `output: NAME` values are collected into `outputs.json` when the DAG completes. Object-form `output: {...}` stays step-scoped for `${step.output.*}` references and is not written to the run outputs file.
+String-form `output: NAME`, `stdout.outputs`, and `action: outputs.write` values are collected into `outputs.json` when the DAG completes. Object-form `output: {...}` stays step-scoped for `${step.output.*}` references unless you explicitly republish values through `stdout.outputs` or `outputs.write`.
 
 See [Outputs](/writing-workflows/outputs) for complete documentation on output collection, access methods, and security features.

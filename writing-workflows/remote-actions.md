@@ -76,9 +76,11 @@ inputs:
 outputs:
   type: object
   additionalProperties: false
-  required: [RESULT]
+  required: [messageId]
   properties:
-    RESULT:
+    messageId:
+      type: string
+    status:
       type: string
 ```
 
@@ -92,16 +94,24 @@ params:
 steps:
   - id: send
     run: ./scripts/notify.sh "${channel}" "${text}"
-    output: RESULT
+    stdout:
+      outputs:
+        fields:
+          messageId:
+            decode: json
+            select: .id
+          status:
+            decode: json
+            select: .status
 ```
 
 The `inputs` schema validates the caller's `with:` object. The input values are passed to the action DAG as run parameters, so the action DAG can read them with normal parameter syntax such as `${text}`.
 
-The `outputs` schema validates the child DAG outputs after the action finishes. Remote action outputs come from string-form `output:` values in the child DAG and are written as JSON to the action step's stdout.
+The `outputs` schema validates the child DAG outputs after the action finishes. Remote action outputs come from `stdout.outputs` or `action: outputs.write` in the action DAG. Dagu also writes the compact outputs JSON to the action step's stdout for compatibility, but callers should read the structured boundary with `${step.outputs.*}`.
 
 ## Use Outputs in the Caller
 
-Use normal structured output capture on the action step when later steps need fields from the action result:
+Use `${action_step.outputs.<field>}` when later steps need fields from the action result:
 
 ```yaml
 steps:
@@ -109,18 +119,36 @@ steps:
     action: acme/dagu-action-notify@v1.2.0
     with:
       text: "Build ${BUILD_ID} finished"
-    output:
-      result:
-        from: stdout
-        decode: json
-        select: .RESULT
 
   - id: audit
     depends: [notify]
-    run: echo "Action result: ${notify.output.result}"
+    run: echo "Notification message: ${notify.outputs.messageId}"
 ```
 
-See [Outputs](/writing-workflows/outputs) for the full `output:` reference.
+Use `stdout.outputs` when a command emits the action result on stdout:
+
+```yaml
+steps:
+  - id: classify
+    run: ./classify.sh "${text}"
+    stdout:
+      outputs:
+        decode: json
+```
+
+Use `outputs.write` when the action DAG needs to assemble the result from parameters, previous steps, or literal values:
+
+```yaml
+steps:
+  - id: publish
+    action: outputs.write
+    with:
+      values:
+        messageId: ${send.output.id}
+        status: sent
+```
+
+See [Outputs](/writing-workflows/outputs) for the full output reference.
 
 ## Reference Formats
 

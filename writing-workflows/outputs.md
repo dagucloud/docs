@@ -1,18 +1,20 @@
 # Outputs
 
-Capture small step results, publish structured values, and collect final run outputs.
+Capture small step results, publish structured values, and return final run or action outputs.
 
 ## Overview
 
-Dagu supports two `output:` modes:
+Dagu has three related output surfaces:
 
 - **String form** captures a step's trimmed stdout into one variable such as `${VERSION}`.
 - **Object form** publishes structured step-scoped output for `${step_id.output.*}` references.
+- **DAG/action outputs** publish values for the run's Outputs tab and for remote action callers through `${step_id.outputs.*}`.
 
 These modes solve different problems:
 
 - Use **string form** when you want a flat variable and a final `outputs.json` entry.
-- Use **object form** when you want structured downstream data without brittle `echo` glue.
+- Use **object form** when one step needs structured downstream data through `${step_id.output.*}`.
+- Use **DAG/action outputs** when the whole DAG or remote action should return values to its caller.
 
 Use `output:` for small values. If a step produces a large report, JSON dump, Markdown document, or log that users should inspect later, write the stream directly to an artifact with `stdout.artifact` or `stderr.artifact` instead:
 
@@ -148,6 +150,8 @@ Step IDs expose several properties:
 - `${id.stderr}` - path to the stderr log file
 - `${id.exit_code}` - exit code as a string
 - `${id.output}` - captured string output or the full object-form payload as compact JSON
+- `${id.outputs}` - DAG/action outputs published by that step as compact JSON
+- `${id.outputs.field}` - one field from the published DAG/action outputs
 
 Nested access works when the output value is structured JSON:
 
@@ -175,11 +179,67 @@ ${build.output:0:5}
 
 > `${id.stdout}` and `${id.stderr}` are file paths, not file content. Use `cat ${id.stdout}` to read the content.
 
+## DAG and Action Outputs
+
+Use `stdout.outputs` when the command's stdout is the value you want to return from the DAG or action.
+
+String form captures stdout text into one output field:
+
+```yaml
+steps:
+  - id: create_ticket
+    run: ./create-ticket.sh
+    stdout:
+      outputs: ticketId
+```
+
+Object form can decode stdout as JSON or YAML. If no `field` is set, decoded JSON must be an object and each key becomes an output:
+
+```yaml
+steps:
+  - id: notify
+    run: ./notify.sh
+    stdout:
+      outputs:
+        decode: json
+```
+
+Use `fields` when stdout has more data than the boundary should expose:
+
+```yaml
+steps:
+  - id: notify
+    run: ./notify.sh
+    stdout:
+      outputs:
+        fields:
+          messageId:
+            decode: json
+            select: .id
+          status:
+            decode: json
+            select: .status
+```
+
+Use `outputs.write` when the result is assembled from prior step outputs or literal values:
+
+```yaml
+steps:
+  - id: publish
+    action: outputs.write
+    with:
+      values:
+        messageId: msg-123
+        status: sent
+```
+
+Remote action callers read these values with `${notify.outputs.messageId}`. This is intentionally separate from `${notify.output.*}`, which is for step-scoped `output:` values.
+
 ## Run Output Collection
 
 When a DAG run completes, Dagu writes collected outputs to `outputs.json` for the Web UI and Outputs API.
 
-Only **string-form** `output: NAME` participates in `outputs.json` today.
+Collected run outputs include string-form `output: NAME`, `stdout.outputs`, and `outputs.write`. Object-form `output:` stays step-scoped and is not collected unless the workflow explicitly republishes values through `stdout.outputs` or `outputs.write`.
 
 Example:
 
@@ -206,7 +266,7 @@ Result:
 }
 ```
 
-Keys are converted from `SCREAMING_SNAKE_CASE` to `camelCase`.
+String-form `output: NAME` keys are converted from `SCREAMING_SNAKE_CASE` to `camelCase`. Keys from `stdout.outputs` and `outputs.write` are preserved.
 
 If multiple steps write the same output variable name, the last collected value wins.
 

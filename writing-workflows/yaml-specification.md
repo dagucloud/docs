@@ -1104,7 +1104,7 @@ steps:
 | `with.shell` | string/array | Shell program and args for this `run` step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
 | `with.shell_args` | array | Arguments appended to the shell for this `run` step | - |
 | `with.shell_packages` | array | Packages available to `nix-shell` steps | - |
-| `stdout` | string/object | Redirect stdout to a file, or use `{ artifact: path }` to write stdout directly to a DAG-run artifact | - |
+| `stdout` | string/object | Redirect stdout to a file, use `{ artifact: path }` for DAG-run artifacts, or use `{ outputs: ... }` to publish DAG/action outputs | - |
 | `stderr` | string/object | Redirect stderr to a file, or use `{ artifact: path }` to write stderr directly to a DAG-run artifact | - |
 | `log_output` | string | Override DAG-level log output mode for this step | DAG's log_output |
 | `output` | string/object | String form captures trimmed stdout into one variable. Object form publishes structured step output for `${step_id.output.*}` references. | - |
@@ -1112,7 +1112,7 @@ steps:
 
 `shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level `with.shell` values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
-Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Only string-form `output: NAME` is collected into the run's `outputs.json`.
+Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Object-form `output:` is step-scoped for `${step.output.*}`. Use `stdout.outputs` or `action: outputs.write` for run-level outputs and remote action return values.
 
 `output_schema:` is an inline JSON Schema object for stdout JSON contracts. When present, Dagu captures stdout, decodes it as JSON, and validates it before publishing output. Invalid JSON or a schema mismatch fails the step. If no `output:` mapping is set, the validated decoded object becomes `${step_id.output}` and can be accessed with `${step_id.output.field}`.
 

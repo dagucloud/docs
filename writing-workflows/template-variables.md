@@ -337,6 +337,8 @@ Available properties:
 - `${id.stdout}` - Path to stdout log file
 - `${id.stderr}` - Path to stderr log file
 - `${id.output}` - Captured string output or structured object-form payload (requires `output:` on the referenced step)
+- `${id.outputs}` - DAG/action outputs published by the step as compact JSON
+- `${id.outputs.field}` - One field from the published DAG/action outputs
 
 > **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content.
 >
@@ -345,7 +347,7 @@ Available properties:
 > - To store large command output as a run artifact: use `stdout.artifact` or `stderr.artifact`
 > - Substring slicing like `${id.stdout:0:5}` operates on the **file path string**, not file content
 >
-> `${id.output}` returns the captured text value for string-form output, or the full published payload as compact JSON for object-form output. Nested access such as `${id.output.version}` works when the output is structured JSON. If the referenced step does not have `output:` configured, the reference is not expanded and passes through as a literal. Substring slicing still works on the final string value: `${id.output:0:5}`.
+> `${id.output}` returns the captured text value for string-form output, or the full published payload as compact JSON for object-form output. Nested access such as `${id.output.version}` works when the output is structured JSON. `${id.outputs.foo}` reads values published through `stdout.outputs` or `outputs.write`. If the referenced step does not have the requested output configured, the reference is not expanded and passes through as a literal. Substring slicing still works on the final string value: `${id.output:0:5}`.
 
 ## Variable Precedence
 
