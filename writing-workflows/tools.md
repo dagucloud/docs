@@ -184,6 +184,8 @@ If the parent also runs `jq` in its own steps, declare the same tool in the pare
 
 This rule also applies to inline sub-DAGs in the same YAML file. Each YAML document is its own DAG definition for tool declarations.
 
+Remote actions follow the same rule. If a remote action uses external CLIs, put top-level `tools` in the referenced action DAG file, not in `dagu-action.yaml`. The caller DAG's `tools` are not inherited across the action boundary, and the action manifest accepts only `apiVersion`, `name`, `dag`, `inputs`, and `outputs`.
+
 In distributed shared-nothing mode, the worker that executes the child DAG prepares the child DAG's tools in that worker's local data directory. Different workers maintain independent caches, and later runs on the same worker reuse the local cache.
 
 ## Current Limitations

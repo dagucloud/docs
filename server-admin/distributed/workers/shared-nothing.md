@@ -63,6 +63,8 @@ Log streaming is best-effort: failures don't fail the step execution. Some logs 
 
 Remote actions are supported in shared-nothing mode. The worker executing the action step resolves the action reference, validates the `dagu-action.yaml` manifest, and packages the resolved action workspace. When the action sub-DAG is dispatched, the workspace bundle is transferred through the coordinator and materialized on the worker that runs the child DAG.
 
+The workspace bundle contains the action DAG, manifest, scripts, and helper files. It does not contain external binaries from the caller's environment. If the action DAG needs portable CLIs, declare them with top-level `tools` in the action DAG file; the worker running the child action DAG prepares those tools in its own local cache.
+
 Use GitHub or explicit Git `source:` references for portable shared-nothing deployments:
 
 ```yaml

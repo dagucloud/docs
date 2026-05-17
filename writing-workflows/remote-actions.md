@@ -85,7 +85,12 @@ Supported manifest keys are exactly `apiVersion`, `name`, `dag`, `inputs`, and `
 
 The action DAG is a normal Dagu workflow, but it must not set `working_dir`. Dagu runs it inside the materialized action workspace so relative files in the package are available.
 
+If the action DAG invokes external CLIs, declare them in top-level `tools` in the action DAG file. Do not put `tools` in `dagu-action.yaml`; unknown manifest keys are rejected. Caller DAG tools are not inherited by the action DAG, so an action package that needs `jq`, `yq`, `kubectl`, or another portable CLI should pin that dependency itself. Dagu prepares the action DAG's tools on the worker that runs the action DAG, using that worker's local tools cache.
+
 ```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
 params:
   - text
 steps:
