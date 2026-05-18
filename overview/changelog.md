@@ -1,5 +1,55 @@
 # Changelog
 
+## v2.7.1 (2026-05-18)
+
+### Added
+
+- feat: add action schema v2 ([#2122](https://github.com/dagucloud/dagu/pull/2122)) [@yottahmd](https://github.com/yottahmd)
+- feat: make webhook payload size configurable ([#2148](https://github.com/dagucloud/dagu/pull/2148)) [@yottahmd](https://github.com/yottahmd)
+- feat: add DAG-level aqua tools ([#2150](https://github.com/dagucloud/dagu/pull/2150)) [@yottahmd](https://github.com/yottahmd)
+- feat: add file operation actions ([#2151](https://github.com/dagucloud/dagu/pull/2151)) [@yottahmd](https://github.com/yottahmd)
+- feat: add simplified secret management ([#2153](https://github.com/dagucloud/dagu/pull/2153)) [@yottahmd](https://github.com/yottahmd)
+- feat: simplify secret scopes ([#2155](https://github.com/dagucloud/dagu/pull/2155)) [@yottahmd](https://github.com/yottahmd)
+- feat: add DuckDB SQL actions ([#2156](https://github.com/dagucloud/dagu/pull/2156)) [@yottahmd](https://github.com/yottahmd)
+- feat: add wait action ([#2157](https://github.com/dagucloud/dagu/pull/2157)) [@yottahmd](https://github.com/yottahmd)
+- feat: add Dagu MCP server ([#2158](https://github.com/dagucloud/dagu/pull/2158)) [@yottahmd](https://github.com/yottahmd)
+- feat: add artifact actions ([#2159](https://github.com/dagucloud/dagu/pull/2159)) [@yottahmd](https://github.com/yottahmd)
+- feat: add data convert and pick actions ([#2160](https://github.com/dagucloud/dagu/pull/2160)) [@yottahmd](https://github.com/yottahmd)
+- feat: add git checkout action ([#2161](https://github.com/dagucloud/dagu/pull/2161)) [@yottahmd](https://github.com/yottahmd)
+- feat: add dag enqueue action ([#2163](https://github.com/dagucloud/dagu/pull/2163)) [@yottahmd](https://github.com/yottahmd)
+- feat: add artifact output stream syntax ([#2164](https://github.com/dagucloud/dagu/pull/2164)) [@yottahmd](https://github.com/yottahmd)
+- feat: add remote action executor ([#2167](https://github.com/dagucloud/dagu/pull/2167)) [@yottahmd](https://github.com/yottahmd)
+- feat: add notification channels and rules ([#2169](https://github.com/dagucloud/dagu/pull/2169)) [@yottahmd](https://github.com/yottahmd)
+- feat: add incident connections and routing ([#2170](https://github.com/dagucloud/dagu/pull/2170)) [@yottahmd](https://github.com/yottahmd)
+
+### Changed
+
+- chore(deps): bump github.com/slack-go/slack from 0.19.0 to 0.23.1 in the go-security group across 1 directory ([#2152](https://github.com/dagucloud/dagu/pull/2152)) [@dependabot](https://github.com/dependabot)
+- Make graph the default DAG type ([#2168](https://github.com/dagucloud/dagu/pull/2168)) [@yottahmd](https://github.com/yottahmd)
+- refactor: remove core DuckDB executor ([#2172](https://github.com/dagucloud/dagu/pull/2172)) [@yottahmd](https://github.com/yottahmd)
+
+### Fixed
+
+- fix: include recent Slack notifications in agent context ([#2147](https://github.com/dagucloud/dagu/pull/2147)) [@yottahmd](https://github.com/yottahmd)
+- fix: remove agent step LLM request timeout ([#2154](https://github.com/dagucloud/dagu/pull/2154)) [@yottahmd](https://github.com/yottahmd)
+- fix: suppress pending auto-retry notifications ([#2162](https://github.com/dagucloud/dagu/pull/2162)) [@yottahmd](https://github.com/yottahmd)
+- fix: defer failure handler during auto retry ([#2165](https://github.com/dagucloud/dagu/pull/2165)) [@yottahmd](https://github.com/yottahmd)
+- fix: default empty DAG type to graph ([#2171](https://github.com/dagucloud/dagu/pull/2171)) [@yottahmd](https://github.com/yottahmd)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| feat: customizable webhook payload size ([#2146](https://github.com/dagucloud/dagu/issues/2146)) | [@bagemt](https://github.com/bagemt) (report) |
+| chore(deps): bump github.com/slack-go/slack from 0.19.0 to 0.23.1 in the go-security group across 1 directory ([#2152](https://github.com/dagucloud/dagu/pull/2152)) | [@dependabot](https://github.com/dependabot) |
+| feat: Native DuckDB Connector or Embedded Analytical Store ([#2149](https://github.com/dagucloud/dagu/issues/2149)) | [@vit76](https://github.com/vit76) (request) |
+
+## Acknowledgements
+
+Special thanks to the [aquaproj](https://github.com/aquaproj) project and [aqua](https://github.com/aquaproj/aqua). Dagu v2.7.0’s new DAG-level `tools` feature uses aqua internally to install pinned CLI tools reproducibly.
+
 ## v2.6.8 (2026-05-10)
 
 ### Added
