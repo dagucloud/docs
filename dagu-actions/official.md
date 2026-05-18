@@ -14,10 +14,76 @@ Versions are required. Pin production workflows to a version tag or commit SHA; 
 
 | Action | Repository | Runtime owned by the action | Use when |
 |--------|------------|-----------------------------|----------|
+| `duckdb@v1` | [`dagucloud/duckdb`](https://github.com/dagucloud/duckdb) | `duckdb/duckdb@v1.5.2` through action `tools` | You need analytical SQL or file-backed DuckDB workflows without adding DuckDB bindings to the Dagu core binary. |
 | `node-script@v1` | [`dagucloud/node-script`](https://github.com/dagucloud/node-script) | `nodejs/node@v22.21.1` through action `tools` | You need a small JavaScript transform or glue step and want the action to provide Node.js. |
 | `python-script@v1` | [`dagucloud/python-script`](https://github.com/dagucloud/python-script) | `astral-sh/uv@0.11.14` through action `tools`; default Python `3.13.9` | You need a small Python transform or glue step, optionally with pinned Python requirements. |
 
-Official actions are not sandboxes. The script runs with the same worker permissions, filesystem access, network access, and secrets available to the Dagu run. Only run trusted code.
+Official actions are not sandboxes. The action runs with the same worker permissions, filesystem access, network access, and secrets available to the Dagu run. Only run trusted code.
+
+## DuckDB: `duckdb`
+
+```yaml
+steps:
+  - id: query
+    action: duckdb@v1
+    with:
+      query: |
+        SELECT 42 AS answer, 'duckdb' AS engine;
+
+  - id: print
+    depends: [query]
+    run: printf '%s\n' '${query.outputs.result}'
+```
+
+`query` is passed to `duckdb -c`. By default, the action uses DuckDB JSON output mode and publishes raw stdout as `${query.outputs.result}`, replacing `query` with your step id.
+
+Use `database` to run against an existing file, `workdir` when SQL references files by relative path, and `readonly: true` for read-only inspection:
+
+```yaml
+steps:
+  - id: summarize
+    action: duckdb@v1
+    with:
+      workdir: /data/project
+      database: analytics.duckdb
+      readonly: true
+      query: |
+        SELECT count(*) AS events
+        FROM read_csv_auto('events.csv');
+```
+
+Inputs include:
+
+| Field | Description |
+|-------|-------------|
+| `query` | Required SQL passed to `duckdb -c`. |
+| `database` | Optional DuckDB database file path. Omit for a transient in-memory database. |
+| `workdir` | Optional directory to `cd` into before running DuckDB. |
+| `format` | Output format: `json`, `csv`, `table`, `markdown`, `line`, `list`, or `column`. Defaults to `json`. |
+| `readonly` | Open the database in read-only mode. Defaults to `false`. |
+
+Outputs include:
+
+| Field | Description |
+|-------|-------------|
+| `result` | Raw DuckDB stdout in the selected format. |
+
+Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${DAG_RUN_ARTIFACTS_DIR}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`:
+
+```yaml
+tools:
+  - duckdb/duckdb@v1.5.2
+
+steps:
+  - id: export_rows
+    run: |
+      duckdb -batch -bail -no-stdin -csv /data/source.duckdb \
+        -c "SELECT id, name, score FROM source_table WHERE score >= 80"
+    stdout:
+      artifact: exports/selected_rows.csv
+```
+
+See [DuckDB](/step-types/sql/duckdb) for database-file handling, multi-step workflows, import/export examples, and artifact patterns.
 
 ## JavaScript: `node-script`
 

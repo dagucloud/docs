@@ -1,341 +1,309 @@
 # DuckDB
 
-Execute analytical queries and data operations against DuckDB databases. DuckDB is useful for local OLAP workflows, file-backed analytics, and transformations that should run inside the workflow without a separate database server.
+Run DuckDB SQL from a workflow with the official `duckdb@v1` action.
+
+DuckDB is packaged as an official action instead of a built-in SQL executor. This keeps the Dagu core binary portable and cgo-free while still letting workflows use a pinned DuckDB CLI through the action's own `tools` declaration.
+
+::: info Official Action
+Use `action: duckdb@v1`. Older built-in forms such as `duckdb.query` and `duckdb.import` are not part of the core SQL step types.
+:::
 
 ## Basic Usage
 
 ```yaml
+type: graph
+
 steps:
-  - id: query_orders
-    action: duckdb.query
+  - id: query
+    action: duckdb@v1
     with:
-      dsn: "./analytics.duckdb"
       query: |
-        SELECT customer_id, sum(total) AS total_spend
-        FROM orders
-        GROUP BY customer_id
-        ORDER BY total_spend DESC
-    output: CUSTOMER_TOTALS
+        SELECT 42 AS answer, 'duckdb' AS engine;
+
+  - id: print_result
+    depends: [query]
+    run: printf '%s\n' '${query.outputs.result}'
 ```
 
-::: tip Output Destination
-Query results are written to **stdout** by default in JSONL format. Use `output: VAR_NAME` for small results that need to become an environment variable. For large results, use `streaming: true` with an explicit `output_file`. When `output_file` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the file appears as a run artifact.
-:::
+The default output format is DuckDB JSON mode, so `result` is a JSON string:
 
-## Database Path
+```json
+[{"answer":42,"engine":"duckdb"}]
+```
 
-### File Database
+Use `${query.outputs.result}` for small results such as counts, IDs, status rows, or compact JSON, replacing `query` with your step id. For large rowsets, write to an artifact or file instead of routing the data through action outputs.
 
-Use a file path when multiple steps need to read or write the same DuckDB database:
+## Existing DuckDB Files
+
+Use `database` to run SQL against an existing DuckDB file:
 
 ```yaml
-with:
-  dsn: "./data/warehouse.duckdb"
+type: graph
+
+steps:
+  - id: query_existing_db
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        SELECT count(*) AS users FROM users;
 ```
 
-The path is resolved by the step process. Use an absolute path or a path relative to the step working directory when the workflow may run on different workers.
-
-### In-Memory Database
+Use `workdir` when the database path or files referenced by SQL should be resolved relative to a directory:
 
 ```yaml
-with:
-  dsn: ":memory:"
+type: graph
+
+steps:
+  - id: query_project_db
+    action: duckdb@v1
+    with:
+      workdir: /data/project
+      database: analytics.duckdb
+      query: |
+        SELECT * FROM read_csv_auto('events.csv') LIMIT 10;
 ```
 
-An in-memory DuckDB database is scoped to the step execution. Use a file database when tables must persist across steps.
+The database file must exist on the worker that runs the action. In distributed shared-nothing mode, use a shared mount, object storage, or an absolute path available on that worker. Omitting `database` creates a transient in-memory database for that one action invocation, so it cannot share state with later steps.
 
-## Build Support
+Use `readonly: true` when a step should only inspect an existing database:
 
-::: info Native DuckDB Support
-The DuckDB action depends on DuckDB native bindings. On builds where those bindings are unavailable or cgo is disabled, `duckdb.query` and `duckdb.import` fail at runtime with a clear unsupported-platform error.
-:::
+```yaml
+steps:
+  - id: inspect
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      readonly: true
+      query: |
+        SELECT table_name
+        FROM information_schema.tables
+        ORDER BY table_name;
+```
 
-## Configuration
+## Multiple Operations
+
+For tightly coupled operations, run multiple SQL statements in one action. This keeps them in one DuckDB process and lets you control the transaction boundary:
+
+```yaml
+type: graph
+
+steps:
+  - id: update_metrics
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        BEGIN TRANSACTION;
+
+        CREATE TABLE IF NOT EXISTS metrics (
+          name VARCHAR,
+          value INTEGER
+        );
+
+        DELETE FROM metrics WHERE name = 'runs';
+        INSERT INTO metrics VALUES ('runs', 1);
+
+        COMMIT;
+
+        SELECT * FROM metrics WHERE name = 'runs';
+```
+
+For separate DAG visibility, use multiple action steps against the same database file and connect them with `depends`:
+
+```yaml
+type: graph
+
+steps:
+  - id: insert_rows
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        CREATE TABLE IF NOT EXISTS metrics (
+          name VARCHAR,
+          value INTEGER
+        );
+
+        DELETE FROM metrics WHERE name = 'jobs';
+        INSERT INTO metrics VALUES ('jobs', 10);
+
+  - id: update_rows
+    depends: [insert_rows]
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        UPDATE metrics SET value = value + 5 WHERE name = 'jobs';
+
+  - id: select_rows
+    depends: [update_rows]
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      readonly: true
+      query: |
+        SELECT * FROM metrics WHERE name = 'jobs';
+
+  - id: print_result
+    depends: [select_rows]
+    run: printf '%s\n' '${select_rows.outputs.result}'
+```
+
+Keep write operations ordered with `depends`. Parallel writes to the same DuckDB file can conflict because DuckDB uses file-level locking semantics.
+
+## Import Data
+
+Use DuckDB SQL functions such as `read_csv_auto`, `read_json_auto`, and `read_parquet` to load files.
+
+Create or replace a table from CSV:
+
+```yaml
+steps:
+  - id: import_orders
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        CREATE OR REPLACE TABLE orders AS
+        SELECT *
+        FROM read_csv_auto('/data/orders.csv');
+```
+
+Append rows from JSONL:
+
+```yaml
+steps:
+  - id: append_events
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        INSERT INTO events
+        SELECT *
+        FROM read_json_auto('/data/events.jsonl');
+```
+
+Load one DuckDB database from another by using `ATTACH`:
+
+```yaml
+steps:
+  - id: copy_between_databases
+    action: duckdb@v1
+    with:
+      database: /data/target.duckdb
+      query: |
+        ATTACH '/data/source.duckdb' AS source_db;
+
+        INSERT INTO target_table
+        SELECT *
+        FROM source_db.source_table;
+```
+
+## Export Data
+
+For large or typed datasets, write files directly from SQL. When the target path is under `${DAG_RUN_ARTIFACTS_DIR}`, Dagu stores it as a run artifact.
+
+```yaml
+steps:
+  - id: export_parquet
+    action: duckdb@v1
+    with:
+      database: /data/analytics.duckdb
+      query: |
+        COPY (
+          SELECT id, name, score
+          FROM source_table
+          WHERE score >= 80
+        )
+        TO '${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
+        (FORMAT parquet);
+```
+
+You can load that file in a later step when the artifact directory is readable by the worker running the step:
+
+```yaml
+steps:
+  - id: export_parquet
+    action: duckdb@v1
+    with:
+      database: /data/source.duckdb
+      query: |
+        COPY (
+          SELECT id, name, score
+          FROM source_table
+          WHERE score >= 80
+        )
+        TO '${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
+        (FORMAT parquet);
+
+  - id: insert_parquet
+    depends: [export_parquet]
+    action: duckdb@v1
+    with:
+      database: /data/target.duckdb
+      query: |
+        INSERT INTO target_table
+        SELECT *
+        FROM read_parquet('${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet');
+```
+
+In distributed shared-nothing mode, an artifact path may be worker-local while the run is still executing. For cross-worker data handoff, use a shared mounted path, object storage, or keep the transfer inside one DuckDB statement with `ATTACH` and `INSERT INTO ... SELECT`.
+
+## Stdout Artifacts
+
+If the query result should be stored as a file instead of action output, call the pinned DuckDB CLI directly and attach stdout to an artifact:
+
+```yaml
+type: graph
+
+tools:
+  - duckdb/duckdb@v1.5.2
+
+steps:
+  - id: export_rows
+    run: |
+      duckdb -batch -bail -no-stdin -csv /data/source.duckdb \
+        -c "SELECT id, name, score FROM source_table WHERE score >= 80"
+    stdout:
+      artifact: exports/selected_rows.csv
+```
+
+This keeps the CSV out of Dagu output variables while making it available in the run's Artifacts tab.
+
+## Inputs
+
+| Name | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `query` | string | Yes | - | SQL passed to `duckdb -c`. |
+| `database` | string | No | transient in-memory database | Database file path. Use an absolute path when the file lives outside the action workspace. |
+| `workdir` | string | No | action workspace | Directory to `cd` into before running DuckDB. Use this when SQL references local files with relative paths. |
+| `format` | string | No | `json` | Output format: `json`, `csv`, `table`, `markdown`, `line`, `list`, or `column`. |
+| `readonly` | boolean | No | `false` | Open the database in read-only mode. |
+
+## Outputs
+
+| Name | Type | Description |
+|------|------|-------------|
+| `result` | string | Raw DuckDB stdout in the selected format. |
+
+## Local Development
+
+Use `source:` to call a local checkout of the action:
 
 ```yaml
 steps:
   - id: query
-    action: duckdb.query
+    action: source:file:///path/to/duckdb@local
     with:
-      dsn: "./analytics.duckdb"
-      timeout: 60
-      output_format: jsonl
-      max_rows: 10000
+      query: SELECT 1 AS ok;
 ```
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `dsn` | string | required | DuckDB database path, or `:memory:` |
-| `timeout` | int | 60 | Query timeout in seconds |
-| `transaction` | bool | false | Wrap execution in a transaction |
-| `params` | map/array | - | Query parameters |
-| `output_format` | string | jsonl | `jsonl`, `json`, `csv` |
-| `headers` | bool | false | Include headers in CSV output |
-| `null_string` | string | null | NULL representation |
-| `max_rows` | int | 0 | Limit rows returned by a query (0 = unlimited) |
-| `streaming` | bool | false | Stream query results to a file |
-| `output_file` | string | - | Explicit output path for streaming results |
-
-## Parameterized Queries
-
-### Named Parameters
-
-Use `:name` syntax for named parameters:
-
-```yaml
-steps:
-  - id: sales_by_region
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      params:
-        region: apac
-        min_total: 1000
-      query: |
-        SELECT order_id, customer_id, total
-        FROM orders
-        WHERE region = :region AND total >= :min_total
-```
-
-### Positional Parameters
-
-DuckDB uses `?` for positional parameters:
-
-```yaml
-steps:
-  - id: customer_orders
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      params:
-        - 42
-        - shipped
-      query: "SELECT * FROM orders WHERE customer_id = ? AND status = ?"
-```
-
-## Transactions
-
-```yaml
-steps:
-  - id: refresh_summary
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      transaction: true
-      query: |
-        DELETE FROM daily_summary WHERE date = current_date;
-        INSERT INTO daily_summary
-        SELECT current_date, count(*), sum(total)
-        FROM orders
-        WHERE order_date = current_date;
-```
-
-DuckDB does not support PostgreSQL advisory locks or SQLite file lock configuration through the SQL action.
-
-## Data Import
-
-Create the target table before importing data. `duckdb.import` supports CSV, TSV, and JSONL input.
-
-### CSV Import
-
-```yaml
-steps:
-  - id: import_orders
-    action: duckdb.import
-    with:
-      dsn: "./analytics.duckdb"
-      import:
-        input_file: /data/orders.csv
-        table: orders
-        format: csv
-        has_header: true
-        batch_size: 1000
-```
-
-### TSV Import
-
-```yaml
-steps:
-  - id: import_products
-    action: duckdb.import
-    with:
-      dsn: "./analytics.duckdb"
-      import:
-        input_file: /data/products.tsv
-        table: products
-        format: tsv
-        has_header: true
-```
-
-### JSONL Import
-
-```yaml
-steps:
-  - id: import_events
-    action: duckdb.import
-    with:
-      dsn: "./analytics.duckdb"
-      import:
-        input_file: /data/events.jsonl
-        table: events
-        format: jsonl
-        batch_size: 5000
-```
-
-### Import with Conflict Handling
-
-DuckDB supports SQLite-style conflict handling:
-
-```yaml
-steps:
-  - id: upsert_orders
-    action: duckdb.import
-    with:
-      dsn: "./analytics.duckdb"
-      import:
-        input_file: /data/order-updates.csv
-        table: orders
-        on_conflict: replace
-```
-
-| on_conflict | DuckDB Behavior |
-|-------------|-----------------|
-| `error` | Fail on duplicate (default) |
-| `ignore` | `INSERT OR IGNORE` - skip duplicates |
-| `replace` | `INSERT OR REPLACE` - replace existing rows |
-
-`conflict_target` and `update_columns` are PostgreSQL-specific and are not used by DuckDB.
-
-## Output Formats
-
-### JSONL (Default)
-
-One JSON object per row:
-
-```yaml
-steps:
-  - id: export_jsonl
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      output_format: jsonl
-      query: "SELECT * FROM orders"
-```
-
-Output:
-
-```json
-{"order_id":1,"customer_id":42,"total":99.99}
-{"order_id":2,"customer_id":43,"total":149.99}
-```
-
-### JSON Array
-
-```yaml
-steps:
-  - id: export_json
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      output_format: json
-      max_rows: 1000
-      query: "SELECT * FROM orders"
-```
-
-::: warning Memory Usage
-The `json` format buffers all rows in memory before writing. For large result sets, use `jsonl` or `csv` instead.
-:::
-
-### CSV
-
-```yaml
-steps:
-  - id: export_csv
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      output_format: csv
-      headers: true
-      query: "SELECT order_id, customer_id, total FROM orders"
-```
-
-## Streaming Large Results
-
-For large result sets, stream directly to a file:
-
-```yaml
-steps:
-  - id: export_large_report
-    action: duckdb.query
-    with:
-      dsn: "./analytics.duckdb"
-      streaming: true
-      output_file: "${DAG_RUN_ARTIFACTS_DIR}/orders.jsonl"
-      output_format: jsonl
-      query: "SELECT * FROM orders"
-```
-
-::: tip Best Practices for Large Results
-- Use `output_format: jsonl` or `csv`; these formats write rows as they are read.
-- Avoid `output_format: json` for large exports because it buffers the full result.
-- Set `max_rows` as a safety limit for broad queries.
-- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/orders.jsonl`; this reference auto-enables artifact storage.
-:::
-
-## Complete Example
-
-```yaml
-name: duckdb-local-analytics
-env:
-  - DB_PATH: "./data/analytics.duckdb"
-
-steps:
-  - id: setup_schema
-    action: duckdb.query
-    with:
-      dsn: "${DB_PATH}"
-      query: |
-        CREATE TABLE IF NOT EXISTS orders (
-          order_id INTEGER PRIMARY KEY,
-          customer_id INTEGER,
-          region TEXT,
-          total DOUBLE,
-          order_date DATE
-        );
-
-  - id: import_orders
-    action: duckdb.import
-    with:
-      dsn: "${DB_PATH}"
-      import:
-        input_file: /data/orders.csv
-        table: orders
-        format: csv
-        has_header: true
-        on_conflict: replace
-    depends:
-      - setup_schema
-
-  - id: export_region_summary
-    action: duckdb.query
-    with:
-      dsn: "${DB_PATH}"
-      streaming: true
-      output_file: "${DAG_RUN_ARTIFACTS_DIR}/region-summary.csv"
-      output_format: csv
-      headers: true
-      query: |
-        SELECT region, count(*) AS order_count, sum(total) AS revenue
-        FROM orders
-        GROUP BY region
-        ORDER BY revenue DESC;
-    depends:
-      - import_orders
-```
+Remote actions run in their own action workspace. If a query needs files from a caller workspace, pass `workdir` and use paths that exist on the worker running the action.
 
 ## See Also
 
-- [ETL Overview](/step-types/sql/) - Common configuration and features
-- [PostgreSQL](/step-types/sql/postgresql) - PostgreSQL-specific documentation
-- [SQLite](/step-types/sql/sqlite) - SQLite-specific documentation
+- [Official Actions](/dagu-actions/official) - Maintained `dagucloud/*` action packages
+- [ETL Overview](/step-types/sql/) - Built-in PostgreSQL and SQLite step types
 - [Artifacts](/writing-workflows/artifacts) - Persisting run-scoped output files
+- [Tools](/writing-workflows/tools) - Pinned CLI tools for command steps

@@ -181,4 +181,4 @@ steps:
 
 ## Size Guidance
 
-`data.convert` is intended for small values and step outputs. For large CSV files, use `duckdb.import`, `sqlite.import`, or `postgres.import`.
+`data.convert` is intended for small values and step outputs. For large CSV files, use `postgres.import`, `sqlite.import`, or the official [`duckdb@v1` action](/step-types/sql/duckdb) with DuckDB SQL such as `read_csv_auto`.

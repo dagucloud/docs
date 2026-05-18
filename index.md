@@ -45,7 +45,7 @@ Dagu fits teams that already have operational work spread across scripts, cron j
   </div>
   <div class="real-world-usecase">
     <h3>ETL and Data Operations</h3>
-    <p><strong>Run:</strong> PostgreSQL, SQLite, or DuckDB queries, S3 transfers, pinned <code>jq</code> or <code>yq</code> transforms, readiness waits, validation steps, and reusable sub-workflows.</p>
+    <p><strong>Run:</strong> PostgreSQL and SQLite queries, DuckDB through the official action, S3 transfers, pinned <code>jq</code> or <code>yq</code> transforms, readiness waits, validation steps, and reusable sub-workflows.</p>
     <p><strong>Why Dagu fits:</strong> daily data workflows stay declarative, observable, and easy to retry when one step fails.</p>
   </div>
   <div class="real-world-usecase">
@@ -208,7 +208,7 @@ Common built-in step types include:
 | `git.checkout` | Clone or update Git repositories |
 | `http.request` | HTTP requests |
 | `data.convert`, `data.pick` | Convert and select JSON, YAML, CSV, TSV, and text |
-| `postgres.query`, `sqlite.query`, `duckdb.query` | SQL queries |
+| `postgres.query`, `sqlite.query` | SQL queries |
 | `redis.<operation>` | Redis commands and scripts |
 | `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 object operations |
 | `jq.filter` | JSON transformation |
@@ -221,6 +221,8 @@ Common built-in step types include:
 | `template.render` | Template rendering |
 | `chat.completion` | LLM chat completion |
 | `agent.run` | Tool-using agent step |
+
+For DuckDB, use the official [`duckdb@v1` action](/step-types/sql/duckdb) instead of a built-in SQL step type.
 
 DAGs can also declare reusable `actions` that expand to built-in step types at load time. See [Custom Actions](/dagu-actions/custom) and [Step Types](/step-types/shell) for the exact configuration surface.
 

@@ -2,13 +2,15 @@
 
 Execute SQL queries and data operations directly in your workflows.
 
+PostgreSQL and SQLite are built-in SQL step types. DuckDB is available as the official [`duckdb@v1` action](/step-types/sql/duckdb), which keeps the Dagu core binary portable and cgo-free.
+
 ## Supported Databases
 
-| Database | Executor Type | Description |
-|----------|---------------|-------------|
-| [PostgreSQL](/step-types/sql/postgresql) | `postgres` | Full-featured PostgreSQL support with advisory locks |
-| [SQLite](/step-types/sql/sqlite) | `sqlite` | Lightweight embedded database with file locking |
-| [DuckDB](/step-types/sql/duckdb) | `duckdb` | Embedded analytical database for local OLAP workflows |
+| Database | Action | Description |
+|----------|--------|-------------|
+| [PostgreSQL](/step-types/sql/postgresql) | `postgres.query`, `postgres.import` | Full-featured PostgreSQL support with advisory locks |
+| [SQLite](/step-types/sql/sqlite) | `sqlite.query`, `sqlite.import` | Lightweight embedded database with file locking |
+| [DuckDB](/step-types/sql/duckdb) | `duckdb@v1` official action | Embedded analytical database for local OLAP workflows |
 
 ## Basic Usage
 
@@ -31,7 +33,9 @@ steps:
 Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture small results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file. When `output_file` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the file appears as a run artifact.
 :::
 
-Use `postgres.query`, `sqlite.query`, or `duckdb.query` for queries. Use `postgres.import`, `sqlite.import`, or `duckdb.import` to load CSV, TSV, or JSONL files into a table.
+Use `postgres.query` or `sqlite.query` for built-in SQL queries. Use `postgres.import` or `sqlite.import` to load CSV, TSV, or JSONL files into a table.
+
+Use `action: duckdb@v1` for DuckDB. DuckDB imports and exports are expressed with DuckDB SQL such as `read_csv_auto`, `read_json_auto`, `read_parquet`, and `COPY`.
 
 ::: info Secrets
 Secrets are automatically masked in logs. Use `provider: file` for Kubernetes/Docker secrets. See [Secrets](/writing-workflows/secrets) for details.
@@ -354,4 +358,4 @@ See [parallel.items](/writing-workflows/execution-control#parallel-execution) fo
 
 - [PostgreSQL](/step-types/sql/postgresql) - PostgreSQL-specific features
 - [SQLite](/step-types/sql/sqlite) - SQLite-specific features
-- [DuckDB](/step-types/sql/duckdb) - DuckDB-specific features
+- [DuckDB](/step-types/sql/duckdb) - Official DuckDB action

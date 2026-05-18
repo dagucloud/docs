@@ -1027,8 +1027,8 @@ Current built-in step type names:
 | `docker.run` | Docker executor | optional `command`, Docker config |
 | `container.run` | Container executor | optional `command`, container config |
 | `k8s.run`, `kubernetes.run` | Kubernetes job execution | optional `command`, Kubernetes config |
-| `postgres.query`, `sqlite.query`, `duckdb.query` | SQL queries | `query`, database config |
-| `postgres.import`, `sqlite.import`, `duckdb.import` | SQL imports | `import`, database config |
+| `postgres.query`, `sqlite.query` | SQL queries | `query`, database config |
+| `postgres.import`, `sqlite.import` | SQL imports | `import`, database config |
 | `redis.<operation>` | Redis operations | Redis config; operation comes from the action suffix |
 | `jq.filter` | jq transforms | `filter`, plus `data` or `input` |
 | `dag.run` | Child DAG execution | `dag`, optional `params` |
@@ -1047,6 +1047,8 @@ Current built-in step type names:
 | `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 operations | S3 config |
 | `sftp.upload`, `sftp.download` | SFTP transfers | SFTP config |
 | `noop` | Output-only or approval-only placeholder step | no `with`, or empty `with` |
+
+DuckDB is provided as the official [`duckdb@v1` action](/step-types/sql/duckdb), not as a built-in SQL step type.
 
 For wait-specific fields and examples, see [Wait](/step-types/wait). Use step-level `timeout_sec` to cap the total wait time for `wait.file` and `wait.http`.
 
