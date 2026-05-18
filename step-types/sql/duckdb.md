@@ -2,7 +2,7 @@
 
 Run DuckDB SQL from a workflow with the official `duckdb@v1` action.
 
-DuckDB is packaged as an official action instead of a built-in SQL executor. This keeps the Dagu core binary portable and cgo-free while still letting workflows use a pinned DuckDB CLI through the action's own `tools` declaration.
+DuckDB is packaged as an official action instead of a built-in SQL executor. This keeps the Dagu core binary portable and cgo-free while still letting workflows use a pinned DuckDB CLI through the action's own `tools` declaration. Dagu `tools` is powered internally by [aqua](https://github.com/aquaproj/aqua) from the [aquaproj](https://github.com/aquaproj) project.
 
 ::: info Official Action
 Use `action: duckdb@v1`. Older built-in forms such as `duckdb.query` and `duckdb.import` are not part of the core SQL step types.

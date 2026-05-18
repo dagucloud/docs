@@ -8,8 +8,8 @@ Use top-level `tools` when a workflow depends on portable command-line binaries 
 
 This keeps the workflow definition reproducible: the DAG records the tools it needs instead of relying on whatever happens to be installed on a worker.
 
-::: tip
-You do not need to install the `aqua` CLI separately. Dagu uses aqua internally and still runs as a single binary.
+::: tip Powered by aqua
+Dagu's `tools` feature is powered internally by [aqua](https://github.com/aquaproj/aqua) from the [aquaproj](https://github.com/aquaproj) project. This lets Dagu install pinned, reproducible CLI tools while still shipping as a single binary. You do not need to install the `aqua` CLI separately.
 :::
 
 ## Quick Example

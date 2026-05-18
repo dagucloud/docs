@@ -14,7 +14,7 @@ Versions are required. Pin production workflows to a version tag or commit SHA; 
 
 | Action | Repository | Runtime owned by the action | Use when |
 |--------|------------|-----------------------------|----------|
-| `duckdb@v1` | [`dagucloud/duckdb`](https://github.com/dagucloud/duckdb) | `duckdb/duckdb@v1.5.2` through action `tools` | You need analytical SQL or file-backed DuckDB workflows without adding DuckDB bindings to the Dagu core binary. |
+| `duckdb@v1` | [`dagucloud/duckdb`](https://github.com/dagucloud/duckdb) | `duckdb/duckdb@v1.5.2` through action `tools`, powered internally by [aqua](https://github.com/aquaproj/aqua) from [aquaproj](https://github.com/aquaproj) | You need analytical SQL or file-backed DuckDB workflows without adding DuckDB bindings to the Dagu core binary. |
 | `node-script@v1` | [`dagucloud/node-script`](https://github.com/dagucloud/node-script) | `nodejs/node@v22.21.1` through action `tools` | You need a small JavaScript transform or glue step and want the action to provide Node.js. |
 | `python-script@v1` | [`dagucloud/python-script`](https://github.com/dagucloud/python-script) | `astral-sh/uv@0.11.14` through action `tools`; default Python `3.13.9` | You need a small Python transform or glue step, optionally with pinned Python requirements. |
 
@@ -68,7 +68,7 @@ Outputs include:
 |-------|-------------|
 | `result` | Raw DuckDB stdout in the selected format. |
 
-Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${DAG_RUN_ARTIFACTS_DIR}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`:
+Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${DAG_RUN_ARTIFACTS_DIR}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`. The CLI is pinned through Dagu `tools`, which is powered by aqua from the aquaproj project:
 
 ```yaml
 tools:
