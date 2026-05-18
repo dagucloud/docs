@@ -491,6 +491,10 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
     <p>Versioned action packages with input and output schemas</p>
   </div>
   <div class="step-card">
+    <h3><a href="/writing-workflows/official-actions">Official Actions</a></h3>
+    <p>Maintained Dagu action packages such as Node.js and Python script runners</p>
+  </div>
+  <div class="step-card">
     <h3><a href="/step-types/shell">Actions</a></h3>
     <p>Built-in executor types</p>
   </div>

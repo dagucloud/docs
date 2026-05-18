@@ -11,7 +11,7 @@ Call a GitHub action package with `owner/repo@version`:
 ```yaml
 steps:
   - id: notify
-    action: acme/dagu-action-slack@v1.2.0
+    action: acme/dagu-action-notify@v1.2.0
     with:
       channel: "#ops"
       text: "Deployment finished for ${ENVIRONMENT}"
@@ -21,12 +21,16 @@ Official Dagu actions use the short form `name@version`. This resolves to `daguc
 
 ```yaml
 steps:
-  - id: notify
-    action: slack@v1.2.0
+  - id: compute
+    action: python-script@v1
     with:
-      channel: "#ops"
-      text: "Workflow ${DAG_NAME} finished"
+      input:
+        values: [3, 5, 8]
+      script: |
+        return {"total": sum(input["values"])}
 ```
+
+See [Official Actions](/writing-workflows/official-actions) for the current official action list and exact input/output contracts.
 
 Use `source:` when you need an explicit source location:
 
@@ -168,7 +172,7 @@ See [Outputs](/writing-workflows/outputs) for the full output reference.
 
 | Format | Meaning | Example |
 |--------|---------|---------|
-| `name@version` | Official Dagu action, resolved as `dagucloud/name` | `node-script@v1.2.0` |
+| `name@version` | Official Dagu action, resolved as `dagucloud/name` | `node-script@v1` |
 | `owner/repo@version` | GitHub repository | `acme/dagu-action-notify@v1.2.0` |
 | `source:target@version` | Explicit local path, `file://` path, or Git source | `source:./actions/notify@local` |
 
@@ -206,5 +210,6 @@ Use a custom action when:
 ## Related
 
 - [Custom Actions](/writing-workflows/custom-step-types)
+- [Official Actions](/writing-workflows/official-actions)
 - [Outputs](/writing-workflows/outputs)
 - [Distributed Workers](/server-admin/distributed/workers/)

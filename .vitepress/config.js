@@ -105,6 +105,7 @@ const fullSidebar = [
   {
     text: "Actions",
     items: [
+      { text: "Official Actions", link: "/writing-workflows/official-actions" },
       { text: "Remote Actions", link: "/writing-workflows/remote-actions" },
       { text: "Custom Actions", link: "/writing-workflows/custom-step-types" },
       { text: "Shell", link: "/step-types/shell" },
