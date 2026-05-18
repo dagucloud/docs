@@ -17,7 +17,7 @@ steps:
       text: "Deployment finished for ${ENVIRONMENT}"
 ```
 
-Official Dagu actions use the short form `name@version`. This resolves to `dagucloud/action-name`:
+Official Dagu actions use the short form `name@version`. This resolves to `dagucloud/name`:
 
 ```yaml
 steps:
@@ -168,7 +168,7 @@ See [Outputs](/writing-workflows/outputs) for the full output reference.
 
 | Format | Meaning | Example |
 |--------|---------|---------|
-| `name@version` | Official Dagu action, resolved as `dagucloud/action-name` | `slack@v1.2.0` |
+| `name@version` | Official Dagu action, resolved as `dagucloud/name` | `node-script@v1.2.0` |
 | `owner/repo@version` | GitHub repository | `acme/dagu-action-notify@v1.2.0` |
 | `source:target@version` | Explicit local path, `file://` path, or Git source | `source:./actions/notify@local` |
 
