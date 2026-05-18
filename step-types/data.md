@@ -157,7 +157,7 @@ steps:
       data: ${USERS_JSON}
       raw: true
     output: FIRST_NAME
-    depends: [users]
+    depends: users
 ```
 
 Use `jq.filter` when you need full jq expressions such as filtering, grouping, or reshaping arrays.

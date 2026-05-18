@@ -123,7 +123,7 @@ steps:
       messages:
         - role: user
           content: "Now multiply that by 3."
-    depends: [setup]
+    depends: setup
 ```
 
 The `followup` step automatically inherits session history from `setup`.

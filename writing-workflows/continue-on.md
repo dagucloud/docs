@@ -283,7 +283,7 @@ steps:
 
   - id: step_b
     run: echo "Step A status: failed"
-    depends: [step_a]  # Runs because of continue_on
+    depends: step_a  # Runs because of continue_on
 
   - id: step_c
     run: exit 1
@@ -293,7 +293,7 @@ steps:
 
   - id: step_d
     run: echo "Step C status: success"
-    depends: [step_c]  # Sees step-c as successful
+    depends: step_c  # Sees step-c as successful
 ```
 
 ## Examples

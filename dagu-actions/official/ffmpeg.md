@@ -44,7 +44,7 @@ steps:
 
   - id: print_probe
     run: printf '%s\n' '${inspect.outputs.stdout}'
-    depends: [inspect]
+    depends: inspect
 ```
 
 ## Inputs

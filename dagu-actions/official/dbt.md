@@ -26,7 +26,7 @@ steps:
     run: |
       echo "dbt exit code: ${dbt_build.outputs.exitCode}"
       echo "dbt run results: ${dbt_build.outputs.runResultsPath}"
-    depends: [dbt_build]
+    depends: dbt_build
 ```
 
 `projectDir` must point to the directory containing `dbt_project.yml` on the worker that runs the action. Packaged actions run in their own action workspace, so use absolute paths or paths that are meaningful on that worker.

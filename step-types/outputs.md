@@ -32,7 +32,7 @@ steps:
 
   - id: audit
     run: echo "Message: ${notify.outputs.messageId}"
-    depends: [notify]
+    depends: notify
 ```
 
 ## Configuration

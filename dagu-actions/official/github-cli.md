@@ -19,7 +19,7 @@ steps:
 
   - id: print
     run: printf '%s\n' '${repo.outputs.stdout}'
-    depends: [repo]
+    depends: repo
 ```
 
 `args` is passed to `gh` as an argument array, without shell parsing. Do not include the `gh` executable name.

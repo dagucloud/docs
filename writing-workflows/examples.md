@@ -120,7 +120,7 @@ steps:
     run: echo "step 1"
   - id: step_2
     run: echo "step 2"
-    depends: [step_1]
+    depends: step_1
 
 # Independent steps can run in parallel
 ---
@@ -438,7 +438,7 @@ steps:
       routes:
         "success": [success_handler]
         "failure": [failure_handler]
-    depends: [check_status]
+    depends: check_status
 
   - id: success_handler
     run: echo "Handling success"
@@ -724,7 +724,7 @@ steps:
     parallel:
       items: ${CHUNKS}
       max_concurrent: 5
-    depends: [split_data]
+    depends: split_data
 
   - run: python merge_results.py
 

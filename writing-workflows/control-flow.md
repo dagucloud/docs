@@ -89,7 +89,7 @@ steps:
 
   - id: continue_parent
     run: echo "Report workflow was queued"
-    depends: [fanout_report]
+    depends: fanout_report
 ```
 
 If `with.queue` is omitted, the child DAG uses its own `queue` setting, base-config default, or local DAG queue. Use `dag.run` instead when later parent steps need the child output or success/failure result before they execute.
@@ -166,7 +166,7 @@ steps:
     parallel:
       items: ${TASK_LIST}
       max_concurrent: 1
-    depends: [discover_tasks]
+    depends: discover_tasks
 ---
 name: worker
 params:
@@ -197,12 +197,12 @@ steps:
       items: ${CHUNKS}
       max_concurrent: 3
     output: MAP_RESULTS
-    depends: [split_chunks]
+    depends: split_chunks
 
   - id: reduce_results
     run: |
       echo "Reducing results from ${MAP_RESULTS.outputs}"
-    depends: [map_chunks]
+    depends: map_chunks
 ---
 name: worker
 params:
@@ -442,7 +442,7 @@ steps:
       routes:
         "success": [success_handler]
         "failure": [failure_handler]
-    depends: [check_status]
+    depends: check_status
 
   - id: success_handler
     run: echo "Handling success"

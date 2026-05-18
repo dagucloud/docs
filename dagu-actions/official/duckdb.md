@@ -19,7 +19,7 @@ steps:
 
   - id: print
     run: printf '%s\n' '${query.outputs.result}'
-    depends: [query]
+    depends: query
 ```
 
 `query` is passed to `duckdb -c`. By default, the action uses DuckDB JSON output mode and publishes raw stdout as `${query.outputs.result}`, replacing `query` with your step id.

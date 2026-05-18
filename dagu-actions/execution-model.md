@@ -33,7 +33,7 @@ steps:
 
   - id: audit
     run: echo "Message: ${notify.outputs.messageId}"
-    depends: [notify]
+    depends: notify
 ```
 
 ## Package Shape
@@ -188,7 +188,7 @@ steps:
 
   - id: audit
     run: echo "Message: ${notify.outputs.messageId}"
-    depends: [notify]
+    depends: notify
 ```
 
 ## Distributed Workers

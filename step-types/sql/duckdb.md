@@ -22,7 +22,7 @@ steps:
 
   - id: print_result
     run: printf '%s\n' '${query.outputs.result}'
-    depends: [query]
+    depends: query
 ```
 
 The default output format is DuckDB JSON mode, so `result` is a JSON string:
@@ -135,7 +135,7 @@ steps:
       query: |
         UPDATE metrics SET value = value + 5 WHERE name = 'jobs';
 
-    depends: [insert_rows]
+    depends: insert_rows
   - id: select_rows
     action: duckdb@v1
     with:
@@ -144,10 +144,10 @@ steps:
       query: |
         SELECT * FROM metrics WHERE name = 'jobs';
 
-    depends: [update_rows]
+    depends: update_rows
   - id: print_result
     run: printf '%s\n' '${select_rows.outputs.result}'
-    depends: [select_rows]
+    depends: select_rows
 ```
 
 Keep write operations ordered with `depends`. Parallel writes to the same DuckDB file can conflict because DuckDB uses file-level locking semantics.
@@ -245,7 +245,7 @@ steps:
         INSERT INTO target_table
         SELECT *
         FROM read_parquet('${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet');
-    depends: [export_parquet]
+    depends: export_parquet
 ```
 
 In distributed shared-nothing mode, an artifact path may be worker-local while the run is still executing. For cross-worker data handoff, use a shared mounted path, object storage, or keep the transfer inside one DuckDB statement with `ATTACH` and `INSERT INTO ... SELECT`.

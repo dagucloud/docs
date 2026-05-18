@@ -338,11 +338,11 @@ steps:
 
   - id: transform_a
     run: ./transform_a.sh
-    depends: [extract]
+    depends: extract
 
   - id: transform_b
     run: ./transform_b.sh
-    depends: [extract]
+    depends: extract
 
   - id: load
     run: ./load.sh
@@ -405,7 +405,7 @@ steps:
       dag: etl/transform
       params:
         INPUT: ${extract.outputs.result}
-    depends: [extract]
+    depends: extract
 
   - name: load
     action: dag.run
@@ -413,7 +413,7 @@ steps:
       dag: etl/load
       params:
         DATA: ${transform.outputs.result}
-    depends: [transform]
+    depends: transform
 ```
 
 ### SSH Remote Execution

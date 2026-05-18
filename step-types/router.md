@@ -69,7 +69,7 @@ Rules:
 
 ## Route Dependencies
 
-Router target steps implicitly depend on the router step. You normally do not need to repeat `depends: [router]`.
+Router target steps implicitly depend on the router step. You normally do not need to repeat `depends: router`.
 
 ```yaml
 type: graph
@@ -85,7 +85,7 @@ steps:
       routes:
         prod: [deploy_prod]
         stg: [deploy_stg]
-    depends: [setup]
+    depends: setup
 
   - id: deploy_prod
     run: echo "Deploying production"

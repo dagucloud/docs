@@ -535,7 +535,7 @@ steps:
               operator: In
               values: [42]
       command: [app, report, --date, "${DATE}"]
-    depends: [migrate]
+    depends: migrate
 ```
 
 ## Unsupported Fields

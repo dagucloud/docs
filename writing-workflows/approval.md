@@ -12,7 +12,7 @@ steps:
       prompt: "Verify staging deployment before production"
   - id: deploy_prod
     run: ./deploy.sh production
-    depends: [deploy_staging]
+    depends: deploy_staging
 ```
 
 The `deploy_staging` step runs `./deploy.sh staging`, then enters `Waiting` status. The `deploy_prod` step remains `Not Started` until the approval is resolved.
@@ -60,7 +60,7 @@ steps:
       required: [APPROVED_BY]
   - id: execute_migration
     run: ./migrate.sh --approver "${APPROVED_BY}" --window "${MAINTENANCE_WINDOW}"
-    depends: [generate_plan]
+    depends: generate_plan
 ```
 
 `APPROVED_BY` must be provided (it's in `required`). `MAINTENANCE_WINDOW` is optional. Both are injected as environment variables into `execute_migration` after approval.
@@ -80,7 +80,7 @@ steps:
       prompt: "Review test results before deploying"
   - id: deploy
     run: ./deploy.sh production
-    depends: [run_integration_tests]
+    depends: run_integration_tests
 ```
 
 The `integration-test-suite` DAG (which may contain many steps internally) executes fully. Once finished, `run_integration_tests` enters `Waiting`. The approver reviews the sub-DAG's results before `deploy` proceeds.
@@ -105,7 +105,7 @@ steps:
     with:
       dag: production-deploy
       params: "deploy_version=${DEPLOY_VERSION}"
-    depends: [review_config]
+    depends: review_config
 ```
 
 `validate-deploy-config.sh` runs and shows the configuration diff. The approver reviews it, provides `DEPLOY_VERSION`, and approves. Then `production-deploy` (a full deployment pipeline with its own steps) executes with the approved version.
@@ -138,10 +138,10 @@ steps:
       prompt: "Review the draft report"
       input: [FEEDBACK]
       rewind_to: prepare_report
-    depends: [prepare_report]
+    depends: prepare_report
   - id: publish_report
     run: ./publish-report.sh
-    depends: [draft_report]
+    depends: draft_report
 ```
 
 If the reviewer pushes `draft_report` back, Dagu resets `prepare_report`, `draft_report`, and `publish_report` to `Not Started`. `prepare_report` reruns immediately, `draft_report` reruns and waits for approval again, and `publish_report` runs later after approval is granted. Each rewound step receives the push-back context when it executes.
@@ -223,7 +223,7 @@ steps:
       input: [SINCE, GROUPING]
   - id: send_report
     run: ./send-to-slack.sh
-    depends: [query_metrics]
+    depends: query_metrics
 ```
 
 First run: `SINCE` and `GROUPING` are unset, so the script defaults to `7d` and `daily`. The approver reviews the output and pushes back with `SINCE=30d` and `GROUPING=weekly`. The step re-runs with those values, producing a different summary. The approver can push back again or approve.
@@ -246,7 +246,7 @@ steps:
       input: [FEEDBACK]
   - id: publish
     run: ./publish-changelog.sh
-    depends: [draft_changelog]
+    depends: draft_changelog
 ```
 
 First run: Claude generates a changelog from the git log. The reviewer reads the output in the Approval tab and pushes back with `FEEDBACK="Make it more concise and group by feature area"`. The step re-runs, this time passing the feedback into the prompt. This loop continues until the reviewer approves.

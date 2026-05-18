@@ -76,7 +76,7 @@ steps:
     run: |
       echo "Deploying ${inspect_build.output.version}"
       echo "Artifact: ${inspect_build.output.artifact.url}"
-    depends: [inspect_build]
+    depends: inspect_build
 ```
 
 ### Entry Forms
@@ -257,7 +257,7 @@ steps:
   - id: test
     run: pytest --collect-only -q | tail -1
     output: TEST_COUNT
-    depends: [build]
+    depends: build
 ```
 
 Result:

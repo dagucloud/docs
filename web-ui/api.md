@@ -441,7 +441,7 @@ Validates a DAG YAML specification without persisting any changes. Returns a lis
 **Request Body**:
 ```json
 {
-  "spec": "type: graph\nsteps:\n  - name: step1\n    run: echo hello\n  - name: step2\n    run: echo world\n    depends: [step1]",
+  "spec": "type: graph\nsteps:\n  - name: step1\n    run: echo hello\n  - name: step2\n    run: echo world\n    depends: step1",
   "name": "optional-dag-name"  // Optional - name to use when spec omits a name
 }
 ```

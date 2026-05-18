@@ -212,7 +212,7 @@ steps:
       messages:
         - role: user
           content: "Now multiply that by 3."
-    depends: [setup]
+    depends: setup
 ```
 
 The `followup` step receives the full session history from `setup`, including the assistant's response.
@@ -390,7 +390,7 @@ steps:
         "feature": [handle_feature]
         "question": [handle_question]
 
-    depends: [classify]
+    depends: classify
   - id: handle_bug
     action: chat.completion
     with:

@@ -53,7 +53,7 @@ steps:
       dag: file-processor
       params: "FILE=${ITEM}"
     parallel: ${CSV_FILES}
-    depends: [list_files]
+    depends: list_files
 ```
 
 ### Capturing Output

@@ -34,7 +34,7 @@ steps:
     with:
       channel: changelog
       version: ${build.output.version}
-    depends: [build]
+    depends: build
 ```
 
 The call site stays consistent:
@@ -171,7 +171,7 @@ steps:
 
   - id: route
     run: echo "${classify.output.category}:${classify.output.priority}"
-    depends: [classify]
+    depends: classify
 ```
 
 Rules:

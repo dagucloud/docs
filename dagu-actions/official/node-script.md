@@ -27,7 +27,7 @@ steps:
 
   - id: print
     run: echo "release tag is ${compute.outputs.result.tag}"
-    depends: [compute]
+    depends: compute
 ```
 
 `script` is a JavaScript async function body. `return` publishes `result`. The action exposes `input`, `params`, `env`, and a captured `console` object.

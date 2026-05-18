@@ -19,7 +19,7 @@ steps:
 
   - id: print
     run: printf '%s\n' '${list_files.outputs.stdout}'
-    depends: [list_files]
+    depends: list_files
 ```
 
 The action returns a JSON output object. Use `${step.outputs.stdout}` for small listings or command output. For large listings, exports, or command logs, write to an artifact instead of routing the data through action outputs.
@@ -57,7 +57,7 @@ steps:
       source: /data/reports
       destination: backup:reports
       allowDestructive: true
-    depends: [preview_sync]
+    depends: preview_sync
 ```
 
 ## Inputs

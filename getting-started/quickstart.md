@@ -48,7 +48,7 @@ steps:
     run: echo "Hello from Dagu!"
   - id: step_2
     run: echo "Running step 2"
-    depends: [hello]
+    depends: hello
 ```
 
 ## 3. Run it

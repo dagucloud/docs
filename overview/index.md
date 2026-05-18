@@ -51,14 +51,14 @@ steps:
 
   - id: normalize
     run: python scripts/normalize.py
-    depends: [fetch_orders]
+    depends: fetch_orders
 
   - id: load_warehouse
     action: postgres.query
     with:
       dsn: "${WAREHOUSE_DSN}"
       query: "CALL load_daily_orders()"
-    depends: [normalize]
+    depends: normalize
 ```
 
 <div class="overview-lifecycle" aria-label="Dagu workflow lifecycle">

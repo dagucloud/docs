@@ -118,7 +118,7 @@ steps:
       mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/reports" "${DAG_RUN_ARTIFACTS_DIR}/images"
       cp ./charts/service-latency.png "${DAG_RUN_ARTIFACTS_DIR}/images/service-latency.png"
       printf 'status=ok\n' > "${DAG_RUN_ARTIFACTS_DIR}/reports/metadata.txt"
-    depends: [build-report]
+    depends: build-report
 ```
 
 This gives the run a Markdown report, a plain-text sidecar file, and an image that operators can preview directly in the [Web UI](/overview/web-ui).

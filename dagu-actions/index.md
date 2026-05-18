@@ -28,7 +28,7 @@ steps:
 
   - id: print
     run: echo "total=${compute.outputs.result.total}"
-    depends: [compute]
+    depends: compute
 ```
 
 The action package owns its manifest, implementation workflow, output contract, and tool dependencies. The caller only supplies `with:` and reads `${compute.outputs.*}`.

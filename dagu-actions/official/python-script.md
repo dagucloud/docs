@@ -31,7 +31,7 @@ steps:
 
   - id: print
     run: echo "major version is ${compute.outputs.result.major}"
-    depends: [compute]
+    depends: compute
 ```
 
 `script` is a Python async function body. `return` publishes `result`, and `await` works directly. The action exposes `input`, `params`, and `env`.

@@ -1666,7 +1666,7 @@ steps:
       max_concurrent: 2
     continue_on:
       failure: false
-    depends: [extract-data]
+    depends: extract-data
 
   # Use different container for this step
   - id: load_data

@@ -38,11 +38,11 @@ steps:
         return {
             "message": f"release {input['tag']} is ready for {input['channel']}"
         }
-    depends: [prepare_release]
+    depends: prepare_release
 
   - id: print
     run: echo "${summarize.outputs.result.message}"
-    depends: [summarize]
+    depends: summarize
 ```
 
 The default DAG type is now `graph`. Existing workflows that omitted `type` and relied on implicit sequential execution should set `type: chain`, or add explicit `depends`, to preserve the previous ordering.

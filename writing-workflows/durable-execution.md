@@ -228,7 +228,7 @@ steps:
     retry_policy:
       limit: 0
       interval_sec: 0
-    depends: [fetch]
+    depends: fetch
 ```
 
 Exact behavior:

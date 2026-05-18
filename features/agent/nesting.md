@@ -152,7 +152,7 @@ steps:
       dag: implementer-agent
       params: "ANALYSIS=${FIRST.outputs.FINDINGS} REPO_PATH=/app/src"
     output: SECOND
-    depends: [analyze]
+    depends: analyze
 
   - id: verify
     action: dag.run
@@ -160,11 +160,11 @@ steps:
       dag: verifier-agent
       params: "CHANGES=${SECOND.outputs.CHANGES} REPO_PATH=/app/src"
     output: THIRD
-    depends: [implement]
+    depends: implement
 
   - id: print_verification
     run: echo "Verification - ${THIRD.outputs.VERDICT}"
-    depends: [verify]
+    depends: verify
 ```
 
 Each child DAG contains its own `action: agent.run` step focused on a specific task — analysis, implementation, or verification.
@@ -266,7 +266,7 @@ steps:
       params: "FILES=${FILE_LIST}"
     output: REFACTOR_RESULT
 
-    depends: [plan]
+    depends: plan
   - id: summarize
     action: agent.run
     with:
@@ -278,7 +278,7 @@ steps:
 
             Write a brief summary of what was changed and why.
     output: SUMMARY
-    depends: [refactor]
+    depends: refactor
 ```
 
 The `plan` step (agent) identifies files, the `refactor` step (sub-DAG call) delegates the work to a child agent DAG, and the `summarize` step (agent) produces the final report.
@@ -419,7 +419,7 @@ steps:
       params: "PLAN=${TEST_PLAN}"
     output: EXECUTION
 
-    depends: [plan]
+    depends: plan
   - id: summarize
     action: agent.run
     with:
@@ -431,7 +431,7 @@ steps:
 
             Summarize what was accomplished and any remaining gaps.
     output: SUMMARY
-    depends: [write_tests]
+    depends: write_tests
 ```
 
 ## See Also

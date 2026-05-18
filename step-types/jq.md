@@ -56,7 +56,7 @@ steps:
       input: "${producer.stdout}"
       filter: '.items[] | .name'
     output: RESULT
-    depends: [producer]
+    depends: producer
 ```
 
 **File URL via `with.data`**
@@ -74,7 +74,7 @@ steps:
       filter: '.items[] | .name'
       data: "file://${producer.stdout}"
     output: RESULT
-    depends: [producer]
+    depends: producer
 ```
 
 `with.input` and `with.data` are mutually exclusive. Setting both produces a validation error.

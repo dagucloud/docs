@@ -441,7 +441,7 @@ steps:
       messages:
         - role: user
           content: "Execute the approved migration plan: ${MIGRATION_PLAN}"
-    depends: [draft]
+    depends: draft
 ```
 
 ## See Also

@@ -101,7 +101,7 @@ steps:
 
   - id: audit
     run: echo "Notification message: ${notify.outputs.messageId}"
-    depends: [notify]
+    depends: notify
 ```
 
 Inside the action workflow, publish caller-visible outputs with `stdout.outputs` or `outputs.write`.
