@@ -1806,6 +1806,7 @@ steps:
       env:
         - PYTHONPATH=/app
     run: pytest
+    depends: build
 ```
 
 ### Changed
@@ -2646,6 +2647,7 @@ steps:
 
   - id: use_output
     run: echo ${OUT.outputs.RESULT}
+    depends: run_sub_dag
 ```
 
 #### Multiple DAGs in Single File
@@ -2686,6 +2688,7 @@ steps:
         FILE_NAME: ${ITEM}
     parallel:
       items: ${FILES}
+    depends: get_files
 ```
 
 #### Enhanced Web UI
@@ -2890,6 +2893,7 @@ steps:
     output: SUB_RESULT
   - id: use_output
     run: echo "The result is ${SUB_RESULT.outputs.finalValue}"
+    depends: sub_workflow
 ```
 
 If `SUB_RESULT` contains:

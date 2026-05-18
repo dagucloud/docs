@@ -170,8 +170,8 @@ steps:
       text: "App crashes on startup"
 
   - id: route
-    depends: [classify]
     run: echo "${classify.output.category}:${classify.output.priority}"
+    depends: [classify]
 ```
 
 Rules:

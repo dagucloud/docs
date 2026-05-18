@@ -235,9 +235,12 @@ Capture command output to use in later steps:
 
 ```yaml
 steps:
-  - run: cat VERSION
+  - id: get_version
+    run: cat VERSION
     output: VERSION
-  - run: docker build -t myapp:${VERSION} .
+  - id: build_image
+    run: docker build -t myapp:${VERSION} .
+    depends: get_version
 ```
 
 ### Output Size Limits
@@ -288,11 +291,14 @@ Access nested values in JSON output:
 
 ```yaml
 steps:
-  - run: |
+  - id: get_config
+    run: |
       echo '{"db": {"host": "localhost", "port": 5432}}'
     output: CONFIG
     
-  - run: psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
+  - id: connect_database
+    run: psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
+    depends: get_config
 ```
 
 ### Sub-workflow Output
@@ -301,15 +307,18 @@ Access outputs from nested workflows:
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: run_etl
+    action: dag.run
     with:
       dag: etl-workflow
       params: "DATE=${TODAY}"
     output: ETL_RESULT
     
-  - run: |
+  - id: print_etl_result
+    run: |
       echo "Records processed: ${ETL_RESULT.outputs.record_count}"
       echo "Status: ${ETL_RESULT.outputs.status}"
+    depends: run_etl
 ```
 
 ## Step ID References
@@ -322,7 +331,8 @@ steps:
     run: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
     continue_on: failed
 
-  - run: |
+  - id: handle_result
+    run: |
       if [ "${risky.exit_code}" = "0" ]; then
         echo "Success! Output was:"
         cat ${risky.stdout}  # Read content from file path
@@ -330,6 +340,7 @@ steps:
         echo "Failed with code ${risky.exit_code}"
         cat ${risky.stderr}  # Read content from file path
       fi
+    depends: risky
 ```
 
 Available properties:

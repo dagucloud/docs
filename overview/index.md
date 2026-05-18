@@ -30,7 +30,7 @@ Understanding Dagu is easier once the main terms are clear.
 |------|---------|
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
-| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [remote actions](/dagu-actions/remote), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/step-types/sql/duckdb). |
+| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
 | **Tool** | A pinned external CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
 | **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
@@ -51,12 +51,14 @@ steps:
 
   - id: normalize
     run: python scripts/normalize.py
+    depends: [fetch_orders]
 
   - id: load_warehouse
     action: postgres.query
     with:
       dsn: "${WAREHOUSE_DSN}"
       query: "CALL load_daily_orders()"
+    depends: [normalize]
 ```
 
 <div class="overview-lifecycle" aria-label="Dagu workflow lifecycle">

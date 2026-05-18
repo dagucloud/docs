@@ -22,10 +22,13 @@ Capture command output and use it in subsequent steps:
 
 ```yaml
 steps:
-  - run: cat VERSION
+  - id: get_version
+    run: cat VERSION
     output: VERSION
 
-  - run: docker build -t myapp:${VERSION} .
+  - id: build_image
+    run: docker build -t myapp:${VERSION} .
+    depends: get_version
 ```
 
 ### How It Works
@@ -113,7 +116,8 @@ Access nested values in JSON output using dot notation:
 
 ```yaml
 steps:
-  - run: |
+  - id: get_config
+    run: |
       echo '{
         "database": {
           "host": "localhost",
@@ -125,10 +129,12 @@ steps:
       }'
     output: CONFIG
     
-  - run: |
+  - id: connect_database
+    run: |
       psql -h ${CONFIG.database.host} \
            -p ${CONFIG.database.port} \
            -U ${CONFIG.database.credentials.username}
+    depends: get_config
 ```
 
 ### Array Access
@@ -137,14 +143,17 @@ Access array elements by index:
 
 ```yaml
 steps:
-  - run: |
+  - id: get_servers
+    run: |
       echo '[
         {"name": "web1", "ip": "10.0.1.1"},
         {"name": "web2", "ip": "10.0.1.2"}
       ]'
     output: SERVERS
     
-  - run: ping -c 1 ${SERVERS[0].ip}
+  - id: ping_first_server
+    run: ping -c 1 ${SERVERS[0].ip}
+    depends: get_servers
 ```
 
 ## Environment Variables
@@ -236,7 +245,8 @@ steps:
     continue_on:
       failure: true
 
-  - run: |
+  - id: handle_risky_result
+    run: |
       if [ "${risky.exit_code}" = "0" ]; then
         echo "Success! Checking output..."
         cat ${risky.stdout}  # Read content from the file
@@ -245,6 +255,7 @@ steps:
         echo "Error log:"
         cat ${risky.stderr}  # Read content from the file
       fi
+    depends: risky
 ```
 
 Available properties:
@@ -273,10 +284,10 @@ steps:
       printf 'Revenue grew 18 percent year over year.'
 
   - id: report
-    depends: [extract_title, extract_summary]
     run: |
       printf 'Title: %s\nSummary: %s' "${extract_title.output}" "${extract_summary.output}"
     output: REPORT
+    depends: [extract_title, extract_summary]
 ```
 
 String-form `${id.output}` returns the captured text value.
@@ -291,9 +302,11 @@ steps:
       artifact:
         url: "https://example.test/app.tgz"
 
-  - run: |
+  - id: print_publish_output
+    run: |
       echo "Version: ${publish.output.version}"
       echo "Artifact: ${publish.output.artifact.url}"
+    depends: publish
 ```
 
 `${id.output}` vs `${id.stdout}`:
@@ -313,16 +326,19 @@ Capture outputs from nested workflows:
 ```yaml
 # parent.yaml
 steps:
-  - action: dag.run
+  - id: run_etl
+    action: dag.run
     with:
       dag: etl-workflow
       params: "DATE=${TODAY}"
     output: ETL_RESULT
     
-  - run: |
+  - id: print_etl_result
+    run: |
       echo "Status: ${ETL_RESULT.status}"
       echo "Records: ${ETL_RESULT.outputs.record_count}"
       echo "Duration: ${ETL_RESULT.outputs.duration}"
+    depends: run_etl
 ```
 
 ### Output Structure
@@ -346,14 +362,17 @@ Access outputs from deeply nested workflows:
 
 ```yaml
 steps:
-    output: PIPELINE
+  - id: run_pipeline
     action: dag.run
     with:
       dag: main-pipeline
-  - run: |
+    output: PIPELINE
+  - id: print_pipeline_outputs
+    run: |
       # Access nested outputs
       echo "ETL Status: ${PIPELINE.outputs.ETL_OUTPUT.status}"
       echo "ML Score: ${PIPELINE.outputs.ML_OUTPUT.outputs.accuracy}"
+    depends: run_pipeline
 ```
 
 ## Parallel Execution Outputs
@@ -362,16 +381,19 @@ When running parallel executions, outputs are aggregated:
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: process_regions
+    action: dag.run
     with:
       dag: region-processor
     parallel:
       items: ["us-east", "us-west", "eu-central"]
     output: RESULTS
 
-  - run: |
+  - id: summarize_regions
+    run: |
       echo "Total regions: ${RESULTS.summary.total}"
       echo "Succeeded: ${RESULTS.summary.succeeded}"
+    depends: process_regions
       echo "Failed: ${RESULTS.summary.failed}"
       
       # Access individual results
@@ -414,10 +436,13 @@ Redirect output to local files when another step reads the file from the same fi
 
 ```yaml
 steps:
-  - run: python generate_report.py
+  - id: generate_report
+    run: python generate_report.py
     stdout: /tmp/report.txt
     
-  - run: mail -s "Report" user@example.com < /tmp/report.txt
+  - id: email_report
+    run: mail -s "Report" user@example.com < /tmp/report.txt
+    depends: generate_report
 ```
 
 If the file is a run result that users should preview or download, stream the command output to an artifact instead:
@@ -433,14 +458,17 @@ steps:
 
 ```yaml
 steps:
-  - run: |
+  - id: extract_files
+    run: |
       tar -xzf data.tar.gz -C /tmp/
       ls /tmp/data/ > /tmp/filelist.txt
     
-  - run: |
+  - id: process_files
+    run: |
       while read file; do
         process.sh "/tmp/data/$file"
       done < /tmp/filelist.txt
+    depends: extract_files
 ```
 
 ## Special Environment Variables

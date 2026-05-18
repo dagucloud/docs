@@ -97,6 +97,7 @@ steps:
 
   - id: process
     run: echo "${USER_DATA}" | jq '.email'
+    depends: get_user
 ```
 
 ### JSON Output Mode

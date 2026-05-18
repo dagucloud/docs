@@ -205,7 +205,6 @@ steps:
           content: "What is 2+2?"
 
   - id: followup
-    depends: [setup]
     action: chat.completion
     with:
       provider: openai
@@ -213,6 +212,7 @@ steps:
       messages:
         - role: user
           content: "Now multiply that by 3."
+    depends: [setup]
 ```
 
 The `followup` step receives the full session history from `setup`, including the assistant's response.
@@ -281,7 +281,8 @@ The response is written to stdout and can be captured with `output`:
 
 ```yaml
 steps:
-  - action: chat.completion
+  - id: generate_json
+    action: chat.completion
     with:
       provider: openai
       model: gpt-4o
@@ -290,7 +291,9 @@ steps:
           content: "Generate a JSON object with name and age fields."
     output: CHAT_RESPONSE
 
-  - run: echo "${CHAT_RESPONSE}" | jq '.name'
+  - id: extract_name
+    run: echo "${CHAT_RESPONSE}" | jq '.name'
+    depends: generate_json
 ```
 
 ### Temperature Control

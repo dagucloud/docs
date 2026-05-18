@@ -59,15 +59,18 @@ The agent writes its result via the `output` tool, which is captured by the step
 schedule: "0 6 * * *"
 
 steps:
-  - action: agent.run
+  - id: analyze_deployments
+    action: agent.run
     with:
       messages:
         - role: user
           content: "Analyze yesterday's deployment logs and summarize any issues."
     output: ANALYSIS
 
-  - run: |
+  - id: email_report
+    run: |
       echo "${ANALYSIS}" | mail -s "Daily Deployment Report" team@example.com
+    depends: analyze_deployments
 ```
 
 If the agent never calls the `output` tool, the output variable will be empty.
@@ -149,7 +152,8 @@ steps:
 schedule: "0 9 * * MON"
 
 steps:
-  - action: agent.run
+  - id: summarize_commits
+    action: agent.run
     with:
       messages:
         - role: user
@@ -158,7 +162,9 @@ steps:
             Write a concise weekly summary in Markdown format.
     output: WEEKLY_SUMMARY
 
-  - run: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
+  - id: write_report
+    run: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
+    depends: summarize_commits
 ```
 
 ### Scheduled Agent with Restricted Tools and Bash Policy
@@ -227,8 +233,8 @@ steps:
 
             Infrastructure: ${INFRA_STATUS}
             Application: ${APP_STATUS}
-    depends: [check_infra, check_app]
     output: MORNING_BRIEF
+    depends: [check_infra, check_app]
 ```
 
 The `check_infra` and `check_app` steps run in parallel. The `summarize` step waits for both to finish before combining their outputs.

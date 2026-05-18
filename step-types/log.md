@@ -47,10 +47,10 @@ steps:
     output: VERSION
 
   - id: announce
-    depends: version
     action: log.write
     with:
       message: "Deploying ${VERSION} to ${ENVIRONMENT}"
+    depends: version
 ```
 
 ## Capturing Output
@@ -71,8 +71,8 @@ steps:
     output: RELEASE_LINE
 
   - id: use_release_line
-    depends: release_line
     run: printf '%s\n' "${RELEASE_LINE}"
+    depends: release_line
 ```
 
 ## When to Use `log`

@@ -38,7 +38,7 @@ steps:
   - run: ./load.sh
 ```
 
-Each handler is a normal step definition. You can use `run`, `script`, `action` (for remote actions or built-in step type names), `executor`, containers, timeouts, or any other step field that makes sense for a single task.
+Each handler is a normal step definition. You can use `run`, `script`, `action` (for built-in, official, or third-party actions), `executor`, containers, timeouts, or any other step field that makes sense for a single task.
 
 ## Execution Model
 
@@ -137,6 +137,7 @@ steps:
       prompt: "Approve production?"
   - id: deploy_prod
     run: ./deploy.sh production
+    depends: deploy_staging
 ```
 
 The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of step names currently waiting for approval.

@@ -50,13 +50,13 @@ steps:
     run: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
 
   - id: filter
-    depends: [producer]
     action: jq.filter
     with:
       raw: true
       input: "${producer.stdout}"
       filter: '.items[] | .name'
     output: RESULT
+    depends: [producer]
 ```
 
 **File URL via `with.data`**
@@ -68,13 +68,13 @@ steps:
     run: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
 
   - id: filter
-    depends: [producer]
     action: jq.filter
     with:
       raw: true
       filter: '.items[] | .name'
       data: "file://${producer.stdout}"
     output: RESULT
+    depends: [producer]
 ```
 
 `with.input` and `with.data` are mutually exclusive. Setting both produces a validation error.
@@ -156,6 +156,7 @@ steps:
       filter: '.products | map(select(.inventory > 0) | {id, name, price})'
       data: ${API_RESPONSE}
     output: IN_STOCK
+    depends: fetch_data
 ```
 
 ### Aggregate Data

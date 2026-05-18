@@ -170,6 +170,7 @@ steps:
         Report available at: ${REPORT_PATH}
       attachments:
         - run: ${REPORT_PATH}
+    depends: generate_report
 ```
 
 ### Error Notification
@@ -274,6 +275,7 @@ steps:
         fi`
       subject: "Alert from ${ENV}"
       message: "Environment-specific alert"
+    depends: check_environment
 ```
 
 ### HTML Emails

@@ -228,6 +228,7 @@ steps:
   - id: final_step
     run: ./cleanup.sh
     # Uses LOG_LEVEL=info again (step-level doesn't persist)
+    depends: [normal_processing, debug_processing]
 ```
 
 Step-level variables support the same features as DAG-level:

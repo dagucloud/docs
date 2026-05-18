@@ -81,14 +81,14 @@ steps:
     output: NAME
 
   - id: render
-    depends:
-      - producer
     action: template.render
     with:
       template: "Hello, {{ .name }}!"
       data:
         name: ${NAME}
     output: RESULT
+    depends:
+      - producer
 ```
 
 `RESULT` captures `Hello, Alice!`.

@@ -8,13 +8,13 @@ Dagu has three related output surfaces:
 
 - **String form** captures a step's trimmed stdout into one variable such as `${VERSION}`.
 - **Object form** publishes structured step-scoped output for `${step_id.output.*}` references.
-- **DAG/action outputs** publish values for the run's Outputs tab and for remote action callers through `${step_id.outputs.*}`.
+- **DAG/action outputs** publish values for the run's Outputs tab and for packaged action callers through `${step_id.outputs.*}`.
 
 These modes solve different problems:
 
 - Use **string form** when you want a flat variable and a final `outputs.json` entry.
 - Use **object form** when one step needs structured downstream data through `${step_id.output.*}`.
-- Use **DAG/action outputs** when the whole DAG or remote action should return values to its caller.
+- Use **DAG/action outputs** when the whole DAG or packaged action should return values to its caller.
 
 Use `output:` for small values. If a step produces a large report, JSON dump, Markdown document, or log that users should inspect later, write the stream directly to an artifact with `stdout.artifact` or `stderr.artifact` instead:
 
@@ -38,6 +38,7 @@ steps:
 
   - id: build_image
     run: docker build -t myapp:${VERSION} .
+    depends: get_version
 ```
 
 The captured stdout is trimmed and becomes:
@@ -72,10 +73,10 @@ steps:
         select: .artifact
 
   - id: deploy
-    depends: [inspect_build]
     run: |
       echo "Deploying ${inspect_build.output.version}"
       echo "Artifact: ${inspect_build.output.artifact.url}"
+    depends: [inspect_build]
 ```
 
 ### Entry Forms
@@ -161,7 +162,9 @@ steps:
     run: echo '{"version":"v1.2.3"}'
     output: BUILD_JSON
 
-  - run: echo "Version: ${build.output.version}"
+  - id: print_version
+    run: echo "Version: ${build.output.version}"
+    depends: build
 ```
 
 For object-form output, nested access is the primary pattern:
@@ -233,9 +236,9 @@ steps:
         status: sent
 ```
 
-Remote action callers read these values with `${notify.outputs.messageId}`. This is intentionally separate from `${notify.output.*}`, which is for step-scoped `output:` values.
+Packaged action callers read these values with `${notify.outputs.messageId}`. This is intentionally separate from `${notify.output.*}`, which is for step-scoped `output:` values.
 
-When these values are produced inside a remote action DAG, Dagu validates the final action output object against the `outputs` schema in `dagu-action.yaml` after the action DAG returns a run result. `stdout.outputs` and `outputs.write` publish values; the manifest schema is what validates the action boundary. If validation fails, the parent action step fails.
+When these values are produced inside an action package workflow, Dagu validates the final action output object against the `outputs` schema in `dagu-action.yaml` after the action workflow returns a run result. `stdout.outputs` and `outputs.write` publish values; the manifest schema is what validates the action boundary. If validation fails, the parent action step fails.
 
 ## Run Output Collection
 

@@ -135,10 +135,10 @@ steps:
     with:
       dag: child-analytics.yaml
       params: "INPUT=${run-etl.output}"
+    depends: [run-analytics]
     depends: [run-etl]
 
   - run: echo "Parent workflow complete"
-    depends: [run-analytics]
 ```
 
 ### 2. Create Sub DAGs
@@ -155,9 +155,12 @@ otel:
   insecure: true
 
 steps:
-  - run: echo "Extracting from ${SOURCE}"
+  - id: extract
+    run: echo "Extracting from ${SOURCE}"
     output: EXTRACTED_DATA
-  - run: echo "Transforming data" && echo "/tmp/data.csv"
+  - id: transform
+    run: echo "Transforming data" && echo "/tmp/data.csv"
+    depends: extract
 ```
 
 ```yaml

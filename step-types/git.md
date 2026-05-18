@@ -158,6 +158,7 @@ steps:
 
   - id: print_commit
     run: echo "Checked out ${CHECKOUT.commit}"
+    depends: checkout_source
 ```
 
 Example output:

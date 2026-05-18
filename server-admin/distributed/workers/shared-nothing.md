@@ -59,13 +59,13 @@ Workers stream stdout/stderr to the coordinator via the `StreamLogs` gRPC call:
 
 Log streaming is best-effort: failures don't fail the step execution. Some logs may be lost if network issues occur during streaming.
 
-### Remote Actions
+### Packaged Actions
 
-Remote actions are supported in shared-nothing mode. The worker executing the action step resolves the action reference, validates the `dagu-action.yaml` manifest, and packages the resolved action workspace. When the action sub-DAG is dispatched, the workspace bundle is transferred through the coordinator and materialized on the worker that runs the child DAG.
+Packaged actions are supported in shared-nothing mode. The worker executing the action step resolves the action reference, validates the `dagu-action.yaml` manifest, and packages the resolved action workspace. When the action sub-DAG is dispatched, the workspace bundle is transferred through the coordinator and materialized on the worker that runs the child DAG.
 
 The workspace bundle contains the action DAG, manifest, scripts, and helper files. It does not contain external binaries from the caller's environment. If the action DAG needs portable CLIs, declare them with top-level `tools` in the action DAG file; the worker running the child action DAG prepares those tools in its own local cache.
 
-Use GitHub or explicit Git `source:` references for portable shared-nothing deployments:
+Use pinned GitHub references for portable shared-nothing deployments:
 
 ```yaml
 steps:
@@ -74,7 +74,7 @@ steps:
       text: "shared-nothing worker run"
 ```
 
-Local `source:` references such as `source:./actions/notify@local` work only when that path exists on the worker executing the action step. See [Remote Actions](/dagu-actions/remote) for the reference formats and packaging rules.
+See [Third-Party Actions](/dagu-actions/third-party) for non-official package references and packaging rules.
 
 ### Zombie Detection
 

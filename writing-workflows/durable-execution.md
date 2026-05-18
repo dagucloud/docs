@@ -95,12 +95,14 @@ steps:
     retry_policy:
       limit: 5
       interval_sec: 10
+    depends: fetch
 
   - id: notify
     run: ./notify.sh
     retry_policy:
       limit: 0
       interval_sec: 0
+    depends: deploy
 
 handler_on:
   failure:
@@ -222,11 +224,11 @@ steps:
     run: curl -fsS https://api.example.com/data
 
   - id: deploy
-    depends: [fetch]
     run: ./deploy.sh
     retry_policy:
       limit: 0
       interval_sec: 0
+    depends: [fetch]
 ```
 
 Exact behavior:

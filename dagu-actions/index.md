@@ -1,20 +1,20 @@
 # Dagu Actions
 
-Dagu actions are reusable step interfaces. They let a workflow call a named unit of work with a `with:` object instead of repeating the underlying implementation details at every call site.
+Dagu Actions are official reusable action packages maintained by the `dagucloud` organization. They let a workflow call a maintained package with a short versioned reference such as `python-script@v1` or `duckdb@v1`.
 
-There are three action reuse models:
+Custom Actions and Third-Party Actions use related `action:` syntax, but they are different concepts:
 
 | Model | Call shape | Where it lives | Use when |
 |-------|------------|----------------|----------|
-| Official action | `action: python-script@v1` | A maintained `dagucloud/*` repository | Dagu already provides the reusable package you need. |
-| Remote action | `action: owner/repo@version` or `source:...@version` | A GitHub repository, explicit Git source, or local directory | The reusable unit needs files, scripts, schemas, tools, or its own DAG structure. |
-| Custom action | `action: release.announce` | The current DAG document or `base.yaml` | You need an inline typed wrapper around a built-in step type. |
+| Dagu Action | `action: python-script@v1` | A maintained `dagucloud/*` repository | Dagu already provides the reusable package you need. |
+| Third-Party Action | `action: owner/repo@version` | A repository outside the official `dagucloud` action set | The reusable unit is maintained outside Dagu and should be pinned by version. |
+| Custom Action | `action: release.announce` | The current DAG document or `base.yaml` | You need an inline typed wrapper around a built-in step type. |
 
-Built-in step types such as `run`, `http.request`, `docker.run`, `postgres.query`, and `agent.run` are documented separately in [Step Types](/step-types/shell). Dagu actions can wrap or package those step types, but they are not the same layer.
+Built-in step types such as `run`, `http.request`, `docker.run`, `postgres.query`, and `agent.run` are documented separately in [Step Types](/step-types/shell). Packaged actions can use those step types internally, but they are not the same layer.
 
 ## Quick Example
 
-Official actions use a short versioned reference:
+Dagu Actions use a short versioned reference:
 
 ```yaml
 steps:
@@ -27,23 +27,23 @@ steps:
         return {"total": sum(input["values"])}
 
   - id: print
-    depends: [compute]
     run: echo "total=${compute.outputs.result.total}"
+    depends: [compute]
 ```
 
-The action package owns its manifest, implementation DAG, output contract, and tool dependencies. The caller only supplies `with:` and reads `${compute.outputs.*}`.
+The action package owns its manifest, implementation workflow, output contract, and tool dependencies. The caller only supplies `with:` and reads `${compute.outputs.*}`.
 
 ## Choose a Model
 
-Use an official action first when it matches the task. Official actions are remote action packages maintained in the `dagucloud` organization and can be called with `name@version`.
+Use a Dagu Action first when it matches the task. Dagu Actions are maintained in the `dagucloud` organization and can be called with `name@version`.
 
-Use a remote action when the reusable behavior should be versioned independently, shared across repositories or teams, or implemented with package files such as scripts and templates.
+Use a third-party action when the reusable behavior is packaged outside the official `dagucloud` action set and should be pinned by version.
 
 Use a custom action when the reusable behavior is only a small wrapper around a built-in step type and should remain inside one DAG file or shared `base.yaml`.
 
-## How Remote Actions Run
+## How Packages Run
 
-Remote and official actions are implemented as normal Dagu workflows with an action manifest:
+Dagu Actions and Third-Party Actions are implemented as normal Dagu workflows with an action manifest:
 
 ```text
 dagu-action.yaml  # manifest and schemas
@@ -57,7 +57,7 @@ See [Execution Model](/dagu-actions/execution-model) for the exact lifecycle and
 
 ## Pages
 
-- [Official Actions](/dagu-actions/official)
-- [Remote Actions](/dagu-actions/remote)
+- [Official Dagu Actions](/dagu-actions/official)
+- [Third-Party Actions](/dagu-actions/third-party)
 - [Custom Actions](/dagu-actions/custom)
 - [Execution Model](/dagu-actions/execution-model)

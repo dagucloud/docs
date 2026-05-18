@@ -291,9 +291,12 @@ description: "Transform and clean data"
 params: "data format=json"
 
 steps:
-  - run: echo "$1" | jq '.' > /tmp/transformed.json
-  - run: cat /tmp/transformed.json
+  - id: transform
+    run: echo "$1" | jq '.' > /tmp/transformed.json
+  - id: read_result
+    run: cat /tmp/transformed.json
     output: TRANSFORMED_DATA
+    depends: transform
 
 ---
 # Store data tool

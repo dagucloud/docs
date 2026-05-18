@@ -64,12 +64,12 @@ When set to `true`, the workflow continues even if the step fails with any non-z
 ```yaml
 steps:
   # Shorthand syntax
-  - id: optional_cleanup
+  - id: optional_cleanup_shorthand
     run: rm -rf /tmp/cache/*
     continue_on: failed
 
   # Object syntax (equivalent)
-  - id: optional_cleanup
+  - id: optional_cleanup_object
     run: rm -rf /tmp/cache/*
     continue_on:
       failure: true
@@ -82,7 +82,7 @@ When set to `true`, the workflow continues when a step is skipped due to unmet p
 ```yaml
 steps:
   # Shorthand syntax
-  - id: conditional_task
+  - id: conditional_task_shorthand
     run: echo "Processing"
     preconditions:
       - condition: "${ENABLE_FEATURE}"
@@ -90,7 +90,7 @@ steps:
     continue_on: skipped
 
   # Object syntax (equivalent)
-  - id: conditional_task
+  - id: conditional_task_object
     run: echo "Processing"
     preconditions:
       - condition: "${ENABLE_FEATURE}"
@@ -160,6 +160,7 @@ steps:
 
   - id: main_process
     run: echo "Processing"
+    depends: cache_warmup
 ```
 
 ### Handling Known Exit Codes
@@ -175,6 +176,7 @@ steps:
 
   - id: process_changes
     run: echo "Handling changes"
+    depends: git_diff
 ```
 
 ### Warning Detection
@@ -193,6 +195,7 @@ steps:
     run: eslint . --max-warnings 0
     continue_on:
       failure: false  # This one must pass
+    depends: lint_code
 ```
 
 ### Graceful Degradation
@@ -210,6 +213,7 @@ steps:
     preconditions:
       - condition: "${TRY_OPTIMAL_METHOD_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"  # Only run if previous failed
+    depends: try_optimal_method
 ```
 
 ### Complex Output Matching
@@ -229,6 +233,7 @@ steps:
 
   - id: handle_deployment_issue
     run: echo "Fixing deployment"
+    depends: deployment_check
 ```
 
 ## Interaction with Other Features
@@ -307,6 +312,7 @@ steps:
 
   - id: verify_migration
     run: echo "Verifying database"
+    depends: run_migration
 ```
 
 ### Multi-Cloud Deployment
@@ -324,6 +330,7 @@ steps:
   - id: verify_deployment
     run: echo "Verifying cloud deployment"
     # No continue_on - at least one cloud must be working
+    depends: [deploy_aws, deploy_gcp]
 ```
 
 ### Service Health Check
@@ -340,4 +347,5 @@ steps:
     preconditions:
       - condition: "${CHECK_PRIMARY_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"  # Only if primary failed
+    depends: check_primary
 ```

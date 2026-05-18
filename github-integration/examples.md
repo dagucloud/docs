@@ -45,6 +45,7 @@ steps:
   - id: integration-test
     run: |
       ./scripts/run-integration-tests.sh
+    depends: migrate
 ```
 
 ### Runtime Data
@@ -97,6 +98,7 @@ steps:
   - id: deploy-preview
     run: |
       ./scripts/deploy-preview-env.sh "${PR_NUMBER}" "${IMAGE_TAG}"
+    depends: build-image
 ```
 
 ### Runtime Data
@@ -164,6 +166,7 @@ steps:
   - id: soak-test
     run: |
       ./scripts/run-soak-test.sh full
+    depends: prepare
 ```
 
 ### Runtime Data
@@ -270,6 +273,7 @@ steps:
   - id: validate
     run: |
       ./scripts/run-hardware-validation.sh
+    depends: prepare
 ```
 
 ### Runtime Data

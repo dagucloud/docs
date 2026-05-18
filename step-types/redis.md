@@ -35,6 +35,7 @@ steps:
     with:
       key: mykey
     output: RESULT
+    depends: set_value
 ```
 
 Steps inherit connection settings from the DAG level. Step-level `with` values override DAG-level defaults.
@@ -124,6 +125,7 @@ steps:
     with:
       key: user:1:name
     output: USER_NAME
+    depends: set_key
 
   - id: increment
     action: redis.incr
@@ -174,12 +176,14 @@ steps:
       key: user:1
       field: email
     output: EMAIL
+    depends: set_hash
 
   - id: get_all_hash
     action: redis.hgetall
     with:
       key: user:1
     output: USER_DATA
+    depends: set_hash
 ```
 
 ### List Operations
@@ -200,12 +204,14 @@ steps:
       start: 0
       stop: -1  # all elements
     output: TASKS
+    depends: push_to_list
 
   - id: pop_from_list
     action: redis.lpop
     with:
       key: queue:tasks
     output: NEXT_TASK
+    depends: get_list_range
 ```
 
 ### Set Operations
@@ -226,12 +232,14 @@ steps:
     with:
       key: tags:article:1
     output: TAGS
+    depends: add_to_set
 
   - id: check_membership
     action: redis.sismember
     with:
       key: tags:article:1
       value: "redis"
+    depends: add_to_set
 ```
 
 ### Sorted Set Operations
@@ -253,6 +261,7 @@ steps:
       stop: 9
       with_scores: true
     output: TOP_PLAYERS
+    depends: add_score
 ```
 
 ### Pipeline Operations

@@ -304,14 +304,17 @@ The step's `output` field captures whatever the agent writes to stdout via the `
 
 ```yaml
 steps:
-  - action: agent.run
+  - id: count_files
+    action: agent.run
     with:
       messages:
         - role: user
           content: "Count the number of .go files in this directory"
     output: FILE_COUNT
 
-  - run: echo "Found ${FILE_COUNT} Go files"
+  - id: print_count
+    run: echo "Found ${FILE_COUNT} Go files"
+    depends: count_files
 ```
 
 The agent is instructed (via system prompt) to call the `output` tool with its final result. The content is written directly to stdout and captured by the `output` field.
@@ -392,14 +395,16 @@ params:
   - REPO_PATH
 
 steps:
-  - action: agent.run
+  - id: analyze_coverage
+    action: agent.run
     with:
       messages:
         - role: user
           content: "Analyze the test coverage of ${REPO_PATH} and identify untested code paths"
     output: COVERAGE_ANALYSIS
 
-  - action: agent.run
+  - id: write_tests
+    action: agent.run
     with:
       model: claude-opus
       max_iterations: 100
@@ -411,6 +416,7 @@ steps:
 
             Write unit tests for the untested code paths in ${REPO_PATH}.
     output: TEST_RESULT
+    depends: analyze_coverage
 ```
 
 ### Graph DAG with Agent and Approval

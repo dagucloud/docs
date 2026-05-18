@@ -141,11 +141,13 @@ steps:
       volumes:
         - ./migrations:/migrations
     run: php artisan migrate --force
+    depends: prepare_app
 
   # Exec back into the app container
   - id: restart_app
     container: my-app
     run: php artisan up
+    depends: migrate
 ```
 
 ### Configuration Options
@@ -229,6 +231,7 @@ steps:
       env:
         - GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp.json
     run: gcloud app deploy
+    depends: install
 ```
 
 ## Executor `with` Syntax
@@ -512,6 +515,7 @@ steps:
     container:
       image: ghcr.io/myorg/analyzer:v2  # from GitHub
     run: analyze-results
+    depends: process
 ```
 
 ## Remote Docker Daemon

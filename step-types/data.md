@@ -150,7 +150,6 @@ steps:
     output: USERS_JSON
 
   - id: first_name
-    depends: [users]
     action: data.pick
     with:
       from: json
@@ -158,6 +157,7 @@ steps:
       data: ${USERS_JSON}
       raw: true
     output: FIRST_NAME
+    depends: [users]
 ```
 
 Use `jq.filter` when you need full jq expressions such as filtering, grouping, or reshaping arrays.

@@ -106,8 +106,21 @@ const fullSidebar = [
     text: "Dagu Actions",
     items: [
       { text: "Overview", link: "/dagu-actions/" },
-      { text: "Official Actions", link: "/dagu-actions/official" },
-      { text: "Remote Actions", link: "/dagu-actions/remote" },
+      {
+        text: "Official Actions",
+        link: "/dagu-actions/official",
+        collapsed: false,
+        items: [
+          { text: "Node Script", link: "/dagu-actions/official/node-script" },
+          { text: "Python Script", link: "/dagu-actions/official/python-script" },
+          { text: "dbt", link: "/dagu-actions/official/dbt" },
+          { text: "DuckDB", link: "/dagu-actions/official/duckdb" },
+          { text: "FFmpeg", link: "/dagu-actions/official/ffmpeg" },
+          { text: "GitHub CLI", link: "/dagu-actions/official/github-cli" },
+          { text: "Rclone", link: "/dagu-actions/official/rclone" },
+        ],
+      },
+      { text: "Third-Party Actions", link: "/dagu-actions/third-party" },
       { text: "Custom Actions", link: "/dagu-actions/custom" },
       { text: "Execution Model", link: "/dagu-actions/execution-model" },
     ],

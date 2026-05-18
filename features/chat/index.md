@@ -116,7 +116,6 @@ steps:
           content: "What is 2+2?"
 
   - id: followup
-    depends: [setup]
     action: chat.completion
     with:
       provider: openai
@@ -124,6 +123,7 @@ steps:
       messages:
         - role: user
           content: "Now multiply that by 3."
+    depends: [setup]
 ```
 
 The `followup` step automatically inherits session history from `setup`.

@@ -156,15 +156,16 @@ steps:
 
   - id: process
     run: ./process.sh data.zip
-    depends: download
     continue_on:
       failure: true
+    depends: download
 
 handler_on:
   failure:
     run: echo "run failed" | mail -s "alert" admin@example.com
   exit:
     run: rm -f data.zip
+    depends: download
 ```
 
 ### Containers

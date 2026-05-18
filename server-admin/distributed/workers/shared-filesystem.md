@@ -106,7 +106,7 @@ Required shared directories:
 > [!NOTE]
 > DAG definitions (`dags/`) do **not** need to be shared. Workers receive DAG definitions via gRPC when tasks are dispatched.
 
-Remote action packages are also transferred as workspace bundles after the worker executing the action resolves the reference. Local `source:` action paths can be used in shared-filesystem deployments when the path is mounted and readable by the worker. GitHub or explicit Git refs are more portable across mixed worker pools. See [Remote Actions](/dagu-actions/remote).
+Packaged actions are also transferred as workspace bundles after the worker executing the action resolves the reference. Use pinned GitHub references such as `owner/repo@version` for third-party action packages across mixed worker pools. See [Third-Party Actions](/dagu-actions/third-party).
 
 ## Configuration
 

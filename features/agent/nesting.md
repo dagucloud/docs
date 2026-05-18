@@ -26,13 +26,16 @@ A parent DAG calls a child DAG that contains a single agent step. The agent's ou
 ```yaml
 # parent.yaml
 steps:
-  - action: dag.run
+  - id: run_agent_child
+    action: dag.run
     with:
       dag: agent-child
       params: "TARGET_FILE=src/main.go"
     output: CHILD_RESULT
 
-  - run: echo "Agent said - ${CHILD_RESULT.outputs.REVIEW}"
+  - id: print_review
+    run: echo "Agent said - ${CHILD_RESULT.outputs.REVIEW}"
+    depends: run_agent_child
 ```
 
 ```yaml
@@ -71,13 +74,16 @@ Define both parent and child in a single file using the `---` separator. The par
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: run_review
+    action: dag.run
     with:
       dag: code-reviewer
       params: "FILE=README.md"
     output: RESULT
 
-  - run: echo "Review - ${RESULT.outputs.SUMMARY}"
+  - id: print_review
+    run: echo "Review - ${RESULT.outputs.SUMMARY}"
+    depends: run_review
 
 ---
 
@@ -145,19 +151,21 @@ steps:
     with:
       dag: implementer-agent
       params: "ANALYSIS=${FIRST.outputs.FINDINGS} REPO_PATH=/app/src"
-    depends: [analyze]
     output: SECOND
+    depends: [analyze]
 
   - id: verify
     action: dag.run
     with:
       dag: verifier-agent
       params: "CHANGES=${SECOND.outputs.CHANGES} REPO_PATH=/app/src"
-    depends: [implement]
     output: THIRD
+    depends: [implement]
 
-  - run: echo "Verification - ${THIRD.outputs.VERDICT}"
+  - id: print_verification
+    run: echo "Verification - ${THIRD.outputs.VERDICT}"
     depends: [verify]
+    depends: [implement]
 ```
 
 Each child DAG contains its own `action: agent.run` step focused on a specific task — analysis, implementation, or verification.
@@ -168,7 +176,8 @@ Use `parallel.items` and `parallel.max_concurrent` to run the same agent child D
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: run_file_reviews
+    action: dag.run
     with:
       dag: file-reviewer
       params: "FILE=${ITEM}"
@@ -177,9 +186,11 @@ steps:
       max_concurrent: 3
     output: REVIEWS
 
-  - run: |
+  - id: summarize_reviews
+    run: |
       echo "Total: ${REVIEWS.summary.total}"
       echo "Succeeded: ${REVIEWS.summary.succeeded}"
+    depends: run_file_reviews
 
 ---
 
@@ -254,9 +265,9 @@ steps:
     with:
       dag: refactor-agent
       params: "FILES=${FILE_LIST}"
-    depends: [plan]
     output: REFACTOR_RESULT
 
+    depends: [plan]
   - id: summarize
     action: agent.run
     with:
@@ -267,8 +278,8 @@ steps:
             ${REFACTOR_RESULT.outputs.CHANGES}
 
             Write a brief summary of what was changed and why.
-    depends: [refactor]
     output: SUMMARY
+    depends: [refactor]
 ```
 
 The `plan` step (agent) identifies files, the `refactor` step (sub-DAG call) delegates the work to a child agent DAG, and the `summarize` step (agent) produces the final report.
@@ -314,8 +325,8 @@ steps:
             Lint: ${LINT.outputs.FINDINGS}
             Security: ${SECURITY.outputs.FINDINGS}
             Docs: ${DOCS.outputs.FINDINGS}
-    depends: [lint_review, security_review, docs_review]
     output: FINAL_REPORT
+    depends: [lint_review, security_review, docs_review]
 ```
 
 In graph mode, `lint_review`, `security_review`, and `docs_review` run in parallel since they have no dependencies on each other.
@@ -326,13 +337,16 @@ A single-file parent + child agent DAG.
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: analyze_logs
+    action: dag.run
     with:
       dag: log-analyzer
       params: "LOG_PATH=/var/log/app.log"
     output: RESULT
 
-  - run: echo "${RESULT.outputs.ANALYSIS}"
+  - id: print_analysis
+    run: echo "${RESULT.outputs.ANALYSIS}"
+    depends: analyze_logs
 
 ---
 
@@ -355,7 +369,8 @@ Run the same agent child DAG across multiple inputs concurrently.
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: check_services
+    action: dag.run
     with:
       dag: service-health-check
       params: "SERVICE=${ITEM}"
@@ -364,8 +379,10 @@ steps:
       max_concurrent: 3
     output: HEALTH
 
-  - run: |
+  - id: summarize_health
+    run: |
       echo "Health check complete: ${HEALTH.summary.succeeded}/${HEALTH.summary.total} passed"
+    depends: check_services
 
 ---
 
@@ -401,9 +418,9 @@ steps:
     with:
       dag: test-writer
       params: "PLAN=${TEST_PLAN}"
-    depends: [plan]
     output: EXECUTION
 
+    depends: [plan]
   - id: summarize
     action: agent.run
     with:
@@ -414,8 +431,8 @@ steps:
             ${EXECUTION.outputs.RESULTS}
 
             Summarize what was accomplished and any remaining gaps.
-    depends: [write_tests]
     output: SUMMARY
+    depends: [write_tests]
 ```
 
 ## See Also

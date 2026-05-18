@@ -60,16 +60,19 @@ steps:
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: process_tasks
+    action: dag.run
     with:
       dag: task-processor
     parallel:
       items: [1, 2, 3]
     output: RESULTS
 
-  - run: |
+  - id: summarize_tasks
+    run: |
       echo "Total: ${RESULTS.summary.total}"
       echo "Succeeded: ${RESULTS.summary.succeeded}"
+    depends: process_tasks
       echo "Failed: ${RESULTS.summary.failed}"
 ```
 
@@ -235,12 +238,12 @@ steps:
 
   - id: task_b
     run: echo "Running task B"
-    depends: setup
-
-  - run: echo "Finalizing"
     depends:
       - task_a
       - task_b
+    depends: setup
+
+  - run: echo "Finalizing"
 ```
 
 ## Retry and Repeat Control

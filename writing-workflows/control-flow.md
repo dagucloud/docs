@@ -45,20 +45,25 @@ Run other workflows as steps and compose them hierarchically.
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: extract
+    action: dag.run
     with:
       dag: workflows/extract.yaml
       params: "SOURCE=production"
 
-  - action: dag.run
+  - id: transform
+    action: dag.run
     with:
       dag: workflows/transform.yaml
       params: "INPUT=${extract.output}"
+    depends: extract
 
-  - action: dag.run
+  - id: load
+    action: dag.run
     with:
       dag: workflows/load.yaml
       params: "DATA=${transform.output}"
+    depends: transform
 ```
 
 > **Note**: Sub-DAGs do not inherit `handler_on` from the base configuration. Each nested workflow should define its own lifecycle handlers if needed. See [Sub-DAG Handler Isolation](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
@@ -83,8 +88,8 @@ steps:
       queue: background
 
   - id: continue_parent
-    depends: [fanout_report]
     run: echo "Report workflow was queued"
+    depends: [fanout_report]
 ```
 
 If `with.queue` is omitted, the child DAG uses its own `queue` setting, base-config default, or local DAG queue. Use `dag.run` instead when later parent steps need the child output or success/failure result before they execute.
@@ -134,8 +139,12 @@ name: data-processor
 params:
   - TYPE: "batch"
 steps:
-  - run: echo "Extracting ${TYPE} data"
-  - run: echo "Transforming data"
+  - id: extract
+    run: echo "Extracting ${TYPE} data"
+
+  - id: transform
+    run: echo "Transforming data"
+    depends: extract
 ```
 
 ### Dynamic Iteration
@@ -149,7 +158,8 @@ steps:
       echo '["file1.csv","file2.csv","file3.csv"]'
     output: TASK_LIST
 
-  - action: dag.run
+  - id: process_tasks
+    action: dag.run
     with:
       dag: worker
       params: "FILE=${ITEM}"
@@ -162,7 +172,8 @@ name: worker
 params:
   - FILE: ""
 steps:
-  - run: echo "Processing ${FILE}"
+  - id: process_file
+    run: echo "Processing ${FILE}"
 
 ```
 
@@ -177,24 +188,28 @@ steps:
       echo '["chunk1","chunk2","chunk3"]'
     output: CHUNKS
 
-  - action: dag.run
+  - id: map_chunks
+    action: dag.run
     with:
       dag: worker
       params: "CHUNK=${ITEM}"
     parallel:
       items: ${CHUNKS}
       max_concurrent: 3
-    depends: [split_chunks]
     output: MAP_RESULTS
+    depends: [split_chunks]
 
-  - run: |
+  - id: reduce_results
+    run: |
       echo "Reducing results from ${MAP_RESULTS.outputs}"
+    depends: [map_chunks]
 ---
 name: worker
 params:
   - CHUNK: ""
 steps:
-  - run: echo "Processing ${CHUNK}"
+  - id: process_chunk
+    run: echo "Processing ${CHUNK}"
     output: RESULT
 ```
 
@@ -623,45 +638,57 @@ The values must resolve to valid integers at runtime. If a variable reference ca
 
 ```yaml
 steps:
-  - run: echo "Cleaning up"
+  - id: cleanup
+    run: echo "Cleaning up"
     continue_on: failed  # Shorthand syntax
-  - run: echo "Processing"
+  - id: process
+    run: echo "Processing"
+    depends: cleanup
 ```
 
 ### Continue on Specific Exit Codes
 
 ```yaml
 steps:
-  - run: echo "Checking status"
+  - id: check_status
+    run: echo "Checking status"
     continue_on:
       exit_code: [0, 1, 2]  # Continue on these codes
-  - run: echo "Processing"
+  - id: process
+    run: echo "Processing"
+    depends: check_status
 ```
 
 ### Continue on Output Match
 
 ```yaml
 steps:
-  - run: echo "Validating"
+  - id: validate
+    run: echo "Validating"
     continue_on:
       output:
         - "WARNING"
         - "SKIP"
         - "re:^\[WARN\]"        # Regex: lines starting with [WARN]
         - "re:error.*ignored"   # Regex: error...ignored pattern
-  - run: echo "Processing"
+  - id: process
+    run: echo "Processing"
+    depends: validate
 ```
 
 ### Continue on Skipped
 
 ```yaml
 steps:
-  - run: echo "Enabling feature"
+  - id: enable_feature
+    run: echo "Enabling feature"
     preconditions:
       - condition: "${FEATURE_FLAG}"
         expected: "enabled"
     continue_on: skipped  # Shorthand syntax
-  - run: echo "Processing"  # Runs regardless of optional feature
+  - id: process
+    run: echo "Processing"  # Runs regardless of optional feature
+    depends: enable_feature
 ```
 
 ### Mark as Success
@@ -681,7 +708,8 @@ Combine multiple conditions for sophisticated control flow:
 ```yaml
 steps:
   # Tool with complex exit code meanings
-  - run: echo "Analyzing data"
+  - id: analyze_data
+    run: echo "Analyzing data"
     continue_on:
       exit_code: [0, 3, 4, 5]  # Various non-error states
       output:
@@ -690,18 +718,22 @@ steps:
       mark_success: true
       
   # Graceful degradation pattern
-  - run: echo "Processing with advanced settings"
+  - id: try_advanced_method
+    run: echo "Processing with advanced settings"
     continue_on:
       failure: true
       output: ["FALLBACK REQUIRED", "re:.*not available.*"]
       
-  - run: echo "Processing with simple settings"
+  - id: simple_method
+    run: echo "Processing with simple settings"
     preconditions:
       - condition: "${TRY_ADVANCED_METHOD_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"
+    depends: try_advanced_method
         
   # Skip pattern with continuation
-  - run: echo "Running feature"
+  - id: optional_feature
+    run: echo "Running feature"
     preconditions:
       - condition: "${ENABLE_FEATURE}"
         expected: "true"

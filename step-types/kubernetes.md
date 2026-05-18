@@ -523,7 +523,6 @@ steps:
       command: [app, migrate]
   - id: report
     action: kubernetes.run
-    depends: [migrate]
     with:
       image: ghcr.io/example/report:2026-03-31
       termination_grace_period_seconds: 30
@@ -536,6 +535,7 @@ steps:
               operator: In
               values: [42]
       command: [app, report, --date, "${DATE}"]
+    depends: [migrate]
 ```
 
 ## Unsupported Fields

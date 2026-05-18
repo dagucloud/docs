@@ -91,13 +91,13 @@ Configuration precedence: System defaults → Base config → DAG config
 
 See [Base Configuration](/server-admin/base-config) for complete documentation on all available fields.
 
-## Reusable Dagu Actions
+## Reusable Actions
 
-Use Dagu actions when several workflows should share one validated interface.
+Use reusable actions when several workflows should share one validated interface.
 
 - Use [Custom Actions](/dagu-actions/custom) for inline wrappers around built-in step types.
-- Use [Remote Actions](/dagu-actions/remote) for package-style actions that live in a local directory, GitHub repository, or explicit Git source.
-- Use [Official Actions](/dagu-actions/official) when a maintained `dagucloud/*` action already matches the task.
+- Use [Dagu Actions](/dagu-actions/official) when a maintained `dagucloud/*` action already matches the task.
+- Use [Third-Party Actions](/dagu-actions/third-party) when a non-official repository provides the package you want to pin and call.
 
 Custom actions are defined in `actions` when you want a typed wrapper around a built-in step type.
 
@@ -124,7 +124,7 @@ steps:
 
 The most common pattern is a `run` custom action with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal built-in step before execution. See [Custom Actions](/dagu-actions/custom) for the exact rules.
 
-Remote actions are called directly by versioned reference:
+Third-party actions are called directly by versioned reference:
 
 ```yaml
 steps:
@@ -134,7 +134,7 @@ steps:
       text: "Deployment finished"
 ```
 
-Official actions are remote actions maintained by Dagu and called with the short form:
+Dagu Actions are maintained by Dagu and called with the short form:
 
 ```yaml
 steps:
@@ -147,7 +147,7 @@ steps:
         return { total: input.values.reduce((sum, value) => sum + value, 0) }
 ```
 
-Remote action packages contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action DAG as a sub-DAG, and exposes the action outputs as JSON. See [Dagu Actions](/dagu-actions/) for the full section and [Execution Model](/dagu-actions/execution-model) for package layout, reference formats, output validation, and distributed worker behavior.
+Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action workflow as a sub-DAG, and exposes the action outputs as JSON. See [Dagu Actions](/dagu-actions/) for the full section and [Execution Model](/dagu-actions/execution-model) for package layout, reference formats, output validation, and distributed worker behavior.
 
 ## Guide Sections
 
@@ -163,7 +163,7 @@ Remote action packages contain a `dagu-action.yaml` manifest and a DAG entrypoin
 10. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
 11. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
 
-Reusable action APIs live in the [Dagu Actions](/dagu-actions/) section.
+Reusable action docs live in the [Dagu Actions](/dagu-actions/) section.
 
 If your workflows are triggered from GitHub through Dagu Cloud, see the dedicated [GitHub Integration](/github-integration/) section.
 
@@ -194,23 +194,23 @@ steps:
 
   - id: validate
     run: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
-    depends: download
     continue_on:
       failure: false
 
+    depends: download
   - id: process
     parallel: [users, orders, products]
     run: python process.py --type=$ITEM --date=${DATE}
-    depends: validate
     output: RESULT_${ITEM}
 
+    depends: validate
   - id: report
     run: python report.py --date=${DATE}
+    run: echo "Notifying failure for ${DATE}"
     depends: process
 
 handler_on:
   failure:
-    run: echo "Notifying failure for ${DATE}"
 ```
 
 ## Common Patterns

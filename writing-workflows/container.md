@@ -19,8 +19,11 @@ container:
   image: python:3.11
 
 steps:
-  - run: pip install pandas numpy  # Install dependencies
-  - run: python process.py          # Process data
+  - id: install
+    run: pip install pandas numpy  # Install dependencies
+  - id: process
+    run: python process.py          # Process data
+    depends: install
 ```
 
 All steps run in the same container instance, sharing the filesystem and installed packages.
@@ -34,8 +37,11 @@ Execute commands in a container that's already running (e.g., started by Docker 
 container: my-running-container
 
 steps:
-  - run: php artisan migrate
-  - run: php artisan cache:clear
+  - id: migrate
+    run: php artisan migrate
+  - id: clear_cache
+    run: php artisan cache:clear
+    depends: migrate
 ```
 
 Or with overrides for user, working directory, and environment:
@@ -69,9 +75,14 @@ container:
   working_dir: /app
 
 steps:
-  - run: npm install    # Install dependencies
-  - run: npm run build  # Build the application
-  - run: npm test       # Run tests
+  - id: install
+    run: npm install    # Install dependencies
+  - id: build
+    run: npm run build  # Build the application
+    depends: install
+  - id: test
+    run: npm test       # Run tests
+    depends: build
 ```
 
 ## With Environment Variables
@@ -84,11 +95,14 @@ container:
     - POSTGRES_DB=myapp
 
 steps:
-  - run: pg_isready -U postgres
+  - id: wait_for_postgres
+    run: pg_isready -U postgres
     retry_policy:
       limit: 10
       
-  - run: psql -U postgres myapp -f schema.sql
+  - id: load_schema
+    run: psql -U postgres myapp -f schema.sql
+    depends: wait_for_postgres
 ```
 
 ## Private Registry Authentication
@@ -480,6 +494,7 @@ steps:
         - ./src:/app
       working_dir: /app
     run: npm test
+    depends: build
 
   - id: deploy
     container:
@@ -487,6 +502,7 @@ steps:
       env:
         - AWS_DEFAULT_REGION=us-east-1
     run: python deploy.py
+    depends: test
 ```
 
 #### Step-Level Exec Mode
@@ -507,12 +523,14 @@ steps:
       user: www-data
       working_dir: /var/www
     run: php artisan cache:clear
+    depends: run_migration
 
   # Mix exec and image modes in the same workflow
   - id: run_tests
     container:
       image: node:24
     run: npm test
+    depends: clear_cache
 ```
 
 ::: warning

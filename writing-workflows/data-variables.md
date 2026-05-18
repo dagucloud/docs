@@ -348,11 +348,14 @@ Examples:
 
 ```yaml
 steps:
-  - output: SUB_RESULT
+  - id: run_sub_workflow
+    output: SUB_RESULT
     action: dag.run
     with:
       dag: sub_workflow
-  - run: echo "The result is ${SUB_RESULT.outputs.finalValue}"
+  - id: print_result
+    run: echo "The result is ${SUB_RESULT.outputs.finalValue}"
+    depends: run_sub_workflow
 ```
 
 If `SUB_RESULT` contains:
@@ -380,10 +383,10 @@ steps:
 
   - id: validate
     run: python validate.py
-    depends:
-      - extract  # Can use ID in dependencies
+    depends: extract  # Can use ID in dependencies
 
-  - run: |
+  - id: inspect_extract
+    run: |
       # Reference step properties using IDs
       echo "Exit code: ${extract.exit_code}"
       echo "Stdout file: ${extract.stdout}"
@@ -426,12 +429,15 @@ The result of the sub workflow will be available from the standard output of the
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: run_sub_workflow
+    action: dag.run
     with:
       dag: sub_workflow
       params: "FOO=BAR"
     output: SUB_RESULT
-  - run: echo $SUB_RESULT
+  - id: print_result
+    run: echo $SUB_RESULT
+    depends: run_sub_workflow
 ```
 
 Example output format:
@@ -474,10 +480,13 @@ steps:
 
 ```yaml
 steps:
-  - run: python generate.py
+  - id: generate
+    run: python generate.py
     stdout: /tmp/data.json
   
-  - run: python process.py < /tmp/data.json
+  - id: process
+    run: python process.py < /tmp/data.json
+    depends: generate
 ```
 
 For run-scoped files that users should preview or download, prefer an artifact stream instead of a local temporary path:

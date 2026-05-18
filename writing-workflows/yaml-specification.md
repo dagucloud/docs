@@ -48,14 +48,14 @@ type: graph
 steps:
   - id: step_name          # Optional
     run: echo "Hello"
+    run: notify-success.sh
+  failure:
+    run: cleanup-on-failure.sh
     depends: previous_step # Optional
 
 # Lifecycle handlers
 handler_on:
   success:
-    run: notify-success.sh
-  failure:
-    run: cleanup-on-failure.sh
 ```
 
 ## Root Fields
@@ -238,6 +238,7 @@ steps:
 
   - id: process_data
     run: ./process.sh
+    depends: fetch_data
 ```
 
 ```yaml
@@ -1120,7 +1121,7 @@ Plain string step entries are legacy syntax; write step objects with `run` inste
 
 `shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level `with.shell` values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
 
-Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Object-form `output:` is step-scoped for `${step.output.*}`. Use `stdout.outputs` or `action: outputs.write` for run-level outputs and remote action return values.
+Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Object-form `output:` is step-scoped for `${step.output.*}`. Use `stdout.outputs` or `action: outputs.write` for run-level outputs and packaged action return values.
 
 `output_schema:` is an inline JSON Schema object for stdout JSON contracts. When present, Dagu captures stdout, decodes it as JSON, and validates it before publishing output. Invalid JSON or a schema mismatch fails the step. If no `output:` mapping is set, the validated decoded object becomes `${step_id.output}` and can be accessed with `${step_id.output.field}`.
 
@@ -1434,6 +1435,7 @@ steps:
       required: [APPROVED_BY]
   - id: deploy_prod
     run: ./deploy.sh production
+    depends: deploy_staging
 ```
 
 The step executes normally, then enters `Waiting` status until approved. Collected inputs become environment variables in subsequent steps.
@@ -1566,18 +1568,24 @@ steps:
 
 ```yaml
 steps:
-  - run: cat VERSION
+  - id: get_version
+    run: cat VERSION
     output: VERSION
-  - run: docker build -t app:${VERSION} .
+  - id: build_image
+    run: docker build -t app:${VERSION} .
+    depends: get_version
 ```
 
 ### JSON Path Access
 
 ```yaml
 steps:
-  - run: cat config.json
+  - id: get_config
+    run: cat config.json
     output: CONFIG
-  - run: echo "Port is ${CONFIG.server.port}"
+  - id: print_port
+    run: echo "Port is ${CONFIG.server.port}"
+    depends: get_config
 ```
 
 ## Special Variables
@@ -1641,7 +1649,6 @@ steps:
 
   - id: extract-data
     run: python extract.py --date=${DATE}
-    depends: validate-environment
     output: RAW_DATA_PATH
     retry_policy:
       limit: 3
@@ -1659,6 +1666,7 @@ steps:
       failure: false
 
  # Use different container for this step
+    depends: validate-environment
   - id: load_data
     container:
       image: postgres:16
@@ -1667,7 +1675,6 @@ steps:
     run: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
 
   - run: python validate_results.py --date=${DATE}
-    depends: load_data
     mail_on_error: true
 
 handler_on:
@@ -1692,4 +1699,5 @@ smtp:
   host: smtp.company.com
   port: "587"
   username: etl-notifications@company.com
+    depends: load_data
 ```

@@ -119,8 +119,8 @@ steps:
   - id: step_1
     run: echo "step 1"
   - id: step_2
-    depends: [step_1]
     run: echo "step 2"
+    depends: [step_1]
 
 # Independent steps can run in parallel
 ---
@@ -471,14 +471,17 @@ flowchart TD
 
 ```yaml
 steps:
-  - run: exit 3  # This will exit with code 3
+  - id: optional_check
+    run: exit 3  # This will exit with code 3
     continue_on:
       exit_code: [0, 3]        # Treat 0 and 3 as non-fatal
       output:
         - "WARNING"
         - "re:^INFO:.*"       # Regex match
       mark_success: true       # Mark as success when matched
-  - run: echo "Continue regardless"
+  - id: continue_after_check
+    run: echo "Continue regardless"
+    depends: optional_check
 ```
 
 ```mermaid
@@ -507,14 +510,17 @@ stateDiagram-v2
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: run_etl
+    action: dag.run
     with:
       dag: etl.yaml
       params: "ENV=prod DATE=today"
 
-  - action: dag.run
+  - id: run_analysis
+    action: dag.run
     with:
       dag: analyze.yaml
+    depends: run_etl
 ```
 
 ```mermaid
@@ -563,8 +569,12 @@ name: data-processor
 params:
   - TYPE: "batch"
 steps:
-  - run: echo "Extracting ${TYPE} data"
-  - run: echo "Transforming data"
+  - id: extract
+    run: echo "Extracting ${TYPE} data"
+
+  - id: transform
+    run: echo "Transforming data"
+    depends: extract
 ```
 
 ```mermaid
@@ -590,15 +600,20 @@ graph TD
 
 ```yaml
 steps:
-  - run: python prepare_dataset.py
+  - id: prepare_dataset
+    run: python prepare_dataset.py
 
-  - action: dag.run
+  - id: train_model
+    action: dag.run
     with:
       dag: train-model
+    depends: prepare_dataset
 
-  - action: dag.run
+  - id: evaluate_model
+    action: dag.run
     with:
       dag: evaluate-model
+    depends: train_model
 ---
 name: train-model
 worker_selector:
@@ -640,15 +655,20 @@ flowchart LR
 ```yaml
 steps:
   # Runs on any available worker (local or remote)
-  - run: wget https://data.example.com/dataset.tar.gz
+  - id: download_dataset
+    run: wget https://data.example.com/dataset.tar.gz
 
   # Must run on specific worker type
-  - action: dag.run
+  - id: process_on_gpu
+    action: dag.run
     with:
       dag: process-on-gpu
+    depends: download_dataset
 
   # Runs locally (no selector)
-  - run: echo "Processing complete"
+  - id: finish
+    run: echo "Processing complete"
+    depends: process_on_gpu
 
 ---
 name: process-on-gpu
@@ -673,8 +693,12 @@ steps:
 worker_selector: local
 
 steps:
-  - run: curl -f http://localhost:8080/health
-  - run: echo "Ran locally"
+  - id: health_check
+    run: curl -f http://localhost:8080/health
+
+  - id: finish
+    run: echo "Ran locally"
+    depends: health_check
 ```
 
 Use `worker_selector: local` as an escape hatch in distributed deployments for lightweight DAGs that should never leave the main instance.
@@ -745,11 +769,14 @@ graph TD
 ```yaml
 steps:
   # Optional task that may fail
-  - run: exit 1  # This will fail
+  - id: optional_task
+    run: exit 1  # This will fail
     continue_on:
       failure: true
   # This step always runs
-  - run: echo "This must succeed"
+  - id: required_task
+    run: echo "This must succeed"
+    depends: optional_task
 ```
 
 <a href="/writing-workflows/error-handling#continue" class="learn-more">Learn more →</a>
@@ -763,14 +790,17 @@ steps:
 ```yaml
 steps:
   # Optional step that may be skipped
-  - run: echo "Enabling feature"
+  - id: optional_feature
+    run: echo "Enabling feature"
     preconditions:
       - condition: "${FEATURE_FLAG}"
         expected: "enabled"
     continue_on:
       skipped: true
   # This step always runs
-  - run: echo "Processing main task"
+  - id: main_task
+    run: echo "Processing main task"
+    depends: optional_feature
 ```
 
 <a href="/writing-workflows/control-flow#continue-on-skipped" class="learn-more">Learn more →</a>
@@ -1007,9 +1037,12 @@ steps:
 
 ```yaml
 steps:
-  - run: echo `date +%Y%m%d`
+  - id: get_today
+    run: echo `date +%Y%m%d`
     output: TODAY
-  - run: echo "Today's date is ${TODAY}"
+  - id: print_today
+    run: echo "Today's date is ${TODAY}"
+    depends: get_today
 ```
 
 <a href="/writing-workflows/data-variables#output" class="learn-more">Learn more →</a>
@@ -1022,7 +1055,8 @@ steps:
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: process_regions
+    action: dag.run
     with:
       dag: worker
       params: "REGION=${ITEM}"
@@ -1030,10 +1064,12 @@ steps:
       items: [east, west, eu]
     output: RESULTS
 
-  - run: |
+  - id: summarize_regions
+    run: |
       echo "Total: ${RESULTS.summary.total}"
       echo "First region: ${RESULTS.results[0].params}"
       echo "First output: ${RESULTS.outputs[0].value}"
+    depends: process_regions
 
 ---
 name: worker
@@ -1124,11 +1160,14 @@ steps:
 
 ```yaml
 steps:
-  - output: SUB_RESULT
+  - id: run_sub_workflow
+    output: SUB_RESULT
     action: dag.run
     with:
       dag: sub_workflow
-  - run: echo "Result: ${SUB_RESULT.outputs.finalValue}"
+  - id: print_result
+    run: echo "Result: ${SUB_RESULT.outputs.finalValue}"
+    depends: run_sub_workflow
 ```
 
 <a href="/writing-workflows/data-variables#json-paths" class="learn-more">Learn more →</a>
@@ -1150,8 +1189,11 @@ steps:
     output:
       version: "${build.output.version}"
       versionLabel: "ver - ${build.output.version}"
+    depends: build
 
-  - run: echo "${publish.output.versionLabel}"
+  - id: print
+    run: echo "${publish.output.versionLabel}"
+    depends: publish
 ```
 
 <a href="/writing-workflows/outputs#object-form" class="learn-more">Learn more →</a>
@@ -1290,10 +1332,15 @@ steps:
 ```yaml
 working_dir: /tmp
 steps:
-  - run: pwd               # Outputs: /tmp
-  - run: mkdir -p data
-  - working_dir: /tmp/data
+  - id: show_default_dir
+    run: pwd               # Outputs: /tmp
+  - id: create_data_dir
+    run: mkdir -p data
+    depends: show_default_dir
+  - id: show_data_dir
+    working_dir: /tmp/data
     run: pwd      # Outputs: /tmp/data
+    depends: create_data_dir
 ```
 
 <a href="/writing-workflows/basics#working-directory" class="learn-more">Learn more →</a>
@@ -1394,9 +1441,14 @@ container:
     - ./src:/app
 
 steps:
-  - run: pip install -r requirements.txt
-  - run: pytest tests/
-  - run: python setup.py build
+  - id: install
+    run: pip install -r requirements.txt
+  - id: test
+    run: pytest tests/
+    depends: install
+  - id: build
+    run: python setup.py build
+    depends: test
 ```
 
 <a href="/writing-workflows/yaml-specification#container-configuration" class="learn-more">Learn more →</a>
@@ -1418,11 +1470,14 @@ container:
     - "5432:5432"
 
 steps:
-  - run: postgres -D /var/lib/postgresql/data
-  - run: pg_isready -U postgres -h localhost
+  - id: start_postgres
+    run: postgres -D /var/lib/postgresql/data
+  - id: wait_for_postgres
+    run: pg_isready -U postgres -h localhost
     retry_policy:
       limit: 10
       interval_sec: 2
+    depends: start_postgres
 ```
 
 <a href="/writing-workflows/yaml-specification#container-configuration" class="learn-more">Learn more →</a>
@@ -1478,8 +1533,11 @@ steps:
 container: my-app-container
 
 steps:
-  - run: php artisan migrate
-  - run: php artisan cache:clear
+  - id: migrate
+    run: php artisan migrate
+  - id: clear_cache
+    run: php artisan cache:clear
+    depends: migrate
 ```
 
 <a href="/writing-workflows/container#exec-mode-use-existing-container" class="learn-more">Learn more →</a>
@@ -1500,8 +1558,11 @@ container:
     - APP_DEBUG=true
 
 steps:
-  - run: composer install
-  - run: chown -R www-data:www-data storage
+  - id: install
+    run: composer install
+  - id: fix_permissions
+    run: chown -R www-data:www-data storage
+    depends: install
 ```
 
 <a href="/writing-workflows/container#exec-mode-use-existing-container" class="learn-more">Learn more →</a>
@@ -1524,11 +1585,13 @@ steps:
     container:
       image: my-app:latest
     run: php artisan migrate
+    depends: maintenance_mode
 
   # Exec back into app container
   - id: restart
     container: my-app
     run: php artisan up
+    depends: migrate
 ```
 
 <a href="/step-types/docker#mixed-mode-example" class="learn-more">Learn more →</a>
@@ -1547,8 +1610,11 @@ ssh:
   key: ~/.ssh/deploy_key
 
 steps:
-  - run: curl -f localhost:8080/health
-  - run: systemctl restart myapp
+  - id: health_check
+    run: curl -f localhost:8080/health
+  - id: restart_app
+    run: systemctl restart myapp
+    depends: health_check
 ```
 
 <a href="/step-types/ssh" class="learn-more">Learn more →</a>
@@ -1608,8 +1674,8 @@ steps:
     timeout_sec: 300
 
   - id: continue_after_ready
-    depends: wait_for_api
     run: ./run-after-ready.sh
+    depends: wait_for_api
 ```
 
 <a href="/step-types/wait" class="learn-more">Learn more →</a>
@@ -1623,7 +1689,8 @@ steps:
 ```yaml
 steps:
   # Fetch sample users from a public mock API
-  - action: http.request
+  - id: fetch_users
+    action: http.request
     with:
       method: GET
       url: https://reqres.in/api/users
@@ -1631,10 +1698,12 @@ steps:
     output: API_RESPONSE
 
   # Extract user emails from the JSON response
-  - action: jq.filter
+  - id: extract_emails
+    action: jq.filter
     with:
       filter: '.data[] | .email'
       data: ${API_RESPONSE}
+    depends: fetch_users
 ```
 
 <a href="/step-types/jq" class="learn-more">Learn more →</a>
@@ -1735,6 +1804,7 @@ steps:
         - ./src:/app
       working_dir: /app
     run: npm test
+    depends: build
 
   - id: deploy
     container:
@@ -1742,6 +1812,7 @@ steps:
       env:
         - AWS_DEFAULT_REGION=us-east-1
     run: python deploy.py
+    depends: test
 ```
 
 ```mermaid
@@ -1861,7 +1932,8 @@ Steps inherit LLM config from DAG level.
 
 ```yaml
 steps:
-  - action: chat.completion
+  - id: ask
+    action: chat.completion
     with:
       provider: openai
       model: gpt-4o
@@ -1869,13 +1941,15 @@ steps:
         - role: user
           content: "What is 2+2?"
 
-  - action: chat.completion
+  - id: follow_up
+    action: chat.completion
     with:
       provider: openai
       model: gpt-4o
       messages:
         - role: user
           content: "Now multiply that by 3."
+    depends: ask
 ```
 
 Steps inherit session history from previous steps.
@@ -1936,9 +2010,14 @@ steps:
 schedule: "0 */4 * * *"    # Every 4 hours
 skip_if_successful: true     # Skip if already succeeded
 steps:
-  - run: echo "Extracting data"
-  - run: echo "Transforming data"
-  - run: echo "Loading data"
+  - id: extract
+    run: echo "Extracting data"
+  - id: transform
+    run: echo "Transforming data"
+    depends: extract
+  - id: load
+    run: echo "Loading data"
+    depends: transform
 ```
 
 <a href="/writing-workflows/scheduling#skip-redundant" class="learn-more">Learn more →</a>
@@ -2069,8 +2148,11 @@ steps:
 hist_retention_days: 30    # Keep 30 days of history
 schedule: "0 0 * * *"     # Daily at midnight
 steps:
-  - run: echo "Archiving old data"
-  - run: rm -rf /tmp/archive/*
+  - id: archive_old_data
+    run: echo "Archiving old data"
+  - id: cleanup_archive
+    run: rm -rf /tmp/archive/*
+    depends: archive_old_data
 ```
 
 Control how long execution history is retained.
@@ -2103,11 +2185,14 @@ steps:
 log_dir: /data/etl/logs/${DAG_NAME}
 hist_retention_days: 90
 steps:
-  - run: echo "Extracting data"
+  - id: extract
+    run: echo "Extracting data"
     stdout: extract.log
     stderr: extract.err
-  - run: echo "Transforming data"
+  - id: transform
+    run: echo "Transforming data"
     stdout: transform.log
+    depends: extract
 ```
 
 Organize logs in custom directories with retention.
@@ -2182,12 +2267,17 @@ otel:
     service.name: "dagu-${DAG_NAME}"
     deployment.environment: "${ENV}"
 steps:
-  - run: echo "Fetching data"
-  - run: python process.py
+  - id: fetch
+    run: echo "Fetching data"
+  - id: process
+    run: python process.py
+    depends: fetch
 
-  - action: dag.run
+  - id: transform
+    action: dag.run
     with:
       dag: pipelines/transform
+    depends: process
 ```
 
 Enable OpenTelemetry tracing for observability.
@@ -2231,9 +2321,14 @@ steps:
 ```yaml
 queue: compute-queue      # Assign to specific queue
 steps:
-  - run: echo "Preparing data"
-  - run: echo "Running intensive computation"
-  - run: echo "Storing results"
+  - id: prepare
+    run: echo "Preparing data"
+  - id: compute
+    run: echo "Running intensive computation"
+    depends: prepare
+  - id: store
+    run: echo "Storing results"
+    depends: compute
 ```
 
 <a href="/writing-workflows/queues" class="learn-more">Learn more →</a>

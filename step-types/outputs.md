@@ -1,6 +1,6 @@
 # Outputs Action
 
-Publish DAG or remote action outputs without parsing stdout in the caller.
+Publish DAG or packaged action outputs without parsing stdout in the caller.
 
 Use `action: outputs.write` when a workflow needs to return a small structured result assembled from literals, parameters, or previous step outputs:
 
@@ -21,7 +21,7 @@ ${publish_result.outputs.messageId}
 ${publish_result.outputs.status}
 ```
 
-When the step is inside a remote action DAG, the parent workflow reads those fields from the action step:
+When the step is inside an action package workflow, the parent workflow reads those fields from the action step:
 
 ```yaml
 steps:
@@ -31,8 +31,8 @@ steps:
       text: "Deploy finished"
 
   - id: audit
-    depends: [notify]
     run: echo "Message: ${notify.outputs.messageId}"
+    depends: [notify]
 ```
 
 ## Configuration
@@ -43,7 +43,7 @@ steps:
 
 Values should be small JSON-compatible values. Use [Artifacts](/writing-workflows/artifacts) for files, reports, logs, screenshots, or large JSON payloads.
 
-`outputs.write` does not validate a remote action manifest by itself. When the step runs inside a remote action DAG, Dagu validates the final collected action output object against the `outputs` schema in `dagu-action.yaml` after the action DAG returns.
+`outputs.write` does not validate an action manifest by itself. When the step runs inside an action package workflow, Dagu validates the final collected action output object against the `outputs` schema in `dagu-action.yaml` after the action workflow returns.
 
 ## Stdout Outputs
 
@@ -75,5 +75,5 @@ steps:
 ## Related
 
 - [Workflow Outputs](/writing-workflows/outputs)
-- [Remote Actions](/dagu-actions/remote)
+- [Third-Party Actions](/dagu-actions/third-party)
 - [Artifacts](/writing-workflows/artifacts)

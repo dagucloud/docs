@@ -156,9 +156,11 @@ steps:
 
 ```yaml
 steps:
-  - run: echo "Generating report..." > report.txt
+  - id: generate_report
+    run: echo "Generating report..." > report.txt
 
-  - action: mail.send
+  - id: send_report
+    action: mail.send
     with:
       to: management@company.com
       from: reports@company.com
@@ -166,6 +168,7 @@ steps:
       message: "Please find the weekly report attached."
       attachments:
         - report.txt
+    depends: generate_report
 ```
 
 ### With Retry

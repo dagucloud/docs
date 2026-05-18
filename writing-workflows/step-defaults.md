@@ -62,6 +62,7 @@ steps:
 
   - id: process_data
     run: ./process.sh
+    depends: fetch_data
 ```
 
 ### Shared Continue On
@@ -81,6 +82,7 @@ steps:
 
   - id: report
     run: echo "cleanup done"
+    depends: [cleanup_cache, cleanup_logs]
 ```
 
 ### Step Override or Disable
@@ -233,6 +235,7 @@ steps:
     env:
       - OUTPUT_DIR: /reports
     # Effective env: [NOTIFY=true, OUTPUT_DIR=/reports]
+    depends: [fetch_users, fetch_orders]
 ```
 
 ## Interaction with Base Configuration

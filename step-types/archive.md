@@ -62,12 +62,14 @@ steps:
     with:
       source: ./logs
       destination: logs-backup.tar.gz
+    depends: unpack
 
   - id: inspect
     action: archive.list
     with:
       source: logs-backup.tar.gz
     output: ARCHIVE_INDEX
+    depends: package
 ```
 
 `extract` and `create` emit a JSON summary (files processed, bytes, duration, etc.) on `stdout`. `list` outputs a JSON array of entries so subsequent steps can filter or inspect the archive with tools like `jq`.

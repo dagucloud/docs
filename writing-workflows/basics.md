@@ -194,9 +194,11 @@ steps:
 
   - id: process
     run: python process.py
+    depends: download
 
   - id: upload
     run: aws s3 cp output.csv s3://bucket/
+    depends: process
 ```
 
 ### Parallel Execution
@@ -269,6 +271,7 @@ steps:
 
   - id: build
     run: docker build -t app:${VERSION} .
+    depends: get_version
 ```
 
 ## Basic Error Handling
@@ -284,6 +287,7 @@ steps:
 
   - id: always_runs
     run: cleanup.sh
+    depends: optional_step
 ```
 
 ### Simple Retry
