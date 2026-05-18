@@ -2,6 +2,51 @@
 
 ## v2.7.1 (2026-05-18)
 
+This is one of the largest Dagu releases so far. It turns workflows from a collection of commands into reusable, packageable automation units: steps can now be plain commands, built-in actions, or versioned Dagu actions with their own inputs, outputs, artifacts, and toolchain.
+
+Highlights:
+
+- **Action schema v2** adds the new `run`, `action`, `with`, and `outputs` style for clearer workflow definitions while keeping existing workflows supported.
+- **Remote and Official Dagu Actions** make reusable workflow packages possible. Actions can be referenced by version, resolve their own workspace, expose typed outputs, and run as sub-DAGs. DuckDB is provided through this Dagu Action model rather than as a built-in action.
+- **DAG-level tools** let workflows declare required CLIs and runtimes directly in YAML. Tool installation is powered by [Aqua](https://aquaproj.github.io/), so workers can prepare the right tools at runtime instead of baking everything into images.
+- **New built-in actions** cover common workflow glue: file operations, artifact publishing, artifact stream capture, data conversion and picking, waits, Git checkout, DAG enqueue, and structured output writing.
+- **Operations features** now include simplified Dagu-managed secrets, notification channels and rules, incident connections and routing, the Dagu MCP server, and configurable webhook payload limits.
+- **Execution behavior and reliability** were tightened with `graph` as the default DAG type, better auto-retry notification behavior, deferred failure handlers during retries, richer Slack context for the agent, and no hard LLM request timeout for agent steps.
+
+For example, the new [Official Dagu Actions](/dagu-actions/official) let a workflow run small Node.js and Python glue steps without baking those runtimes into every worker image:
+
+```yaml
+steps:
+  - id: prepare_release
+    action: node-script@v1
+    with:
+      input:
+        version: "2.7.1"
+      script: |
+        return {
+          tag: `v${input.version}`,
+          channel: input.version.includes("-") ? "preview" : "stable"
+        }
+
+  - id: summarize
+    action: python-script@v1
+    with:
+      input:
+        tag: "${prepare_release.outputs.result.tag}"
+        channel: "${prepare_release.outputs.result.channel}"
+      script: |
+        return {
+            "message": f"release {input['tag']} is ready for {input['channel']}"
+        }
+    depends: [prepare_release]
+
+  - id: print
+    run: echo "${summarize.outputs.result.message}"
+    depends: [summarize]
+```
+
+The default DAG type is now `graph`. Existing workflows that omitted `type` and relied on implicit sequential execution should set `type: chain`, or add explicit `depends`, to preserve the previous ordering.
+
 ### Added
 
 - feat: add action schema v2 ([#2122](https://github.com/dagucloud/dagu/pull/2122)) [@yottahmd](https://github.com/yottahmd)

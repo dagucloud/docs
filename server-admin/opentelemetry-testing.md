@@ -135,10 +135,11 @@ steps:
     with:
       dag: child-analytics.yaml
       params: "INPUT=${run-etl.output}"
-    depends: [run-analytics]
     depends: [run-etl]
 
-  - run: echo "Parent workflow complete"
+  - id: complete_parent
+    run: echo "Parent workflow complete"
+    depends: [run-analytics]
 ```
 
 ### 2. Create Sub DAGs

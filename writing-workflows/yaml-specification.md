@@ -1645,7 +1645,8 @@ preconditions:
 
 type: graph
 steps:
-  - run: ./scripts/validate.sh
+  - id: validate-environment
+    run: ./scripts/validate.sh
 
   - id: extract-data
     run: python extract.py --date=${DATE}
@@ -1653,29 +1654,33 @@ steps:
     retry_policy:
       limit: 3
       interval_sec: 300
+    depends: validate-environment
 
-  - action: dag.run
+  - id: transform-data
+    action: dag.run
     with:
       dag: transform-module
       params: "TYPE=${ITEM} INPUT=${RAW_DATA_PATH}"
     parallel:
       items: [customers, orders, products]
       max_concurrent: 2
-    depends: [extract-data]
     continue_on:
       failure: false
+    depends: [extract-data]
 
- # Use different container for this step
-    depends: validate-environment
+  # Use different container for this step
   - id: load_data
     container:
       image: postgres:16
       env:
         - PGPASSWORD=${DB_PASSWORD}
     run: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
+    depends: transform-data
 
-  - run: python validate_results.py --date=${DATE}
+  - id: validate_results
+    run: python validate_results.py --date=${DATE}
     mail_on_error: true
+    depends: load_data
 
 handler_on:
   success:

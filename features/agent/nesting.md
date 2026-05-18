@@ -165,7 +165,6 @@ steps:
   - id: print_verification
     run: echo "Verification - ${THIRD.outputs.VERDICT}"
     depends: [verify]
-    depends: [implement]
 ```
 
 Each child DAG contains its own `action: agent.run` step focused on a specific task — analysis, implementation, or verification.

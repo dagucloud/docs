@@ -238,9 +238,6 @@ steps:
 
   - id: task_b
     run: echo "Running task B"
-    depends:
-      - task_a
-      - task_b
     depends: setup
 
   - run: echo "Finalizing"
