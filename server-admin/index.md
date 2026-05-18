@@ -76,6 +76,11 @@ docker run -d \
 - Global and workspace notification rules
 - License requirements for team notification routing
 
+**[Incident Routing](/web-ui/incidents)**
+- Reusable PagerDuty and SolarWinds Incident Response connections
+- Global, workspace, and DAG incident routes
+- License requirements for team incident routing
+
 **[Operations](/server-admin/operations)**
 - Running as a service
 - Monitoring and metrics

@@ -56,7 +56,7 @@ Dagu fits teams that already have operational work spread across scripts, cron j
   <div class="real-world-usecase">
     <h3>Infrastructure and Server Automation</h3>
     <p><strong>Run:</strong> SSH backups, cleanup jobs, deploy scripts, patch windows, precondition checks, and lifecycle hooks.</p>
-    <p><strong>Why Dagu fits:</strong> remote operations get schedules, retries, notifications, and per-step logs without requiring operators to SSH into servers for every recovery.</p>
+    <p><strong>Why Dagu fits:</strong> remote operations get schedules, retries, notifications, incident routing, and per-step logs without requiring operators to SSH into servers for every recovery.</p>
   </div>
   <div class="real-world-usecase">
     <h3>GitHub-driven Workflows</h3>
@@ -299,6 +299,7 @@ Per-DAG OpenTelemetry tracing configuration with OTLP endpoint, custom headers, 
 
 - JSON or text format logging (`DAGU_LOG_FORMAT`), per-run log files with separate stdout/stderr capture per step
 - Web UI notification rules for reusable Slack, email, Telegram, and webhook channels across Global, workspace, and DAG scopes
+- Web UI incident routing for PagerDuty and SolarWinds Incident Response across Global, workspace, and DAG scopes
 - Slack and Telegram bot integration for run status events (`succeeded`, `failed`, `aborted`, `waiting`, `rejected`)
 - Email notifications on DAG success, failure, or wait status via SMTP
 - Per-DAG webhook endpoints with token authentication
@@ -500,6 +501,10 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
   <div class="step-card">
     <h3><a href="/server-admin/authentication/">Authentication</a></h3>
     <p>RBAC, OIDC, API keys, audit logging</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/web-ui/incidents">Incident Routing</a></h3>
+    <p>PagerDuty and SolarWinds incidents for production workflow failures</p>
   </div>
   <div class="step-card">
     <h3><a href="/server-admin/">Server Administration</a></h3>

@@ -198,6 +198,7 @@ Users need developer, manager, or admin permission to manage notification channe
 ## Related
 
 - [Workspaces](/web-ui/workspaces)
+- [Incident Routing](/web-ui/incidents)
 - [Email Notifications](/writing-workflows/email-notifications)
 - [Lifecycle Handlers](/writing-workflows/lifecycle-handlers)
 - [User Management](/server-admin/authentication/user-management)

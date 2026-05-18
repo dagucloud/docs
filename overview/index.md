@@ -93,7 +93,7 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   </div>
   <div class="overview-card">
     <h3><a href="/overview/web-ui">Observable by default</a></h3>
-    <p>Every run has <a href="/web-ui/cockpit">status</a>, <a href="/overview/web-ui#run-history-and-logs">per-step logs</a>, <a href="/overview/web-ui#run-details">timing and history</a>, <a href="/writing-workflows/artifacts">artifacts</a>, <a href="/writing-workflows/approval">approvals</a>, <a href="/web-ui/notifications">notifications</a>, and <a href="/overview/web-ui">UI controls</a> for debugging, recovery, and operator handoff.</p>
+    <p>Every run has <a href="/web-ui/cockpit">status</a>, <a href="/overview/web-ui#run-history-and-logs">per-step logs</a>, <a href="/overview/web-ui#run-details">timing and history</a>, <a href="/writing-workflows/artifacts">artifacts</a>, <a href="/writing-workflows/approval">approvals</a>, <a href="/web-ui/notifications">notifications</a>, <a href="/web-ui/incidents">incident routing</a>, and <a href="/overview/web-ui">UI controls</a> for debugging, recovery, and operator handoff.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/server-admin/distributed/">Scales gradually</a></h3>
@@ -227,7 +227,7 @@ Dagu is useful anywhere existing scripts, containers, operational tasks, or agen
   <div class="overview-card overview-usecase-card">
     <h3>Infrastructure and Server Automation</h3>
     <p><strong>Run:</strong> <a href="/step-types/ssh">SSH backups</a>, cleanup jobs, deploy scripts, patch windows, precondition checks, and <a href="/writing-workflows/lifecycle-handlers">lifecycle hooks</a>.</p>
-    <p><strong>Why Dagu fits:</strong> remote operations get <a href="/writing-workflows/scheduling">schedules</a>, <a href="/writing-workflows/durable-execution">retries</a>, <a href="/writing-workflows/email-notifications">notifications</a>, and <a href="/overview/web-ui#run-history-and-logs">per-step logs</a> without requiring operators to SSH into servers for every recovery.</p>
+    <p><strong>Why Dagu fits:</strong> remote operations get <a href="/writing-workflows/scheduling">schedules</a>, <a href="/writing-workflows/durable-execution">retries</a>, <a href="/writing-workflows/email-notifications">notifications</a>, <a href="/web-ui/incidents">incident routing</a>, and <a href="/overview/web-ui#run-history-and-logs">per-step logs</a> without requiring operators to SSH into servers for every recovery.</p>
   </div>
   <div class="overview-card overview-usecase-card">
     <h3>GitHub-driven Workflows</h3>
@@ -315,5 +315,9 @@ Workflow Operator connects Slack or Telegram to the built-in steward, so teams c
   <div class="step-card">
     <h3><a href="/features/agent/">Steward</a></h3>
     <p>Use Dagu's built-in steward to create, update, and debug workflows.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/web-ui/incidents">Incident Routing</a></h3>
+    <p>Open, deduplicate, and resolve provider incidents for production workflow failures.</p>
   </div>
 </div>

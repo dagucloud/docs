@@ -297,7 +297,7 @@ See [`history` CLI reference](/getting-started/cli#history) and [`cleanup` comma
 
 ### Alerting
 
-For team-managed notification routes, use [Notifications](/web-ui/notifications) in the Web UI. It supports reusable Slack, email, Telegram, and webhook channels with Global and workspace rules. On self-hosted Dagu, this Web UI routing requires an active license or trial.
+For team-managed notification routes, use [Notifications](/web-ui/notifications) in the Web UI. It supports reusable Slack, email, Telegram, and webhook channels with Global and workspace rules. For managed provider incidents, use [Incident Routing](/web-ui/incidents). On self-hosted Dagu, these Web UI routing features require an active license or trial.
 
 #### Email
 
@@ -350,6 +350,8 @@ handler_on:
           }]
         }
 ```
+
+For managed provider incidents that open after final failure and resolve on recovery, prefer [Incident Routing](/web-ui/incidents). The YAML pattern below is still useful when the provider call should travel with one workflow definition.
 
 **PagerDuty:**
 ```yaml

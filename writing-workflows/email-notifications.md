@@ -3,7 +3,7 @@
 Dagu provides built-in email notifications for workflow events and errors.
 
 ::: tip Web UI notification routing
-For team-wide Slack, email, Telegram, and webhook routing from the Web UI, use [Notifications](/web-ui/notifications). Web UI notification channels and Global/workspace rules require an active Dagu license or trial on self-hosted deployments.
+For team-wide Slack, email, Telegram, and webhook routing from the Web UI, use [Notifications](/web-ui/notifications). For PagerDuty or SolarWinds incidents that open on final failure and resolve on recovery, use [Incident Routing](/web-ui/incidents). Web UI notification and incident routing require an active Dagu license or trial on self-hosted deployments.
 :::
 
 The YAML fields on this page are useful when you want email behavior to travel with a DAG or base configuration. Web UI notification rules are better when operators should manage channels and event routing without editing DAG YAML.

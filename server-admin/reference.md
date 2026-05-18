@@ -235,7 +235,7 @@ All options support `DAGU_` prefix.
 ### Server
 - `DAGU_HOST` - Server host (default: `127.0.0.1`)
 - `DAGU_PORT` - Server port (default: `8080`)
-- `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification DAG-run links
+- `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification and incident DAG-run links
 - `DAGU_BASE_PATH` - Base path for reverse proxy
 - `DAGU_API_BASE_URL` - **DEPRECATED** - Use `api_base_path` config instead
 - `DAGU_TZ` - Server timezone

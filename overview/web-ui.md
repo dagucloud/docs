@@ -26,6 +26,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Run details** for outputs, artifacts, logs, and retries
 - **Docs** for markdown documents and runbooks
 - **Notifications** for Slack, email, Telegram, and webhook routing
+- **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Secrets** for global and workspace-scoped Dagu-managed secret values
 - **Search** for finding workflows and documents quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
@@ -116,7 +117,7 @@ From this page you can usually:
 
 ## Notifications
 
-The Notifications section manages team alerting from the Web UI.
+The Notifications section manages team messages from the Web UI.
 
 ![Notification rules](/notification-rules-light.png)
 
@@ -129,6 +130,24 @@ Use it to:
 - test channels before relying on them in production
 
 Notification channels and Global/workspace rules require an active Dagu license or trial on self-hosted deployments. See [Notifications](/web-ui/notifications) for the full model.
+
+## Incidents
+
+The Incidents section manages provider incidents for production workflow failures.
+
+![Incident routing](/incident-routing-light.png)
+
+Use it to:
+
+- create reusable PagerDuty and SolarWinds Incident Response connections
+- set a Global incident route for every DAG
+- override the Global route for one workspace
+- configure per-DAG exceptions from the DAG detail page
+- test provider credentials before relying on them in production
+
+Incident routing opens incidents only after automatic retries are exhausted, deduplicates repeated failures for the same provider, workspace, and DAG, and resolves the same incident when a later run succeeds.
+
+Incident connections and routing require an active Dagu license or trial on self-hosted deployments. See [Incident Routing](/web-ui/incidents) for the full model.
 
 ## Run Details
 
@@ -263,6 +282,7 @@ Depending on your role and license, the navigation can also include pages such a
 - **Base Config**
 - **Secrets**
 - **Notifications**
+- **Incidents**
 - **Events**
 - **Audit Logs**
 - **License**
@@ -314,6 +334,7 @@ ui:
 - [Workspaces](/web-ui/workspaces)
 - [Cockpit](/web-ui/cockpit)
 - [Notifications](/web-ui/notifications)
+- [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)
 - [Documents](/web-ui/documents)
 - [Learn the REST API](/overview/api)

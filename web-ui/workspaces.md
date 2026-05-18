@@ -13,13 +13,14 @@ Use workspaces when you want to:
 - keep generated documents grouped with the workflows that produced them
 - keep Web UI-managed secrets scoped to the workflows that use them
 - route notifications to team- or environment-specific channels
+- route incidents to team- or environment-specific PagerDuty or SolarWinds connections
 - give a user or API key access to a selected set of workflows
 
 Workspaces are a navigation and access-control feature inside one Dagu installation. If you need hard tenant isolation, run separate Dagu deployments with separate storage and credentials.
 
 ## Selecting a Workspace
 
-The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, Docs, and Notifications.
+The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, Docs, Notifications, and Incident Routing.
 
 | Selection | What You See |
 | --- | --- |
@@ -97,6 +98,18 @@ Use workspace notification rules when each team or environment has its own Slack
 
 See [Notifications](/web-ui/notifications) for the full routing model and license requirements.
 
+## Incidents in Workspaces
+
+Incident routing can be Global or workspace-scoped.
+
+- **Global** routing is the default for every DAG.
+- A named workspace can inherit Global routing, configure its own incident routes, or turn incidents off.
+- A DAG can still override the workspace from the DAG detail **Incidents** tab when it needs a one-off route.
+
+Use workspace incident routing when each team or environment has its own PagerDuty service or SolarWinds Incident Response endpoint. A workflow with `labels: [workspace=ops]` uses the `ops` workspace incident route when it is configured; otherwise it falls back to Global.
+
+See [Incident Routing](/web-ui/incidents) for the full routing model and license requirements.
+
 ## Access Rules
 
 Admins can give users and API keys access to all workspaces or selected workspaces.
@@ -138,6 +151,7 @@ For an interactive reference, open **API Docs** in the Web UI or visit `/api-doc
 
 - [Cockpit](/web-ui/cockpit)
 - [Notifications](/web-ui/notifications)
+- [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)
 - [Documents](/web-ui/documents)
 - [User Management](/server-admin/authentication/user-management)
