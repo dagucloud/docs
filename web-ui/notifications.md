@@ -6,6 +6,8 @@ This page covers self-hosted Dagu. Reusable notification channels and Global/wor
 
 Notifications route DAG-run events to team destinations without hard-coding Slack webhooks, email recipients, Telegram chats, or webhook endpoints in every DAG file.
 
+Use notifications for ordinary message delivery: Slack, Google Chat, email, Telegram, or custom webhooks. Use [Incident Routing](/web-ui/incidents) only for systems that manage an incident lifecycle, such as PagerDuty or SolarWinds Incident Response.
+
 ![Notification rules in light mode](/notification-rules-light.png)
 
 ## Mental Model
@@ -57,6 +59,8 @@ Open **Notifications > Channels** to create destinations before adding rules.
 | **Email** | Send to one or more recipients through the configured SMTP transport. |
 | **Generic Webhook** | POST a structured payload to an incident system, chat relay, or internal service. |
 | **Telegram** | Send messages through a Telegram bot token and chat ID. |
+
+For Google Chat or another chat service without a dedicated channel type, use a generic webhook when the receiver can accept Dagu's JSON payload, or point the generic webhook at a small relay that converts the payload into that service's expected format.
 
 Channel secrets such as webhook URLs, HMAC secrets, SMTP passwords, and bot tokens are stored encrypted. The UI shows redacted previews after save.
 

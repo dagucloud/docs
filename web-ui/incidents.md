@@ -4,7 +4,7 @@
 This page covers self-hosted Dagu. Incident routing requires an active Dagu self-host license or trial. Existing self-host licenses include this feature; no separate incident add-on or new feature claim is required. Hosted Dagu Cloud includes incident routing by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
-Incident routing opens and resolves incidents in incident-management systems when workflow failures need an operational response. Use it for PagerDuty and SolarWinds Incident Response. Use [Notifications](/web-ui/notifications) when you only need Slack, email, Telegram, or generic webhook messages.
+Incident routing opens and resolves incidents in incident-management systems when workflow failures need an operational response. Use it for PagerDuty and SolarWinds Incident Response. Use [Notifications](/web-ui/notifications) when you only need Slack, Google Chat, email, Telegram, or generic webhook messages.
 
 ![Incident routing in the Web UI](/incident-routing-light.png)
 
@@ -29,10 +29,12 @@ Notifications and incidents solve different problems:
 
 | Feature | Use It For |
 | --- | --- |
-| **Notifications** | Chat, email, Telegram, and generic webhook messages for DAG-run events such as failed, waiting, rejected, aborted, or succeeded. |
+| **Notifications** | Chat, email, Telegram, and generic webhook messages for DAG-run events such as failed, waiting, rejected, aborted, or succeeded. Use this for ordinary destinations such as Slack and Google Chat. |
 | **Incident Routing** | Provider incidents that open on final failure, deduplicate repeated failures, and resolve when the DAG recovers. |
 
 Use both when operators should receive a chat message and an incident should also be opened in the escalation system.
+
+Do not add chat tools as incident connections unless they manage an incident lifecycle. Slack, Google Chat, email, and simple webhooks are notification destinations; PagerDuty and SolarWinds Incident Response are incident connections because they support trigger, deduplication, and resolve semantics.
 
 ## Setup
 
@@ -53,8 +55,8 @@ Open **Incidents > Connections** to create reusable provider connections.
 
 | Provider | Required Setting | Notes |
 | --- | --- | --- |
-| **PagerDuty** | Events API v2 routing key | Dagu sends trigger and resolve events with a stable generated dedup key. |
-| **SolarWinds Incident Response** | Incoming webhook URL | Dagu sends trigger and resolve events using the generated incident key. |
+| **PagerDuty** | Events API v2 routing key | Dagu sends trigger and resolve events with the rendered dedup key. |
+| **SolarWinds Incident Response** | Incoming webhook URL | Dagu sends trigger and resolve events using the rendered incident key. |
 
 Secrets such as routing keys and webhook URLs are encrypted at rest. After saving, Dagu only returns redacted previews through the API and Web UI. Existing secret values are preserved when you edit a connection without entering a new secret.
 
@@ -80,9 +82,15 @@ Incident delivery is handled by the Dagu server-side event monitor, not by a wor
 
 ## Deduplication
 
-Dagu generates the provider incident key. The key is stable for each provider, workspace, and DAG combination, so repeated final failures update the same provider incident until a later success resolves it.
+Dagu uses the route's dedup key template to render the provider incident key. The default key is stable for each workspace and DAG:
 
-Custom dedup templates are not used. This keeps routing predictable and prevents accidental duplicate incident streams.
+```text
+dagu:workspace:{{workspace}}:dag:{{dag.name}}:failure
+```
+
+Repeated final failures update the same provider incident until a later success resolves it. Dagu stores incident state by provider and rendered dedup key, so recovery can still resolve an open incident after a route is recreated or moved, as long as the provider and rendered dedup key stay the same.
+
+Only customize the dedup key when you intentionally want a different incident stream. Keep it stable across failures and recoveries; changing it while an incident is open can create a new provider incident instead of resolving the old one.
 
 ## Message Templates
 
