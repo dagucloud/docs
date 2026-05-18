@@ -267,7 +267,7 @@ See [Wait](/step-types/wait) for more details.
 
 ### Custom Actions
 
-Define reusable actions in `actions` when you want a typed wrapper around a builtin action:
+Define reusable actions in `actions` when you want a typed wrapper around a built-in step type:
 
 ```yaml
 actions:
@@ -290,7 +290,7 @@ steps:
       message: hello
 ```
 
-The common case is a custom action with a templated `run` step. Schema defaults can be applied to the `with` object, the result is validated against `input_schema`, and then the template expands to a builtin step before execution. See [Custom Actions](/writing-workflows/custom-step-types) for the full rules.
+The common case is a custom action with a templated `run` step. Schema defaults can be applied to the `with` object, the result is validated against `input_schema`, and then the template expands to a built-in step before execution. See [Custom Actions](/dagu-actions/custom) for the full rules.
 
 ## Scheduling
 

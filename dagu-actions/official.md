@@ -105,4 +105,4 @@ Official actions declare their own `tools` in the action DAG. Caller DAG `tools`
 
 In standalone runs, the local Dagu process resolves the action, prepares the action tools, and runs the action DAG as a sub-DAG. In distributed runs, the worker executing the action step resolves and packages the action workspace; the worker running the action DAG prepares that action DAG's tools in its own local tools cache.
 
-For the full package model, reference formats, manifest rules, output publication rules, and distributed execution details, see [Remote Actions](/writing-workflows/remote-actions).
+For the full package model, reference formats, manifest rules, output publication rules, and distributed execution details, see [Execution Model](/dagu-actions/execution-model).

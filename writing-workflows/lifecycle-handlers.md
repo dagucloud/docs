@@ -38,7 +38,7 @@ steps:
   - run: ./load.sh
 ```
 
-Each handler is a normal step definition. You can use `run`, `script`, `action` (for remote actions or built-in actions), `executor`, containers, timeouts, or any other step field that makes sense for a single task.
+Each handler is a normal step definition. You can use `run`, `script`, `action` (for remote actions or built-in step type names), `executor`, containers, timeouts, or any other step field that makes sense for a single task.
 
 ## Execution Model
 

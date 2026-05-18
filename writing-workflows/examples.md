@@ -1376,7 +1376,7 @@ steps:
 
 Add `output_schema` when stdout should be a typed JSON contract. Invalid JSON or schema mismatches fail the step; without an explicit `output:` mapping, the validated object is available as `${step_id.output.*}`.
 
-<a href="/writing-workflows/custom-step-types" class="learn-more">Learn more →</a>
+<a href="/dagu-actions/custom" class="learn-more">Learn more →</a>
 
 </div>
 

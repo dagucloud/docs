@@ -91,15 +91,15 @@ Configuration precedence: System defaults → Base config → DAG config
 
 See [Base Configuration](/server-admin/base-config) for complete documentation on all available fields.
 
-## Reusable Actions
+## Reusable Dagu Actions
 
-Use reusable actions when several workflows should share one validated interface.
+Use Dagu actions when several workflows should share one validated interface.
 
-- Use [Custom Actions](/writing-workflows/custom-step-types) for inline wrappers around builtin actions.
-- Use [Remote Actions](/writing-workflows/remote-actions) for package-style actions that live in a local directory, GitHub repository, or explicit Git source.
-- Use [Official Actions](/writing-workflows/official-actions) when a maintained `dagucloud/*` action already matches the task.
+- Use [Custom Actions](/dagu-actions/custom) for inline wrappers around built-in step types.
+- Use [Remote Actions](/dagu-actions/remote) for package-style actions that live in a local directory, GitHub repository, or explicit Git source.
+- Use [Official Actions](/dagu-actions/official) when a maintained `dagucloud/*` action already matches the task.
 
-Custom actions are defined in `actions` when you want a typed wrapper around a builtin action.
+Custom actions are defined in `actions` when you want a typed wrapper around a built-in step type.
 
 ```yaml
 actions:
@@ -122,7 +122,7 @@ steps:
       message: hello
 ```
 
-The most common pattern is a `run` custom action with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal builtin step before execution. See [Custom Actions](/writing-workflows/custom-step-types) for the exact rules.
+The most common pattern is a `run` custom action with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal built-in step before execution. See [Custom Actions](/dagu-actions/custom) for the exact rules.
 
 Remote actions are called directly by versioned reference:
 
@@ -147,7 +147,7 @@ steps:
         return { total: input.values.reduce((sum, value) => sum + value, 0) }
 ```
 
-Remote action packages contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action DAG as a sub-DAG, and exposes the action outputs as JSON. See [Remote Actions](/writing-workflows/remote-actions) for package layout, reference formats, and distributed worker behavior.
+Remote action packages contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action DAG as a sub-DAG, and exposes the action outputs as JSON. See [Dagu Actions](/dagu-actions/) for the full section and [Execution Model](/dagu-actions/execution-model) for package layout, reference formats, output validation, and distributed worker behavior.
 
 ## Guide Sections
 
@@ -158,13 +158,12 @@ Remote action packages contain a `dagu-action.yaml` manifest and a DAG entrypoin
 5. **[Durable Execution](/writing-workflows/durable-execution)** - Step retries, default step retries, DAG retries
 6. **[Error Handling](/writing-workflows/error-handling)** - Continue-on behavior, handlers, notifications
 7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
-8. **[Custom Actions](/writing-workflows/custom-step-types)** - Reusable typed wrappers around builtin actions
-9. **[Remote Actions](/writing-workflows/remote-actions)** - Versioned action packages backed by DAGs
-10. **[Official Actions](/writing-workflows/official-actions)** - Maintained `dagucloud/*` remote actions
-11. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
-12. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
-13. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
-14. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
+8. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
+9. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
+10. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
+11. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
+
+Reusable action APIs live in the [Dagu Actions](/dagu-actions/) section.
 
 If your workflows are triggered from GitHub through Dagu Cloud, see the dedicated [GitHub Integration](/github-integration/) section.
 

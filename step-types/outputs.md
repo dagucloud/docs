@@ -75,5 +75,5 @@ steps:
 ## Related
 
 - [Workflow Outputs](/writing-workflows/outputs)
-- [Remote Actions](/writing-workflows/remote-actions)
+- [Remote Actions](/dagu-actions/remote)
 - [Artifacts](/writing-workflows/artifacts)

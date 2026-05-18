@@ -274,17 +274,17 @@ See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation
 |-------|------|-------------|---------|
 | `actions` | object | Reusable custom action definitions for this YAML document. Merged with base-config `actions` per document. Duplicate names across scopes are rejected. | - |
 
-Custom actions expand to builtin-backed steps during DAG load. They are not runtime plugins.
+Custom actions expand to built-in step definitions during DAG load. They are not runtime plugins.
 
 Each definition accepts:
 
-- `type`: required builtin action or builtin alias
+- `type`: required built-in step type or built-in alias
 - `input_schema`: required inline JSON Schema object, which must resolve to an object schema
 - `output_schema`: optional inline JSON Schema object, which must resolve to an object schema and validates stdout JSON after execution
 - `template`: required step fragment expanded at build time
 - `description`: optional fallback description for the expanded step
 
-See [Custom Actions](/writing-workflows/custom-step-types) for the full definition rules, template rendering behavior, and call-site restrictions.
+See [Custom Actions](/dagu-actions/custom) for the full definition rules, template rendering behavior, and call-site restrictions.
 
 ### Data Fields
 
@@ -1017,7 +1017,7 @@ steps:
     timeout_sec: 300
 ```
 
-Current builtin action names:
+Current built-in step type names:
 
 | Action | Use for | Key inputs |
 |--------|---------|------------|
@@ -1350,13 +1350,13 @@ steps:
       destination: ./assets
 ```
 
-If `action` refers to a custom action, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded builtin step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
+If `action` refers to a custom action, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded built-in step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
 
 Custom action call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `run`, `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
 
 Custom action precedence is `call site > template > defaults` for replacement fields. For additive fields, `env` and `preconditions` compose as `defaults -> template -> call site`.
 
-See [Custom Actions](/writing-workflows/custom-step-types) for the exact allowed field set.
+See [Custom Actions](/dagu-actions/custom) for the exact allowed field set.
 
 ### Artifact Actions
 

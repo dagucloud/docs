@@ -398,4 +398,4 @@ The following information is recorded:
 
 - [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) — Execute handlers on wait status
 - [Email Notifications](/writing-workflows/email-notifications) — Configure wait status emails
-- [Actions Reference](/step-types/shell) — All available actions
+- [Step Types](/step-types/shell) — Built-in execution types

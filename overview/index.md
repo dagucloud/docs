@@ -30,7 +30,7 @@ Understanding Dagu is easier once the main terms are clear.
 |------|---------|
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
-| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`duckdb.query`](/step-types/sql/duckdb), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/writing-workflows/custom-step-types), call [remote actions](/writing-workflows/remote-actions), or use [official actions](/writing-workflows/official-actions). |
+| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`duckdb.query`](/step-types/sql/duckdb), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [remote actions](/dagu-actions/remote), or use [official actions](/dagu-actions/official). |
 | **Tool** | A pinned external CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
 | **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
@@ -101,7 +101,7 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/yaml-specification">Plain YAML</a></h3>
-      <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/writing-workflows/custom-step-types">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
+      <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/dagu-actions/custom">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
   </div>
 </div>
 
@@ -293,7 +293,7 @@ Workflow Operator connects Slack or Telegram to the built-in steward, so teams c
     <p>Learn workflows, steps, dependencies, parameters, and execution behavior.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/step-types/shell">Actions</a></h3>
+    <h3><a href="/step-types/shell">Step Types</a></h3>
     <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, wait, S3, and agent execution.</p>
   </div>
   <div class="step-card">
@@ -301,8 +301,8 @@ Workflow Operator connects Slack or Telegram to the built-in steward, so teams c
     <p>Pin external CLI binaries directly in workflow YAML.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/writing-workflows/remote-actions">Remote Actions</a></h3>
-    <p>Create versioned DAG-backed action packages with input and output schemas.</p>
+    <h3><a href="/dagu-actions/">Dagu Actions</a></h3>
+    <p>Create reusable action APIs with official packages, remote packages, or custom wrappers.</p>
   </div>
   <div class="step-card">
     <h3><a href="/overview/architecture">Architecture</a></h3>

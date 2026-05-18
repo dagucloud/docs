@@ -195,7 +195,7 @@ Visit [http://localhost:8080](http://localhost:8080)
 
 ## Built-in Actions
 
-Common built-in actions include:
+Common built-in step types include:
 
 | Action | Purpose |
 |----------|---------|
@@ -222,7 +222,7 @@ Common built-in actions include:
 | `chat.completion` | LLM chat completion |
 | `agent.run` | Tool-using agent step |
 
-DAGs can also declare reusable `actions` that expand to built-in actions at load time. See [Custom Actions](/writing-workflows/custom-step-types) and [Actions](/step-types/shell) for the exact configuration surface.
+DAGs can also declare reusable `actions` that expand to built-in step types at load time. See [Custom Actions](/dagu-actions/custom) and [Step Types](/step-types/shell) for the exact configuration surface.
 
 ## Scheduling and Reliability
 
@@ -487,16 +487,12 @@ Full CLI and environment variable reference: [CLI](/overview/cli) | [Configurati
     <p>Reproducible CLI dependencies</p>
   </div>
   <div class="step-card">
-    <h3><a href="/writing-workflows/remote-actions">Remote Actions</a></h3>
-    <p>Versioned action packages with input and output schemas</p>
+    <h3><a href="/dagu-actions/">Dagu Actions</a></h3>
+    <p>Reusable action APIs, official packages, remote packages, and custom wrappers</p>
   </div>
   <div class="step-card">
-    <h3><a href="/writing-workflows/official-actions">Official Actions</a></h3>
-    <p>Maintained Dagu action packages such as Node.js and Python script runners</p>
-  </div>
-  <div class="step-card">
-    <h3><a href="/step-types/shell">Actions</a></h3>
-    <p>Built-in executor types</p>
+    <h3><a href="/step-types/shell">Step Types</a></h3>
+    <p>Built-in executors such as shell, Docker, HTTP, SQL, Redis, and agents</p>
   </div>
   <div class="step-card">
     <h3><a href="/server-admin/distributed/">Distributed Execution</a></h3>

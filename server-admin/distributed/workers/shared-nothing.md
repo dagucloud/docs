@@ -74,7 +74,7 @@ steps:
       text: "shared-nothing worker run"
 ```
 
-Local `source:` references such as `source:./actions/notify@local` work only when that path exists on the worker executing the action step. See [Remote Actions](/writing-workflows/remote-actions) for the reference formats and packaging rules.
+Local `source:` references such as `source:./actions/notify@local` work only when that path exists on the worker executing the action step. See [Remote Actions](/dagu-actions/remote) for the reference formats and packaging rules.
 
 ### Zombie Detection
 

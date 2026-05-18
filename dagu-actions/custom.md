@@ -1,6 +1,6 @@
 # Custom Actions
 
-`actions` defines reusable, typed actions that expand to builtin actions when a workflow is loaded. Use them when several DAGs should share the same validated call shape without copying executor-specific YAML everywhere.
+`actions` defines reusable, typed actions that expand to built-in step types when a workflow is loaded. Use them when several DAGs should share the same validated call shape without copying executor-specific YAML everywhere.
 
 ## Basic Shape
 
@@ -66,7 +66,7 @@ Action names must match:
 ^[A-Za-z][A-Za-z0-9_-]*(\.[A-Za-z][A-Za-z0-9_-]*)*$
 ```
 
-Custom action names cannot reuse builtin action names such as `http.request`, `dag.run`, `dag.enqueue`, `template.render`, or `agent.run`.
+Custom action names cannot reuse built-in step type names such as `http.request`, `dag.run`, `dag.enqueue`, `template.render`, or `agent.run`.
 
 ## Template Rules
 
@@ -236,6 +236,7 @@ steps:
 
 ## Related
 
+- [Dagu Actions](/dagu-actions/)
 - [YAML Specification](/writing-workflows/yaml-specification)
 - [Base Configuration](/server-admin/base-config)
-- [Actions](/step-types/shell)
+- [Step Types](/step-types/shell)

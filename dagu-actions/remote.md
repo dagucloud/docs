@@ -2,7 +2,7 @@
 
 Remote actions package a DAG as a reusable action that another workflow can call by version. Use them when the reusable logic needs its own files, scripts, schemas, or sub-DAG structure instead of a small inline wrapper.
 
-For inline wrappers around built-in actions, use [Custom Actions](/writing-workflows/custom-step-types). For package-style reuse across repositories and workers, use remote actions.
+For inline wrappers around built-in step types, use [Custom Actions](/dagu-actions/custom). For package-style reuse across repositories and workers, use remote actions.
 
 ## Call a Remote Action
 
@@ -30,7 +30,7 @@ steps:
         return {"total": sum(input["values"])}
 ```
 
-See [Official Actions](/writing-workflows/official-actions) for the current official action list and exact input/output contracts.
+See [Official Actions](/dagu-actions/official) for the current official action list and exact input/output contracts.
 
 Use `source:` when you need an explicit source location:
 
@@ -203,13 +203,14 @@ Use a remote action when:
 
 Use a custom action when:
 
-- The reusable unit is only a small wrapper around `run:` or a built-in action.
+- The reusable unit is only a small wrapper around `run:` or another built-in step type.
 - The action should live in `base.yaml` or inside one DAG file.
 - You do not need a separate package, Git ref, or action manifest.
 
 ## Related
 
-- [Custom Actions](/writing-workflows/custom-step-types)
-- [Official Actions](/writing-workflows/official-actions)
+- [Custom Actions](/dagu-actions/custom)
+- [Official Actions](/dagu-actions/official)
+- [Execution Model](/dagu-actions/execution-model)
 - [Outputs](/writing-workflows/outputs)
 - [Distributed Workers](/server-admin/distributed/workers/)

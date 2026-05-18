@@ -30,7 +30,7 @@ pnpm preview
 - `getting-started/` — onboarding material for new Dagu users.
 - `features/` — feature-focused guides.
 - `writing-workflows/` — authoring workflows and best practices.
-- `step-types/` — built-in action references.
+- `step-types/` — built-in step type references.
 - `web-ui/` — Cockpit, workspace, documents, and REST API guides.
 - `server-admin/` — server configuration, operations, authentication, and deployment guides.
 - `github-integration/` — GitHub integration setup and examples.

@@ -326,9 +326,9 @@ steps:
 
 Base-config and DAG-local `actions` are merged per YAML document. If a DAG declares the same custom action name as the base config, Dagu fails the load with a duplicate-definition error.
 
-Schema defaults are applied to `with` at the call site, the result is validated against `input_schema`, and `template` expands to a builtin step before normal step validation runs.
+Schema defaults are applied to `with` at the call site, the result is validated against `input_schema`, and `template` expands to a built-in step before normal step validation runs.
 
-See [Custom Actions](/writing-workflows/custom-step-types) for the exact field rules and template behavior.
+See [Custom Actions](/dagu-actions/custom) for the exact field rules and template behavior.
 
 ### Logging and Artifacts
 

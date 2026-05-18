@@ -103,11 +103,18 @@ const fullSidebar = [
     ],
   },
   {
-    text: "Actions",
+    text: "Dagu Actions",
     items: [
-      { text: "Official Actions", link: "/writing-workflows/official-actions" },
-      { text: "Remote Actions", link: "/writing-workflows/remote-actions" },
-      { text: "Custom Actions", link: "/writing-workflows/custom-step-types" },
+      { text: "Overview", link: "/dagu-actions/" },
+      { text: "Official Actions", link: "/dagu-actions/official" },
+      { text: "Remote Actions", link: "/dagu-actions/remote" },
+      { text: "Custom Actions", link: "/dagu-actions/custom" },
+      { text: "Execution Model", link: "/dagu-actions/execution-model" },
+    ],
+  },
+  {
+    text: "Step Types",
+    items: [
       { text: "Shell", link: "/step-types/shell" },
       { text: "Shell (macOS / Linux)", link: "/step-types/shell-unix" },
       { text: "Shell (Windows)", link: "/step-types/shell-windows" },
