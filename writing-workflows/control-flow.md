@@ -15,6 +15,7 @@ steps:
   - id: extract
     run: unzip data.zip                     # Extract files
     depends: download
+
   - id: process
     run: python process.py                  # Process data
     depends: extract

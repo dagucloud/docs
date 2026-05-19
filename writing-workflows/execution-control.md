@@ -219,6 +219,7 @@ steps:
   - id: step_2
     run: echo "2"
     depends: step_1
+
   - id: step_3
     run: echo "3"
     depends: step_2

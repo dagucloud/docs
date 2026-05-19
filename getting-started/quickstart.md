@@ -121,9 +121,11 @@ steps:
   - id: transform_a
     run: ./transform_a.sh
     depends: extract
+
   - id: transform_b
     run: ./transform_b.sh
     depends: extract
+
   - id: load
     run: ./load.sh
     depends: [transform_a, transform_b]

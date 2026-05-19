@@ -135,6 +135,7 @@ steps:
       query: |
         UPDATE metrics SET value = value + 5 WHERE name = 'jobs';
     depends: insert_rows
+
   - id: select_rows
     action: duckdb@v1
     with:
@@ -143,6 +144,7 @@ steps:
       query: |
         SELECT * FROM metrics WHERE name = 'jobs';
     depends: update_rows
+
   - id: print_result
     run: printf '%s\n' '${select_rows.outputs.result}'
     depends: select_rows

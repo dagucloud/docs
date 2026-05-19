@@ -86,6 +86,7 @@ steps:
   - id: second
     run: echo "Second"
     depends: first
+
   - id: third
     run: echo "Third"
     depends: second

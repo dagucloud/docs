@@ -266,6 +266,7 @@ steps:
       params: "FILES=${FILE_LIST}"
     output: REFACTOR_RESULT
     depends: plan
+
   - id: summarize
     action: agent.run
     with:
@@ -418,6 +419,7 @@ steps:
       params: "PLAN=${TEST_PLAN}"
     output: EXECUTION
     depends: plan
+
   - id: summarize
     action: agent.run
     with:

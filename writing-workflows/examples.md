@@ -1337,6 +1337,7 @@ steps:
   - id: create_data_dir
     run: mkdir -p data
     depends: show_default_dir
+
   - id: show_data_dir
     working_dir: /tmp/data
     run: pwd      # Outputs: /tmp/data
@@ -1446,6 +1447,7 @@ steps:
   - id: test
     run: pytest tests/
     depends: install
+
   - id: build
     run: python setup.py build
     depends: test
@@ -2015,6 +2017,7 @@ steps:
   - id: transform
     run: echo "Transforming data"
     depends: extract
+
   - id: load
     run: echo "Loading data"
     depends: transform
@@ -2302,9 +2305,11 @@ steps:
   - id: process_batch_1
     run: echo "Processing batch 1"
     depends: validate
+
   - id: process_batch_2
     run: echo "Processing batch 2"
     depends: validate
+
   - id: process_batch_3
     run: echo "Processing batch 3"
     depends: validate
@@ -2326,6 +2331,7 @@ steps:
   - id: compute
     run: echo "Running intensive computation"
     depends: prepare
+
   - id: store
     run: echo "Storing results"
     depends: compute

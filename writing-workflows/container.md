@@ -80,6 +80,7 @@ steps:
   - id: build
     run: npm run build  # Build the application
     depends: install
+
   - id: test
     run: npm test       # Run tests
     depends: build

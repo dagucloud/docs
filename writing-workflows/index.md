@@ -197,11 +197,13 @@ steps:
     continue_on:
       failure: false
     depends: download
+
   - id: process
     parallel: [users, orders, products]
     run: python process.py --type=$ITEM --date=${DATE}
     output: RESULT_${ITEM}
     depends: validate
+
   - id: report
     run: python report.py --date=${DATE}
     run: echo "Notifying failure for ${DATE}"
@@ -221,6 +223,7 @@ steps:
   - id: transform
     run: echo "Transforming data"
     depends: extract
+
   - id: load
     run: echo "Loading data"
     depends: transform

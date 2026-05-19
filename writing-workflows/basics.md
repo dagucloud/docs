@@ -109,6 +109,7 @@ steps:
   - id: step_2
     run: ls -la
     depends: step_1
+
   - id: step_3
     run: python script.py
     depends: step_2

@@ -139,6 +139,7 @@ steps:
       input: [FEEDBACK]
       rewind_to: prepare_report
     depends: prepare_report
+
   - id: publish_report
     run: ./publish-report.sh
     depends: draft_report
