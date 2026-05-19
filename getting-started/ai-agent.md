@@ -122,7 +122,7 @@ See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#e
 - [Agent Step](/features/agent/step) — Using the agent as a workflow step
 - [Steward Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
 - [MCP Server](/getting-started/mcp) — Connect external MCP clients to a running Dagu server
-- [Workflow Operator](/features/bots/) — Use the built-in steward from Slack or Telegram
+- [Workflow Operator](/features/bots/) — Use the built-in steward from Slack, Telegram, Discord, or LINE
 - [Basic Chat](/features/chat/basics) — Single-shot LLM calls in workflows
 - [OpenCode](/features/chat/opencode) — Kimi, DeepSeek, GLM, Qwen via OpenCode subscription
 - [Local AI](/features/chat/local-ai) — Ollama, vLLM, and other local OpenAI-compatible servers

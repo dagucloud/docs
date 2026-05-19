@@ -353,7 +353,7 @@ Per-DAG OpenTelemetry tracing configuration with OTLP endpoint, custom headers, 
 - JSON or text format logging (`DAGU_LOG_FORMAT`), per-run log files with separate stdout/stderr capture per step
 - Web UI notification rules for reusable Slack, email, Telegram, and webhook channels across Global, workspace, and DAG scopes
 - Web UI incident routing for PagerDuty and SolarWinds Incident Response across Global, workspace, and DAG scopes
-- Slack and Telegram bot integration for run status events (`succeeded`, `failed`, `aborted`, `waiting`, `rejected`)
+- Slack, Telegram, Discord, and LINE bot integration for run status events (`succeeded`, `failed`, `aborted`, `waiting`, `rejected`)
 - Email notifications on DAG success, failure, or wait status via SMTP
 - Per-DAG webhook endpoints with token authentication
 

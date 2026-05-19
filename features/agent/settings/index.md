@@ -11,7 +11,7 @@ It controls:
 - Tool permissions and bash command policy from `/agent-tools`
 - Model-native web search and provider-backed web tools from `/agent-tools`
 - The default profile/personality
-- Prerequisites for Workflow Operator on Slack and Telegram
+- Prerequisites for Workflow Operator on Slack, Telegram, Discord, and LINE
 
 If you are looking for workflow YAML configuration, see [Agent Step](/features/agent/step) and [Chat & LLM](/features/chat/).
 
@@ -30,7 +30,7 @@ The settings surface is split into smaller pages:
 
 - It does not replace workflow `action: agent.run` settings in DAG YAML
 - It does not replace workflow `action: chat.completion` settings in DAG YAML
-- It does not configure chat-bot platform tokens for Slack or Telegram
+- It does not configure chat-bot platform tokens for Slack, Telegram, Discord, or LINE
 
 Those are separate features with their own documentation.
 
@@ -56,13 +56,15 @@ The settings page also does not replace the `chat` workflow step. `action: chat.
 
 ### Workflow Operator (Chat Bot)
 
-Workflow Operator depends on the built-in steward being configured first. Slack and Telegram conversations are routed into steward sessions, so Steward must already have a working model and policy configuration.
+Workflow Operator depends on the built-in steward being configured first. Slack, Telegram, Discord, and LINE conversations are routed into steward sessions, so Steward must already have a working model and policy configuration.
 
 See:
 
 - [Workflow Operator (Chat Bot)](/features/bots/)
 - [Workflow Operator on Slack](/features/bots/slack)
 - [Workflow Operator on Telegram](/features/bots/telegram)
+- [Workflow Operator on Discord](/features/bots/discord)
+- [Workflow Operator on LINE](/features/bots/line)
 
 ## See Also
 

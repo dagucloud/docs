@@ -648,7 +648,7 @@ Audit logs are written as daily records and can be reviewed in the Web UI at **S
 
 The centralized event store persists operational events such as DAG-run outcomes and LLM usage records. It is enabled by default in `dagu server` and `dagu start-all`.
 
-The `/api/v1/event-logs` endpoint reads from this store, and the Slack and Telegram DAG-run monitors use it when available.
+The `/api/v1/event-logs` endpoint reads from this store, and the chat-bot DAG-run monitors use it when available.
 
 ### Configuration
 

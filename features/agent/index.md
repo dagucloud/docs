@@ -10,7 +10,7 @@ The same assistant foundation appears in three places:
 
 - the **Web UI assistant**
 - workflow steps with `action: agent.run`
-- **Workflow Operator** integrations such as Slack and Telegram
+- **Workflow Operator** integrations such as Slack, Telegram, Discord, and LINE
 
 ## Quick Start
 

@@ -318,11 +318,11 @@ steps:
     output: ANALYSIS_RESULT
 ```
 
-Workflow Operator connects Slack or Telegram to the built-in steward, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat.
+Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in steward, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat.
 
 - [Steward Overview](/features/agent/) explains interactive workflow generation and debugging.
 - [Agent Step](/features/agent/step) explains how to run agent tasks inside DAGs.
-- [Workflow Operator](/features/bots/) explains Slack and Telegram operation.
+- [Workflow Operator](/features/bots/) explains chat-operator setup.
 
 ## Learn More
 
