@@ -963,6 +963,9 @@ Each step in the `steps` array can have these fields:
 Use a multi-line `run` block when multiple shell commands should share the same step configuration:
 
 ```yaml
+tools:
+  - nodejs/node@v22.21.1
+
 steps:
   - id: build_and_test
     run: |
@@ -1462,8 +1465,11 @@ name: gpu-training
 worker_selector:
   gpu: "true"
   memory: "64G"
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python train_model.py
+  - run: uv run --python 3.13.9 python train_model.py
 ```
 
 To force a DAG to run locally even when `default_execution_mode` is `distributed`, use the string `"local"`:
@@ -1645,12 +1651,15 @@ preconditions:
     expected: "re:[1-5]"  # Weekdays only
 
 type: graph
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: validate-environment
     run: ./scripts/validate.sh
 
   - id: extract-data
-    run: python extract.py --date=${DATE}
+    run: uv run --python 3.13.9 python extract.py --date=${DATE}
     output: RAW_DATA_PATH
     retry_policy:
       limit: 3
@@ -1679,7 +1688,7 @@ steps:
     depends: transform-data
 
   - id: validate_results
-    run: python validate_results.py --date=${DATE}
+    run: uv run --python 3.13.9 python validate_results.py --date=${DATE}
     mail_on_error: true
     depends: load_data
 

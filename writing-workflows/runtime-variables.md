@@ -157,11 +157,14 @@ Markdown files written under `DAG_DOCS_DIR` appear in the web UI's [Documents](/
 labels:
   - workspace=ops
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: generate_report
     run: |
       mkdir -p "${DAG_DOCS_DIR}"
-      python generate_report.py > "${DAG_DOCS_DIR}/report.md"
+      uv run --python 3.13.9 python generate_report.py > "${DAG_DOCS_DIR}/report.md"
 ```
 
 ## Parameter Payload (`DAG_PARAMS_JSON`)
@@ -293,6 +296,9 @@ webhook:
   forward_headers:
     - X-GitHub-Event
     - X-GitHub-Delivery
+
+tools:
+  - jqlang/jq@jq-1.7.1
 
 steps:
   - id: route

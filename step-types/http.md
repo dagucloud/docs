@@ -86,6 +86,9 @@ steps:
 ### Capture Response
 
 ```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
 steps:
   - id: get_user
     action: http.request

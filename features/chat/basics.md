@@ -280,6 +280,9 @@ steps:
 The response is written to stdout and can be captured with `output`:
 
 ```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
 steps:
   - id: generate_json
     action: chat.completion

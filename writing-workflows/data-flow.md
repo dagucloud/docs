@@ -168,8 +168,11 @@ env:
   - DATA_DIR: /var/data
   - API_URL: https://api.example.com
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
+  - run: uv run --python 3.13.9 python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
 ```
 
 ### Variable Expansion
@@ -435,9 +438,12 @@ steps:
 Redirect output to local files when another step reads the file from the same filesystem:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: generate_report
-    run: python generate_report.py
+    run: uv run --python 3.13.9 python generate_report.py
     stdout: /tmp/report.txt
     
   - id: email_report
@@ -448,8 +454,11 @@ steps:
 If the file is a run result that users should preview or download, stream the command output to an artifact instead:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python generate_report.py
+  - run: uv run --python 3.13.9 python generate_report.py
     stdout:
       artifact: reports/report.txt
 ```

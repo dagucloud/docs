@@ -174,8 +174,11 @@ Tasks are routed to workers based on `worker_selector` in DAG definitions and th
 worker_selector:
   gpu: "true"
   memory: "64G"
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python train.py
+  - run: uv run --python 3.13.9 python train.py
 ```
 
 ### Communication Protocol

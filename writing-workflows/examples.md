@@ -73,6 +73,9 @@ graph TD
 ### Multiple Commands per Step
 
 ```yaml
+tools:
+  - nodejs/node@v22.21.1
+
 steps:
   - id: build_and_test
     run: |
@@ -599,9 +602,12 @@ graph TD
 ### Dispatch to Specific Workers
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: prepare_dataset
-    run: python prepare_dataset.py
+    run: uv run --python 3.13.9 python prepare_dataset.py
 
   - id: train_model
     action: dag.run
@@ -620,15 +626,20 @@ worker_selector:
   gpu: "true"
   cuda: "11.8"
   memory: "64G"
-steps:
-  - run: python train.py --gpu
+tools:
+  - astral-sh/uv@0.11.14
 
+steps:
+  - run: uv run --python 3.13.9 python train.py --gpu
 ---
 name: evaluate-model
 worker_selector:
   gpu: "true"
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python evaluate.py
+  - run: uv run --python 3.13.9 python evaluate.py
 ```
 
 ```mermaid
@@ -675,8 +686,11 @@ name: process-on-gpu
 worker_selector:
   gpu: "true"
   gpu-model: "nvidia-a100"
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python gpu_process.py
+  - run: uv run --python 3.13.9 python gpu_process.py
 ```
 
 <a href="/server-admin/distributed/#task-routing" class="learn-more">Learn more →</a>
@@ -712,9 +726,12 @@ Use `worker_selector: local` as an escape hatch in distributed deployments for l
 ### Parallel Distributed Tasks
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: split_data
-    run: python split_data.py --chunks=10
+    run: uv run --python 3.13.9 python split_data.py --chunks=10
     output: CHUNKS
 
   - action: dag.run
@@ -726,8 +743,7 @@ steps:
       max_concurrent: 5
     depends: split_data
 
-  - run: python merge_results.py
-
+  - run: uv run --python 3.13.9 python merge_results.py
 ---
 name: chunk-processor
 worker_selector:
@@ -735,8 +751,11 @@ worker_selector:
   cpu-cores: "8"
 params:
   - CHUNK: ""
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python process_chunk.py ${CHUNK}
+  - run: uv run --python 3.13.9 python process_chunk.py ${CHUNK}
 ```
 
 ```mermaid
@@ -940,9 +959,12 @@ env:
   - SOME_FILE: ${SOME_DIR}/some_file
   - LOG_LEVEL: debug
   - API_KEY: ${SECRET_API_KEY}
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - working_dir: ${SOME_DIR}
-    run: python main.py ${SOME_FILE}
+    run: uv run --python 3.13.9 python main.py ${SOME_FILE}
 ```
 
 <a href="/writing-workflows/data-variables#env" class="learn-more">Learn more →</a>
@@ -1000,8 +1022,11 @@ steps:
 
 ```yaml
 params: param1 param2  # Default values for $1 and $2
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python main.py $1 $2
+  - run: uv run --python 3.13.9 python main.py $1 $2
 ```
 
 <a href="/writing-workflows/data-variables#params" class="learn-more">Learn more →</a>
@@ -1023,8 +1048,11 @@ params:
     type: string
     default: dev
     enum: [dev, staging, prod]
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python main.py ${foo} ${bar} --env=${environment}
+  - run: uv run --python 3.13.9 python main.py ${foo} ${bar} --env=${environment}
 ```
 
 <a href="/writing-workflows/data-variables#named-params" class="learn-more">Learn more →</a>
@@ -1206,9 +1234,12 @@ steps:
 
 ```yaml
 type: graph
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: extract
-    run: python extract.py
+    run: uv run --python 3.13.9 python extract.py
     output: DATA
   - run: |
       echo "Exit code: ${extract.exit_code}"
@@ -1266,9 +1297,12 @@ Run shell script with default shell.
 ### Shebang Script
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - run: |
-      #!/usr/bin/env python3
+      #!/usr/bin/env -S uv run --python 3.13.9 python
       import platform
       print(platform.python_version())
 ```
@@ -1284,6 +1318,9 @@ Runs with the interpreter declared in the shebang.
 ### Python Scripts
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - run: |
       import os
@@ -1292,7 +1329,7 @@ steps:
       print(f"Current directory: {os.getcwd()}")
       print(f"Current time: {datetime.datetime.now()}")
     with:
-      shell: python3
+      shell: uv run --python 3.13.9 python
 ```
 
 Execute script with specific interpreter.
@@ -2269,11 +2306,14 @@ otel:
   resource:
     service.name: "dagu-${DAG_NAME}"
     deployment.environment: "${ENV}"
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: fetch
     run: echo "Fetching data"
   - id: process
-    run: python process.py
+    run: uv run --python 3.13.9 python process.py
     depends: fetch
 
   - id: transform

@@ -142,8 +142,11 @@ Use `worker_selector` in your DAG definitions to route tasks:
 worker_selector:
   gpu: "true"
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python train_model.py
+  - run: uv run --python 3.13.9 python train_model.py
 ```
 
 Or at the step level for sub-DAG steps:

@@ -46,8 +46,11 @@ Set `worker_selector` at the top of a DAG file to route the entire DAG to a matc
 worker_selector:
   gpu: "true"
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python train.py
+  - run: uv run --python 3.13.9 python train.py
 ```
 
 When the coordinator dispatches this DAG, it selects a worker whose labels include `gpu=true`.
@@ -128,15 +131,20 @@ steps:
 name: train-model
 worker_selector:
   gpu: "true"
-steps:
-  - run: python train.py
+tools:
+  - astral-sh/uv@0.11.14
 
+steps:
+  - run: uv run --python 3.13.9 python train.py
 ---
 name: aggregate-results
 worker_selector:
   cpu-optimized: "true"
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python aggregate.py
+  - run: uv run --python 3.13.9 python aggregate.py
 ```
 
 The parent DAG's dispatch decision and each child's dispatch decision are evaluated independently. See [Distributed Execution — Sub-DAG Dispatch](/server-admin/distributed/#sub-dag-dispatch) for details.

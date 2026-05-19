@@ -1809,6 +1809,9 @@ Requires builtin authentication mode (`auth.mode: builtin`). See [Webhooks docum
 - Multiple Commands per Step: Steps can now execute multiple commands sequentially using an array syntax. This allows sharing step configuration (`env`, `working_dir`, `retry_policy`, `preconditions`, `container`, etc.) across multiple commands instead of duplicating it across separate steps.
 
 ```yaml
+tools:
+  - nodejs/node@v22.21.1
+
 steps:
   - id: build_and_test
     run: |

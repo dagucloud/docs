@@ -187,8 +187,11 @@ name: analyze_data
 description: "Analyze data and generate insights"
 params: "data"
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: echo "$1" | python analyze.py
+  - run: echo "$1" | uv run --python 3.13.9 python analyze.py
     output: INSIGHTS
 ```
 
@@ -290,6 +293,9 @@ name: transform_data
 description: "Transform and clean data"
 params: "data format=json"
 
+tools:
+  - jqlang/jq@jq-1.7.1
+
 steps:
   - id: transform
     run: echo "$1" | jq '.' > /tmp/transformed.json
@@ -297,7 +303,6 @@ steps:
     run: cat /tmp/transformed.json
     output: TRANSFORMED_DATA
     depends: transform
-
 ---
 # Store data tool
 name: store_data

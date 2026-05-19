@@ -26,17 +26,23 @@ graph LR
 The basic unit of execution. Each step runs a command or action:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: download
     run: curl -O https://example.com/data.csv
   - id: analyze
-    run: python analyze.py data.csv
+    run: uv run --python 3.13.9 python analyze.py data.csv
     depends: download
 ```
 
 Steps can execute multiple commands that share the same configuration:
 
 ```yaml
+tools:
+  - nodejs/node@v22.21.1
+
 steps:
   - id: build_and_test
     run: |

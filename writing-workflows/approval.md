@@ -211,6 +211,9 @@ See [Special Environment Variables](/writing-workflows/runtime-variables#push-ba
 A step queries metrics and outputs a summary. The approver can push back with different parameters until the output looks right:
 
 ```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
 steps:
   - id: query_metrics
     run: |

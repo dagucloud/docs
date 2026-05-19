@@ -270,8 +270,11 @@ steps:
 Redirect to local files instead of capturing:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python report.py
+  - run: uv run --python 3.13.9 python report.py
     stdout: /tmp/report.txt
     stderr: /tmp/errors.log
 ```
@@ -279,8 +282,11 @@ steps:
 Use artifact-relative stream output when the redirected content should appear in the DAG run's Artifacts tab:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python report.py
+  - run: uv run --python 3.13.9 python report.py
     stdout:
       artifact: reports/report.txt
 ```

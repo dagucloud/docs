@@ -25,12 +25,15 @@ Apply execution caps at both the DAG and step level:
 ```yaml
 timeout_sec: 600         # (Optional) Overall DAG timeout in seconds
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: quick_check
     run: curl -sf https://example.com/health
     timeout_sec: 30      # Kills this step after 30s (overrides DAG-level 600s)
   - id: long_task
-    run: python long_task.py   # Inherits DAG-level 600s since no step timeout
+    run: uv run --python 3.13.9 python long_task.py   # Inherits DAG-level 600s since no step timeout
 ```
 
 Behavior:

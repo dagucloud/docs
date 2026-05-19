@@ -185,6 +185,9 @@ env:
   - DATE: "`date +%Y-%m-%d`"
   - DATA_DIR: /tmp/data/${DATE}
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: download
     run: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
@@ -193,24 +196,24 @@ steps:
       interval_sec: 60
 
   - id: validate
-    run: python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
+    run: uv run --python 3.13.9 python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
     continue_on:
       failure: false
     depends: download
 
   - id: process
     parallel: [users, orders, products]
-    run: python process.py --type=$ITEM --date=${DATE}
+    run: uv run --python 3.13.9 python process.py --type=$ITEM --date=${DATE}
     output: RESULT_${ITEM}
     depends: validate
 
   - id: report
-    run: python report.py --date=${DATE}
-    run: echo "Notifying failure for ${DATE}"
+    run: uv run --python 3.13.9 python report.py --date=${DATE}
     depends: process
 
 handler_on:
   failure:
+    run: echo "Notifying failure for ${DATE}"
 ```
 
 ## Common Patterns

@@ -9,6 +9,9 @@ Define execution order with step dependencies.
 ### Basic Dependencies
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: download
     run: wget https://example.com/data.zip  # Download archive
@@ -17,7 +20,7 @@ steps:
     depends: download
 
   - id: process
-    run: python process.py                  # Process data
+    run: uv run --python 3.13.9 python process.py                  # Process data
     depends: extract
 ```
 
@@ -175,7 +178,6 @@ params:
 steps:
   - id: process_file
     run: echo "Processing ${FILE}"
-
 ```
 
 ### Map-Reduce Pattern

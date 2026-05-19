@@ -158,10 +158,13 @@ actions:
           enum: [low, medium, high]
     template:
       run: |
-        python3 - <<'PY'
+        uv run --python 3.13.9 python - <<'PY'
         import json
         print(json.dumps({"category": "bug", "priority": "high"}))
         PY
+
+tools:
+  - astral-sh/uv@0.11.14
 
 steps:
   - id: classify

@@ -23,8 +23,11 @@ steps:
 name: file-processor
 params:
   - FILE: ""
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python process.py --file ${FILE}
+  - run: uv run --python 3.13.9 python process.py --file ${FILE}
 ```
 
 ### With Concurrency Control
@@ -158,13 +161,16 @@ Apply a per‑step cap that overrides the workflow timeout for that specific ste
 ```yaml
 timeout_sec: 1800  # Overall DAG timeout (30m)
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: fast_check
     run: curl -sf https://example.com/health
     timeout_sec: 20    # This step fails if still running after 20s
 
   - id: bulk_import
-    run: python import.py   # Inherits 30m DAG timeout
+    run: uv run --python 3.13.9 python import.py   # Inherits 30m DAG timeout
 
   - id: guarded_external
     run: bash -c 'long_unstable_call'

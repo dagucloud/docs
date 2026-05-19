@@ -45,12 +45,15 @@ See [Core Concepts](/getting-started/concepts) for the deeper model.
 Dagu keeps the workflow definition separate from the code it executes. Your scripts, containers, or services stay the same. Dagu wraps them with scheduling, dependencies, logs, retries, and recovery controls.
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: fetch_orders
-    run: python scripts/fetch_orders.py
+    run: uv run --python 3.13.9 python scripts/fetch_orders.py
 
   - id: normalize
-    run: python scripts/normalize.py
+    run: uv run --python 3.13.9 python scripts/normalize.py
     depends: fetch_orders
 
   - id: load_warehouse

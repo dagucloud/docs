@@ -81,8 +81,11 @@ env:
   - OUTPUT_DIR: ${DATA_DIR}/output
   - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python process.py --output ${OUTPUT_DIR}
+  - run: uv run --python 3.13.9 python process.py --output ${OUTPUT_DIR}
 ```
 
 ### Supported Formats
@@ -234,13 +237,16 @@ steps:
 Step-level variables support the same features as DAG-level:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: process_data
     env:
       - INPUT_PATH: ${DATA_DIR}/input
       - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
       - WORKER_ID: worker_${HOSTNAME}
-    run: python process.py
+    run: uv run --python 3.13.9 python process.py
 ```
 
 ## Variable Expansion Syntax

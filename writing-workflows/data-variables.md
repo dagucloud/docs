@@ -63,9 +63,12 @@ Define variables accessible throughout the DAG:
 env:
   - SOME_DIR: ${HOME}/batch
   - SOME_FILE: ${SOME_DIR}/some_file
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - working_dir: ${SOME_DIR}
-    run: python main.py ${SOME_FILE}
+    run: uv run --python 3.13.9 python main.py ${SOME_FILE}
 ```
 
 ### Step-Level Environment Variables
@@ -94,9 +97,12 @@ Step environment variables support the same features as DAG-level variables, inc
 env:
   - BASE_PATH: /data
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: process_data
-    run: python process.py
+    run: uv run --python 3.13.9 python process.py
     env:
       - INPUT_PATH: ${BASE_PATH}/input
       - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
@@ -208,8 +214,11 @@ Define default positional parameters that can be overridden:
 
 ```yaml
 params: param1 param2     # Default values for $1 and $2
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python main.py $1 $2  # Will use command-line args or defaults
+  - run: uv run --python 3.13.9 python main.py $1 $2  # Will use command-line args or defaults
 ```
 
 ### Named Parameters
@@ -220,8 +229,11 @@ Define default named parameters that can be overridden:
 params:
   - FOO: 1           # Default value for ${FOO}
   - BAR: hello       # Default value for ${BAR}
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
+  - run: uv run --python 3.13.9 python main.py ${FOO} ${BAR}  # Will use command-line args or defaults
 ```
 
 Parameter defaults are literal by default. If you need `$VAR` expansion or backtick command substitution for a DAG param, use `eval:` on an inline rich param definition (`- name: ...`). Runtime overrides from the CLI, API, and sub-DAG calls remain literal. See [Parameters](/writing-workflows/parameters) for precedence, fallback, and validation rules.
@@ -240,8 +252,11 @@ params:
     default: 100
     minimum: 1
     maximum: 1000
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python main.py --env "${environment}" --batch "${batch_size}"
+  - run: uv run --python 3.13.9 python main.py --env "${environment}" --batch "${batch_size}"
 ```
 
 CLI/API/sub-DAG inputs are coerced to the declared type before validation, but step commands still receive strings.
@@ -376,13 +391,16 @@ You can assign short identifiers to steps and use them to reference step propert
 
 ```yaml
 type: graph
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: extract  # Short identifier
-    run: python extract.py
+    run: uv run --python 3.13.9 python extract.py
     output: DATA  # Captures stdout content into DATA variable
 
   - id: validate
-    run: python validate.py
+    run: uv run --python 3.13.9 python validate.py
     depends: extract  # Can use ID in dependencies
 
   - id: inspect_extract
@@ -479,21 +497,27 @@ steps:
 ### Through Files
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: generate
-    run: python generate.py
+    run: uv run --python 3.13.9 python generate.py
     stdout: /tmp/data.json
   
   - id: process
-    run: python process.py < /tmp/data.json
+    run: uv run --python 3.13.9 python process.py < /tmp/data.json
     depends: generate
 ```
 
 For run-scoped files that users should preview or download, prefer an artifact stream instead of a local temporary path:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python generate.py
+  - run: uv run --python 3.13.9 python generate.py
     stdout:
       artifact: data/data.json
 ```

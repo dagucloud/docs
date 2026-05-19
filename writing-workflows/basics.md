@@ -35,9 +35,12 @@ env:
   - RUN_DATE: "`date +%Y-%m-%d`"
 
 # Steps
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: process
-    run: python process.py ${DATE} ${RUN_DATE}
+    run: uv run --python 3.13.9 python process.py ${DATE} ${RUN_DATE}
 
 # Handlers
 handler_on:
@@ -93,16 +96,22 @@ For parallel steps (see below), the pattern is `parallel_{group}_{executor}_{ind
 Use `run` for shell commands and scripts:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - run: echo "Hello World"
   - run: ls -la
-  - run: python script.py
+  - run: uv run --python 3.13.9 python script.py
 ```
 
 This is equivalent to:
 
 ```yaml
 type: graph
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: step_1
     run: echo "Hello World"
@@ -111,7 +120,7 @@ steps:
     depends: step_1
 
   - id: step_3
-    run: python script.py
+    run: uv run --python 3.13.9 python script.py
     depends: step_2
 ```
 
@@ -120,6 +129,9 @@ steps:
 Multiple commands share the same step configuration:
 
 ```yaml
+tools:
+  - nodejs/node@v22.21.1
+
 steps:
   - id: build_and_test
     run: |
@@ -144,13 +156,16 @@ For non-shell work, use an explicit `action` and put action-specific inputs unde
 ### Multi-line Scripts
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - run: |
       #!/bin/bash
       set -e
 
       echo "Processing..."
-      python analyze.py data.csv
+      uv run --python 3.13.9 python analyze.py data.csv
       echo "Complete"
 ```
 
@@ -177,24 +192,30 @@ The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "
 When you omit a step-level `shell`, Dagu runs through the DAG shell (or system default) and automatically adds `-e` on Unix-like shells so scripts stop on first error. If you explicitly set `shell` on a step, include `-e` yourself if you want the same errexit behavior.
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - run: |
       import pandas as pd
       df = pd.read_csv('data.csv')
       print(df.head())
     with:
-      shell: python3
+      shell: uv run --python 3.13.9 python
 ```
 
 ## Dependencies
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: download
     run: wget data.csv
 
   - id: process
-    run: python process.py
+    run: uv run --python 3.13.9 python process.py
     depends: download
 
   - id: upload
@@ -230,10 +251,13 @@ steps:
 Set where commands execute:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: in_project
     working_dir: /home/user/project
-    run: python main.py
+    run: uv run --python 3.13.9 python main.py
 
   - id: in_data
     working_dir: /data/input
@@ -317,12 +341,15 @@ steps:
 Document your steps:
 
 ```yaml
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
   - id: etl_process
     description: |
       Extract data from API, transform to CSV,
       and load into data warehouse
-    run: python etl.py
+    run: uv run --python 3.13.9 python etl.py
 ```
 
 ## Labels and Organization

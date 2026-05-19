@@ -267,8 +267,11 @@ params:
     default: 4
     minimum: 1
 
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python processor.py --input "${INPUT_FILE}" --threads "${THREADS}" --date "${DATE}" --home "${HOME_DIR}"
+  - run: uv run --python 3.13.9 python processor.py --input "${INPUT_FILE}" --threads "${THREADS}" --date "${DATE}" --home "${HOME_DIR}"
 ```
 
 `env:` values can also reference `params:` values using `${param_name}`, since parameters are resolved before environment variables:

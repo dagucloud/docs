@@ -117,6 +117,9 @@ If you want to set `dagRunId` without mixing it into `WEBHOOK_PAYLOAD`, use the 
 Example DAG step that reads the payload:
 
 ```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
 steps:
   - id: inspect_webhook
     run: |

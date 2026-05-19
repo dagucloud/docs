@@ -88,6 +88,8 @@ steps:
 
 Caller workflow tools are not inherited across the action boundary. Each action package must declare the tools it needs.
 
+Action `tools` are Dagu-managed CLI dependencies. Dagu resolves pinned packages from the aqua registry, prepares them before the action workflow runs, and exposes their commands on `PATH` for that action run. See [Tools](/writing-workflows/tools) for package syntax, registry behavior, and current limitations.
+
 ## Return Outputs
 
 Callers read action outputs with `${step.outputs.*}`:
@@ -159,5 +161,6 @@ Use a custom action instead when:
 - [Official Dagu Actions](/dagu-actions/official)
 - [Custom Actions](/dagu-actions/custom)
 - [Execution Model](/dagu-actions/execution-model)
+- [Tools](/writing-workflows/tools)
 - [Outputs](/writing-workflows/outputs)
 - [Distributed Workers](/server-admin/distributed/workers/)

@@ -19,8 +19,11 @@ name: my-workflow
 otel:
   enabled: true
   endpoint: "localhost:4317"  # OTLP gRPC endpoint
+tools:
+  - astral-sh/uv@0.11.14
+
 steps:
-  - run: python process.py
+  - run: uv run --python 3.13.9 python process.py
 ```
 
 ### Full Configuration
