@@ -1,197 +1,203 @@
 # YAML Specification
 
-## Overview
+This page documents the YAML fields accepted by the current Dagu workflow parser. It is a reference for the top-level DAG document and for individual step definitions.
 
-Dagu workflows are defined using YAML files. Each file represents a DAG (Directed Acyclic Graph) that describes your workflow steps and their relationships.
+For the generated JSON Schema shipped with the Dagu binary, run:
 
-## Basic Structure
+```bash
+dagu schema dag
+dagu schema dag steps
+```
+
+## Minimal Workflow
 
 ```yaml
-# Workflow metadata
-description: "What this workflow does"
-labels: {env: prod, team: platform}  # Optional: key-value labels
+steps:
+  - run: echo "hello"
+```
 
-# Scheduling
-schedule: "0 * * * *"      # Optional: cron expression or typed start/stop/restart schedule map
+A workflow file defines one DAG. If `name` is omitted, Dagu uses the file name without its extension.
 
-# Execution control
-max_active_steps: 10         # Max parallel steps
-timeout_sec: 3600           # Workflow timeout (seconds)
-resources:
-  limits:
-    cpu: "500m"             # Optional: DAG run CPU limit
-    memory: "1Gi"           # Optional: DAG run memory limit
+## Typical Workflow
 
-# Parameters (`default` is literal; inline `eval` is optional)
+```yaml
+name: daily_report
+description: Build a weekday report
+labels:
+  env: prod
+  team: analytics
+
+schedule:
+  start:
+    - "0 8 * * MON-FRI"
+catchup_window: 6h
+overlap_policy: latest
+
+type: graph
+max_active_steps: 4
+timeout_sec: 3600
+
 params:
-  - name: environment
+  - name: region
     type: string
-    default: staging
-    enum: [dev, staging, prod]
-  - name: batch_size
-    type: integer
-    default: 25
-    minimum: 1
-    maximum: 100
+    default: us-east-1
+    enum: [us-east-1, us-west-2]
 
-# Environment variables
 env:
-  - VAR_NAME: value
-  - PATH: ${PATH}:/custom/path
+  REPORT_DIR: reports
 
-# External CLI tools installed before the run
+dotenv:
+  - .env.production
+
 tools:
   - jqlang/jq@jq-1.7.1
 
-# DAG run artifacts
 artifacts:
   enabled: true
 
-# Workflow steps (type: graph requires explicit depends)
-type: graph
-steps:
-  - id: step_name          # Optional
-    run: echo "Hello"
-    run: notify-success.sh
-  failure:
-    run: cleanup-on-failure.sh
-    depends: previous_step # Optional
+defaults:
+  retry_policy:
+    limit: 2
+    interval_sec: 30
 
-# Lifecycle handlers
+steps:
+  - id: fetch_data
+    run: "echo '{\"count\":3}'"
+    output: RAW_JSON
+
+  - id: summarize_data
+    action: jq.filter
+    with:
+      raw: true
+      filter: .count
+      data: "${RAW_JSON}"
+    output: COUNT
+    depends: fetch_data
+
 handler_on:
-  success:
+  failure:
+    action: mail.send
+    with:
+      to: ops@example.com
+      subject: "daily_report failed"
+      message: "See ${DAG_RUN_LOG_FILE}"
 ```
 
-## Root Fields
+## Top-Level Fields
 
-### Metadata Fields
+Unknown top-level fields are rejected. The accepted top-level fields are listed below.
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `name` | string | Workflow name | Filename without extension |
-| `description` | string | Human-readable description | - |
-| `labels` | string/object/array | Labels for categorization. Supports key-value pairs. See [Labels](/writing-workflows/labels). | `[]` |
-| `group` | string | Group name for organization | - |
-
-### Execution Type
+### Metadata
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Execution type: `graph` or `chain` | `graph` |
+| `name` | string | DAG name. Must be 40 characters or fewer and match `^[a-zA-Z0-9_.-]+$`. | File name without extension |
+| `description` | string | Human-readable description. | - |
+| `group` | string | Group name used for organization. | - |
+| `labels` | string, array, or object | Labels for filtering and workspace selection. | `[]` |
+| `tags` | string, array, or object | Deprecated alias for labels. Prefer `labels`. | `[]` |
 
-- **`graph`**: Steps are scheduled from their declared `depends` relationships.
-- **`chain`**: Steps execute sequentially in definition order. The `depends` field is not allowed in chain mode.
+### Execution Mode
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `type` | string | Step scheduling mode. Accepted values are `graph` and `chain`. | `graph` |
+
+`graph` schedules steps from their `depends` relationships.
 
 ```yaml
-# Sequential execution with the default graph mode
-steps:
-  - id: first
-    run: echo "First"
-  - id: second
-    run: echo "Second"
-    depends: first
+type: graph
 
-  - id: third
-    run: echo "Third"
-    depends: second
-
----
-
-# Fan-out and fan-in with the default graph mode
 steps:
   - id: fetch_a
     run: curl https://api.example.com/a
+
   - id: fetch_b
     run: curl https://api.example.com/b
+
   - id: merge
     run: ./merge.sh
-    depends: [fetch_a, fetch_b]  # Runs after both complete
+    depends: [fetch_a, fetch_b]
 ```
 
-### Scheduling Fields
+`chain` runs steps in definition order. In `chain` mode, `depends` is not allowed, and router steps are not allowed.
+
+```yaml
+type: chain
+
+steps:
+  - run: echo "first"
+  - run: echo "second"
+```
+
+`type: agent` is reserved and is rejected by the current parser.
+
+### Scheduling
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `schedule` | string/array/object | Cron expression(s), one-off `at` entries in top-level arrays, or a `start`/`stop`/`restart` schedule map. `start` also accepts one-off `at` entries. | - |
-| `skip_if_successful` | boolean | Skip if already succeeded today | `false` |
-| `restart_wait_sec` | integer | Wait seconds before restart | `0` |
-| `catchup_window` | string | Lookback horizon for replaying missed cron runs on scheduler restart. Duration string (e.g. `"6h"`, `"2d12h"`). If omitted, missed runs are not replayed. | - |
-| `overlap_policy` | string | Catchup overlap behavior when DAG is already running: `"skip"` drops the run, `"all"` retries next tick, `"latest"` keeps only the newest missed interval. | `"skip"` |
-
-#### Schedule Formats
+| `schedule` | string, array, or object | Cron schedule, multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
+| `skip_if_successful` | boolean | Skip the scheduled run if the DAG already succeeded for that day. | `false` |
+| `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. | `0` |
+| `catchup_window` | string | Duration for replaying missed cron runs after scheduler downtime. If omitted, missed runs are not replayed. | - |
+| `overlap_policy` | string | Catchup overlap behavior: `skip`, `all`, or `latest`. | `skip` |
 
 ```yaml
-# Single schedule
+# Single cron schedule
 schedule: "0 2 * * *"
 
-# Multiple schedules
+# Multiple cron schedules
 schedule:
-  - "0 9 * * MON-FRI"   # 9 AM weekdays
-  - "0 14 * * SAT,SUN"  # 2 PM weekends
+  - "0 9 * * MON-FRI"
+  - "0 14 * * SAT,SUN"
 
-# With timezone
+# Cron with timezone
 schedule: "CRON_TZ=America/New_York 0 9 * * *"
 
 # One-off schedule
 schedule:
   - at: "2026-03-29T09:30:00+09:00"
 
-# One-off start time
+# Start, stop, and restart schedules
 schedule:
   start:
+    - "0 8 * * MON-FRI"
     - at: "2026-03-29T09:30:00+09:00"
-
-# Equivalent explicit kind
-schedule:
-  start:
-    - kind: at
-      at: "2026-03-29T09:30:00+09:00"
-
-# Start/stop schedules
-schedule:
-  start:
-    - "0 8 * * MON-FRI"   # Start at 8 AM
   stop:
-    - "0 18 * * MON-FRI"  # Stop at 6 PM
+    - "0 18 * * MON-FRI"
   restart:
-    - "0 12 * * MON-FRI"  # Restart at noon
+    - "0 12 * * MON-FRI"
 ```
 
-`at` is supported in top-level `schedule` arrays and under `schedule.start`. `stop` and `restart` remain cron-only. The timestamp must be an RFC 3339 timestamp with an explicit offset or `Z`, and seconds must be `:00`.
+`at` is accepted only in a top-level `schedule` array and under `schedule.start`. `schedule.stop` and `schedule.restart` accept cron entries only. `at` timestamps must be RFC 3339 timestamps with an explicit offset or `Z`, and seconds must be `:00`.
 
-### Execution Control Fields
+### Execution Control
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `max_active_runs` | integer | **DEPRECATED**: Use global queues with `queue` field instead. Local queues now use FIFO (concurrency 1). | `1` |
-| `max_active_steps` | integer | Max parallel steps | `1` |
-| `timeout_sec` | integer | Workflow timeout in seconds | `0` (no timeout) |
-| `delay_sec` | integer | Initial delay before start (seconds) | `0` |
-| `max_clean_up_time_sec` | integer | Max cleanup time (seconds) | `5` |
-| `preconditions` | string/array | Workflow-level preconditions | - |
-| `retry_policy` | object | Scheduler-driven retry policy for the whole DAG | - |
-| `run_config` | object | User interaction controls when starting DAG | - |
-| `resources` | object | CPU and memory limits requested for the DAG run. See [DAG Run Resource Limits](/writing-workflows/dag-run-resource-limits). | - |
+| `queue` | string | Global queue name from `config.yaml`. If omitted, Dagu uses the DAG's local queue. | DAG name |
+| `max_active_runs` | integer | Deprecated per-DAG run concurrency field. Local queues are FIFO with concurrency 1; use global queues for concurrency control. | `1` |
+| `max_active_steps` | integer | Maximum number of concurrently running steps inside one DAG run. `0` means unlimited. | `0` |
+| `timeout_sec` | integer | Whole-DAG timeout in seconds. `0` means no timeout. | `0` |
+| `delay_sec` | integer | Initial delay before execution starts, in seconds. | `0` |
+| `max_clean_up_time_sec` | integer | Maximum cleanup time after termination, in seconds. | `5` |
+| `preconditions` | string or array | DAG-level preconditions evaluated before any step starts. | - |
+| `retry_policy` | object | Scheduler-driven retry policy for the whole DAG run. | - |
+| `run_config` | object | UI/API controls for starting DAG runs. | - |
+| `worker_selector` | object or `local` | Distributed worker label selector, or `local` to force local execution. | - |
+
+There is no accepted top-level `resources` field in the current YAML parser. For DAG-level concurrency use `max_active_steps` or `queue`. For Kubernetes resource defaults, use top-level `kubernetes.resources`, which applies only to explicit `k8s.run` or `kubernetes.run` steps.
 
 ### DAG Retry Policy
 
-Root `retry_policy` is a DAG-level retry policy. It is different from step `retry_policy`.
-
-- It retries the whole DAG after a failed attempt.
-- It requires the scheduler.
-- It creates a new attempt under the same DAG-run ID.
-- It does not support `exit_code`.
-
-See [Durable Execution](/writing-workflows/durable-execution) for the full behavior, including scheduler polling and `scheduler.retry_failure_window`.
-
-#### DAG Retry Policy Fields
+Root `retry_policy` retries the whole DAG through the scheduler. It is separate from a step-level `retry_policy`.
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `limit` | integer/string | Maximum number of scheduler-issued DAG retries. Must be non-negative. Numeric strings are accepted. Use `0` to disable DAG-level automatic retries, for example to override an inherited base config retry policy. | required |
-| `interval_sec` | integer/string | Base delay before retrying, in seconds. Must be positive. Numeric strings are accepted. | `60` |
-| `backoff` | boolean/number | `true` means `2.0`. A number greater than `1.0` is used as the multiplier. `false`, `0`, or omission keeps a fixed interval. | fixed interval |
-| `max_interval_sec` | integer | Maximum retry delay in seconds. Must be positive. | `3600` |
+| `limit` | integer or string | Maximum number of scheduler-issued DAG retries. `0` disables DAG-level automatic retries. | required |
+| `interval_sec` | integer or string | Base delay before retrying, in seconds. | `60` |
+| `backoff` | boolean or number | `true` means `2.0`; a number greater than `1.0` is used as the multiplier. | fixed interval |
+| `max_interval_sec` | integer | Maximum retry delay, in seconds. | `3600` |
 
 ```yaml
 retry_policy:
@@ -201,201 +207,46 @@ retry_policy:
   max_interval_sec: 900
 ```
 
-### Step Defaults
+### History And Output Limits
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `defaults` | object | Default values applied to every step and `handler_on` step. Steps that define their own value override the default. | - |
+| `hist_retention_days` | integer | Days of DAG-run history to retain. `0` uses the default when `hist_retention_runs` is not set. Negative values disable automatic cleanup. | `30` |
+| `hist_retention_runs` | integer | Number of DAG runs to retain. Must be greater than `0` if set. Cannot be set with `hist_retention_days`. | - |
+| `max_output_size` | integer | Maximum captured output size per step, in bytes. | `1048576` |
 
-The `defaults` block accepts the following fields:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `retry_policy` | object | Default [retry policy](#retry-policy-fields) for all steps |
-| `continue_on` | string/object | Default [continue_on](#continueon-fields) condition for all steps |
-| `repeat_policy` | object | Default [repeat policy](#repeat-policy-fields) for all steps |
-| `timeout_sec` | integer | Default step timeout in seconds |
-| `mail_on_error` | boolean | Default mail-on-error flag for all steps |
-| `signal_on_stop` | string | Default signal sent when a step is stopped |
-| `env` | array/object | Environment variables prepended to each step's own `env` |
-| `preconditions` | string/array | Preconditions prepended to each step's own `preconditions` |
-| `agent` | object | Default agent configuration merged per field into a step's `agent` block. See [Agent Step](/features/agent/step#dag-level-defaults). |
-
-**Merge rules:**
-
-- **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): Applied only when the step does not set its own value. A step-level value fully replaces the default.
-- **Agent fields** (`agent`): Applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
-- **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both the default and step values are present at runtime.
-
-Unknown keys inside `defaults` cause a validation error.
-
-```yaml
-# All steps inherit retry_policy and continue_on
-defaults:
-  retry_policy:
-    limit: 3
-    interval_sec: 5
-    exit_code: [1]
-  continue_on: failed
-
-steps:
-  - id: fetch_data
-    run: curl https://api.example.com/data
-
-  - id: process_data
-    run: ./process.sh
-    depends: fetch_data
-```
-
-```yaml
-# Override + additive behavior
-defaults:
-  retry_policy:
-    limit: 5
-    interval_sec: 10
-  env:
-    - LOG_LEVEL: info
-
-steps:
-  # Inherits retry_policy (limit: 5) and gets LOG_LEVEL from defaults
-  - id: step_a
-    run: ./run.sh
-
-  # Overrides retry_policy with its own; still gets LOG_LEVEL from defaults
-  # plus its own TIMEOUT env var
-  - id: step_b
-    run: ./run-critical.sh
-    retry_policy:
-      limit: 1
-      interval_sec: 0
-    env:
-      - TIMEOUT: "30"
-    # Effective env: [LOG_LEVEL=info, TIMEOUT=30]
-```
-
-See [Step Defaults](/writing-workflows/step-defaults) for detailed documentation and examples.
-
-### Custom Actions
+### Data, Environment, And Files
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `actions` | object | Reusable custom action definitions for this YAML document. Merged with base-config `actions` per document. Duplicate names across scopes are rejected. | - |
+| `params` | string, array, or object | DAG parameters. Supports legacy string/map forms, inline rich definitions, and JSON Schema mode. | `[]` |
+| `env` | array or object | DAG environment variables. | `[]` |
+| `secrets` | array | Secret references resolved at runtime and exposed as environment variables. | `[]` |
+| `dotenv` | string or array | `.env` files to load. `[]` disables dotenv loading. | `[".env"]` |
+| `tools` | array or object | Pinned external CLI tools installed before the DAG starts. | - |
+| `working_dir` | string | DAG working directory. Relative paths resolve from the DAG file directory. | See below |
+| `shell` | string or array | Default shell for `run` steps. Step `with.shell` overrides it. | System default |
+| `log_dir` | string | Custom log directory. | System default |
+| `log_output` | string | Log output mode: `separate` or `merged`. | `separate` |
+| `artifacts` | object | Per-run artifact storage configuration. | - |
 
-Custom actions expand to built-in step definitions during DAG load. They are not runtime plugins.
+When `working_dir` is omitted from the YAML and base config, local runs use the per-run `DAG_RUN_WORK_DIR` as the process working directory. When `working_dir` is explicitly set, Dagu uses that path and still exposes `DAG_RUN_WORK_DIR` as an environment variable.
 
-Each definition accepts:
+`dotenv` behavior:
 
-- `type`: required built-in step type or built-in alias
-- `input_schema`: required inline JSON Schema object, which must resolve to an object schema
-- `output_schema`: optional inline JSON Schema object, which must resolve to an object schema and validates stdout JSON after execution
-- `template`: required step fragment expanded at build time
-- `description`: optional fallback description for the expanded step
-
-See [Custom Actions](/dagu-actions/custom) for the full definition rules, template rendering behavior, and call-site restrictions.
-
-### Data Fields
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `params` | string/array/object | Default DAG parameters. Supports positional strings, named params, inline rich definitions, and external schema mode. | `[]` |
-| `env` | array | Environment variables | `[]` |
-| `secrets` | array | External secret references resolved at runtime and exposed as environment variables | `[]` |
-| `dotenv` | string/array | .env files to load | `[".env"]` |
-| `tools` | array/object | External CLI tools installed before this DAG runs. Not inherited by sub-DAGs. See [Tools](/writing-workflows/tools). | - |
-| `working_dir` | string | Working directory for the DAG. Sub-DAGs inherit parent's working_dir if not set. When not set, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. | Per-run work directory (or inherited from parent for sub-DAGs) |
-| `shell` | string/array | Default shell program (and args) for all steps; accepts string (`"bash -e"`) or array (`["bash", "-e"]`). Step-level `shell` overrides. | System shell with errexit on Unix when no step shell is set |
-| `log_dir` | string | Custom log directory | System default |
-| `artifacts` | object | Per-run artifact storage configuration. Storage can be enabled explicitly or auto-enabled by `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, and artifact stream outputs. | - |
-| `log_output` | string | Log output mode: `separate` (stdout/stderr to separate files) or `merged` (both to single file) | `separate` |
-| `hist_retention_days` | integer | History retention days | `30` |
-| `max_output_size` | integer | Max output size per step (bytes) | `1048576` |
-
-`hist_retention_days` defaults to `30`. Setting it to `0` also uses the default `30`-day retention. Negative values disable automatic cleanup.
-
-#### `params`
-
-Top-level DAG `params:` supports:
-
-- Positional strings such as `params: first second`
-- Named strings such as `params: ENV=dev PORT=8080`
-- Ordered lists of strings or single-key maps
-- Inline rich definitions in list form using objects with a required `name` field
-- Top-level inline JSON Schema using `type: object` plus `properties`
-- External schema mode with `{ schema, values }`
-- In schema mode, `schema` can be a local path/URL string, an inline JSON Schema object, or a boolean schema
-
-Literal `default` values stay inert. Inline rich definitions may also set `eval` to compute the effective default at execution time.
-
-Recommended authored form:
+- If `dotenv` is omitted, Dagu loads `.env`.
+- If `dotenv` is a string or array, Dagu still prepends `.env` at load time and de-duplicates entries.
+- If `dotenv: []` is set, dotenv loading is disabled.
+- Files are resolved from `working_dir`; if the DAG file directory differs, Dagu also searches there.
+- Missing dotenv files are skipped.
 
 ```yaml
-params:
-  - name: region
-    type: string
-    default: us-east-1
-    enum: [us-east-1, us-west-2]
-    description: Deployment region
-  - name: instance_count
-    type: integer
-    default: 3
-    minimum: 1
-    maximum: 10
-  - name: debug
-    type: boolean
-    default: false
+dotenv:
+  - .env.defaults
+  - .env.production
 ```
 
-#### `artifacts`
-
-Use `artifacts` to store arbitrary files for each DAG run.
-
-```yaml
-artifacts:
-  enabled: true
-  dir: /mnt/dagu-artifacts
-```
-
-Rules:
-
-- `enabled: true` turns artifact storage on explicitly.
-- `dir` changes the base directory for this DAG only.
-- `dir` without `enabled: true` does not enable artifact storage unless the DAG references `DAG_RUN_ARTIFACTS_DIR` or uses `artifact.*`, `stdout.artifact`, or `stderr.artifact`.
-- `DAG_RUN_ARTIFACTS_DIR` references, `artifact.*`, `stdout.artifact`, and `stderr.artifact` auto-enable artifact storage.
-- `artifacts.enabled: false` explicitly disables artifacts; using artifact actions or artifact stream outputs in that case is invalid, and `DAG_RUN_ARTIFACTS_DIR` is not set.
-- Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and handlers when artifact storage is active.
-- The resolved per-run path is recorded in DAG run status as `archiveDir`.
-
-See [Artifacts](/writing-workflows/artifacts) for directory layout, Web UI, and API details.
-
-The older nested-map form such as `- region: { type: string }` is not accepted for rich definitions.
-
-Inline definition fields use `snake_case` in YAML:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `eval` | string | Expression evaluated at execution time for the effective default |
-| `default` | string/integer/number/boolean | Default value |
-| `description` | string | Help text |
-| `type` | string | `string`, `integer`, `number`, or `boolean` |
-| `required` | boolean | Requires runtime input when no default exists |
-| `enum` | array | Allowed values |
-| `minimum` / `maximum` | number | Numeric bounds |
-| `min_length` / `max_length` | integer | String length bounds |
-| `pattern` | string | RE2 regex for string validation |
-
-Inline types affect validation and typed UI controls. Runtime shell variables and `DAG_PARAMS_JSON` remain string-based.
-
-If both `eval` and `default` are present, `eval` wins at execution time and `default` becomes the literal fallback and display value.
-
-For backward compatibility:
-
-- `params: { schema: prod }` remains a legacy named param unless `schema` looks like a file path or URL or `values` is also present.
-- `params: { schema: true }` remains a legacy named param unless `values` is also present.
-- `params: { properties: { foo: bar } }` remains a legacy named param map unless the same object also has `type: object`.
-
-#### `tools`
-
-Top-level `tools` declares portable CLI packages that Dagu installs before the DAG starts:
+Top-level `tools` uses pinned package versions:
 
 ```yaml
 tools:
@@ -403,7 +254,7 @@ tools:
   - google/pprof@d04f2422c8a17569c14e84da0fae252d9529826b
 ```
 
-The object form accepts `provider`, `registry`, and `packages`:
+Object form:
 
 ```yaml
 tools:
@@ -414,237 +265,242 @@ tools:
       commands: [jq]
 ```
 
-`provider` defaults to `aqua`. Package versions must be pinned; `latest` is rejected. `commands` is optional and is usually inferred from the aqua registry.
+The default provider is `aqua`. `latest` is rejected; package versions must be pinned. Managed tools are scoped to the current DAG run and are not inherited by sub-DAGs.
 
-Tools are scoped to the current DAG run. Sub-DAGs do not inherit the parent DAG's managed tool environment; declare `tools` in each child DAG that uses a managed command.
+### Parameters
 
-See [Tools](/writing-workflows/tools) for registry configuration, immutable refs, distributed worker cache behavior, and current limitations.
-
-#### `params[].eval`
-
-`eval` is available on inline rich definitions:
+Recommended rich parameter form:
 
 ```yaml
-env:
-  - BASE_DIR: /srv/data
-
 params:
-  - name: output_dir
-    eval: "$BASE_DIR/out"
-    default: /tmp/out
-  - name: today
-    eval: "`date +%Y-%m-%d`"
-  - name: workers
+  - name: region
+    type: string
+    default: us-east-1
+    enum: [us-east-1, us-west-2]
+    description: Deployment region
+  - name: count
     type: integer
-    eval: "`nproc`"
+    default: 3
+    minimum: 1
+    maximum: 10
+  - name: debug
+    type: boolean
+    default: false
 ```
 
-Behavior:
+Rich parameter fields use snake_case:
 
-- `default` remains literal.
-- Runtime precedence is: override, then `eval`, then `default`.
-- DAG `env:` is evaluated first, then params are evaluated sequentially from top to bottom.
-- Later params can reference earlier params.
-- Inline typed eval results are coerced before validation.
-- If `eval` fails and `default` exists, Dagu falls back to `default`.
-- If `eval` fails and no `default` exists, the run fails before any step starts.
-- CLI, API, and sub-DAG runtime overrides are never evaluated.
-- Metadata-only loads skip `eval`.
-- External-schema-backed defaults are not evaluated.
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Parameter name. Required in rich list entries. |
+| `type` | string | `string`, `integer`, `number`, or `boolean`. |
+| `default` | string, integer, number, or boolean | Literal default value. |
+| `eval` | string | Expression evaluated at execution time to produce the effective default. |
+| `description` | string | Help text. |
+| `required` | boolean | Requires runtime input when no default exists. |
+| `enum` | array | Allowed values. |
+| `minimum`, `maximum` | number | Numeric bounds. |
+| `min_length`, `max_length` | integer | String length bounds. |
+| `pattern` | string | RE2 regex for string validation. |
 
-### Container Configuration
+`default` values are literal. `eval` is optional and runs at execution time. Runtime precedence is: explicit override, then `eval`, then `default`. DAG `env` is evaluated before params, and params are evaluated from top to bottom so later params can reference earlier params.
+
+JSON Schema parameter mode is also accepted:
+
+```yaml
+params:
+  type: object
+  properties:
+    region:
+      type: string
+      default: us-east-1
+  required: [region]
+```
+
+External schema mode:
+
+```yaml
+params:
+  schema: ./params.schema.json
+  values:
+    region: us-east-1
+```
+
+### Defaults
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `container` | string/object | Container configuration. Can be a string (existing container name to exec into) or an object (container configuration with `exec` or `image` field). | - |
+| `defaults` | object | Default values applied to every step and every `handler_on` step. | - |
 
-The `container` field supports two modes:
-- **Image mode**: Create a new container from a Docker image (`image` field required)
-- **Exec mode**: Execute in an existing running container (`exec` field or string form)
+Accepted `defaults` fields:
 
-#### String Form (Exec Mode)
+| Field | Type | Merge behavior |
+|-------|------|----------------|
+| `retry_policy` | object | Step value replaces default. |
+| `continue_on` | string or object | Step value replaces default. |
+| `repeat_policy` | object | Step value replaces default. |
+| `timeout_sec` | integer | Step value replaces default. |
+| `mail_on_error` | boolean | Step value replaces default. |
+| `signal_on_stop` | string | Step value replaces default. |
+| `env` | array or object | Prepended before step `env`. |
+| `preconditions` | string or array | Prepended before step `preconditions`. |
+| `agent` | object | Merged per supported agent subfield. |
+
+Unknown keys inside `defaults` cause a validation error.
 
 ```yaml
-container: my-running-container  # Exec into existing container with defaults
+defaults:
+  retry_policy:
+    limit: 3
+    interval_sec: 5
+  env:
+    LOG_LEVEL: info
+
+steps:
+  - id: fetch_data
+    run: ./fetch.sh
+
+  - id: critical_step
+    run: ./critical.sh
+    retry_policy:
+      limit: 1
+      interval_sec: 60
 ```
 
-#### Object Form - Image Mode
+### Custom Actions
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `actions` | object | Reusable custom action definitions for this YAML document. | - |
+| `step_types` | object | Deprecated legacy custom step type definitions. Prefer `actions`. | - |
+
+Custom action definitions expand to built-in step definitions during DAG load. They are not runtime plugins.
+
+Each `actions` entry accepts:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Required built-in step type or alias used by the action template. |
+| `input_schema` | object | Required inline JSON Schema object schema for `with`. |
+| `output_schema` | object | Optional inline JSON Schema object schema for stdout validation. |
+| `template` | object | Required step fragment expanded at load time. |
+| `description` | string | Optional fallback description. |
+
+Action names in steps can refer to built-ins, local custom actions, base-config custom actions, or remote action refs such as `action@version`, `owner/repo@version`, or `source:...@version`.
+
+### Integrations And Defaults
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `container` | string or object | DAG-level Docker container context. Mutually exclusive with top-level `ssh`. |
+| `registry_auths` | object or string | Docker registry auth configuration as a map or Docker auth JSON string. |
+| `ssh` | object | DAG-level SSH defaults. Mutually exclusive with top-level `container`. |
+| `s3` | object | DAG-level defaults for `s3.*` actions. |
+| `llm` | object | DAG-level defaults for chat and agent steps. |
+| `redis` | object | DAG-level defaults for `redis.<operation>` actions. |
+| `harnesses` | object | Named harness configurations used by `harness.run`. |
+| `harness` | object | Default harness configuration used by `harness.run`. |
+| `kubernetes` | object | DAG-level defaults for explicit `k8s.run` and `kubernetes.run` steps. |
+| `otel` | object | OpenTelemetry tracing configuration. |
+| `webhook` | object | Webhook controls such as `forward_headers`. |
+
+Top-level `kubernetes` is not a global execution mode. It is only merged into steps that explicitly use `action: k8s.run` or `action: kubernetes.run`.
+
+### Container
+
+`container` has two modes.
+
+String form attaches to an existing running container:
+
+```yaml
+container: my-running-container
+```
+
+Object exec mode:
 
 ```yaml
 container:
-  name: my-workflow        # Optional: custom container name
-  image: python:3.11       # Required for image mode
-  pull_policy: missing      # always, missing, never
+  exec: my-running-container
+  user: root
+  working_dir: /app
   env:
-    - API_KEY=${API_KEY}
+    DEBUG: "true"
+  shell: ["/bin/sh", "-c"]
+```
+
+Object image mode:
+
+```yaml
+container:
+  image: python:3.11
+  name: report-runner
+  pull_policy: missing
+  env:
+    PYTHONUNBUFFERED: "1"
   volumes:
-    - /data:/data:ro
+    - ./data:/data
   working_dir: /app
   platform: linux/amd64
   user: "1000:1000"
   ports:
     - "8080:8080"
   network: host
-  startup: keepalive       # keepalive | entrypoint | command
-  command: ["sh", "-c", "my-daemon"]   # when startup: command
-  wait_for: running         # running | healthy
-  log_pattern: "Ready to accept connections"  # optional regex
-  restart_policy: unless-stopped              # optional: no|always|unless-stopped
-  keep_container: false     # Keep container after DAG run
-  shell: ["/bin/bash", "-c"]  # Optional: shell wrapper for step commands (enables pipes, &&, etc.)
+  startup: keepalive
+  wait_for: running
+  log_pattern: "Ready"
+  restart_policy: unless-stopped
+  keep_container: false
+  shell: ["/bin/bash", "-c"]
 ```
 
-#### Object Form - Exec Mode
+Rules:
 
-```yaml
-container:
-  exec: my-running-container  # Required for exec mode
-  user: root                  # Optional: override user
-  working_dir: /app            # Optional: override working directory
-  env:                        # Optional: additional environment variables
-    - DEBUG=true
-  shell: ["/bin/sh", "-c"]    # Optional: shell wrapper for step commands
-```
+- Object form must set exactly one of `exec` or `image`.
+- Exec mode allows only `exec`, `user`, `working_dir`, `env`, and `shell`.
+- Image mode requires `image` and accepts the remaining container fields.
+- Container `shell` is array form only.
+- Relative host paths in `volumes` resolve from the DAG `working_dir`.
 
-#### Field Availability by Mode
-
-| Field | Exec Mode | Image Mode |
-|-------|-----------|------------|
-| `exec` | **Required** | Not allowed |
-| `image` | Not allowed | **Required** |
-| `user`, `working_dir`, `env`, `shell` | Optional | Optional |
-| All other fields | Not allowed | Optional |
-
-> Note: A DAG‑level `container` is started once (image mode) or attached to (exec mode)
-> and kept alive while the workflow runs; each step executes via `docker exec` inside that container.
-> This means step commands do not pass through the image's `ENTRYPOINT`/`CMD`.
-> If your image's entrypoint dispatches subcommands, invoke it explicitly in
-> the step command (see [Execution Model and Entrypoint Behavior](/writing-workflows/container#execution-model-and-entrypoint-behavior)).
-> For exec mode, the container must be running; Dagu waits up to 120 seconds.
-> For image mode, readiness waiting (running/healthy and optional log_pattern) times out after
-> 120 seconds with a clear error including the last known state.
-
-### Secrets
-
-The `secrets` block defines environment variables whose values are resolved at runtime. Each item uses exactly one of two shapes:
-
-```yaml
-# Dagu-managed registry ref
-secrets:
-  - name: DB_PASSWORD
-    ref: prod/db-password
-```
-
-```yaml
-# Direct provider ref
-secrets:
-  - name: DB_PASSWORD
-    provider: env
-    key: PROD_DB_PASSWORD
-```
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Environment variable name exposed to steps (required) |
-| `ref` | string | Dagu-managed registry ref. Must be lowercase slug segments separated by `/`, for example `prod/db-password`. Cannot be combined with `provider`, `key`, or `options`. |
-| `provider` | string | Direct provider identifier. Built-in providers are `env`, `file`, `kubernetes`, and `vault`. Required with `key` when `ref` is not used. |
-| `key` | string | Provider-specific key. For `env` this is the source variable name. For `file` this is a path. For `kubernetes` this is a `secret-name/data-key` pair unless `options.secret_name` is set. For `vault` this is a Vault path or a `path/field` pair, depending on `options.field`. |
-| `options` | object | Provider-specific options for direct provider refs. Values must be strings. |
-
-`name` must be a valid environment variable name, must be unique inside the DAG, and must not start with `DAGU_`.
-
-Registry refs resolve from the DAG's own scope first, then the global scope. A DAG with `labels: [workspace=ops]` checks `ops` before global. A DAG without a workspace label uses the global scope directly. Named workspaces never read another named workspace. Do not include the scope or workspace name in `ref`.
-
-For direct provider refs, `key` and `options` are literal provider inputs. Dagu does not expand `${...}` expressions inside them.
-
-Example:
-
-```yaml
-labels:
-  - workspace=payments
-
-secrets:
-  - name: DB_PASSWORD
-    ref: prod/db-password       # Dagu-managed registry secret in the payments workspace
-  - name: API_TOKEN
-    provider: env
-    key: PROD_API_TOKEN         # Read from process environment
-  - name: FILE_TOKEN
-    provider: file
-    key: ../secrets/api-token    # Relative paths resolve using working_dir then DAG file directory
-  - name: K8S_PASSWORD
-    provider: kubernetes
-    key: app-secrets/db-password
-    options:
-      namespace: production
-```
-
-Secret values are injected after DAG-level variables and built-in runtime variables, meaning they take precedence over everything except step-level overrides. Dagu masks resolved secret values in its managed logs and captured outputs, but workflow code can still write those values elsewhere.
-
-See [Secrets](/writing-workflows/secrets) for provider behavior and lookup rules.
-
-### SSH Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `ssh` | object | Default SSH configuration for all steps | - |
+### SSH
 
 ```yaml
 ssh:
   user: deploy
   host: production.example.com
-  port: "22"           # Optional, defaults to "22"
-  key: ~/.ssh/id_rsa   # Optional, defaults to standard keys
-  password: "${SSH_PASSWORD}" # Optional; prefer keys for security
-  strict_host_key: true  # Optional, defaults to true for security
-  known_host_file: ~/.ssh/known_hosts  # Optional, defaults to ~/.ssh/known_hosts
-  shell: "/bin/bash -e"  # Optional: shell (string or array) for remote execution
-```
-
-When configured at the DAG level, all steps using SSH executor will inherit these settings:
-
-```yaml
-# DAG-level SSH configuration
-ssh:
-  user: deploy
-  host: app.example.com
-  key: ~/.ssh/deploy_key
-  shell: /bin/bash  # Commands wrapped in shell
+  port: "22"
+  key: ~/.ssh/id_rsa
+  strict_host_key: true
+  known_host_file: ~/.ssh/known_hosts
+  shell: "/bin/bash -e"
 
 steps:
-  # These steps inherit the DAG-level SSH configuration
   - action: ssh.run
     with:
       command: systemctl status myapp
-  - action: ssh.run
-    with:
-      command: systemctl restart myapp
-
-  # Step-level with overrides DAG-level
-  - action: ssh.run
-    with:
-      user: backup      # Override user
-      host: db.example.com  # Override host
-      key: ~/.ssh/backup_key  # Override key
-      shell:
-        - /bin/sh        # Override shell with explicit flags
-        - -e
-      command: mysqldump mydb > backup.sql
 ```
 
-**Important Notes:**
-- SSH and container fields are mutually exclusive at the DAG level
-- Step-level SSH configuration completely overrides DAG-level configuration (no partial overrides)
-- Password authentication is supported but not recommended; prefer key-based auth
-- Default SSH keys are tried if no key is specified: `~/.ssh/id_rsa`, `~/.ssh/id_ecdsa`, `~/.ssh/id_ed25519`, `~/.ssh/id_dsa`
-- `ssh.shell` at the DAG level accepts either a string (e.g., `"/bin/bash -e"`) or array form (e.g., `["/bin/bash","-e","-o","pipefail"]`). Dagu tokenizes the value into the remote shell executable and arguments before wrapping commands.
-- For step-level SSH `with.shell`, use string form (e.g., `"/bin/bash -e"`). Array syntax is not supported when decoding the YAML map into the executor configuration.
+Step-level SSH values under `with` override the DAG-level SSH config for that step.
 
-### LLM Configuration
+### S3
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `llm` | object | Default LLM configuration for all chat steps | - |
+Top-level `s3` provides defaults for `s3.upload`, `s3.download`, `s3.list`, and `s3.delete`.
+
+```yaml
+s3:
+  region: us-east-1
+  bucket: reports
+  profile: analytics
+
+steps:
+  - action: s3.upload
+    with:
+      local_path: ./report.csv
+      key: daily/report.csv
+```
+
+Accepted top-level S3 fields are `region`, `endpoint`, `access_key_id`, `secret_access_key`, `session_token`, `profile`, `force_path_style`, `disable_ssl`, and `bucket`.
+
+### LLM
 
 ```yaml
 llm:
@@ -658,56 +514,31 @@ steps:
     with:
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: "Summarize ${REPORT_PATH}"
 ```
 
-When configured at the DAG level, all chat steps inherit the LLM configuration. Step-level `llm:` completely overrides DAG-level configuration (no field-level merging).
+Supported provider values in the schema are `openai`, `anthropic`, `gemini`, `google`, `openrouter`, `local`, `ollama`, `vllm`, and `llama`.
 
-See [Chat Executor](/features/chat/) for full documentation.
+LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`.
 
-### Redis Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `redis` | object | Default Redis configuration for all redis steps | - |
+### Redis
 
 ```yaml
 redis:
   host: localhost
   port: 6379
-  password: ${REDIS_PASSWORD}
   db: 0
 
 steps:
-  - id: cache_lookup
-    action: redis.get
+  - action: redis.get
     with:
       key: cache:user:${USER_ID}
     output: CACHED_DATA
 ```
 
-When configured at the DAG level, all redis steps inherit the connection settings. Step-level `with` values override DAG-level defaults (field-level merging).
+Top-level Redis fields are `url`, `host`, `port`, `password`, `username`, `db`, `tls`, `tls_skip_verify`, `mode`, `sentinel_master`, `sentinel_addrs`, `cluster_addrs`, and `max_retries`.
 
-**Available fields:**
-- `url` - Redis URL (`redis://user:pass@host:port/db`)
-- `host` - Redis host (alternative to URL)
-- `port` - Redis port (default: 6379)
-- `password` - Authentication password
-- `username` - ACL username (Redis 6+)
-- `db` - Database number (0-15)
-- `tls` - Enable TLS connection
-- `mode` - Connection mode: `standalone`, `sentinel`, `cluster`
-- `sentinel_master` - Sentinel master name
-- `sentinel_addrs` - Sentinel addresses
-- `cluster_addrs` - Cluster node addresses
-
-See [Redis Executor](/step-types/redis) for full documentation.
-
-### Kubernetes Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `kubernetes` | object | Default Kubernetes configuration for explicit `k8s` / `kubernetes` steps | - |
+### Kubernetes
 
 ```yaml
 kubernetes:
@@ -727,270 +558,232 @@ steps:
       command: echo hello
 ```
 
-When configured at the DAG level, only steps with `action: k8s.run` or `action: kubernetes.run` inherit these defaults. The root `kubernetes:` block does not change the executor type of plain command steps.
+Step-level `with` overrides DAG-level `kubernetes` using Kubernetes merge rules: scalars replace, nested maps merge by key, arrays replace, and empty maps or arrays can clear inherited nested values.
 
-Step-level `with` overrides DAG-level `kubernetes` using Kubernetes-specific merge rules:
-- scalar values replace DAG defaults
-- nested objects merge by key with the step value winning
-- arrays replace the DAG value wholesale
-- empty objects and empty arrays can be used to clear inherited nested values
+### Notifications
 
-The DAG-level block accepts the same fields as the step-level Kubernetes executor `with` block, except `image` is optional at the DAG level and must still be provided by the effective step configuration.
-
-That includes cluster selection, image/runtime settings, env and env sources, resources, service account, scheduling controls, labels/annotations, volumes, lifecycle controls, and the typed Kubernetes additions:
-
-- `security_context`
-- `pod_security_context`
-- `affinity`
-- `termination_grace_period_seconds`
-- `priority_class_name`
-- `pod_failure_policy`
-
-See [Kubernetes Step](/step-types/kubernetes) for the full executor reference and examples.
-
-### Working Directory and Volume Resolution
-
-When using container volumes with relative paths, the paths are resolved relative to the DAG's `working_dir`:
-
-```yaml
-# DAG with working directory and container volumes
-working_dir: /app/project
-container:
-  image: python:3.11
-  volumes:
-    - ./data:/data        # Resolves to /app/project/data:/data
-    - .:/workspace        # Resolves to /app/project:/workspace
-    - /abs/path:/other   # Absolute paths are unchanged
-
-steps:
-  - run: python process.py
-```
-
-**Default Working Directory:**
-- When `working_dir` is **not** set in the DAG YAML or base config, the per-run work directory (`DAG_RUN_WORK_DIR`) is used as the process working directory. This gives each run an isolated workspace automatically.
-- When `working_dir` **is** explicitly set, the explicit value is used. `DAG_RUN_WORK_DIR` is still available as an environment variable.
-
-**Working Directory Inheritance:**
-- Steps inherit `working_dir` from the DAG if not explicitly set
-- Step-level `working_dir` overrides DAG-level `working_dir`
-- **Sub-DAGs (via `call`)** inherit the parent's `working_dir` when executed locally, unless they define their own explicit `working_dir`
-
-```yaml
-# Example of working_dir inheritance
-working_dir: /project          # DAG-level working directory
-
-steps:
-  - run: pwd                   # Outputs: /project
-  - working_dir: /custom   # Override DAG working_dir
-    run: pwd          # Outputs: /custom
-```
-
-**Sub-DAG Working Directory Inheritance:**
-
-When a parent DAG calls a child DAG using `action: dag.run`, the child inherits the parent's working directory for local execution:
-
-```yaml
-# Parent DAG with working_dir
-working_dir: /app/project
-
-steps:
-  - action: dag.run
-    with:
-      dag: child-workflow    # Child inherits /app/project as working_dir
----
-# Child DAG without explicit working_dir
-name: child-workflow
-steps:
-  - run: pwd                     # Outputs: /app/project (inherited from parent)
-
----
-# Child DAG with explicit working_dir (overrides inheritance)
-name: child-with-custom-wd
-working_dir: /custom/path
-steps:
-  - run: pwd                     # Outputs: /custom/path
-```
-
-> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `worker_selector`), sub-DAGs use their own context on the worker node.
-
-### Queue Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `queue` | string | Assign to a global queue defined in `config.yaml` for concurrency control. See [Queues](/writing-workflows/queues). | DAG name (local queue) |
-
-> **Note**: For concurrency control, define global queues in `~/.config/dagu/config.yaml` and reference them with the `queue` field. Local (DAG-based) queues always use FIFO processing with concurrency of 1.
-
-### OpenTelemetry Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `otel` | object | OpenTelemetry tracing configuration | - |
-
-```yaml
-otel:
-  enabled: true
-  endpoint: "localhost:4317"  # OTLP gRPC endpoint
-  headers:
-    Authorization: "Bearer ${OTEL_TOKEN}"
-  insecure: false
-  timeout: 30s
-  resource:
-    service.name: "dagu-${DAG_NAME}"
-    service.version: "1.0.0"
-    deployment.environment: "${ENVIRONMENT}"
-```
-
-See [OpenTelemetry Tracing](../server-admin/opentelemetry.md) for detailed configuration.
-
-### Notification Fields
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `mail_on` | object | Email notification triggers | - |
-| `error_mail` | object | Error email configuration | - |
-| `info_mail` | object | Success email configuration | - |
-| `wait_mail` | object | Wait status email configuration | - |
-| `smtp` | object | SMTP server configuration | - |
+| Field | Type | Description |
+|-------|------|-------------|
+| `mail_on` | object | Email notification triggers: `success`, `failure`, and `wait`. |
+| `error_mail` | object | Mail settings for failure notifications. |
+| `info_mail` | object | Mail settings for success notifications. |
+| `wait_mail` | object | Mail settings for wait/approval notifications. |
+| `smtp` | object | SMTP connection settings. |
 
 ```yaml
 mail_on:
   success: true
   failure: true
-  wait: true      # Email when DAG is waiting for approval
+  wait: true
 
 error_mail:
   from: alerts@example.com
-  to: oncall@example.com  # Single recipient (string)
-  # Or multiple recipients (array):
-  # to:
-  #   - oncall@example.com
-  #   - manager@example.com
+  to:
+    - oncall@example.com
   prefix: "[ALERT]"
   attach_logs: true
 
-info_mail:
-  from: notifications@example.com
-  to: team@example.com  # Single recipient (string)
-  # Or multiple recipients (array):
-  # to:
-  #   - team@example.com
-  #   - stakeholders@example.com
-  prefix: "[INFO]"
-  attach_logs: false
-
-wait_mail:
-  from: dagu@example.com
-  to: approvers@example.com
-  prefix: "[WAITING]"
-  attach_logs: false
-
 smtp:
-  host: smtp.gmail.com
+  host: smtp.example.com
   port: "587"
   username: notifications@example.com
   password: ${SMTP_PASSWORD}
 ```
 
-### Handler Fields
+`mail.send` step inputs use `message`, not `body`.
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `handler_on` | object | Lifecycle event handlers | - |
+### Lifecycle Handlers
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `handler_on.init` | step | Runs before normal steps after DAG preconditions pass. |
+| `handler_on.success` | step | Runs when the DAG succeeds. |
+| `handler_on.failure` | step | Runs when the DAG fails. |
+| `handler_on.abort` | step | Runs when the DAG is aborted. |
+| `handler_on.wait` | step | Runs when the DAG enters wait status for approval. |
+| `handler_on.exit` | step | Runs when the DAG exits. |
+
+Handlers use the same step schema as normal steps and receive `defaults`.
 
 ```yaml
 handler_on:
   init:
-    run: echo "Setting up"      # Runs before any steps
-  success:
-    run: echo "Workflow succeeded"
+    run: echo "starting"
   failure:
-    run: echo "Notifying failure"
-  abort:
-    run: echo "Cleaning up"
-  wait:
-    run: echo "Waiting for approval: ${DAG_WAITING_STEPS}"
+    action: mail.send
+    with:
+      to: ops@example.com
+      subject: "${DAG_NAME} failed"
+      message: "See ${DAG_RUN_LOG_FILE}"
   exit:
-    run: echo "Always running"
+    run: ./cleanup.sh
 ```
-
-> **Note**: Sub-DAGs (invoked via `call`) do **not** inherit `handler_on` from base configuration. Each sub-DAG must define its own handlers explicitly. See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers#sub-dag-handler-isolation) for details.
-
-### RunConfig
-
-The `run_config` field allows you to control user interactions when starting DAG runs:
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `disable_param_edit` | boolean | Prevent parameter editing when starting DAG | `false` |
-| `disable_run_id_edit` | boolean | Prevent custom run ID input when starting DAG | `false` |
-
-Example usage:
-
-```yaml
-# Prevent users from modifying parameters at runtime
-run_config:
-  disable_param_edit: true
-  disable_run_id_edit: false
-
-params:
-  - name: environment
-    type: string
-    default: production
-    description: Users cannot change this
-  - name: version
-    default: 1.0.0
-    description: Fixed release version
-```
-
-This is useful when:
-- You want to enforce specific parameter values for production workflows
-- You need consistent run IDs for tracking purposes
-- You want to prevent accidental parameter changes
 
 ## Step Fields
 
-Each step in the `steps` array can have these fields:
+Steps can be an array or a map. Array form is recommended because it preserves order clearly.
 
-### Basic Fields
+```yaml
+type: graph
+
+steps:
+  - id: first
+    run: echo "first"
+
+  - id: second
+    run: echo "second"
+    depends: first
+```
+
+Map form is accepted:
+
+```yaml
+type: graph
+
+steps:
+  first:
+    run: echo "first"
+  second:
+    run: echo "second"
+    depends: first
+```
+
+In an array, nested arrays define a parallel group for chain dependency injection.
+
+```yaml
+type: chain
+
+steps:
+  - run: echo "start"
+  - - run: echo "branch A"
+    - run: echo "branch B"
+  - run: echo "finish"
+```
+
+Plain string step entries are legacy syntax and normalize to the legacy command executor. Prefer object steps with `run`.
+
+### Step Identity
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `name` | string | Step name (optional - auto-generated if not provided) | Auto-generated |
-| `id` | string | Optional stable identifier for references and dependencies | - |
-| `run` | string | Shell command or multi-line shell script. | - |
-| `action` | string | Builtin or custom action name. Action-specific settings go under `with`. | - |
-| `with` | object | Action-specific settings. | - |
-| `depends` | string/array | Step dependencies | - |
+| `name` | string | Step name. Auto-generated when omitted in array form. | Auto-generated |
+| `id` | string | Stable identifier for references and dependencies. | - |
+| `description` | string | Human-readable step description. | - |
+| `depends` | string or array | Dependencies by step name or `id`. Not allowed in `type: chain`. | - |
 
-#### Multiple Commands
+Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and cannot be one of `env`, `params`, `args`, `stdout`, `stderr`, `output`, or `outputs`. Hyphens are not allowed in step IDs. Use `load_data`, not `load-data`.
 
-Use a multi-line `run` block when multiple shell commands should share the same step configuration:
+### Preferred Execution Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `run` | string | Shell command or multi-line shell script. |
+| `action` | string | Built-in, custom, or remote action name. |
+| `with` | object | Inputs for `action`, or shell config for `run`. |
+| `working_dir` | string | Step working directory. |
+| `env` | array or object | Step-specific environment variables. |
+| `stdout` | string or object | Redirect stdout to a file, artifact, or run outputs. |
+| `stderr` | string or object | Redirect stderr to a file or artifact. |
+| `log_output` | string | Step-level log output mode. |
+| `output` | string or object | Captured step output variable or structured output mapping. |
+| `output_schema` | object | Inline JSON Schema for stdout JSON validation. |
+| `timeout_sec` | integer | Step timeout in seconds. |
+| `container` | string or object | Step-level container override. |
+| `worker_selector` | object | Step-level distributed worker selector. |
+
+`run` and `action` are mutually exclusive.
+
+For `run` steps, put shell controls under `with`:
 
 ```yaml
-tools:
-  - nodejs/node@v22.21.1
-
 steps:
-  - id: build_and_test
+  - id: build
     run: |
       npm install
       npm run build
-      npm test
-    env:
-      - NODE_ENV: production
-    working_dir: /app
+    with:
+      shell: bash
+      shell_args: [-e, -o, pipefail]
 ```
 
-Instead of duplicating `env`, `working_dir`, `retry_policy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
+Accepted `with` keys for `run` are `shell`, `shell_args`, and `shell_packages`.
 
-Commands run in order and stop on first failure. Retries restart from the first command.
+For action steps, action-specific inputs go under `with`:
 
-**Trade-off:** You lose the ability to retry or resume from the middle of the command list.
+```yaml
+steps:
+  - id: wait_for_api
+    action: wait.http
+    with:
+      url: https://api.example.com/health
+      status: 200
+      poll_interval: 5s
+    timeout_sec: 300
+```
 
-#### Direct Exec
+`with` and `config` cannot both be used. `config` is a legacy alias.
 
-For direct command execution steps, `action: exec` runs a binary with explicit argv and no shell parsing.
+### Legacy Execution Fields
+
+The parser still accepts these legacy step fields, but new workflow files should prefer `run` or `action`:
+
+| Field | Replacement |
+|-------|-------------|
+| `command` | `run`, or `action: exec` for direct argv execution |
+| `exec` | `action: exec` |
+| `script` | `run` or action-specific input |
+| `shell` | `with.shell` on a `run` step |
+| `shell_args` | `with.shell_args` on a `run` step |
+| `shell_packages` | `with.shell_packages` on a `run` step |
+| `type` | `action` |
+| `call` and step `params` | `action: dag.run` with `with.dag` and `with.params` |
+| `messages`, `llm` | `action: chat.completion` with `with` |
+| `agent` | `action: agent.run` with `with` |
+| `value`, `routes` | `action: router.route` with `with` |
+
+Do not combine `run` or `action` with legacy execution fields.
+
+### Built-In Actions
+
+Accepted built-in action names:
+
+| Action | Purpose |
+|--------|---------|
+| `agent.run` | Agent step execution. |
+| `artifact.list`, `artifact.read`, `artifact.write` | DAG-run artifact operations. |
+| `archive.create`, `archive.extract`, `archive.list` | Archive operations. |
+| `chat.completion` | LLM chat completion. |
+| `container.run` | Container executor. |
+| `dag.run` | Run a child DAG synchronously. |
+| `dag.enqueue` | Enqueue a child DAG asynchronously. |
+| `data.convert`, `data.pick` | Data conversion and selection helpers. |
+| `docker.run` | Docker executor. |
+| `exec` | Direct process execution without shell parsing. |
+| `file.copy`, `file.delete`, `file.list`, `file.mkdir`, `file.move`, `file.read`, `file.stat`, `file.write` | File operations. |
+| `git.checkout` | Clone or update a Git repository. |
+| `harness.run` | CLI coding-agent harness execution. |
+| `http.request` | HTTP requests. |
+| `jq.filter` | jq transforms. |
+| `k8s.run`, `kubernetes.run` | Kubernetes job execution. |
+| `log.write` | Write a log message. |
+| `mail.send` | Send email. |
+| `noop` | Placeholder step. |
+| `outputs.write` | Write run-level or action outputs. |
+| `postgres.query`, `postgres.import` | PostgreSQL query/import actions. |
+| `redis.<operation>` | Redis operation selected by the action suffix. |
+| `router.route` | Conditional routing. |
+| `s3.delete`, `s3.download`, `s3.list`, `s3.upload` | S3 operations. |
+| `sftp.download`, `sftp.upload` | SFTP transfers. |
+| `sqlite.query`, `sqlite.import` | SQLite query/import actions. |
+| `ssh.run` | Remote shell over SSH. |
+| `template.render` | Template rendering. |
+| `wait.duration`, `wait.file`, `wait.http`, `wait.until` | Wait and polling actions. |
+
+DuckDB is provided as the official [`duckdb@v1` action](/step-types/sql/duckdb), not as a built-in SQL action.
+
+### Direct Exec
+
+Use `action: exec` to run a binary with explicit argv and no shell parsing.
 
 ```yaml
 steps:
@@ -1004,640 +797,292 @@ steps:
         - 10
 ```
 
-Rules:
+`with.command` is required. `with.args` accepts strings, numbers, and booleans.
 
-- `with.command` is required.
-- `with.args` accepts strings, numbers, and booleans.
-- Use `action: exec` for direct process execution.
-- `action: exec` cannot be combined with `run` or legacy execution fields such as `command`, `script`, `shell`, or `shell_packages`.
-- `working_dir`, `env`, `stdout`, `stderr`, `retry_policy`, `output`, and other normal orchestration fields still apply.
-
-#### Named Actions
-
-Use `action:` for builtin or custom actions. Action inputs go under `with:`.
-
-```yaml
-steps:
-  - id: wait_for_api
-    action: wait.http
-    with:
-      url: https://api.example.com/health
-      status: 200
-      poll_interval: 5s
-    timeout_sec: 300
-```
-
-Current built-in step type names:
-
-| Action | Use for | Key inputs |
-|--------|---------|------------|
-| `http.request` | HTTP calls | `method`, `url`, headers/body config |
-| `ssh.run` | Remote shell over SSH | `command`, SSH connection config |
-| `exec` | Direct process execution without shell parsing | `command`, optional `args` |
-| `docker.run` | Docker executor | optional `command`, Docker config |
-| `container.run` | Container executor | optional `command`, container config |
-| `k8s.run`, `kubernetes.run` | Kubernetes job execution | optional `command`, Kubernetes config |
-| `postgres.query`, `sqlite.query` | SQL queries | `query`, database config |
-| `postgres.import`, `sqlite.import` | SQL imports | `import`, database config |
-| `redis.<operation>` | Redis operations | Redis config; operation comes from the action suffix |
-| `jq.filter` | jq transforms | `filter`, plus `data` or `input` |
-| `dag.run` | Child DAG execution | `dag`, optional `params` |
-| `dag.enqueue` | Asynchronous child DAG enqueue | `dag`, optional `params`, optional `queue` |
-| `router.route` | Conditional routing | `value`, `routes` |
-| `chat.completion` | LLM chat completion | `prompt` or `messages`, model config |
-| `agent.run` | Agent step execution | `task`, `prompt`, or `messages`, agent config |
-| `harness.run` | CLI coding-agent harnesses | `prompt`, provider config, optional `stdin` |
-| `template.render` | Text/template rendering | `template`, optional data/config |
-| `log.write` | Log messages | `message` |
-| `mail.send` | Email sending | mail executor config |
-| `archive.create`, `archive.extract`, `archive.list` | Archive operations | archive config |
-| `file.stat`, `file.read`, `file.write`, `file.copy`, `file.move`, `file.delete`, `file.mkdir`, `file.list` | File operations | path/source/destination/content config |
-| `git.checkout` | Clone or update Git repositories | `repository`, `path`, optional `ref`, `depth`, auth config |
-| `wait.duration`, `wait.until`, `wait.file`, `wait.http` | Wait or poll for time, files, or HTTP readiness | `duration`, `until`, `path`, `url`, optional polling config |
-| `s3.upload`, `s3.download`, `s3.list`, `s3.delete` | S3 operations | S3 config |
-| `sftp.upload`, `sftp.download` | SFTP transfers | SFTP config |
-| `noop` | Output-only or approval-only placeholder step | no `with`, or empty `with` |
-
-DuckDB is provided as the official [`duckdb@v1` action](/step-types/sql/duckdb), not as a built-in SQL step type.
-
-For wait-specific fields and examples, see [Wait](/step-types/wait). Use step-level `timeout_sec` to cap the total wait time for `wait.file` and `wait.http`.
-
-For Git checkout fields and examples, see [Git](/step-types/git). Use `git.checkout` when a step needs to clone or refresh a source repository during the DAG run.
-
-#### Child DAG Actions
-
-Use `dag.run` for synchronous child DAG execution. The parent waits for the child run to finish and the parent step reflects the child result.
+### Child DAG Actions
 
 ```yaml
 steps:
   - id: run_child
     action: dag.run
     with:
-      dag: child-workflow
+      dag: child_workflow
       params:
         MODE: blocking
 ```
-
-Use `dag.enqueue` for asynchronous child DAG dispatch. The parent waits only until the child run is persisted and queued.
 
 ```yaml
 steps:
   - id: enqueue_child
     action: dag.enqueue
     with:
-      dag: child-workflow
+      dag: child_workflow
       params:
         MODE: background
       queue: background
 ```
 
-`dag.enqueue` accepts the same `with.dag` and `with.params` inputs as `dag.run`, plus `with.queue` to override the queue for the enqueued child run. If `with.queue` is omitted, Dagu uses the child DAG's own queue selection.
+`dag.run` waits for the child DAG to finish. `dag.enqueue` waits only until the child run is persisted and queued. `dag.enqueue` accepts the same `with.dag` and `with.params` inputs as `dag.run`, plus `with.queue`.
 
-`run:` and `action:` are mutually exclusive. Do not combine `action:` with legacy execution fields such as `command:`, `script:`, step-level `type:`, `call:`, `messages:`, `agent:`, `llm:`, `value:`, or `routes:`.
+### Parallel Child DAG Runs
 
-### Step Definition Formats
+| Field | Type | Description |
+|-------|------|-------------|
+| `parallel.items` | array | Static items to fan out. |
+| `parallel.variable` | string | Variable name whose value is expanded at runtime. |
+| `parallel.max_concurrent` | integer | Maximum concurrent child runs. Must be greater than `0` if set. |
 
-Steps can be defined in multiple formats:
-
-#### Standard Format
-```yaml
-steps:
-  - run: echo "Hello"
-```
-
-#### Run-only Step Objects
-```yaml
-type: chain
-
-steps:
-  - run: echo "Hello"
-  - run: ls -la
-```
-
-Plain string step entries are legacy syntax; write step objects with `run` instead.
-
-### Execution Fields
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `working_dir` | string | Working directory (inherits from DAG-level working_dir) | DAG's working_dir |
-| `with.shell` | string/array | Shell program and args for this `run` step; overrides DAG `shell` | DAG `shell` (system default when omitted) |
-| `with.shell_args` | array | Arguments appended to the shell for this `run` step | - |
-| `with.shell_packages` | array | Packages available to `nix-shell` steps | - |
-| `stdout` | string/object | Redirect stdout to a file, use `{ artifact: path }` for DAG-run artifacts, or use `{ outputs: ... }` to publish DAG/action outputs | - |
-| `stderr` | string/object | Redirect stderr to a file, or use `{ artifact: path }` to write stderr directly to a DAG-run artifact | - |
-| `log_output` | string | Override DAG-level log output mode for this step | DAG's log_output |
-| `output` | string/object | String form captures trimmed stdout into one variable. Object form publishes structured step output for `${step_id.output.*}` references. | - |
-| `env` | array/object | Step-specific environment variables (overrides DAG-level) | - |
-
-`shell` accepts either a string (e.g., `"bash -e"`) or an array (e.g., `["bash", "-e"]`). DAG-level values expand environment variables when the workflow loads; step-level `with.shell` values are evaluated at runtime so you can reference parameters, secrets, or previous outputs.
-
-Object-form `output:` entries can be literal values or long-form publishers with `value`, `from`, `path`, `decode`, and `select`. Plain objects stay literal unless they use one of those reserved keys; use `value:` when you need those key names as literal data. Object-form `output:` is step-scoped for `${step.output.*}`. Use `stdout.outputs` or `action: outputs.write` for run-level outputs and packaged action return values.
-
-`output_schema:` is an inline JSON Schema object for stdout JSON contracts. When present, Dagu captures stdout, decodes it as JSON, and validates it before publishing output. Invalid JSON or a schema mismatch fails the step. If no `output:` mapping is set, the validated decoded object becomes `${step_id.output}` and can be accessed with `${step_id.output.field}`.
-
-Use `stdout.artifact` or `stderr.artifact` when command output should become a run artifact:
-
-```yaml
-steps:
-  - id: report
-    run: ./generate-report --format markdown
-    stdout:
-      artifact: reports/report.md
-```
-
-Artifact stream paths are relative to the run artifact directory. Parent directories are created automatically. Absolute paths, Windows drive paths, and paths containing `..` are rejected. Artifact stream outputs auto-enable artifact storage. If `artifacts.enabled: false` is set explicitly, artifact stream outputs are invalid.
-
-### Parallel Execution
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `parallel` | array | Items to process in parallel | - |
-| `max_concurrent` | integer | Max parallel executions | No limit |
-
-`parallel` can fan out `dag.run` or `dag.enqueue`. With `dag.run`, each child is executed as a blocking sub-DAG. With `dag.enqueue`, each child is added to a queue and the parent step completes after enqueueing the generated child runs.
+`parallel` is valid only with `action: dag.run` or `action: dag.enqueue`, and it requires `items` or `variable`.
 
 ```yaml
 steps:
   - action: dag.run
     with:
-      dag: file-processor
+      dag: file_processor
       params: "FILE=${ITEM}"
     parallel:
       items: [file1.csv, file2.csv, file3.csv]
       max_concurrent: 2
 ```
 
-### Conditional Execution
+Inside each parallel child run, `ITEM` is set to the current item.
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `preconditions` | string/array | Conditions to check before execution | - |
-| `continue_on` | string/object | Continue workflow on certain conditions | - |
+### Output
 
-#### ContinueOn Fields
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `failure` | boolean | Continue execution when step fails | `false` |
-| `skipped` | boolean | Continue when step is skipped due to preconditions | `false` |
-| `exit_code` | array | List of exit codes that allow continuation | `[]` |
-| `output` | array | List of stdout patterns that allow continuation (supports regex with `re:` prefix) | `[]` |
-| `mark_success` | boolean | Mark step as successful when continue conditions are met | `false` |
-
-#### Precondition Fields
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `condition` | string | Expression or check to evaluate. If `expected` is omitted, Dagu replaces variables in this string and runs the result as a command check. | - |
-| `expected` | string | Expected value or regex pattern (prefix with `re:`). When set, Dagu compares the evaluated string result instead of using command exit status. | - |
-| `negate` | boolean | Invert the condition logic (run when condition does NOT match) | `false` |
+String form captures trimmed stdout into an environment variable:
 
 ```yaml
-type: chain
+type: graph
 
 steps:
-  - run: echo "Deploying"
-    with:
-      shell: bash
+  - id: get_version
+    run: cat VERSION
+    output: VERSION
+
+  - id: build
+    run: docker build -t app:${VERSION} .
+    depends: get_version
+```
+
+Object form publishes structured step output for `${step_id.output.*}` references:
+
+```yaml
+type: graph
+
+steps:
+  - id: get_config
+    run: cat config.json
+    output_schema:
+      type: object
+      properties:
+        port:
+          type: integer
+      required: [port]
+```
+
+`output_schema` must be an inline JSON Schema object. It is not a path. When present, Dagu captures stdout, decodes it as JSON, validates it, and fails the step on invalid JSON or schema mismatch.
+
+Use `stdout.artifact` or `stderr.artifact` to write command output into the run artifact directory:
+
+```yaml
+steps:
+  - id: report
+    run: ./generate-report
+    stdout:
+      artifact: reports/report.md
+```
+
+Artifact stream paths are relative to the run artifact directory. Absolute paths, Windows drive paths, and paths containing `..` are rejected. Artifact stream outputs auto-enable artifacts unless `artifacts.enabled: false` is set.
+
+### Conditions And Continuation
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `preconditions` | string or array | Conditions checked before the step executes. |
+| `continue_on` | string or object | Conditions under which the DAG continues after failure or skip. |
+
+```yaml
+steps:
+  - id: deploy
+    run: ./deploy.sh
     preconditions:
       - condition: "${ENVIRONMENT}"
-        expected: "production"
+        expected: production
       - condition: "`git branch --show-current`"
-        expected: "main"
-      # Shell syntax like "test ... " requires a shell.
-      # Without a shell, Dagu executes the resulting string directly.
-      - condition: "test ${DEPLOY_READY} = yes"
+        expected: main
 
-  # With negate: run only when NOT in production
-  - run: echo "Running dev task"
-    preconditions:
-      - condition: "${ENVIRONMENT}"
-        expected: "production"
-        negate: true  # Runs when condition does NOT match
-
-  - run: echo "Running optional task"
+  - id: optional
+    run: ./optional.sh
     continue_on:
       failure: true
       skipped: true
       exit_code: [0, 1, 2]
-      output: ["WARNING", "SKIP", "re:^INFO:.*"]
+      output: ["WARNING", "re:^INFO:"]
       mark_success: true
 ```
 
-See the [Continue On Reference](/writing-workflows/continue-on) for detailed documentation.
+Precondition fields:
 
-### Error Handling
+| Field | Type | Description |
+|-------|------|-------------|
+| `condition` | string | Expression or command check. |
+| `expected` | string | Expected value or regex pattern with `re:`. |
+| `negate` | boolean | Invert the condition result. |
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `retry_policy` | object | Retry configuration | - |
-| `repeat_policy` | object | Repeat configuration | - |
-| `mail_on_error` | boolean | Send email on error | `false` |
-| `signal_on_stop` | string | Signal to send on stop | `SIGTERM` |
+If `expected` is omitted, Dagu evaluates `condition` and runs the result as a command check. Shell syntax requires a shell.
 
-#### Retry Policy Fields
+### Retry And Repeat
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `limit` | integer/string | Maximum retry attempts after the first failure. Required when `retry_policy` is present. | required |
-| `interval_sec` | integer/string | Base interval between retries in seconds. Required when `retry_policy` is present. | required |
-| `backoff` | boolean/number | Exponential backoff multiplier. `true` = 2.0, or specify a number greater than 1.0. `false`, `0`, or omission keeps a fixed interval. | fixed interval |
-| `max_interval_sec` | integer | Maximum interval between retries in seconds. Applied only when greater than `0`. | uncapped |
-| `exit_code` | array | Exit codes that trigger retry | All non-zero |
+Step-level `retry_policy` retries one step.
 
-**Exponential Backoff**: When `backoff` is set, intervals increase exponentially using the formula:  
-`interval * (backoff ^ attemptCount)`
+| Field | Type | Description |
+|-------|------|-------------|
+| `limit` | integer or string | Maximum retry attempts after the first failure. Required when `retry_policy` is present. |
+| `interval_sec` | integer or string | Base interval between retries, in seconds. Required when `retry_policy` is present. |
+| `backoff` | boolean or number | `true` means `2.0`; a number greater than `1.0` is used as the multiplier. |
+| `max_interval_sec` | integer | Maximum interval between retries. |
+| `exit_code` | array | Exit codes that trigger retry. Default is all non-zero exits. |
 
-String values for step `limit` and `interval_sec` are evaluated at runtime and must resolve to integers.
-
-Root `retry_policy` is different from this step-level `retry_policy`. See [DAG Retry Policy](#dag-retry-policy).
-
-#### Repeat Policy Fields
-
-For iterating over a list of items, use [`parallel`](#parallel-execution) instead.
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `repeat` | string/boolean | Repeat mode: `"while"`, `"until"`, or `true` (legacy alias for `"while"`) | - |
-| `interval_sec` | integer/string | Base interval between repetitions (seconds). Accepts variable references like `$VAR` or `${VAR}` resolved at runtime. | - |
-| `backoff` | any | Exponential backoff multiplier. `true` = 2.0, or specify custom number > 1.0 | - |
-| `max_interval_sec` | integer/string | Maximum interval between repetitions (seconds). Accepts variable references. | - |
-| `limit` | integer/string | Maximum number of executions. Accepts variable references. | - |
-| `condition` | string | Condition to evaluate | - |
-| `expected` | string | Expected value/pattern | - |
-| `exit_code` | array | Exit codes that trigger repeat | - |
-
-**Repeat Modes:**
-- `while`: Repeats while the condition is true or exit code matches
-- `until`: Repeats until the condition is true or exit code matches
-
-**Exponential Backoff**: When `backoff` is set, intervals increase exponentially using the formula:  
-`interval * (backoff ^ attemptCount)`
 ```yaml
-type: chain
-
 steps:
-  - run: curl https://api.example.com
-    retry_policy:
-      limit: 3
-      interval_sec: 30
-      exit_code: [1, 255]  # Retry only on specific codes
-      
   - run: curl https://api.example.com
     retry_policy:
       limit: 5
       interval_sec: 2
-      backoff: true        # Exponential backoff (2.0x multiplier)
-      max_interval_sec: 60   # Cap at 60 seconds
-      exit_code: [429, 503] # Rate limit or unavailable
-    
+      backoff: true
+      max_interval_sec: 60
+      exit_code: [429, 503]
+```
+
+`repeat_policy` repeats one step.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `repeat` | string or boolean | `while`, `until`, or legacy `true` for `while`. |
+| `interval_sec` | integer or string | Delay between repetitions. |
+| `backoff` | boolean or number | Exponential backoff multiplier. |
+| `max_interval_sec` | integer or string | Maximum repetition interval. |
+| `limit` | integer or string | Maximum number of executions. |
+| `condition` | string | Condition to evaluate. |
+| `expected` | string | Expected value or pattern. |
+| `exit_code` | array | Exit codes that trigger repeat. |
+
+```yaml
+steps:
   - run: check-process.sh
     repeat_policy:
-      repeat: while        # Repeat WHILE process is running
-      exit_code: [0]        # Exit code 0 means process found
+      repeat: while
+      exit_code: [0]
       interval_sec: 60
       limit: 30
-      
-  - run: echo "Checking status"
-    output: STATUS
-    repeat_policy:
-      repeat: until        # Repeat UNTIL status is ready
-      condition: "${STATUS}"
-      expected: "ready"
-      interval_sec: 5
-      backoff: 1.5         # Custom backoff multiplier
-      max_interval_sec: 300  # Cap at 5 minutes
-      limit: 60
 ```
+
+### Approval
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `approval.prompt` | string | Message displayed to the approver. |
+| `approval.input` | array | Parameter names to collect from the approver. |
+| `approval.required` | array | Required parameters, as a subset of `input`. |
+| `approval.rewind_to` | string | Optional step name or ID to restart from on push-back. |
+
+```yaml
+steps:
+  - id: deploy_prod
+    run: ./deploy.sh production
+    approval:
+      prompt: "Approve production deploy?"
+      input: [APPROVED_BY]
+      required: [APPROVED_BY]
+```
+
+The step runs, then enters waiting status until approved. Collected inputs become environment variables for subsequent steps.
 
 ### Step-Level Container
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `container` | string/object | Container configuration for this step. Can be a string (exec mode) or object (exec or image mode). | - |
-
-Use the `container` field to run a step in its own container:
+Step `container` uses the same string/object forms as top-level `container` and overrides the DAG-level container for that step.
 
 ```yaml
-type: chain
-
 steps:
-  # Image mode - create new container
   - id: run_in_container
     container:
       image: python:3.11
       volumes:
         - /data:/data:ro
-      env:
-        - API_KEY=${API_KEY}
     run: python process.py
 
-  # Exec mode - string form
   - id: run_migration
     container: my-app-container
     run: php artisan migrate
-
-  # Exec mode - object form with overrides
-  - id: admin_task
-    container:
-      exec: my-app-container
-      user: root
-      working_dir: /app
-    run: chown -R app:app /data
 ```
-
-::: tip
-The step-level `container` field uses the same format as DAG-level container configuration, supporting both image mode and exec mode.
-:::
-
-::: warning
-When using `container`, you cannot use `executor` or `script` fields on the same step.
-:::
-
-### Action Configuration
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `action` | string | Builtin action or custom action name declared in `actions` or base config | - |
-| `with` | object | Builtin executor configuration, or validated input for a custom action definition | - |
-
-```yaml
-steps:
-  - action: archive.extract
-    with:
-      source: assets.tar.gz
-      destination: ./assets
-```
-
-If `action` refers to a custom action, schema defaults are applied to `with`, the result is validated against that definition's `input_schema`, and then it is used to render the definition's `template` during DAG load. Runtime expressions can be written directly in `template` strings or used in custom `with` input as scalar leaves. Direct template expressions such as `${COUNT}` are preserved by custom template rendering and expand later only if the expanded built-in step field is runtime-evaluated. For custom `with` input, string schema fields may contain embedded expressions, while integer, number, boolean, and scalar enum fields require the expression to be the whole value. The template is not rendered again when the step executes.
-
-Custom action call sites can still set orchestration fields such as `depends`, `retry_policy`, `env`, `timeout_sec`, `output`, and `approval`, but action-defining fields such as `run`, `command`, `exec`, `script`, `shell`, `shell_packages`, `working_dir`, `call`, `params`, `parallel`, `container`, `llm`, `messages`, `agent`, `value`, and `routes` are rejected at the call site.
-
-Custom action precedence is `call site > template > defaults` for replacement fields. For additive fields, `env` and `preconditions` compose as `defaults -> template -> call site`.
-
-See [Custom Actions](/dagu-actions/custom) for the exact allowed field set.
-
-### Artifact Actions
-
-Use `artifact.write`, `artifact.read`, and `artifact.list` to work with files in the current DAG-run artifact directory. When a command naturally emits the artifact content to stdout or stderr, prefer `stdout.artifact` or `stderr.artifact` on that step.
-
-```yaml
-steps:
-  - id: save_summary
-    action: artifact.write
-    with:
-      path: reports/summary.md
-      content: |
-        # Summary
-        status: ok
-      overwrite: true
-```
-
-Artifact paths are relative to the run artifact directory. Absolute paths and paths containing `..` are rejected. See [Artifact](/step-types/artifact) for the full field list.
-
-### Chat (LLM)
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `action` | string | Set to `chat.completion` for LLM-based steps | - |
-| `with` | object | LLM configuration and session messages for chat steps | - |
-
-```yaml
-steps:
-  - action: chat.completion
-    with:
-      provider: openai
-      model: gpt-4o
-      system: "You are a helpful assistant."
-      messages:
-        - role: user
-          content: "What is 2+2?"
-    output: ANSWER
-```
-
-**LLM configuration fields:**
-- `provider`: LLM provider (`openai`, `anthropic`, `gemini`, `openrouter`, `zai`, `local`)
-- `model`: Model identifier (e.g., `gpt-4o`, `claude-sonnet-4-20250514`)
-- `system`: Default system prompt (optional)
-- `temperature`: Randomness control 0.0-2.0 (optional)
-- `max_tokens`: Maximum tokens to generate (optional)
-- `top_p`: Nucleus sampling 0.0-1.0 (optional)
-- `base_url`: Custom API endpoint (optional)
-- `api_key_name`: API key override (optional)
-- `stream`: Enable streaming output (default: true)
-
-**Message format:**
-- `role`: Message role (`system`, `user`, `assistant`)
-- `content`: Message content (supports `${VAR}` substitution)
-
-See [Chat Executor](/features/chat/) for full documentation.
-
-### Approval
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `approval.prompt` | string | Message displayed to the approver | - |
-| `approval.input` | string[] | Parameter names to collect from approver | - |
-| `approval.required` | string[] | Required parameters (subset of `input`) | - |
-| `approval.rewind_to` | string | Optional step name or ID to restart from on push-back | - |
-
-```yaml
-steps:
-  - id: deploy_staging
-    run: ./deploy.sh staging
-    approval:
-      prompt: "Approve production?"
-      input: [APPROVED_BY]
-      required: [APPROVED_BY]
-
-  - id: deploy_prod
-    run: ./deploy.sh production
-    depends: deploy_staging
-```
-
-The step executes normally, then enters `Waiting` status until approved. Collected inputs become environment variables in subsequent steps.
-
-See [Approval](/writing-workflows/approval) for full documentation.
-
-### Distributed Execution
-
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `worker_selector` | object \| `"local"` | Worker label requirements for distributed execution, or `"local"` to force local execution | - |
-
-When using distributed execution, specify `worker_selector` to route tasks to workers with matching labels:
-
-```yaml
-steps:
-  - action: dag.run
-    with:
-      dag: gpu-training
----
-# Run on a worker with gpu
-name: gpu-training
-worker_selector:
-  gpu: "true"
-  memory: "64G"
-tools:
-  - astral-sh/uv@0.11.14
-
-steps:
-  - run: uv run --python 3.13.9 python train_model.py
-```
-
-To force a DAG to run locally even when `default_execution_mode` is `distributed`, use the string `"local"`:
-
-```yaml
-# Always runs on the main instance
-worker_selector: local
-steps:
-  - run: curl -f http://localhost:8080/health
-```
-
-**Worker Selection Rules:**
-- All labels in `worker_selector` must match exactly on the worker
-- Label values are case-sensitive strings
-- Steps without `worker_selector` can run on any available worker
-- If no workers match the selector, the task waits until a matching worker is available
-- `worker_selector: local` overrides `default_execution_mode` and forces local execution
-
-See [Distributed Execution](/server-admin/distributed/) for complete documentation.
 
 ## Variable Substitution
 
-### Parameter References
+Dagu evaluates `${VAR}` references and backtick command substitutions in fields that are runtime-evaluated. Literal defaults in `params` are not executed; use `eval` when a parameter default must be computed.
 
 ```yaml
 params:
   - USER: john
   - DOMAIN: example.com
 
+env:
+  API_URL: https://api.example.com
+
 steps:
   - run: echo "Hello ${USER} from ${DOMAIN}"
-```
-
-### Environment Variables
-
-```yaml
-env:
-  - API_URL: https://api.example.com
-  - API_KEY: ${SECRET_API_KEY}  # From system env
-
-steps:
-  - run: curl -H "X-API-Key: ${API_KEY}" ${API_URL}
-```
-
-### Loading Environment from .env Files
-
-The `dotenv` field allows loading environment variables from `.env` files:
-
-```yaml
-# Load specific .env file
-dotenv: .env.production
-
-# Load multiple .env files (all files loaded, later override earlier)
-dotenv:
-  - .env.defaults
-  - .env.local
-
-# Disable all .env loading
-dotenv: []
-```
-
-**Loading behavior:**
-- If `dotenv` is not specified, Dagu loads `.env` by default
-- When files are specified, `.env` is automatically prepended to the list (and deduplicated if already included)
-- All files are loaded sequentially in order
-- Variables from later files override variables from earlier files
-- Missing files are silently skipped
-- Files are loaded relative to the DAG's `working_dir`
-- System environment variables take precedence over .env file variables
-- .env files are loaded at DAG startup, before any steps execute
-
-**Example .env file:**
-```bash
-# .env file
-DATABASE_URL=postgres://localhost/mydb
-API_KEY=secret123
-DEBUG=true
-```
-
-```yaml
-# DAG using .env variables
-working_dir: /app
-dotenv: .env          # Optional, this is the default
-type: chain
-
-steps:
-  - run: psql ${DATABASE_URL}
-  - run: echo "Debug is ${DEBUG}"
-```
-
-### Command Substitution
-
-```yaml
-type: chain
-
-steps:
   - run: echo "Today is `date +%Y-%m-%d`"
-    
-  - run: deploy.sh
-    preconditions:
-      - condition: "`git branch --show-current`"
-        expected: "main"
 ```
 
-### Output Variables
+Outputs can be referenced by the output variable name or through structured output references:
 
 ```yaml
-steps:
-  - id: get_version
-    run: cat VERSION
-    output: VERSION
+type: graph
 
-  - id: build_image
-    run: docker build -t app:${VERSION} .
-    depends: get_version
-```
-
-### JSON Path Access
-
-```yaml
 steps:
   - id: get_config
     run: cat config.json
-    output: CONFIG
+    output_schema:
+      type: object
+      properties:
+        server:
+          type: object
+          properties:
+            port:
+              type: integer
 
   - id: print_port
-    run: echo "Port is ${CONFIG.server.port}"
+    run: echo "Port is ${get_config.output.server.port}"
     depends: get_config
 ```
 
 ## Special Variables
 
-These variables are automatically available:
+Common runtime variables:
 
 | Variable | Description |
 |----------|-------------|
-| `DAG_NAME` | Current DAG name |
-| `DAG_RUN_ID` | Unique run identifier |
-| `DAG_RUN_LOG_FILE` | Path to workflow log |
-| `DAG_RUN_STEP_NAME` | Current step name |
-| `DAG_RUN_STEP_STDOUT_FILE` | Step stdout file path |
-| `DAG_RUN_STEP_STDERR_FILE` | Step stderr file path |
-| `DAG_RUN_WORK_DIR` | Per-run isolated work directory path |
-| `ITEM` | Current item in parallel execution |
+| `DAG_NAME` | Current DAG name. |
+| `DAG_RUN_ID` | Current DAG-run ID. |
+| `DAG_RUN_LOG_FILE` | Path to the DAG-run log file. |
+| `DAG_RUN_STEP_NAME` | Current step name. |
+| `DAG_RUN_STEP_STDOUT_FILE` | Current step stdout file path. |
+| `DAG_RUN_STEP_STDERR_FILE` | Current step stderr file path. |
+| `DAG_RUN_WORK_DIR` | Per-run isolated work directory path. |
+| `DAG_RUN_ARTIFACTS_DIR` | Per-run artifact directory when artifacts are enabled. |
+| `ITEM` | Current `parallel` item. |
+
+See [Runtime Variables](/writing-workflows/runtime-variables) for the full list.
 
 ## Complete Example
 
 ```yaml
-name: production-etl
+name: production_etl
 description: Daily ETL pipeline for production data
 labels:
   env: production
   type: etl
   priority: critical
+
 schedule: "0 2 * * *"
 
 max_active_steps: 5
@@ -1648,63 +1093,60 @@ params:
   - ENVIRONMENT: production
 
 env:
-  - DATE: "`date +%Y-%m-%d`"
-  - DATA_DIR: /data/etl
-  - LOG_LEVEL: info
-  
+  DATE: "`date +%Y-%m-%d`"
+  DATA_DIR: /data/etl
+  LOG_LEVEL: info
+
 dotenv:
   - /etc/dagu/production.env
 
-# Default container for all steps
 container:
   image: python:3.11-slim
   pull_policy: missing
   env:
-    - PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED: "1"
   volumes:
     - ./data:/data
     - ./scripts:/scripts:ro
 
 preconditions:
   - condition: "`date +%u`"
-    expected: "re:[1-5]"  # Weekdays only
+    expected: "re:[1-5]"
 
 type: graph
+
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - id: validate-environment
+  - id: validate_environment
     run: ./scripts/validate.sh
 
-  - id: extract-data
+  - id: extract_data
     run: uv run --python 3.13.9 python extract.py --date=${DATE}
     output: RAW_DATA_PATH
     retry_policy:
       limit: 3
       interval_sec: 300
-    depends: validate-environment
+    depends: validate_environment
 
-  - id: transform-data
+  - id: transform_data
     action: dag.run
     with:
-      dag: transform-module
+      dag: transform_module
       params: "TYPE=${ITEM} INPUT=${RAW_DATA_PATH}"
     parallel:
       items: [customers, orders, products]
       max_concurrent: 2
-    continue_on:
-      failure: false
-    depends: extract-data
+    depends: extract_data
 
-  # Use different container for this step
   - id: load_data
     container:
       image: postgres:16
       env:
-        - PGPASSWORD=${DB_PASSWORD}
+        PGPASSWORD: ${DB_PASSWORD}
     run: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
-    depends: transform-data
+    depends: transform_data
 
   - id: validate_results
     run: uv run --python 3.13.9 python validate_results.py --date=${DATE}
@@ -1713,25 +1155,34 @@ steps:
 
 handler_on:
   success:
-    run: |
-      echo "ETL completed successfully for ${DATE}"
-      ./scripts/notify-success.sh
+    run: ./scripts/notify-success.sh
   failure:
     action: mail.send
     with:
       to: data-team@example.com
-      subject: "ETL Failed - ${DATE}"
-      body: "Check logs at ${DAG_RUN_LOG_FILE}"
+      subject: "ETL failed - ${DATE}"
+      message: "Check logs at ${DAG_RUN_LOG_FILE}"
       attach_logs: true
   exit:
     run: ./scripts/cleanup.sh ${DATE}
 
 mail_on:
   failure: true
-  
+
 smtp:
   host: smtp.company.com
   port: "587"
   username: etl-notifications@company.com
-    depends: load_data
+  password: ${SMTP_PASSWORD}
 ```
+
+## Common Accuracy Gotchas
+
+- Top-level `resources` is not accepted by the current YAML parser.
+- Step IDs cannot contain hyphens. Use underscores.
+- `max_active_steps` defaults to `0`, which means unlimited step concurrency inside one DAG run.
+- `mail.send` uses `message`, not `body`.
+- `type: chain` forbids explicit `depends` and router steps.
+- `run` and `action` are mutually exclusive.
+- `output_schema` is an inline JSON Schema object, not a file path.
+- `dotenv` defaults to `.env`; specifying extra files does not remove `.env`. Use `dotenv: []` to disable dotenv loading.
