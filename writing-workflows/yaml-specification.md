@@ -17,6 +17,10 @@ schedule: "0 * * * *"      # Optional: cron expression or typed start/stop/resta
 # Execution control
 max_active_steps: 10         # Max parallel steps
 timeout_sec: 3600           # Workflow timeout (seconds)
+resources:
+  limits:
+    cpu: "500m"             # Optional: DAG run CPU limit
+    memory: "1Gi"           # Optional: DAG run memory limit
 
 # Parameters (`default` is literal; inline `eval` is optional)
 params:
@@ -167,6 +171,7 @@ schedule:
 | `preconditions` | string/array | Workflow-level preconditions | - |
 | `retry_policy` | object | Scheduler-driven retry policy for the whole DAG | - |
 | `run_config` | object | User interaction controls when starting DAG | - |
+| `resources` | object | CPU and memory limits requested for the DAG run. See [DAG Run Resource Limits](/writing-workflows/dag-run-resource-limits). | - |
 
 ### DAG Retry Policy
 

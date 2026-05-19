@@ -96,6 +96,7 @@ const fullSidebar = [
       // Configuration
       { text: "Step Defaults", link: "/writing-workflows/step-defaults" },
       { text: "Resource Limits", link: "/writing-workflows/resource-limits" },
+      { text: "DAG Run Resource Limits", link: "/writing-workflows/dag-run-resource-limits" },
       { text: "Container", link: "/writing-workflows/container" },
       { text: "Tags", link: "/writing-workflows/tags" },
       // Reference

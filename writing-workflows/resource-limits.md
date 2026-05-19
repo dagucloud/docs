@@ -2,6 +2,10 @@
 
 Manage workflow execution with concurrency limits.
 
+::: tip CPU and Memory Limits
+This page covers concurrency, timeout, and queue controls. For CPU and memory caps on a DAG run, see [DAG Run Resource Limits](/writing-workflows/dag-run-resource-limits).
+:::
+
 ## Concurrency Control
 
 ```yaml
