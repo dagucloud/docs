@@ -25,6 +25,57 @@ Explore without installing: [Live Demo](https://dagu-demo-f5e33d0e.dagu.sh/)
 Credentials: `demouser` / `demouser`
 :::
 
+## Production workflows need more than commands
+
+Dagu can handle the setup around a run: install the right CLI binaries, call a pinned action package, and send failed or waiting runs to the people who own them.
+
+<div class="features-grid">
+  <div class="feature-card">
+    <h3><a href="/writing-workflows/tools">Pinned tools</a></h3>
+    <p>Put <code>tools</code> at the top of the DAG. Dagu installs those pinned CLIs before host-command steps run, so the workflow is not at the mercy of a stale worker image.</p>
+  </div>
+  <div class="feature-card">
+    <h3><a href="/dagu-actions/">Dagu Actions</a></h3>
+    <p>Use actions such as <code>python-script@v1</code>, <code>duckdb@v1</code>, <code>ffmpeg@v1</code>, <code>github-cli@v1</code>, and <code>rclone@v1</code>. Each action brings its own inputs, outputs, helper files, and tool dependencies.</p>
+  </div>
+  <div class="feature-card">
+    <h3><a href="/web-ui/notifications">Notifications</a></h3>
+    <p>Send failed, waiting, rejected, aborted, or successful runs to Slack, email, Telegram, Google Chat, or webhooks through channels managed in the Web UI.</p>
+  </div>
+  <div class="feature-card">
+    <h3><a href="/web-ui/incidents">Incident routing</a></h3>
+    <p>Open PagerDuty or SolarWinds incidents after a run is finally failed, update the same incident on repeated failures, and resolve it when a later run succeeds.</p>
+  </div>
+</div>
+
+A small DAG shows the shape. It pins `jq` and uses the official Python action. Notification and incident rules stay in the Web UI, so credentials stay out of YAML.
+
+```yaml
+tools:
+  - jqlang/jq@jq-1.7.1
+
+steps:
+  - id: check_tools
+    run: jq --version
+
+  - id: summarize
+    action: python-script@v1
+    with:
+      input:
+        orders:
+          - amount: 42
+          - amount: 8
+      script: |
+        rows = input["orders"]
+
+        return {"orders": len(rows), "total": sum(row["amount"] for row in rows)}
+    depends: check_tools
+
+  - id: print
+    run: echo "orders=${summarize.outputs.result.orders} total=${summarize.outputs.result.total}"
+    depends: summarize
+```
+
 ## What Dagu Does
 
 Dagu is an operations automation engine that helps teams consolidate existing scripts, commands, containers, server tasks, SQL jobs, HTTP calls, SSH operations, and runbooks into one self-hosted workflow system.

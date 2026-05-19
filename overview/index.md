@@ -22,6 +22,33 @@ Many environments grow into hundreds of cron jobs and shell scripts on large ser
 
 Dagu was built for teams that already have important automation but lack a practical way to manage it in one place. Instead of asking teams to translate scripts and jobs into a platform-specific model, Dagu wraps existing commands with scheduling, visible dependencies, execution status, logs, retries, approvals, and Web UI controls.
 
+## What Dagu adds around a run
+
+The YAML still looks like scripts and commands. The difference is that the workflow also carries the runtime details operators usually keep in worker images, wiki pages, or chat history.
+
+<div class="overview-card-grid">
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/tools">Pinned tools</a></h3>
+    <p>A top-level <code>tools</code> block lists the CLIs and versions the workflow needs. Dagu prepares them on the worker and puts them on <code>PATH</code> before host commands run.</p>
+    <p><strong>Why it matters:</strong> the DAG names its toolchain. That means fewer surprises from stale worker images or hand-installed binaries.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/dagu-actions/">Dagu Actions</a></h3>
+    <p>A step can call <code>python-script@v1</code>, <code>duckdb@v1</code>, or <code>ffmpeg@v1</code>. Dagu resolves the action package and runs it as its own child workflow.</p>
+    <p><strong>Why it matters:</strong> shared logic can live with its inputs, outputs, helper files, and tool dependencies. The caller stays small.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/web-ui/notifications">Notifications</a></h3>
+    <p>Channels and rules send run events to Slack, email, Telegram, Google Chat, or webhooks when a run fails, waits, gets rejected, is aborted, or succeeds.</p>
+    <p><strong>Why it matters:</strong> teams manage routing in the Web UI, globally, by workspace, or for one DAG. The DAG does not need webhook URLs.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/web-ui/incidents">Incident routing</a></h3>
+    <p>Routes create provider incidents after final workflow failure and resolve them after a later successful run recovers the DAG.</p>
+    <p><strong>Why it matters:</strong> failures and recovery stay tied to the workflow, with run links, dedup keys, and provider state stored by Dagu.</p>
+  </div>
+</div>
+
 ## Core Terminology
 
 Understanding Dagu is easier once the main terms are clear.
@@ -31,8 +58,11 @@ Understanding Dagu is easier once the main terms are clear.
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
 | **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
-| **Tool** | A pinned external CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
+| **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
+| **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
+| **Notification** | A UI-managed route that sends run events to Slack, email, Telegram, Google Chat, or webhooks. |
+| **Incident** | A provider-backed failure lifecycle that opens on final failure, deduplicates repeated failures, and resolves after recovery. |
 | **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
 | **Queue** | [Concurrency control](/server-admin/queues) for workflows, useful when jobs must not overlap or when workers are shared. |
 | **Worker** | A machine that executes tasks in [distributed mode](/server-admin/distributed/). Workers can be selected by [labels](/server-admin/distributed/worker-labels) such as region, GPU, or environment. |
@@ -42,27 +72,35 @@ See [Core Concepts](/getting-started/concepts) for the deeper model.
 
 ## How a Workflow Runs
 
-Dagu keeps the workflow definition separate from the code it executes. Your scripts, containers, or services stay the same. Dagu wraps them with scheduling, dependencies, logs, retries, and recovery controls.
+Dagu does not make you rewrite the work. Your scripts, containers, and services can stay as they are; the YAML adds order, logs, retries, and recovery controls around them.
 
 ```yaml
 tools:
-  - astral-sh/uv@0.11.14
+  - jqlang/jq@jq-1.7.1
 
 steps:
-  - id: fetch_orders
-    run: uv run --python 3.13.9 python scripts/fetch_orders.py
+  - id: check_tools
+    run: jq --version
 
-  - id: normalize
-    run: uv run --python 3.13.9 python scripts/normalize.py
-    depends: fetch_orders
-
-  - id: load_warehouse
-    action: postgres.query
+  - id: summarize
+    action: python-script@v1
     with:
-      dsn: "${WAREHOUSE_DSN}"
-      query: "CALL load_daily_orders()"
-    depends: normalize
+      input:
+        orders:
+          - amount: 42
+          - amount: 8
+      script: |
+        rows = input["orders"]
+
+        return {"orders": len(rows), "total": sum(row["amount"] for row in rows)}
+    depends: check_tools
+
+  - id: print
+    run: echo "orders=${summarize.outputs.result.orders} total=${summarize.outputs.result.total}"
+    depends: summarize
 ```
+
+In this example, the DAG names its `jq` version and the Python code runs through `python-script@v1`. Notification and incident destinations are configured in the Web UI instead of being stored in YAML.
 
 <div class="overview-lifecycle" aria-label="Dagu workflow lifecycle">
   <span>Write YAML</span>
