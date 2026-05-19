@@ -1102,6 +1102,8 @@ steps:
 
 #### Run-only Step Objects
 ```yaml
+type: chain
+
 steps:
   - run: echo "Hello"
   - run: ls -la
@@ -1187,6 +1189,8 @@ steps:
 | `negate` | boolean | Invert the condition logic (run when condition does NOT match) | `false` |
 
 ```yaml
+type: chain
+
 steps:
   - run: echo "Deploying"
     with:
@@ -1266,6 +1270,8 @@ For iterating over a list of items, use [`parallel`](#parallel-execution) instea
 **Exponential Backoff**: When `backoff` is set, intervals increase exponentially using the formula:  
 `interval * (backoff ^ attemptCount)`
 ```yaml
+type: chain
+
 steps:
   - run: curl https://api.example.com
     retry_policy:
@@ -1309,6 +1315,8 @@ steps:
 Use the `container` field to run a step in its own container:
 
 ```yaml
+type: chain
+
 steps:
   # Image mode - create new container
   - id: run_in_container
@@ -1437,6 +1445,7 @@ steps:
       prompt: "Approve production?"
       input: [APPROVED_BY]
       required: [APPROVED_BY]
+
   - id: deploy_prod
     run: ./deploy.sh production
     depends: deploy_staging
@@ -1553,6 +1562,7 @@ DEBUG=true
 # DAG using .env variables
 working_dir: /app
 dotenv: .env          # Optional, this is the default
+type: chain
 
 steps:
   - run: psql ${DATABASE_URL}
@@ -1562,6 +1572,8 @@ steps:
 ### Command Substitution
 
 ```yaml
+type: chain
+
 steps:
   - run: echo "Today is `date +%Y-%m-%d`"
     
@@ -1578,6 +1590,7 @@ steps:
   - id: get_version
     run: cat VERSION
     output: VERSION
+
   - id: build_image
     run: docker build -t app:${VERSION} .
     depends: get_version
@@ -1590,6 +1603,7 @@ steps:
   - id: get_config
     run: cat config.json
     output: CONFIG
+
   - id: print_port
     run: echo "Port is ${CONFIG.server.port}"
     depends: get_config

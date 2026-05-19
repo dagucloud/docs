@@ -24,6 +24,8 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 
 - **Inline command string**:
   ```yaml
+  type: chain
+
   steps:
     - run: echo "Hello"
     - run: echo "Hello with key"

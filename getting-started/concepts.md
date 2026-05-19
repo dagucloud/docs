@@ -180,6 +180,8 @@ handler_on:
 Runs commands in the system shell. Set it once per DAG or override per step:
 
 ```yaml
+type: chain
+
 shell: [bash, -e]  # Default shell + args for all steps
 steps:
   - run: echo "Hello"   # Uses DAG shell
