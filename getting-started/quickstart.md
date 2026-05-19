@@ -226,3 +226,4 @@ steps:
 - [Step Types](/step-types/shell) — built-in executors (docker, ssh, http, wait, sql, s3, sub-DAG, ...)
 - [Examples](/writing-workflows/examples) — ready-to-adapt patterns
 - [CLI Reference](/getting-started/cli) — every command and flag
+- [AI Agent and MCP](/getting-started/ai-agent) — built-in Steward, the Dagu skill, and the MCP server for external AI tools

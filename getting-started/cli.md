@@ -718,7 +718,13 @@ Install the Dagu skill for external AI coding tools with GitHub CLI:
 gh skill install dagucloud/dagu dagu
 ```
 
-For details, run `gh skill install --help`.
+The skill helps AI coding tools write correct Dagu workflow YAML. To let MCP-capable clients operate a running Dagu server, start Dagu and configure the client to use:
+
+```text
+http://localhost:8080/mcp
+```
+
+For details, run `gh skill install --help` and see [MCP Server](/getting-started/mcp).
 
 ### `migrate`
 

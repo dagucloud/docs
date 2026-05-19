@@ -93,15 +93,23 @@ steps:
 
 ## AI Coding Tool Integration
 
-Install the Dagu skill for external AI coding tools (Claude Code, Codex, Gemini CLI, etc.) so they can write correct Dagu DAG files.
+Use the Dagu skill and MCP server for external AI coding tools (Claude Code, Codex, Gemini CLI, and other MCP-capable clients).
 
-Use GitHub CLI's skill installer:
+Install the Dagu skill when you want an AI coding tool to write correct Dagu DAG files:
 
 ```bash
 gh skill install dagucloud/dagu dagu
 ```
 
-See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
+Connect the Dagu MCP server when you want a tool to operate a running Dagu server. Start Dagu and configure the client to use the Streamable HTTP endpoint:
+
+```text
+http://localhost:8080/mcp
+```
+
+The MCP server exposes `dagu_read`, `dagu_change`, and `dagu_execute` for reading state, previewing or applying DAG changes, and controlling DAG runs.
+
+See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
 
 ## See Also
 
@@ -113,6 +121,7 @@ See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for
 - [Personality](/features/agent/settings/behavior) — Configure profiles
 - [Agent Step](/features/agent/step) — Using the agent as a workflow step
 - [Steward Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
+- [MCP Server](/getting-started/mcp) — Connect external MCP clients to a running Dagu server
 - [Workflow Operator](/features/bots/) — Use the built-in steward from Slack or Telegram
 - [Basic Chat](/features/chat/basics) — Single-shot LLM calls in workflows
 - [OpenCode](/features/chat/opencode) — Kimi, DeepSeek, GLM, Qwen via OpenCode subscription

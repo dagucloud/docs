@@ -40,6 +40,7 @@ const fullSidebar = [
       { text: "Core Concepts", link: "/getting-started/concepts" },
       { text: "CLI Commands", link: "/getting-started/cli" },
       { text: "AI Agent", link: "/getting-started/ai-agent" },
+      { text: "MCP Server", link: "/getting-started/mcp" },
     ],
   },
   {

@@ -262,13 +262,20 @@ dagu agent resume <session-id>
 `dagu agent` uses the active CLI context. Use `dagu context` to select a remote Dagu server.
 
 #### Install Dagu Skill
+
 Use GitHub CLI's skill installer:
 
 ```bash
 gh skill install dagucloud/dagu dagu
 ```
 
-See [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
+To connect MCP-capable clients to a running Dagu server, use the Streamable HTTP endpoint:
+
+```text
+http://localhost:8080/mcp
+```
+
+See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
 
 ## Advanced Usage
 
