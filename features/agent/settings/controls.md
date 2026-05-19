@@ -1,14 +1,37 @@
-# Tool Permissions & Bash Policy
+# Tool Permissions, Web Search & Bash Policy
 
-This page covers the `/agent-tools` controls that limit what the built-in steward is allowed to do.
+This page covers the `/agent-tools` controls that limit which tools Dagu's agent may use and how bash commands are filtered.
+
+The global policy applies to:
+
+- the Web UI Steward
+- the `dagu agent` CLI session
+- Workflow Operator sessions for Slack, Telegram, Discord, and LINE
+- workflow steps that run `action: agent.run`
+
+Workflow `action: agent.run` steps expose a narrower runtime tool set than interactive sessions. They can narrow that list further with `with.tools.enabled` and can override bash policy fields with `with.tools.bash_policy`, but they cannot re-enable a tool that the global policy disables.
+
+## Web Search Backend
+
+The **Web Search Backend** section controls whether agent sessions get web access.
+
+The current UI values are:
+
+- `Model Web Search`: provider-native search, when the selected model provider supports it
+- `Tavily`: hosted search and extraction tools
+- `Firecrawl`: hosted search and extraction tools
+
+For `Model Web Search`, the UI can set an optional max-use limit per request.
+
+For `Tavily` and `Firecrawl`, the UI stores the provider API key status and backend options. Hosted backends expose the callable `web_search` and `web_extract` tools only when the backend is enabled and configured. Those tools are still subject to **Tool Permissions**.
 
 ## Tool Permissions
 
-The settings page includes a **Tool Permissions** section listing the tools exposed by the built-in steward.
+The page includes a **Tool Permissions** section listing registered agent tools.
 
 Each tool can be enabled or disabled individually.
 
-This affects the built-in Web UI steward and features built on top of it, including Workflow Operator.
+Disabling a tool removes it from interactive agent sessions and prevents workflow `action: agent.run` steps from using it.
 
 Examples include:
 
@@ -19,8 +42,15 @@ Examples include:
 - `navigate`
 - `ask_user`
 - `delegate`
+- `dag_def_manage`
+- `dag_run_manage`
+- `runbook_manage`
+- `remote_agent`
+- `list_contexts`
+- `web_search`
+- `web_extract`
 
-The exact tool list is loaded from the backend. Remote-node tools only appear when remote nodes are configured.
+The exact tool list is loaded from the backend. Some tools are listed because they are registered, but are only available at runtime when their dependency is configured. For example, remote-agent tools require a remote context resolver, and hosted web tools require a configured Tavily or Firecrawl backend.
 
 See [Tools Reference](/features/agent/tools) for what each tool does.
 
@@ -44,7 +74,7 @@ The current UI values are:
 
 ### Ordered Rules
 
-Rules are evaluated top-down. Each rule includes:
+Rules are evaluated top-down. Disabled rules are skipped. Each rule includes:
 
 - `Name`
 - `Regex Pattern`
@@ -62,7 +92,7 @@ The current UI also lets you:
 
 The backend does not evaluate the entire shell string as one blob.
 
-It splits the command into executable segments and checks rules against each segment. The first matching rule for a segment decides the result for that segment.
+It splits the command into executable segments and checks rules against each segment. Segment boundaries include semicolons, newlines, pipes, `&&`, `||`, and `&`. The first matching enabled rule for a segment decides the result for that segment.
 
 If no rule matches:
 
@@ -84,19 +114,19 @@ The current policy code rejects commands that use:
 
 This is intentional because the policy matcher is not a full shell parser.
 
-## Relationship to Safe Mode
+## Relationship to Safe Mode and Workflows
 
-Safe mode is not configured on `/agent-settings`.
+Safe mode is not configured on `/agent-settings` or `/agent-tools`.
 
 It is a runtime control in the interactive chat UI and in bot request handling.
 
 When a bash command is denied:
 
 - `On Deny = Block` always blocks it
-- `On Deny = Ask User` triggers approval only when safe mode is on and an approval UI is available
-- If safe mode is off, `Ask User` behaves like allow in interactive sessions
+- `On Deny = Ask User` triggers approval only when safe mode is on and the session has an approval handler
+- if safe mode is off, `Ask User` behaves like allow in interactive sessions
 
-For workflow `action: agent.run` steps, there is no approval UI, so denied bash commands fail instead of prompting.
+For workflow `action: agent.run` steps, denied bash commands fail instead of prompting. In workflow steps, `deny_behavior: ask_user` is effectively a block because there is no command-approval handler.
 
 ## Practical Guidance
 
