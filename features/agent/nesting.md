@@ -265,7 +265,6 @@ steps:
       dag: refactor-agent
       params: "FILES=${FILE_LIST}"
     output: REFACTOR_RESULT
-
     depends: plan
   - id: summarize
     action: agent.run
@@ -418,7 +417,6 @@ steps:
       dag: test-writer
       params: "PLAN=${TEST_PLAN}"
     output: EXECUTION
-
     depends: plan
   - id: summarize
     action: agent.run

@@ -389,7 +389,6 @@ steps:
         "bug": [handle_bug]
         "feature": [handle_feature]
         "question": [handle_question]
-
     depends: classify
   - id: handle_bug
     action: chat.completion
