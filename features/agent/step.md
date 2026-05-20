@@ -16,11 +16,11 @@ steps:
     output: ANALYSIS_RESULT
 ```
 
-The agent uses the default model configured in Steward Settings (`/agent-settings`). No per-step model configuration is needed.
+The agent uses the default model configured in AI agent Settings (`/agent-settings`). No per-step model configuration is needed.
 
 ## Configuration
 
-The `with` block provides the task through `task`, `prompt`, or `messages`. Other fields fall back to `defaults.agent` and then global Steward Settings when omitted.
+The `with` block provides the task through `task`, `prompt`, or `messages`. Other fields fall back to `defaults.agent` and then global AI agent Settings when omitted.
 
 ```yaml
 steps:
@@ -45,7 +45,7 @@ steps:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `model` | string | global default | Model ID from Steward Settings. Overrides the default model for this step. |
+| `model` | string | global default | Model ID from AI agent Settings. Overrides the default model for this step. |
 | `tools` | object | — | Tool selection and bash policy. See [Tools](#tools). |
 | `soul` | string | — | Profile (`soul`) ID for this step's identity. When omitted, inherits from `defaults.agent.soul`. |
 | `memory` | object | `{ enabled: false }` | When `enabled: true`, loads global and per-DAG memory into the agent context. See [Memory](/features/agent/memory). |
@@ -60,10 +60,10 @@ The agent step resolves its model after DAG-level defaults are applied:
 
 1. If `with.model` is set in the step, look up that model ID in the global `ModelStore`
 2. If `defaults.agent.model` is set, use that model ID
-3. Otherwise use the global default model (`DefaultModelID` from Steward Settings)
+3. Otherwise use the global default model (`DefaultModelID` from AI agent Settings)
 4. If no model is configured, the step fails with: `"no model configured; set a default model in Agent Settings or specify agent.model in the step"`
 
-Model configuration (provider, API key, base URL) is managed entirely through Steward Settings. This avoids duplicating credentials in DAG files.
+Model configuration (provider, API key, base URL) is managed entirely through AI agent Settings. This avoids duplicating credentials in DAG files.
 
 ## DAG-Level Defaults
 
@@ -143,7 +143,7 @@ The `output` tool is always included even if not listed in `tools.enabled`.
 
 Tools are filtered in two layers:
 
-1. **Global policy** (from Steward Settings): Tools disabled in the global `ToolPolicy.Tools` are removed. You cannot re-enable a globally-disabled tool at the step level.
+1. **Global policy** (from AI agent Settings): Tools disabled in the global `ToolPolicy.Tools` are removed. You cannot re-enable a globally-disabled tool at the step level.
 2. **Step-level `tools.enabled`**: If specified, only the listed tools are available (intersected with what's globally allowed).
 
 When `tools.enabled` is omitted, all globally-enabled tools are available.
@@ -157,11 +157,11 @@ agent:
       - think
 ```
 
-If `read` is disabled in global Steward Settings and the step specifies `enabled: [bash, read]`, only `bash` and `output` will be available. The step does not produce a warning for this.
+If `read` is disabled in global AI agent Settings and the step specifies `enabled: [bash, read]`, only `bash` and `output` will be available. The step does not produce a warning for this.
 
 ## Bash Policy
 
-Bash command policy rules are loaded from global Steward Settings and enforced via a `BeforeToolExecHook` on every bash tool call. Rules are evaluated in order; the first matching rule determines the action.
+Bash command policy rules are loaded from global AI agent Settings and enforced via a `BeforeToolExecHook` on every bash tool call. Rules are evaluated in order; the first matching rule determines the action.
 
 Agent steps do not have an interactive approval UI. If a command is denied by policy, the step receives a policy error instead of a prompt.
 
@@ -446,8 +446,8 @@ steps:
 
 ## See Also
 
-- [Steward Overview](/features/agent/) — Web UI steward with sessions and interactive tools
-- [Steward Tools Reference](/features/agent/tools) — Full parameter documentation for each tool
+- [AI agent Overview](/features/agent/) — Web UI steward with sessions and interactive tools
+- [AI agent Tools Reference](/features/agent/tools) — Full parameter documentation for each tool
 - [Chat & AI Agents](/features/chat/) — `action: chat.completion` for simple LLM calls with DAG-based tools
 - [Approval](/writing-workflows/approval) — Human approval gates
 - [Scheduled Agents](/features/agent/scheduling) — Running agent steps on a cron schedule

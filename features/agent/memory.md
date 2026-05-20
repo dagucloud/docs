@@ -25,12 +25,12 @@ As a rule, keep information as close as possible to the workflow it belongs to.
 
 ## How Users Control Memory
 
-You can tell Steward directly:
+You can tell AI agent directly:
 
 - **"remember this"** when something should be kept
 - **"forget this"** when it should be removed
 
-When Steward is working with a specific DAG, it will usually prefer that DAG's memory rather than global memory.
+When AI agent is working with a specific DAG, it will usually prefer that DAG's memory rather than global memory.
 
 ## What To Save
 
@@ -83,6 +83,6 @@ If you use [Git Sync](/server-admin/git-sync), memory files can move through the
 
 ## Related Pages
 
-- [Steward](/features/agent/)
+- [AI agent](/features/agent/)
 - [Agent Step](/features/agent/step)
 - [Git Sync](/server-admin/git-sync)

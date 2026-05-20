@@ -4,7 +4,7 @@ Workflow Operator on Discord connects Discord channels and DMs to the built-in D
 
 ## Prerequisites
 
-Before setting up Workflow Operator on Discord, configure Steward in the Web UI. Go to **Steward Settings** (`/agent-settings`) and set up the model, tool policy, and other defaults first. The Discord bot forwards messages to the built-in steward, so it must be configured before Discord can use it. Start with [Steward Settings](/features/agent/settings/), then use [Models & Providers](/features/agent/settings/models) and [Tool Permissions & Bash Policy](/features/agent/settings/controls) for the concrete setup pieces.
+Before setting up Workflow Operator on Discord, configure AI agent in the Web UI. Go to **AI agent Settings** (`/agent-settings`) and set up the model, tool policy, and other defaults first. The Discord bot forwards messages to the built-in steward, so it must be configured before Discord can use it. Start with [AI agent Settings](/features/agent/settings/), then use [Models & Providers](/features/agent/settings/models) and [Tool Permissions & Bash Policy](/features/agent/settings/controls) for the concrete setup pieces.
 
 ## Creating a Discord App
 

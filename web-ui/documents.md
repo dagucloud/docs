@@ -11,7 +11,7 @@ Use Docs to:
 - keep operational runbooks next to the workflows that use them
 - publish Markdown reports from DAG steps
 - search workflow notes and generated summaries
-- reference documents from Steward with `@` mentions
+- reference documents from AI agent with `@` mentions
 - edit Markdown without leaving the Web UI
 
 Docs works best for text that should stay close to Dagu workflows. Use a separate knowledge base for broad company documentation.
@@ -102,14 +102,14 @@ title: Deployment Runbook
 
 If no title is set, Docs uses the file name.
 
-## Steward Integration
+## AI agent Integration
 
-Steward can use documents as context:
+AI agent can use documents as context:
 
-1. Open the Steward chat.
+1. Open the AI agent chat.
 2. Type `@`.
 3. Select a document from the picker.
-4. Ask Steward to explain, summarize, or apply the document.
+4. Ask AI agent to explain, summarize, or apply the document.
 
 The picker follows the current workspace, so users see only documents available to them.
 
@@ -144,4 +144,4 @@ See [Workspaces](/web-ui/workspaces) for workspace behavior and [Git Sync](/serv
 - [Workspaces](/web-ui/workspaces)
 - [Runtime Variables](/writing-workflows/runtime-variables)
 - [Git Sync](/server-admin/git-sync)
-- [Steward Overview](/features/agent/)
+- [AI agent Overview](/features/agent/)

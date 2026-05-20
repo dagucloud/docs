@@ -4,7 +4,7 @@ This page covers the `/agent-tools` controls that limit which tools Dagu's agent
 
 The global policy applies to:
 
-- the Web UI Steward
+- the Web UI AI agent
 - the `dagu agent` CLI session
 - Workflow Operator sessions for Slack, Telegram, Discord, and LINE
 - workflow steps that run `action: agent.run`
@@ -137,7 +137,7 @@ For workflow `action: agent.run` steps, denied bash commands fail instead of pro
 
 ## See Also
 
-- [Steward Settings](/features/agent/settings/)
+- [AI agent Settings](/features/agent/settings/)
 - [Models & Providers](/features/agent/settings/models)
 - [Web Search](/features/agent/web-search)
 - [Tools Reference](/features/agent/tools)

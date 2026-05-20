@@ -4,7 +4,7 @@ Workflow Operator on LINE connects LINE one-on-one chats, groups, and rooms to t
 
 ## Prerequisites
 
-Before setting up Workflow Operator on LINE, configure Steward in the Web UI. Go to **Steward Settings** (`/agent-settings`) and set up the model, tool policy, and other defaults first. The LINE bot forwards messages to the built-in steward, so it must be configured before LINE can use it.
+Before setting up Workflow Operator on LINE, configure AI agent in the Web UI. Go to **AI agent Settings** (`/agent-settings`) and set up the model, tool policy, and other defaults first. The LINE bot forwards messages to the built-in steward, so it must be configured before LINE can use it.
 
 You also need a public HTTPS URL for the Dagu server. LINE requires the webhook URL to use HTTPS with a certificate trusted by common browsers.
 

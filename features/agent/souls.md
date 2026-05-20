@@ -9,7 +9,7 @@ You can create multiple profiles and switch between them from [Personality](/fea
 1. Create a Markdown file in `{DAGsDir}/souls/`.
 2. Add a `name` and optional `description` in the YAML frontmatter.
 3. Write the instructions you want the agent to follow in the Markdown body.
-4. Open **Steward Settings** and choose that profile as the default personality.
+4. Open **AI agent Settings** and choose that profile as the default personality.
 
 ## What A Profile Controls
 
@@ -81,13 +81,13 @@ IDs must match the pattern `[a-z0-9]+(-[a-z0-9]+)*` with a maximum of 128 charac
 
 A `default` soul is included so the profile selector has a sensible starting point.
 
-When no profile is selected, or the selected profile cannot be found, Steward falls back to the `default` soul.
+When no profile is selected, or the selected profile cannot be found, AI agent falls back to the `default` soul.
 
 ## Selecting a Profile
 
 ### Via Web UI
 
-Open **Steward Settings** (`/agent-settings`) and use the **Default Profile** selector.
+Open **AI agent Settings** (`/agent-settings`) and use the **Default Profile** selector.
 
 The settings behavior is documented on [Personality](/features/agent/settings/behavior).
 
@@ -103,7 +103,7 @@ The selected profile takes effect on the next session creation.
 
 ## Safety Boundary
 
-Profiles shape Steward's identity and style, but they do not override Dagu's built-in safety rules. This means:
+Profiles shape AI agent's identity and style, but they do not override Dagu's built-in safety rules. This means:
 
 - You **can** customize: identity, priorities, communication style, custom guidelines
 - You **cannot** override: safety rules, security policies, tool restrictions, data hygiene rules
@@ -164,7 +164,7 @@ Then select it from [Personality](/features/agent/settings/behavior) or via the 
 
 ## See Also
 
-- [Steward Overview](/features/agent/) — Chat interface and configuration
+- [AI agent Overview](/features/agent/) — Chat interface and configuration
 - [Personality](/features/agent/settings/behavior) — Choose the default profile in the Web UI
 - [Agent Step](/features/agent/step) — Using profiles (`soul`) in DAG agent steps
 - [Git Sync](/server-admin/git-sync) — Synchronizing profile files with Git

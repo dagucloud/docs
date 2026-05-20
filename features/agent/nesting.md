@@ -15,7 +15,7 @@ Use `action: dag.run` with `with.dag` to invoke child DAGs that contain `action:
 
 ## Prerequisites
 
-- A default model must be configured in Steward Settings (`/agent-settings`), or each agent step must specify `agent.model`
+- A default model must be configured in AI agent Settings (`/agent-settings`), or each agent step must specify `agent.model`
 - Familiarity with [Agent Step](/features/agent/step) configuration
 - Familiarity with [Nested Workflows](/writing-workflows/control-flow#nested-workflows) and [Sub DAG Outputs](/writing-workflows/data-flow#sub-dag-outputs)
 

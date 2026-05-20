@@ -34,7 +34,7 @@ Use [Web Search](/features/agent/web-search) for:
 
 ## See Also
 
-- [Steward Settings](/features/agent/settings/)
+- [AI agent Settings](/features/agent/settings/)
 - [Profiles](/features/agent/souls)
 - [Agent Step](/features/agent/step)
 - [Web Search](/features/agent/web-search)

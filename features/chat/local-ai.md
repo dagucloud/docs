@@ -32,7 +32,7 @@ Enter the **base URL**, not a full endpoint. Do not paste vendor-native endpoint
 | `http://localhost:11434/api/generate` | Wrong |
 | `http://localhost:11434/v1/chat/completions` | Wrong |
 
-## Web UI Steward Setup
+## Web UI AI agent Setup
 
 1. Start your local model server
 2. Make sure the model you want is already available there
@@ -119,5 +119,5 @@ Check where Dagu is actually running. If Dagu runs in Docker, Kubernetes, or on 
 ## Related Pages
 
 - [Basic Chat](/features/chat/basics)
-- [Steward](/features/agent/)
+- [AI agent](/features/agent/)
 - [Models & Providers](/features/agent/settings/models)

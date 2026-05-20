@@ -1,4 +1,4 @@
-# Steward Tools Reference
+# AI agent Tools Reference
 
 Reference for tools available to the interactive Dagu steward in the Web UI.
 

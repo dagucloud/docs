@@ -31,10 +31,10 @@ OpenCode (`opencode.ai`) provides a unified OpenAI-compatible endpoint for a rot
 
 The model catalog may expand over time. Check [opencode.ai/docs/go](https://opencode.ai/docs/go/) for the current list.
 
-## Web UI Steward Setup
+## Web UI AI agent Setup
 
 1. Go to `/agent-settings`
-2. Enable Steward if not already on
+2. Enable AI agent if not already on
 3. Click **Add Model**
 4. Fill in:
    - **Provider**: `OpenCode`
@@ -141,5 +141,5 @@ OpenCode reasoning models return thinking text in a `reasoning` field. Dagu pres
 
 - [Basic Chat](/features/chat/basics)
 - [Local AI](/features/chat/local-ai)
-- [Steward](/features/agent/)
+- [AI agent](/features/agent/)
 - [Models & Providers](/features/agent/settings/models)

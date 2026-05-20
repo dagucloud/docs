@@ -5,7 +5,7 @@ Agent steps work with `schedule` like any other action. Add a `schedule` field t
 ## Prerequisites
 
 - The scheduler must be running (`dagu scheduler` or `dagu start-all`)
-- An agent model must be configured in Steward Settings (`/agent-settings`)
+- An agent model must be configured in AI agent Settings (`/agent-settings`)
 - See [Scheduling](/writing-workflows/scheduling) for cron syntax and scheduler setup
 - See [Agent Step](/features/agent/step) for agent configuration
 

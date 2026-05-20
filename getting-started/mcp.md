@@ -203,6 +203,6 @@ Most AI-assisted workflow authoring setups benefit from both: install the skill 
 
 ## See also
 
-- [AI Agent](/getting-started/ai-agent) — built-in Steward and workflow agent steps
+- [AI Agent](/getting-started/ai-agent) — built-in AI agent and workflow agent steps
 - [CLI Commands](/getting-started/cli) — command reference, including external AI tool integration
 - [API Keys](/server-admin/authentication/api-keys) — bearer tokens for programmatic access

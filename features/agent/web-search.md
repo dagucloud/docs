@@ -1,6 +1,6 @@
 # Web Search
 
-Dagu supports web access for Steward in two different ways:
+Dagu supports web access for AI agent in two different ways:
 
 | Backend | What The Agent Gets | Best For | Requires |
 |---------|---------------------|----------|----------|
@@ -14,8 +14,8 @@ Use `Model Web Search` when you want the model provider to manage the search. Us
 
 You need admin access to change agent settings.
 
-1. Open **Steward Settings** at `/agent-settings`
-2. Enable Steward, add a model, and set a default model
+1. Open **AI agent Settings** at `/agent-settings`
+2. Enable AI agent, add a model, and set a default model
 3. Open **Agent Tools** at `/agent-tools`
 4. Turn on **Web Search Backend**
 5. Choose `Model Web Search`, `Tavily`, or `Firecrawl`
@@ -183,6 +183,6 @@ Supported backend values are `tavily` and `firecrawl`.
 ## Related Pages
 
 - [Agent Step](/features/agent/step)
-- [Steward Tools Reference](/features/agent/tools)
+- [AI agent Tools Reference](/features/agent/tools)
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls)
 - [Models & Providers](/features/agent/settings/models)

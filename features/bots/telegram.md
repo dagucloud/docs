@@ -4,7 +4,7 @@ Workflow Operator on Telegram connects Telegram chats to the built-in Dagu agent
 
 ## Prerequisites
 
-Before setting up Workflow Operator on Telegram, configure Steward in the Web UI. Go to **Steward Settings** (`/agent-settings`) and set up the model, tool policy, and other defaults first. The Telegram bot forwards messages to the built-in steward, so it must be configured before Telegram can use it. Start with [Steward Settings](/features/agent/settings/), then use [Models & Providers](/features/agent/settings/models) and [Tool Permissions & Bash Policy](/features/agent/settings/controls) for the concrete setup pieces.
+Before setting up Workflow Operator on Telegram, configure AI agent in the Web UI. Go to **AI agent Settings** (`/agent-settings`) and set up the model, tool policy, and other defaults first. The Telegram bot forwards messages to the built-in steward, so it must be configured before Telegram can use it. Start with [AI agent Settings](/features/agent/settings/), then use [Models & Providers](/features/agent/settings/models) and [Tool Permissions & Bash Policy](/features/agent/settings/controls) for the concrete setup pieces.
 
 ## Creating a Telegram Bot
 

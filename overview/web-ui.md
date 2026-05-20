@@ -60,11 +60,11 @@ Use it when you want to:
 
 See [Cockpit](/web-ui/cockpit) for the dedicated guide.
 
-## Steward
+## AI agent
 
 The built-in steward helps with workflow authoring, debugging, and day-to-day operations directly in the UI.
 
-![Steward Chat](/agent-modal.png)
+![AI agent Chat](/agent-modal.png)
 
 Typical uses:
 
@@ -75,7 +75,7 @@ Typical uses:
 
 Configure it from `/agent-settings`.
 
-See [Steward](/features/agent/) for the full setup and usage guide.
+See [AI agent](/features/agent/) for the full setup and usage guide.
 
 ## Dashboard
 

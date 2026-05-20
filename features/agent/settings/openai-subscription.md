@@ -24,7 +24,7 @@ The connection is scoped to the currently selected node. If you switch to anothe
 
 ## Web UI Setup
 
-### 1. Open Steward Settings
+### 1. Open AI agent Settings
 
 Go to `/agent-settings` and enable the built-in steward if it is not already enabled.
 
@@ -83,4 +83,4 @@ Disconnecting the subscription does not delete the saved model entry. It only re
 ## Related Pages
 
 - [Models & Providers](/features/agent/settings/models)
-- [Steward](/features/agent/)
+- [AI agent](/features/agent/)

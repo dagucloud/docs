@@ -1,10 +1,10 @@
-# Steward
+# AI agent
 
-Dagu Steward is an LLM-powered assistant integrated into the Web UI. It can read, create, and modify your workflows through a chat interface with tool-calling capabilities.
+Dagu AI agent is an LLM-powered assistant integrated into the Web UI. It can read, create, and modify your workflows through a chat interface with tool-calling capabilities.
 
 ## Quick Setup
 
-1. **Enable Steward** — Toggle it on in the Web UI at `/agent-settings`, or set the environment variable `DAGU_AGENT_ENABLED=true`.
+1. **Enable AI agent** — Toggle it on in the Web UI at `/agent-settings`, or set the environment variable `DAGU_AGENT_ENABLED=true`.
 
 2. **Add a model** — Click **Add Model** in the settings page and configure an LLM provider. Supported providers: `anthropic`, `openai`, `openai-codex`, `gemini`, `openrouter`, `zai`, `opencode`, `local` (Ollama, vLLM, etc.).
 
@@ -12,11 +12,11 @@ Dagu Steward is an LLM-powered assistant integrated into the Web UI. It can read
 
 3. **Set a default model** — Click the star icon next to a model to make it the default.
 
-Once configured, click the **Steward** button at the bottom-left corner of any page to start chatting.
+Once configured, click the **AI agent** button at the bottom-left corner of any page to start chatting.
 
 If you are using Ollama or another local model server, read [Local AI](/features/chat/local-ai) before setting the `Base URL`. Dagu expects an OpenAI-compatible base such as `http://localhost:11434/v1`, not a native Ollama endpoint like `/api/generate`.
 
-For the full built-in steward configuration surface, start with [Steward Settings](/features/agent/settings/). The settings docs are split into focused pages for models, tool policy, personality, and web search.
+For the full built-in steward configuration surface, start with [AI agent Settings](/features/agent/settings/). The settings docs are split into focused pages for models, tool policy, personality, and web search.
 
 ## CLI Agent
 
@@ -34,7 +34,7 @@ dagu agent resume <session-id> -p "continue from here"
 
 ## Available Tools
 
-Steward can use these built-in tools. Some are only available when the corresponding feature is configured:
+AI agent can use these built-in tools. Some are only available when the corresponding feature is configured:
 
 | Tool | Description |
 |------|-------------|
@@ -113,14 +113,14 @@ See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#e
 
 ## See Also
 
-- [Steward Documentation](/features/agent/) — Complete guide to Steward and its configuration
-- [Steward Settings](/features/agent/settings/) — Start here for the built-in Web UI steward settings
+- [AI agent Documentation](/features/agent/) — Complete guide to AI agent and its configuration
+- [AI agent Settings](/features/agent/settings/) — Start here for the built-in Web UI steward settings
 - [Models & Providers](/features/agent/settings/models) — Add models and set the default model
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls) — Control tools and bash rules
 - [Web Search](/features/agent/web-search) — Configure model-native search, Tavily, or Firecrawl
 - [Personality](/features/agent/settings/behavior) — Configure profiles
 - [Agent Step](/features/agent/step) — Using the agent as a workflow step
-- [Steward Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
+- [AI agent Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
 - [MCP Server](/getting-started/mcp) — Connect external MCP clients to a running Dagu server
 - [Workflow Operator](/features/bots/) — Use the built-in steward from Slack, Telegram, Discord, or LINE
 - [Basic Chat](/features/chat/basics) — Single-shot LLM calls in workflows

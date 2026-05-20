@@ -1,6 +1,6 @@
-# Steward Settings
+# AI agent Settings
 
-The **Steward Settings** page in the Web UI (`/agent-settings`) configures the built-in steward itself.
+The **AI agent Settings** page in the Web UI (`/agent-settings`) configures the built-in steward itself.
 
 This is broader than workflow `action: agent.run` or workflow `action: chat.completion` configuration.
 
@@ -19,10 +19,10 @@ If you are looking for workflow YAML configuration, see [Agent Step](/features/a
 
 The settings surface is split into smaller pages:
 
-- [Models & Providers](/features/agent/settings/models) for enabling Steward, adding models, choosing a default model, and understanding model fields
+- [Models & Providers](/features/agent/settings/models) for enabling AI agent, adding models, choosing a default model, and understanding model fields
 - [OpenAI Subscription](/features/agent/settings/openai-subscription) for connecting a ChatGPT subscription and using the `openai-codex` provider
 - [OpenCode](/features/chat/opencode) for Kimi, DeepSeek, GLM, Qwen, and other models via an OpenCode subscription
-- [Tool Permissions & Bash Policy](/features/agent/settings/controls) for deciding which tools Steward may use and how bash commands are filtered
+- [Tool Permissions & Bash Policy](/features/agent/settings/controls) for deciding which tools AI agent may use and how bash commands are filtered
 - [Web Search](/features/agent/web-search) for selecting model-native search, Tavily, or Firecrawl
 - [Personality](/features/agent/settings/behavior) for selecting a default profile
 
@@ -36,7 +36,7 @@ Those are separate features with their own documentation.
 
 ## Recommended Setup Order
 
-1. Enable Steward
+1. Enable AI agent
 2. Add at least one model
 3. Set the default model
 4. Review tool permissions and bash command policy
@@ -56,7 +56,7 @@ The settings page also does not replace the `chat` workflow step. `action: chat.
 
 ### Workflow Operator (Chat Bot)
 
-Workflow Operator depends on the built-in steward being configured first. Slack, Telegram, Discord, and LINE conversations are routed into steward sessions, so Steward must already have a working model and policy configuration.
+Workflow Operator depends on the built-in steward being configured first. Slack, Telegram, Discord, and LINE conversations are routed into steward sessions, so AI agent must already have a working model and policy configuration.
 
 See:
 
@@ -68,7 +68,7 @@ See:
 
 ## See Also
 
-- [Steward Overview](/features/agent/)
+- [AI agent Overview](/features/agent/)
 - [Models & Providers](/features/agent/settings/models)
 - [OpenAI Subscription](/features/agent/settings/openai-subscription)
 - [Tool Permissions & Bash Policy](/features/agent/settings/controls)

@@ -2,9 +2,9 @@
 
 This page covers the part of `/agent-settings` where you decide whether the built-in steward can run and which models it can use.
 
-## Enable Steward
+## Enable AI agent
 
-The **Enable Steward** toggle turns the built-in Web UI assistant on or off.
+The **Enable AI agent** toggle turns the built-in Web UI assistant on or off.
 
 You can also enable it through configuration:
 
@@ -14,7 +14,7 @@ export DAGU_AGENT_ENABLED=true
 
 ## Models Table
 
-When Steward is enabled, Dagu shows a models table where you can:
+When AI agent is enabled, Dagu shows a models table where you can:
 
 - add a model
 - edit an existing model
