@@ -23,6 +23,129 @@ dagu start-all
 
 If you changed Dagu's server base path, append `/mcp` under that base path instead.
 
+## Install in an MCP client
+
+Dagu's MCP server is built into the Dagu HTTP server, so there is no separate `dagu-mcp` package. Installing MCP for an AI tool means starting Dagu, then adding the Dagu Streamable HTTP endpoint to that tool.
+
+### Before you configure a client
+
+1. Start Dagu:
+
+```bash
+dagu start-all
+```
+
+2. Confirm the MCP endpoint URL:
+
+| Server setup | MCP URL |
+|--------------|---------|
+| Default local server | `http://localhost:8080/mcp` |
+| Custom port | `http://localhost:<port>/mcp` |
+| Custom server base path such as `/dagu` | `http://localhost:8080/dagu/mcp` |
+
+3. If Dagu uses `builtin` authentication, create an [API key](/server-admin/authentication/api-keys) and export it before launching the MCP client:
+
+```bash
+export DAGU_MCP_API_KEY=dagu_...
+```
+
+Use a role that matches what the client should do. For example, `viewer` is enough for read-only inspection, `operator` can run and stop workflows, and `developer` can create or edit workflows.
+
+### Codex
+
+Codex supports Streamable HTTP MCP servers through `config.toml`. The CLI and IDE extension share this configuration.
+
+For a Dagu server without authentication:
+
+```bash
+codex mcp add dagu --url http://localhost:8080/mcp
+```
+
+For a Dagu server using `builtin` authentication:
+
+```bash
+export DAGU_MCP_API_KEY=dagu_...
+codex mcp add dagu \
+  --url http://localhost:8080/mcp \
+  --bearer-token-env-var DAGU_MCP_API_KEY
+```
+
+This writes the same configuration you can also add manually to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.dagu]
+url = "http://localhost:8080/mcp"
+bearer_token_env_var = "DAGU_MCP_API_KEY"
+```
+
+Verify the setup:
+
+```bash
+codex mcp list
+```
+
+In an interactive Codex session, use `/mcp` to see whether the `dagu` server is connected and which tools are available.
+
+### Claude Code
+
+Claude Code supports Streamable HTTP MCP servers with `claude mcp add --transport http`.
+
+For a Dagu server without authentication:
+
+```bash
+claude mcp add --transport http dagu http://localhost:8080/mcp
+```
+
+For a Dagu server using `builtin` authentication:
+
+```bash
+export DAGU_MCP_API_KEY=dagu_...
+claude mcp add --transport http dagu http://localhost:8080/mcp \
+  --header "Authorization: Bearer ${DAGU_MCP_API_KEY}"
+```
+
+The default Claude Code scope is local to the current project. To make the server available in every Claude Code project on your machine, add `--scope user`:
+
+```bash
+claude mcp add --transport http --scope user dagu http://localhost:8080/mcp \
+  --header "Authorization: Bearer ${DAGU_MCP_API_KEY}"
+```
+
+Verify the setup:
+
+```bash
+claude mcp list
+claude mcp get dagu
+```
+
+Inside Claude Code, use `/mcp` to inspect the connection status.
+
+### Share Claude Code setup with a team
+
+Use project scope when you want a repository to include the MCP server definition. Keep the secret in each user's environment:
+
+```bash
+claude mcp add --transport http --scope project dagu http://localhost:8080/mcp
+```
+
+Then edit the generated `.mcp.json` so the API key is read from an environment variable instead of being committed:
+
+```json
+{
+  "mcpServers": {
+    "dagu": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp",
+      "headers": {
+        "Authorization": "Bearer ${DAGU_MCP_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Each teammate should create their own Dagu API key and export `DAGU_MCP_API_KEY` before starting Claude Code.
+
 ## Authentication
 
 The MCP endpoint uses the same authentication mode as the Dagu server.
@@ -33,7 +156,7 @@ The MCP endpoint uses the same authentication mode as the Dagu server.
 | `builtin` | Create an [API key](/server-admin/authentication/api-keys) and send it as `Authorization: Bearer dagu_...`. A login JWT also works, but API keys are better for tools and automation. |
 | `basic` | Use HTTP Basic authentication if your MCP client supports it. |
 
-Prefer an `Authorization` header. If a client cannot send headers, Dagu also accepts `?token=<token>` on stream endpoints, but headers are safer for shared or proxied environments.
+Prefer an `Authorization` header. Codex and Claude Code both support sending headers to HTTP MCP servers. If a client cannot send headers, Dagu also accepts `?token=<token>` on stream endpoints, but headers are safer for shared or proxied environments.
 
 ## Tool surface
 
