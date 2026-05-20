@@ -2,19 +2,28 @@
 title: What is Dagu?
 ---
 
-<div class="overview-hero">
-  <div class="overview-hero-copy">
-    <h2>Local-first workflow engine for production scripts</h2>
-    <p>
-      Define workflows in simple declarative YAML syntax, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers.
-    </p>
-    <div class="overview-actions">
-      <a href="/getting-started/quickstart" class="overview-button overview-button-primary">Start in minutes</a>
-      <a href="/overview/deployment-models" class="overview-button overview-button-secondary">Deployment models</a>
-      <a href="/writing-workflows/examples" class="overview-button overview-button-secondary">Browse examples</a>
-    </div>
+<img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
+
+<div class="tagline" style="text-align: center;">
+  <h2>Local-first workflow engine for production scripts</h2>
+  <p>Define workflows in simple declarative YAML syntax, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers.</p>
+</div>
+
+<div class="hero-section">
+  <div class="hero-actions">
+    <a href="/getting-started/quickstart" class="VPButton brand">Get Started</a>
+    <a href="/overview/deployment-models" class="VPButton alt">Deployment Models</a>
+    <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
   </div>
 </div>
+
+<video src="/cockpit-demo.mp4" controls preload="metadata" playsinline aria-label="Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;"></video>
+
+::: tip Try It Live
+Explore without installing: [Live Demo](https://dagu-demo-f5e33d0e.dagu.sh/)
+
+Credentials: `demouser` / `demouser`
+:::
 
 ## Motivation
 
@@ -22,7 +31,9 @@ Many environments grow into hundreds of cron jobs and shell scripts on large ser
 
 Dagu was built for teams that already have important automation but lack a practical way to manage it in one place. Instead of asking teams to translate scripts and jobs into a platform-specific model, Dagu wraps existing commands with scheduling, visible dependencies, execution status, logs, retries, approvals, and Web UI controls.
 
-## What Dagu adds around a run
+By default, Dagu keeps workflows, run history, logs, and artifacts on local disk, so teams can move from fragmented cron and scattered scripts to visible, retryable workflows without introducing a large orchestration project.
+
+## What Dagu Adds Around a Run
 
 The YAML still looks like scripts and commands. The difference is that the workflow also carries the runtime details operators usually keep in worker images, wiki pages, or chat history.
 
@@ -48,27 +59,6 @@ The YAML still looks like scripts and commands. The difference is that the workf
     <p><strong>Why it matters:</strong> failures and recovery stay tied to the workflow, with run links, dedup keys, and provider state stored by Dagu.</p>
   </div>
 </div>
-
-## Core Terminology
-
-Understanding Dagu is easier once the main terms are clear.
-
-| Term | Meaning |
-|------|---------|
-| **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
-| **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
-| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
-| **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
-| **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
-| **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
-| **Notification** | A UI-managed route that sends run events to Slack, email, Telegram, Google Chat, or webhooks. |
-| **Incident** | A provider-backed failure lifecycle that opens on final failure, deduplicates repeated failures, and resolves after recovery. |
-| **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
-| **Queue** | [Concurrency control](/server-admin/queues) for workflows, useful when jobs must not overlap or when workers are shared. |
-| **Worker** | A machine that executes tasks in [distributed mode](/server-admin/distributed/). Workers can be selected by [labels](/server-admin/distributed/worker-labels) such as region, GPU, or environment. |
-| **Artifact** | A file produced by a run and stored with the [run history](/getting-started/cli#history) for [preview, download, or audit](/writing-workflows/artifacts). |
-
-See [Core Concepts](/getting-started/concepts) for the deeper model.
 
 ## How a Workflow Runs
 
@@ -113,6 +103,27 @@ In this example, the DAG names its `jq` version and the Python code runs through
 
 During a run, Dagu resolves dependencies, starts ready steps, captures stdout and stderr, tracks status, applies retry rules, stores artifacts, and updates the Web UI in real time.
 
+## Core Terminology
+
+Understanding Dagu is easier once the main terms are clear.
+
+| Term | Meaning |
+|------|---------|
+| **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
+| **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
+| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
+| **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
+| **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
+| **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
+| **Notification** | A UI-managed route that sends run events to Slack, email, Telegram, Google Chat, or webhooks. |
+| **Incident** | A provider-backed failure lifecycle that opens on final failure, deduplicates repeated failures, and resolves after recovery. |
+| **Schedule** | [Cron-based automation](/writing-workflows/scheduling) for starting DAG runs, including timezone support. |
+| **Queue** | [Concurrency control](/server-admin/queues) for workflows, useful when jobs must not overlap or when workers are shared. |
+| **Worker** | A machine that executes tasks in [distributed mode](/server-admin/distributed/). Workers can be selected by [labels](/server-admin/distributed/worker-labels) such as region, GPU, or environment. |
+| **Artifact** | A file produced by a run and stored with the [run history](/getting-started/cli#history) for [preview, download, or audit](/writing-workflows/artifacts). |
+
+See [Core Concepts](/getting-started/concepts) for the deeper model.
+
 ## Why Teams Choose Dagu
 
 The main reason teams choose Dagu is that it modernizes existing operations automation without turning that work into a platform rollout.
@@ -144,7 +155,7 @@ The main reason teams choose Dagu is that it modernizes existing operations auto
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/yaml-specification">Plain YAML</a></h3>
-      <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/dagu-actions/custom">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
+    <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/dagu-actions/custom">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
   </div>
 </div>
 
@@ -336,6 +347,10 @@ Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in ste
     <p>Learn workflows, steps, dependencies, parameters, and execution behavior.</p>
   </div>
   <div class="step-card">
+    <h3><a href="/writing-workflows/">Writing Workflows</a></h3>
+    <p>YAML syntax, scheduling, execution control, artifacts, outputs, and reliability settings.</p>
+  </div>
+  <div class="step-card">
     <h3><a href="/step-types/shell">Step Types</a></h3>
     <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, wait, S3, and agent execution.</p>
   </div>
@@ -352,15 +367,28 @@ Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in ste
     <p>Understand standalone mode, distributed workers, storage, queues, and service layout.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/writing-workflows/examples">Examples</a></h3>
-    <p>Start from practical workflow patterns and adapt them to your environment.</p>
-  </div>
-  <div class="step-card">
-    <h3><a href="/features/agent/">Steward</a></h3>
-    <p>Use Dagu's built-in steward to create, update, and debug workflows.</p>
+    <h3><a href="/overview/deployment-models">Deployment Models</a></h3>
+    <p>Compare local, self-hosted, managed, and hybrid operating models.</p>
   </div>
   <div class="step-card">
     <h3><a href="/web-ui/incidents">Incident Routing</a></h3>
     <p>Open, deduplicate, and resolve provider incidents for production workflow failures.</p>
   </div>
+</div>
+
+## Community
+
+<div class="community-links">
+  <a href="https://github.com/dagu-org/dagu" class="community-link">
+    <span class="icon">GitHub</span>
+  </a>
+  <a href="https://discord.gg/gpahPUjGRk" class="community-link">
+    <span class="icon">Discord</span>
+  </a>
+  <a href="https://bsky.app/profile/dagu-org.bsky.social" class="community-link">
+    <span class="icon">Bluesky</span>
+  </a>
+  <a href="https://github.com/dagu-org/dagu/issues" class="community-link">
+    <span class="icon">Issues</span>
+  </a>
 </div>
