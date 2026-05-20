@@ -3,7 +3,7 @@
 Configure authentication and access control for your Dagu instance.
 
 ::: info Deployment Model
-These pages focus on configuring self-hosted Dagu. Hosted Dagu Cloud includes managed user authentication, user management, OIDC/SSO, and audit logging by default, so you typically do not need to configure those features manually there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
+These pages focus on configuring self-hosted Dagu. Managed server includes user management, OIDC/SSO, audit logging, incident SaaS integration by default, so you typically do not need to configure those features manually there. See the [pricing page](https://dagu.sh/pricing) for more details.
 :::
 
 ## Available Authentication Methods
@@ -20,7 +20,7 @@ These pages focus on configuring self-hosted Dagu. Hosted Dagu Cloud includes ma
 
 ### Builtin Authentication (Recommended)
 
-Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu. On self-hosted Dagu, creating additional users or enabling OIDC/SSO requires an active self-host license. Hosted Dagu Cloud includes those features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
+Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu. On self-hosted Dagu, creating additional users or enabling OIDC/SSO requires an active self-host license. Managed server includes those features by default. See the [pricing page](https://dagu.sh/pricing) for more details.
 
 ```yaml
 auth:
@@ -60,7 +60,7 @@ auth:
 
 **Recommended: Builtin + OIDC** for self-hosted SSO:
 
-On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Hosted Dagu Cloud includes authentication features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
+On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Managed server includes authentication features by default. See the [pricing page](https://dagu.sh/pricing) for more details.
 
 ```yaml
 auth:
@@ -87,7 +87,7 @@ auth:
 | Method | Use Case |
 |--------|----------|
 | **Builtin** | Self-hosted JWT login, admin bootstrap, password changes, and API keys |
-| **Builtin + OIDC** | Self-hosted SSO with auto-signup and role mapping; requires a self-host license on self-hosted Dagu and is included in Dagu Cloud |
+| **Builtin + OIDC** | Self-hosted SSO with auto-signup and role mapping; requires a self-host license on self-hosted Dagu and is included in managed server |
 | **API Keys** | CI/CD pipelines, automation with role-based access (requires Builtin Auth) |
 | **Webhooks** | External integrations (GitHub, Slack, CI/CD) to trigger specific DAGs (requires Builtin Auth) |
 | **Basic** | Single user, simple setup, no user management needed |

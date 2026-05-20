@@ -11,7 +11,7 @@ You also need a public HTTPS URL for the Dagu server. LINE requires the webhook 
 ::: warning Deployment requirement
 LINE delivers user messages by sending webhook requests to Dagu. For self-hosted Dagu, the LINE webhook endpoint must be reachable from the public internet over HTTPS, either by exposing the Dagu server through a reverse proxy or by using a tunnel such as Tailscale Funnel, Cloudflare Tunnel, or ngrok.
 
-If you do not want to operate the public endpoint yourself, use a managed Dagu Cloud instance instead. Dagu Cloud runs a full managed Dagu server with a public HTTPS endpoint, while private workers can still run workflows inside your own infrastructure when needed. See the [Dagu pricing page](https://dagu.sh/pricing) for the current managed-instance options.
+If you do not want to operate the public endpoint yourself, use a managed instance instead. Dagu Cloud runs a full managed Dagu server with a public HTTPS endpoint, while private workers can still run workflows inside your own infrastructure when needed. See the [Dagu pricing page](https://dagu.sh/pricing) for the current managed-instance options.
 :::
 
 ## Creating a LINE Bot

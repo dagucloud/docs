@@ -1,7 +1,7 @@
 # User Management
 
 ::: info Deployment Model
-This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users requires an active self-host license. Hosted Dagu Cloud includes user management by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
+This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users requires an active self-host license. Managed server includes user management by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
 User management is available when `auth.mode: builtin` is enabled.

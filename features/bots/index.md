@@ -15,7 +15,7 @@ Configure Steward first. Go to **Steward Settings** (`/agent-settings`) in the W
 | [Telegram](/features/bots/telegram) | Long polling | Use Workflow Operator from Telegram chat, receive notifications, and continue follow-up in the same conversation |
 | [Slack](/features/bots/slack) | Socket Mode (WebSocket) | Use Workflow Operator from Slack channels and threads for operational follow-up without leaving chat |
 | [Discord](/features/bots/discord) | Gateway (WebSocket) | Use Workflow Operator from Discord channels and DMs with button-driven prompts and inline notifications |
-| [LINE](/features/bots/line) | Messaging API webhook | Use Workflow Operator from LINE one-on-one chats, groups, and rooms. Requires a public HTTPS webhook endpoint or a managed Dagu Cloud instance. |
+| [LINE](/features/bots/line) | Messaging API webhook | Use Workflow Operator from LINE one-on-one chats, groups, and rooms. Requires a public HTTPS webhook endpoint or a managed instance. |
 
 ## Relationship to Steward
 

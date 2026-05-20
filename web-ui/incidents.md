@@ -1,7 +1,7 @@
 # Incident Routing
 
 ::: info Deployment Model
-This page covers self-hosted Dagu. Incident routing requires an active Dagu self-host license or trial. Existing self-host licenses include this feature; no separate incident add-on or new feature claim is required. Hosted Dagu Cloud includes incident routing by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
+This page covers self-hosted Dagu. Incident routing requires an active Dagu self-host license or trial. Existing self-host licenses include this feature; no separate incident add-on or new feature claim is required. Managed server includes incident routing by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
 Incident routing opens and resolves incidents in incident-management systems when workflow failures need an operational response. Use it for PagerDuty and SolarWinds Incident Response. Use [Notifications](/web-ui/notifications) when you only need Slack, Google Chat, email, Telegram, or generic webhook messages.

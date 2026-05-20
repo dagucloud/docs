@@ -1,7 +1,7 @@
 # Notifications
 
 ::: info Deployment Model
-This page covers self-hosted Dagu. Reusable notification channels and Global/workspace rules require an active Dagu self-host license or trial. Existing self-host licenses include this feature; no separate notification add-on is required. Hosted Dagu Cloud includes team notification routing by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
+This page covers self-hosted Dagu. Reusable notification channels and Global/workspace rules require an active Dagu self-host license or trial. Existing self-host licenses include this feature; no separate notification add-on is required. Managed server includes team notification routing by default. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
 Notifications route DAG-run events to team destinations without hard-coding Slack webhooks, email recipients, Telegram chats, or webhook endpoints in every DAG file.

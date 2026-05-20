@@ -43,7 +43,7 @@ const copy = {
       "Coordinator, scheduler, queue, logs, and run state use the same Dagu storage.",
   },
   managed: {
-    eyebrow: "Dagu Cloud managed server",
+    eyebrow: "Managed server",
     title: "A full managed Dagu server, not only a coordinator",
     description:
       "Managed server, runtime, and storage run in an isolated gVisor instance on GKE.",
@@ -52,7 +52,7 @@ const copy = {
     eyebrow: "Hybrid execution",
     title: "Managed server, hybrid workers in your infrastructure",
     description:
-      "Dagu Cloud operates the server; hybrid workers run Docker and private-network steps.",
+      "Workers on your infrastructure run Docker and private-network steps.",
   },
 } satisfies Record<DeploymentModel, { eyebrow: string; title: string; description: string }>;
 
@@ -413,7 +413,7 @@ const SelfHosted = () => (
 
 const Managed = () => (
   <>
-    <Panel x={48} y={190} w={864} h={292} title="Dagu Cloud managed server" accent={colors.green}>
+    <Panel x={48} y={190} w={864} h={292} title="Managed server" accent={colors.green}>
       <Node x={42} y={86} w={262} h={78} title="Managed Dagu server" detail="UI / API, scheduler, coordinator" color={colors.green} icon={<CloudIcon />} />
       <Node x={610} y={86} w={210} h={78} title="Managed storage" detail="Dagu persistent volume" color={colors.blue} icon={<StorageIcon />} />
       <Node x={338} y={176} w={258} h={78} title="Managed runtime" detail="Dedicated GKE + gVisor instance" color={colors.violet} icon={<ServerIcon />} />
@@ -429,7 +429,7 @@ const Managed = () => (
 const Hybrid = () => (
   <>
     <Panel x={48} y={190} w={864} h={292} title="Managed server + hybrid execution" accent={colors.violet}>
-      <Node x={42} y={96} w={270} h={86} title="Dagu Cloud server" detail="UI / API, scheduler, coordinator" color={colors.green} icon={<CloudIcon />} />
+      <Node x={42} y={96} w={270} h={86} title="Managed server" detail="UI / API, scheduler, coordinator" color={colors.green} icon={<CloudIcon />} />
       <Node x={42} y={200} w={270} h={58} title="Managed storage" detail="Run history and state" color={colors.blue} icon={<StorageIcon />} />
       <Node x={568} y={96} w={254} h={86} title="Hybrid worker" detail="Runs in your infrastructure" color={colors.violet} icon={<WorkerIcon />} />
       <Mini x={578} y={204} text="Docker steps" color={colors.amber} />
