@@ -18,7 +18,7 @@ dagu start-all
 | Field | Value |
 |-------|-------|
 | Name | `dagu` |
-| URL | `http://localhost:8080/mcp` |
+| URL | `https://<your-dagu-host>/mcp`, or `http://localhost:8080/mcp` when Dagu runs on the same machine as the MCP client |
 | Auth | Use `Authorization: Bearer <token>` when Dagu authentication is enabled |
 
 If you changed Dagu's server base path, append `/mcp` under that base path instead.
@@ -29,19 +29,32 @@ Dagu's MCP server is built into the Dagu HTTP server, so there is no separate `d
 
 ### Before you configure a client
 
-1. Start Dagu:
+1. Start or identify the Dagu server. For a local same-machine setup:
 
 ```bash
 dagu start-all
 ```
 
-2. Confirm the MCP endpoint URL:
+2. Set the MCP endpoint URL for your Dagu server:
+
+```bash
+export DAGU_MCP_URL=http://localhost:8080/mcp
+```
+
+Use `localhost` only when the AI tool and Dagu server run on the same machine. For a remote or shared Dagu server, use its reachable HTTPS URL instead:
+
+```bash
+export DAGU_MCP_URL=https://dagu.example.com/mcp
+```
+
+Common URL shapes:
 
 | Server setup | MCP URL |
 |--------------|---------|
-| Default local server | `http://localhost:8080/mcp` |
-| Custom port | `http://localhost:<port>/mcp` |
-| Custom server base path such as `/dagu` | `http://localhost:8080/dagu/mcp` |
+| Same-machine local server | `http://localhost:8080/mcp` |
+| Same-machine custom port | `http://localhost:<port>/mcp` |
+| Remote or shared server | `https://dagu.example.com/mcp` |
+| Server base path such as `/dagu` | `https://dagu.example.com/dagu/mcp` |
 
 3. If Dagu uses `builtin` authentication, create an [API key](/server-admin/authentication/api-keys) and export it before launching the MCP client:
 
@@ -58,7 +71,7 @@ Codex supports Streamable HTTP MCP servers through `config.toml`. The CLI and ID
 For a Dagu server without authentication:
 
 ```bash
-codex mcp add dagu --url http://localhost:8080/mcp
+codex mcp add dagu --url "$DAGU_MCP_URL"
 ```
 
 For a Dagu server using `builtin` authentication:
@@ -66,7 +79,7 @@ For a Dagu server using `builtin` authentication:
 ```bash
 export DAGU_MCP_API_KEY=dagu_...
 codex mcp add dagu \
-  --url http://localhost:8080/mcp \
+  --url "$DAGU_MCP_URL" \
   --bearer-token-env-var DAGU_MCP_API_KEY
 ```
 
@@ -74,7 +87,7 @@ This writes the same configuration you can also add manually to `~/.codex/config
 
 ```toml
 [mcp_servers.dagu]
-url = "http://localhost:8080/mcp"
+url = "https://dagu.example.com/mcp"
 bearer_token_env_var = "DAGU_MCP_API_KEY"
 ```
 
@@ -93,21 +106,21 @@ Claude Code supports Streamable HTTP MCP servers with `claude mcp add --transpor
 For a Dagu server without authentication:
 
 ```bash
-claude mcp add --transport http dagu http://localhost:8080/mcp
+claude mcp add --transport http dagu "$DAGU_MCP_URL"
 ```
 
 For a Dagu server using `builtin` authentication:
 
 ```bash
 export DAGU_MCP_API_KEY=dagu_...
-claude mcp add --transport http dagu http://localhost:8080/mcp \
+claude mcp add --transport http dagu "$DAGU_MCP_URL" \
   --header "Authorization: Bearer ${DAGU_MCP_API_KEY}"
 ```
 
 The default Claude Code scope is local to the current project. To make the server available in every Claude Code project on your machine, add `--scope user`:
 
 ```bash
-claude mcp add --transport http --scope user dagu http://localhost:8080/mcp \
+claude mcp add --transport http --scope user dagu "$DAGU_MCP_URL" \
   --header "Authorization: Bearer ${DAGU_MCP_API_KEY}"
 ```
 
@@ -125,7 +138,7 @@ Inside Claude Code, use `/mcp` to inspect the connection status.
 Use project scope when you want a repository to include the MCP server definition. Keep the secret in each user's environment:
 
 ```bash
-claude mcp add --transport http --scope project dagu http://localhost:8080/mcp
+claude mcp add --transport http --scope project dagu "$DAGU_MCP_URL"
 ```
 
 Then edit the generated `.mcp.json` so the API key is read from an environment variable instead of being committed:
@@ -135,7 +148,7 @@ Then edit the generated `.mcp.json` so the API key is read from an environment v
   "mcpServers": {
     "dagu": {
       "type": "http",
-      "url": "http://localhost:8080/mcp",
+      "url": "${DAGU_MCP_URL}",
       "headers": {
         "Authorization": "Bearer ${DAGU_MCP_API_KEY}"
       }
@@ -144,7 +157,7 @@ Then edit the generated `.mcp.json` so the API key is read from an environment v
 }
 ```
 
-Each teammate should create their own Dagu API key and export `DAGU_MCP_API_KEY` before starting Claude Code.
+Each teammate should set `DAGU_MCP_URL`, create their own Dagu API key, and export `DAGU_MCP_API_KEY` before starting Claude Code.
 
 ## Authentication
 
