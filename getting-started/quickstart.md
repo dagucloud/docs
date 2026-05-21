@@ -7,11 +7,11 @@ From zero to a running workflow in under five minutes.
 ::: code-group
 
 ```bash [macOS/Linux]
-curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
 ```
 
 ```powershell [Windows]
-irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 | iex
+irm https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.ps1 | iex
 ```
 
 ```bash [Docker]

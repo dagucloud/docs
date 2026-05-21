@@ -152,6 +152,8 @@ const fullSidebar = [
       { text: "Template", link: "/step-types/template" },
       { text: "Log", link: "/step-types/log" },
       { text: "Outputs", link: "/step-types/outputs" },
+      { text: "Artifact", link: "/step-types/artifact" },
+      { text: "File", link: "/step-types/file" },
       { text: "Mail", link: "/step-types/mail" },
       { text: "HTTP", link: "/step-types/http" },
       { text: "SSH", link: "/step-types/ssh" },

@@ -514,6 +514,71 @@ Display version information.
 dagu version
 ```
 
+### `config`
+
+Show the resolved filesystem paths used by Dagu.
+
+```bash
+dagu config
+dagu config --dagu-home /custom/path
+```
+
+### `schema`
+
+Browse the JSON schema for DAG definitions or server configuration.
+
+```bash
+dagu schema dag
+dagu schema dag steps
+dagu schema dag steps.container
+dagu schema config
+dagu schema config server
+```
+
+### `example`
+
+List bundled example DAGs or print one example by numeric ID.
+
+```bash
+dagu example
+dagu example 1
+dagu example 7
+```
+
+### `completion`
+
+Generate shell completion scripts.
+
+```bash
+dagu completion bash
+dagu completion fish
+dagu completion powershell
+dagu completion zsh
+```
+
+### `upgrade`
+
+Upgrade the Dagu binary to the latest release or a specified version.
+
+```bash
+dagu upgrade --check
+dagu upgrade
+dagu upgrade --version vX.Y.Z
+dagu upgrade --dry-run
+```
+
+Use `--yes` to skip prompts in automation. Self-upgrade is unavailable for package-manager or container installs such as Homebrew, Snap, `go install`, and Docker.
+
+### `license`
+
+Activate, deactivate, or check Dagu license status.
+
+```bash
+dagu license activate <key>
+dagu license check
+dagu license deactivate
+```
+
 ### `cleanup`
 
 Remove old DAG run history for a specified DAG.

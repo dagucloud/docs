@@ -16,10 +16,12 @@ api_base_path: "/api/v1"    # API endpoint base path
 tz: "America/New_York"
 debug: false
 log_format: "text"         # "text" or "json"
+access_log_mode: "all"     # Access log mode: "all", "non-public", or "none"
 headless: false
 check_updates: true       # Automatic web UI update checks (default: true)
 skip_examples: false       # Skip creating example DAGs
 metrics: "private"        # Metrics endpoint: "private" (default) or "public"
+cache: "normal"            # Cache mode
 
 # Terminal (web-based shell access)
 terminal:
@@ -34,7 +36,7 @@ audit:
 # Centralized Event Store
 event_store:
   enabled: true           # Enable centralized event logging (default: true)
-  retention_days: 3        # Days to keep event log files (default: 3, 0 = keep forever)
+  retention_days: 1        # Days to keep event log files (default: 1, 0 = keep forever)
 
 # Webhook Trigger Limits
 webhooks:
@@ -44,9 +46,18 @@ webhooks:
 session:
   max_per_user: 100        # Max sessions per user (default: 100, 0 = unlimited)
 
+# Server-Sent Events
+sse:
+  max_topics_per_connection: 20
+  max_clients: 1000
+  heartbeat_interval: "10s"
+  write_buffer_size: 65536
+  slow_client_timeout: "30s"
+
 # Directories (must be under "paths" key)
 paths:
   dags_dir: "~/.config/dagu/dags"
+  alt_dags_dir: ""          # Additional read-only DAG directories
   docs_dir: ""                # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
@@ -60,7 +71,9 @@ paths:
   queue_dir: ""              # Auto: {data_dir}/queue
   proc_dir: ""               # Auto: {data_dir}/proc
   service_registry_dir: ""    # Auto: {data_dir}/service-registry
+  users_dir: ""              # Auto: {data_dir}/users
   contexts_dir: ""           # Auto: {data_dir}/contexts
+  workspaces_dir: ""         # Auto: {data_dir}/workspaces
   executable: ""            # Auto: current executable path
 
 # External Secret Providers
@@ -100,6 +113,7 @@ auth:
     auto_signup: true         # Auto-create users on first login
     role_mapping:
       default_role: "viewer"  # Role for new users
+      group_mappings: {}      # OIDC group to Dagu role map
     allowed_domains: []       # Restrict by email domain
     button_label: "Login with SSO"
 
@@ -122,6 +136,7 @@ latest_status_today: true      # Show only today's status
 
 # Execution
 default_execution_mode: "local"  # "local" (default) or "distributed"
+default_shell: ""           # Default shell for command steps
 env_passthrough:
   - SSL_CERT_FILE
   - HTTP_PROXY
@@ -162,6 +177,7 @@ coordinator:
 # Worker (for distributed execution)
 worker:
   id: ""                  # Worker ID (default: hostname@PID)
+  coordinators: []          # Explicit coordinator addresses for shared-nothing mode
   max_active_runs: 100      # Max parallel task executions
   health_port: 8092         # HTTP health check port (0 to disable)
   labels:                 # Worker capabilities
@@ -243,11 +259,13 @@ All options support `DAGU_` prefix.
 - `DAGU_ENV_PASSTHROUGH_PREFIXES` - Comma-separated env var prefixes to forward to step execution
 - `DAGU_DEBUG` - Enable debug mode
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
+- `DAGU_ACCESS_LOG_MODE` - Access log mode (`all`, `non-public`, or `none`; default: `all`)
 - `DAGU_HEADLESS` - Run without UI
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_LATEST_STATUS_TODAY` - Show only today's status
 - `DAGU_SKIP_EXAMPLES` - Skip automatic creation of example DAGs (default: `false`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
+- `DAGU_CACHE` - Cache mode (default: `normal`)
 
 ### Terminal
 - `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
@@ -259,7 +277,17 @@ All options support `DAGU_` prefix.
 
 ### Event Store
 - `DAGU_EVENT_STORE_ENABLED` - Enable centralized event logging (default: `true`)
-- `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `3`, `0` = keep forever)
+- `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `1`, `0` = keep forever)
+
+### Webhooks
+- `DAGU_WEBHOOKS_MAX_PAYLOAD_SIZE` - Max accepted webhook payload size in bytes (default: `1048576`)
+
+### Server-Sent Events
+- `DAGU_SSE_MAX_TOPICS_PER_CONNECTION` - Max subscribed topics per SSE connection (default: `20`)
+- `DAGU_SSE_MAX_CLIENTS` - Max concurrent SSE clients (default: `1000`)
+- `DAGU_SSE_HEARTBEAT_INTERVAL` - SSE heartbeat interval (default: `10s`)
+- `DAGU_SSE_WRITE_BUFFER_SIZE` - Per-client SSE write buffer size (default: `65536`)
+- `DAGU_SSE_SLOW_CLIENT_TIMEOUT` - Timeout for slow SSE clients (default: `30s`)
 
 ### Session Storage
 - `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
@@ -269,6 +297,7 @@ All options support `DAGU_` prefix.
 - `DAGU_DAGS_DIR` - DAG definitions
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
 - `DAGU_DOCS_DIR` - Documents directory (default: `{dags_dir}/docs`)
+- `DAGU_ALT_DAGS_DIR` - Additional read-only DAG directories
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
 - `DAGU_TOOLS_DIR` - Managed DAG tool cache (default: `{data_dir}/tools`)
@@ -281,7 +310,9 @@ All options support `DAGU_` prefix.
 - `DAGU_QUEUE_DIR` - Queue data directory
 - `DAGU_PROC_DIR` - Process data directory
 - `DAGU_SERVICE_REGISTRY_DIR` - Service registry data directory
+- `DAGU_USERS_DIR` - User data directory (default: `{data_dir}/users`)
 - `DAGU_CONTEXTS_DIR` - CLI contexts directory (default: `{data_dir}/contexts`)
+- `DAGU_WORKSPACES_DIR` - Workspace data directory (default: `{data_dir}/workspaces`)
 - `DAGU_EXECUTABLE` - Path to Dagu executable
 
 **Note:** The `--dagu-home` CLI flag takes precedence over the `DAGU_HOME` environment variable.
@@ -314,6 +345,7 @@ OIDC settings (used under builtin auth mode, auto-enabled when all required fiel
 Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `true`)
 - `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
+- `DAGU_AUTH_OIDC_GROUP_MAPPINGS` - OIDC group-to-role mappings
 - `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Email domains allowed to authenticate (comma-separated)
 - `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text (default: `Login with SSO`)
 - `DAGU_AUTH_OIDC_GROUPS_CLAIM` - JWT claim containing group membership (default: `groups`)
@@ -338,6 +370,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 
 ### Execution
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
+- `DAGU_DEFAULT_SHELL` - Default shell for command steps. When unset, Dagu falls back to `$SHELL`, then `sh`.
 
 ### Coordinator
 - `DAGU_COORDINATOR_ENABLED` - Enable coordinator service (default: `true`)
@@ -351,6 +384,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
 - `DAGU_WORKER_HEALTH_PORT` - Worker HTTP health check port (default: `8092`, `0` to disable)
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
+- `DAGU_WORKER_COORDINATORS` - Explicit coordinator addresses for shared-nothing mode
 - `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS` - PostgreSQL max idle connections per DSN (default: `5`)
 - `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME` - PostgreSQL connection max lifetime in seconds (default: `300`)
@@ -368,6 +402,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_SCHEDULER_LOCK_STALE_THRESHOLD` - Time after which a scheduler lock is considered stale (default: `30s`)
 - `DAGU_SCHEDULER_LOCK_RETRY_INTERVAL` - Interval between lock acquisition attempts (default: `5s`)
 - `DAGU_SCHEDULER_ZOMBIE_DETECTION_INTERVAL` - Interval for detecting zombie DAG runs (default: `45s`, `0` to disable)
+- `DAGU_SCHEDULER_RETRY_FAILURE_WINDOW` - Lookback window for DAG-level retry scanning (default: `24h`, `0` to disable)
 - `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)
 
 ### Proc Liveness
@@ -385,6 +420,45 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 ### Resource Monitoring
 - `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)
 - `DAGU_MONITORING_INTERVAL` - How often to collect resource metrics (default: `5s`)
+
+### Tunnel
+- `DAGU_TUNNEL` / `DAGU_TUNNEL_ENABLED` - Enable the Tailscale tunnel
+- `DAGU_TUNNEL_TAILSCALE_AUTH_KEY` - Tailscale auth key
+- `DAGU_TUNNEL_TAILSCALE_HOSTNAME` - Tailscale hostname
+- `DAGU_TUNNEL_TAILSCALE_FUNNEL` - Enable Tailscale Funnel
+- `DAGU_TUNNEL_TAILSCALE_HTTPS` - Enable HTTPS for the tunnel
+- `DAGU_TUNNEL_TAILSCALE_STATE_DIR` - Tailscale tunnel state directory
+- `DAGU_TUNNEL_ALLOW_TERMINAL` - Allow terminal access through the tunnel
+- `DAGU_TUNNEL_ALLOWED_IPS` - Comma-separated allowed source IP ranges
+- `DAGU_TUNNEL_RATE_LIMITING_ENABLED` - Enable tunnel login rate limiting
+- `DAGU_TUNNEL_RATE_LIMITING_LOGIN_ATTEMPTS` - Allowed login attempts per window
+- `DAGU_TUNNEL_RATE_LIMITING_WINDOW_SECONDS` - Login rate-limit window in seconds
+- `DAGU_TUNNEL_RATE_LIMITING_BLOCK_DURATION_SECONDS` - Login rate-limit block duration in seconds
+
+### Bots
+- `DAGU_BOTS_PROVIDER` - Bot provider (`telegram`, `slack`, `discord`, or `line`)
+- `DAGU_BOTS_SAFE_MODE` - Restrict bot actions to safe operations
+- `DAGU_BOTS_TELEGRAM_TOKEN` - Telegram bot token
+- `DAGU_BOTS_TELEGRAM_ALLOWED_CHAT_IDS` - Comma-separated allowed Telegram chat IDs
+- `DAGU_BOTS_TELEGRAM_INTERESTED_EVENT_TYPES` - Telegram event type filter
+- `DAGU_BOTS_SLACK_BOT_TOKEN` - Slack bot token
+- `DAGU_BOTS_SLACK_APP_TOKEN` - Slack app token
+- `DAGU_BOTS_SLACK_ALLOWED_CHANNEL_IDS` - Comma-separated allowed Slack channel IDs
+- `DAGU_BOTS_SLACK_INTERESTED_EVENT_TYPES` - Slack event type filter
+- `DAGU_BOTS_SLACK_RESPOND_TO_ALL` - Respond outside direct mentions in allowed channels
+- `DAGU_BOTS_DISCORD_TOKEN` - Discord bot token
+- `DAGU_BOTS_DISCORD_ALLOWED_CHANNEL_IDS` - Comma-separated allowed Discord channel IDs
+- `DAGU_BOTS_DISCORD_INTERESTED_EVENT_TYPES` - Discord event type filter
+- `DAGU_BOTS_DISCORD_RESPOND_TO_ALL` - Respond outside direct mentions in allowed channels
+- `DAGU_BOTS_LINE_CHANNEL_ACCESS_TOKEN` - LINE channel access token
+- `DAGU_BOTS_LINE_CHANNEL_SECRET` - LINE channel secret
+- `DAGU_BOTS_LINE_ALLOWED_SOURCE_IDS` - Comma-separated allowed LINE source IDs
+- `DAGU_BOTS_LINE_INTERESTED_EVENT_TYPES` - LINE event type filter
+- `DAGU_BOTS_LINE_RESPOND_TO_ALL` - Respond outside direct mentions in allowed sources
+
+### License
+- `DAGU_LICENSE_KEY` - License key
+- `DAGU_LICENSE_CLOUD_URL` - License validation service URL
 
 ### External Secrets
 - `DAGU_SECRETS_VAULT_ADDRESS` - Default Vault server address for the `vault` secret provider

@@ -10,12 +10,12 @@ The YAML fields on this page are useful when you want email behavior to travel w
 
 ## SMTP Configuration
 
-### Global Configuration
+### Base Configuration
 
-Set up SMTP settings in your Dagu configuration:
+Set up SMTP defaults in the base configuration inherited by DAGs:
 
 ```yaml
-# ~/.config/dagu/config.yaml
+# ~/.config/dagu/base.yaml
 smtp:
   host: smtp.gmail.com
   port: "587"
@@ -29,20 +29,25 @@ error_mail:
   attach_logs: true
 ```
 
-### Environment Variables
+### Credentials From Environment Or Secrets
 
-Configure SMTP via environment:
+`smtp`, `error_mail`, `info_mail`, and `wait_mail` are DAG/base-config fields. They are not read from server-level `DAGU_*` SMTP or mail environment variables.
 
-```bash
-export DAGU_SMTP_HOST=smtp.gmail.com
-export DAGU_SMTP_PORT=587
-export DAGU_SMTP_USERNAME=alerts@example.com
-export DAGU_SMTP_PASSWORD=secret-password
+If SMTP credentials come from the process environment, import them into DAG scope with `env:` or `secrets:` and reference the scoped variables from `smtp`:
 
-export DAGU_ERROR_MAIL_FROM=alerts@example.com
-export DAGU_ERROR_MAIL_TO=team@example.com
-export DAGU_ERROR_MAIL_PREFIX="[Alert]"
+```yaml
+env:
+  - SMTP_USER: ${SMTP_USER}
+  - SMTP_PASS: ${SMTP_PASS}
+
+smtp:
+  host: smtp.gmail.com
+  port: "587"
+  username: "${SMTP_USER}"
+  password: "${SMTP_PASS}"
 ```
+
+For Web UI-managed notification rules, configure email delivery from [Notifications](/web-ui/notifications) instead of DAG YAML.
 
 ## DAG-Level Configuration
 

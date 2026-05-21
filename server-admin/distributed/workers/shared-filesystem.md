@@ -64,7 +64,7 @@ paths:
 ```
 
 ```bash
-export DAGU_PATHS_SERVICE_REGISTRY_DIR=/nfs/shared/dagu/service-registry
+export DAGU_SERVICE_REGISTRY_DIR=/nfs/shared/dagu/service-registry
 ```
 
 ### Status Persistence
