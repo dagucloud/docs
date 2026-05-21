@@ -96,7 +96,7 @@ Notification rules can be Global or workspace-scoped.
 
 Use workspace notification rules when each team or environment has its own Slack channel, email list, Telegram chat, or webhook endpoint. A workflow with `labels: [workspace=ops]` uses the `ops` workspace rules when they are configured; otherwise it falls back to Global.
 
-See [Notifications](/web-ui/notifications) for the full routing model and license requirements.
+See [Notifications](/web-ui/notifications) for the full routing model.
 
 ## Incidents in Workspaces
 
