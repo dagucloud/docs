@@ -34,7 +34,7 @@ helm upgrade dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-cla
 ## From a source checkout
 
 ```bash
-git clone https://github.com/dagu-org/dagu.git
+git clone https://github.com/dagucloud/dagu.git
 cd dagu
 helm install dagu ./charts/dagu --set persistence.storageClass=<your-rwx-storage-class>
 ```
@@ -52,7 +52,7 @@ helm install dagu ./charts/dagu --set persistence.storageClass=<your-rwx-storage
 
 ## Full configuration
 
-All values are documented in [`charts/dagu/README.md`](https://github.com/dagu-org/dagu/blob/main/charts/dagu/README.md) and validated against `values.schema.json`.
+All values are documented in [`charts/dagu/README.md`](https://github.com/dagucloud/dagu/blob/main/charts/dagu/README.md) and validated against `values.schema.json`.
 
 ## Verify
 

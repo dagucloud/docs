@@ -5,7 +5,7 @@ The guided script installer is the recommended path. It can register Dagu as a s
 ## Script installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | bash
 ```
 
 By default the wizard installs to `~/.local/bin` (no sudo required). It can also:
@@ -17,7 +17,7 @@ By default the wizard installs to `~/.local/bin` (no sudo required). It can also
 ### Non-interactive with user service
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
   bash -s -- \
     --service yes \
     --admin-username admin \
@@ -27,7 +27,7 @@ curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installe
 ### System-wide service
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
   bash -s -- \
     --service yes \
     --service-scope system \
@@ -55,7 +55,7 @@ When the installer registers a service, it snapshots the `PATH` from your curren
 
 ## Manual binary
 
-Download the tarball for your architecture from [GitHub Releases](https://github.com/dagu-org/dagu/releases), extract, and place `dagu` on your `PATH`:
+Download the tarball for your architecture from [GitHub Releases](https://github.com/dagucloud/dagu/releases), extract, and place `dagu` on your `PATH`:
 
 ```bash
 tar -xzf dagu_*_linux_amd64.tar.gz

@@ -4,7 +4,7 @@
 
 ```bash
 # Install to /usr/local/bin (system-wide)
-curl -L https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -L https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
   bash -s -- --install-dir /usr/local/bin
 
 # Create user and directories

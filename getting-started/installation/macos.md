@@ -21,7 +21,7 @@ The npm package downloads the Dagu binary during postinstall. Use the script ins
 ## Script installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | bash
 ```
 
 The wizard can add `dagu` to your `PATH`, register a LaunchAgent, and create the first admin account.
@@ -29,7 +29,7 @@ The wizard can add `dagu` to your `PATH`, register a LaunchAgent, and create the
 ### Non-interactive install with service
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dagu-org/dagu/main/scripts/installer.sh | \
+curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
   bash -s -- \
     --service yes \
     --admin-username admin \
@@ -54,7 +54,7 @@ When the installer sets up a background service, it captures the `PATH` from the
 
 ## Manual binary
 
-Download from [GitHub Releases](https://github.com/dagu-org/dagu/releases), unpack, and put `dagu` on your `PATH`.
+Download from [GitHub Releases](https://github.com/dagucloud/dagu/releases), unpack, and put `dagu` on your `PATH`.
 
 ## Verify
 

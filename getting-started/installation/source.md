@@ -11,7 +11,7 @@ For contributors or users who want to run a specific commit.
 ## Build
 
 ```bash
-git clone https://github.com/dagu-org/dagu.git
+git clone https://github.com/dagucloud/dagu.git
 cd dagu
 make build       # builds the frontend bundle + the Go binary
 ```
@@ -56,4 +56,4 @@ Run `dagu start-all` in a separate terminal for the backend.
 .local/bin/dagu version
 ```
 
-See [CONTRIBUTING.md](https://github.com/dagu-org/dagu/blob/main/CONTRIBUTING.md) for the full development workflow.
+See [CONTRIBUTING.md](https://github.com/dagucloud/dagu/blob/main/CONTRIBUTING.md) for the full development workflow.
