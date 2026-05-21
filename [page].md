@@ -5,8 +5,8 @@ title: What is Dagu?
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Self-service workflows for private scripts and production runbooks</h2>
-  <p>Dagu turns scripts, SQL, SSH commands, API calls, containers, and operational runbooks into repeatable workflows with parameters, validation, visual execution, logs, artifacts, run history, and optional human review.</p>
+  <h2>Turn any operation into a durable workflow in minutes</h2>
+  <p>Dagu wraps scripts, SQL, SSH commands, API calls, containers, and runbooks with typed inputs, validation, retries, visual execution, logs, artifacts, run history, and optional human review.</p>
 </div>
 
 <div class="hero-section">
