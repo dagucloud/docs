@@ -5,8 +5,8 @@ title: What is Dagu?
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Local-first data pipeline orchestration for scripts and private infrastructure</h2>
-  <p>Dagu turns existing scripts, SQL jobs, containers, and runbooks into scheduled, observable pipelines that run where your data already lives.</p>
+  <h2>Self-service workflows for private scripts and production runbooks</h2>
+  <p>Dagu turns scripts, SQL, SSH commands, API calls, containers, and operational runbooks into repeatable workflows with parameters, validation, visual execution, logs, artifacts, run history, and optional human review.</p>
 </div>
 
 <div class="hero-section">
@@ -30,31 +30,36 @@ Credentials: `demouser` / `demouser`
 <div class="overview-card-grid">
   <div class="overview-card">
     <h3><a href="/overview/architecture">Local-first</a></h3>
-    <p>Run workflows with one binary and file-backed state by default. Dagu does not require an external database or broker for the common single-server setup, which keeps private-network and air-gapped deployments practical.</p>
+    <p>Run workflows close to private networks, internal databases, local files, credentials, and existing CLIs. The common single-server setup uses one binary and file-backed state, with no required external database or broker.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/writing-workflows/examples">No rewrite</a></h3>
-    <p>Bring shell scripts, Python jobs, SQL, dbt, DuckDB, containers, and data-processing runbooks as they are. Dagu wraps them with pipeline orchestration instead of forcing them into a framework-specific programming model.</p>
+    <h3><a href="/writing-workflows/parameters">Self-service inputs</a></h3>
+    <p>Declare workflow parameters once in YAML. Dagu uses them to render a guided start form in the Web UI, validate operator input, and keep submitted values attached to the run history.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/getting-started/mcp">AI-agent ready</a></h3>
-    <p>Use MCP-capable agents to inspect state, preview workflow changes, apply edits, and start, retry, or stop runs. Agent steps and external agent CLIs can also run inside the same observable workflow model.</p>
+    <p>Use MCP-capable agents to inspect state, preview workflow changes, apply edits, and start, retry, or stop runs. Agent-authored workflows still run through the same logs, approvals, artifacts, and audit trail as human-authored YAML.</p>
   </div>
 </div>
 
 ## Motivation
 
-Production data work often starts as scripts: a shell extractor, a Python cleanup job, a SQL load, a dbt command, a DuckDB transform, a container task, or a runbook that only works on a specific server. These jobs may become critical before they have a proper control plane. Their schedules, dependencies, retries, logs, and recovery steps end up spread across crontabs, worker images, chat messages, and operator knowledge.
+Important operations often start as scripts: a shell repair command, a Python cleanup job, a SQL check, an SSH backup, a dbt command, a container task, or a runbook that only works on a specific server. These tasks may become critical before they have a proper control plane. Inputs, permissions, approvals, logs, recovery steps, and operational context end up spread across crontabs, worker images, wiki pages, chat messages, and engineer knowledge.
 
-Dagu was built for teams that already have important data and operations automation but need a practical way to manage it in one place. Instead of asking teams to move execution into a cloud job platform or translate every job into a large orchestration stack, Dagu wraps existing work with scheduling, visible dependencies, durable execution, logs, artifacts, queues, distributed workers, notifications, and Web UI controls.
+Dagu was built for teams that already have useful automation but need a practical way to let the right people run it safely. Instead of asking teams to move execution into a cloud job platform, build a custom admin UI, or translate every job into a large orchestration stack, Dagu wraps existing work with typed parameters, generated input forms, visible dependencies, durable execution, approvals, logs, artifacts, queues, distributed workers, notifications, and Web UI controls.
 
-By default, Dagu keeps workflows, run history, logs, and artifacts on local disk, so pipelines can run near private networks, internal databases, local files, specialized hardware, and existing CLIs. Teams can move from fragmented cron and scattered scripts to visible, retryable pipelines without introducing a large platform project first.
+By default, Dagu keeps workflows, run history, logs, and artifacts on local disk, so workflows can run near private networks, internal databases, local files, specialized hardware, and existing CLIs. Teams can move from manual engineer execution and fragmented cron to visible, retryable, self-service workflows without introducing a large platform project first.
 
 ## What Dagu Adds Around a Run
 
-The YAML still looks like scripts, commands, and data jobs. The difference is that the workflow also carries the runtime details operators usually keep in worker images, wiki pages, or chat history.
+The YAML still looks like scripts, commands, and service calls. The difference is that the workflow also carries the inputs, runtime details, and review points operators usually keep in wiki pages, worker images, or chat history.
 
 <div class="overview-card-grid">
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/parameters">Generated parameter UI</a></h3>
+    <p>A top-level <code>params</code> block defines names, types, defaults, descriptions, and allowed values for a workflow run. Dagu turns those declarations into a start form in the Web UI.</p>
+    <p><strong>Why it matters:</strong> operators get a guided way to provide inputs, while engineers keep the contract versioned with the workflow.</p>
+  </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/tools">Pinned tools</a></h3>
     <p>A top-level <code>tools</code> block lists the CLIs and versions the workflow needs. Dagu prepares them on the worker and puts them on <code>PATH</code> before host commands run.</p>
@@ -79,35 +84,49 @@ The YAML still looks like scripts, commands, and data jobs. The difference is th
 
 ## How a Workflow Runs
 
-Dagu does not make you rewrite the work. Your scripts, SQL files, containers, and services can stay as they are; the YAML adds schedules, order, logs, retries, tool pinning, and recovery controls around them.
+Dagu does not make you rewrite the work. Your scripts, SQL files, containers, SSH commands, APIs, and services can stay as they are; the YAML adds inputs, order, logs, retries, approvals, artifacts, and recovery controls around them.
 
 ```yaml
-schedule:
-  - "0 2 * * *"
-overlap_policy: skip
-catchup_window: "6h"
-
-tools:
-  - jqlang/jq@jq-1.7.1
-  - duckdb/duckdb@v1.5.2
+params:
+  - name: customer_id
+    type: string
+    description: Customer or account identifier
+  - name: change_scope
+    type: string
+    description: What the repair is allowed to change
+    enum:
+      - metadata_only
+      - permissions
+      - full_account
+    default: metadata_only
+  - name: dry_run
+    type: boolean
+    default: true
 
 steps:
-  - id: extract
-    run: ./scripts/extract.sh > data/raw.json
-    retry_policy:
-      limit: 3
-      interval_sec: 30
+  - id: inspect_account
+    run: ./scripts/inspect-account.sh --customer "${customer_id}"
+    stdout:
+      artifact: reports/inspection.md
 
-  - id: validate
-    run: jq -e '.rows | length > 0' data/raw.json
-    depends: extract
+  - id: review
+    action: noop
+    depends: inspect_account
+    approval:
+      prompt: Review the inspection report before running the repair.
 
-  - id: load
-    run: duckdb warehouse.duckdb < sql/load.sql
-    depends: validate
+  - id: repair_account
+    run: >-
+      ./scripts/repair-account.sh
+      --customer "${customer_id}"
+      --scope "${change_scope}"
+      --dry-run="${dry_run}"
+    depends: review
+    stdout:
+      artifact: reports/repair.log
 ```
 
-In this example, the DAG schedules an existing data pipeline, prevents overlapping runs, catches up missed runs within a window, retries extraction, validates the extracted file, and loads it through a pinned DuckDB CLI. The `tools` block names the exact external CLIs the workflow needs, so workers do not depend on whichever `jq` or `duckdb` version happens to be installed locally.
+In this example, the DAG turns an existing account-repair runbook into a reviewed workflow. The `params` block gives Dagu enough information to render a guided input form before the run starts. The inspection output is stored as an artifact, the repair waits for explicit approval, and the submitted values, logs, artifacts, and status stay attached to the run history.
 
 <div class="overview-lifecycle" aria-label="Dagu workflow lifecycle">
   <span>Write YAML</span>
@@ -118,7 +137,7 @@ In this example, the DAG schedules an existing data pipeline, prevents overlappi
   <span>Notify and Audit</span>
 </div>
 
-During a run, Dagu resolves dependencies, starts ready steps, captures stdout and stderr, tracks status, applies retry rules, stores artifacts, and updates the Web UI in real time.
+During a run, Dagu resolves dependencies, starts ready steps, captures stdout and stderr, tracks status, applies retry rules, pauses for approvals, stores artifacts, and updates the Web UI in real time.
 
 ## Core Terminology
 
@@ -130,6 +149,7 @@ Understanding Dagu is easier once the main terms are clear.
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
 | **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
 | **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
+| **Parameter** | A declared run input with a name, type, default, description, or allowed values. Parameters power the generated Web UI start form and keep submitted values visible with the run. |
 | **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
 | **Notification** | A UI-managed route that sends run events to Slack, email, Telegram, Google Chat, or webhooks. |
@@ -143,7 +163,7 @@ See [Core Concepts](/getting-started/concepts) for the deeper model.
 
 ## Why Teams Choose Dagu
 
-The main reason teams choose Dagu is that it modernizes existing data pipelines and operations runbooks without turning that work into a platform rollout.
+The main reason teams choose Dagu is that it turns existing automation into safe, visible workflows without turning that work into a platform rollout.
 
 <div class="overview-card-grid overview-strengths-grid">
   <div class="overview-card">
@@ -156,7 +176,11 @@ The main reason teams choose Dagu is that it modernizes existing data pipelines 
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/examples">No rewrite workflows</a></h3>
-    <p>Wrap existing <a href="/step-types/shell">scripts and commands</a>, <a href="/step-types/sql/">SQL</a>, dbt commands, DuckDB jobs, <a href="/step-types/docker">containers</a>, and other <a href="/writing-workflows/examples">data-processing tasks</a> instead of converting them into framework-specific jobs.</p>
+    <p>Wrap existing <a href="/step-types/shell">scripts and commands</a>, <a href="/step-types/sql/">SQL</a>, dbt commands, DuckDB jobs, <a href="/step-types/docker">containers</a>, SSH operations, HTTP calls, and other <a href="/writing-workflows/examples">automation tasks</a> instead of converting them into framework-specific jobs.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/parameters">Generated forms</a></h3>
+    <p>Declare typed <a href="/writing-workflows/parameters">parameters</a> in YAML and Dagu automatically presents the right inputs in the <a href="/overview/web-ui">Web UI</a>, including defaults, descriptions, and allowed values.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/tools">Reproducible CLI tools</a></h3>
@@ -252,20 +276,20 @@ See [Architecture](/overview/architecture) for internals and storage, and [Deplo
     </thead>
     <tbody>
       <tr>
-        <td>Data jobs scattered across cron, shell scripts, SQL files, and worker hosts</td>
-        <td>One YAML workflow with schedules, dependencies, retries, catch-up, logs, artifacts, and run controls.</td>
+        <td>Operational tasks are scattered across scripts, SQL files, SSH commands, API calls, cron entries, and engineer runbooks</td>
+        <td>One YAML workflow with parameters, dependencies, approvals, retries, logs, artifacts, and run controls.</td>
       </tr>
       <tr>
-        <td>A cloud job platform would move execution away from private data and internal networks</td>
-        <td>Run jobs where the data, credentials, files, and existing CLIs already live.</td>
+        <td>A custom admin UI is needed just to let support or operations teams run a safe command</td>
+        <td>Declare parameters in YAML and let Dagu generate the Web UI input form, validation, logs, and run history.</td>
+      </tr>
+      <tr>
+        <td>A cloud job platform would move execution away from private data, credentials, and internal networks</td>
+        <td>Run workflows where the data, credentials, files, and existing CLIs already live.</td>
       </tr>
       <tr>
         <td>A large orchestrator is too much infrastructure for scripts and runbooks</td>
         <td>Start with one binary and file-backed state, then add queues and distributed workers only when needed.</td>
-      </tr>
-      <tr>
-        <td>Code-first task queues assume the work lives inside application code</td>
-        <td>Orchestrate command-first work across shell, Python, SQL, HTTP, SSH, Docker, Kubernetes, and AI agent CLIs.</td>
       </tr>
       <tr>
         <td>Important runbooks still require manual SSH sessions and tribal knowledge</td>
@@ -277,7 +301,7 @@ See [Architecture](/overview/architecture) for internals and storage, and [Deplo
 
 ## Real-World Use Cases
 
-Dagu is useful anywhere existing data jobs, scripts, containers, operational tasks, or agent-driven jobs need scheduling, retries, visibility, and a safe way for a team to run them.
+Dagu is useful anywhere existing scripts, containers, SQL jobs, operational tasks, or agent-driven jobs need parameters, approvals, scheduling, retries, visibility, and a safe way for a team to run them.
 
 <div class="overview-card-grid">
   <div class="overview-card overview-usecase-card">
