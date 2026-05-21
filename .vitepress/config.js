@@ -128,7 +128,7 @@ const fullSidebar = [
     ],
   },
   {
-    text: "Step Types",
+    text: "Built-in Actions",
     items: [
       { text: "Shell", link: "/step-types/shell" },
       { text: "Shell (macOS / Linux)", link: "/step-types/shell-unix" },
