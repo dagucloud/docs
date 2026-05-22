@@ -230,10 +230,10 @@ flowchart LR
         API["REST API"]
     end
 
-    subgraph Dagu["Dagu Engine<br/>single process in standalone mode"]
+    subgraph Dagu["Dagu Engine"]
         Scheduler["Scheduler"]
         Queue["Queue"]
-        Runs["Run state<br/>logs<br/>artifacts<br/>status"]
+        Runs["Runs"]
     end
 
     subgraph Distributed["Distributed Mode"]

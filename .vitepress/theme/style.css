@@ -847,22 +847,6 @@
   fill: #e5e7eb !important;
 }
 
-/* Mermaid scopes generated SVG styles by ID, so match that specificity for dark mode. */
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .node rect,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .node circle,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .node ellipse,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .node polygon,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .node path,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .flowchart-node rect,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .flowchart-node circle,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .flowchart-node ellipse,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .flowchart-node polygon,
-.dark .mermaid :is(#mermaid-specificity-boost#mermaid-specificity-boost#mermaid-specificity-boost, [id^="mermaid-"]) .flowchart-node path {
-  fill: #3a322c !important;
-  stroke: #5c554a !important;
-  stroke-width: 1.6px !important;
-}
-
 /* Sequence diagram specific styling - more aggressive targeting */
 .mermaid g.sequenceDiagram text,
 .mermaid g text,
