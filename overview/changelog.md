@@ -1,5 +1,43 @@
 # Changelog
 
+For the full version history of Dagu, see the [releases page](https://github.com/dagucloud/dagu/releases).
+
+## v2.7.4 (2026-05-22)
+
+This is primarily a bug fix release.
+
+### Added
+
+- feat: add DAG run resource limits ([#2179](https://github.com/dagucloud/dagu/pull/2179)) [@yohamta0](https://github.com/yohamta0)
+- feat: add MCP auditability ([#2193](https://github.com/dagucloud/dagu/pull/2193)) [@yohamta0](https://github.com/yohamta0)
+
+### Changed
+
+- refactor: extract DAG-run intake module ([#2178](https://github.com/dagucloud/dagu/pull/2178)) [@yohamta0](https://github.com/yohamta0)
+- refactor: extract queue dispatch module ([#2180](https://github.com/dagucloud/dagu/pull/2180)) [@yohamta0](https://github.com/yohamta0)
+- chore(deps): bump the ui-security group across 1 directory with 3 updates ([#2182](https://github.com/dagucloud/dagu/pull/2182)) [@dependabot](https://github.com/dependabot)
+- refactor: extract distributed attempt ownership ([#2183](https://github.com/dagucloud/dagu/pull/2183)) [@yohamta0](https://github.com/yohamta0)
+- refactor: extract StepExecutor for step execution ([#2185](https://github.com/dagucloud/dagu/pull/2185)) [@yohamta0](https://github.com/yohamta0)
+- refactor: stage DAG spec compiler ([#2186](https://github.com/dagucloud/dagu/pull/2186)) [@yohamta0](https://github.com/yohamta0)
+- refactor: extract process wiring modules ([#2188](https://github.com/dagucloud/dagu/pull/2188)) [@yohamta0](https://github.com/yohamta0)
+
+### Fixed
+
+- fix: show DAG tool preparation status ([#2184](https://github.com/dagucloud/dagu/pull/2184)) [@yohamta0](https://github.com/yohamta0)
+- fix(mail): forward cfg.Attachments to the mailer instead of an empty slice ([#2190](https://github.com/dagucloud/dagu/pull/2190)) [@bitsmashtrader](https://github.com/bitsmashtrader)
+- fix: prevent false zombie repair for live local runs ([#2191](https://github.com/dagucloud/dagu/pull/2191)) [@yohamta0](https://github.com/yohamta0)
+- fix: stabilize queued retry dispatch ([#2192](https://github.com/dagucloud/dagu/pull/2192)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| chore(deps): bump the ui-security group across 1 directory with 3 updates ([#2182](https://github.com/dagucloud/dagu/pull/2182)) | [@dependabot](https://github.com/dependabot) |
+| fix(mail): forward cfg.Attachments to the mailer instead of an empty slice ([#2190](https://github.com/dagucloud/dagu/pull/2190)) | [@bitsmashtrader](https://github.com/bitsmashtrader) |
+| Zombie detector false-positive: child-agent heartbeat stalls >90s under concurrent dispatch + long SSH steps (2.6.10) ([#2189](https://github.com/dagucloud/dagu/issues/2189)) | [@JonBasse](https://github.com/JonBasse) (report) |
+
 ## v2.7.1 (2026-05-18)
 
 This is one of the largest Dagu releases so far. It turns workflows from a collection of commands into reusable, packageable automation units: steps can now be plain commands, built-in actions, or versioned Dagu actions with their own inputs, outputs, artifacts, and toolchain.
