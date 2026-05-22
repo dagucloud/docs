@@ -3,7 +3,7 @@
 Builtin authentication is the recommended authentication mode for self-hosted Dagu. It provides JWT-based login, admin bootstrap, password management, API keys, and the role-based access model used by self-hosted Dagu.
 
 ::: info Deployment Model
-This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and deleting users and enabling OIDC/SSO login require an active self-host license. Managed server includes those features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
+This page covers self-hosted Dagu. On self-hosted Dagu, Community installs can create up to 2 API keys without an active license. Creating additional API keys beyond that limit, creating, updating, and deleting users, and enabling OIDC/SSO login require an active self-host license. Managed server includes those features by default. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
 
 ## Features
@@ -11,7 +11,7 @@ This page covers self-hosted Dagu. On self-hosted Dagu, creating, updating, and 
 - **JWT Authentication**: Secure token-based authentication
 - **Initial Admin Bootstrap**: Create the first admin through config, environment variables, or the setup page
 - **Password Management**: Users can change their own passwords; admins can reset any user's password
-- **API Key Management**: Create and manage API keys for programmatic access with role-based permissions
+- **API Key Management**: Create and manage API keys for programmatic access with role-based permissions; Community self-hosted installs can create up to 2 keys without an active license
 - **User Management**: List and inspect users, reset passwords, and, with an active self-host license, create, update, disable, and delete users through the web UI and API
 - **Role-Based Access Control**: Five roles with different permission levels
 - **Workspace Scoping**: Show all workspaces or selected workspaces with per-workspace roles inside one Dagu installation
@@ -264,7 +264,9 @@ If `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` and `DAGU_AUTH_BUILTIN_INITIAL_ADM
 
 ## API Key Management
 
-Builtin authentication includes full API key management capabilities. API keys provide programmatic access with role-based permissions, ideal for CI/CD pipelines, automation scripts, and service-to-service communication.
+Builtin authentication includes API key management capabilities. API keys provide programmatic access with role-based permissions, ideal for CI/CD pipelines, automation scripts, and service-to-service communication.
+
+Community self-hosted installs without an active self-host license can create up to 2 API keys. Existing keys above that number keep working, but Dagu shows a warning on the API key management page and blocks new key creation until enough keys are deleted or an active license is configured. Paid self-host licenses fund ongoing development and maintenance while keeping Community free.
 
 ### Quick Start
 
@@ -283,6 +285,7 @@ curl -H "Authorization: Bearer dagu_your-api-key-here" \
 ### Key Features
 
 - **Role Assignment**: Each API key has its own role (admin, manager, developer, operator, viewer)
+- **Community Limit**: Up to 2 API keys can be created without an active self-host license
 - **Usage Tracking**: See when each key was last used
 - **Web UI Management**: Create and manage keys from Settings > API Keys
 - **Secure Handling**: The full key is shown only once at creation

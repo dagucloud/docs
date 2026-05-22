@@ -13,6 +13,14 @@ Use an API key when you need:
 
 API keys require [Builtin Authentication](./builtin).
 
+## Community Limit
+
+Community self-hosted installs without an active self-host license can create up to 2 API keys.
+
+The limit applies only to new key creation. Existing keys are not deleted or disabled by this limit. If an unlicensed server already has more than 2 keys, Dagu shows a warning on the API key management page and blocks new key creation until you delete enough keys or configure an active self-host license.
+
+This keeps small installations free while asking larger automation setups to support ongoing Dagu development and maintenance. See the [pricing page](https://dagu.sh/pricing#self-host) for the current self-host license options.
+
 ## What You Manage
 
 Each API key has:
@@ -104,6 +112,8 @@ curl -X POST http://localhost:8080/api/v1/api-keys \
 
 The response includes the key secret once. Save it before you leave the page or discard the response output.
 
+On a Community self-hosted install without an active license, `POST /api/v1/api-keys` returns `403 Forbidden` once the server already has 2 API keys.
+
 ## CI/CD Example
 
 ```yaml
@@ -155,9 +165,10 @@ Admins can list, inspect, update, and delete API keys from the UI or API.
 1. Use a separate key per service or pipeline.
 2. Give each key the smallest role it needs.
 3. Scope keys to workspaces when possible.
-4. Rotate keys regularly.
-5. Delete keys you no longer use.
-6. Store keys in your normal secret manager rather than in source control.
+4. On Community installs, keep the 2-key creation limit in mind; use an active self-host license when you need broader per-service key separation.
+5. Rotate keys regularly.
+6. Delete keys you no longer use.
+7. Store keys in your normal secret manager rather than in source control.
 
 ## Related Pages
 

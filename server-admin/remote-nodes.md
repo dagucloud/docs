@@ -35,7 +35,7 @@ remote_nodes:
     auth_token: "dagu_7Kq9mXxN3pLwR5tY2vZa8bCdEfGhJk4n6sUwXy0zA1B"
 ```
 
-API keys provide fine-grained role-based permissions (admin, manager, developer, operator, viewer) and usage tracking. See [Remote Nodes Authentication](/server-admin/authentication/remote-nodes) for detailed setup instructions.
+API keys provide fine-grained role-based permissions (admin, manager, developer, operator, viewer) and usage tracking. Community self-hosted servers can create up to 2 API keys without an active self-host license; larger remote-node setups that need more service keys should use an active license on the server where the keys are created. See [Remote Nodes Authentication](/server-admin/authentication/remote-nodes) for detailed setup instructions.
 
 ## See Also
 

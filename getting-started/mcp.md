@@ -64,6 +64,8 @@ export DAGU_MCP_API_KEY=dagu_...
 
 Use a role that matches what the client should do. For example, `viewer` is enough for read-only inspection, `operator` can run and stop workflows, and `developer` can create or edit workflows.
 
+Community self-hosted servers can create up to 2 API keys without an active self-host license. For shared teams, prefer individual keys when you need per-user auditability; use an active self-host license when that means you need more than 2 keys.
+
 ### Codex
 
 Codex supports Streamable HTTP MCP servers through `config.toml`. The CLI and IDE extension share this configuration.
@@ -157,7 +159,7 @@ Then edit the generated `.mcp.json` so the API key is read from an environment v
 }
 ```
 
-Each teammate should set `DAGU_MCP_URL`, create their own Dagu API key, and export `DAGU_MCP_API_KEY` before starting Claude Code.
+Each teammate should set `DAGU_MCP_URL`, create their own Dagu API key, and export `DAGU_MCP_API_KEY` before starting Claude Code. Community self-hosted servers can create up to 2 API keys without an active license, so larger teams should configure a self-host license before issuing individual teammate keys.
 
 ## Authentication
 
