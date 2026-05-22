@@ -254,9 +254,9 @@ flowchart LR
     WorkerA --> Runs
     WorkerB --> Runs
 
-    classDef interface fill:#2a2420,stroke:#c4956a,color:#e8e2d8
-    classDef engine fill:#1f1a16,stroke:#8b7355,color:#e8e2d8
-    classDef distributed fill:#1f1a16,stroke:#7da87d,color:#e8e2d8
+    classDef interface stroke:#c4956a,stroke-width:1.6px
+    classDef engine stroke:#8b7355,stroke-width:1.6px
+    classDef distributed stroke:#7da87d,stroke-width:1.6px
     class CLI,UI,API interface
     class Scheduler,Queue,Runs engine
     class Coordinator,WorkerA,WorkerB distributed
