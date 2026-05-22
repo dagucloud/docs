@@ -37,7 +37,7 @@ Credentials: `demouser` / `demouser`
     <p>Declare workflow parameters once in YAML. Dagu uses them to render a guided start form in the Web UI, validate operator input, and keep submitted values attached to the run history.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/getting-started/mcp">AI-agent ready</a></h3>
+    <h3><a href="/mcp/">AI-agent ready</a></h3>
     <p>Use MCP-capable agents to inspect state, preview workflow changes, apply edits, and start, retry, or stop runs. Agent-authored workflows still run through the same logs, approvals, artifacts, and audit trail as human-authored YAML.</p>
   </div>
 </div>
@@ -372,7 +372,7 @@ steps:
 
 Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in steward, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat.
 
-- [MCP Setup](/getting-started/mcp) explains how agents can inspect state and operate workflows through Dagu.
+- [MCP Server](/mcp/) explains how agents can inspect state and operate workflows through Dagu.
 - [AI Agent Authoring](/getting-started/ai-agent) explains workflow generation and debugging with coding agents.
 - [Agent Step](/features/agent/step) explains how to run agent tasks inside DAGs.
 - [Workflow Operator](/features/bots/) explains chat-operator setup.
@@ -413,7 +413,7 @@ Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in ste
     <p>Compare local, self-hosted, managed, and hybrid operating models.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/getting-started/mcp">MCP Setup</a></h3>
+    <h3><a href="/mcp/">MCP Server</a></h3>
     <p>Connect AI agents to inspect state, preview changes, and operate workflow runs.</p>
   </div>
 </div>

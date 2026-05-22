@@ -29,6 +29,8 @@ Each API key has:
 - an optional **description**
 - a **role**
 - optional **workspace limits**
+- accepted **surfaces**, such as REST API and MCP
+- an **attribution class**, either user-owned or service account
 - **last used** tracking in the UI
 
 The full secret is shown only once when you create the key.
@@ -41,7 +43,9 @@ The full secret is shown only once when you create the key.
 4. Enter a name and optional description
 5. Choose the role
 6. Choose **All workspaces** or **Selected workspaces**
-7. Create the key and store the secret immediately
+7. Choose the accepted surfaces
+8. Choose user-owned or service-account attribution
+9. Create the key and store the secret immediately
 
 ## Use An API Key
 
@@ -58,6 +62,30 @@ For CLI usage:
 export DAGU_API_TOKEN=$DAGU_API_KEY
 dagu status
 ```
+
+## Accepted Surfaces
+
+API keys can be scoped to the public interfaces that should accept them.
+
+| Surface | Use |
+|---------|-----|
+| `rest_api` | REST API, CLI remote contexts, and related HTTP API usage. |
+| `mcp` | The built-in [MCP server](/mcp/). |
+
+Use an MCP-only key for an AI tool that should operate through MCP but should not call the REST API directly. Use both surfaces when the same automation identity needs both REST and MCP.
+
+Legacy API keys created before surface metadata existed are treated as both `rest_api` and `mcp` for compatibility.
+
+## Attribution
+
+API keys can be attributed as either:
+
+| Attribution | Use |
+|-------------|-----|
+| `service_account` | Shared automation identity, such as a CI runner or team MCP client. |
+| `user_owned` | A key owned by a specific Dagu user when audit logs should attribute actions to that user. |
+
+For MCP usage, prefer individual user-owned keys when you need per-user auditability. Prefer service-account keys for shared bots, CI jobs, and integrations with a stable machine identity.
 
 ## Roles And Workspace Access
 
@@ -106,7 +134,10 @@ curl -X POST http://localhost:8080/api/v1/api-keys \
     "name": "ci-pipeline",
     "description": "Workflow automation",
     "role": "operator",
-    "workspaceAccess": { "all": true }
+    "workspaceAccess": { "all": true },
+    "allowedSurfaces": ["rest_api"],
+    "attributionClass": "service_account",
+    "serviceAccountName": "ci-pipeline"
   }'
 ```
 
@@ -165,13 +196,16 @@ Admins can list, inspect, update, and delete API keys from the UI or API.
 1. Use a separate key per service or pipeline.
 2. Give each key the smallest role it needs.
 3. Scope keys to workspaces when possible.
-4. On Community installs, keep the 2-key creation limit in mind; use an active self-host license when you need broader per-service key separation.
-5. Rotate keys regularly.
-6. Delete keys you no longer use.
-7. Store keys in your normal secret manager rather than in source control.
+4. Limit each key to the surfaces it actually needs.
+5. Use user-owned keys for MCP clients when individual audit attribution matters.
+6. On Community installs, keep the 2-key creation limit in mind; use an active self-host license when you need broader per-service key separation.
+7. Rotate keys regularly.
+8. Delete keys you no longer use.
+9. Store keys in your normal secret manager rather than in source control.
 
 ## Related Pages
 
 - [Builtin Authentication](./builtin)
 - [User Management](./user-management)
 - [Remote Nodes Authentication](./remote-nodes)
+- [MCP Authentication](/mcp/authentication)

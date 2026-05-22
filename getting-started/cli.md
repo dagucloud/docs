@@ -789,7 +789,7 @@ The skill helps AI coding tools write correct Dagu workflow YAML. To let MCP-cap
 http://localhost:8080/mcp
 ```
 
-For details, run `gh skill install --help` and see [MCP Server](/getting-started/mcp).
+For details, run `gh skill install --help` and see [MCP Server](/mcp/).
 
 ### `migrate`
 

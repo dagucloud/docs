@@ -109,7 +109,7 @@ http://localhost:8080/mcp
 
 The MCP server exposes `dagu_read`, `dagu_change`, and `dagu_execute` for reading state, previewing or applying DAG changes, and controlling DAG runs.
 
-See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
+See [MCP Server](/mcp/) and [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
 
 ## See Also
 
@@ -121,7 +121,7 @@ See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#e
 - [Personality](/features/agent/settings/behavior) — Configure profiles
 - [Agent Step](/features/agent/step) — Using the agent as a workflow step
 - [AI agent Tools Reference](/features/agent/tools) — Detailed tool parameter documentation
-- [MCP Server](/getting-started/mcp) — Connect external MCP clients to a running Dagu server
+- [MCP Server](/mcp/) — Connect external MCP clients to a running Dagu server
 - [Workflow Operator](/features/bots/) — Use the built-in steward from Slack, Telegram, Discord, or LINE
 - [Basic Chat](/features/chat/basics) — Single-shot LLM calls in workflows
 - [OpenCode](/features/chat/opencode) — Kimi, DeepSeek, GLM, Qwen via OpenCode subscription

@@ -275,7 +275,7 @@ To connect MCP-capable clients to a running Dagu server, use the Streamable HTTP
 http://localhost:8080/mcp
 ```
 
-See [MCP Server](/getting-started/mcp) and [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
+See [MCP Server](/mcp/) and [CLI Commands](/getting-started/cli#external-ai-coding-tool-integration) for more details.
 
 ## Advanced Usage
 

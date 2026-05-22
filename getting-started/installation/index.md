@@ -63,7 +63,7 @@ export DAGU_DATA_DIR=/var/lib/dagu
 dagu version
 ```
 
-Then run the [Quickstart](/getting-started/quickstart) to create your first workflow. If you use AI coding tools, install the [Dagu skill](/getting-started/ai-agent#ai-coding-tool-integration) for workflow authoring and connect the [Dagu MCP server](/getting-started/mcp) to operate a running Dagu server.
+Then run the [Quickstart](/getting-started/quickstart) to create your first workflow. If you use AI coding tools, install the [Dagu skill](/getting-started/ai-agent#ai-coding-tool-integration) for workflow authoring and connect the [Dagu MCP server](/mcp/) to operate a running Dagu server.
 
 ## Uninstalling
 
