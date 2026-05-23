@@ -5,8 +5,11 @@ title: What is Dagu?
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Turn any operation into a durable workflow in minutes</h2>
-  <p>Dagu wraps scripts, SQL, SSH commands, API calls, containers, and runbooks with typed inputs, validation, retries, visual execution, logs, artifacts, run history, and optional human review.</p>
+  <h2>Local-first Control Plane for Existing Ops Automation and AI Agent Workflows</h2>
+  <div class="tagline" style="text-align: left;">
+    <p>Define workflows in simple declarative YAML syntax, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers. The built-in Web UI eliminates the need for SSHing into servers to debug failed runs, check logs, or retry steps manually. All without requiring databases, message brokers, or code changes to your existing scripts. It natively supports command execution via SSH, running docker containers, kubernetes jobs, and you can extend it with custom step types for your specific use case.</p>
+    <p>Built for developers who want powerful workflow orchestration without the operational overhead.</p>
+  </div>
 </div>
 
 <div class="hero-section">
@@ -25,62 +28,12 @@ Explore without installing: [Live Demo](https://dagu-demo-f5e33d0e.dagu.sh/)
 Credentials: `demouser` / `demouser`
 :::
 
-## Why Dagu?
-
-<div class="overview-card-grid">
-  <div class="overview-card">
-    <h3><a href="/overview/architecture">Local-first</a></h3>
-    <p>Run workflows close to private networks, internal databases, local files, credentials, and existing CLIs. The common single-server setup uses one binary and file-backed state, with no required external database or broker.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/writing-workflows/parameters">Self-service inputs</a></h3>
-    <p>Declare workflow parameters once in YAML. Dagu uses them to render a guided start form in the Web UI, validate operator input, and keep submitted values attached to the run history.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/mcp/">AI-agent ready</a></h3>
-    <p>Use MCP-capable agents to inspect state, preview workflow changes, apply edits, and start, retry, or stop runs. Agent-authored workflows still run through the same logs, approvals, artifacts, and audit trail as human-authored YAML.</p>
-  </div>
-</div>
-
 ## Motivation
 
-Important operations often start as scripts: a shell repair command, a Python cleanup job, a SQL check, an SSH backup, a dbt command, a container task, or a runbook that only works on a specific server. These tasks may become critical before they have a proper control plane. Inputs, permissions, approvals, logs, recovery steps, and operational context end up spread across crontabs, worker images, wiki pages, chat messages, and engineer knowledge.
-
-Dagu was built for teams that already have useful automation but need a practical way to let the right people run it safely. Instead of asking teams to move execution into a cloud job platform, build a custom admin UI, or translate every job into a large orchestration stack, Dagu wraps existing work with typed parameters, generated input forms, visible dependencies, durable execution, approvals, logs, artifacts, queues, distributed workers, notifications, and Web UI controls.
-
-By default, Dagu keeps workflows, run history, logs, and artifacts on local disk, so workflows can run near private networks, internal databases, local files, specialized hardware, and existing CLIs. Teams can move from manual engineer execution and fragmented cron to visible, retryable, self-service workflows without introducing a large platform project first.
-
-## What Dagu Adds Around a Run
-
-The YAML still looks like scripts, commands, and service calls. The difference is that the workflow also carries the inputs, runtime details, and review points operators usually keep in wiki pages, worker images, or chat history.
-
-<div class="overview-card-grid">
-  <div class="overview-card">
-    <h3><a href="/writing-workflows/parameters">Generated parameter UI</a></h3>
-    <p>A top-level <code>params</code> block defines names, types, defaults, descriptions, and allowed values for a workflow run. Dagu turns those declarations into a start form in the Web UI.</p>
-    <p><strong>Why it matters:</strong> operators get a guided way to provide inputs, while engineers keep the contract versioned with the workflow.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/writing-workflows/tools">Pinned tools</a></h3>
-    <p>A top-level <code>tools</code> block lists the CLIs and versions the workflow needs. Dagu prepares them on the worker and puts them on <code>PATH</code> before host commands run.</p>
-    <p><strong>Why it matters:</strong> the DAG names its toolchain. That means fewer surprises from stale worker images or hand-installed binaries.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/dagu-actions/">Dagu Actions</a></h3>
-    <p>A step can call <code>python-script@v1</code>, <code>duckdb@v1</code>, or <code>ffmpeg@v1</code>. Dagu resolves the action package and runs it as its own child workflow.</p>
-    <p><strong>Why it matters:</strong> shared logic can live with its inputs, outputs, helper files, and tool dependencies. The caller stays small.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/web-ui/notifications">Notifications</a></h3>
-    <p>Channels and rules send run events to Slack, email, Telegram, Google Chat, or webhooks when a run fails, waits, gets rejected, is aborted, or succeeds.</p>
-    <p><strong>Why it matters:</strong> teams manage routing in the Web UI, globally, by workspace, or for one DAG. The DAG does not need webhook URLs.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/web-ui/incidents">Incident routing</a></h3>
-    <p>Routes create provider incidents after final workflow failure and resolve them after a later successful run recovers the DAG.</p>
-    <p><strong>Why it matters:</strong> failures and recovery stay tied to the workflow, with run links, dedup keys, and provider state stored by Dagu.</p>
-  </div>
-</div>
+Legacy systems often have complex and implicit dependencies between jobs. When there are hundreds of cron jobs on a server, it can be difficult to keep track of
+these dependencies and to determine which job to rerun if one fails. It can also be a hassle to SSH into a server to view logs and manually rerun shell scripts on
+e by one. Dagu aims to solve these problems by allowing you to explicitly visualize and manage pipeline dependencies as a DAG, and by providing a web UI for check
+ing dependencies, execution status, and logs and for rerunning or stopping jobs with a simple mouse click.
 
 ## How a Workflow Runs
 
