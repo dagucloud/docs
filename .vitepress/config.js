@@ -190,7 +190,7 @@ const fullSidebar = [
     ],
   },
   {
-    text: "GitHub Integration",
+    text: "Managed GitHub App",
       items: [
         { text: "Overview", link: "/github-integration/" },
         { text: "Setup", link: "/github-integration/setup" },
@@ -416,7 +416,7 @@ export default withMermaid(
         { text: "MCP", link: "/mcp/", activeMatch: "/mcp/" },
         { text: "Writing Workflows", link: "/writing-workflows/", activeMatch: "/writing-workflows/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/step-types/" },
-        { text: "GitHub Integration", link: "/github-integration/", activeMatch: "/github-integration/" },
+        { text: "Managed GitHub App", link: "/github-integration/", activeMatch: "/github-integration/" },
         { text: "AI Agent", link: "/features/agent/", activeMatch: "/features/agent/" },
         { text: "Server Admin", link: "/server-admin/", activeMatch: "/server-admin/" },
       ],
