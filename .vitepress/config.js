@@ -228,6 +228,7 @@ const fullSidebar = [
           { text: "Telegram", link: "/features/bots/telegram" },
           { text: "Slack", link: "/features/bots/slack" },
           { text: "Discord", link: "/features/bots/discord" },
+          { text: "LINE", link: "/features/bots/line" },
         ],
       },
     ],
