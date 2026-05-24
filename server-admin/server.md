@@ -42,6 +42,7 @@ access_log_mode: "all"     # Access log mode: "all" (default), "non-public", or 
 headless: false           # Run without Web UI
 check_updates: true       # Automatic web UI update checks (default: true)
 metrics: "private"        # Metrics endpoint access: "private" (default) or "public"
+cors_allowed_origins: []  # Explicit CORS origins; empty = allow all without credentials (default)
 
 # Directory Paths (must be under "paths" key)
 paths:
@@ -179,6 +180,7 @@ All options support `DAGU_` prefix:
 - `DAGU_ACCESS_LOG_MODE` - Access log mode: `all` (default), `non-public`, or `none`
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
+- `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`); when empty, all origins are allowed without credentials
 
 **Paths:**
 - `DAGU_HOME` - Set all paths
@@ -268,6 +270,7 @@ Before exposing Dagu beyond a single-user localhost setup, review these controls
 - **Use TLS or a trusted reverse proxy.** If Dagu binds to `0.0.0.0`, pair that with TLS termination and network-level controls rather than exposing the port broadly.
 - **Secure distributed traffic.** For coordinator and worker traffic that crosses host or network boundaries, set `peer.insecure: false` and configure `peer.cert_file`, `peer.key_file`, and `peer.client_ca_file` for peer TLS/mTLS.
 - **Treat host executors as privileged.** Docker socket mounts, root containers, host bind mounts, and shell-capable workflows should be treated as administrative access to the machine that runs Dagu.
+- **Restrict CORS origins for embedded deployments.** If the Dagu UI is embedded in or accessed alongside another web application, set `cors_allowed_origins` to the explicit list of allowed origins. The default (allow all, no credentials) is safe for standalone deployments.
 
 Example production-focused baseline:
 

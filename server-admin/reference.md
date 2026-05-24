@@ -21,6 +21,7 @@ headless: false
 check_updates: true       # Automatic web UI update checks (default: true)
 skip_examples: false       # Skip creating example DAGs
 metrics: "private"        # Metrics endpoint: "private" (default) or "public"
+cors_allowed_origins: []  # Explicit CORS origins; empty = allow all without credentials (default)
 cache: "normal"            # Cache mode
 
 # Terminal (web-based shell access)
@@ -713,6 +714,7 @@ peer:
 - `public_url`: empty
 - `check_updates`: `true`
 - `metrics`: `private`
+- `cors_allowed_origins`: empty (allow all, no credentials)
 - `default_execution_mode`: `local`
 - `coordinator.enabled`: `true`
 - `terminal.enabled`: `false`
