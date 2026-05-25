@@ -5,10 +5,10 @@ title: What is Dagu?
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Local-first Control Plane for Existing Ops Automation and AI Agent Workflows</h2>
+  <h2>Lightweight and Powerful Workflow Engine</h2>
   <div class="tagline" style="text-align: left;">
-    <p>Define workflows in simple declarative YAML syntax, execute them anywhere with a single binary, compose complex pipelines from reusable sub-workflows, and distribute tasks across workers. The built-in Web UI eliminates the need for SSHing into servers to debug failed runs, check logs, or retry steps manually. All without requiring databases, message brokers, or code changes to your existing scripts. It natively supports command execution via SSH, running docker containers, kubernetes jobs, and you can extend it with custom step types for your specific use case.</p>
-    <p>Built for developers who want powerful workflow orchestration without the operational overhead.</p>
+    <p>Dagu is a lightweight workflow engine that comes with a Web UI. Define workflows in a simple, declarative YAML format and run existing scripts or tools without modification. It natively supports shell commands, Docker containers, Kubernetes Jobs, SSH commands, and more.</p>
+    <p>Start with one self-contained binary and file-backed state. No DBMS or message broker is required, and you can add queues, workers, MCP, or AI-agent steps only when your workflows need them.</p>
   </div>
 </div>
 
@@ -30,10 +30,9 @@ Credentials: `demouser` / `demouser`
 
 ## Motivation
 
-Legacy systems often have complex and implicit dependencies between jobs. When there are hundreds of cron jobs on a server, it can be difficult to keep track of
-these dependencies and to determine which job to rerun if one fails. It can also be a hassle to SSH into a server to view logs and manually rerun shell scripts on
-e by one. Dagu aims to solve these problems by allowing you to explicitly visualize and manage pipeline dependencies as a DAG, and by providing a web UI for check
-ing dependencies, execution status, and logs and for rerunning or stopping jobs with a simple mouse click.
+In complex systems often have implicit dependencies between jobs. When there are hundreds of cron jobs on a server, it can be difficult to keep track of these dependencies and to determine which job to rerun if one fails. It can also be a hassle to SSH into a server to view logs and manually rerun shell scripts one by one. Dagu aims to solve these problems by allowing you to explicitly visualize and manage pipeline dependencies as a DAG, and by providing a web UI for checking dependencies, execution status, and logs and for rerunning or stopping jobs with a simple mouse click.
+
+There are many existing tools such as Airflow, Prefect, and Temporal, but many of these require you to write code in a programming language like Python to define your DAG. For many systems, there may already be complex jobs with hundreds of thousands of lines of code. Adding another layer of complexity on top of these codes can reduce maintainability. Dagu was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.
 
 ## How a Workflow Runs
 
@@ -117,44 +116,44 @@ See [Core Concepts](/getting-started/concepts) for the deeper model.
 
 ## Why Teams Choose Dagu
 
-The main reason teams choose Dagu is that it turns existing automation into safe, visible workflows without turning that work into a platform rollout.
+Teams choose Dagu when they want workflow orchestration without adopting a large platform. Start with one binary, describe work in YAML, keep existing scripts and tools intact, and add operational controls only where they help.
 
 <div class="overview-card-grid overview-strengths-grid">
   <div class="overview-card">
-    <h3><a href="/getting-started/installation/">Single binary</a></h3>
-    <p>Install <a href="/getting-started/installation/">one executable</a>. The default <a href="/getting-started/quickstart">quickstart setup</a> runs without an external <a href="/overview/architecture">database or broker</a> and without splitting the <a href="/writing-workflows/scheduling">scheduler</a>, queue, or <a href="/overview/web-ui">Web UI</a> into separate required services.</p>
+    <h3><a href="/getting-started/installation/">Self-contained</a></h3>
+    <p>Install <a href="/getting-started/installation/">one executable</a>. The default <a href="/getting-started/quickstart">quickstart setup</a> includes the scheduler, workflow runtime, and <a href="/overview/web-ui">Web UI</a> without requiring an external DBMS or message broker.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/overview/architecture">Local-first storage</a></h3>
-    <p><a href="/getting-started/cli#history">Run history</a>, <a href="/overview/web-ui#run-history-and-logs">logs</a>, and artifacts stay local by default, which keeps <a href="/overview/deployment-models">self-hosting</a> simple and fits private-network, data-local, and air-gapped deployment patterns.</p>
+    <h3><a href="/writing-workflows/yaml-specification">Declarative YAML</a></h3>
+    <p>Define workflows in a simple, declarative <a href="/writing-workflows/yaml-specification">YAML format</a>. Dependencies, parameters, schedules, retries, and execution controls are visible in one file and easy to review in Git.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/persistent-state">Persistent workflow state</a></h3>
     <p>Store small JSON <a href="/writing-workflows/persistent-state">state</a> across runs for cursors, checkpoints, previous snapshots, and change detection without adding an external database.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/writing-workflows/examples">No rewrite workflows</a></h3>
-    <p>Wrap existing <a href="/step-types/shell">scripts and commands</a>, <a href="/step-types/sql/">SQL</a>, dbt commands, DuckDB jobs, <a href="/step-types/docker">containers</a>, SSH operations, HTTP calls, and other <a href="/writing-workflows/examples">automation tasks</a> instead of converting them into framework-specific jobs.</p>
+    <h3><a href="/writing-workflows/examples">CLI-oriented</a></h3>
+    <p>Use existing <a href="/step-types/shell">scripts and commands</a>, Python jobs, SQL, dbt, DuckDB, <a href="/step-types/docker">containers</a>, SSH operations, HTTP calls, and other tools without modification.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/writing-workflows/parameters">Generated forms</a></h3>
-    <p>Declare typed <a href="/writing-workflows/parameters">parameters</a> in YAML and Dagu automatically presents the right inputs in the <a href="/overview/web-ui">Web UI</a>, including defaults, descriptions, and allowed values.</p>
+    <h3><a href="/overview/web-ui">Built-in Web UI</a></h3>
+    <p>Inspect runs, read logs, retry failed steps, start workflows, and review history from the <a href="/overview/web-ui">Web UI</a> instead of SSHing into servers for routine operation.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/writing-workflows/tools">Reproducible CLI tools</a></h3>
-    <p>Declare pinned <a href="/writing-workflows/tools">external tool packages</a> in the DAG so portable CLIs such as <code>jq</code>, <code>yq</code>, and <code>duckdb</code> are installed automatically and every worker runs the same binary version.</p>
+    <h3><a href="/step-types/">Native executors</a></h3>
+    <p>Run <a href="/step-types/shell">shell commands</a>, <a href="/step-types/docker">Docker containers</a>, <a href="/step-types/kubernetes">Kubernetes Jobs</a>, <a href="/step-types/ssh">SSH commands</a>, HTTP requests, SQL queries, sub-workflows, and agent steps.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/overview/web-ui">Observable by default</a></h3>
-    <p>Every run has <a href="/web-ui/cockpit">status</a>, <a href="/overview/web-ui#run-history-and-logs">per-step logs</a>, <a href="/overview/web-ui#run-details">timing and history</a>, <a href="/writing-workflows/artifacts">artifacts</a>, <a href="/writing-workflows/approval">approvals</a>, <a href="/web-ui/notifications">notifications</a>, <a href="/web-ui/incidents">incident routing</a>, and <a href="/overview/web-ui">UI controls</a> for debugging, recovery, and handoff.</p>
+    <h3><a href="/overview/architecture">File-backed state</a></h3>
+    <p><a href="/getting-started/cli#history">Run history</a>, <a href="/overview/web-ui#run-history-and-logs">logs</a>, and artifacts are stored as files by default, keeping local and self-hosted deployments simple.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/server-admin/distributed/">Scales gradually</a></h3>
     <p>Start on <a href="/getting-started/quickstart">one machine</a>, then move heavy, regional, or specialized jobs to <a href="/server-admin/distributed/">distributed workers</a> with <a href="/server-admin/distributed/worker-labels">label-based routing</a>.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/writing-workflows/yaml-specification">Plain YAML</a></h3>
-    <p>Workflows live as <a href="/writing-workflows/yaml-specification">plain YAML</a>, can be reviewed in <a href="/server-admin/git-sync">Git</a>, generated with <a href="/dagu-actions/custom">reusable tooling</a>, edited by <a href="/getting-started/ai-agent">AI agents</a>, and checked with <a href="/getting-started/cli#validate">validation</a> before they run.</p>
+    <h3><a href="/mcp/">AI and MCP ready</a></h3>
+    <p>Use MCP-capable agents to inspect state, preview workflow changes, and operate runs, or call agent CLIs from workflow steps when automation needs AI assistance.</p>
   </div>
 </div>
 
@@ -315,7 +314,7 @@ If it can run from a <a href="/step-types/shell">shell command</a>, <a href="/st
 
 ## AI Agents and Workflow Operator
 
-Dagu includes AI features, but they build on the same local-first workflow model. The built-in MCP server lets MCP-capable agents read Dagu state, preview or apply workflow changes, and start, enqueue, retry, or stop runs. Agent steps and external agent CLIs can also run inside workflows, with the same scheduling, logs, retries, approvals, and run history as any other step.
+Dagu includes AI features, but they build on the same self-contained workflow engine. The built-in MCP server lets MCP-capable agents read Dagu state, preview or apply workflow changes, and start, enqueue, retry, or stop runs. Agent steps and external agent CLIs can also run inside workflows, with the same scheduling, logs, retries, approvals, and run history as any other step.
 
 ```yaml
 steps:
