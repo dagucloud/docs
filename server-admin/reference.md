@@ -2,6 +2,8 @@
 
 All Dagu configuration options.
 
+For configuration precedence, file locations, `DAGU_HOME`, and path defaults, see [Configuration](/server-admin/configuration).
+
 ## Configuration File
 
 Default: `~/.config/dagu/config.yaml`

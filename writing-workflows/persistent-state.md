@@ -328,6 +328,8 @@ If omitted, Dagu derives it from the data directory:
 {paths.data_dir}/dag-state
 ```
 
+See [Configuration](/server-admin/configuration#persistent-state-directory) for configuration precedence and path defaults.
+
 The file-backed store is safe for concurrent local processes on the same filesystem. State record filenames are encoded so hierarchical keys, Windows-invalid characters, and case variants do not collide on disk.
 
 ## Distributed Execution

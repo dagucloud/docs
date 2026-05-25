@@ -61,6 +61,11 @@ docker run -d \
 
 ## Topics
 
+**[Configuration](/server-admin/configuration)**
+- Config file, environment variables, and precedence
+- `DAGU_HOME` and path defaults
+- Persistent state directory configuration
+
 **[Server Configuration](/server-admin/server)**
 - Host, port, authentication
 - TLS/HTTPS setup
@@ -162,6 +167,7 @@ dagu start-all
 ## See Also
 
 - [Set up authentication](/server-admin/server#authentication) for production
+- [Understand configuration precedence](/server-admin/configuration) before mixing flags, environment variables, and `config.yaml`
 - [Configure base defaults](/server-admin/base-config) for shared DAG settings
 - [Configure monitoring](/server-admin/operations#monitoring) for visibility
 - [Set up distributed execution](/server-admin/distributed/) for scaling

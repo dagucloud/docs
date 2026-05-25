@@ -261,6 +261,7 @@ const fullSidebar = [
     text: "Server Administration",
     items: [
       { text: "Overview", link: "/server-admin/" },
+      { text: "Configuration", link: "/server-admin/configuration" },
       { text: "Server Configuration", link: "/server-admin/server" },
       { text: "Reference", link: "/server-admin/reference" },
       { text: "Operations", link: "/server-admin/operations" },
