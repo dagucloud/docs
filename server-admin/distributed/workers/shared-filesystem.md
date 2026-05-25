@@ -15,10 +15,8 @@ In shared filesystem mode, workers share storage access with the coordinator. Al
          ▼                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    Shared Storage                           │
-│  ┌───────────────┬─────────────────┬─────────────────────┐  │
-│  │ service-      │   dag-runs/     │      logs/          │  │
-│  │ registry/     │   (status)      │   (execution logs)  │  │
-│  └───────────────┴─────────────────┴─────────────────────┘  │
+│  service-registry/  dag-runs/  dag-state/  logs/          │
+│  (discovery)        (status)   (state)     (logs)         │
 └─────────────────────────────────────────────────────────────┘
          ▲                              ▲
          │                              │
@@ -94,6 +92,10 @@ Workers write execution logs directly to the shared log directory:
         └── status.yaml
 ```
 
+### Persistent State
+
+`state.*` actions store small JSON values under `paths.dag_state_dir`. In shared filesystem mode, point this directory at shared persistent storage when multiple processes may read or write the same state keys. By default it is derived from `paths.data_dir` as `{data}/dag-state`.
+
 ## Requirements
 
 Shared storage must be mounted at the same path on all nodes, or configured via `DAGU_HOME` to point to the shared location.
@@ -101,6 +103,7 @@ Shared storage must be mounted at the same path on all nodes, or configured via 
 Required shared directories:
 - `{data}/service-registry/` — worker registration and discovery
 - `{data}/dag-runs/` — execution status
+- `{data}/dag-state/` — persistent state for `state.*` actions, unless `paths.dag_state_dir` points elsewhere
 - `{logs}/` — execution logs (required for Web UI log display)
 
 > [!NOTE]
@@ -135,6 +138,7 @@ paths:
   data_dir: "/shared/dagu/data"        # Must be shared
   log_dir: "/shared/dagu/logs"         # Must be shared
   service_registry_dir: "/shared/dagu/service-registry"  # Must be shared
+  dag_state_dir: "/shared/dagu/data/dag-state"           # Must be shared for persistent state
 
 worker:
   id: "worker-gpu-01"

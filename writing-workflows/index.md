@@ -159,9 +159,10 @@ Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dag
 6. **[Error Handling](/writing-workflows/error-handling)** - Continue-on behavior, handlers, notifications
 7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
 8. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
-9. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
-10. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
-11. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
+9. **[Persistent State](/writing-workflows/persistent-state)** - Cursors, checkpoints, and previous values across DAG runs
+10. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
+11. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
+12. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
 
 Reusable action docs live in the [Dagu Actions](/dagu-actions/) section.
 

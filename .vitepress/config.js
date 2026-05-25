@@ -91,6 +91,7 @@ const fullSidebar = [
       { text: "Data & Variables", link: "/writing-workflows/data-variables" },
       { text: "Data Flow", link: "/writing-workflows/data-flow" },
       { text: "Outputs", link: "/writing-workflows/outputs" },
+      { text: "Persistent State", link: "/writing-workflows/persistent-state" },
       { text: "Artifacts", link: "/writing-workflows/artifacts" },
       // Flow control
       { text: "Control Flow", link: "/writing-workflows/control-flow" },
@@ -176,6 +177,7 @@ const fullSidebar = [
       { text: "Wait", link: "/step-types/wait" },
       { text: "S3", link: "/step-types/s3" },
       { text: "Redis", link: "/step-types/redis" },
+      { text: "Persistent State", link: "/writing-workflows/persistent-state" },
       { text: "Archive", link: "/step-types/archive" },
       {
         text: "SQL",

@@ -11,10 +11,13 @@ Dagu provides multiple mechanisms for passing data through workflows:
 - Parameters - Pass runtime values into workflows
 - File-based Passing - Redirect output to local files within the step environment
 - Artifacts - Persist large run files for preview and download
+- Persistent State - Store small JSON values across DAG runs
 - JSON Path References - Access nested data structures
 - Step ID References - Reference step properties and files
 - Sub DAG Outputs - Capture results from sub-workflows
 - DAG Run Outputs - Collect string-form outputs into a structured file for viewing and API access
+
+Use [Persistent State](/writing-workflows/persistent-state) when a later DAG run needs a previous cursor, checkpoint, snapshot, or last-seen value. Use outputs when the value is needed only inside the current run, and artifacts when the result is a file or large payload.
 
 ## Output Variables
 

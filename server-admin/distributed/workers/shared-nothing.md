@@ -9,13 +9,8 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
 │                     Dagu Instance                           │
 │  (Scheduler + Web UI + Coordinator)                         │
 │                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │              Local Storage                          │    │
-│  │  ┌───────────────┬─────────────────┬────────────┐   │    │
-│  │  │  dag-runs/    │     logs/       │   dags/    │   │    │
-│  │  │  (status)     │ (execution logs)│            │   │    │
-│  │  └───────────────┴─────────────────┴────────────┘   │    │
-│  └─────────────────────────────────────────────────────┘    │
+│  Local Storage: dag-runs/  dag-state/  logs/                │
+│                 (status)   (state)     (logs)               │
 └─────────────────────────────────────────────────────────────┘
          ▲                              │
          │ ReportStatus + StreamLogs    │ Task Dispatch
@@ -23,7 +18,7 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
          │                              ▼
 ┌────────┴───────────┐        ┌────────────────────┐
 │     Worker 1       │        │     Worker N       │
-│  (No local state)  │        │  (No local state)  │
+│ (No shared disk)   │        │ (No shared disk)   │
 └────────────────────┘        └────────────────────┘
 ```
 
@@ -58,6 +53,12 @@ Workers stream stdout/stderr to the coordinator via the `StreamLogs` gRPC call:
 4. Worker sends final marker when execution completes
 
 Log streaming is best-effort: failures don't fail the step execution. Some logs may be lost if network issues occur during streaming.
+
+### Persistent State
+
+Workers use coordinator RPCs for `state.*` actions, so they do not write persistent DAG state to worker-local disks. The coordinator stores state under `paths.dag_state_dir`, which defaults to `{data_dir}/dag-state`.
+
+When multiple coordinators are configured, state requests are routed deterministically by state scope and namespace. This keeps all workers using the same coordinator for the same logical state keyspace. If coordinator pods or VMs can be replaced, back `paths.dag_state_dir` with persistent storage so the selected coordinator does not lose state on restart.
 
 ### Packaged Actions
 
@@ -128,6 +129,7 @@ coordinator:
 
 paths:
   data_dir: "/var/lib/dagu/data"   # Local storage for status
+  dag_state_dir: "/var/lib/dagu/data/dag-state" # Local persistent DAG state
   log_dir: "/var/lib/dagu/logs"    # Local storage for logs
 
 ---
@@ -150,6 +152,9 @@ worker:
 ### Environment Variables
 
 ```bash
+# Coordinator
+export DAGU_DAG_STATE_DIR=/var/lib/dagu/data/dag-state
+
 # Worker
 export DAGU_WORKER_COORDINATORS="coordinator-1:50055,coordinator-2:50055"
 export DAGU_WORKER_ID=worker-01

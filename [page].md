@@ -104,6 +104,7 @@ Understanding Dagu is easier once the main terms are clear.
 | **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
 | **Parameter** | A declared run input with a name, type, default, description, or allowed values. Parameters power the generated Web UI start form and keep submitted values visible with the run. |
 | **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
+| **State** | A small JSON value stored across DAG runs with [`state.*` actions](/writing-workflows/persistent-state), useful for cursors, checkpoints, previous snapshots, and change detection. |
 | **Run** | One execution of a DAG. Runs keep [status](/web-ui/cockpit), [logs](/overview/web-ui#run-history-and-logs), [timing](/overview/web-ui#run-details), [outputs](/writing-workflows/outputs), and [artifacts](/writing-workflows/artifacts). |
 | **Notification** | A UI-managed route that sends run events to Slack, email, Telegram, Google Chat, or webhooks. |
 | **Incident** | A provider-backed failure lifecycle that opens on final failure, deduplicates repeated failures, and resolves after recovery. |
@@ -126,6 +127,10 @@ The main reason teams choose Dagu is that it turns existing automation into safe
   <div class="overview-card">
     <h3><a href="/overview/architecture">Local-first storage</a></h3>
     <p><a href="/getting-started/cli#history">Run history</a>, <a href="/overview/web-ui#run-history-and-logs">logs</a>, and artifacts stay local by default, which keeps <a href="/overview/deployment-models">self-hosting</a> simple and fits private-network, data-local, and air-gapped deployment patterns.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/persistent-state">Persistent workflow state</a></h3>
+    <p>Store small JSON <a href="/writing-workflows/persistent-state">state</a> across runs for cursors, checkpoints, previous snapshots, and change detection without adding an external database.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/examples">No rewrite workflows</a></h3>

@@ -776,6 +776,7 @@ Accepted built-in action names:
 | `sftp.download`, `sftp.upload` | SFTP transfers. |
 | `sqlite.query`, `sqlite.import` | SQLite query/import actions. |
 | `ssh.run` | Remote shell over SSH. |
+| `state.get`, `state.set`, `state.delete`, `state.list`, `state.diff` | Persistent JSON state across DAG runs. See [Persistent State](/writing-workflows/persistent-state). |
 | `template.render` | Template rendering. |
 | `wait.duration`, `wait.file`, `wait.http`, `wait.until` | Wait and polling actions. |
 

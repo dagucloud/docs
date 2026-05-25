@@ -113,6 +113,31 @@ steps:
     depends: date_stamp
 ```
 
+### Persistent State
+
+Use persistent state when one DAG run needs to remember a small JSON value for the next run:
+
+```yaml
+steps:
+  - id: load_cursor
+    action: state.get
+    output: CURSOR
+    with:
+      key: cursors/feed
+      default:
+        last_id: 0
+
+  - id: save_cursor
+    action: state.set
+    with:
+      key: cursors/feed
+      value:
+        last_id: 123
+    depends: load_cursor
+```
+
+State is versioned, stored locally by default, and can be scoped to the current DAG, the root DAG, a global namespace, or a custom shared namespace. See [Persistent State](/writing-workflows/persistent-state).
+
 ### Tools
 
 Declare portable CLI dependencies at the DAG level when the workflow needs a reproducible binary version:
