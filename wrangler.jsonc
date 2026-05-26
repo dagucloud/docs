@@ -3,10 +3,9 @@
   "compatibility_date": "2025-04-01",
   "routes": [
     { "pattern": "docs.dagu.sh", "custom_domain": true },
-    { "pattern": "docs.daguit.dev", "custom_domain": true },
-    { "pattern": "docs.dagu.cloud", "custom_domain": true }
+    { "pattern": "docs.dagu.cloud", "custom_domain": true },
   ],
   "assets": {
-    "directory": ".vitepress/dist/"
-  }
+    "directory": ".vitepress/dist/",
+  },
 }
