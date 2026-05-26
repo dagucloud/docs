@@ -344,7 +344,7 @@ Examples:
 
 `workerPools.<poolName>.labels` are Dagu worker capability labels. They are not copied into Kubernetes pod metadata.
 
-The worker pod metadata always includes `daguit.dev/worker-pool: <poolName>`, but the contents of `workerPools.<poolName>.labels` are only used to build the `--worker.labels` argument.
+The worker pod metadata always includes `dagu.sh/worker-pool: <poolName>`, but the contents of `workerPools.<poolName>.labels` are only used to build the `--worker.labels` argument.
 
 When `labels` is non-empty, the worker Deployment adds:
 
