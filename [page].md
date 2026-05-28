@@ -5,9 +5,9 @@ title: What is Dagu?
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">
 
 <div class="tagline" style="text-align: center;">
-  <h2>Lightweight and Powerful Workflow Engine</h2>
+  <h2>Local-first Control Plane for Existing Ops Automation and AI Agent Workflows</h2>
   <div class="tagline" style="text-align: left;">
-    <p>Dagu is a lightweight workflow engine that comes with a Web UI. Define workflows in a simple, declarative YAML format and run existing scripts or tools without modification. It natively supports shell commands, Docker containers, Kubernetes Jobs, SSH commands, and more.</p>
+    <p>Dagu is the control plane for operations automation and AI agent workflows in private infrastructure. Define workflows in a simple, declarative YAML format and run existing scripts or tools without modification. It natively supports shell commands, Docker containers, Kubernetes Jobs, remote commands via SSH, and more.</p>
     <p>Start with one self-contained binary and file-backed state. No DBMS or message broker is required, and you can add queues, workers, MCP, or AI-agent steps only when your workflows need them.</p>
   </div>
 </div>
@@ -33,6 +33,8 @@ Credentials: `demouser` / `demouser`
 In complex systems often have implicit dependencies between jobs. When there are hundreds of cron jobs on a server, it can be difficult to keep track of these dependencies and to determine which job to rerun if one fails. It can also be a hassle to SSH into a server to view logs and manually rerun shell scripts one by one. Dagu aims to solve these problems by allowing you to explicitly visualize and manage pipeline dependencies as a DAG, and by providing a web UI for checking dependencies, execution status, and logs and for rerunning or stopping jobs with a simple mouse click.
 
 There are many existing tools such as Airflow, Prefect, and Temporal, but many of these require you to write code in a programming language like Python to define your DAG. For many systems, there may already be complex jobs with hundreds of thousands of lines of code. Adding another layer of complexity on top of these codes can reduce maintainability. Dagu was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.
+
+With declarative YAML workflows with MCP integration, AI agents can create and modify reproducible workflows with human oversight, making Dagu a great fit for AI-assisted automation.
 
 ## How a Workflow Runs
 
