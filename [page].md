@@ -34,8 +34,8 @@ In complex systems often have implicit dependencies between jobs. When there are
 
 There are many existing tools such as Airflow, Prefect, and Temporal, but many of these require you to write code in a programming language like Python to define your DAG. For many systems, there may already be complex jobs with hundreds of thousands of lines of code. Adding another layer of complexity on top of these codes can reduce maintainability. Dagu was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.
 
-With declarative YAML workflows with MCP integration, AI agents can create and modify reproducible workflows with human oversight, making Dagu a great fit for AI-assisted automation.
-
+With declarative YAML syntax with MCP integration, AI agents can create and modify reproducible workflows with human oversight, making Dagu a great fit for AI-assisted automation.
+  
 ## How a Workflow Runs
 
 Dagu does not make you rewrite the work. Your scripts, SQL files, containers, SSH commands, APIs, and services can stay as they are; the YAML adds inputs, order, logs, retries, approvals, artifacts, and recovery controls around them.
