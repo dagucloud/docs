@@ -369,7 +369,7 @@ export default withMermaid(
         "link",
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
         },
       ],
       [
@@ -474,8 +474,10 @@ export default withMermaid(
     },
 
     markdown: {
+      // Code is a CRT readout in both modes — same dark token set on a
+      // void background, so light mode renders dark code blocks too.
       theme: {
-        light: "github-light",
+        light: "github-dark",
         dark: "github-dark",
       },
       lineNumbers: true,
