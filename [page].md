@@ -7,7 +7,7 @@ title: What is Dagu?
 <div class="tagline" style="text-align: center;">
   <h2>Local-first workflow orchestrator with Web UI</h2>
   <div class="tagline" style="text-align: left;">
-    <p>Dagu is a lightweight, self-contained alternative to Airflow or Cron with Web UI that runs on Linux / Mac / Windows. Define DAGs in a simple, declarative YAML format and run existing scripts or tools without modification. It natively supports shell commands, Docker containers, Kubernetes Jobs, remote commands via SSH, and more.</p>
+    <p>Dagu is a lightweight, self-contained alternative to Airflow or Cron with Web UI that runs on Linux / Mac / Windows. Define DAGs in a simple, declarative YAML format. It supports shell commands, Docker containers, Kubernetes Jobs, remote commands via SSH, and more. It was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.</p>
     <p>Start with one self-contained binary and file-backed state. No DBMS or message broker is required, and you can add queues, workers, MCP, or AI-agent steps only when your workflows need them.</p>
   </div>
 </div>
