@@ -2,6 +2,37 @@
 
 For the full version history of Dagu, see the [releases page](https://github.com/dagucloud/dagu/releases).
 
+## v2.7.5 (2026-05-30)
+
+### Added
+
+- feat: add security headers middleware ([#2195](https://github.com/dagucloud/dagu/pull/2195)) [@yohamta0](https://github.com/yohamta0)
+- feat: add per-IP sliding window rate limiting to login endpoint ([#2196](https://github.com/dagucloud/dagu/pull/2196)) [@yohamta0](https://github.com/yohamta0)
+- feat: add persistent DAG state ([#2203](https://github.com/dagucloud/dagu/pull/2203)) [@yohamta0](https://github.com/yohamta0)
+
+### Fixed
+
+- fix: track temp files via registry file instead of subshell-local array ([#2198](https://github.com/dagucloud/dagu/pull/2198)) [@kuishou68](https://github.com/kuishou68)
+- fix(auth): invalidate JWT tokens on password change or reset ([#2199](https://github.com/dagucloud/dagu/pull/2199)) [@yohamta0](https://github.com/yohamta0)
+- fix(auth): move OIDC token from query param to hash fragment ([#2200](https://github.com/dagucloud/dagu/pull/2200)) [@yohamta0](https://github.com/yohamta0)
+- fix(cors): remove invalid AllowCredentials with wildcard origin ([#2201](https://github.com/dagucloud/dagu/pull/2201)) [@yohamta0](https://github.com/yohamta0)
+- fix: harden scheduler DAG file reload on Windows ([#2204](https://github.com/dagucloud/dagu/pull/2204)) [@yohamta0](https://github.com/yohamta0)
+- fix: recover scheduler tick panics ([#2215](https://github.com/dagucloud/dagu/pull/2215)) [@yohamta0](https://github.com/yohamta0)
+- fix: preserve dotenv env on retry ([#2225](https://github.com/dagucloud/dagu/pull/2225)) [@yohamta0](https://github.com/yohamta0)
+- fix(ui): guard api-keys page against undefined config.license ([#2228](https://github.com/dagucloud/dagu/pull/2228)) [@yohamta0](https://github.com/yohamta0)
+- fix(core): serialize Container.Env so container.env: vars appear in step output ([#2231](https://github.com/dagucloud/dagu/pull/2231)) [@mingfang](https://github.com/mingfang)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| bug: Environment variables are not loaded when retry from the failed step ([#2223](https://github.com/dagucloud/dagu/issues/2223)) | [@Sky-Zeng](https://github.com/Sky-Zeng) (report) |
+| [BUG] cleanup_tmpfiles in installer.sh does not clear tmp dir ([#2001](https://github.com/dagucloud/dagu/issues/2001)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
+| fix: track temp files via registry file instead of subshell-local array ([#2198](https://github.com/dagucloud/dagu/pull/2198)) | [@kuishou68](https://github.com/kuishou68) |
+| fix(core): serialize Container.Env so container.env: vars appear in step output ([#2231](https://github.com/dagucloud/dagu/pull/2231)) | [@mingfang](https://github.com/mingfang) |
+
 ## v2.7.4 (2026-05-22)
 
 This is primarily a bug fix release.
