@@ -34,6 +34,8 @@ dagu worker --worker.coordinators=coordinator-1:50055,coordinator-2:50055
 
 No service registry or shared storage is required.
 
+For Kubernetes, private network, VPN, overlay network, and SSH forwarding examples, see [Distributed Networking](/server-admin/distributed/networking).
+
 ### Status Pushing
 
 Workers send execution status to the coordinator via the `ReportStatus` gRPC call:
@@ -309,24 +311,7 @@ spec:
 
 ## TLS Configuration
 
-For production deployments, enable TLS for gRPC communication:
-
-```bash
-# Coordinator with TLS
-dagu coordinator \
-  --coordinator.host=0.0.0.0 \
-  --peer.insecure=false \
-  --peer.cert-file=/certs/server.crt \
-  --peer.key-file=/certs/server.key
-
-# Worker with TLS
-dagu worker \
-  --worker.coordinators=coordinator:50055 \
-  --peer.insecure=false \
-  --peer.cert-file=/certs/client.crt \
-  --peer.key-file=/certs/client.key \
-  --peer.client-ca-file=/certs/ca.crt
-```
+For TLS, mTLS, and certificate requirements for coordinator gRPC traffic, see [Distributed Transport Security](/server-admin/distributed/transport-security).
 
 ## Technical Details
 

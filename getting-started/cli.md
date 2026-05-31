@@ -888,7 +888,8 @@ dagu worker --worker.labels cpu-arch=amd64,instance-type=m5.xlarge
 
 # With TLS connection
 dagu worker \
-  --peer.insecure=false
+  --peer.insecure=false \
+  --peer.client-ca-file=ca.pem
 
 # With mutual TLS
 dagu worker \
@@ -897,9 +898,10 @@ dagu worker \
   --peer.key-file=client-key.pem \
   --peer.client-ca-file=ca.pem
 
-# With self-signed certificates
+# Temporarily skip certificate verification
 dagu worker \
   --peer.insecure=false \
+  --peer.client-ca-file=ca.pem \
   --peer.skip-tls-verify
 ```
 

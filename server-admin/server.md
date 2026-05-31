@@ -268,7 +268,7 @@ Before exposing Dagu beyond a single-user localhost setup, review these controls
 - **Minimize write access.** If operators should run reviewed DAGs but not modify them, set `permissions.write_dags: false`.
 - **Keep the web terminal disabled unless you need it.** `terminal.enabled: false` is the safest setting for shared environments.
 - **Use TLS or a trusted reverse proxy.** If Dagu binds to `0.0.0.0`, pair that with TLS termination and network-level controls rather than exposing the port broadly.
-- **Secure distributed traffic.** For coordinator and worker traffic that crosses host or network boundaries, set `peer.insecure: false` and configure `peer.cert_file`, `peer.key_file`, and `peer.client_ca_file` for peer TLS/mTLS.
+- **Secure distributed traffic.** For coordinator and worker traffic that crosses host or network boundaries, configure peer TLS or mTLS. See [Distributed Transport Security](/server-admin/distributed/transport-security).
 - **Treat host executors as privileged.** Docker socket mounts, root containers, host bind mounts, and shell-capable workflows should be treated as administrative access to the machine that runs Dagu.
 - **Restrict CORS origins for embedded deployments.** If the Dagu UI is embedded in or accessed alongside another web application, set `cors_allowed_origins` to the explicit list of allowed origins. The default (allow all, no credentials) is safe for standalone deployments.
 

@@ -199,7 +199,7 @@ peer:
   insecure: true          # Use h2c instead of TLS (default: true)
   cert_file: ""            # TLS certificate for peer connections
   key_file: ""             # TLS key for peer connections
-  client_ca_file: ""        # CA certificate for peer verification (mTLS)
+  client_ca_file: ""        # CA certificate for peer verification
   skip_tls_verify: false    # Skip TLS certificate verification
 
 # Scheduler
@@ -399,7 +399,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_PEER_INSECURE` - Use insecure connection (default: `true`)
 - `DAGU_PEER_CERT_FILE` - TLS certificate for peer connections
 - `DAGU_PEER_KEY_FILE` - TLS key for peer connections
-- `DAGU_PEER_CLIENT_CA_FILE` - CA certificate for peer verification (mTLS)
+- `DAGU_PEER_CLIENT_CA_FILE` - CA certificate for peer verification
 - `DAGU_PEER_SKIP_TLS_VERIFY` - Skip TLS certificate verification
 
 ### Scheduler

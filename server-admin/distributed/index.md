@@ -37,7 +37,7 @@ DAG definitions do not need to be shared in either mode — they are transmitted
 
 ## How Dispatch Decisions Work
 
-Every execution path in Dagu — API, CLI, scheduler, queue, and sub-DAG steps — uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior regardless of how a run is triggered.
+Every server-side execution path in Dagu — API, scheduler, queue, and sub-DAG steps — uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior for runs handled by the server and queue processor.
 
 ### Decision Priority
 
@@ -59,7 +59,7 @@ All of the following entry points evaluate the same decision logic:
 |---------|-------------|
 | API start | Immediate execution from the UI or API |
 | API retry | Retrying a failed run from the UI or API |
-| CLI `dagu start` | Running a DAG from the command line |
+| CLI `dagu enqueue` | Queueing a DAG-run from the command line for the queue processor to dispatch |
 | Scheduler | Cron-triggered scheduled runs |
 | Queue consumer | Dequeuing a previously enqueued run |
 | Sub-DAG step | A `call` step executing a child DAG |
@@ -77,8 +77,11 @@ Each sub-DAG independently evaluates the dispatch decision. A DAG running locall
 The default peer transport is convenient for local evaluation, but it is not the right choice for untrusted networks.
 
 - If coordinator and workers communicate only on a single private host or an isolated development network, the default peer transport may be acceptable.
-- If coordinator and workers communicate across machines, clusters, VPN boundaries, or any network segment you do not fully trust, set `peer.insecure=false` and configure `peer.cert_file`, `peer.key_file`, and `peer.client_ca_file` so peer traffic uses TLS or mTLS.
+- If coordinator and workers communicate across machines, clusters, VPN boundaries, or any network segment you do not fully trust, configure peer TLS or mTLS.
 - Treat worker connectivity as a control plane. Anyone who can intercept or impersonate that channel can affect workflow execution.
+
+For Kubernetes, private network, VPN, overlay network, and SSH forwarding examples, see [Distributed Networking](/server-admin/distributed/networking).
+For peer certificates and mTLS setup, see [Distributed Transport Security](/server-admin/distributed/transport-security).
 
 ## Setting Up Distributed Execution
 

@@ -2,6 +2,10 @@
 
 Enable encrypted connections for Dagu.
 
+::: tip
+This page covers Web UI/API HTTPS. For coordinator and worker gRPC certificates, see [Distributed Transport Security](/server-admin/distributed/transport-security).
+:::
+
 ## Configuration
 
 ### YAML Configuration

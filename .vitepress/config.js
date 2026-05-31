@@ -294,6 +294,8 @@ const fullSidebar = [
         collapsed: false,
         items: [
           { text: "Overview", link: "/server-admin/distributed/" },
+          { text: "Networking", link: "/server-admin/distributed/networking" },
+          { text: "Transport Security", link: "/server-admin/distributed/transport-security" },
           {
             text: "Workers",
             collapsed: false,
