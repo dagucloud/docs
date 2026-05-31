@@ -37,7 +37,8 @@ steps:
       max_iterations: 30
       messages:
         - role: user
-          content: "Fix the invalid database_url in /etc/app/config.yaml"
+          content: |
+            Fix the invalid database_url in /etc/app/config.yaml
     output: RESULT
 ```
 
@@ -81,7 +82,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Analyze the logs"
+          content: |
+            Analyze the logs
     # Uses defaults: model=claude-opus, soul=tsumugi, max_iterations=30
 
   - action: agent.run
@@ -89,7 +91,8 @@ steps:
       model: claude-sonnet   # overrides defaults.agent.model
       messages:
         - role: user
-          content: "Review the analysis"
+          content: |
+            Review the analysis
     # Uses model=claude-sonnet (override), soul=tsumugi (default), etc.
 ```
 
@@ -215,7 +218,8 @@ steps:
           region: California
           country: US
           timezone: America/Los_Angeles
-      task: "Research recent dependency changes"
+      task: |
+        Research recent dependency changes
 ```
 
 | Field | Type | Description |
@@ -240,7 +244,8 @@ steps:
         enabled:
           - web_search
           - web_extract
-      task: "Summarize the latest API changelog"
+      task: |
+        Summarize the latest API changelog
 ```
 
 The tools are still filtered by the global tool policy. If `web_search` or `web_extract` is disabled globally, a step cannot re-enable it.
@@ -263,7 +268,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Analyze ${INPUT_FILE} and write results to ${OUTPUT_DIR}"
+          content: |
+            Analyze ${INPUT_FILE} and write results to ${OUTPUT_DIR}
     output: RESULT
 ```
 
@@ -309,7 +315,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Count the number of .go files in this directory"
+          content: |
+            Count the number of .go files in this directory
     output: FILE_COUNT
 
   - id: print_count
@@ -331,7 +338,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Summarize the README.md in this repository"
+          content: |
+            Summarize the README.md in this repository
     output: SUMMARY
 ```
 
@@ -344,7 +352,8 @@ steps:
       model: claude-opus
       messages:
         - role: user
-          content: "Review the code in src/main.go for bugs and security issues"
+          content: |
+            Review the code in src/main.go for bugs and security issues
     output: REVIEW
 ```
 
@@ -360,7 +369,8 @@ steps:
           - think
       messages:
         - role: user
-          content: "Analyze the architecture of this codebase without modifying anything"
+          content: |
+            Analyze the architecture of this codebase without modifying anything
     output: ANALYSIS
 ```
 
@@ -384,7 +394,8 @@ steps:
       max_iterations: 20
       messages:
         - role: user
-          content: "Report the health of all pods in the staging namespace"
+          content: |
+            Report the health of all pods in the staging namespace
     output: HEALTH_REPORT
 ```
 
@@ -400,7 +411,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Analyze the test coverage of ${REPO_PATH} and identify untested code paths"
+          content: |
+            Analyze the test coverage of ${REPO_PATH} and identify untested code paths
     output: COVERAGE_ANALYSIS
 
   - id: write_tests
@@ -430,7 +442,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Draft a migration plan for upgrading the database from v3 to v4"
+          content: |
+            Draft a migration plan for upgrading the database from v3 to v4
     output: MIGRATION_PLAN
     approval:
       prompt: "Review the migration plan and approve if acceptable"
@@ -440,7 +453,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Execute the approved migration plan: ${MIGRATION_PLAN}"
+          content: |
+            Execute the approved migration plan: ${MIGRATION_PLAN}
     depends: draft
 ```
 

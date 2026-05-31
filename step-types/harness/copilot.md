@@ -27,7 +27,8 @@ steps:
     action: harness.run
     with:
       provider: copilot
-      prompt: "Explain what this function does and suggest improvements"
+      prompt: |
+        Explain what this function does and suggest improvements
       model: gpt-4o
 ```
 
@@ -49,7 +50,8 @@ steps:
     action: harness.run
     with:
       provider: copilot
-      prompt: "Review this PR for security issues"
+      prompt: |
+        Review this PR for security issues
       auto: true
 ```
 

@@ -60,7 +60,8 @@ steps:
       base_url: http://localhost:11434/v1
       messages:
         - role: user
-          content: "Summarize this repository in one paragraph."
+          content: |
+            Summarize this repository in one paragraph.
     output: RESULT
 ```
 

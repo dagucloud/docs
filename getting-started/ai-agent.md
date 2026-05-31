@@ -87,7 +87,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Summarize today's error logs."
+          content: |
+            Summarize today's error logs.
     output: SUMMARY
 ```
 

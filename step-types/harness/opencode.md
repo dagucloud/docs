@@ -27,7 +27,8 @@ steps:
     action: harness.run
     with:
       provider: opencode
-      prompt: "Review the current branch and list problems"
+      prompt: |
+        Review the current branch and list problems
       model: claude-sonnet-4
 ```
 
@@ -47,7 +48,8 @@ steps:
     action: harness.run
     with:
       provider: opencode
-      prompt: "Implement the feature described in the issue"
+      prompt: |
+        Implement the feature described in the issue
       auto: true
 ```
 

@@ -58,7 +58,8 @@ steps:
       model: kimi-k2.6
       messages:
         - role: user
-          content: "Summarize today's error logs."
+          content: |
+            Summarize today's error logs.
     output: SUMMARY
 ```
 
@@ -73,7 +74,8 @@ steps:
       api_key_name: MY_OPENCODE_KEY
       messages:
         - role: user
-          content: "Hello!"
+          content: |
+            Hello!
 ```
 
 ### With Thinking Enabled
@@ -91,7 +93,8 @@ steps:
         effort: high
       messages:
         - role: user
-          content: "Analyze the security implications of this code..."
+          content: |
+            Analyze the security implications of this code...
     output: ANALYSIS
 ```
 
@@ -105,7 +108,8 @@ steps:
       model: opencode-kimi-k2-6
       messages:
         - role: user
-          content: "Review and fix the invalid entries in /etc/app/config.yaml"
+          content: |
+            Review and fix the invalid entries in /etc/app/config.yaml
     output: RESULT
 ```
 
@@ -130,7 +134,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Explain this error."
+          content: |
+            Explain this error.
 ```
 
 ## Reasoning and Tool Calls

@@ -48,7 +48,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Review the code in ${TARGET_FILE} for bugs and suggest fixes."
+          content: |
+            Review the code in ${TARGET_FILE} for bugs and suggest fixes.
     output: REVIEW
 ```
 
@@ -96,7 +97,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Summarize the contents of ${FILE} in one paragraph."
+          content: |
+            Summarize the contents of ${FILE} in one paragraph.
     output: SUMMARY
 ```
 
@@ -202,7 +204,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Review ${FILE} for security issues. Be concise."
+          content: |
+            Review ${FILE} for security issues. Be concise.
     output: RESULT
 ```
 
@@ -256,7 +259,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "List the top 3 files to refactor in /app/src. Output just the file paths, one per line."
+          content: |
+            List the top 3 files to refactor in /app/src. Output just the file paths, one per line.
     output: FILE_LIST
 
   - id: refactor
@@ -358,7 +362,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Read ${LOG_PATH} and identify the most frequent error patterns."
+          content: |
+            Read ${LOG_PATH} and identify the most frequent error patterns.
     output: ANALYSIS
 ```
 
@@ -394,7 +399,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Check the health of the ${SERVICE} service. Report status and any issues found."
+          content: |
+            Check the health of the ${SERVICE} service. Report status and any issues found.
     output: STATUS
 ```
 
@@ -409,7 +415,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Analyze /app/src and create a test plan. List files that need tests."
+          content: |
+            Analyze /app/src and create a test plan. List files that need tests.
     output: TEST_PLAN
 
   - id: write_tests

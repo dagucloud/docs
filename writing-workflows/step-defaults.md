@@ -191,7 +191,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Review the failing workflow"
+          content: |
+            Review the failing workflow
     # Inherits model, soul, and max_iterations
 
   - action: agent.run
@@ -199,7 +200,8 @@ steps:
       model: claude-opus
       messages:
         - role: user
-          content: "Summarize the review"
+          content: |
+            Summarize the review
     # Overrides only model; still inherits soul and max_iterations
 ```
 

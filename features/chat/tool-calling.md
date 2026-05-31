@@ -40,7 +40,8 @@ steps:
         - calculator
       messages:
         - role: user
-          content: "What is 15 times 23?"
+          content: |
+            What is 15 times 23?
 
 ---
 # Tool DAG definition
@@ -119,7 +120,8 @@ steps:
         - database_tool   # Loaded from DAG directory
       messages:
         - role: user
-          content: "Use the tools as needed."
+          content: |
+            Use the tools as needed.
 
 ---
 # Local tool (inline definition)
@@ -152,7 +154,8 @@ steps:
       max_tool_iterations: 15  # Allow more iterations for complex tasks
       messages:
         - role: user
-          content: "Research and analyze..."
+          content: |
+            Research and analyze...
 ```
 
 ## Multi-Tool Example
@@ -169,7 +172,8 @@ steps:
         - analyze_data
       messages:
         - role: user
-          content: "Search for AI trends and analyze them"
+          content: |
+            Search for AI trends and analyze them
 
 ---
 # Search tool
@@ -275,7 +279,8 @@ steps:
       max_tool_iterations: 20
       messages:
         - role: user
-          content: "Fetch user data, transform it to standard format, and store in database"
+          content: |
+            Fetch user data, transform it to standard format, and store in database
 
 ---
 # Fetch data tool

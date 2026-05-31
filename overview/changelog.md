@@ -979,7 +979,8 @@ Thanks to our contributors for this release:
         max_tool_iterations: 10
         messages:
           - role: user
-            content: "What's the latest news about AI?"
+            content: |
+              What's the latest news about AI?
 
   ---
   # Define tool DAG
@@ -1615,7 +1616,8 @@ Everyone who participated in discussions, reported feedback, or helped other use
         model: gpt-4o
         messages:
           - role: user
-            content: "What is 2+2?"
+            content: |
+              What is 2+2?
       output: ANSWER
   ```
 
@@ -1751,7 +1753,8 @@ Everyone who participated in discussions, reported feedback, or helped other use
         model: gpt-4o
         messages:
           - role: user
-            content: "What is 2+2?"
+            content: |
+              What is 2+2?
       output: ANSWER
   ```
 

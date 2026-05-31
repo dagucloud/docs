@@ -38,7 +38,8 @@ steps:
     action: harness.run
     with:
       provider: codex
-      prompt: "Write unit tests for the auth module"
+      prompt: |
+        Write unit tests for the auth module
       model: gpt-5.5
       full-auto: true
 ```
@@ -59,7 +60,8 @@ steps:
     action: harness.run
     with:
       provider: codex
-      prompt: "Fix all lint errors"
+      prompt: |
+        Fix all lint errors
       yolo: true
       sandbox: workspace-write
 ```
@@ -86,7 +88,8 @@ steps:
   - name: refactor
     action: harness.run
     with:
-      prompt: "Refactor the database layer to use interfaces"
+      prompt: |
+        Refactor the database layer to use interfaces
 ```
 
 ## See Also

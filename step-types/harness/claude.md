@@ -30,7 +30,8 @@ steps:
     action: harness.run
     with:
       provider: claude
-      prompt: "Review the current branch for bugs and style issues"
+      prompt: |
+        Review the current branch for bugs and style issues
       model: sonnet
       bare: true
 ```
@@ -51,7 +52,8 @@ steps:
     action: harness.run
     with:
       provider: claude
-      prompt: "Refactor the auth module"
+      prompt: |
+        Refactor the auth module
       dangerously_skip_permissions: true
 ```
 
@@ -73,7 +75,8 @@ steps:
     action: harness.run
     with:
       provider: claude
-      prompt: "Implement the requested feature"
+      prompt: |
+        Implement the requested feature
       model: opus
     approval:
       prompt: "Review the implementation"

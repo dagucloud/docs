@@ -22,7 +22,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
     output: ANSWER
 ```
 
@@ -39,7 +40,8 @@ steps:
         - calculator
       messages:
         - role: user
-          content: "What is 15 times 23?"
+          content: |
+            What is 15 times 23?
 
 ---
 # Tool DAG definition
@@ -110,10 +112,12 @@ steps:
     with:
       provider: openai
       model: gpt-4o
-      system: "You are a math tutor."
+      system: |
+        You are a math tutor.
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
 
   - id: followup
     action: chat.completion
@@ -122,7 +126,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Now multiply that by 3."
+          content: |
+            Now multiply that by 3.
     depends: setup
 ```
 
@@ -142,13 +147,15 @@ steps:
     with:
       messages:
         - role: user
-          content: "Explain quantum computing"
+          content: |
+            Explain quantum computing
 
   - action: chat.completion
     with:
       messages:
         - role: user
-          content: "Now explain it to a 5-year-old"
+          content: |
+            Now explain it to a 5-year-old
 ```
 
 Both steps inherit the DAG-level LLM configuration.

@@ -12,7 +12,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
     output: ANSWER
 ```
 
@@ -105,7 +106,8 @@ Define LLM defaults at the DAG level to share configuration across multiple chat
 llm:
   provider: anthropic
   model: claude-sonnet-4-20250514
-  system: "You are a helpful assistant."
+  system: |
+    You are a helpful assistant.
   temperature: 0.7
   thinking:
     enabled: true
@@ -117,7 +119,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
 
   # This step overrides DAG-level config
   - action: chat.completion
@@ -126,7 +129,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Different provider and model (no thinking)"
+          content: |
+            Different provider and model (no thinking)
 ```
 
 ::: warning Full Override Pattern
@@ -164,7 +168,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Explain quantum computing briefly."
+          content: |
+            Explain quantum computing briefly.
 ```
 
 ### Variable Substitution
@@ -183,7 +188,8 @@ steps:
       model: claude-sonnet-4-20250514
       messages:
         - role: user
-          content: "Explain ${TOPIC} in ${LANGUAGE}."
+          content: |
+            Explain ${TOPIC} in ${LANGUAGE}.
 ```
 
 ### Multi-turn Session
@@ -199,10 +205,12 @@ steps:
     with:
       provider: openai
       model: gpt-4o
-      system: "You are a math tutor."
+      system: |
+        You are a math tutor.
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
 
   - id: followup
     action: chat.completion
@@ -211,7 +219,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Now multiply that by 3."
+          content: |
+            Now multiply that by 3.
     depends: setup
 ```
 
@@ -241,7 +250,8 @@ steps:
       model: llama3
       messages:
         - role: user
-          content: "Hello!"
+          content: |
+            Hello!
 ```
 
 See [Local AI](/features/chat/local-ai) for the correct Ollama `base_url`, current limitations, and common `404` causes.
@@ -258,7 +268,8 @@ steps:
       api_key_name: CUSTOM_API_KEY
       messages:
         - role: user
-          content: "Hello!"
+          content: |
+            Hello!
 ```
 
 ### Disable Streaming
@@ -272,7 +283,8 @@ steps:
       stream: false
       messages:
         - role: user
-          content: "Generate a haiku."
+          content: |
+            Generate a haiku.
 ```
 
 ### Capture Output
@@ -291,7 +303,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Generate a JSON object with name and age fields."
+          content: |
+            Generate a JSON object with name and age fields.
     output: CHAT_RESPONSE
 
   - id: extract_name
@@ -310,7 +323,8 @@ steps:
       temperature: 1.5
       messages:
         - role: user
-          content: "Write a creative story opening."
+          content: |
+            Write a creative story opening.
 
   - action: chat.completion
     with:
@@ -319,7 +333,8 @@ steps:
       temperature: 0.1
       messages:
         - role: user
-          content: "What is the capital of France?"
+          content: |
+            What is the capital of France?
 ```
 
 ### Extended Thinking Mode
@@ -338,7 +353,8 @@ steps:
         effort: high
       messages:
         - role: user
-          content: "Analyze the security implications of this code..."
+          content: |
+            Analyze the security implications of this code...
 
   # Using explicit token budget
   - action: chat.completion
@@ -350,7 +366,8 @@ steps:
         budget_tokens: 16384
       messages:
         - role: user
-          content: "Solve this complex optimization problem..."
+          content: |
+            Solve this complex optimization problem...
 
   # OpenAI reasoning model
   - action: chat.completion
@@ -362,7 +379,8 @@ steps:
         effort: high
       messages:
         - role: user
-          content: "Prove this mathematical theorem..."
+          content: |
+            Prove this mathematical theorem...
 ```
 
 ### Conditional Routing
@@ -378,10 +396,12 @@ steps:
     with:
       provider: openai
       model: gpt-4o
-      system: "Classify the request. Reply with exactly: bug, feature, or question"
+      system: |
+        Classify the request. Reply with exactly: bug, feature, or question
       messages:
         - role: user
-          content: "${USER_REQUEST}"
+          content: |
+            ${USER_REQUEST}
     output: TYPE
 
   - id: route
@@ -399,30 +419,36 @@ steps:
     with:
       provider: anthropic
       model: claude-sonnet-4-20250514
-      system: "You are a debugging expert."
+      system: |
+        You are a debugging expert.
       messages:
         - role: user
-          content: "${USER_REQUEST}"
+          content: |
+            ${USER_REQUEST}
 
   - id: handle_feature
     action: chat.completion
     with:
       provider: anthropic
       model: claude-sonnet-4-20250514
-      system: "You are a product designer."
+      system: |
+        You are a product designer.
       messages:
         - role: user
-          content: "${USER_REQUEST}"
+          content: |
+            ${USER_REQUEST}
 
   - id: handle_question
     action: chat.completion
     with:
       provider: anthropic
       model: claude-sonnet-4-20250514
-      system: "You are a helpful assistant."
+      system: |
+        You are a helpful assistant.
       messages:
         - role: user
-          content: "${USER_REQUEST}"
+          content: |
+            ${USER_REQUEST}
 ```
 
 The `classify` step analyzes the request and outputs a category. The router then executes only the matching handler.
@@ -461,7 +487,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "What is the capital of France?"
+          content: |
+            What is the capital of France?
 ```
 
 First model is primary, rest are fallbacks tried in order on any error. Shared config (`temperature`, `max_tokens`, `top_p`) applies to all models.
@@ -566,7 +593,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Check if this token is valid: ${API_TOKEN}"
+          content: |
+            Check if this token is valid: ${API_TOKEN}
 ```
 
 The `${API_TOKEN}` value is substituted in the message content, but the actual secret is replaced with `*******` before being sent to the LLM provider. The saved session history retains the original content for debugging.

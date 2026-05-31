@@ -1933,7 +1933,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
     output: ANSWER
 ```
 
@@ -1949,14 +1950,16 @@ steps:
 llm:
   provider: openai
   model: gpt-4o
-  system: "You are a helpful assistant."
+  system: |
+    You are a helpful assistant.
 
 steps:
   - action: chat.completion
     with:
       messages:
         - role: user
-          content: "Explain ${TOPIC} briefly."
+          content: |
+            Explain ${TOPIC} briefly.
 ```
 
 Steps inherit LLM config from DAG level.
@@ -1978,7 +1981,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "What is 2+2?"
+          content: |
+            What is 2+2?
 
   - id: follow_up
     action: chat.completion
@@ -1987,7 +1991,8 @@ steps:
       model: gpt-4o
       messages:
         - role: user
-          content: "Now multiply that by 3."
+          content: |
+            Now multiply that by 3.
     depends: ask
 ```
 
@@ -2012,7 +2017,8 @@ steps:
         effort: high
       messages:
         - role: user
-          content: "Analyze this complex problem..."
+          content: |
+            Analyze this complex problem...
 ```
 
 Enable deeper reasoning for complex tasks.

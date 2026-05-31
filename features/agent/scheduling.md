@@ -64,7 +64,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Analyze yesterday's deployment logs and summarize any issues."
+          content: |
+            Analyze yesterday's deployment logs and summarize any issues.
     output: ANALYSIS
 
   - id: email_report
@@ -89,7 +90,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Check application metrics for the last hour and flag anomalies."
+          content: |
+            Check application metrics for the last hour and flag anomalies.
     output: MONITOR_RESULT
 ```
 
@@ -112,7 +114,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Review open pull requests and summarize their status."
+          content: |
+            Review open pull requests and summarize their status.
     output: PR_SUMMARY
 ```
 
@@ -213,7 +216,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Check disk usage, memory, and CPU across all servers."
+          content: |
+            Check disk usage, memory, and CPU across all servers.
     output: INFRA_STATUS
 
   - id: check_app
@@ -221,7 +225,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Review application health endpoints and response times."
+          content: |
+            Review application health endpoints and response times.
     output: APP_STATUS
 
   - action: agent.run

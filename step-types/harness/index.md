@@ -36,7 +36,8 @@ steps:
   - name: review
     action: harness.run
     with:
-      prompt: "Review the current branch and list problems"
+      prompt: |
+        Review the current branch and list problems
       provider: claude
       model: sonnet
       bare: true
@@ -57,7 +58,8 @@ steps:
   - id: implement
     action: harness.run
     with:
-      prompt: "Implement the requested change and summarize what changed"
+      prompt: |
+        Implement the requested change and summarize what changed
       provider: codex
     approval:
       prompt: "Review the implementation"
@@ -102,7 +104,8 @@ steps:
   - name: summarize
     action: harness.run
     with:
-      prompt: "Summarize the repository status"
+      prompt: |
+        Summarize the repository status
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -141,7 +144,8 @@ harnesses:
 steps:
   - action: harness.run
     with:
-      prompt: "Review the auth module"
+      prompt: |
+        Review the auth module
       provider: aider
       model: sonnet
 ```
@@ -167,7 +171,8 @@ harnesses:
 steps:
   - action: harness.run
     with:
-      prompt: "Review the auth module"
+      prompt: |
+        Review the auth module
       provider: gemini
       model: gemini-2.5-pro
 ```
@@ -190,7 +195,8 @@ harnesses:
 steps:
   - action: harness.run
     with:
-      prompt: "Review this patch"
+      prompt: |
+        Review this patch
       stdin: |
         diff --git a/main.go b/main.go
         ...
@@ -262,11 +268,13 @@ harness:
 steps:
   - action: harness.run
     with:
-      prompt: "Write tests for the auth module"
+      prompt: |
+        Write tests for the auth module
 
   - action: harness.run
     with:
-      prompt: "Fix the flaky integration tests"
+      prompt: |
+        Fix the flaky integration tests
       model: opus
       effort: high
 ```
@@ -293,7 +301,8 @@ steps:
   - name: implement
     action: harness.run
     with:
-      prompt: "Implement the feature and add tests"
+      prompt: |
+        Implement the feature and add tests
       provider: claude
       fallback:
         - provider: codex
@@ -319,7 +328,8 @@ steps:
   - name: task
     action: harness.run
     with:
-      prompt: "Analyze the repository layout"
+      prompt: |
+        Analyze the repository layout
       provider: "${PROVIDER}"
 ```
 

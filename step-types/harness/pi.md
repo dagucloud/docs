@@ -26,7 +26,8 @@ steps:
     action: harness.run
     with:
       provider: pi
-      prompt: "Summarize the README in one paragraph"
+      prompt: |
+        Summarize the README in one paragraph
 ```
 
 Generated invocation:
@@ -47,7 +48,8 @@ steps:
     action: harness.run
     with:
       provider: pi
-      prompt: "Summarize the README in one paragraph"
+      prompt: |
+        Summarize the README in one paragraph
       auto: true
 ```
 

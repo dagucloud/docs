@@ -506,7 +506,8 @@ Accepted top-level S3 fields are `region`, `endpoint`, `access_key_id`, `secret_
 llm:
   provider: openai
   model: gpt-4o
-  system: "You are a helpful assistant."
+  system: |
+    You are a helpful assistant.
   temperature: 0.7
 
 steps:
@@ -514,7 +515,8 @@ steps:
     with:
       messages:
         - role: user
-          content: "Summarize ${REPORT_PATH}"
+          content: |
+            Summarize ${REPORT_PATH}
 ```
 
 Supported provider values in the schema are `openai`, `anthropic`, `gemini`, `google`, `openrouter`, `local`, `ollama`, `vllm`, and `llama`.

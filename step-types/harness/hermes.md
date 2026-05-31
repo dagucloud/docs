@@ -43,7 +43,8 @@ steps:
     action: harness.run
     with:
       provider: hermes
-      prompt: "Refactor the auth module to use interfaces"
+      prompt: |
+        Refactor the auth module to use interfaces
       yolo: true
       toolsets: "terminal,skills"
 ```
@@ -64,7 +65,8 @@ steps:
     action: harness.run
     with:
       provider: hermes
-      prompt: "Refactor the auth module to use interfaces"
+      prompt: |
+        Refactor the auth module to use interfaces
       yolo: true
       toolsets: "terminal,skills"
 ```
@@ -89,7 +91,8 @@ steps:
   - name: analyze
     action: harness.run
     with:
-      prompt: "Analyze the codebase for security issues"
+      prompt: |
+        Analyze the codebase for security issues
 ```
 
 ## Notes

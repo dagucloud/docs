@@ -121,7 +121,8 @@ steps:
         max_uses: 5
       messages:
         - role: user
-          content: "Summarize current incident reports for this vendor."
+          content: |
+            Summarize current incident reports for this vendor.
     output: INCIDENT_SUMMARY
 ```
 
@@ -137,7 +138,8 @@ steps:
           - web_extract
       messages:
         - role: user
-          content: "Find and extract the current API changelog."
+          content: |
+            Find and extract the current API changelog.
     output: CHANGELOG_SUMMARY
 ```
 
