@@ -218,6 +218,7 @@ spec:
         - name: dagu
           image: dagu:latest
           args:
+            - "dagu"
             - "start-all"
             - "--host=0.0.0.0"
             - "--coordinator.host=0.0.0.0"
@@ -264,6 +265,7 @@ spec:
         - name: worker
           image: dagu:latest
           args:
+            - "dagu"
             - "worker"
             - "--worker.coordinators=dagu-coordinator.default.svc.cluster.local:50055"
             - "--worker.labels=region=us-east-1"
@@ -288,6 +290,7 @@ spec:
       containers:
         - name: dagu
           args:
+            - "dagu"
             - "start-all"
             - "--coordinator.host=0.0.0.0"
             - "--coordinator.advertise=coordinator.cluster-a.example.com"
@@ -304,6 +307,7 @@ spec:
       containers:
         - name: worker
           args:
+            - "dagu"
             - "worker"
             - "--worker.coordinators=coordinator.cluster-a.example.com:50055"
             - "--worker.labels=region=us-west-2,cluster=cluster-b"

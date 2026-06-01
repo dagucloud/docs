@@ -14,7 +14,7 @@ services:
     ports:
       - "8525:8080"
 
-    entrypoint: [] # Override any default entrypoint for Docker in Docker (DinD) support
+    entrypoint: ["/usr/local/bin/tini", "-g", "--"] # Keep Tini as PID 1
 
     # Default command: run all-in-one (server + scheduler + coordinator in-process)
     # You may override this at runtime, e.g.:
@@ -70,6 +70,8 @@ volumes:
     driver: local
 
 ```
+
+This setup bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. For normal command changes, leave `entrypoint` unset and override only `command`.
 
 Start with:
 ```bash

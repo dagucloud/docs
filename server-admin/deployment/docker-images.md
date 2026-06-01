@@ -12,6 +12,24 @@ Dagu publishes multiple container images to GitHub Container Registry at `ghcr.i
 
 > Prefer pinning to a specific version tag (`ghcr.io/dagucloud/dagu:<version>`) for reproducible deployments.
 
+## Entrypoint and Process Reaping
+
+Official images start with [Tini](https://github.com/krallin/tini) as PID 1:
+
+```text
+/usr/local/bin/tini -g -- /entrypoint.sh dagu start-all
+```
+
+Keep that entrypoint unless there is a specific reason to replace it. Tini reaps orphaned child processes and forwards stop signals to Dagu. Without an init process, a workflow step that starts a background subprocess can leave a zombie process in the container.
+
+`/entrypoint.sh` prepares `DAGU_HOME`, applies `PUID`/`PGID`, runs optional init scripts, and then starts the requested Dagu command.
+
+When changing how the container starts:
+
+- Docker Compose: use `command: ["dagu", "..."]`; do not use `entrypoint: []` or `entrypoint: ["dagu", ...]`.
+- Kubernetes: use `args: ["dagu", "..."]`; do not use `command:` unless the replacement command keeps an init process.
+- Docker socket/root mode: if `/entrypoint.sh` must be bypassed, keep Tini with `entrypoint: ["/usr/local/bin/tini", "-g", "--"]`.
+
 ## Examples
 
 Standard image:

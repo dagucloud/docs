@@ -159,7 +159,7 @@ version: '3.8'
 services:
   dagu-main:
     image: dagu:latest
-    command: start-all --host=0.0.0.0 --coordinator.host=0.0.0.0
+    command: ["dagu", "start-all", "--host=0.0.0.0", "--coordinator.host=0.0.0.0"]
     ports:
       - "8080:8080"
       - "50055:50055"
@@ -169,7 +169,7 @@ services:
 
   worker-gpu:
     image: dagu:latest
-    command: worker --worker.labels=gpu=true,cuda=11.8
+    command: ["dagu", "worker", "--worker.labels=gpu=true,cuda=11.8"]
     volumes:
       - shared-data:/var/lib/dagu       # Shared storage (no dags needed)
     deploy:
@@ -181,7 +181,7 @@ services:
 
   worker-cpu:
     image: dagu:latest
-    command: worker --worker.labels=cpu-only=true
+    command: ["dagu", "worker", "--worker.labels=cpu-only=true"]
     volumes:
       - shared-data:/var/lib/dagu       # Shared storage (no dags needed)
     deploy:
@@ -218,7 +218,7 @@ spec:
       containers:
         - name: dagu
           image: dagu:latest
-          args: ["start-all", "--host=0.0.0.0", "--coordinator.host=0.0.0.0"]
+          args: ["dagu", "start-all", "--host=0.0.0.0", "--coordinator.host=0.0.0.0"]
           volumeMounts:
             - name: shared
               mountPath: /var/lib/dagu
@@ -243,7 +243,7 @@ spec:
       containers:
         - name: worker
           image: dagu:latest
-          args: ["worker", "--worker.labels=region=us-east-1"]
+          args: ["dagu", "worker", "--worker.labels=region=us-east-1"]
           volumeMounts:
             - name: shared
               mountPath: /var/lib/dagu

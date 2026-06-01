@@ -547,9 +547,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./dags:/var/lib/dagu/dags
-    entrypoint: ["dagu", "start-all"]
+    entrypoint: ["/usr/local/bin/tini", "-g", "--"]
+    command: ["dagu", "start-all"]
     user: "0:0"  # Run as root for Docker access
 ```
+
+This bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. Do not use `entrypoint: []`; that removes process reaping.
 
 ## Container Lifecycle Management
 

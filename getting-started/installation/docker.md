@@ -60,11 +60,13 @@ services:
     volumes:
       - dagu:/var/lib/dagu
       - /var/run/docker.sock:/var/run/docker.sock
-    entrypoint: []   # override default entrypoint
+    entrypoint: ["/usr/local/bin/tini", "-g", "--"]  # keep Tini as PID 1
     user: "0:0"      # root is needed for socket access
 volumes:
   dagu: {}
 ```
+
+This example bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. Do not change it to `entrypoint: []`; that removes process reaping.
 
 ::: warning Security
 Mounting `/var/run/docker.sock` grants the container full control of the host Docker daemon. Only do this on trusted hosts and behind authentication.
