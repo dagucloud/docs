@@ -44,10 +44,10 @@ services:
       # - PUID=1000 # optional. default is 1000
       # - PGID=1000 # optional. default is 1000
 
-    # Dev-friendly mounts (persistent data + read-only DAGs)
+    # Dev-friendly mounts (persistent data + writable DAGs)
     volumes:
       - dagu-data:/var/lib/dagu
-      - ./dags:/var/lib/dagu/dags:ro
+      - ./dags:/var/lib/dagu/dags
       # For Docker in Docker (DinD) support, mount the host Docker socket:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -72,6 +72,8 @@ volumes:
 ```
 
 This setup bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. For normal command changes, leave `entrypoint` unset and override only `command`.
+
+The `./dags` mount is writable so Dagu can seed first-run examples and save DAG edits. Add `:ro` only when using immutable DAG sources.
 
 Start with:
 ```bash
