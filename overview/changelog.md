@@ -2,6 +2,23 @@
 
 For the full version history of Dagu, see the [releases page](https://github.com/dagucloud/dagu/releases).
 
+## v2.7.7 (2026-06-01)
+
+This release only includes fixes for Docker containers.
+
+### Fixed
+
+- fix(container): preserve image init process ([#2243](https://github.com/dagucloud/dagu/pull/2243)) [@yohamta0](https://github.com/yohamta0)
+- fix(compose): keep DAG mounts writable ([#2245](https://github.com/dagucloud/dagu/pull/2245)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| bug: zombie processes accumulation in containers ([#2237](https://github.com/dagucloud/dagu/issues/2237)) | [@frafra](https://github.com/frafra) (report) |
+
 ## v2.7.6 (2026-06-01)
 
 This is a hotfix release for a parameter-passing bug in the distributed queue dispatch. Thanks for fixing the bug, [@mingfang](https://github.com/mingfang)!
