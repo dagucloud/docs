@@ -2,6 +2,34 @@
 
 For the full version history of Dagu, see the [releases page](https://github.com/dagucloud/dagu/releases).
 
+## v2.7.6 (2026-06-01)
+
+This is a hotfix release for a parameter-passing bug in the distributed queue dispatch. Thanks for fixing the bug, [@mingfang](https://github.com/mingfang)!
+
+### Added
+
+- feat: add builtin agent harness provider ([#2236](https://github.com/dagucloud/dagu/pull/2236)) [@yohamta0](https://github.com/yohamta0)
+
+### Changed
+
+- refactor: separate dispatch and launcher from engine core ([#2233](https://github.com/dagucloud/dagu/pull/2233)) [@yohamta0](https://github.com/yohamta0)
+- chore(deps): bump the actions-patch group with 2 updates ([#2240](https://github.com/dagucloud/dagu/pull/2240)) [@dependabot](https://github.com/dependabot)
+- test: cover distributed queued runtime params ([#2242](https://github.com/dagucloud/dagu/pull/2242)) [@yohamta0](https://github.com/yohamta0)
+
+### Fixed
+
+- fix(dag): propagate runtime params in distributed queue dispatch ([#2238](https://github.com/dagucloud/dagu/pull/2238)) [@mingfang](https://github.com/mingfang)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| chore(deps): bump the actions-patch group with 2 updates ([#2240](https://github.com/dagucloud/dagu/pull/2240)) | [@dependabot](https://github.com/dependabot) |
+| fix(dag): propagate runtime params in distributed queue dispatch ([#2238](https://github.com/dagucloud/dagu/pull/2238)) | [@mingfang](https://github.com/mingfang) |
+| refactor: separate dispatch and launcher from engine core ([#2233](https://github.com/dagucloud/dagu/pull/2233)), feat: add builtin agent harness provider ([#2236](https://github.com/dagucloud/dagu/pull/2236)), test: cover distributed queued runtime params ([#2242](https://github.com/dagucloud/dagu/pull/2242)) | [@yohamta0](https://github.com/yohamta0) |
+
 ## v2.7.5 (2026-05-30)
 
 ### Added
