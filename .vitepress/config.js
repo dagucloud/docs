@@ -71,6 +71,7 @@ const fullSidebar = [
       { text: "Base Configuration", link: "/server-admin/base-config" },
       { text: "Parameters", link: "/writing-workflows/parameters" },
       { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
+      { text: "Runtime Profiles", link: "/writing-workflows/runtime-profiles" },
       { text: "Tools", link: "/writing-workflows/tools" },
       {
         text: "Secrets",
@@ -252,7 +253,7 @@ const fullSidebar = [
       { text: "Workspaces", link: "/web-ui/workspaces" },
       { text: "Notifications", link: "/web-ui/notifications" },
       { text: "Incident Routing", link: "/web-ui/incidents" },
-      { text: "Secrets", link: "/web-ui/secrets" },
+      { text: "Profiles", link: "/web-ui/profiles" },
       { text: "Documents", link: "/web-ui/documents" },
       { text: "REST API", link: "/web-ui/api" },
     ],

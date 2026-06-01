@@ -2,6 +2,8 @@
 
 Environment variables configure the runtime environment for your workflows. Dagu supports defining variables at three levels: base configuration, DAG-level, and step-level.
 
+For centrally managed variables selected when a run starts, use [Runtime Profiles](/writing-workflows/runtime-profiles). Profiles are useful for environment-specific values such as `dev`, `staging`, and `prod` settings without changing the DAG YAML.
+
 ## Overview
 
 Variables flow from base configuration through DAG definition to individual steps:
@@ -377,6 +379,8 @@ steps:
   - run: ./deploy.sh
     # AWS_SECRET_ACCESS_KEY is available but masked in logs
 ```
+
+For sensitive values that should be selected together with a runtime environment, use [runtime profile secrets](/writing-workflows/runtime-profiles#profile-entries). Profile secrets are injected as secrets and masked like values from the DAG `secrets:` block.
 
 ## See Also
 

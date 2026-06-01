@@ -2,6 +2,8 @@
 
 `secrets:` declares environment variables whose values are resolved when a DAG run starts.
 
+For secrets that should be selected as part of a named runtime environment, use [Runtime Profiles](/writing-workflows/runtime-profiles). Runtime profile secrets are managed outside the DAG YAML and selected with the profile at run start.
+
 Dagu supports two secret declaration styles:
 
 1. **Registry refs** for secrets managed from Dagu's Web UI.
@@ -21,7 +23,7 @@ secrets:
 
 `name` is the environment variable exposed to steps. `ref` is the registry key. The DAG does not store the plaintext value or provider details.
 
-Create or rotate the value in the Web UI under **Secrets**:
+Create or rotate the value from the standalone **Secrets** page:
 
 1. Select **Global** or a named workspace.
 2. Create a Dagu-managed secret with ref `prod/db-password`.
@@ -232,6 +234,7 @@ Masking is not a process sandbox. The step process receives the raw secret in it
 
 ## Provider Pages
 
+- [Runtime Profiles](/writing-workflows/runtime-profiles)
 - [Web UI Secrets](/web-ui/secrets)
 - [Dotenv Loading](/writing-workflows/secrets/dotenv)
 - [`env` Provider](/writing-workflows/secrets/env-provider)

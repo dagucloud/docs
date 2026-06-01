@@ -1,6 +1,8 @@
 # Secrets
 
-The Secrets page lets admins and managers create and rotate Dagu-managed secrets from the Web UI.
+The standalone Secrets page lets admins and managers create and rotate Dagu-managed secrets that are referenced directly from DAG YAML.
+
+For named runtime environments selected when a run starts, use [Profiles](/web-ui/profiles). Profile secret entries are created and rotated from the Profiles page, even though Dagu stores their values in the managed secret store internally.
 
 Secrets created here are referenced from DAG YAML with `ref`:
 
@@ -31,7 +33,7 @@ Do not include the scope or workspace name in the ref. A DAG in `workspace=payme
 
 ## Create A Secret
 
-1. Open **Secrets** from the Web UI.
+1. Open the standalone **Secrets** page.
 2. Select **Global** or a named workspace.
 3. Click **Add Secret**.
 4. Keep provider set to **Dagu Managed**.
@@ -81,6 +83,7 @@ Secret management is intended for administrative users. A user needs manager or 
 
 ## Related
 
+- [Profiles](/web-ui/profiles)
 - [Workflow Secrets](/writing-workflows/secrets)
 - [Workspaces](/web-ui/workspaces)
 - [User Management](/server-admin/authentication/user-management)

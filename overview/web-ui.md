@@ -27,7 +27,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Docs** for markdown documents and runbooks
 - **Notifications** for Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
-- **Secrets** for global and workspace-scoped Dagu-managed secret values
+- **Profiles** for runtime variables and secrets selected when a run starts
 - **Search** for finding workflows and documents quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
@@ -221,9 +221,19 @@ Common workflows:
 
 See [Documents](/web-ui/documents) for the dedicated guide.
 
+## Profiles
+
+The Profiles page manages named runtime profiles for DAG runs. A profile groups non-secret variables and write-only secret values, then makes that group selectable from the start and enqueue dialogs.
+
+Use profiles when the same DAG should run against different environments, such as `dev`, `staging`, or `prod`, without changing the DAG YAML.
+
+Run history and run details show the selected profile name when a profile was used. Retries inherit the original run's profile.
+
+See [Profiles](/web-ui/profiles) for the Web UI workflow and [Runtime Profiles](/writing-workflows/runtime-profiles) for CLI, API, permission, and retry behavior.
+
 ## Secrets
 
-The Secrets page manages encrypted Dagu-managed secret values for a selected scope.
+The standalone Secrets page manages encrypted Dagu-managed secret values for a selected scope. These secrets are referenced directly from DAG YAML with `secrets[].ref`.
 
 Use it to:
 
@@ -280,7 +290,7 @@ Depending on your role and license, the navigation can also include pages such a
 - **API Keys**
 - **Remote Nodes**
 - **Base Config**
-- **Secrets**
+- **Profiles**
 - **Notifications**
 - **Incidents**
 - **Events**
@@ -333,6 +343,7 @@ ui:
 
 - [Workspaces](/web-ui/workspaces)
 - [Cockpit](/web-ui/cockpit)
+- [Profiles](/web-ui/profiles)
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)

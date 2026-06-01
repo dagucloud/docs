@@ -5,6 +5,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - Both formats: `start`, `stop`, `status`, `retry`
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
+- Local management commands: `profile`
 
 ## Global Options
 
@@ -59,6 +60,7 @@ Remote command rules:
 - For `start`, `enqueue`, `status`, `stop`, `retry`, and `restart`, pass the remote DAG `fileName` or a unique deployed DAG name. Local YAML paths such as `./job.yaml` are rejected.
 - For `history`, pass a deployed DAG name. Local YAML paths are rejected.
 - Commands that are not context-aware always run against the local instance and reject non-local contexts.
+- `--profile` is local-only for `start`, `enqueue`, and `dry`. To select a profile on a remote server, use the Web UI or the REST API `profileName` field.
 
 ## Commands
 
@@ -105,6 +107,7 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--run-id, -r` - Custom run ID
 - `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
+- `--profile` - Runtime profile to apply to this run
 
 > **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
 
@@ -117,6 +120,9 @@ dagu start etl.yaml -- DATE=2024-01-01 ENV=prod
 
 # Custom run ID
 dagu start --run-id batch-001 etl.yaml
+
+# Select a runtime profile
+dagu start --profile prod etl.yaml
 
 # Override DAG name
 dagu start --name my_custom_name my-workflow.yaml
@@ -171,6 +177,8 @@ dagu retry [options] DAG_NAME_OR_FILE
 ```bash
 dagu retry --run-id=20240101_120000 my-workflow
 ```
+
+Retries inherit the original run's runtime profile. `dagu retry` does not accept `--profile`.
 
 ### `status`
 
@@ -460,11 +468,13 @@ dagu dry [options] DAG_FILE [-- PARAMS...]
 **Options:**
 - `--params, -p` - Parameters as JSON
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
+- `--profile` - Runtime profile to use during the dry run
 
 ```bash
 dagu dry my-workflow.yaml
 dagu dry etl.yaml -- DATE=2024-01-01  # With parameters
 dagu dry --name my_custom_name my-workflow.yaml  # Override DAG name
+dagu dry --profile prod my-workflow.yaml
 ```
 
 ### `enqueue`
@@ -480,6 +490,7 @@ dagu enqueue [options] DAG_FILE [-- PARAMS...]
 - `--params, -p` - Parameters as JSON
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--queue, -u` - Override DAG-level queue name for this enqueue
+- `--profile` - Runtime profile to apply when the queued run starts
 
 ```bash
 dagu enqueue my-workflow.yaml
@@ -488,7 +499,42 @@ dagu enqueue --run-id=batch-001 etl.yaml -- TYPE=daily
 dagu enqueue --queue=high-priority my-workflow.yaml
 # Override DAG name
 dagu enqueue --name my_custom_name my-workflow.yaml
+# Select a runtime profile
+dagu enqueue --profile prod my-workflow.yaml
 ```
+
+### `profile`
+
+Manage runtime profiles in the local Dagu data directory.
+
+```bash
+dagu profile <command>
+```
+
+Subcommands:
+
+- `list` - List runtime profiles.
+- `show <profile>` - Show profile metadata and entries. Secret values are masked.
+- `create <profile>` - Create a profile.
+- `enable <profile>` - Enable a disabled profile.
+- `disable <profile>` - Disable a profile so new runs cannot use it.
+- `delete <profile>` - Delete a profile.
+- `set-var <profile> <key> <value>` - Set a plain variable entry.
+- `set-secret <profile> <key>` - Set or rotate a secret entry.
+- `delete-key <profile> <key>` - Delete one profile entry.
+
+Examples:
+
+```bash
+dagu profile create prod --description "Production runtime settings"
+dagu profile set-var prod LOG_LEVEL info
+printf '%s\n' "$PROD_API_TOKEN" | dagu profile set-secret prod API_TOKEN --value-stdin
+dagu profile show prod
+```
+
+The `profile` command is local-only. Use [Profiles in the Web UI](/web-ui/profiles) or the REST API for a remote server.
+
+See [Runtime Profiles](/writing-workflows/runtime-profiles) for behavior, permissions, and retry rules.
 
 ### `dequeue`
 
