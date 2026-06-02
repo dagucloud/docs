@@ -32,6 +32,8 @@ Profile names must be lowercase slugs. A valid name starts with a lowercase lett
 
 From the Web UI, open **Profiles** and create a profile such as `prod`. Add variables and secrets from the profile details table.
 
+![Profiles page showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
+
 From the CLI, profile management is local to the configured Dagu home. Remote CLI contexts do not manage profiles; use the Web UI or REST API on the remote server instead.
 
 ```bash
@@ -62,6 +64,8 @@ dagu dry etl.yaml --profile prod
 
 Remote CLI `start` and `enqueue` reject `--profile`. To start a remote run with a profile, use the Web UI profile selector or send `profileName` through the REST API:
 
+![Start DAG dialog showing the runtime profile selector](/runtime-profile-start-dialog.png)
+
 ```bash
 curl -X POST "http://localhost:8080/api/v1/dags/etl.yaml/start" \
   -H "Content-Type: application/json" \
@@ -82,6 +86,8 @@ When a run starts, Dagu:
 3. Injects variables as run-level environment variables.
 4. Injects secrets as secret environment variables.
 5. Records the selected profile name and non-secret entry metadata in run status.
+
+![DAG run details showing the selected runtime profile](/runtime-profile-run-details.png)
 
 Secret entry plaintext is write-only. API and UI responses show secret entry metadata, not the secret value.
 

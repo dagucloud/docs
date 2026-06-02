@@ -4,6 +4,8 @@ The Profiles page manages runtime profiles: named sets of variables and secrets 
 
 Use profiles when the same DAG should run against different environments without changing the DAG YAML. For example, a single workflow can run with the `dev`, `staging`, or `prod` profile.
 
+![Profiles page showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
+
 ## What A Profile Contains
 
 Each profile has:
@@ -43,7 +45,11 @@ Rotating a secret entry writes a new secret value. New runs and new retry attemp
 
 When starting or enqueueing a DAG from the Web UI, select a profile from the **Profile** field in the start dialog. If no profile is selected, the run uses only the environment, parameters, and secrets defined by the DAG and server configuration.
 
+![Start DAG dialog showing the runtime profile selector](/runtime-profile-start-dialog.png)
+
 Run history and run details show the selected profile name when a profile was used.
+
+![DAG run details showing the selected runtime profile](/runtime-profile-run-details.png)
 
 ## Retries
 
