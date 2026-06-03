@@ -2,6 +2,25 @@
 
 For the full version history of Dagu, see the [releases page](https://github.com/dagucloud/dagu/releases).
 
+## v2.7.8 (2026-06-03)
+
+### Added
+
+- feat: complete runtime profile management ([#2246](https://github.com/dagucloud/dagu/pull/2246)) [@yohamta0](https://github.com/yohamta0)
+
+### Fixed
+
+- refactor: move local subworkflows behind runner ([#2247](https://github.com/dagucloud/dagu/pull/2247)) [@yohamta0](https://github.com/yohamta0)
+- fix: require DAG write permission for inline specs ([#2250](https://github.com/dagucloud/dagu/pull/2250)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| fix: require DAG write permission for inline specs ([#2250](https://github.com/dagucloud/dagu/issues/2250)) | [@YHalo-wyh](https://github.com/YHalo-wyh) (report) |
+
 ## v2.7.7 (2026-06-01)
 
 This release only includes fixes for Docker containers.
