@@ -39,7 +39,7 @@ Users who can write workflows can create workspaces from the selector:
 3. Enter a short name such as `ops` or `data-platform`.
 4. Press **Enter**.
 
-Use letters, numbers, underscores, and hyphens. Avoid spaces, slashes, dots, and punctuation. The names `all` and `default` are reserved for the built-in selector choices.
+Use letters, numbers, underscores, and hyphens. Avoid spaces, slashes, dots, and punctuation. The names `all`, `default`, and `global` are reserved for built-in scopes and selector choices.
 
 ## Adding Workflows to a Workspace
 
@@ -85,6 +85,20 @@ Do not include the workspace name in the ref. Select the workspace in the Web UI
 Global secrets are workspace-less values. A workflow in `ops` checks `ops` first, then **Global**. It never reads another named workspace.
 
 See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
+
+## Profile Defaults in Workspaces
+
+The Profiles page supports workspace runtime profile defaults. These are variables and profile-owned secrets that apply automatically to DAGs in a named workspace.
+
+A DAG in `workspace=ops` receives:
+
+```text
+Global profile defaults < ops workspace profile defaults < selected runtime profile
+```
+
+Workspace defaults are useful for baseline values that all workflows in a workspace need, such as `REGION`, internal service URLs, or team-specific credentials. They are not selectable profiles and do not apply to workflows in other workspaces.
+
+See [Profiles](/web-ui/profiles) and [Runtime Profiles](/writing-workflows/runtime-profiles) for the full layering model.
 
 ## Notifications in Workspaces
 
@@ -153,5 +167,6 @@ For an interactive reference, open **API Docs** in the Web UI or visit `/api-doc
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)
+- [Profiles](/web-ui/profiles)
 - [Documents](/web-ui/documents)
 - [User Management](/server-admin/authentication/user-management)

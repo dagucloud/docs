@@ -15,6 +15,33 @@ Use runtime profiles when values are shared across many runs or when the operato
 
 Use regular DAG `env:` when a value belongs to the workflow definition itself. Use `params:` when the value is part of one run's business input, such as a date, account ID, or batch size. Use `secrets:` when the DAG should always resolve a specific secret ref from YAML.
 
+## Default Profile Layers
+
+Runtime profiles support inherited default layers. These layers are resolved automatically and do not need to be selected at run start.
+
+| Layer | When it applies | Purpose |
+| --- | --- | --- |
+| Global defaults | Every DAG run | Installation-wide fallback variables and secrets |
+| Workspace defaults | DAGs with `labels: [workspace=<name>]` | Team- or environment-specific fallback values |
+| Selected profile | Runs started with `--profile`, `profileName`, or the Web UI selector | Explicit runtime environment chosen for that run |
+
+Resolution order is:
+
+```text
+Global defaults < Workspace defaults < Selected profile
+```
+
+If more than one layer defines the same key, the later layer overrides the earlier one. Defaults are best for shared baseline values such as `REGION`, `HTTP_PROXY`, or common credentials. Selected profiles are best when the operator needs to choose between environments such as `dev`, `staging`, and `prod`.
+
+A workspace default applies only when the DAG has a workspace label:
+
+```yaml
+labels:
+  - workspace=ops
+```
+
+A DAG without a workspace label can still receive Global defaults. It does not receive defaults from any named workspace.
+
 ## Profile Entries
 
 Each profile contains entries. Each entry has an environment variable key and one of two kinds:
@@ -81,17 +108,19 @@ The same `profileName` field is accepted by start, synchronous start, enqueue, a
 
 When a run starts, Dagu:
 
-1. Validates that the selected profile exists and is active.
-2. Resolves profile variables and profile secrets.
-3. Injects variables as run-level environment variables.
-4. Injects secrets as secret environment variables.
-5. Records the selected profile name and non-secret entry metadata in run status.
+1. Resolves Global defaults if they exist.
+2. Resolves workspace defaults when the DAG belongs to a named workspace.
+3. Validates that the selected profile exists and is active when one was selected.
+4. Merges the layers in precedence order.
+5. Injects variables as run-level environment variables.
+6. Injects secrets as secret environment variables.
+7. Records the effective profile entry metadata in run status.
 
 ![DAG run details showing the selected runtime profile](/runtime-profile-run-details.png)
 
 Secret entry plaintext is write-only. API and UI responses show secret entry metadata, not the secret value.
 
-Profile variables are run-level values. Step-level `env:` can still override them for a single step. Profile secrets are treated as secrets, so they participate in secret masking and have higher precedence than normal run-level environment values. Avoid reusing the same key across DAG `env:`, DAG `secrets:`, and runtime profiles unless the override behavior is intentional.
+Default profile entries are fallback values. A selected profile overrides default layers for matching keys. Step-level `env:` can still override variables for a single step. Profile secrets are treated as secrets, so they participate in secret masking. Avoid reusing the same key across DAG `env:`, DAG `secrets:`, default layers, and selected profiles unless the override behavior is intentional.
 
 ## Retries
 
@@ -153,6 +182,16 @@ Runtime profile endpoints are available under `/api/v1/profiles`:
 | `PUT` | `/profiles/{profileName}/variables/{key}` | Set a plain variable entry |
 | `PUT` | `/profiles/{profileName}/secrets/{key}` | Set or rotate a secret entry |
 | `DELETE` | `/profiles/{profileName}/entries/{key}` | Delete an entry |
+| `GET` | `/profiles/_global` | Get Global runtime profile defaults |
+| `PATCH` | `/profiles/_global` | Update Global defaults metadata |
+| `PUT` | `/profiles/_global/variables/{key}` | Set a Global default variable |
+| `PUT` | `/profiles/_global/secrets/{key}` | Set or rotate a Global default secret |
+| `DELETE` | `/profiles/_global/entries/{key}` | Delete a Global default entry |
+| `GET` | `/profiles/_workspaces/{workspaceName}` | Get workspace runtime profile defaults |
+| `PATCH` | `/profiles/_workspaces/{workspaceName}` | Update workspace defaults metadata |
+| `PUT` | `/profiles/_workspaces/{workspaceName}/variables/{key}` | Set a workspace default variable |
+| `PUT` | `/profiles/_workspaces/{workspaceName}/secrets/{key}` | Set or rotate a workspace default secret |
+| `DELETE` | `/profiles/_workspaces/{workspaceName}/entries/{key}` | Delete a workspace default entry |
 
 Example:
 
@@ -166,6 +205,22 @@ curl -X PUT "http://localhost:8080/api/v1/profiles/prod/variables/LOG_LEVEL" \
   -d '{"value":"info"}'
 
 curl -X PUT "http://localhost:8080/api/v1/profiles/prod/secrets/API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"value":"secret-token"}'
+```
+
+Global defaults example:
+
+```bash
+curl -X PUT "http://localhost:8080/api/v1/profiles/_global/variables/REGION" \
+  -H "Content-Type: application/json" \
+  -d '{"value":"us-east-1"}'
+```
+
+Workspace defaults example:
+
+```bash
+curl -X PUT "http://localhost:8080/api/v1/profiles/_workspaces/ops/secrets/OPS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"value":"secret-token"}'
 ```

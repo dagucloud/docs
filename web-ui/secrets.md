@@ -2,7 +2,7 @@
 
 The standalone Secrets page lets admins and managers create and rotate Dagu-managed secrets that are referenced directly from DAG YAML.
 
-For named runtime environments selected when a run starts, use [Profiles](/web-ui/profiles). Profile secret entries are created and rotated from the Profiles page, even though Dagu stores their values in the managed secret store internally.
+For named runtime environments selected when a run starts, or for Global/workspace runtime profile defaults, use [Profiles](/web-ui/profiles). Profile secret entries are created and rotated from the Profiles page, even though Dagu stores their values in the managed secret store internally.
 
 Secrets created here are referenced from DAG YAML with `ref`:
 
@@ -67,6 +67,12 @@ secrets:
 
 See [Workflow Secrets](/writing-workflows/secrets) for the full YAML behavior and direct provider reference.
 
+## Profile-Owned Secrets
+
+Runtime profile secret entries are profile-owned. This includes entries on named profiles, Global profile defaults, and workspace profile defaults. Manage those values from **Profiles** so the profile entry and its backing secret stay in sync.
+
+Do not create a standalone secret with the same intent and then expect a runtime profile to pick it up by ref. Standalone secrets are resolved only when DAG YAML references them with `secrets[].ref`.
+
 ## Storage
 
 Dagu-managed secrets are stored in Dagu's internal secret store under:
@@ -84,6 +90,7 @@ Secret management is intended for administrative users. A user needs manager or 
 ## Related
 
 - [Profiles](/web-ui/profiles)
+- [Runtime Profiles](/writing-workflows/runtime-profiles)
 - [Workflow Secrets](/writing-workflows/secrets)
 - [Workspaces](/web-ui/workspaces)
 - [User Management](/server-admin/authentication/user-management)

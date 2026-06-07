@@ -19,6 +19,28 @@ Each profile has:
 
 Variables store plain values. Secrets store write-only Dagu-managed secret values. Secret values are not shown again after saving.
 
+## Default Profile Layers
+
+Profiles can also define default entries that apply before a run-specific profile is selected:
+
+| Layer | Applies to | Managed from |
+| --- | --- | --- |
+| Global defaults | Every DAG run | **Profiles** page, Global defaults row |
+| Workspace defaults | DAGs with `labels: [workspace=<name>]` | **Profiles** page while that workspace is selected |
+| Selected profile | Runs that choose a named profile | The named profile row |
+
+Defaults are not selectable profiles. They are fallback entries that Dagu resolves automatically when a run starts. A DAG in `workspace=ops` receives Global defaults, then `ops` workspace defaults, then the selected profile if one was chosen. A DAG without a workspace label receives only Global defaults before the selected profile.
+
+When multiple layers define the same key, the later layer wins:
+
+```text
+Global defaults < Workspace defaults < Selected profile
+```
+
+Use default layers for values that should be present across many runs without requiring operators to pick a profile every time. Use a selected profile when the operator should choose the runtime environment for a specific run.
+
+Admins manage Global defaults. Workspace defaults require permission to write configuration for that workspace.
+
 ## Create A Profile
 
 1. Open **Profiles**.
@@ -43,7 +65,7 @@ Rotating a secret entry writes a new secret value. New runs and new retry attemp
 
 ## Use A Profile
 
-When starting or enqueueing a DAG from the Web UI, select a profile from the **Profile** field in the start dialog. If no profile is selected, the run uses only the environment, parameters, and secrets defined by the DAG and server configuration.
+When starting or enqueueing a DAG from the Web UI, select a profile from the **Profile** field in the start dialog. If no profile is selected, the run still receives any matching Global or workspace default entries, plus the environment, parameters, and secrets defined by the DAG and server configuration.
 
 ![Start DAG dialog showing the runtime profile selector](/runtime-profile-start-dialog.png)
 
@@ -60,6 +82,8 @@ Retries always inherit the original run's profile. The retry dialog does not all
 The standalone Secrets feature manages registry secrets referenced directly from DAG YAML with `secrets[].ref`.
 
 Runtime profile secrets are different: they belong to a runtime profile and should be created or rotated from the Profiles page. Dagu stores their values in the managed secret store internally, but the profile remains the user-facing owner of those values.
+
+This also applies to profile default layers. Default-layer secret entries should be created, rotated, and deleted from **Profiles**, not from the standalone Secrets page.
 
 ## Related
 
