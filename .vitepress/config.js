@@ -423,9 +423,9 @@ export default withMermaid(
         { text: "MCP", link: "/mcp/", activeMatch: "/mcp/" },
         { text: "Writing Workflows", link: "/writing-workflows/", activeMatch: "/writing-workflows/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/step-types/" },
-        { text: "Managed GitHub App", link: "/github-integration/", activeMatch: "/github-integration/" },
         { text: "AI Agent", link: "/features/agent/", activeMatch: "/features/agent/" },
         { text: "Server Admin", link: "/server-admin/", activeMatch: "/server-admin/" },
+        { text: "llms.txt", link: "https://raw.githubusercontent.com/dagu-org/dagu/main/llms.txt" },
       ],
 
       sidebar: {
