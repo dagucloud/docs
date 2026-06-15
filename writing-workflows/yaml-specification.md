@@ -684,7 +684,7 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `run` | string | Shell command or multi-line shell script. |
+| `run` | string or array | Shell command or multi-line shell script. Array form is legacy compatibility. |
 | `action` | string | Built-in, custom, or remote action name. |
 | `with` | object | Inputs for `action`, or shell config for `run`. |
 | `working_dir` | string | Step working directory. |
@@ -699,6 +699,8 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `worker_selector` | object | Step-level distributed worker selector. |
 
 `run` and `action` are mutually exclusive.
+
+Array-form `run` is accepted for legacy compatibility, but new workflows should use string `run`. Use `action: exec` when a command must run as direct argv without shell parsing.
 
 For `run` steps, put shell controls under `with`:
 
@@ -1030,19 +1032,21 @@ steps:
 
 ## Variable Substitution
 
-Dagu evaluates `${VAR}` references and backtick command substitutions in fields that are runtime-evaluated. Literal defaults in `params` are not executed; use `eval` when a parameter default must be computed.
+Dagu resolves runtime variables such as `${VAR}` in fields that support value resolution before the field is used. In `run`, Dagu may expand known `$VAR` and `${VAR}` values from the run scope before handing the command to the selected shell; unknown shell variables remain for the shell. Dagu does not execute `$()` or backticks in `run`. Literal defaults in `params` are not executed; use `eval` when a parameter default must be computed by Dagu before steps start.
 
 ```yaml
 params:
-  - USER: john
-  - DOMAIN: example.com
-
-env:
-  API_URL: https://api.example.com
+  - name: USER
+    default: john
+  - name: DOMAIN
+    default: example.com
+  - name: TODAY
+    eval: `date +%Y-%m-%d`
 
 steps:
   - run: echo "Hello ${USER} from ${DOMAIN}"
-  - run: echo "Today is `date +%Y-%m-%d`"
+  - run: echo "Today is ${TODAY}"
+  - run: echo "The shell can still run this: `date +%Y-%m-%d`"
 ```
 
 Outputs can be referenced by the output variable name or through structured output references:
@@ -1102,10 +1106,12 @@ timeout_sec: 7200
 hist_retention_days: 90
 
 params:
-  - ENVIRONMENT: production
+  - name: ENVIRONMENT
+    default: production
+  - name: DATE
+    eval: `date +%Y-%m-%d`
 
 env:
-  DATE: "`date +%Y-%m-%d`"
   DATA_DIR: /data/etl
   LOG_LEVEL: info
 
