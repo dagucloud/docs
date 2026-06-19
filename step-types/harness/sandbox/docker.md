@@ -171,37 +171,17 @@ The runner container created for a harness step does not need the Docker socket
 unless the agent itself should manage containers. Most harness runner images
 should receive only the workspace mount and provider credentials.
 
-## Offline Container Check
+## Network Access
 
-Use `network: none` only for commands that do not need network access. This
-example verifies that a harness step can run in a container without network
-access:
+Hosted agent CLIs such as Codex, Claude Code, and OpenCode usually need
+outbound network access to reach their provider APIs. Do not set
+`network: none` for those providers unless the CLI is configured to use a local
+endpoint available inside the container.
 
-```yaml
-harnesses:
-  shell:
-    binary: sh
-    prefix_args:
-      - -c
-    prompt_mode: arg
-
-steps:
-  - id: offline_workspace_check
-    action: harness.run
-    container:
-      image: alpine:3.20
-      pull_policy: missing
-      network: none
-      working_dir: /workspace
-      volumes:
-        - .:/workspace:ro
-    with:
-      provider: shell
-      prompt: |
-        set -eu
-        test -f /etc/alpine-release
-        find . -maxdepth 2 -type f | head
-```
+If a harness step needs restricted egress, configure that restriction outside
+Dagu with Docker networks, daemon policy, firewall rules, or an outbound proxy.
+Then attach the harness container to the network or proxy environment that
+provides the intended access.
 
 ## Pull Policy
 
@@ -223,4 +203,4 @@ container:
 | image not found | image name, registry access, and `pull_policy` |
 | agent binary not found | the runner image contains the selected provider binary in `PATH` |
 | permission denied on workspace | volume mode, container user, and file ownership |
-| no network access | `container.network` and daemon network policy |
+| no network access | `container.network` and external daemon, firewall, or proxy configuration |
