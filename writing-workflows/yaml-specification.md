@@ -226,11 +226,14 @@ retry_policy:
 | `tools` | array or object | Pinned external CLI tools installed before the DAG starts. | - |
 | `working_dir` | string | DAG working directory. Relative paths resolve from the DAG file directory. | See below |
 | `shell` | string or array | Default shell for `run` steps. Step `with.shell` overrides it. | System default |
+| `shell_args` | array | Additional arguments appended to the DAG-level shell for `run` steps. Step `with.shell_args` overrides them. | `[]` |
 | `log_dir` | string | Custom log directory. | System default |
 | `log_output` | string | Log output mode: `separate` or `merged`. | `separate` |
 | `artifacts` | object | Per-run artifact storage configuration. | - |
 
 When `working_dir` is omitted from the YAML and base config, local runs use the per-run `DAG_RUN_WORK_DIR` as the process working directory. When `working_dir` is explicitly set, Dagu uses that path and still exposes `DAG_RUN_WORK_DIR` as an environment variable.
+
+`shell` accepts a string such as `bash -e` or an array such as `["bash", "-e"]`. `shell_args` appends additional arguments to that DAG-level shell. Use step-level `with.shell` and `with.shell_args` when only one `run` step needs a different shell invocation.
 
 `dotenv` behavior:
 

@@ -1390,7 +1390,8 @@ steps:
 ### Shell Selection
 
 ```yaml
-shell: ["/bin/bash", "-e"]   # Default shell for all steps
+shell: /bin/bash             # Default shell for all steps
+shell_args: ["-e"]           # Default shell args for all steps
 steps:
   - run: echo hello world | xargs echo
   - run: echo "from zsh"     # Override for a single step

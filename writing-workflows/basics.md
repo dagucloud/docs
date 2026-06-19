@@ -176,7 +176,8 @@ If you omit `shell`, Dagu uses the interpreter declared in the script's shebang 
 Set a default shell for every step at the DAG level, and override it per step when needed:
 
 ```yaml
-shell: ["/bin/bash", "-e", "-u"]  # Default shell + args for the whole workflow
+shell: /bin/bash                  # Default shell for the whole workflow
+shell_args: ["-e", "-u"]          # Default shell args for every run step
 steps:
   - id: bash_task
     run: echo "Runs with bash -e -u"
@@ -187,7 +188,7 @@ steps:
       shell: /bin/zsh              # Step-level override
 ```
 
-The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Arrays avoid quoting issues when you need multiple flags.
+The `shell` value accepts either a string (`"bash -e"`) or an array (`["bash", "-e"]`). Use `shell_args` when you want to keep the shell command and its default arguments separate. Arrays avoid quoting issues when you need multiple flags.
 
 When you omit a step-level `shell`, Dagu runs through the DAG shell (or system default) and automatically adds `-e` on Unix-like shells so scripts stop on first error. If you explicitly set `shell` on a step, include `-e` yourself if you want the same errexit behavior.
 
