@@ -1,8 +1,8 @@
 # Harness Sandbox with Docker
 
 Docker is the default runtime for containerized harness execution. If
-`DAGU_CONTAINER_RUNTIME` is unset or set to `docker`, Dagu creates the Moby SDK
-client from the normal Docker environment.
+`DAGU_CONTAINER_RUNTIME` is unset or set to `docker`, Dagu uses the Docker
+environment available to the Dagu process.
 
 The same Docker connection is used for root-level `container:`, step-level
 `container:`, `docker.run`, and containerized `harness.run` steps.
@@ -32,8 +32,8 @@ Docker is selected by default:
 DAGU_CONTAINER_RUNTIME=docker
 ```
 
-This setting is optional. When the runtime is Docker, Dagu leaves the daemon
-host empty and lets the Moby client use the standard Docker environment:
+This setting is optional. When the runtime is Docker, Dagu uses the standard
+Docker environment:
 
 | Variable | Meaning |
 |----------|---------|
@@ -59,79 +59,91 @@ DAGU_CONTAINER_RUNTIME=docker dagu start-all
 DOCKER_HOST=tcp://docker.example.com:2375 dagu start-all
 ```
 
-## Root-Level Shared Sandbox
+## Root-Level Shared Container
 
 Use root-level `container:` when ordinary steps and `harness.run` should share
-one workflow sandbox:
+one workflow container:
 
 ```yaml
+type: graph
+
 container:
-  image: dagu-codex-runner:local
-  pull_policy: never
+  image: alpine:3.20
+  pull_policy: missing
   working_dir: /workspace
   volumes:
     - .:/workspace
-  env:
-    - CODEX_API_KEY=${CODEX_API_KEY}
+
+harnesses:
+  shell:
+    binary: sh
+    prefix_args:
+      - -c
+    prompt_mode: arg
 
 steps:
-  - id: test
-    run: npm test
+  - id: write_file
+    run: echo "from command step" > shared.txt
 
-  - id: review
+  - id: read_file
     action: harness.run
     with:
-      provider: codex
+      provider: shell
       prompt: |
-        Review this repository and report the highest-risk issues.
+        set -eu
+        cat shared.txt
+        cat /etc/alpine-release
 ```
 
-The shared container is started once for the DAG run. The `test` step and the
-`review` harness provider both execute inside that same container. The image
-therefore needs `npm`, the `codex` binary, and any other tools the workflow
-expects.
+Both steps run inside the same container. The file written by `write_file` is
+visible to `read_file`.
 
-Because root-level `container.env` is shared by the ordinary command steps too,
-do not pass `CODEX_API_KEY` this way when repository-controlled commands should
-not see it. Use the step-level shape below for that case.
+If root-level `container.env` contains credentials, every inherited step inside
+the shared container can read them.
 
-## Step-Level Per-Attempt Sandbox
+## Step-Level Container
 
-Use step-level `container:` when the harness attempt should get its own
-container:
+Use step-level `container:` when the harness attempt should get its own image,
+mounts, and environment:
 
 ```yaml
+type: graph
+
+harnesses:
+  shell:
+    binary: sh
+    prefix_args:
+      - -c
+    prompt_mode: arg
+
 steps:
-  - id: review
+  - id: inspect
     action: harness.run
     container:
-      image: dagu-codex-runner:local
-      pull_policy: never
+      image: alpine:3.20
+      pull_policy: missing
       working_dir: /workspace
       volumes:
         - .:/workspace:ro
-      env:
-        - CODEX_API_KEY=${CODEX_API_KEY}
     with:
-      provider: codex
+      provider: shell
       prompt: |
-        Review this repository and report the highest-risk issues.
+        set -eu
+        pwd
+        find . -maxdepth 1 -type f | sort | head
 ```
 
-The runner image must include the `codex` binary. The repository is mounted
-read-only, so the agent can inspect the workspace but cannot edit files through
-that mount.
+Only the `inspect` step runs in this container.
 
-To use a ChatGPT subscription login instead of `CODEX_API_KEY`, mount the
-worker's file-backed Codex home into the runner container and set `CODEX_HOME`.
-See [Use Your ChatGPT Subscription Login](./images#use-your-chatgpt-subscription-login).
+For a real provider, use a runner image that contains the provider binary and
+pass the provider credential with `container.env` or a mounted credentials
+directory.
 
-For implementation tasks, mount the workspace read-write:
+Provider-specific examples:
 
-```yaml
-volumes:
-  - .:/workspace
-```
+- [Codex](./codex)
+- [Claude Code](./claude-code)
+- [OpenCode](./opencode)
 
 ## Dagu in Docker
 
@@ -159,16 +171,11 @@ The runner container created for a harness step does not need the Docker socket
 unless the agent itself should manage containers. Most harness runner images
 should receive only the workspace mount and provider credentials.
 
-## Isolation Tips
+## Offline Container Check
 
-- Use image mode for most sandboxes so each harness attempt starts from a clean image.
-- Mount only the directories the agent needs.
-- Prefer read-only mounts for review-only tasks.
-- Pass only the credentials needed for that provider and task.
-- Avoid mounting `/var/run/docker.sock` into the runner image unless the agent is expected to manage containers.
-- Use `network: none` only for providers or smoke tests that do not need network
-  access. API-backed providers such as Codex need network access for real
-  `codex exec` runs.
+Use `network: none` only for commands that do not need network access. This
+example verifies that a harness step can run in a container without network
+access:
 
 ```yaml
 harnesses:
@@ -196,13 +203,10 @@ steps:
         find . -maxdepth 2 -type f | head
 ```
 
-## Smoke Test
+## Pull Policy
 
-Use the smoke test from [Harness Sandboxed Execution](./) to verify Docker
-runtime plumbing before introducing a real agent image.
-
-If the image is already present locally and the test should not pull from a
-registry, set:
+If an image is already present locally and the DAG must not pull from a
+registry, set `pull_policy: never`:
 
 ```yaml
 container:
@@ -210,7 +214,7 @@ container:
   pull_policy: never
 ```
 
-## Troubleshooting
+## Runtime Checks
 
 | Symptom | Check |
 |---------|-------|

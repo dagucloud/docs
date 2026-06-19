@@ -6,6 +6,8 @@
 
 See the [OpenCode installation guide](https://opencode.ai).
 
+For containerized Dagu runs, see [Run OpenCode in a Container](./sandbox/opencode).
+
 ## Base Invocation
 
 ```text

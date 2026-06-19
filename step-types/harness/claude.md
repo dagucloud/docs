@@ -6,6 +6,8 @@
 
 See the [official installation guide](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview).
 
+For containerized Dagu runs, see [Run Claude Code in a Container](./sandbox/claude-code).
+
 ## Base Invocation
 
 ```text

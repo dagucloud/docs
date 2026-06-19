@@ -1,8 +1,8 @@
 # Harness Sandbox with Podman
 
-Dagu can run root-level and step-level harness containers with Podman by
-connecting the Moby SDK client to Podman's Docker-compatible API socket. Dagu
-does not shell out to the `podman` CLI for each step.
+Dagu can run root-level and step-level harness containers with Podman through
+Podman's Docker-compatible API socket. Dagu does not use a `container.runtime`
+field in DAG YAML.
 
 Podman is useful when a deployment prefers rootless containers or already uses
 Podman/Podman Compose for local or self-hosted execution.
@@ -167,8 +167,8 @@ dagu start-all
 ```
 
 On macOS, use the socket path from `podman machine inspect`. The `podman --url`
-check is only a connectivity check; Dagu still uses the Docker-compatible API
-through the Moby SDK when it runs the workflow.
+check is only a connectivity check; the workflow still runs through Podman's
+Docker-compatible API socket.
 
 ## Docker Environment Isolation
 
@@ -177,80 +177,102 @@ Podman default socket. It does not let `DOCKER_HOST` override that selected
 Podman socket.
 
 This prevents a stale Docker environment from redirecting Podman-mode harness
-steps to a different daemon. `DOCKER_API_VERSION` is still honored by the Moby
-client for API version negotiation.
+steps to a different daemon.
 
-## Root-Level Shared Sandbox
+## Root-Level Shared Container
 
 Use root-level `container:` when ordinary steps and `harness.run` should share
-one workflow sandbox:
+one workflow container:
 
 ```yaml
+type: graph
+
 container:
-  image: dagu-codex-runner:local
-  pull_policy: never
+  image: alpine:3.20
+  pull_policy: missing
   working_dir: /workspace
   volumes:
     - .:/workspace
-  env:
-    - CODEX_API_KEY=${CODEX_API_KEY}
+
+harnesses:
+  shell:
+    binary: sh
+    prefix_args:
+      - -c
+    prompt_mode: arg
 
 steps:
-  - id: test
-    run: npm test
+  - id: write_file
+    run: echo "from command step" > shared.txt
 
-  - id: review
+  - id: read_file
     action: harness.run
     with:
-      provider: codex
+      provider: shell
       prompt: |
-        Review this repository and report the highest-risk issues.
+        set -eu
+        cat shared.txt
+        cat /etc/alpine-release
 ```
 
-Root-level `container.env` is shared by the ordinary command steps in the same
-container. Use this shape only when every step in the shared sandbox is trusted
-to receive `CODEX_API_KEY`.
+Both steps run inside the same container. The file written by `write_file` is
+visible to `read_file`.
 
-## Step-Level Per-Attempt Sandbox
+If root-level `container.env` contains credentials, every inherited step inside
+the shared container can read them.
 
-Use step-level `container:` when the harness attempt should get its own
-container:
+## Step-Level Container
+
+Use step-level `container:` when the harness attempt should get its own image,
+mounts, and environment:
 
 ```yaml
+type: graph
+
+harnesses:
+  shell:
+    binary: sh
+    prefix_args:
+      - -c
+    prompt_mode: arg
+
 steps:
-  - id: review
+  - id: inspect
     action: harness.run
     container:
-      image: dagu-codex-runner:local
-      pull_policy: never
+      image: alpine:3.20
+      pull_policy: missing
       working_dir: /workspace
       volumes:
         - .:/workspace:ro
-      env:
-        - CODEX_API_KEY=${CODEX_API_KEY}
     with:
-      provider: codex
+      provider: shell
       prompt: |
-        Review this repository and report the highest-risk issues.
+        set -eu
+        pwd
+        find . -maxdepth 1 -type f | sort | head
 ```
 
 The DAG YAML is the same as the Docker version. The runtime is selected by the
 Dagu service environment, not by a `container.runtime` field.
 
-To use a ChatGPT subscription login instead of `CODEX_API_KEY`, mount the
-worker's file-backed Codex home into the runner container and set `CODEX_HOME`.
-See [Use Your ChatGPT Subscription Login](./images#use-your-chatgpt-subscription-login).
+For a real provider, use a runner image that contains the provider binary and
+pass the provider credential with `container.env` or a mounted credentials
+directory.
+
+Provider-specific examples:
+
+- [Codex](./codex)
+- [Claude Code](./claude-code)
+- [OpenCode](./opencode)
 
 The image must exist in Podman's image store or `pull_policy` must allow Dagu to
 pull it through Podman. Docker and Podman do not necessarily share local image
 stores.
 
-## Smoke Test
+## Pull Policy
 
-Use the smoke test from [Harness Sandboxed Execution](./) to verify that Dagu
-can create and remove a container through Podman's Docker-compatible API.
-
-For a local smoke test that must use an already-present image:
+For a local run that must use an already-present image:
 
 ```yaml
 container:
@@ -261,7 +283,7 @@ container:
 If the image is missing from Podman's image store, pull it into Podman first or
 use `pull_policy: missing`.
 
-## Troubleshooting
+## Runtime Checks
 
 | Symptom | Check |
 |---------|-------|

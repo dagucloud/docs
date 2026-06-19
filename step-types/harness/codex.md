@@ -6,13 +6,9 @@ OpenAI Codex is an agentic coding tool that runs in your terminal.
 
 See the [official OpenAI Codex documentation](https://platform.openai.com/docs/guides/codex).
 
-For containerized Dagu runs, see
-[Harness Runner Images](./sandbox/images) for a tested Dockerfile that builds a
-`dagu-codex-runner:local` image from OpenAI's `codex-universal` image and
-installs the Codex CLI.
-
-That page also shows how to reuse a ChatGPT subscription login by mounting a
-file-backed Codex home into the runner container and setting `CODEX_HOME`.
+For containerized Dagu runs, see [Run Codex in a Container](./sandbox/codex).
+That page includes a Dockerfile based on OpenAI's `codex-universal` image and a
+ChatGPT login mount example using `CODEX_HOME`.
 
 ## Base Invocation
 
