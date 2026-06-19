@@ -212,6 +212,29 @@ container:
 | `platform` | Not allowed | Optional |
 | `keep_container` | Not allowed | Optional |
 
+### Volume Source Paths
+
+Volume specs use `source:target[:ro|rw]`.
+
+- Dagu expands `$VAR` and `${VAR}` only on the source side, using the Dagu process environment after DAG expression interpolation.
+- `target` is the container path and is not expanded from host environment variables.
+- `ro` and `rw` are the only valid modes; the mode is not expanded.
+- Path-like sources become bind mounts. Sources that are not path-like remain Docker named volumes.
+- Missing source-side environment variables fail before Dagu calls Docker.
+
+These rules apply to DAG-level `container:`, step-level `container:`, and the
+shortcut `volumes:` field under `action: docker.run` `with:` config.
+
+```yaml
+container:
+  image: ghcr.io/example/agent:latest
+  volumes:
+    - ${HOME}/.codex:/codex-home
+    - ${CACHE_VOLUME}:/cache
+```
+
+With `CACHE_VOLUME=dagu-cache`, the second entry remains a named volume.
+
 ### Step Container Overrides DAG Container
 
 When a step has its own `container` field, it runs in that container instead of the DAG-level container:
@@ -253,6 +276,10 @@ steps:
       command: pwd
 ```
 
+The shortcut `volumes:` field follows the same source-side expansion and
+named-volume rules as `container.volumes`. Direct Docker SDK fields under
+`host:` are passed as Docker configuration.
+
 ### Advanced Docker SDK Options
 
 Pass Docker SDK configuration directly via `container`, `host`, and `network` fields:
@@ -282,7 +309,9 @@ steps:
 - **Required fields**: `container.image` is required.
 - **Container name**: Must be unique. If a container with the same name already exists (running or stopped), the DAG fails.
 - **Volume format**: `source:target[:ro|rw]`
-  - `source` may be absolute, relative to DAG working_dir (`.` or `./...`), or `~`-expanded; otherwise it is treated as a named volume.
+  - Source-side `$VAR` and `${VAR}` values are expanded from the Dagu process environment.
+  - Path-like sources may be absolute, relative to DAG working_dir (`.`, `./...`, or another relative path), or `~`-expanded; otherwise the source is treated as a named volume.
+  - The target path and mode are not expanded from host environment variables.
   - Only `ro` or `rw` are valid modes.
 - **Port format**: `"80"`, `"8080:80"`, `"127.0.0.1:8080:80"`, optional protocol: `80/tcp|udp|sctp` (default tcp).
 - **Network**: Accepts `bridge`, `host`, `none`, `container:<name|id>`, or a custom network name.
@@ -404,14 +433,18 @@ steps:
 ```
 
 ::: tip OS Variables
-OS environment variables not defined in the DAG `env:` block (like `$HOME`, `$PATH`)
-are **not** expanded by Dagu. They pass through to the container as-is. To use a local
-OS value, explicitly import it in the DAG-level `env:` block:
+Most container fields expand DAG-scoped variables, not arbitrary OS
+environment variables from the Dagu process. To use a local OS value in fields
+such as `image`, `env`, or `registry_auths`, explicitly import it in the
+DAG-level `env:` block:
 
 ```yaml
 env:
   - HOST_HOME: ${HOME}  # Import local $HOME into DAG scope
 ```
+
+The source side of `volumes` is the exception: `${HOME}/.codex:/codex-home`
+uses the Dagu process `HOME` directly, because that side names a host path.
 :::
 
 ::: tip Literal Dollar Signs

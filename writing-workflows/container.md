@@ -86,6 +86,18 @@ steps:
     depends: build
 ```
 
+Volume specs use `source:target[:ro|rw]`.
+
+- `source` may be an absolute host path, `~`, `.`, `./...`, another relative path, or a Docker named volume.
+- Dagu expands `$VAR` and `${VAR}` only on the source side, using the Dagu process environment after DAG expression interpolation.
+- `target` is the container path and is not expanded from host environment variables.
+- `ro` and `rw` are the only valid modes; the mode is not expanded.
+- Missing source-side environment variables fail before Dagu calls Docker.
+
+Path-like sources become bind mounts. Sources that are not path-like remain
+Docker named volumes, so `${CACHE_VOLUME}:/cache` is a named volume when
+`CACHE_VOLUME=dagu-cache`, while `${HOME}/.codex:/codex-home` is a bind mount.
+
 ## With Environment Variables
 
 ```yaml
@@ -342,7 +354,7 @@ container:
 **Image mode:**
 - `image` is required.
 - `name` is optional; if specified, must be unique. If a container with the same name already exists (running or stopped), the workflow fails.
-- `volumes` must use `source:target[:ro|rw]` format; relative paths are resolved from the DAG `working_dir`; invalid formats fail.
+- `volumes` must use `source:target[:ro|rw]` format. Source-side `$VAR` and `${VAR}` values are expanded from the Dagu process environment; relative bind paths are resolved from the DAG `working_dir`; invalid formats fail.
 - `ports` accept `"80"`, `"8080:80"`, `"127.0.0.1:8080:80"`; container port may have `/tcp|udp|sctp` (default tcp); invalid formats fail.
 - `network` accepts `bridge`, `host`, `none`, `container:<name|id>`, or a custom network name.
 - `restart_policy` supports `no`, `always`, or `unless-stopped`; other values fail.

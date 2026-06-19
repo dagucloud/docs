@@ -140,15 +140,16 @@ Mount the host Codex home to a separate path such as `/codex-home`:
 
 ```sh
 docker run --rm \
-  -v /Users/alice/.codex:/codex-home \
+  -v "${HOME}/.codex:/codex-home" \
   -e CODEX_HOME=/codex-home \
   dagu-codex-runner:local \
   codex login status
 ```
 
-Replace `/Users/alice/.codex` with the absolute path to the Codex home on the
-Dagu worker. The host path must be absolute; Dagu does not expand `${HOME}` in
-`container.volumes`.
+In DAG `container.volumes`, Dagu expands `$VAR` and `${VAR}` on the source side
+from the Dagu process environment. That means `${HOME}/.codex:/codex-home`
+mounts the worker user's Codex home. The container target path and the optional
+mode are not expanded.
 
 Do not mount the host Codex home over `/root/.codex` in this runner image. The
 Dockerfile above installs the standalone Codex package under `/root/.codex`, so
@@ -174,7 +175,7 @@ steps:
       image: dagu-codex-runner:local
       pull_policy: never
       volumes:
-        - /Users/alice/.codex:/codex-home
+        - ${HOME}/.codex:/codex-home
       env:
         - CODEX_HOME=/codex-home
     with:
@@ -199,7 +200,7 @@ steps:
       working_dir: /workspace
       volumes:
         - .:/workspace:ro
-        - /Users/alice/.codex:/codex-home
+        - ${HOME}/.codex:/codex-home
       env:
         - CODEX_HOME=/codex-home
     with:
@@ -222,7 +223,7 @@ printf 'cli_auth_credentials_store = "file"\n' > /Users/alice/.codex-dagu/config
 CODEX_HOME=/Users/alice/.codex-dagu codex login
 ```
 
-Then mount `/Users/alice/.codex-dagu:/codex-home` in the DAG.
+Then mount `${HOME}/.codex-dagu:/codex-home` in the DAG.
 
 ## Run Codex in a Step Sandbox
 
@@ -334,7 +335,7 @@ For ChatGPT subscription auth:
 ```yaml
 container:
   volumes:
-    - /Users/alice/.codex:/codex-home
+    - ${HOME}/.codex:/codex-home
   env:
     - CODEX_HOME=/codex-home
 ```
