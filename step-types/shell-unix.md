@@ -67,7 +67,8 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
 
 ## Script Behavior (Unix)
 
-- A `run:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
+- A `run:` block is prepared as temporary script input and removed after the step finishes. Do not depend on the prepared script path or directory.
+- Dagu resolves `${...}` references in the script before it starts. Backticks remain in the script text; the selected shell or interpreter defines what they mean.
 - If there is no step-level `shell` and the script has a shebang, that interpreter runs the script. Without a shebang, the resolved shell runs it (Dagu appends `-e` for sh/bash/zsh/ksh/ash/dash when using the default/DAG-level shell; step-level shells are left unchanged).
 - When both `shell` and a multi-line `run` block are set, the shell value is used as the interpreter.
 

@@ -69,14 +69,15 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 
 ## Script Behavior (Windows)
 
-- A `run:` block is saved to a temp file in the working directory when possible and removed after the step finishes.
-- With PowerShell/pwsh, the script is stored as `.ps1` and executed by the selected shell. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` and `$PSNativeCommandUseErrorActionPreference = $true` so cmdlet errors and native command failures stop execution. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
+- A `run:` block is prepared as temporary script input and removed after the step finishes. Do not depend on the prepared script path or directory.
+- Dagu resolves `${...}` references in the script before it starts. Backticks remain in the script text; the selected shell or interpreter defines what they mean.
+- With PowerShell/pwsh, the script runs through PowerShell file execution. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup so cmdlet errors stop execution and text handling is stable. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
 - When both `shell` and a multi-line `run` block are set, the shell value is used as the interpreter.
 
 ## Shell Options
 
 - **PowerShell / pwsh**  
-  Use DAG-level `shell: powershell`/`shell: pwsh`, or step-level `with.shell: powershell`/`with.shell: pwsh`. Script blocks become `.ps1` files and are prefixed with `$ErrorActionPreference = 'Stop'` plus `$PSNativeCommandUseErrorActionPreference = $true` for fail-fast behavior on cmdlet errors and native command exit codes (PowerShell 7.4+). Use PowerShell syntax for variables/pipelines.
+  Use DAG-level `shell: powershell`/`shell: pwsh`, or step-level `with.shell: powershell`/`with.shell: pwsh`. Script blocks run through PowerShell file execution and are prefixed with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup. Use PowerShell syntax for variables/pipelines.
 
 - **cmd.exe**  
   Set DAG-level `shell: cmd`, or step-level `with.shell: cmd`, for command prompt semantics. Include `/c` in the shell string/array when you want to run a single command string. For multi-line cmd scripts, embed the batch pattern directly in YAML:

@@ -80,6 +80,7 @@ OS-only variables not defined in the DAG scope are preserved as-is, letting the 
 
 **Template steps:**
 The `script` body is not expanded by Dagu at all, so `${VAR}` remains literal there. Pass values through `with.data` when you want Dagu to expand them before template rendering.
+This exception is for template action script bodies, not multi-line command-step `run: |` scripts.
 
 ```yaml
 # Example: Non-shell executor (SSH)
@@ -225,7 +226,7 @@ steps:
 
 **Note:** Command substitution is always supported in `env:` blocks. For DAG-level `params:`, use `eval:` on an inline rich param definition when you want `$VAR` expansion or backtick command substitution. Literal `default` values and runtime overrides from the CLI, API, and sub-DAG calls remain literal.
 
-Backticks are still part of normal runtime evaluation in fields such as `command`, `stdout`, `stderr`, sub-DAG `params`, and executor `with:` config. Command-step `script` is the main exception: Dagu replaces variables there but leaves backticks for the shell.
+Backticks are still part of normal runtime evaluation in fields such as `command`, `stdout`, `stderr`, sub-DAG `params`, and executor `with:` config. Multi-line command-step `run: |` scripts are the main exception: Dagu resolves `${...}` references there but leaves backticks in the script text for the selected shell or interpreter.
 
 ## Output Variables
 
