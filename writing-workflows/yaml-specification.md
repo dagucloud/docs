@@ -392,7 +392,7 @@ Action names in steps can refer to built-ins, local custom actions, base-config 
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `container` | string or object | DAG-level Docker container context. Mutually exclusive with top-level `ssh`. |
+| `container` | string or object | DAG-level shared container context. Mutually exclusive with top-level `ssh`. |
 | `registry_auths` | object or string | Docker registry auth configuration as a map or Docker auth JSON string. |
 | `ssh` | object | DAG-level SSH defaults. Mutually exclusive with top-level `container`. |
 | `s3` | object | DAG-level defaults for `s3.*` actions. |
@@ -408,7 +408,10 @@ Top-level `kubernetes` is not a global execution mode. It is only merged into st
 
 ### Container
 
-`container` has two modes.
+`container` has two modes. At the DAG level it creates or attaches to one
+shared container for the run. Command steps and CLI-based `harness.run` steps
+inherit that shared container unless the step defines a supported step-level
+`container:`.
 
 String form attaches to an existing running container:
 
@@ -460,6 +463,8 @@ Rules:
 - Image mode requires `image` and accepts the remaining container fields.
 - Container `shell` is array form only.
 - Relative host paths in `volumes` resolve from the DAG `working_dir`.
+- The container runtime is selected by the Dagu process environment
+  (`DAGU_CONTAINER_RUNTIME`, `DAGU_PODMAN_HOST`), not by a YAML field.
 
 ### SSH
 
@@ -1003,7 +1008,11 @@ The step runs, then enters waiting status until approved. Collected inputs becom
 
 ### Step-Level Container
 
-Step `container` uses the same string/object forms as top-level `container` and overrides the DAG-level container for that step.
+Step `container` uses the same string/object forms as top-level `container`.
+For actions that support step-level containers, it overrides the DAG-level
+container for that step. Without a step-level container, command steps and
+CLI-based `harness.run` steps inherit the DAG-level shared container when one is
+configured.
 
 ```yaml
 steps:

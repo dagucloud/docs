@@ -2,14 +2,16 @@
 
 Run workflow steps in Docker containers for isolated, reproducible execution.
 
-::: warning Docker runtime required
-Docker-based step execution requires access to a Docker daemon through a local
-Docker socket or a remote daemon such as `DOCKER_HOST`.
+::: warning Docker-compatible runtime required
+Docker-based step execution requires access to a Docker-compatible container
+API. By default, Dagu uses Docker through a local Docker socket or a remote
+daemon such as `DOCKER_HOST`. Self-hosted deployments can also select Podman's
+Docker-compatible API with `DAGU_CONTAINER_RUNTIME=podman`.
 
 Dagu Cloud managed instances run on GKE with gVisor isolation and do not expose
-a Docker daemon or Docker socket. Docker actions are not supported inside
-managed instances. Use self-hosted Dagu, or route the workflow to a self-hosted
-worker, when a workflow needs Docker step execution.
+a Docker-compatible daemon socket. Docker/container actions are not supported
+inside managed instances. Use self-hosted Dagu, or route the workflow to a
+self-hosted worker, when a workflow needs container step execution.
 :::
 
 The `container` field supports two modes:
@@ -533,6 +535,23 @@ All `container:` steps and `action: docker.run` steps will use the remote daemon
 
 > **Note:** `DOCKER_AUTH_CONFIG` is **not** whitelisted — it may contain credentials. Use `registry_auths:` in the DAG file or reference it explicitly via `env:` or `secrets:` if needed.
 
+## Podman Runtime
+
+Set `DAGU_CONTAINER_RUNTIME=podman` on the Dagu process to make root-level
+`container:`, step-level `container:`, and `action: docker.run` use Podman's
+Docker-compatible API. If the Podman socket is not
+`unix:///run/podman/podman.sock`, also set `DAGU_PODMAN_HOST`.
+
+```bash
+DAGU_CONTAINER_RUNTIME=podman \
+DAGU_PODMAN_HOST=unix:///run/user/1000/podman/podman.sock \
+dagu start-all
+```
+
+These variables are process-level settings, not DAG YAML fields. See
+[Harness Sandbox with Podman](/step-types/harness/sandbox/podman) for socket
+setup details.
+
 ## Docker in Docker
 
 Mount the Docker socket and run as root to use Docker inside your containers:
@@ -655,3 +674,7 @@ steps:
 ```
 
 See [parallel.items](/writing-workflows/execution-control#parallel-execution) for full fan-out options.
+
+## See Also
+
+- [Harness Sandboxed Execution](/step-types/harness/sandbox/) - Run AI and coding-agent harness steps inside Docker or Podman containers.

@@ -49,7 +49,8 @@ Start with `docker compose up -d`.
 
 ## Giving DAGs access to the host Docker daemon
 
-Use this layout when workflows run the `docker` / `container` action and should reuse the host's Docker engine:
+Use this layout when workflows run `container:`, `docker.run`, or
+containerized `harness.run` steps and should reuse the host's Docker engine:
 
 ```yaml
 services:
@@ -60,6 +61,8 @@ services:
     volumes:
       - dagu:/var/lib/dagu
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DAGU_CONTAINER_RUNTIME=docker
     entrypoint: ["/usr/local/bin/tini", "-g", "--"]  # keep Tini as PID 1
     user: "0:0"      # root is needed for socket access
 volumes:
@@ -71,6 +74,9 @@ This example bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket
 ::: warning Security
 Mounting `/var/run/docker.sock` grants the container full control of the host Docker daemon. Only do this on trusted hosts and behind authentication.
 :::
+
+For AI and coding-agent CLI sandboxes, see
+[Harness Sandboxed Execution](/step-types/harness/sandbox/).
 
 ## Image tags
 

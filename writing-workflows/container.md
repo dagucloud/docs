@@ -467,6 +467,12 @@ steps:
 If you want each step to run in its own container (as with a fresh `docker run`
 per step), use the step-level `container` field:
 
+Step-level containers also apply to `action: harness.run`. If a DAG has a
+root-level `container:`, CLI-based `harness.run` steps inherit that shared
+container unless the step defines its own `container:`. See
+[Harness Sandboxed Execution](/step-types/harness/sandbox/) for running AI and
+coding-agent CLIs inside container sandboxes.
+
 ```yaml
 steps:
   - id: send_confirmation_emails
@@ -538,9 +544,13 @@ steps:
 When using step-level `container`, you cannot use `executor` or `script` fields on the same step.
 :::
 
-Note: When a DAG‑level `container:` is set, step-level `container` fields are ignored. The step runs inside the shared DAG container via `docker exec`. To use step-specific container settings, remove the DAG‑level `container`.
+Note: A supported step-level `container:` overrides the DAG-level container for
+that step. Without a step-level container, command steps and CLI-based
+`harness.run` steps inherit the shared DAG-level container when one is
+configured.
 
 ## See Also
 
 - [Docker Executor](/step-types/docker) - Step-level container execution
 - [Registry Authentication](/step-types/docker#registry-authentication) - Private registry setup
+- [Harness Sandboxed Execution](/step-types/harness/sandbox/) - Run AI and coding-agent CLIs inside Docker or Podman sandboxes

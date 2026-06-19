@@ -93,6 +93,22 @@ Common examples:
 
 For all environment variables, see [Configuration Reference - Environment Variables](/server-admin/reference#environment-variables).
 
+### Container Runtime Environment
+
+Container runtime selection is process-level configuration. Set these variables
+on the Dagu process that executes runs:
+
+| Environment variable | Purpose |
+| --- | --- |
+| `DAGU_CONTAINER_RUNTIME` | Container runtime for root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`. Valid values are `docker` and `podman`; unset means `docker`. |
+| `DAGU_PODMAN_HOST` | Podman's Docker-compatible API socket, used when `DAGU_CONTAINER_RUNTIME=podman`. Default: `unix:///run/podman/podman.sock`. |
+
+These are not DAG YAML fields. Do not set them under DAG-level or step-level
+`env:` to select a runtime for a workflow.
+
+See [Harness Sandboxed Execution](/step-types/harness/sandbox/) for Docker and
+Podman setup examples.
+
 ## `DAGU_HOME`
 
 `DAGU_HOME` is an all-in-one directory override. When set, Dagu derives its default config, base config, DAG, log, and data paths from that directory unless a more specific flag, environment variable, or config field overrides them.

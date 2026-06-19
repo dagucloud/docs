@@ -154,6 +154,16 @@ const fullSidebar = [
         collapsed: false,
         items: [
           { text: "Overview", link: "/step-types/harness/" },
+          {
+            text: "Sandboxed Execution",
+            collapsed: false,
+            items: [
+              { text: "Overview", link: "/step-types/harness/sandbox/" },
+              { text: "Docker", link: "/step-types/harness/sandbox/docker" },
+              { text: "Podman", link: "/step-types/harness/sandbox/podman" },
+              { text: "Runner Images", link: "/step-types/harness/sandbox/images" },
+            ],
+          },
           { text: "Claude Code", link: "/step-types/harness/claude" },
           { text: "Codex", link: "/step-types/harness/codex" },
           { text: "Copilot", link: "/step-types/harness/copilot" },

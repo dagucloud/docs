@@ -376,6 +376,10 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 ### Execution
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
 - `DAGU_DEFAULT_SHELL` - Default shell for command steps. When unset, Dagu falls back to `$SHELL`, then `sh`.
+- `DAGU_CONTAINER_RUNTIME` - Container runtime for root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`. Valid values: `docker` (default) or `podman`.
+- `DAGU_PODMAN_HOST` - Podman's Docker-compatible API socket when `DAGU_CONTAINER_RUNTIME=podman` (default: `unix:///run/podman/podman.sock`).
+
+`DAGU_CONTAINER_RUNTIME` and `DAGU_PODMAN_HOST` are read from the Dagu process environment. They are not DAG YAML fields and cannot be selected from DAG-level or step-level `env:`.
 
 ### Coordinator
 - `DAGU_COORDINATOR_ENABLED` - Enable coordinator service (default: `true`)
