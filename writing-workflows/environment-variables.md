@@ -264,6 +264,7 @@ Scoped Dagu references work in value-resolved fields. Shell variable syntax is s
 | Pattern | Description | Example |
 |---------|-------------|---------|
 | `${env.VAR}` | Dagu-scoped environment reference | `${env.HOME}` -> `/home/user` |
+| `${context.run.id}` | Dagu-managed built-in run context reference | `${context.run.id}` -> `20241012_040000_c1f4b2` |
 | `$VAR` | Simple substitution | `$HOME` → `/home/user` |
 | `${VAR}` | Shell or unqualified environment syntax | `${HOME}` -> `/home/user` |
 | `'$VAR'` | Single-quoted (no expansion) | `'$VAR'` → `'$VAR'` |
@@ -311,6 +312,26 @@ run: echo "Literal backtick: \`not a command\`"
 ```
 
 For JSON path access and step output references, see [Variables Reference](/writing-workflows/template-variables).
+
+## Built-In Run Context
+
+Environment variables are one way to read Dagu-managed runtime metadata from a script. In YAML fields where Dagu owns value resolution, prefer the structured context namespace instead:
+
+```yaml
+steps:
+  - id: notify
+    run: notify.sh "${context.dag.name}" "${context.run.id}" "${context.paths.log_file}"
+```
+
+Inside shell scripts, the environment projections remain available:
+
+```yaml
+steps:
+  - id: notify
+    run: notify.sh "$DAG_NAME" "$DAG_RUN_ID" "$DAG_RUN_LOG_FILE"
+```
+
+See [Runtime Context and Variables](/writing-workflows/runtime-variables) for the complete mapping between `${context.*}` references and `DAG_*` projections.
 
 ## Precedence Summary
 
@@ -391,5 +412,5 @@ For sensitive values that should be selected together with a runtime environment
 
 - [Data & Variables](/writing-workflows/data-variables) - Complete data handling guide
 - [Variables Reference](/writing-workflows/template-variables) - Full variable syntax reference
-- [Special Environment Variables](/writing-workflows/runtime-variables) - Built-in DAG_* variables
+- [Runtime Context and Variables](/writing-workflows/runtime-variables) - Built-in `${context.*}` references and `DAG_*` projections
 - [Secrets](/writing-workflows/secrets) - Secure secret management

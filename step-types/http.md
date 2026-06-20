@@ -174,7 +174,7 @@ handler_on:
     with:
       method: POST
       url: https://hooks.example.com/workflow-complete
-      body: '{"status": "completed", "dag": "${env.DAG_NAME}"}'
+      body: '{"status": "completed", "dag": "${context.dag.name}"}'
       headers:
         Content-Type: application/json
 ```

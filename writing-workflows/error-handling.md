@@ -87,11 +87,11 @@ handler_on:
   success:
     run: notify-success.sh
   failure:
-    run: alert-oncall.sh "${env.DAG_NAME} failed"
+    run: alert-oncall.sh "${context.dag.name} failed"
   abort:
     run: cleanup.sh
   exit:
-    run: rm -rf "/tmp/dag-${env.DAG_RUN_ID}"  # Always runs
+    run: rm -rf "/tmp/dag-${context.run.id}"  # Always runs
 
 # With email
 handler_on:
@@ -100,8 +100,8 @@ handler_on:
     with:
       to: oncall@company.com
       from: dagu@company.com
-      subject: "Failed: ${env.DAG_NAME}"
-      message: "Check logs: ${env.DAG_RUN_LOG_FILE}"
+      subject: "Failed: ${context.dag.name}"
+      message: "Check logs: ${context.paths.log_file}"
 ```
 
 ## Email Notifications

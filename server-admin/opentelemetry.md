@@ -41,7 +41,7 @@ otel:
   timeout: 30s     # Export timeout
   resource:
     # Resource attributes (all optional)
-    service.name: "dagu-${env.DAG_NAME}"  # Default value
+    service.name: "dagu-${context.dag.name}"  # Default value
     service.version: "1.0.0"
     deployment.environment: "${env.ENVIRONMENT}"
     # Custom attributes
@@ -140,7 +140,7 @@ otel:
 name: my-workflow
 otel:
   resource:
-    service.name: "dagu-${env.DAG_NAME}"  # Override specific attributes
+    service.name: "dagu-${context.dag.name}"  # Override specific attributes
 steps:
   - run: echo "Processing with telemetry"
 ```
@@ -178,7 +178,7 @@ otel:
   headers:
     Authorization: "Bearer ${env.OTEL_TOKEN}"
   resource:
-    service.name: "dagu-${env.DAG_NAME}"
+    service.name: "dagu-${context.dag.name}"
     deployment.environment: "production"
     service.version: "${env.VERSION}"
 ```

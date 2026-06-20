@@ -1,6 +1,6 @@
 # Lifecycle Handlers
 
-Lifecycle handlers let you run extra steps after the main DAG completes. Use the `handler_on` block to trigger notifications, clean up resources, or kick off follow-up jobs without duplicating logic inside individual steps. Every handler runs with the canonical `DAG_RUN_STATUS` environment variable so you can branch on the final outcome inside a single script.
+Lifecycle handlers let you run extra steps after the main DAG completes. Use the `handler_on` block to trigger notifications, clean up resources, or kick off follow-up jobs without duplicating logic inside individual steps. Every handler runs in a status-aware context, so `${context.run.status}` is available in value-resolved fields and `DAG_RUN_STATUS` is available to scripts.
 
 ## Supported Triggers
 
@@ -26,15 +26,15 @@ handler_on:
   init:
     run: acquire-lock.sh "${env.LOCK_NAME}"   # runs before any steps
   success:
-    run: notify.sh "${env.DAG_NAME} (${env.DAG_RUN_ID}) succeeded" # runs after a clean finish
+    run: notify.sh "${context.dag.name} (${context.run.id}) succeeded" # runs after a clean finish
   failure:
-    run: alert.sh "${env.DAG_NAME} failed" "logs=${env.DAG_RUN_LOG_FILE}"
+    run: alert.sh "${context.dag.name} failed" "logs=${context.paths.log_file}"
   abort:
     run: rollback.sh --lock "${env.LOCK_NAME}"
   wait:
     run: notify-approvers.sh "${env.DAG_WAITING_STEPS}" # runs when waiting for approval
   exit:
-    run: rm -rf "/tmp/${env.DAG_RUN_ID}" # always runs
+    run: rm -rf "/tmp/${context.run.id}" # always runs
 
 steps:
   - run: ./extract.sh
@@ -52,7 +52,7 @@ Each handler is a normal step definition. You can use `run`, `script`, `action` 
 - Handlers are executed sequentially and synchronously. The DAG is still considered running until they finish.
 - If a handler exits with a non-zero status, the overall DAG run ends in `failed`, even if every main step succeeded.
 - Handler logs appear alongside other steps in the run history and respect the same log retention policy.
-- Each handler receives the `DAG_RUN_STATUS` environment variable. The value depends on when the handler runs: `running` (init), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler).
+- Each handler receives `${context.run.status}` and the `DAG_RUN_STATUS` environment variable. The value depends on when the handler runs: `running` (init), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler).
 
 ## Sub-DAG Handler Isolation
 
@@ -97,10 +97,10 @@ handler_on:
     with:
       to: oncall@company.com
       from: dagu@company.com
-      subject: "${env.DAG_NAME} failed"
+      subject: "${context.dag.name} failed"
       message: |
-        Run ID: ${env.DAG_RUN_ID}
-        Logs: ${env.DAG_RUN_LOG_FILE}
+        Run ID: ${context.run.id}
+        Logs: ${context.paths.log_file}
 ```
 
 ### Run a Follow-up DAG
@@ -112,7 +112,7 @@ handler_on:
     with:
       dag: sync-reporting
       params: |
-        parent_run_id: ${env.DAG_RUN_ID}
+        parent_run_id: ${context.run.id}
 ```
 
 ### Guaranteed Cleanup
@@ -121,7 +121,7 @@ handler_on:
 handler_on:
   exit:
     run: |
-      find "/tmp/${env.DAG_RUN_ID}" -maxdepth 1 -type f -delete
+      find "/tmp/${context.run.id}" -maxdepth 1 -type f -delete
 ```
 
 ### Notify on Wait (Approval)

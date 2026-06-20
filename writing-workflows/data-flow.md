@@ -9,6 +9,7 @@ ${params.name}
 ${env.NAME}
 ${consts.name}
 ${steps.step_id.outputs.name}
+${context.run.id}
 ```
 
 Bare `$NAME` and `${NAME}` are shell syntax inside `run` scripts. They are still useful for shell-local variables, but examples that need Dagu validation should use the scoped form.
@@ -160,17 +161,17 @@ steps:
 
 ## Runtime Metadata
 
-Dagu injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, `DAG_RUN_WORK_DIR`, and `DAG_RUN_ARTIFACTS_DIR` into the step environment.
+Dagu exposes run metadata through the canonical `${context.*}` namespace and also projects selected values into the step environment.
 
-Use `${env.<NAME>}` when Dagu should resolve the value before handing a field to the executor:
+Use `${context.*}` when Dagu should resolve the value before handing a field to the executor:
 
 ```yaml
 steps:
   - id: archive_log
-    run: cp "${env.DAG_RUN_LOG_FILE}" "/backup/${env.DAG_RUN_ID}.log"
+    run: cp "${context.paths.log_file}" "/backup/${context.run.id}.log"
 ```
 
-Inside a shell script, native shell syntax is also valid:
+Inside a shell script, native shell syntax is also valid when the process environment should provide the value:
 
 ```yaml
 steps:
@@ -178,7 +179,7 @@ steps:
     run: cp "$DAG_RUN_LOG_FILE" "/backup/${DAG_RUN_ID}.log"
 ```
 
-See [Special Environment Variables](/writing-workflows/runtime-variables) for the complete list.
+See [Runtime Context and Variables](/writing-workflows/runtime-variables) for the complete list.
 
 ## Output Size
 

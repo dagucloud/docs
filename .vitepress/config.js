@@ -88,7 +88,7 @@ const fullSidebar = [
       },
       // Variables & data
       { text: "Template Variables", link: "/writing-workflows/template-variables" },
-      { text: "Runtime Variables", link: "/writing-workflows/runtime-variables" },
+      { text: "Runtime Context and Variables", link: "/writing-workflows/runtime-variables" },
       { text: "Data & Variables", link: "/writing-workflows/data-variables" },
       { text: "Data Flow", link: "/writing-workflows/data-flow" },
       { text: "Outputs", link: "/writing-workflows/outputs" },

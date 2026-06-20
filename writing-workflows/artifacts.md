@@ -80,6 +80,8 @@ Example:
 
 When artifact storage is active, Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and lifecycle handlers. Artifact storage is active when enabled explicitly or auto-enabled by a `DAG_RUN_ARTIFACTS_DIR` reference, artifact action, or artifact stream output.
 
+In value-resolved fields, `${context.paths.artifacts_dir}` resolves to the same path after artifact storage is active. Keep using `DAG_RUN_ARTIFACTS_DIR` references, `artifact.*`, `stdout.artifact`, or `stderr.artifact` when you want artifact storage to be auto-enabled by the DAG definition.
+
 ```yaml
 steps:
   - id: write-files

@@ -59,7 +59,7 @@ The preview supports common Markdown features, including tables and diagrams ren
 
 ## Generated Documents from DAGs
 
-Workflow steps can write Markdown files that appear in Docs automatically. Dagu exposes `DAG_DOCS_DIR` to steps when document management is configured.
+Workflow steps can write Markdown files that appear in Docs automatically. Dagu exposes `DAG_DOCS_DIR` to step scripts when document management is configured. In value-resolved workflow fields, the same path is available as `${context.paths.docs_dir}`.
 
 ```yaml
 name: daily-report
@@ -142,6 +142,6 @@ See [Workspaces](/web-ui/workspaces) for workspace behavior and [Git Sync](/serv
 ## Related
 
 - [Workspaces](/web-ui/workspaces)
-- [Runtime Variables](/writing-workflows/runtime-variables)
+- [Runtime Context and Variables](/writing-workflows/runtime-variables)
 - [Git Sync](/server-admin/git-sync)
 - [AI agent Overview](/features/agent/)

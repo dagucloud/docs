@@ -24,7 +24,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "dagu-${env.DAG_NAME}"
+    service.name: "dagu-${context.dag.name}"
     service.version: "1.0.0"
     environment: "local"
 
@@ -101,7 +101,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "dagu-${env.DAG_NAME}"
+    service.name: "dagu-${context.dag.name}"
     service.version: "2.0.0"
     deployment.environment: "testing"
     team: "platform"
@@ -387,7 +387,7 @@ otel:
     Authorization: "Bearer ${env.OTEL_TOKEN}"
   timeout: 30s
   resource:
-    service.name: "dagu-${env.DAG_NAME}"
+    service.name: "dagu-${context.dag.name}"
     service.version: "${env.APP_VERSION}"
     deployment.environment: "${env.ENVIRONMENT}"
 steps:

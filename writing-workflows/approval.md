@@ -204,7 +204,7 @@ Field meanings:
 - `inputs`: Latest push-back inputs visible to the current step
 - `history`: Chronological push-back history, oldest first
 
-See [Special Environment Variables](/writing-workflows/runtime-variables#push-back-context-dag_pushback) for the runtime variable reference.
+See [Runtime Context and Variables](/writing-workflows/runtime-variables#push-back-context-dag_pushback) for the push-back variable reference.
 
 ### Example
 
@@ -364,7 +364,7 @@ handler_on:
     run: |
       echo "Waiting steps: ${env.DAG_WAITING_STEPS}"
       curl -X POST https://slack.com/webhook \
-        -d '{"text": "Approval required for ${env.DAG_NAME}"}'
+        -d '{"text": "Approval required for ${context.dag.name}"}'
 
 steps:
   - id: deploy

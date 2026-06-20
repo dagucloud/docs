@@ -1,6 +1,47 @@
-# Special Environment Variables
+# Runtime Context and Variables
 
-Dagu injects a small set of read-only environment variables whenever it runs a workflow. These variables carry metadata about the current DAG run (name, run identifier, log locations, status) and are available for interpolation inside commands, arguments, lifecycle handlers, and most other places where you can reference environment variables.
+Dagu exposes run metadata in two forms:
+
+- **Built-in run context references** are the canonical workflow-language form for Dagu-managed metadata in value-resolved YAML fields. Use forms such as `${context.run.id}`, `${context.dag.name}`, and `${context.paths.log_file}` when Dagu should resolve the value before a step or handler starts.
+- **Environment variable projections** are the shell-oriented compatibility form. Use variables such as `$DAG_RUN_ID`, `$DAG_RUN_LOG_FILE`, and `$DAG_RUN_STEP_NAME` inside scripts and tools that read the process environment.
+
+The structured `context` namespace is not sourced from user `env` values. It is Dagu-managed runtime data. A workflow can still define parameters or environment variables named `context`, `run`, or `step`; those remain addressable through their own namespaces, such as `${params.context}` or `${env.RUN}`.
+
+## Built-In Run Context
+
+Use `${context.*}` references in value-resolved fields such as `run`, `with`, `env`, `working_dir`, handler fields, stdout/stderr paths, and other fields documented by the YAML specification.
+
+| Reference | Availability | Environment projection |
+| --- | --- | --- |
+| `${context.dag.name}` | All steps and handlers | `DAG_NAME` |
+| `${context.run.id}` | All steps and handlers | `DAG_RUN_ID` |
+| `${context.run.status}` | Lifecycle handlers and other status-aware surfaces | `DAG_RUN_STATUS` |
+| `${context.run.scheduled_at}` | Scheduled, catchup, and one-off scheduled runs | None |
+| `${context.run.root_name}` | Sub-DAG runs only | None |
+| `${context.run.root_id}` | Sub-DAG runs only | None |
+| `${context.attempt.id}` | Run-attempt-aware scopes | None |
+| `${context.attempt.started_at}` | After the run attempt starts | None |
+| `${context.step.id}` | Current executable step when it has an `id` | None |
+| `${context.step.name}` | Current step or handler | `DAG_RUN_STEP_NAME` |
+| `${context.trigger.type}` | When the trigger type is known | None |
+| `${context.trigger.actor}` | Runs started by an attributable actor | None |
+| `${context.paths.log_file}` | All steps and handlers | `DAG_RUN_LOG_FILE` |
+| `${context.paths.work_dir}` | When a per-run work directory is available | `DAG_RUN_WORK_DIR` |
+| `${context.paths.artifacts_dir}` | When artifact storage is active | `DAG_RUN_ARTIFACTS_DIR` |
+| `${context.paths.docs_dir}` | When a docs directory is configured | `DAG_DOCS_DIR` |
+| `${context.paths.step_stdout_file}` | Current executable step after stdout is assigned | `DAG_RUN_STEP_STDOUT_FILE` |
+| `${context.paths.step_stderr_file}` | Current executable step after stderr is assigned | `DAG_RUN_STEP_STDERR_FILE` |
+| `${context.paths.step_output_file}` | Current step attempt after output publication is prepared | `DAGU_OUTPUT_FILE` |
+| `${context.profile.name}` | Runs with a selected runtime profile | None |
+| `${context.profile.resolved_at}` | Runs with a resolved runtime profile timestamp | None |
+| `${context.pushback.iteration}` | Steps re-executed after approval push-back | `DAG_PUSHBACK_ITERATION` |
+| `${context.pushback.previous_stdout_file}` | Rewound steps that had stdout before reset | `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` |
+
+Unknown fields under the `context` namespace are preserved at runtime. Inspection surfaces can report them with an `unknown_context_field` notice. Text outside supported Dagu-owned namespaces, such as `${not.a.supported.reference}`, is preserved as ordinary string content.
+
+Older workflows may still contain short built-in context aliases such as `${run.id}`, `${dag.name}`, `${paths.log_file}`, or `${step.name}`. These aliases remain supported only for the exact fields that existed before the `context` namespace was introduced. New workflows and documentation should use `${context.*}`. Dagu does not reserve arbitrary descendants of the short aliases, so text such as `${step.xxx.foo}` is not a built-in context reference.
+
+Webhook payloads, webhook headers, GitHub integration variables, and parameter JSON payloads are object-valued compatibility environment variables. They are not structured `${context.*}` string references.
 
 ## Availability
 
@@ -9,9 +50,9 @@ Dagu injects a small set of read-only environment variables whenever it runs a w
 - **Lifecycle handlers** – `onInit`, `onExit`, `onSuccess`, `onFailure`, `onAbort`, and `onWait` handlers inherit the same variables. They additionally receive the `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for approval.
 - **Nested contexts** – When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
 
-Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT_FILE`, and `DAG_RUN_STEP_STDERR_FILE` always point at whichever step (or handler) is currently running.
+Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT_FILE`, `DAG_RUN_STEP_STDERR_FILE`, and their matching `${context.paths.*}` references always point at whichever step or handler is currently running.
 
-## Reference
+## Environment Variable Reference
 
 | Variable | Provided In | Description | Example |
 |----------|-------------|-------------|---------|
@@ -21,13 +62,15 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STEP_NAME` | Current step or handler only | Name field of the step that is currently executing. | `upload-artifacts` |
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step or handler only | File path backing the step's captured stdout stream. | `/var/log/dagu/daily-backup/upload-artifacts.stdout.log` |
 | `DAG_RUN_STEP_STDERR_FILE` | Current step or handler only | File path backing the step's captured stderr stream. | `/var/log/dagu/daily-backup/upload-artifacts.stderr.log` |
+| `DAGU_OUTPUT_FILE` | Current step attempt when declared outputs can be written | File path used to publish declared step outputs. | `/var/log/dagu/daily-backup/upload-artifacts.output` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical status: `running` (init handler), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler). | `failed` |
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval. | `approval-step,review-step` |
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>` for `default` DAGs, or `<paths.docs_dir>/<workspace>/<dag name>` when the DAG has one valid `workspace=<name>` label. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/ops/daily-backup` |
-| `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
+| `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
+| `DAG_PARAMS_JSON` | All steps & handlers | Compatibility alias for `DAGU_PARAMS_JSON`. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
 | `DAG_PUSHBACK_ITERATION` | Steps re-executed after approval push-back only | Current push-back iteration as a plain integer string. Not set on the initial execution. | `2` |
 | `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` | Rewound steps that had stdout before reset | Absolute path to the previous stdout log for the current step. Dagu passes the path instead of inlining stdout because logs can be large. | `/var/log/dagu/report/draft.stdout.log` |
@@ -77,7 +120,7 @@ steps:
     run: make build   # PWD is /app/project
 
   - id: save_artifact
-    run: cp build/output.tar.gz "${env.DAG_RUN_WORK_DIR}/output.tar.gz"
+    run: cp build/output.tar.gz "${context.paths.work_dir}/output.tar.gz"
     depends:
       - build
 ```
@@ -163,13 +206,13 @@ tools:
 steps:
   - id: generate_report
     run: |
-      mkdir -p "${env.DAG_DOCS_DIR}"
-      uv run --python 3.13.9 python generate_report.py > "${env.DAG_DOCS_DIR}/report.md"
+      mkdir -p "${context.paths.docs_dir}"
+      uv run --python 3.13.9 python generate_report.py > "${context.paths.docs_dir}/report.md"
 ```
 
-## Parameter Payload (`DAG_PARAMS_JSON`)
+## Parameter Payload (`DAGU_PARAMS_JSON`)
 
-`DAG_PARAMS_JSON` contains the resolved parameters serialized as JSON. It is not set when the DAG has no parameters and none were supplied at runtime.
+`DAGU_PARAMS_JSON` contains the resolved parameters serialized as JSON. `DAG_PARAMS_JSON` is also set for compatibility. Neither variable is set when the DAG has no parameters and none were supplied at runtime.
 
 - Defaults declared in the DAG plus CLI/API overrides are merged into a single JSON object.
 - Resolved DAG params are serialized as strings, even when inline param definitions use `integer`, `number`, or `boolean` types.
@@ -179,13 +222,14 @@ steps:
 ```yaml
 steps:
   - id: inspect_params
-    run: echo "Full payload: ${env.DAG_PARAMS_JSON}"
+    run: |
+      printf '%s\n' "$DAGU_PARAMS_JSON"
   - id: read_environment
     action: jq.filter
     with:
       filter: '"Environment: \(.ENVIRONMENT // "dev")"'
       raw: true
-      data: ${env.DAG_PARAMS_JSON}
+      data: ${env.DAGU_PARAMS_JSON}
 ```
 
 ## Push-back Context (`DAG_PUSHBACK`)

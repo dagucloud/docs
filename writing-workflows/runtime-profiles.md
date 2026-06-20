@@ -231,5 +231,5 @@ Secret values are write-only. Profile responses include the secret entry key, ki
 
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Workflow Secrets](/writing-workflows/secrets)
-- [Runtime Variables](/writing-workflows/runtime-variables)
+- [Runtime Context and Variables](/writing-workflows/runtime-variables)
 - [Web UI Profiles](/web-ui/profiles)

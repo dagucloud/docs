@@ -175,17 +175,17 @@ Define handlers that run on specific events for all DAGs:
 # base.yaml
 handler_on:
   init:
-    run: echo "Starting DAG ${env.DAG_NAME}"
+    run: echo "Starting DAG ${context.dag.name}"
 
   success:
     run: |
       curl -X POST ${env.SLACK_WEBHOOK} \
-        -d '{"text":"${env.DAG_NAME} completed successfully"}'
+        -d '{"text":"${context.dag.name} completed successfully"}'
 
   failure:
     run: |
       curl -X POST ${env.SLACK_WEBHOOK} \
-        -d '{"text":"${env.DAG_NAME} failed! Run ID: ${env.DAG_RUN_ID}"}'
+        -d '{"text":"${context.dag.name} failed! Run ID: ${context.run.id}"}'
 
   exit:
     run: echo "Cleanup complete"
@@ -202,15 +202,15 @@ handler_on:
 | `exit` | Always runs on completion (cleanup) |
 | `wait` | DAG enters wait status (approval step pending) |
 
-**Special environment variables** available in handlers:
+**Built-in context and environment values** available in handlers:
 
-| Variable | Description |
+| Reference or variable | Description |
 |----------|-------------|
-| `DAG_NAME` | Name of the executing DAG |
-| `DAG_RUN_ID` | Unique identifier for this run |
-| `DAG_RUN_LOG_FILE` | Path to the log file |
-| `DAG_RUN_STATUS` | Current status (running, success, failed) |
-| `DAG_RUN_STEP_NAME` | Name of the handler step |
+| `${context.dag.name}` / `DAG_NAME` | Name of the executing DAG |
+| `${context.run.id}` / `DAG_RUN_ID` | Unique identifier for this run |
+| `${context.paths.log_file}` / `DAG_RUN_LOG_FILE` | Path to the log file |
+| `${context.run.status}` / `DAG_RUN_STATUS` | Current status for the handler surface |
+| `${context.step.name}` / `DAG_RUN_STEP_NAME` | Name of the handler step |
 
 ### Email Notifications
 
@@ -576,7 +576,7 @@ handler_on:
               "type": "section",
               "text": {
                 "type": "mrkdwn",
-                "text": "*DAG Failed*\nName: `${env.DAG_NAME}`\nRun ID: `${env.DAG_RUN_ID}`"
+                "text": "*DAG Failed*\nName: `${context.dag.name}`\nRun ID: `${context.run.id}`"
               }
             }
           ]
@@ -585,7 +585,7 @@ handler_on:
   exit:
     run: |
       # Cleanup temp files
-      rm -rf /tmp/dagu-${env.DAG_RUN_ID}-* 2>/dev/null || true
+      rm -rf /tmp/dagu-${context.run.id}-* 2>/dev/null || true
 
 # Email notifications
 smtp:
@@ -643,7 +643,7 @@ handler_on:
           "routing_key": "${env.PAGERDUTY_KEY}",
           "event_action": "trigger",
           "payload": {
-            "summary": "DAG ${env.DAG_NAME} failed",
+            "summary": "DAG ${context.dag.name} failed",
             "severity": "error",
             "source": "dagu"
           }

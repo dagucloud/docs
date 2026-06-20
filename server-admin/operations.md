@@ -340,12 +340,12 @@ handler_on:
       method: POST
       body: |
         {
-          "text": "Workflow Failed: ${env.DAG_NAME}",
+          "text": "Workflow Failed: ${context.dag.name}",
           "blocks": [{
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "*Run ID:* ${env.DAG_RUN_ID}"
+              "text": "*Run ID:* ${context.run.id}"
             }
           }]
         }
@@ -365,7 +365,7 @@ handler_on:
           "routing_key": "${env.PAGERDUTY_KEY}",
           "event_action": "trigger",
           "payload": {
-            "summary": "Failed: ${env.DAG_NAME}",
+            "summary": "Failed: ${context.dag.name}",
             "severity": "error"
           }
         }
@@ -385,7 +385,7 @@ Built-in forwarded variables:
 - Windows exact names: `USERPROFILE`, `SYSTEMROOT`, `WINDIR`, `SYSTEMDRIVE`, `COMSPEC`, `PATHEXT`, `TEMP`, `TMP`, `PATH`, `PSMODULEPATH`, `HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
 - Prefixes on all platforms: `DAGU_`, `DAG_`, `LC_`, `KUBERNETES_`
 
-Dagu also sets runtime variables with the `DAG_` prefix for each step execution:
+Dagu-managed runtime metadata is available through canonical `${context.*}` references in value-resolved workflow fields. Dagu also projects selected values with the `DAG_` prefix for each step execution:
 - `DAG_NAME`, `DAG_RUN_ID`, `DAG_RUN_STEP_NAME`
 - `DAG_RUN_LOG_FILE`, `DAG_RUN_STEP_STDOUT_FILE`, `DAG_RUN_STEP_STDERR_FILE`
 

@@ -2,7 +2,7 @@
 
 Dagu has two different kinds of variable syntax:
 
-- **Dagu value references** are scoped and validated: `${params.name}`, `${env.NAME}`, `${consts.name}`, and `${steps.step_id.outputs.name}`.
+- **Dagu value references** are scoped and validated: `${params.name}`, `${env.NAME}`, `${consts.name}`, `${steps.step_id.outputs.name}`, and `${context.run.id}`.
 - **Shell variables** are evaluated by the shell or another runtime after Dagu hands off the command: `$NAME`, `${NAME}`, `${NAME:-default}`, and similar shell forms.
 
 Use scoped references in examples where Dagu should validate the source of the value. Use shell syntax only when the shell is intentionally responsible for expansion.
@@ -101,7 +101,7 @@ Runtime overrides from the CLI, API, and sub-DAG calls stay literal.
 
 ## Parameter JSON Payload
 
-Every step receives the merged parameter payload through `DAG_PARAMS_JSON`. Use `${env.DAG_PARAMS_JSON}` when passing that JSON to a value-resolved action field.
+Every step receives the merged parameter payload through `DAGU_PARAMS_JSON`. `DAG_PARAMS_JSON` is also set for compatibility. Use `${env.DAGU_PARAMS_JSON}` when passing that JSON to a value-resolved action field.
 
 ```yaml
 params:
@@ -114,10 +114,26 @@ steps:
     with:
       filter: '"Environment: \(.environment // "dev")"'
       raw: true
-      data: ${env.DAG_PARAMS_JSON}
+      data: ${env.DAGU_PARAMS_JSON}
 ```
 
-Inside shell scripts, `$DAG_PARAMS_JSON` is also available as a process environment variable.
+Inside shell scripts, `$DAGU_PARAMS_JSON` is available as a process environment variable.
+
+## Built-In Run Context
+
+Use `${context.*}` for Dagu-managed metadata about the current run, attempt, step, trigger, path, profile, or push-back scope.
+
+```yaml
+handler_on:
+  failure:
+    run: |
+      notify-oncall \
+        --dag "${context.dag.name}" \
+        --run "${context.run.id}" \
+        --log "${context.paths.log_file}"
+```
+
+The matching `DAG_*` environment variables are still available for shell scripts. Prefer `${context.*}` in value-resolved YAML fields and `$DAG_*` when the script or subprocess should read its own environment.
 
 ## Step Outputs
 
@@ -199,11 +215,11 @@ steps:
 
 ## Legacy Forms
 
-Older workflows may still use unscoped variables such as `${FOO}` or legacy step references such as `${step.output}`. New documentation examples should prefer scoped references because they give Dagu enough structure to validate names and dependencies.
+Older workflows may still use unscoped variables such as `${FOO}`, legacy step references such as `${step.output}`, or frozen built-in context aliases such as `${run.id}`. New documentation examples should prefer scoped references such as `${env.NAME}`, `${steps.step_id.outputs.name}`, and `${context.run.id}` because they give Dagu enough structure to validate names, dependencies, and run-context fields.
 
 ## See Also
 
 - [Outputs](/writing-workflows/outputs)
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Parameters](/writing-workflows/parameters)
-- [Runtime Variables](/writing-workflows/runtime-variables)
+- [Runtime Context and Variables](/writing-workflows/runtime-variables)

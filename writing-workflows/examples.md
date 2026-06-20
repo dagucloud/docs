@@ -1131,18 +1131,18 @@ graph TD
 
 <div class="example-card">
 
-### Special Variables
+### Runtime Context
 
 ```yaml
 steps:
   - run: |
-      echo "DAG: ${env.DAG_NAME}"
-      echo "Run: ${env.DAG_RUN_ID}"
-      echo "Step: ${env.DAG_RUN_STEP_NAME}"
-      echo "Log: ${env.DAG_RUN_LOG_FILE}"
+      echo "DAG: ${context.dag.name}"
+      echo "Run: ${context.run.id}"
+      echo "Step: ${context.step.name}"
+      echo "Log: ${context.paths.log_file}"
 ```
 
-<a href="/writing-workflows/template-variables#special-environment-variables" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/runtime-variables" class="learn-more">Learn more →</a>
 
 </div>
 

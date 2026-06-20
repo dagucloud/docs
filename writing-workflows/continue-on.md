@@ -260,7 +260,7 @@ When a step with `continue_on` fails but the DAG continues, the final status is 
 ```yaml
 handler_on:
   success:
-    run: echo "DAG completed (status: ${env.DAG_RUN_STATUS})"  # partially_succeeded
+    run: echo "DAG completed (status: ${context.run.status})"  # partially_succeeded
 
 steps:
   - id: optional_step

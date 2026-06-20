@@ -579,9 +579,9 @@ DAGU_PORT=8080 dagu start-all --port 9000
 DAGU_HOME=/opt/dagu dagu --dagu-home=/tmp/dagu-test start my-workflow.yaml
 ```
 
-## Special Environment Variables
+## Runtime Context and Variables
 
-Dagu sets metadata like `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, and the active `DAG_RUN_STEP_NAME` while each workflow runs. Consult [Special Environment Variables](/writing-workflows/runtime-variables) for the full list and examples of how to use them in automations.
+Dagu exposes workflow metadata through canonical `${context.*}` references and shell-oriented environment projections such as `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, and `DAG_RUN_STEP_NAME`. Consult [Runtime Context and Variables](/writing-workflows/runtime-variables) for the full list and examples of how to use them in automations.
 
 ## Directory Structure
 

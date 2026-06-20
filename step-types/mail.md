@@ -118,22 +118,22 @@ handler_on:
     with:
       to: team@company.com
       from: dagu@company.com
-      subject: "Pipeline Success - ${env.DAG_NAME}"
+      subject: "Pipeline Success - ${context.dag.name}"
       message: |
         Pipeline completed successfully.
-        Run ID: ${env.DAG_RUN_ID}
-        Logs: ${env.DAG_RUN_LOG_FILE}
+        Run ID: ${context.run.id}
+        Logs: ${context.paths.log_file}
 
   failure:
     action: mail.send
     with:
       to: oncall@company.com
       from: alerts@company.com
-      subject: "Pipeline Failed - ${env.DAG_NAME}"
+      subject: "Pipeline Failed - ${context.dag.name}"
       message: |
         Pipeline failed.
-        Run ID: ${env.DAG_RUN_ID}
-        Check logs: ${env.DAG_RUN_LOG_FILE}
+        Run ID: ${context.run.id}
+        Check logs: ${context.paths.log_file}
 
 steps:
   - run: echo "Run your main tasks here"

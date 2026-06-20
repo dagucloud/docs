@@ -232,11 +232,11 @@ While `dagu exec` doesn't support lifecycle hook flags, you can define handlers 
 # ~/.config/dagu/base.yaml
 handler_on:
   failure:
-    run: 'curl -X POST https://alerts.example.com/webhook -d "dag ${env.DAG_NAME} failed"'
+    run: 'curl -X POST https://alerts.example.com/webhook -d "dag ${context.dag.name} failed"'
   success:
-    run: 'echo "Success: ${env.DAG_NAME}" >> /var/log/dagu-exec.log'
+    run: 'echo "Success: ${context.dag.name}" >> /var/log/dagu-exec.log'
   exit:
-    run: 'rm -f /tmp/${env.DAG_RUN_ID}.lock'
+    run: 'rm -f /tmp/${context.run.id}.lock'
 ```
 
 Every `dagu exec` command inherits these handlers automatically:
@@ -247,7 +247,7 @@ dagu exec -- python risky_script.py
 # The exit handler always runs regardless of success/failure
 ```
 
-Handlers receive the standard environment provided by Dagu, including variables such as `${env.DAG_NAME}`, `${env.DAG_RUN_ID}`, and `${env.DAG_RUN_LOG_FILE}`.
+Handlers receive the standard runtime context and environment provided by Dagu. Use `${context.dag.name}`, `${context.run.id}`, and `${context.paths.log_file}` in value-resolved handler fields, or use `$DAG_NAME`, `$DAG_RUN_ID`, and `$DAG_RUN_LOG_FILE` inside scripts that should read the process environment.
 
 See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) for complete documentation.
 

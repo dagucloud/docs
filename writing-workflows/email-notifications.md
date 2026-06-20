@@ -146,7 +146,7 @@ steps:
       attachments:
         - /reports/daily-${env.TODAY}.pdf
         - /reports/summary-${env.TODAY}.csv
-        - ${env.DAG_RUN_LOG_FILE}
+        - ${context.paths.log_file}
 ```
 
 ## Email Templates
@@ -167,12 +167,12 @@ steps:
     action: mail.send
     with:
       to: stakeholders@example.com
-      subject: "Processing Report - ${env.DAG_NAME}"
+      subject: "Processing Report - ${context.dag.name}"
       message: |
         Automated Report Generated
 
-        DAG: ${env.DAG_NAME}
-        Run ID: ${env.DAG_RUN_ID}
+        DAG: ${context.dag.name}
+        Run ID: ${context.run.id}
         Status: Completed
         Time: $(date)
 
@@ -193,22 +193,22 @@ handler_on:
         - oncall@example.com
         - alerts@example.com
       from: errors@example.com
-      subject: "DAG Failed: ${env.DAG_NAME}"
+      subject: "DAG Failed: ${context.dag.name}"
       message: |
         DAG Execution Failed
 
         Details:
-        - DAG: ${env.DAG_NAME}
-        - Run ID: ${env.DAG_RUN_ID}
+        - DAG: ${context.dag.name}
+        - Run ID: ${context.run.id}
         - Time: $(date)
         - Host: $(hostname)
 
         Error Summary:
-        $(tail -20 ${env.DAG_RUN_LOG_FILE} | grep -i error)
+        $(tail -20 ${context.paths.log_file} | grep -i error)
 
         Full log attached.
       attachments:
-        - ${env.DAG_RUN_LOG_FILE}
+        - ${context.paths.log_file}
 ```
 
 ## SMTP Providers

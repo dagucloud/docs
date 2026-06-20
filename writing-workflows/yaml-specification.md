@@ -82,7 +82,7 @@ handler_on:
     with:
       to: ops@example.com
       subject: "daily_report failed"
-      message: "See ${env.DAG_RUN_LOG_FILE}"
+      message: "See ${context.paths.log_file}"
 ```
 
 ## Top-Level Fields
@@ -628,8 +628,8 @@ handler_on:
     action: mail.send
     with:
       to: ops@example.com
-      subject: "${env.DAG_NAME} failed"
-      message: "See ${env.DAG_RUN_LOG_FILE}"
+      subject: "${context.dag.name} failed"
+      message: "See ${context.paths.log_file}"
   exit:
     run: ./cleanup.sh
 ```
@@ -1076,9 +1076,30 @@ steps:
     depends: get_config
 ```
 
-## Special Variables
+## Built-In Run Context and Runtime Variables
 
-Common runtime variables:
+Use `${context.*}` for Dagu-managed run metadata in value-resolved YAML fields. Dagu also projects selected values into process environment variables for scripts and tools.
+
+Common structured references:
+
+| Reference | Description |
+|----------|-------------|
+| `${context.dag.name}` | Current DAG name. |
+| `${context.run.id}` | Current DAG-run ID. |
+| `${context.run.status}` | Current status in lifecycle handlers and status-aware surfaces. |
+| `${context.attempt.id}` | Current DAG-run attempt ID. |
+| `${context.attempt.started_at}` | UTC timestamp for the current attempt start. |
+| `${context.step.name}` | Current step or handler name. |
+| `${context.trigger.type}` | Trigger type. |
+| `${context.paths.log_file}` | Path to the DAG-run log file. |
+| `${context.paths.work_dir}` | Per-run isolated work directory path. |
+| `${context.paths.artifacts_dir}` | Per-run artifact directory when artifacts are enabled. |
+| `${context.paths.docs_dir}` | Per-DAG docs directory when configured. |
+| `${context.paths.step_stdout_file}` | Current step stdout file path. |
+| `${context.paths.step_stderr_file}` | Current step stderr file path. |
+| `${context.paths.step_output_file}` | Current step output file path for declared outputs. |
+
+Common environment projections:
 
 | Variable | Description |
 |----------|-------------|
@@ -1090,9 +1111,11 @@ Common runtime variables:
 | `DAG_RUN_STEP_STDERR_FILE` | Current step stderr file path. |
 | `DAG_RUN_WORK_DIR` | Per-run isolated work directory path. |
 | `DAG_RUN_ARTIFACTS_DIR` | Per-run artifact directory when artifacts are enabled. |
+| `DAG_DOCS_DIR` | Per-DAG docs directory when configured. |
+| `DAGU_OUTPUT_FILE` | Current step output file path for declared outputs. |
 | `ITEM` | Current `parallel` item. |
 
-See [Runtime Variables](/writing-workflows/runtime-variables) for the full list.
+See [Runtime Context and Variables](/writing-workflows/runtime-variables) for the full list and compatibility notes.
 
 ## Complete Example
 
@@ -1188,7 +1211,7 @@ handler_on:
     with:
       to: data-team@example.com
       subject: "ETL failed - ${params.DATE}"
-      message: "Check logs at ${env.DAG_RUN_LOG_FILE}"
+      message: "Check logs at ${context.paths.log_file}"
       attach_logs: true
   exit:
     run: ./scripts/cleanup.sh "${params.DATE}"
