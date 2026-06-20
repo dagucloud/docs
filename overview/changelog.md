@@ -2,6 +2,301 @@
 
 For the full version history of Dagu, see the [releases page](https://github.com/dagucloud/dagu/releases).
 
+## v2.8.0 (2026-06-20)
+
+This release makes workflows easier to write, inspect, and run safely.
+
+This release improves value resolution, step outputs, runtime context, and shell execution. It also adds container support for `harness.run`, Podman runtime support for sandboxing, flexible Kanban views, and HTML artifact previews.
+
+Special thanks to [@iandvt](https://github.com/iandvt) for the Podman support and the containerized harness work. These changes make it much easier to run coding agents in a controlled container environment.
+
+### Added
+
+#### Harness steps can now run in containers
+
+Contributed by [@iandvt](https://github.com/iandvt).
+
+`harness.run` can now run CLI providers inside `container:`. This works with providers such as `claude`, `codex`, `copilot`, and `opencode`. It also works with custom harness providers.
+
+Use this when an agent needs a fixed toolchain, explicit mounts, limited credentials, or a separate network setup.
+
+```yaml
+container:
+  image: ghcr.io/acme/dagu-agent-runner:latest
+  volumes:
+    - .:/workspace:rw
+  working_dir: /workspace
+
+steps:
+  - name: Test
+    run: go test ./...
+
+  - name: Fix with Codex
+    action: harness.run
+    with:
+      provider: codex
+      prompt: "Fix the failing tests and keep the patch minimal"
+      sandbox: workspace-write
+```
+
+The container is the outer execution boundary. Provider-specific options, such as Codex's `sandbox` flag, are still passed to the provider CLI.
+
+Notes:
+
+- The provider CLI must exist inside the container image.
+- `provider: builtin` does not run in a container.
+- Containerized harness steps do not support stdin-based prompt mode.
+- Custom providers should use `prompt_mode: arg` or `prompt_mode: flag`.
+
+#### Podman is now supported
+
+Contributed by [@iandvt](https://github.com/iandvt).
+
+Dagu can now use Podman through its Docker-compatible API.
+
+The same runtime setting applies to root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`.
+
+```sh
+DAGU_CONTAINER_RUNTIME=podman \
+DAGU_PODMAN_HOST=unix:///run/user/1000/podman/podman.sock \
+dagu start-all
+```
+
+These settings come from the Dagu process environment. They are not DAG YAML fields. A workflow cannot switch the runtime by setting `DAGU_CONTAINER_RUNTIME` inside `env:`.
+
+#### Step outputs are now first-class
+
+Steps can publish named outputs through `$DAGU_OUTPUT_FILE`. Later steps can read them with `${steps.<id>.outputs.<name>}`.
+
+```yaml
+steps:
+  - id: build
+    run: |
+      printf 'image_tag=v1.2.3\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: image_tag
+
+  - id: deploy
+    depends: build
+    env:
+      IMAGE_TAG: ${steps.build.outputs.image_tag}
+    run: ./deploy.sh "$IMAGE_TAG"
+```
+
+This gives workflows a clear way to pass values between steps. It avoids parsing stdout or logs for data flow.
+
+#### Value resolution is more predictable
+
+Dagu now has clearer rules for references such as:
+
+- `${params.name}`
+- `${env.NAME}`
+- `${steps.build.outputs.image_tag}`
+- `${context.run.id}`
+
+If a reference cannot be resolved, Dagu preserves it as text. Validation and the Web UI can show a passive notice. Normal run logs stay quiet.
+
+#### Runtime context is available through `${context.*}`
+
+Workflows can read stable run metadata without relying on internal paths or host environment details.
+
+```yaml
+steps:
+  - id: notify
+    run: notify.sh '${context.dag.name}' '${context.run.id}'
+```
+
+This includes values such as the DAG name, run ID, step name, log path, artifact directory, and output file path.
+
+Use this instead:
+
+### Other improvements
+
+- Added `${context.*}` references for common run metadata, including DAG name, run ID, step name, log paths, artifact paths, and output file paths.
+- Clarified `run` behavior: single-line values run as shell commands, lists run in order, and multiline values run as scripts.
+- Added inline preview for `.html` and `.htm` artifacts in the Web UI, with raw mode available.
+- Added saved views to the Overview page. Views can store filters such as workspace, labels, DAG name, and time range.
+- Container volume sources can now use environment variables.
+- Container cleanup is more reliable.
+- Fixed local sub-DAG retry status handling.
+- Scoped DAG detail SSE updates more accurately to the selected remote node.
+
+### Fixed
+
+- fix: make value resolution misses warning-only ([#2287](https://github.com/dagucloud/dagu/pull/2287)) [@yohamta0](https://github.com/yohamta0)
+- chore(deps): bump the ui-security group across 1 directory with 2 updates ([#2289](https://github.com/dagucloud/dagu/pull/2289)) [@dependabot](https://github.com/dependabot)
+- fix: scope DAG detail remote node for SSE ([#2291](https://github.com/dagucloud/dagu/pull/2291)) [@yohamta0](https://github.com/yohamta0)
+- fix: avoid duplicate container cleanup ([#2297](https://github.com/dagucloud/dagu/pull/2297)) [@yohamta0](https://github.com/yohamta0)
+- fix: repair stale local subdag retry status ([#2301](https://github.com/dagucloud/dagu/pull/2301)) [@yohamta0](https://github.com/yohamta0)
+- test: add value resolution conformance coverage ([#2305](https://github.com/dagucloud/dagu/pull/2305)) [@yohamta0](https://github.com/yohamta0)
+
+### Acknowledgements
+
+Thank you to [@iandvt](https://github.com/iandvt) for the Podman runtime support and the containerized harness work. This is a major improvement for users who run coding agents through Dagu and need tighter control over the execution environment.
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| bug: subdag still shows running after unexpected restart of dagu container ([#2298](https://github.com/dagucloud/dagu/issues/2298)) | [@Kirandeep-Singh-Khehra](https://github.com/Kirandeep-Singh-Khehra) (report) |
+| chore(deps): bump tar from 7.5.13 to 7.5.16 in /npm/dagu in the npm_and_yarn group across 1 directory ([#2288](https://github.com/dagucloud/dagu/pull/2288)), chore(deps): bump the ui-security group across 1 directory with 2 updates ([#2289](https://github.com/dagucloud/dagu/pull/2289)), chore(deps): bump the ui-security group across 1 directory with 3 updates ([#2295](https://github.com/dagucloud/dagu/pull/2295)) | [@dependabot](https://github.com/dependabot) |
+| feat(runtime): service-selected Docker/Podman container runtime ([#2293](https://github.com/dagucloud/dagu/pull/2293)) | [@iandvt](https://github.com/iandvt) |
+
+### New Contributors
+
+- [@iandvt](https://github.com/iandvt) made their first contribution in [#2293](https://github.com/dagucloud/dagu/pull/2293).
+
+**Full Changelog**: [v2.7.17...v2.8.0](https://github.com/dagucloud/dagu/compare/v2.7.17...v2.8.0)
+
+## v2.7.17 (2026-06-16)
+
+This release includes performance improvements for coordinator processes regarding CPU and file I/O.
+
+### Changed
+
+- test: add workflow spec blackbox coverage ([#2282](https://github.com/dagucloud/dagu/pull/2282)) [@yohamta0](https://github.com/yohamta0)
+- refactor: define value resolution rules ([#2285](https://github.com/dagucloud/dagu/pull/2285)) [@yohamta0](https://github.com/yohamta0)
+
+### Fixed
+
+- fix: index dispatch task polling ([#2283](https://github.com/dagucloud/dagu/pull/2283)) [@yohamta0](https://github.com/yohamta0)
+- fix: add durable dispatch admission ([#2284](https://github.com/dagucloud/dagu/pull/2284)) [@yohamta0](https://github.com/yohamta0)
+- fix: update Go patch version and golangci-lint ([#2286](https://github.com/dagucloud/dagu/pull/2286)) [@yohamta0](https://github.com/yohamta0)
+
+**Full Changelog**: [v2.7.16...v2.7.17](https://github.com/dagucloud/dagu/compare/v2.7.16...v2.7.17)
+
+## v2.7.16 (2026-06-12)
+
+### Fixed
+
+- fix: preserve child subdag state on parent retry ([#2281](https://github.com/dagucloud/dagu/pull/2281)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| query: Change in subdag retry behavior ([#2279](https://github.com/dagucloud/dagu/issues/2279)) | [@Kirandeep-Singh-Khehra](https://github.com/Kirandeep-Singh-Khehra) (report) |
+
+**Full Changelog**: [v2.7.15...v2.7.16](https://github.com/dagucloud/dagu/compare/v2.7.15...v2.7.16)
+
+## v2.7.15 (2026-06-11)
+
+### Added
+
+- feat: RPC fallback for missing DAG definitions on workers ([#2271](https://github.com/dagucloud/dagu/pull/2271)) [@four-bytes-robby](https://github.com/four-bytes-robby)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| feat: RPC fallback for missing DAG definitions on workers ([#2271](https://github.com/dagucloud/dagu/pull/2271)) | [@four-bytes-robby](https://github.com/four-bytes-robby) |
+| feat: RPC fallback for missing DAG definitions on workers ([#2259](https://github.com/dagucloud/dagu/issues/2259)) | [@four-bytes-robby](https://github.com/four-bytes-robby) (report) |
+
+**Full Changelog**: [v2.7.14...v2.7.15](https://github.com/dagucloud/dagu/compare/v2.7.14...v2.7.15)
+
+## v2.7.14 (2026-06-10)
+
+### Fixed
+
+- fix(cmd): preserve spaced dash params ([#2276](https://github.com/dagucloud/dagu/pull/2276)) [@mmlngl](https://github.com/mmlngl)
+- fix: bound scheduler latest status lookup ([#2278](https://github.com/dagucloud/dagu/pull/2278)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| memory leak - high memory usage ([#546](https://github.com/dagucloud/dagu/issues/546)) | [@helmut72](https://github.com/helmut72) (report) |
+| fix(cmd): preserve spaced dash params ([#2276](https://github.com/dagucloud/dagu/pull/2276)) | [@mmlngl](https://github.com/mmlngl) |
+| bug: string params with spaces after -- are split incorrectly ([#2275](https://github.com/dagucloud/dagu/issues/2275)) | [@mmlngl](https://github.com/mmlngl) (report) |
+
+### New Contributors
+
+- [@mmlngl](https://github.com/mmlngl) made their first contribution in [#2276](https://github.com/dagucloud/dagu/pull/2276).
+
+**Full Changelog**: [v2.7.13...v2.7.14](https://github.com/dagucloud/dagu/compare/v2.7.13...v2.7.14)
+
+## v2.7.13 (2026-06-08)
+
+### Fixed
+
+- Fixed an issue where the scheduler could use excessive memory and CPU as DAG run history grew.
+- Improved scheduler stability for instances that run many scheduled workflows over time.
+
+**Full Changelog**: [v2.7.12...v2.7.13](https://github.com/dagucloud/dagu/compare/v2.7.12...v2.7.13)
+
+## v2.7.12 (2026-06-07)
+
+### Added
+
+- feat: add layered runtime profile defaults ([#2270](https://github.com/dagucloud/dagu/pull/2270)) [@yohamta0](https://github.com/yohamta0)
+
+**Full Changelog**: [v2.7.11...v2.7.12](https://github.com/dagucloud/dagu/compare/v2.7.11...v2.7.12)
+
+## v2.7.11 (2026-06-06)
+
+### Fixed
+
+- fix: resolve scheduler no-eval env before subprocess launch ([#2269](https://github.com/dagucloud/dagu/pull/2269)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| bug: Scheduler-dispatched DAG runs use un-evaluated env from WithoutEval() metadata cache ([#2268](https://github.com/dagucloud/dagu/issues/2268)) | [@fidecastro](https://github.com/fidecastro) (report) |
+
+**Full Changelog**: [v2.7.10...v2.7.11](https://github.com/dagucloud/dagu/compare/v2.7.10...v2.7.11)
+
+## v2.7.10 (2026-06-05)
+
+### Fixed
+
+- executor: fix nil pointer when sub-DAG not in worker local store ([#2258](https://github.com/dagucloud/dagu/pull/2258)) [@four-bytes-robby](https://github.com/four-bytes-robby)
+- fix: pre-filter retry scanner DAG runs at index level ([#2261](https://github.com/dagucloud/dagu/issues/2261)) ([#2262](https://github.com/dagucloud/dagu/pull/2262)) [@four-bytes-robby](https://github.com/four-bytes-robby)
+- fix: preserve step working dir on retry ([#2264](https://github.com/dagucloud/dagu/pull/2264)) [@yohamta0](https://github.com/yohamta0)
+- fix: preserve retry params for dotenv resolution ([#2267](https://github.com/dagucloud/dagu/pull/2267)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| bug: re-tries loosing parameter value ([#2265](https://github.com/dagucloud/dagu/issues/2265)) | [@KIC](https://github.com/KIC) (report) |
+| bug: DAG run fails on retry. ([#2263](https://github.com/dagucloud/dagu/issues/2263)) | [@Kirandeep-Singh-Khehra](https://github.com/Kirandeep-Singh-Khehra) (report) |
+| executor: fix nil pointer when sub-DAG not in worker local store ([#2258](https://github.com/dagucloud/dagu/pull/2258)), fix: pre-filter retry scanner DAG runs at index level ([#2261](https://github.com/dagucloud/dagu/issues/2261)) ([#2262](https://github.com/dagucloud/dagu/pull/2262)) | [@four-bytes-robby](https://github.com/four-bytes-robby) |
+| coordinator: nil pointer panic when orchestrator DAG (dag.run) dispatched to remote worker via default_execution_mode: distributed ([#2257](https://github.com/dagucloud/dagu/issues/2257)), [FIX] Memory leak: RetryScanner loads all DAG runs into memory before filtering by status ([#2261](https://github.com/dagucloud/dagu/issues/2261)) | [@four-bytes-robby](https://github.com/four-bytes-robby) (report) |
+
+### New Contributors
+
+- [@four-bytes-robby](https://github.com/four-bytes-robby) made their first contribution in [#2258](https://github.com/dagucloud/dagu/pull/2258).
+
+**Full Changelog**: [v2.7.9...v2.7.10](https://github.com/dagucloud/dagu/compare/v2.7.9...v2.7.10)
+
+## v2.7.9 (2026-06-03)
+
+### Fixed
+
+- fix: improve mobile dag run detail layout ([#2255](https://github.com/dagucloud/dagu/pull/2255)) [@yohamta0](https://github.com/yohamta0)
+- fix: isolate parent exit watcher environment ([#2256](https://github.com/dagucloud/dagu/pull/2256)) [@yohamta0](https://github.com/yohamta0)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| signal: killed ([#2253](https://github.com/dagucloud/dagu/issues/2253)) | [@lehy786](https://github.com/lehy786) (report) |
+
 ## v2.7.8 (2026-06-03)
 
 ### Added
@@ -19,7 +314,9 @@ Thanks to our contributors for this release:
 
 | Contribution | Contributor |
 | --- | --- |
-| fix: require DAG write permission for inline specs ([#2250](https://github.com/dagucloud/dagu/issues/2250)) | [@YHalo-wyh](https://github.com/YHalo-wyh) (report) |
+| fix: require DAG write permission for inline specs ([#2250](https://github.com/dagucloud/dagu/pull/2250)) | [@YHalo-wyh](https://github.com/YHalo-wyh) (report) |
+
+**Full Changelog**: [v2.7.7...v2.7.8](https://github.com/dagucloud/dagu/compare/v2.7.7...v2.7.8)
 
 ## v2.7.7 (2026-06-01)
 
@@ -37,6 +334,8 @@ Thanks to our contributors for this release:
 | Contribution | Contributor |
 | --- | --- |
 | bug: zombie processes accumulation in containers ([#2237](https://github.com/dagucloud/dagu/issues/2237)) | [@frafra](https://github.com/frafra) (report) |
+
+**Full Changelog**: [v2.7.6...v2.7.7](https://github.com/dagucloud/dagu/compare/v2.7.6...v2.7.7)
 
 ## v2.7.6 (2026-06-01)
 
@@ -66,7 +365,11 @@ Thanks to our contributors for this release:
 | fix(dag): propagate runtime params in distributed queue dispatch ([#2238](https://github.com/dagucloud/dagu/pull/2238)) | [@mingfang](https://github.com/mingfang) |
 | refactor: separate dispatch and launcher from engine core ([#2233](https://github.com/dagucloud/dagu/pull/2233)), feat: add builtin agent harness provider ([#2236](https://github.com/dagucloud/dagu/pull/2236)), test: cover distributed queued runtime params ([#2242](https://github.com/dagucloud/dagu/pull/2242)) | [@yohamta0](https://github.com/yohamta0) |
 
+**Full Changelog**: [v2.7.5...v2.7.6](https://github.com/dagucloud/dagu/compare/v2.7.5...v2.7.6)
+
 ## v2.7.5 (2026-05-30)
+
+This release mostly focuses on security improvements and bug fixes.
 
 ### Added
 
@@ -96,6 +399,12 @@ Thanks to our contributors for this release:
 | [BUG] cleanup_tmpfiles in installer.sh does not clear tmp dir ([#2001](https://github.com/dagucloud/dagu/issues/2001)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
 | fix: track temp files via registry file instead of subshell-local array ([#2198](https://github.com/dagucloud/dagu/pull/2198)) | [@kuishou68](https://github.com/kuishou68) |
 | fix(core): serialize Container.Env so container.env: vars appear in step output ([#2231](https://github.com/dagucloud/dagu/pull/2231)) | [@mingfang](https://github.com/mingfang) |
+
+### New Contributors
+
+- [@mingfang](https://github.com/mingfang) made their first contribution in [#2231](https://github.com/dagucloud/dagu/pull/2231).
+
+**Full Changelog**: [v2.7.4...v2.7.5](https://github.com/dagucloud/dagu/compare/v2.7.4...v2.7.5)
 
 ## v2.7.4 (2026-05-22)
 
@@ -132,6 +441,45 @@ Thanks to our contributors for this release:
 | chore(deps): bump the ui-security group across 1 directory with 3 updates ([#2182](https://github.com/dagucloud/dagu/pull/2182)) | [@dependabot](https://github.com/dependabot) |
 | fix(mail): forward cfg.Attachments to the mailer instead of an empty slice ([#2190](https://github.com/dagucloud/dagu/pull/2190)) | [@bitsmashtrader](https://github.com/bitsmashtrader) |
 | Zombie detector false-positive: child-agent heartbeat stalls >90s under concurrent dispatch + long SSH steps (2.6.10) ([#2189](https://github.com/dagucloud/dagu/issues/2189)) | [@JonBasse](https://github.com/JonBasse) (report) |
+
+### New Contributors
+
+- [@bitsmashtrader](https://github.com/bitsmashtrader) made their first contribution in [#2190](https://github.com/dagucloud/dagu/pull/2190).
+
+**Full Changelog**: [v2.7.3...v2.7.4](https://github.com/dagucloud/dagu/compare/v2.7.3...v2.7.4)
+
+## v2.7.3 (2026-05-19)
+
+This is a minor bug fix release.
+
+### Added
+
+- feat: add LINE bot integration ([#2177](https://github.com/dagucloud/dagu/pull/2177)) [@yohamta0](https://github.com/yohamta0)
+
+### Fixed
+
+- fix: clean up upgrade version output spacing ([#2175](https://github.com/dagucloud/dagu/pull/2175)) [@yohamta0](https://github.com/yohamta0)
+- fix: repair git sync shallow pulls ([#2176](https://github.com/dagucloud/dagu/pull/2176)) [@yohamta0](https://github.com/yohamta0)
+
+**Full Changelog**: [v2.7.2...v2.7.3](https://github.com/dagucloud/dagu/compare/v2.7.2...v2.7.3)
+
+## v2.7.2 (2026-05-18)
+
+### Fixed
+
+- fix(ui): omit empty schema params so eval-backed defaults resolve ([#2173](https://github.com/dagucloud/dagu/pull/2173)) [@kriyanshii](https://github.com/kriyanshii)
+- fix: restore mermaid graph interactions ([#2174](https://github.com/dagucloud/dagu/pull/2174)) [@yottahmd](https://github.com/yottahmd)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution | Contributor |
+| --- | --- |
+| fix(ui): omit empty schema params so eval-backed defaults resolve ([#2173](https://github.com/dagucloud/dagu/pull/2173)) | [@kriyanshii](https://github.com/kriyanshii) |
+| param eval unexpected behavior ([#2032](https://github.com/dagucloud/dagu/issues/2032)) | [@pommetjehorlepiep](https://github.com/pommetjehorlepiep) (report) |
+
+**Full Changelog**: [v2.7.1...v2.7.2](https://github.com/dagucloud/dagu/compare/v2.7.1...v2.7.2)
 
 ## v2.7.1 (2026-05-18)
 
@@ -227,6 +575,8 @@ Thanks to our contributors for this release:
 ## Acknowledgements
 
 Special thanks to the [aquaproj](https://github.com/aquaproj) project and [aqua](https://github.com/aquaproj/aqua). Dagu v2.7.0’s new DAG-level `tools` feature uses aqua internally to install pinned CLI tools reproducibly.
+
+**Full Changelog**: [v2.6.10...v2.7.1](https://github.com/dagucloud/dagu/compare/v2.6.10...v2.7.1)
 
 ## v2.6.8 (2026-05-10)
 
