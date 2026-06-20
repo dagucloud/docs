@@ -95,7 +95,7 @@ The `messages` field lives under step `with` and contains the session messages.
 | Field | Description |
 |-------|-------------|
 | `role` | `system`, `user`, or `assistant` |
-| `content` | Message text (supports `${VAR}` substitution) |
+| `content` | Message text (supports scoped value references) |
 
 ## DAG-Level Configuration
 
@@ -174,7 +174,7 @@ steps:
 
 ### Variable Substitution
 
-Message content supports variable substitution with `${VAR}` syntax:
+Message content supports scoped value references:
 
 ```yaml
 params:
@@ -189,7 +189,7 @@ steps:
       messages:
         - role: user
           content: |
-            Explain ${TOPIC} in ${LANGUAGE}.
+            Explain ${params.TOPIC} in ${params.LANGUAGE}.
 ```
 
 ### Multi-turn Session
@@ -308,7 +308,7 @@ steps:
     output: CHAT_RESPONSE
 
   - id: extract_name
-    run: echo "${CHAT_RESPONSE}" | jq '.name'
+    run: echo "${steps.generate_json.outputs.CHAT_RESPONSE}" | jq '.name'
     depends: generate_json
 ```
 
@@ -390,6 +390,9 @@ Use a chat step to classify input, then route based on the response:
 ```yaml
 type: graph
 
+params:
+  - USER_REQUEST: "The app crashes on startup"
+
 steps:
   - id: classify
     action: chat.completion
@@ -401,13 +404,13 @@ steps:
       messages:
         - role: user
           content: |
-            ${USER_REQUEST}
+            ${params.USER_REQUEST}
     output: TYPE
 
   - id: route
     action: router.route
     with:
-      value: ${TYPE}
+      value: ${steps.classify.outputs.TYPE}
       routes:
         "bug": [handle_bug]
         "feature": [handle_feature]
@@ -424,7 +427,7 @@ steps:
       messages:
         - role: user
           content: |
-            ${USER_REQUEST}
+            ${params.USER_REQUEST}
 
   - id: handle_feature
     action: chat.completion
@@ -436,7 +439,7 @@ steps:
       messages:
         - role: user
           content: |
-            ${USER_REQUEST}
+            ${params.USER_REQUEST}
 
   - id: handle_question
     action: chat.completion
@@ -448,7 +451,7 @@ steps:
       messages:
         - role: user
           content: |
-            ${USER_REQUEST}
+            ${params.USER_REQUEST}
 ```
 
 The `classify` step analyzes the request and outputs a category. The router then executes only the matching handler.
@@ -594,10 +597,10 @@ steps:
       messages:
         - role: user
           content: |
-            Check if this token is valid: ${API_TOKEN}
+            Check if this token is valid: ${env.API_TOKEN}
 ```
 
-The `${API_TOKEN}` value is substituted in the message content, but the actual secret is replaced with `*******` before being sent to the LLM provider. The saved session history retains the original content for debugging.
+The `${env.API_TOKEN}` value is substituted in the message content, but the actual secret is replaced with `*******` before being sent to the LLM provider. The saved session history retains the original content for debugging.
 
 ## Notes
 

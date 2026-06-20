@@ -26,7 +26,7 @@ steps:
         }
 
   - id: print
-    run: echo "release tag is ${compute.outputs.result.tag}"
+    run: echo "result=${steps.compute.outputs.result}"
     depends: compute
 ```
 
@@ -48,4 +48,3 @@ steps:
 
 - [Official Dagu Actions](/dagu-actions/official)
 - [Action Package Execution](/dagu-actions/execution-model)
-

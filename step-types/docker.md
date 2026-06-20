@@ -174,7 +174,7 @@ container:
   platform: linux/amd64       # Target platform
   env:
     - MY_VAR=value
-    - API_KEY=${API_KEY}      # From host environment
+    - API_KEY=${env.API_KEY}
   volumes:
     - ./data:/data            # Bind mount
     - /host/path:/container/path:ro
@@ -416,7 +416,7 @@ Instead of duplicating the `container`, `env`, `retry_policy`, `preconditions`, 
 
 ## Variable Expansion
 
-Use `${VAR}` syntax in container fields to expand DAG-level environment variables:
+Use scoped references in container fields to expand DAG-level environment variables:
 
 ```yaml
 env:
@@ -424,9 +424,9 @@ env:
   - VOLUME_PATH: /data
 
 container:
-  image: alpine:${IMAGE_TAG}
+  image: alpine:${env.IMAGE_TAG}
   volumes:
-    - ${VOLUME_PATH}:/mnt
+    - ${env.VOLUME_PATH}:/mnt
 
 steps:
   - run: cat /etc/alpine-release
@@ -478,16 +478,16 @@ steps:
 
 Access private container registries with authentication configured at the DAG level.
 
-`${VAR}` references in `registry_auths` fields expand only DAG-scoped variables (`env:`, `params:`, `secrets:`, step outputs). OS environment variables are **not** expanded — define them in the `env:` block first.
+Scoped references in `registry_auths` fields expand DAG-scoped values. OS environment variables are **not** expanded directly. Define them in the `env:` block first.
 
 ```yaml
 registry_auths:
   docker.io:
-    username: ${DOCKER_USERNAME}
-    password: ${DOCKER_PASSWORD}
+    username: ${env.DOCKER_USERNAME}
+    password: ${env.DOCKER_PASSWORD}
   ghcr.io:
-    username: ${GITHUB_USER}
-    password: ${GITHUB_TOKEN}
+    username: ${env.GITHUB_USER}
+    password: ${env.GITHUB_TOKEN}
 
 container:
   image: ghcr.io/myorg/private-app:latest
@@ -503,8 +503,8 @@ steps:
 ```yaml
 registry_auths:
   docker.io:
-    username: ${DOCKER_USERNAME}
-    password: ${DOCKER_PASSWORD}
+    username: ${env.DOCKER_USERNAME}
+    password: ${env.DOCKER_PASSWORD}
 ```
 
 **Pre-encoded authentication:**
@@ -512,13 +512,13 @@ registry_auths:
 ```yaml
 registry_auths:
   gcr.io:
-    auth: ${GCR_AUTH_BASE64}  # base64(username:password)
+    auth: ${env.GCR_AUTH_BASE64}  # base64(username:password)
 ```
 
 **Environment variable:**
 
 ```yaml
-registry_auths: ${DOCKER_AUTH_CONFIG}
+registry_auths: ${env.DOCKER_AUTH_CONFIG}
 ```
 
 The `DOCKER_AUTH_CONFIG` format is compatible with Docker's `~/.docker/config.json`.
@@ -534,11 +534,11 @@ The `DOCKER_AUTH_CONFIG` format is compatible with Docker's `~/.docker/config.js
 ```yaml
 registry_auths:
   docker.io:
-    username: ${DOCKERHUB_USER}
-    password: ${DOCKERHUB_TOKEN}
+    username: ${env.DOCKERHUB_USER}
+    password: ${env.DOCKERHUB_TOKEN}
   ghcr.io:
-    username: ${GITHUB_USER}
-    password: ${GITHUB_TOKEN}
+    username: ${env.GITHUB_USER}
+    password: ${env.GITHUB_TOKEN}
 
 steps:
   - id: process
@@ -655,7 +655,7 @@ steps:
     with:
       dag: run-tests
       params:
-        IMAGE: ${ITEM}
+        IMAGE: ${env.ITEM}
 ---
 name: run-tests
 
@@ -665,45 +665,37 @@ params:
 steps:
   - name: test
     container:
-      image: ${IMAGE}
+      image: ${params.IMAGE}
     run: python -m pytest tests/
 ```
 
-For object items (e.g., different image and platform per run), use `${ITEM.field}` references:
+For a platform matrix, pass the selected platform string as the item value:
 
 ```yaml
 steps:
   - name: build-targets
     parallel:
       items:
-        - image: golang:1.22
-          platform: linux/amd64
-          output: app-amd64
-        - image: golang:1.22
-          platform: linux/arm64
-          output: app-arm64
+        - linux/amd64
+        - linux/arm64
       max_concurrent: 2
     action: dag.run
     with:
       dag: build-target
       params:
-        IMAGE: ${ITEM.image}
-        PLATFORM: ${ITEM.platform}
-        OUTPUT: ${ITEM.output}
+        PLATFORM: ${env.ITEM}
 ---
 name: build-target
 
 params:
-  - IMAGE: ""
   - PLATFORM: ""
-  - OUTPUT: ""
 
 steps:
   - name: build
     container:
-      image: ${IMAGE}
-      platform: ${PLATFORM}
-    run: go build -o ${OUTPUT}
+      image: golang:1.22
+      platform: ${params.PLATFORM}
+    run: go build ./...
 ```
 
 See [parallel.items](/writing-workflows/execution-control#parallel-execution) for full fan-out options.

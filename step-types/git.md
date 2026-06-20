@@ -89,7 +89,7 @@ steps:
       repository: https://github.com/example/private-repo.git
       ref: main
       path: ./repos/private-repo
-      token: ${GITHUB_TOKEN}
+      token: ${env.GITHUB_TOKEN}
 ```
 
 ### HTTPS Username and Password
@@ -107,7 +107,7 @@ steps:
       repository: https://git.example.com/team/repo.git
       path: ./repos/repo
       username: deploy
-      password: ${GIT_PASSWORD}
+      password: ${env.GIT_PASSWORD}
 ```
 
 ### SSH Key
@@ -144,7 +144,7 @@ Use `ssh_passphrase` when the private key is encrypted.
 
 ## Output
 
-The action writes a JSON result to stdout. Capture it with `output:` when later steps need the resolved commit.
+The action publishes a JSON result. Later steps can read fields through the checkout step's declared outputs.
 
 ```yaml
 steps:
@@ -154,10 +154,9 @@ steps:
       repository: https://github.com/example/app.git
       ref: main
       path: ./repos/app
-    output: CHECKOUT
 
   - id: print_commit
-    run: echo "Checked out ${CHECKOUT.commit}"
+    run: echo "Checked out ${steps.checkout_source.outputs.commit}"
     depends: checkout_source
 ```
 

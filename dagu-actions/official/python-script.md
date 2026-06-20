@@ -30,7 +30,7 @@ steps:
         }
 
   - id: print
-    run: echo "major version is ${compute.outputs.result.major}"
+    run: echo "result=${steps.compute.outputs.result}"
     depends: compute
 ```
 

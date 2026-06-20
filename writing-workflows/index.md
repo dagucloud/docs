@@ -25,7 +25,7 @@ env:                       # Environment variables
   - DATA_DIR: /tmp/data
 
 steps:                     # Workflow steps
-  - run: echo "Processing ${ENVIRONMENT} for date ${DATE} with batch ${BATCH_SIZE}"
+  - run: echo "Processing ${params.ENVIRONMENT} for date ${env.DATE} with batch ${params.BATCH_SIZE}"
 ```
 
 Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
@@ -56,12 +56,14 @@ Share common settings across all DAGs using base configuration:
 env:
   - LOG_LEVEL: info
   - AWS_REGION: us-east-1
+  - SMTP_USER: ${SMTP_USER}
+  - SMTP_PASS: ${SMTP_PASS}
 
 smtp:
   host: smtp.company.com
   port: "587"
-  username: ${SMTP_USER}
-  password: ${SMTP_PASS}
+  username: ${env.SMTP_USER}
+  password: ${env.SMTP_PASS}
 
 error_mail:
   from: alerts@company.com
@@ -185,37 +187,36 @@ params:
 
 env:
   - DATE: "`date +%Y-%m-%d`"
-  - DATA_DIR: /tmp/data/${DATE}
+  - DATA_DIR: /tmp/data/${env.DATE}
 
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
   - id: download
-    run: aws s3 cp s3://bucket/${DATE}.csv ${DATA_DIR}/
+    run: aws s3 cp "s3://bucket/${env.DATE}.csv" "${env.DATA_DIR}/"
     retry_policy:
       limit: 3
       interval_sec: 60
 
   - id: validate
-    run: uv run --python 3.13.9 python validate.py ${DATA_DIR}/${DATE}.csv --env=${ENVIRONMENT} --dry-run=${DRY_RUN}
+    run: uv run --python 3.13.9 python validate.py "${env.DATA_DIR}/${env.DATE}.csv" --env="${params.ENVIRONMENT}" --dry-run="${params.DRY_RUN}"
     continue_on:
       failure: false
     depends: download
 
   - id: process
     parallel: [users, orders, products]
-    run: uv run --python 3.13.9 python process.py --type=$ITEM --date=${DATE}
-    output: RESULT_${ITEM}
+    run: uv run --python 3.13.9 python process.py --type="${env.ITEM}" --date="${env.DATE}"
     depends: validate
 
   - id: report
-    run: uv run --python 3.13.9 python report.py --date=${DATE}
+    run: uv run --python 3.13.9 python report.py --date="${env.DATE}"
     depends: process
 
 handler_on:
   failure:
-    run: echo "Notifying failure for ${DATE}"
+    run: echo "Notifying failure for ${env.DATE}"
 ```
 
 ## Common Patterns
@@ -242,11 +243,14 @@ steps:
     with:
       dag: process-file
 
-      params: "FILE=${ITEM}"
+      params: "file=${env.ITEM}"
 ---
 # A child workflow for processing each file
 # This can be in a same file separated by `---` or in a separate file
 name: process-file
+params:
+  - name: file
+    required: true
 steps:
-  - run: echo "Processing" --file ${FILE}
+  - run: echo "Processing" --file "${params.file}"
 ```

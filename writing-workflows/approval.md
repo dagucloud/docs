@@ -59,7 +59,7 @@ steps:
       input: [APPROVED_BY, MAINTENANCE_WINDOW]
       required: [APPROVED_BY]
   - id: execute_migration
-    run: ./migrate.sh --approver "${APPROVED_BY}" --window "${MAINTENANCE_WINDOW}"
+    run: ./migrate.sh --approver "${env.APPROVED_BY}" --window "${env.MAINTENANCE_WINDOW}"
     depends: generate_plan
 ```
 
@@ -104,7 +104,7 @@ steps:
     action: dag.run
     with:
       dag: production-deploy
-      params: "deploy_version=${DEPLOY_VERSION}"
+      params: "deploy_version=${env.DEPLOY_VERSION}"
     depends: review_config
 ```
 
@@ -362,9 +362,9 @@ Execute custom logic when the workflow enters wait status:
 handler_on:
   wait:
     run: |
-      echo "Waiting steps: ${DAG_WAITING_STEPS}"
+      echo "Waiting steps: ${env.DAG_WAITING_STEPS}"
       curl -X POST https://slack.com/webhook \
-        -d '{"text": "Approval required for ${DAG_NAME}"}'
+        -d '{"text": "Approval required for ${env.DAG_NAME}"}'
 
 steps:
   - id: deploy

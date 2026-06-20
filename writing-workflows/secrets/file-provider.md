@@ -76,7 +76,7 @@ steps:
   - name: import
     run: ./import.sh
     env:
-      - DATABASE_URL: postgres://etl:${POSTGRES_PASSWORD}@db/warehouse
+      - DATABASE_URL: postgres://etl:${env.POSTGRES_PASSWORD}@db/warehouse
 ```
 
 The provider only reads local files visible to the Dagu process that executes the run. In distributed execution, that means the worker process must be able to read the same path.

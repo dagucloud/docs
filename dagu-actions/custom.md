@@ -26,14 +26,16 @@ actions:
 
 steps:
   - id: build
-    output:
-      version: "v1.2.3"
+    run: |
+      printf 'version=%s\n' "v1.2.3" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
 
   - id: announce
     action: release.announce
     with:
       channel: changelog
-      version: ${build.output.version}
+      version: ${steps.build.outputs.version}
     depends: build
 ```
 
@@ -100,7 +102,7 @@ Rules:
 - Missing template keys are errors.
 - Template functions are hermetic; environment, network, clock, random, and crypto helpers are not available.
 - `template` must use canonical execution fields such as `run` or `action`. Legacy fields such as `command`, `script`, `type`, `call`, `messages`, `agent`, `value`, and `routes` are rejected for custom action templates.
-- Runtime expressions such as `${BUILD_ID}` are ordinary text during template rendering and are evaluated later by the expanded step if they land in a runtime-evaluated field.
+- Runtime expressions such as `${params.BUILD_ID}` are ordinary text during template rendering and are evaluated later by the expanded step if they land in a runtime-evaluated field.
 
 ## Typed Input Injection
 
@@ -173,7 +175,7 @@ steps:
       text: "App crashes on startup"
 
   - id: route
-    run: echo "${classify.output.category}:${classify.output.priority}"
+    run: echo "${steps.classify.outputs.category}:${steps.classify.outputs.priority}"
     depends: classify
 ```
 
@@ -181,7 +183,7 @@ Rules:
 
 - `stdout` must contain valid JSON that matches `output_schema`.
 - Human-readable logs should go to `stderr`.
-- If the call site does not set `output:`, the decoded JSON object is published as `${step_id.output.*}`.
+- The decoded JSON object is published through `${steps.step_id.outputs.*}`.
 - If the call site sets object-form `output:`, Dagu validates stdout first, then applies the explicit output mapping.
 
 ## Call-Site Fields

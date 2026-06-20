@@ -20,11 +20,14 @@ When a workflow calls a packaged action, Dagu:
 5. Runs the package workflow as a child DAG run.
 6. Collects outputs from the package workflow.
 7. Validates those outputs against the manifest.
-8. Exposes them to the caller as `${step.outputs.*}`.
+8. Exposes them to the caller as `${steps.step_id.outputs.*}`.
 
 From the caller's point of view, the action is just one step:
 
 ```yaml
+params:
+  - BUILD_ID: "42"
+
 steps:
   - id: notify
     action: acme/dagu-action-notify@v1.2.0
@@ -32,7 +35,7 @@ steps:
       text: "Deploy finished"
 
   - id: audit
-    run: echo "Message: ${notify.outputs.messageId}"
+    run: echo "Message: ${steps.notify.outputs.messageId}"
     depends: notify
 ```
 
@@ -94,12 +97,12 @@ steps:
   - id: notify
     action: acme/dagu-action-notify@v1.2.0
     with:
-      text: "Build ${BUILD_ID} finished"
+      text: "Build ${params.BUILD_ID} finished"
 ```
 
 If the manifest has an `inputs` schema, Dagu validates `with:` before the package workflow starts.
 
-Inside the package workflow, scalar input fields are available as runtime parameters. For the example above, the package workflow can read `${text}`:
+Inside the package workflow, scalar input fields are available as runtime parameters. For the example above, the package workflow can read `${params.text}`:
 
 ```yaml
 params:
@@ -107,7 +110,7 @@ params:
 
 steps:
   - id: send
-    run: ./scripts/notify.sh "${text}"
+    run: ./scripts/notify.sh "${params.text}"
 ```
 
 For structured input, read `DAG_PARAMS_JSON` or pass an explicit JSON string and decode it in the action workflow.
@@ -152,7 +155,7 @@ Use `stdout.outputs` when a command writes the result object to stdout:
 ```yaml
 steps:
   - id: send
-    run: ./scripts/notify.sh "${text}"
+    run: ./scripts/notify.sh "${params.text}"
     stdout:
       outputs:
         fields:
@@ -169,7 +172,7 @@ steps:
     action: outputs.write
     with:
       values:
-        messageId: ${send.output.response.id}
+        messageId: ${steps.send.outputs.messageId}
         status: sent
 ```
 
@@ -177,7 +180,7 @@ Do not use object-form `output:` to return values to the caller. Object-form `ou
 
 After the package workflow finishes, Dagu validates the collected output object against the manifest `outputs` schema. If validation fails, the parent action step fails.
 
-The caller reads returned values with `${step.outputs.*}`:
+The caller reads returned values with `${steps.step_id.outputs.*}`:
 
 ```yaml
 steps:
@@ -187,7 +190,7 @@ steps:
       text: "Deploy finished"
 
   - id: audit
-    run: echo "Message: ${notify.outputs.messageId}"
+    run: echo "Message: ${steps.notify.outputs.messageId}"
     depends: notify
 ```
 

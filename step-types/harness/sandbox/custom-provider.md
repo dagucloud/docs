@@ -57,6 +57,9 @@ The CLI receives its prompt as the final command-line argument.
 ```yaml
 type: graph
 
+env:
+  - REVIEW_AGENT_TOKEN: ${REVIEW_AGENT_TOKEN}
+
 harnesses:
   review_agent:
     binary: review-agent
@@ -74,7 +77,7 @@ steps:
       volumes:
         - .:/workspace:ro
       env:
-        - REVIEW_AGENT_TOKEN=${REVIEW_AGENT_TOKEN}
+        - REVIEW_AGENT_TOKEN=${env.REVIEW_AGENT_TOKEN}
     with:
       provider: review_agent
       prompt: |

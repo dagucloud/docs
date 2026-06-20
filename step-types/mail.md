@@ -8,8 +8,8 @@ Send emails from your workflows for notifications, alerts, and reports.
 smtp:
   host: "smtp.gmail.com"
   port: "587"
-  username: "${SMTP_USER}"
-  password: "${SMTP_PASS}"
+  username: "${env.SMTP_USER}"
+  password: "${env.SMTP_PASS}"
 
 steps:
   - action: mail.send
@@ -38,20 +38,20 @@ smtp:
 smtp:
   host: "smtp.office365.com"
   port: "587"
-  username: "${SMTP_USER}"
-  password: "${SMTP_PASS}"
+  username: "${env.SMTP_USER}"
+  password: "${env.SMTP_PASS}"
 
 # AWS SES
 smtp:
   host: "email-smtp.us-east-1.amazonaws.com"
   port: "587"
-  username: "${AWS_SES_SMTP_USER}"
-  password: "${AWS_SES_SMTP_PASSWORD}"
+  username: "${env.AWS_SES_SMTP_USER}"
+  password: "${env.AWS_SES_SMTP_PASSWORD}"
 ```
 
 ### Variable Expansion
 
-`${VAR}` references in `smtp` fields expand only DAG-scoped variables (`env:`, `params:`, `secrets:`, step outputs). OS environment variables are **not** expanded. If your SMTP credentials come from the OS environment, import them in the `env:` block:
+Scoped references in `smtp` fields expand DAG-scoped values. OS environment variables are **not** expanded directly. If your SMTP credentials come from the OS environment, import them in the `env:` block:
 
 ```yaml
 env:
@@ -61,8 +61,8 @@ env:
 smtp:
   host: "smtp.gmail.com"
   port: "587"
-  username: "${SMTP_USER}"  # Expanded — DAG-scoped
-  password: "${SMTP_PASS}"
+  username: "${env.SMTP_USER}"
+  password: "${env.SMTP_PASS}"
 ```
 
 ## Examples
@@ -94,17 +94,18 @@ steps:
 ```yaml
 params:
   - ENVIRONMENT: production
+  - VERSION: v1.2.3
 
 steps:
   - action: mail.send
     with:
       to: devops@company.com
       from: deploy@company.com
-      subject: "Deployed to ${ENVIRONMENT}"
+      subject: "Deployed to ${params.ENVIRONMENT}"
       message: |
         Deployment completed:
-        - Environment: ${ENVIRONMENT}
-        - Version: ${VERSION}
+        - Environment: ${params.ENVIRONMENT}
+        - Version: ${params.VERSION}
         - Time: `date`
 ```
 
@@ -117,22 +118,22 @@ handler_on:
     with:
       to: team@company.com
       from: dagu@company.com
-      subject: "✅ Pipeline Success - ${DAG_NAME}"
+      subject: "Pipeline Success - ${env.DAG_NAME}"
       message: |
         Pipeline completed successfully.
-        Run ID: ${DAG_RUN_ID}
-        Logs: ${DAG_RUN_LOG_FILE}
+        Run ID: ${env.DAG_RUN_ID}
+        Logs: ${env.DAG_RUN_LOG_FILE}
 
   failure:
     action: mail.send
     with:
       to: oncall@company.com
       from: alerts@company.com
-      subject: "❌ Pipeline Failed - ${DAG_NAME}"
+      subject: "Pipeline Failed - ${env.DAG_NAME}"
       message: |
         Pipeline failed.
-        Run ID: ${DAG_RUN_ID}
-        Check logs: ${DAG_RUN_LOG_FILE}
+        Run ID: ${env.DAG_RUN_ID}
+        Check logs: ${env.DAG_RUN_LOG_FILE}
 
 steps:
   - run: echo "Run your main tasks here"

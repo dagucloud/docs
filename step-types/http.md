@@ -66,7 +66,7 @@ steps:
       method: GET
       url: https://api.example.com/protected
       headers:
-        Authorization: "Bearer ${API_TOKEN}"
+        Authorization: "Bearer ${env.API_TOKEN}"
 ```
 
 ### Query Parameters
@@ -96,10 +96,9 @@ steps:
       method: GET
       url: https://api.example.com/user
       silent: true
-    output: USER_DATA
 
   - id: process
-    run: echo "${USER_DATA}" | jq '.email'
+    run: echo "${steps.get_user.outputs.body}" | jq '.email'
     depends: get_user
 ```
 
@@ -175,7 +174,7 @@ handler_on:
     with:
       method: POST
       url: https://hooks.example.com/workflow-complete
-      body: '{"status": "completed", "dag": "${DAG_NAME}"}'
+      body: '{"status": "completed", "dag": "${env.DAG_NAME}"}'
       headers:
         Content-Type: application/json
 ```
@@ -191,7 +190,7 @@ steps:
       url: https://internal-api.company.local/data
       skip_tls_verify: true  # Allow self-signed certificates
       headers:
-        Authorization: "Bearer ${INTERNAL_TOKEN}"
+        Authorization: "Bearer ${env.INTERNAL_TOKEN}"
 ```
 
 ## Fan-Out: Calling Multiple Endpoints
@@ -212,7 +211,7 @@ steps:
     with:
       dag: http-check
       params:
-        URL: ${ITEM}
+        URL: ${env.ITEM}
 ---
 name: http-check
 
@@ -224,42 +223,41 @@ steps:
     action: http.request
     with:
       method: GET
-      url: ${URL}
+      url: ${params.URL}
 ```
 
-For object items (e.g., different method or headers per endpoint), use `${ITEM.field}` references:
+For webhook fan-out, pass the selected webhook URL as the item value and keep shared credentials in the DAG environment:
 
 ```yaml
 steps:
   - name: notify-webhooks
     parallel:
       items:
-        - url: https://hooks.example.com/deploy
-          token: ${DEPLOY_TOKEN}
-        - url: https://hooks.example.com/audit
-          token: ${AUDIT_TOKEN}
+        - https://hooks.example.com/deploy
+        - https://hooks.example.com/audit
       max_concurrent: 2
     action: dag.run
     with:
       dag: send-webhook
       params:
-        URL: ${ITEM.url}
-        TOKEN: ${ITEM.token}
+        URL: ${env.ITEM}
 ---
 name: send-webhook
 
+env:
+  - WEBHOOK_TOKEN: ${WEBHOOK_TOKEN}
+
 params:
   - URL: ""
-  - TOKEN: ""
 
 steps:
   - name: post
     action: http.request
     with:
       method: POST
-      url: ${URL}
+      url: ${params.URL}
       headers:
-        Authorization: "Bearer ${TOKEN}"
+        Authorization: "Bearer ${env.WEBHOOK_TOKEN}"
         Content-Type: application/json
       body: '{"status": "deployed"}'
 ```

@@ -10,6 +10,9 @@ provider.
 Use `container.env` for API keys and provider tokens:
 
 ```yaml
+env:
+  - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
+
 steps:
   - id: review
     action: harness.run
@@ -20,14 +23,14 @@ steps:
       volumes:
         - .:/workspace:ro
       env:
-        - PROVIDER_API_KEY=${PROVIDER_API_KEY}
+        - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
     with:
       provider: your_provider
       prompt: |
         Review this repository.
 ```
 
-`PROVIDER_API_KEY=${PROVIDER_API_KEY}` is evaluated by Dagu before the container
+`PROVIDER_API_KEY=${env.PROVIDER_API_KEY}` is evaluated by Dagu before the container
 starts. The value must be available to the Dagu process that executes the run.
 
 ## Mounted Credential Directories
@@ -36,6 +39,9 @@ Some CLIs store login state in files. Mount the directory the CLI reads, then
 set the provider's home or config variable if that CLI supports one.
 
 ```yaml
+env:
+  - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
+
 steps:
   - id: review
     action: harness.run
@@ -70,7 +76,7 @@ steps:
       image: dagu-provider-runner:local
       pull_policy: never
       env:
-        - PROVIDER_API_KEY=${PROVIDER_API_KEY}
+        - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
     with:
       provider: your_provider
       prompt: |
@@ -85,11 +91,14 @@ Use root-level `container:` only when every inherited step in the shared
 container may receive the same credential:
 
 ```yaml
+env:
+  - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
+
 container:
   image: dagu-provider-runner:local
   pull_policy: never
   env:
-    - PROVIDER_API_KEY=${PROVIDER_API_KEY}
+    - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
 
 steps:
   - id: test

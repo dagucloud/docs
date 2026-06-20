@@ -9,12 +9,15 @@ If a maintained official Dagu Action already fits the job, prefer [Official Dagu
 Call a third-party action with `owner/repo@version`:
 
 ```yaml
+params:
+  - ENVIRONMENT: production
+
 steps:
   - id: notify
     action: acme/dagu-action-notify@v1.2.0
     with:
       channel: "#ops"
-      text: "Deployment finished for ${ENVIRONMENT}"
+      text: "Deployment finished for ${params.ENVIRONMENT}"
 ```
 
 `with:` is the input object passed to the action. The action package can validate that object with the `inputs` schema in `dagu-action.yaml` before its workflow starts.
@@ -74,7 +77,7 @@ params:
 
 steps:
   - id: send
-    run: ./scripts/notify.sh "${text}"
+    run: ./scripts/notify.sh "${params.text}"
     stdout:
       outputs:
         fields:
@@ -92,17 +95,20 @@ Action `tools` are Dagu-managed CLI dependencies. Dagu resolves pinned packages 
 
 ## Return Outputs
 
-Callers read action outputs with `${step.outputs.*}`:
+Callers read action outputs with `${steps.step_id.outputs.*}`:
 
 ```yaml
+params:
+  - BUILD_ID: "42"
+
 steps:
   - id: notify
     action: acme/dagu-action-notify@v1.2.0
     with:
-      text: "Build ${BUILD_ID} finished"
+      text: "Build ${params.BUILD_ID} finished"
 
   - id: audit
-    run: echo "Notification message: ${notify.outputs.messageId}"
+    run: echo "Notification message: ${steps.notify.outputs.messageId}"
     depends: notify
 ```
 
@@ -113,7 +119,7 @@ Use `stdout.outputs` when a command writes the result object to stdout:
 ```yaml
 steps:
   - id: classify
-    run: ./classify.sh "${text}"
+    run: ./classify.sh "${params.text}"
     stdout:
       outputs:
         decode: json
@@ -127,7 +133,7 @@ steps:
     action: outputs.write
     with:
       values:
-        messageId: ${send.output.response.id}
+        messageId: ${steps.send.outputs.messageId}
         status: sent
 ```
 
@@ -135,7 +141,7 @@ Do not use object-form `output:` to return action results to the caller. Object-
 
 ## How It Runs
 
-At runtime, Dagu resolves the action reference, validates `with:` against the manifest `inputs` schema, materializes the action workspace, runs the action workflow as a sub-DAG, collects outputs, validates them against the manifest `outputs` schema, and exposes them to the caller through `${step.outputs.*}`.
+At runtime, Dagu resolves the action reference, validates `with:` against the manifest `inputs` schema, materializes the action workspace, runs the action workflow as a sub-DAG, collects outputs, validates them against the manifest `outputs` schema, and exposes them to the caller through `${steps.step_id.outputs.*}`.
 
 In distributed mode, Dagu transfers the materialized action workspace to the worker that runs the action sub-DAG. The child worker does not need the action repository checked out in its DAG directory.
 

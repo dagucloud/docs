@@ -142,12 +142,12 @@ Minimal example:
 steps:
   - id: inspect-github-context
     run: |
-      echo "event=${GITHUB_EVENT_NAME}"
-      echo "action=${GITHUB_EVENT_ACTION}"
-      echo "repo=${GITHUB_REPOSITORY}"
-      echo "sha=${GITHUB_SHA}"
-      echo "ref=${GITHUB_REF}"
-      echo "actor=${GITHUB_ACTOR}"
+      echo "event=${env.GITHUB_EVENT_NAME}"
+      echo "action=${env.GITHUB_EVENT_ACTION}"
+      echo "repo=${env.GITHUB_REPOSITORY}"
+      echo "sha=${env.GITHUB_SHA}"
+      echo "ref=${env.GITHUB_REF}"
+      echo "actor=${env.GITHUB_ACTOR}"
 ```
 
 Quick rules:

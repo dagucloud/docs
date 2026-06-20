@@ -89,7 +89,7 @@ params:
     description: Deployment region
 
 steps:
-  - run: echo "Deploying to ${env} in ${region}"
+  - run: echo "Deploying to ${params.env} in ${params.region}"
 ```
 
 Override at runtime:
@@ -106,10 +106,12 @@ Pass data between steps using `output`:
 ```yaml
 steps:
   - id: date_stamp
-    run: date +%Y%m%d
-    output: TODAY
+    run: |
+      printf 'today=%s\n' "$(date +%Y%m%d)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: today
   - id: backup
-    run: tar -czf backup_${TODAY}.tar.gz /data
+    run: tar -czf backup_${steps.date_stamp.outputs.today}.tar.gz /data
     depends: date_stamp
 ```
 
@@ -260,7 +262,7 @@ steps:
       method: POST
       url: https://api.example.com/trigger
       headers:
-        Authorization: Bearer ${API_TOKEN}
+        Authorization: Bearer ${env.API_TOKEN}
 ```
 
 See [HTTP](/step-types/http) for more details.

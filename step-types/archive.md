@@ -93,7 +93,7 @@ steps:
 | `dry_run` | Simulate operation | bool | `false` | Calculate metrics without writing files to disk |
 | `password` | Archive password | string | none | **Extraction only** for password-protected `7z` and `rar` archives |
 
-All fields support environment interpolation (`${VAR}`) and outputs from previous steps.
+All fields support scoped value references such as `${env.NAME}`, `${params.name}`, and `${steps.step_id.outputs.name}`.
 
 ## Additional Examples
 
@@ -144,7 +144,7 @@ steps:
     with:
       source: secure-data.7z
       destination: ./decrypted
-      password: ${ARCHIVE_PASSWORD}
+      password: ${env.ARCHIVE_PASSWORD}
       include:
         - "**/*.csv"
       overwrite: true

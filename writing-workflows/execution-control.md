@@ -13,7 +13,7 @@ steps:
   - action: dag.run
     with:
       dag: file-processor
-      params: "FILE=${ITEM}"
+      params: "file=${env.ITEM}"
     parallel:
       items:
         - file1.csv
@@ -22,12 +22,13 @@ steps:
 ---
 name: file-processor
 params:
-  - FILE: ""
+  - name: file
+    default: ""
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: uv run --python 3.13.9 python process.py --file ${FILE}
+  - run: uv run --python 3.13.9 python process.py --file "${params.file}"
 ```
 
 ### With Concurrency Control
@@ -37,9 +38,9 @@ steps:
   - action: dag.run
     with:
       dag: file-processor
-      params: "FILE=${ITEM}"
+      params: "file=${env.ITEM}"
     parallel:
-      items: ${FILE_LIST}
+      items: ${env.FILE_LIST}
       max_concurrent: 2  # Process max 2 files at a time
 ```
 
@@ -48,51 +49,21 @@ steps:
 ```yaml
 steps:
   - id: list_files
-    run: find /data -name "*.csv" -type f
-    output: CSV_FILES
+    run: |
+      {
+        printf 'files<<FILES\n'
+        find /data -name "*.csv" -type f
+        printf 'FILES\n'
+      } >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: files
 
   - action: dag.run
     with:
       dag: file-processor
-      params: "FILE=${ITEM}"
-    parallel: ${CSV_FILES}
+      params: "file=${env.ITEM}"
+    parallel: ${steps.list_files.outputs.files}
     depends: list_files
-```
-
-### Capturing Output
-
-```yaml
-steps:
-  - id: process_tasks
-    action: dag.run
-    with:
-      dag: task-processor
-    parallel:
-      items: [1, 2, 3]
-    output: RESULTS
-
-  - id: summarize_tasks
-    run: |
-      echo "Total: ${RESULTS.summary.total}"
-      echo "Succeeded: ${RESULTS.summary.succeeded}"
-    depends: process_tasks
-      echo "Failed: ${RESULTS.summary.failed}"
-```
-
-Output structure:
-```json
-{
-  "summary": {
-    "total": 3,
-    "succeeded": 3,
-    "failed": 0
-  },
-  "outputs": [
-    {"RESULT": "output1"},
-    {"RESULT": "output2"},
-    {"RESULT": "output3"}
-  ]
-}
 ```
 
 ## Maximum Active Steps
@@ -279,10 +250,11 @@ steps:
 steps:
   # Service health check with backoff
   - run: echo "Health check OK"
-    output: STATUS
+    env:
+      - STATUS: healthy
     repeat_policy:
       repeat: until
-      condition: "${STATUS}"
+      condition: "${env.STATUS}"
       expected: "healthy"
       interval_sec: 2
       backoff: 1.5         # Gentler backoff (1.5x)
@@ -293,15 +265,19 @@ steps:
 
 #### Variable References in Repeat Policy
 
-The `interval_sec`, `limit`, and `max_interval_sec` fields accept variable references (`$VAR`, `${VAR}`, or backtick command substitutions) that are resolved at runtime:
+The `interval_sec`, `limit`, and `max_interval_sec` fields accept scoped value references that are resolved at runtime:
 
 ```yaml
+env:
+  - REPEAT_LIMIT: 10
+  - POLL_INTERVAL: 5
+
 steps:
   - run: echo "repeating"
     repeat_policy:
       repeat: true
-      limit: $REPEAT_LIMIT
-      interval_sec: ${POLL_INTERVAL}
+      limit: ${env.REPEAT_LIMIT}
+      interval_sec: ${env.POLL_INTERVAL}
 ```
 
 The values must resolve to valid integers at runtime.

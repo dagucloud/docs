@@ -19,19 +19,22 @@ Only the handlers you define are executed. The `init` handler runs first (before
 
 ```yaml
 # dag.yaml
+env:
+  - LOCK_NAME: daily-load
+
 handler_on:
   init:
-    run: acquire-lock.sh ${LOCK_NAME}   # runs before any steps
+    run: acquire-lock.sh "${env.LOCK_NAME}"   # runs before any steps
   success:
-    run: notify.sh "${DAG_NAME} (${DAG_RUN_ID}) succeeded" # runs after a clean finish
+    run: notify.sh "${env.DAG_NAME} (${env.DAG_RUN_ID}) succeeded" # runs after a clean finish
   failure:
-    run: alert.sh "${DAG_NAME} failed" "logs=${DAG_RUN_LOG_FILE}"
+    run: alert.sh "${env.DAG_NAME} failed" "logs=${env.DAG_RUN_LOG_FILE}"
   abort:
-    run: rollback.sh --lock ${LOCK_NAME}
+    run: rollback.sh --lock "${env.LOCK_NAME}"
   wait:
-    run: notify-approvers.sh "${DAG_WAITING_STEPS}" # runs when waiting for approval
+    run: notify-approvers.sh "${env.DAG_WAITING_STEPS}" # runs when waiting for approval
   exit:
-    run: rm -rf /tmp/${DAG_RUN_ID} # always runs
+    run: rm -rf "/tmp/${env.DAG_RUN_ID}" # always runs
 
 steps:
   - run: ./extract.sh
@@ -94,10 +97,10 @@ handler_on:
     with:
       to: oncall@company.com
       from: dagu@company.com
-      subject: "${DAG_NAME} failed"
+      subject: "${env.DAG_NAME} failed"
       message: |
-        Run ID: ${DAG_RUN_ID}
-        Logs: ${DAG_RUN_LOG_FILE}
+        Run ID: ${env.DAG_RUN_ID}
+        Logs: ${env.DAG_RUN_LOG_FILE}
 ```
 
 ### Run a Follow-up DAG
@@ -109,7 +112,7 @@ handler_on:
     with:
       dag: sync-reporting
       params: |
-        parent_run_id: ${DAG_RUN_ID}
+        parent_run_id: ${env.DAG_RUN_ID}
 ```
 
 ### Guaranteed Cleanup
@@ -118,7 +121,7 @@ handler_on:
 handler_on:
   exit:
     run: |
-      find /tmp/${DAG_RUN_ID} -maxdepth 1 -type f -delete
+      find "/tmp/${env.DAG_RUN_ID}" -maxdepth 1 -type f -delete
 ```
 
 ### Notify on Wait (Approval)
@@ -128,7 +131,7 @@ When using [approval steps](/writing-workflows/approval), notify stakeholders:
 ```yaml
 handler_on:
   wait:
-    run: notify-slack.sh "Approval needed: ${DAG_WAITING_STEPS}"
+    run: notify-slack.sh "Approval needed: ${env.DAG_WAITING_STEPS}"
 
 steps:
   - id: deploy_staging

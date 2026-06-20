@@ -2,7 +2,7 @@
 
 Convert and select small structured values across JSON, YAML, CSV, TSV, and text without spawning a shell.
 
-`action: data.convert` reads inline data or a file, converts it, and writes the result to stdout. Use `output:` to capture the converted value for later steps.
+`action: data.convert` reads inline data or a file, converts it, and publishes the result for later steps.
 
 `action: data.pick` reads inline data or a file, selects a value with a jq-style path, and writes the selected value to stdout.
 
@@ -19,10 +19,9 @@ steps:
         name,age
         Alice,30
         Bob,25
-    output: USERS_JSON
 ```
 
-`USERS_JSON` contains:
+The result contains:
 
 ```json
 [
@@ -147,16 +146,14 @@ steps:
       data: |
         name,age
         Alice,30
-    output: USERS_JSON
 
   - id: first_name
     action: data.pick
     with:
       from: json
       select: '.[0].name'
-      data: ${USERS_JSON}
+      data: ${steps.users.outputs.result}
       raw: true
-    output: FIRST_NAME
     depends: users
 ```
 

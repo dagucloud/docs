@@ -24,7 +24,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "dagu-${DAG_NAME}"
+    service.name: "dagu-${env.DAG_NAME}"
     service.version: "1.0.0"
     environment: "local"
 
@@ -87,7 +87,7 @@ otel:
   enabled: true
   endpoint: "otel-collector:4317"
   headers:
-    Authorization: "Bearer ${OTEL_TOKEN}"
+    Authorization: "Bearer ${env.OTEL_TOKEN}"
 steps:
   - run: echo "Testing with auth"
 ```
@@ -101,7 +101,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "dagu-${DAG_NAME}"
+    service.name: "dagu-${env.DAG_NAME}"
     service.version: "2.0.0"
     deployment.environment: "testing"
     team: "platform"
@@ -157,7 +157,7 @@ otel:
 
 steps:
   - id: extract
-    run: echo "Extracting from ${SOURCE}"
+    run: echo "Extracting from ${env.SOURCE}"
     output: EXTRACTED_DATA
   - id: transform
     run: echo "Transforming data" && echo "/tmp/data.csv"
@@ -175,7 +175,7 @@ otel:
   insecure: true
 
 steps:
-  - run: echo "Analyzing ${INPUT}"
+  - run: echo "Analyzing ${params.INPUT}"
 ```
 
 ### 3. Run and Verify
@@ -382,14 +382,14 @@ If you have an existing observability platform:
 # production-like-test.yaml
 otel:
   enabled: true
-  endpoint: "${OTEL_ENDPOINT}"
+  endpoint: "${env.OTEL_ENDPOINT}"
   headers:
-    Authorization: "Bearer ${OTEL_TOKEN}"
+    Authorization: "Bearer ${env.OTEL_TOKEN}"
   timeout: 30s
   resource:
-    service.name: "dagu-${DAG_NAME}"
-    service.version: "${APP_VERSION}"
-    deployment.environment: "${ENVIRONMENT}"
+    service.name: "dagu-${env.DAG_NAME}"
+    service.version: "${env.APP_VERSION}"
+    deployment.environment: "${env.ENVIRONMENT}"
 steps:
   - run: echo "Testing production setup"
 ```

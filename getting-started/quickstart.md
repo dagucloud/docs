@@ -139,7 +139,7 @@ params:
   - DEST: /backup
 
 steps:
-  - run: tar -czf ${DEST}/backup.tar.gz ${SOURCE}
+  - run: tar -czf ${params.DEST}/backup.tar.gz ${params.SOURCE}
 ```
 
 ```bash

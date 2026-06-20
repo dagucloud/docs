@@ -90,6 +90,9 @@ Use a step-level container when only the Claude Code step should receive the
 workspace mount and credential.
 
 ```yaml
+env:
+  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
 steps:
   - id: review
     action: harness.run
@@ -100,7 +103,7 @@ steps:
       volumes:
         - .:/workspace:ro
       env:
-        - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+        - ANTHROPIC_API_KEY=${env.ANTHROPIC_API_KEY}
     with:
       provider: claude
       prompt: |
@@ -164,14 +167,14 @@ container runs, the credential must be available inside the container.
 
 ```yaml
 env:
-  - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+  - ANTHROPIC_API_KEY=${env.ANTHROPIC_API_KEY}
 ```
 
 ### Bearer Token
 
 ```yaml
 env:
-  - ANTHROPIC_AUTH_TOKEN=${ANTHROPIC_AUTH_TOKEN}
+  - ANTHROPIC_AUTH_TOKEN=${env.ANTHROPIC_AUTH_TOKEN}
 ```
 
 ### Long-Lived OAuth Token
@@ -186,7 +189,7 @@ Then pass it to the container:
 
 ```yaml
 env:
-  - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
+  - CLAUDE_CODE_OAUTH_TOKEN=${env.CLAUDE_CODE_OAUTH_TOKEN}
 ```
 
 Anthropic documents that `--bare` does not read `CLAUDE_CODE_OAUTH_TOKEN`. Do

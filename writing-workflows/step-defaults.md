@@ -128,7 +128,7 @@ defaults:
 
 steps:
   - id: deploy
-    run: echo "${LOG_LEVEL} ${REGION} ${SERVICE}"
+    run: echo "${env.LOG_LEVEL} ${env.REGION} ${env.SERVICE}"
     env:
       - SERVICE: web-api
     # Effective env: [LOG_LEVEL=info, REGION=us-east-1, SERVICE=web-api]
@@ -141,7 +141,7 @@ Default preconditions are prepended before step preconditions. All must pass for
 ```yaml
 defaults:
   preconditions:
-    - condition: "${ENVIRONMENT}"
+    - condition: "${env.ENVIRONMENT}"
       expected: "production"
 
 steps:

@@ -18,11 +18,11 @@ steps:
       source: /data/input
 
   - id: print
-    run: printf '%s\n' '${list_files.outputs.stdout}'
+    run: printf '%s\n' '${steps.list_files.outputs.stdout}'
     depends: list_files
 ```
 
-The action returns a JSON output object. Use `${step.outputs.stdout}` for small listings or command output. For large listings, exports, or command logs, write to an artifact instead of routing the data through action outputs.
+The action returns a JSON output object. Use `${steps.step_id.outputs.stdout}` for small listings or command output. For large listings, exports, or command logs, write to an artifact instead of routing the data through action outputs.
 
 Use `copy` when the destination should accumulate or update files without mirroring deletions:
 

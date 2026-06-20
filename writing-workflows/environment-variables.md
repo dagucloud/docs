@@ -80,14 +80,14 @@ Define variables accessible to all steps in a workflow:
 ```yaml
 env:
   - DATA_DIR: /var/data
-  - OUTPUT_DIR: ${DATA_DIR}/output
+  - OUTPUT_DIR: ${env.DATA_DIR}/output
   - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
 
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: uv run --python 3.13.9 python process.py --output ${OUTPUT_DIR}
+  - run: uv run --python 3.13.9 python process.py --output "${env.OUTPUT_DIR}"
 ```
 
 ### Supported Formats
@@ -99,7 +99,7 @@ Dagu supports multiple formats for defining environment variables:
 env:
   - KEY1: value1
   - KEY2: value2
-  - KEY3: ${KEY1}_suffix  # Can reference earlier vars
+  - KEY3: ${env.KEY1}_suffix  # Can reference earlier vars
 
 # Format 2: Simple Map (order not guaranteed)
 env:
@@ -115,7 +115,7 @@ env:
 env:
   - KEY1: value1
   - KEY2=value2
-  - KEY3: ${KEY1}
+  - KEY3: ${env.KEY1}
 ```
 
 **Note**: The array format (Format 1) preserves order, which matters when later variables reference earlier ones. The simple map format (Format 2) does not guarantee order.
@@ -133,28 +133,28 @@ env:
 
 ### Variable Expansion
 
-Reference other variables using `${VAR}` or `$VAR` syntax. Earlier variables in the list can be referenced by later ones:
+Reference other variables with the scoped `${env.NAME}` syntax. Earlier variables in the list can be referenced by later ones:
 
 ```yaml
 env:
   - BASE_PATH: /opt/app
-  - BIN_DIR: ${BASE_PATH}/bin      # References BASE_PATH
-  - CONFIG_FILE: ${BASE_PATH}/config.yaml
+  - BIN_DIR: ${env.BASE_PATH}/bin      # References BASE_PATH
+  - CONFIG_FILE: ${env.BASE_PATH}/config.yaml
 ```
 
 ### Referencing Parameters
 
-DAG-level `env:` values can reference `params:` values using `${param_name}`. Parameters are resolved before environment variables, so param values are available during env evaluation:
+DAG-level `env:` values can reference `params:` values using `${params.name}`:
 
 ```yaml
 params:
   data_dir: /tmp/foo
 
 env:
-  - FULL_PATH: "${data_dir}/output"
+  - FULL_PATH: "${params.data_dir}/output"
 
 steps:
-  - run: echo "${FULL_PATH}"  # Outputs: /tmp/foo/output
+  - run: echo "${env.FULL_PATH}"  # Outputs: /tmp/foo/output
 ```
 
 Chained references work too. An env variable can reference a param, and a later env variable can reference that env variable:
@@ -164,11 +164,11 @@ params:
   base: /data
 
 env:
-  - DIR: "${base}/subdir"
-  - FULL: "${DIR}/file.txt"
+  - DIR: "${params.base}/subdir"
+  - FULL: "${env.DIR}/file.txt"
 
 steps:
-  - run: echo "${FULL}"  # Outputs: /data/subdir/file.txt
+  - run: echo "${env.FULL}"  # Outputs: /data/subdir/file.txt
 ```
 
 ### Command Substitution
@@ -239,15 +239,19 @@ steps:
 Step-level variables support the same features as DAG-level:
 
 ```yaml
+env:
+  - DATA_DIR: /data
+  - HOSTNAME: "`hostname -f`"
+
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
   - id: process_data
     env:
-      - INPUT_PATH: ${DATA_DIR}/input
+      - INPUT_PATH: ${env.DATA_DIR}/input
       - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
-      - WORKER_ID: worker_${HOSTNAME}
+      - WORKER_ID: worker_${env.HOSTNAME}
     run: uv run --python 3.13.9 python process.py
 ```
 
@@ -255,12 +259,13 @@ steps:
 
 ### Basic Syntax
 
-These patterns work in all contexts:
+Scoped Dagu references work in value-resolved fields. Shell variable syntax is still valid when a shell owns the text:
 
 | Pattern | Description | Example |
 |---------|-------------|---------|
-| `${VAR}` | Braced substitution | `${HOME}` → `/home/user` |
+| `${env.VAR}` | Dagu-scoped environment reference | `${env.HOME}` -> `/home/user` |
 | `$VAR` | Simple substitution | `$HOME` → `/home/user` |
+| `${VAR}` | Shell or unqualified environment syntax | `${HOME}` -> `/home/user` |
 | `'$VAR'` | Single-quoted (no expansion) | `'$VAR'` → `'$VAR'` |
 | `\$` | Literal dollar (non-shell only) | `\$9.99` → `$9.99` |
 

@@ -36,14 +36,14 @@ otel:
   endpoint: "otel-collector:4317"  # OTLP gRPC endpoint
   # endpoint: "http://otel-collector:4318/v1/traces"  # OTLP HTTP endpoint
   headers:
-    Authorization: "Bearer ${OTEL_AUTH_TOKEN}"
+    Authorization: "Bearer ${env.OTEL_AUTH_TOKEN}"
   insecure: false  # Skip TLS verification (default: false)
   timeout: 30s     # Export timeout
   resource:
     # Resource attributes (all optional)
-    service.name: "dagu-${DAG_NAME}"  # Default value
+    service.name: "dagu-${env.DAG_NAME}"  # Default value
     service.version: "1.0.0"
-    deployment.environment: "${ENVIRONMENT}"
+    deployment.environment: "${env.ENVIRONMENT}"
     # Custom attributes
     team: "data-engineering"
     cost_center: "analytics"
@@ -140,7 +140,7 @@ otel:
 name: my-workflow
 otel:
   resource:
-    service.name: "dagu-${DAG_NAME}"  # Override specific attributes
+    service.name: "dagu-${env.DAG_NAME}"  # Override specific attributes
 steps:
   - run: echo "Processing with telemetry"
 ```
@@ -176,9 +176,9 @@ otel:
   enabled: true
   endpoint: "otel-collector.monitoring:4317"
   headers:
-    Authorization: "Bearer ${OTEL_TOKEN}"
+    Authorization: "Bearer ${env.OTEL_TOKEN}"
   resource:
-    service.name: "dagu-${DAG_NAME}"
+    service.name: "dagu-${env.DAG_NAME}"
     deployment.environment: "production"
-    service.version: "${VERSION}"
+    service.version: "${env.VERSION}"
 ```

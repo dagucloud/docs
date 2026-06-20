@@ -124,8 +124,8 @@ steps:
 # For private images
 registry_auths:
   ghcr.io:
-    username: ${GITHUB_USER}
-    password: ${GITHUB_TOKEN}
+    username: ${env.GITHUB_USER}
+    password: ${env.GITHUB_TOKEN}
 
 container:
   image: ghcr.io/myorg/private-app:latest

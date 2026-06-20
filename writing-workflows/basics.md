@@ -40,7 +40,7 @@ tools:
 
 steps:
   - id: process
-    run: uv run --python 3.13.9 python process.py ${DATE} ${RUN_DATE}
+    run: uv run --python 3.13.9 python process.py "${params.DATE}" "${env.RUN_DATE}"
 
 # Handlers
 handler_on:
@@ -292,11 +292,13 @@ Store command output in variables:
 ```yaml
 steps:
   - id: get_version
-    run: git rev-parse --short HEAD
-    output: VERSION
+    run: |
+      printf 'version=%s\n' "$(git rev-parse --short HEAD)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
 
   - id: build
-    run: docker build -t app:${VERSION} .
+    run: docker build -t "app:${steps.get_version.outputs.version}" .
     depends: get_version
 ```
 

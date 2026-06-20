@@ -18,11 +18,11 @@ steps:
         SELECT 42 AS answer, 'duckdb' AS engine;
 
   - id: print
-    run: printf '%s\n' '${query.outputs.result}'
+    run: printf '%s\n' '${steps.query.outputs.result}'
     depends: query
 ```
 
-`query` is passed to `duckdb -c`. By default, the action uses DuckDB JSON output mode and publishes raw stdout as `${query.outputs.result}`, replacing `query` with your step id.
+`query` is passed to `duckdb -c`. By default, the action uses DuckDB JSON output mode and publishes raw stdout as `${steps.query.outputs.result}`, replacing `query` with your step id.
 
 Use `database` to run against an existing file, `workdir` when SQL references files by relative path, and `readonly: true` for read-only inspection:
 
@@ -55,7 +55,7 @@ steps:
 |-------|-------------|
 | `result` | Raw DuckDB stdout in the selected format. |
 
-Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${DAG_RUN_ARTIFACTS_DIR}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`. The CLI is pinned through Dagu `tools`, which is powered by aqua from the aquaproj project:
+Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${env.DAG_RUN_ARTIFACTS_DIR}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`. The CLI is pinned through Dagu `tools`, which is powered by aqua from the aquaproj project:
 
 ```yaml
 tools:

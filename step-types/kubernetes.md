@@ -534,7 +534,7 @@ steps:
             on_exit_codes:
               operator: In
               values: [42]
-      command: [app, report, --date, "${DATE}"]
+      command: [app, report, --date, "${env.DATE}"]
     depends: migrate
 ```
 

@@ -29,7 +29,7 @@ steps:
 
 ## Parameters
 
-Parameters are defined at the DAG level. The same values apply to every scheduled run. Use `${VAR}` syntax in message content:
+Parameters are defined at the DAG level. The same values apply to every scheduled run. Use scoped parameter references in message content:
 
 ```yaml
 schedule: "0 9 * * MON-FRI"
@@ -44,8 +44,8 @@ steps:
       messages:
         - role: user
           content: |
-            Scan all log files in ${LOG_DIR} for error counts.
-            Flag any file with more than ${THRESHOLD} errors in the last 24 hours.
+            Scan all log files in ${params.LOG_DIR} for error counts.
+            Flag any file with more than ${params.THRESHOLD} errors in the last 24 hours.
     output: ERROR_REPORT
 ```
 
@@ -70,7 +70,7 @@ steps:
 
   - id: email_report
     run: |
-      echo "${ANALYSIS}" | mail -s "Daily Deployment Report" team@example.com
+      echo "${steps.analyze_deployments.outputs.ANALYSIS}" | mail -s "Daily Deployment Report" team@example.com
     depends: analyze_deployments
 ```
 
@@ -166,7 +166,7 @@ steps:
     output: WEEKLY_SUMMARY
 
   - id: write_report
-    run: echo "${WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
+    run: echo "${steps.summarize_commits.outputs.WEEKLY_SUMMARY}" > /reports/weekly-$(date +%Y-%m-%d).md
     depends: summarize_commits
 ```
 
@@ -236,8 +236,8 @@ steps:
           content: |
             Combine these reports into a single morning briefing:
 
-            Infrastructure: ${INFRA_STATUS}
-            Application: ${APP_STATUS}
+            Infrastructure: ${steps.check_infra.outputs.INFRA_STATUS}
+            Application: ${steps.check_app.outputs.APP_STATUS}
     output: MORNING_BRIEF
     depends: [check_infra, check_app]
 ```

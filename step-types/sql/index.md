@@ -24,7 +24,7 @@ steps:
   - id: query_users
     action: postgres.query
     with:
-      dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
+      dsn: "postgres://user:${env.DB_PASSWORD}@localhost:5432/mydb"
       query: "SELECT id, name, email FROM users WHERE active = true"
     output: USERS  # Capture results to variable
 ```
@@ -107,7 +107,7 @@ steps:
   - id: import_csv
     action: postgres.import
     with:
-      dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
+      dsn: "postgres://user:${env.DB_PASSWORD}@localhost:5432/mydb"
       import:
         input_file: /data/users.csv
         table: users
@@ -144,7 +144,7 @@ steps:
   - id: safe_query
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       params:
         status: active
         min_age: 18
@@ -176,7 +176,7 @@ steps:
   - id: transfer_funds
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       transaction: true
       isolation_level: serializable
       query: |
@@ -195,7 +195,7 @@ steps:
   - id: export_jsonl
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       output_format: jsonl
       query: "SELECT * FROM orders"
 ```
@@ -215,7 +215,7 @@ steps:
   - id: export_json
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       output_format: json
       query: "SELECT * FROM orders"
 ```
@@ -233,7 +233,7 @@ steps:
   - id: export_csv
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       output_format: csv
       headers: true
       query: "SELECT * FROM orders"
@@ -248,9 +248,9 @@ steps:
   - id: export_large_table
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       streaming: true
-      output_file: "${DAG_RUN_ARTIFACTS_DIR}/export.jsonl"
+      output_file: "${env.DAG_RUN_ARTIFACTS_DIR}/export.jsonl"
       output_format: jsonl    # Use jsonl or csv for streaming
       query: "SELECT * FROM large_table"
 ```
@@ -260,7 +260,7 @@ steps:
 - Avoid `output_format: json` - it buffers all rows in memory before writing
 - Set `max_rows` as a safety limit for unbounded queries
 - Use `streaming: true` with `output_file` to write directly to disk
-- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${DAG_RUN_ARTIFACTS_DIR}/export.jsonl`; this reference auto-enables artifact storage.
+- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${env.DAG_RUN_ARTIFACTS_DIR}/export.jsonl`; this reference auto-enables artifact storage.
 :::
 
 ## Error Handling
@@ -270,7 +270,7 @@ steps:
   - id: query_with_retry
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       timeout: 30
       query: "SELECT * FROM orders"
     retry_policy:
@@ -298,7 +298,7 @@ steps:
     with:
       dag: run-migration
       params:
-        SCHEMA: ${ITEM}
+        SCHEMA: ${env.ITEM}
 ---
 name: run-migration
 
@@ -309,46 +309,41 @@ steps:
   - name: migrate
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       transaction: true
       query: |
-        SET search_path TO ${SCHEMA};
+        SET search_path TO ${params.SCHEMA};
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ;
 ```
 
-For object items (e.g., different DSN per tenant), use `${ITEM.field}` references:
+For different DSNs per tenant, pass the selected DSN string as the item value:
 
 ```yaml
 steps:
   - name: migrate-all-tenants
     parallel:
       items:
-        - schema: tenant_a
-          dsn: "${TENANT_A_DSN}"
-        - schema: tenant_b
-          dsn: "${TENANT_B_DSN}"
+        - postgres://tenant_a:secret@db-a.example.com/app
+        - postgres://tenant_b:secret@db-b.example.com/app
       max_concurrent: 2
     action: dag.run
     with:
       dag: run-migration
       params:
-        SCHEMA: ${ITEM.schema}
-        DSN: ${ITEM.dsn}
+        DSN: ${env.ITEM}
 ---
 name: run-migration
 
 params:
-  - SCHEMA: ""
   - DSN: ""
 
 steps:
   - name: migrate
     action: postgres.query
     with:
-      dsn: "${DSN}"
+      dsn: "${params.DSN}"
       transaction: true
       query: |
-        SET search_path TO ${SCHEMA};
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ;
 ```
 

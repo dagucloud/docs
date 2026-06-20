@@ -79,7 +79,7 @@ The same response also exposes `histRetentionDays` for DAG history retention.
 
 `defaultParams` is a shell-style string of resolved default pairs such as `environment="staging" batch_size="25"`. It is not JSON.
 
-When a param uses inline `eval`, `paramDefs.default` still represents only the authored literal `default`, if one exists. Computed defaults such as `${BASE_DIR}/out` or `` `nproc` `` are resolved by the server when the DAG is started.
+When a param uses inline `eval`, `paramDefs.default` still represents only the authored literal `default`, if one exists. Computed defaults such as `${env.BASE_DIR}/out` or `` `nproc` `` are resolved by the server when the DAG is started.
 
 #### Create New DAG
 ```bash

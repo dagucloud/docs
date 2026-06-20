@@ -30,7 +30,7 @@ You can also define [custom harness definitions](#custom-harness-definitions) fo
 - `with.stdin` is optional extra stdin content.
 - After DAG-level defaults are applied, the step needs a provider. Omitted provider configuration is still invalid.
 - `with.provider` may be `builtin`, a built-in CLI provider, or a name defined under top-level `harnesses:`.
-- `with.provider` may contain `${VAR}` interpolation and is resolved after interpolation at runtime.
+- `with.provider` may contain scoped references such as `${env.PROVIDER}` and is resolved after interpolation at runtime.
 
 Example:
 
@@ -368,7 +368,7 @@ steps:
     with:
       prompt: |
         Analyze the repository layout
-      provider: "${PROVIDER}"
+      provider: "${params.PROVIDER}"
 ```
 
 Interpolated scalar strings are normalized before flags are generated, so values such as `"true"`, `"10"`, and `"5.5"` become booleans or numbers.

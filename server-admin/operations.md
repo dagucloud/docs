@@ -307,7 +307,7 @@ smtp:
   host: "smtp.gmail.com"
   port: "587"
   username: "notifications@company.com"
-  password: "${SMTP_PASSWORD}"
+  password: "${env.SMTP_PASSWORD}"
 
 error_mail:
   from: "dagu@company.com"
@@ -336,16 +336,16 @@ handler_on:
   failure:
     action: http.request
     with:
-      url: "${SLACK_WEBHOOK_URL}"
+      url: "${env.SLACK_WEBHOOK_URL}"
       method: POST
       body: |
         {
-          "text": "Workflow Failed: ${DAG_NAME}",
+          "text": "Workflow Failed: ${env.DAG_NAME}",
           "blocks": [{
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "*Run ID:* ${DAG_RUN_ID}"
+              "text": "*Run ID:* ${env.DAG_RUN_ID}"
             }
           }]
         }
@@ -362,10 +362,10 @@ handler_on:
       url: https://events.pagerduty.com/v2/enqueue
       body: |
         {
-          "routing_key": "${PAGERDUTY_KEY}",
+          "routing_key": "${env.PAGERDUTY_KEY}",
           "event_action": "trigger",
           "payload": {
-            "summary": "Failed: ${DAG_NAME}",
+            "summary": "Failed: ${env.DAG_NAME}",
             "severity": "error"
           }
         }
@@ -451,7 +451,7 @@ env:
 
 steps:
   - id: deploy
-    run: aws s3 sync ./build s3://${S3_BUCKET}
+    run: aws s3 sync ./build s3://${env.S3_BUCKET}
 ```
 
 See [Secrets](/writing-workflows/secrets) for provider details and masking behavior.

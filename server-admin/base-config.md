@@ -158,10 +158,10 @@ env:
 
 # report.yaml
 env:
-  - REPORT_DIR: "${BASE_DIR}/reports"
+  - REPORT_DIR: "${env.BASE_DIR}/reports"
 params:
   - name: output
-    eval: "$REPORT_DIR/daily.csv"
+    eval: "${env.REPORT_DIR}/daily.csv"
     default: /tmp/daily.csv
 ```
 
@@ -175,17 +175,17 @@ Define handlers that run on specific events for all DAGs:
 # base.yaml
 handler_on:
   init:
-    run: echo "Starting DAG ${DAG_NAME}"
+    run: echo "Starting DAG ${env.DAG_NAME}"
 
   success:
     run: |
-      curl -X POST ${SLACK_WEBHOOK} \
-        -d '{"text":"✅ ${DAG_NAME} completed successfully"}'
+      curl -X POST ${env.SLACK_WEBHOOK} \
+        -d '{"text":"${env.DAG_NAME} completed successfully"}'
 
   failure:
     run: |
-      curl -X POST ${SLACK_WEBHOOK} \
-        -d '{"text":"❌ ${DAG_NAME} failed! Run ID: ${DAG_RUN_ID}"}'
+      curl -X POST ${env.SLACK_WEBHOOK} \
+        -d '{"text":"${env.DAG_NAME} failed! Run ID: ${env.DAG_RUN_ID}"}'
 
   exit:
     run: echo "Cleanup complete"
@@ -222,7 +222,7 @@ smtp:
   host: smtp.sendgrid.net
   port: 587
   username: apikey
-  password: ${SENDGRID_API_KEY}
+  password: ${env.SENDGRID_API_KEY}
 
 mail_on:
   failure: true
@@ -379,8 +379,8 @@ s3:
   endpoint: ""
   force_path_style: false
   # Credentials (prefer IAM roles in production)
-  access_key_id: ${AWS_ACCESS_KEY_ID}
-  secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+  access_key_id: ${env.AWS_ACCESS_KEY_ID}
+  secret_access_key: ${env.AWS_SECRET_ACCESS_KEY}
 ```
 
 #### LLM Configuration
@@ -403,7 +403,7 @@ llm:
 redis:
   host: localhost
   port: 6379
-  password: ${REDIS_PASSWORD}
+  password: ${env.REDIS_PASSWORD}
   db: 0
   tls: false
 ```
@@ -455,10 +455,10 @@ Registry authentication:
 # base.yaml
 registry_auths:
   ghcr.io:
-    username: ${GITHUB_USER}
-    password: ${GITHUB_TOKEN}
+    username: ${env.GITHUB_USER}
+    password: ${env.GITHUB_TOKEN}
   docker.io:
-    auth: ${DOCKER_AUTH_BASE64}
+    auth: ${env.DOCKER_AUTH_BASE64}
 ```
 
 ### Queue & Worker Settings
@@ -522,7 +522,7 @@ otel:
   endpoint: http://otel-collector:4317
   insecure: true
   headers:
-    Authorization: Bearer ${OTEL_TOKEN}
+    Authorization: Bearer ${env.OTEL_TOKEN}
 ```
 
 ### Run Configuration
@@ -548,6 +548,8 @@ env:
   - TZ=UTC
   - ENVIRONMENT=production
   - LOG_LEVEL=info
+  - SLACK_WEBHOOK=${SLACK_WEBHOOK_URL}
+  - SENDGRID_API_KEY=${SENDGRID_API_KEY}
 
 # Execution limits
 timeout_sec: 3600
@@ -565,16 +567,16 @@ shell: ["bash", "-e", "-o", "pipefail"]
 handler_on:
   failure:
     run: |
-      curl -s -X POST "${SLACK_WEBHOOK}" \
+      curl -s -X POST "${env.SLACK_WEBHOOK}" \
         -H "Content-Type: application/json" \
         -d '{
-          "text": "❌ DAG Failed",
+          "text": "DAG Failed",
           "blocks": [
             {
               "type": "section",
               "text": {
                 "type": "mrkdwn",
-                "text": "*DAG Failed*\n• Name: `'"${DAG_NAME}"'`\n• Run ID: `'"${DAG_RUN_ID}"'`"
+                "text": "*DAG Failed*\nName: `${env.DAG_NAME}`\nRun ID: `${env.DAG_RUN_ID}`"
               }
             }
           ]
@@ -583,14 +585,14 @@ handler_on:
   exit:
     run: |
       # Cleanup temp files
-      rm -rf /tmp/dagu-${DAG_RUN_ID}-* 2>/dev/null || true
+      rm -rf /tmp/dagu-${env.DAG_RUN_ID}-* 2>/dev/null || true
 
 # Email notifications
 smtp:
   host: smtp.sendgrid.net
   port: 587
   username: apikey
-  password: ${SENDGRID_API_KEY}
+  password: ${env.SENDGRID_API_KEY}
 
 mail_on:
   failure: true
@@ -638,10 +640,10 @@ handler_on:
       curl -X POST https://events.pagerduty.com/v2/enqueue \
         -H "Content-Type: application/json" \
         -d '{
-          "routing_key": "'"${PAGERDUTY_KEY}"'",
+          "routing_key": "${env.PAGERDUTY_KEY}",
           "event_action": "trigger",
           "payload": {
-            "summary": "DAG '"${DAG_NAME}"' failed",
+            "summary": "DAG ${env.DAG_NAME} failed",
             "severity": "error",
             "source": "dagu"
           }

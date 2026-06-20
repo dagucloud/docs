@@ -16,7 +16,7 @@ steps:
     with:
       overwrite: true
       args: >-
-        -i input.mov -c:v libx264 -c:a aac "${DAG_RUN_ARTIFACTS_DIR}/converted/output.mp4"
+        -i input.mov -c:v libx264 -c:a aac "${env.DAG_RUN_ARTIFACTS_DIR}/converted/output.mp4"
 ```
 
 `args` is the FFmpeg or ffprobe argument string excluding the executable name. It is parsed into argv by the action wrapper, not by a shell. For exact argument boundaries, pass a JSON array string:
@@ -43,7 +43,7 @@ steps:
         -v error -print_format json -show_format -show_streams /data/video.mp4
 
   - id: print_probe
-    run: printf '%s\n' '${inspect.outputs.stdout}'
+    run: printf '%s\n' '${steps.inspect.outputs.stdout}'
     depends: inspect
 ```
 
@@ -76,10 +76,9 @@ steps:
 | `truncated` | Object with `stdout` and `stderr` booleans. |
 | `error` | Error object when validation or process startup fails. |
 
-Do not use action outputs to carry large media data. Write media files under `${DAG_RUN_ARTIFACTS_DIR}`, a shared mounted path, or object storage.
+Do not use action outputs to carry large media data. Write media files under `${env.DAG_RUN_ARTIFACTS_DIR}`, a shared mounted path, or object storage.
 
 ## Related
 
 - [Official Dagu Actions](/dagu-actions/official)
 - [Action Package Execution](/dagu-actions/execution-model)
-

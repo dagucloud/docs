@@ -19,13 +19,13 @@ steps:
       requirements:
         - dbt-duckdb==1.10.1
       command: build
-      targetPath: ${DAG_RUN_ARTIFACTS_DIR}/dbt-target
-      logPath: ${DAG_RUN_ARTIFACTS_DIR}/dbt-logs
+      targetPath: ${env.DAG_RUN_ARTIFACTS_DIR}/dbt-target
+      logPath: ${env.DAG_RUN_ARTIFACTS_DIR}/dbt-logs
 
   - id: print_summary
     run: |
-      echo "dbt exit code: ${dbt_build.outputs.exitCode}"
-      echo "dbt run results: ${dbt_build.outputs.runResultsPath}"
+      echo "dbt exit code: ${steps.dbt_build.outputs.exitCode}"
+      echo "dbt run results: ${steps.dbt_build.outputs.runResultsPath}"
     depends: dbt_build
 ```
 
@@ -76,4 +76,3 @@ Supported commands include `build`, `run`, `test`, `seed`, `snapshot`, `compile`
 
 - [Official Dagu Actions](/dagu-actions/official)
 - [Action Package Execution](/dagu-actions/execution-model)
-

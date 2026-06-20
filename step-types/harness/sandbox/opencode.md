@@ -178,7 +178,19 @@ Provider environment variables:
 
 ```yaml
 env:
-  - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
+container:
+  image: dagu-opencode-runner:local
+  env:
+    - ANTHROPIC_API_KEY=${env.ANTHROPIC_API_KEY}
+```
+
+Or on a step-level container:
+
+```yaml
+env:
+  - ANTHROPIC_API_KEY=${env.ANTHROPIC_API_KEY}
 ```
 
 The `ANTHROPIC_API_KEY` example is only for an OpenCode configuration that uses

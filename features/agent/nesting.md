@@ -7,7 +7,7 @@ Use `action: dag.run` with `with.dag` to invoke child DAGs that contain `action:
 1. A parent step uses `action: dag.run` with `with.dag: child-dag` to invoke a child DAG (a regular [sub-DAG call](/writing-workflows/control-flow#nested-workflows))
 2. The child DAG contains one or more `action: agent.run` steps
 3. Each agent calls the `output` tool → captured by the step's `output` field → included in the child DAG's output JSON
-4. The parent accesses agent results via `${VAR.outputs.AGENT_OUTPUT}`
+4. The parent accesses agent results via `${steps.step_id.outputs.AGENT_OUTPUT}`
 
 ::: warning
 `action: dag.run` and `action: agent.run` cannot be on the **same** step. Use `action: dag.run` on a parent step to invoke a child DAG that *contains* agent steps.
@@ -34,7 +34,7 @@ steps:
     output: CHILD_RESULT
 
   - id: print_review
-    run: echo "Agent said - ${CHILD_RESULT.outputs.REVIEW}"
+    run: echo "Agent said - ${steps.run_agent_child.outputs.REVIEW}"
     depends: run_agent_child
 ```
 
@@ -49,7 +49,7 @@ steps:
       messages:
         - role: user
           content: |
-            Review the code in ${TARGET_FILE} for bugs and suggest fixes.
+            Review the code in ${params.TARGET_FILE} for bugs and suggest fixes.
     output: REVIEW
 ```
 
@@ -67,7 +67,7 @@ The child DAG's output JSON looks like:
 }
 ```
 
-The parent accesses the agent's result via `${CHILD_RESULT.outputs.REVIEW}`.
+The parent accesses the agent's result via `${steps.run_agent_child.outputs.REVIEW}`.
 
 ## Inline Sub-DAGs
 
@@ -83,7 +83,7 @@ steps:
     output: RESULT
 
   - id: print_review
-    run: echo "Review - ${RESULT.outputs.SUMMARY}"
+    run: echo "Review - ${steps.run_review.outputs.SUMMARY}"
     depends: run_review
 
 ---
@@ -98,17 +98,18 @@ steps:
       messages:
         - role: user
           content: |
-            Summarize the contents of ${FILE} in one paragraph.
+            Summarize the contents of ${params.FILE} in one paragraph.
     output: SUMMARY
 ```
 
 ## Passing Parameters to Agent Sub-DAGs
 
-Use `params` on the `call` step to pass values into the child DAG. The child DAG uses `${VAR}` in agent messages.
+Use `params` on the `dag.run` step to pass values into the child DAG. The child DAG uses scoped parameter references in agent messages.
 
 ```yaml
 steps:
-  - action: dag.run
+  - id: run_analysis
+    action: dag.run
     with:
       dag: service-analyzer
       params: "SERVICE_NAME=auth LOG_DIR=/var/log/auth"
@@ -127,13 +128,13 @@ steps:
       messages:
         - role: user
           content: |
-            Analyze the ${SERVICE_NAME} service.
-            Check logs in ${LOG_DIR} for errors from the last hour.
+            Analyze the ${params.SERVICE_NAME} service.
+            Check logs in ${params.LOG_DIR} for errors from the last hour.
             Summarize root causes and suggest fixes.
     output: FINDINGS
 ```
 
-The parent accesses the result via `${ANALYSIS.outputs.FINDINGS}`.
+The parent accesses the result via `${steps.run_analysis.outputs.FINDINGS}`.
 
 ## Chaining Agent Outputs
 
@@ -152,7 +153,7 @@ steps:
     action: dag.run
     with:
       dag: implementer-agent
-      params: "ANALYSIS=${FIRST.outputs.FINDINGS} REPO_PATH=/app/src"
+      params: "ANALYSIS=${steps.analyze.outputs.FINDINGS} REPO_PATH=/app/src"
     output: SECOND
     depends: analyze
 
@@ -160,12 +161,12 @@ steps:
     action: dag.run
     with:
       dag: verifier-agent
-      params: "CHANGES=${SECOND.outputs.CHANGES} REPO_PATH=/app/src"
+      params: "CHANGES=${steps.implement.outputs.CHANGES} REPO_PATH=/app/src"
     output: THIRD
     depends: implement
 
   - id: print_verification
-    run: echo "Verification - ${THIRD.outputs.VERDICT}"
+    run: echo "Verification - ${steps.verify.outputs.VERDICT}"
     depends: verify
 ```
 
@@ -181,16 +182,14 @@ steps:
     action: dag.run
     with:
       dag: file-reviewer
-      params: "FILE=${ITEM}"
+      params: "FILE=${env.ITEM}"
     parallel:
       items: ["src/auth.go", "src/api.go", "src/db.go"]
       max_concurrent: 3
     output: REVIEWS
 
   - id: summarize_reviews
-    run: |
-      echo "Total: ${REVIEWS.summary.total}"
-      echo "Succeeded: ${REVIEWS.summary.succeeded}"
+    run: echo "Reviews complete"
     depends: run_file_reviews
 
 ---
@@ -205,7 +204,7 @@ steps:
       messages:
         - role: user
           content: |
-            Review ${FILE} for security issues. Be concise.
+            Review ${params.FILE} for security issues. Be concise.
     output: RESULT
 ```
 
@@ -267,7 +266,7 @@ steps:
     action: dag.run
     with:
       dag: refactor-agent
-      params: "FILES=${FILE_LIST}"
+      params: "FILES=${steps.plan.outputs.FILE_LIST}"
     output: REFACTOR_RESULT
     depends: plan
 
@@ -278,7 +277,7 @@ steps:
         - role: user
           content: |
             The refactoring agent reported:
-            ${REFACTOR_RESULT.outputs.CHANGES}
+            ${steps.refactor.outputs.CHANGES}
 
             Write a brief summary of what was changed and why.
     output: SUMMARY
@@ -325,9 +324,9 @@ steps:
           content: |
             Combine these review results into a single report:
 
-            Lint: ${LINT.outputs.FINDINGS}
-            Security: ${SECURITY.outputs.FINDINGS}
-            Docs: ${DOCS.outputs.FINDINGS}
+            Lint: ${steps.lint_review.outputs.FINDINGS}
+            Security: ${steps.security_review.outputs.FINDINGS}
+            Docs: ${steps.docs_review.outputs.FINDINGS}
     output: FINAL_REPORT
     depends: [lint_review, security_review, docs_review]
 ```
@@ -348,7 +347,7 @@ steps:
     output: RESULT
 
   - id: print_analysis
-    run: echo "${RESULT.outputs.ANALYSIS}"
+    run: echo "${steps.analyze_logs.outputs.ANALYSIS}"
     depends: analyze_logs
 
 ---
@@ -363,7 +362,7 @@ steps:
       messages:
         - role: user
           content: |
-            Read ${LOG_PATH} and identify the most frequent error patterns.
+            Read ${params.LOG_PATH} and identify the most frequent error patterns.
     output: ANALYSIS
 ```
 
@@ -377,15 +376,14 @@ steps:
     action: dag.run
     with:
       dag: service-health-check
-      params: "SERVICE=${ITEM}"
+      params: "SERVICE=${env.ITEM}"
     parallel:
       items: ["auth", "payments", "notifications"]
       max_concurrent: 3
     output: HEALTH
 
   - id: summarize_health
-    run: |
-      echo "Health check complete: ${HEALTH.summary.succeeded}/${HEALTH.summary.total} passed"
+    run: echo "Health check complete"
     depends: check_services
 
 ---
@@ -400,7 +398,7 @@ steps:
       messages:
         - role: user
           content: |
-            Check the health of the ${SERVICE} service. Report status and any issues found.
+            Check the health of the ${params.SERVICE} service. Report status and any issues found.
     output: STATUS
 ```
 
@@ -423,7 +421,7 @@ steps:
     action: dag.run
     with:
       dag: test-writer
-      params: "PLAN=${TEST_PLAN}"
+      params: "PLAN=${steps.plan.outputs.TEST_PLAN}"
     output: EXECUTION
     depends: plan
 
@@ -434,7 +432,7 @@ steps:
         - role: user
           content: |
             Test writing results:
-            ${EXECUTION.outputs.RESULTS}
+            ${steps.write_tests.outputs.RESULTS}
 
             Summarize what was accomplished and any remaining gaps.
     output: SUMMARY

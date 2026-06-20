@@ -1,24 +1,138 @@
 # Outputs
 
-Capture small step results, publish structured values, and return final run or action outputs.
+Use step outputs when one step needs to pass a validated value to a later step.
 
-## Overview
+The current validated reference form is:
 
-Dagu has three related output surfaces:
+```text
+${steps.<step_id>.outputs.<output_name>}
+```
 
-- **String form** captures a step's trimmed stdout into one variable such as `${VERSION}`.
-- **Object form** publishes structured step-scoped output for `${step_id.output.*}` references.
-- **DAG/action outputs** publish values for the run's Outputs tab and for packaged action callers through `${step_id.outputs.*}`.
+The producing step must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`.
 
-These modes solve different problems:
-
-- Use **string form** when you want a flat variable and a final `outputs.json` entry.
-- Use **object form** when one step needs structured downstream data through `${step_id.output.*}`.
-- Use **DAG/action outputs** when the whole DAG or packaged action should return values to its caller.
-
-Use `output:` for small values. If a step produces a large report, JSON dump, Markdown document, or log that users should inspect later, write the stream directly to an artifact with `stdout.artifact` or `stderr.artifact` instead:
+## Basic Example
 
 ```yaml
+type: graph
+
+steps:
+  - id: get_version
+    run: |
+      printf 'version=%s\n' "$(cat VERSION)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
+
+  - id: build_image
+    depends: get_version
+    run: docker build -t "myapp:${steps.get_version.outputs.version}" .
+```
+
+This is more explicit than a bare `${VERSION}` reference:
+
+- `get_version` declares that it publishes `version`
+- `build_image` declares the dependency that makes the output available
+- Dagu can report a passive notice if the step id, output name, or dependency is wrong
+
+## Output File Format
+
+For each step attempt, Dagu creates an output file and exposes its path as `DAGU_OUTPUT_FILE`.
+
+Write single-line values as `name=value`:
+
+```yaml
+steps:
+  - id: inspect_build
+    run: |
+      printf 'version=v1.2.3\n' >> "$DAGU_OUTPUT_FILE"
+      printf 'artifact_url=https://example.test/app.tgz\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
+      - name: artifact_url
+```
+
+Write multi-line values with a delimiter:
+
+```yaml
+steps:
+  - id: summarize
+    run: |
+      {
+        printf 'report<<REPORT\n'
+        ./generate-report --format markdown
+        printf '\nREPORT\n'
+      } >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: report
+```
+
+Rules:
+
+- Every declared output must be written exactly once.
+- Written output names must be declared.
+- Duplicate output names fail the step attempt.
+- Failed, aborted, timed-out, skipped, and not-yet-completed steps publish no outputs.
+
+## JSON Outputs
+
+Declare `type: json` when the output value must be valid JSON.
+
+```yaml
+steps:
+  - id: inspect
+    run: |
+      cat >> "$DAGU_OUTPUT_FILE" <<'EOF'
+      metadata<<JSON
+      {"image":"api","tag":"v1.2.3"}
+      JSON
+      EOF
+    outputs:
+      - name: metadata
+        type: json
+
+  - id: print_metadata
+    depends: inspect
+    run: printf '%s\n' '${steps.inspect.outputs.metadata}'
+```
+
+Step output references read top-level declared output names. Nested output paths such as `${steps.inspect.outputs.metadata.tag}` are not part of the strict reference syntax.
+
+## Dependency Requirement
+
+Step output references do not create dependencies. The consuming step must depend directly or transitively on the producing step.
+
+```yaml
+steps:
+  - id: build
+    run: |
+      printf 'image=registry.example.com/app:v1.2.3\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: image
+
+  - id: deploy
+    depends: build
+    run: ./deploy.sh "${steps.build.outputs.image}"
+```
+
+If `deploy` omits `depends: build`, Dagu preserves `${steps.build.outputs.image}` and inspection surfaces can report a `missing_dependency` notice.
+
+## Output Names
+
+Output names must match:
+
+```text
+^[A-Za-z][A-Za-z0-9_]*$
+```
+
+Use names such as `version`, `image_tag`, `artifact_url`, or `record_count`.
+
+## Large Results
+
+Do not use step outputs for large reports, logs, media files, or full datasets. Write those to an artifact instead and publish only the small path or summary that later steps need.
+
+```yaml
+artifacts:
+  enabled: true
+
 steps:
   - id: report
     run: ./generate-report --format markdown
@@ -26,295 +140,4 @@ steps:
       artifact: reports/report.md
 ```
 
-## String Form
-
-Capture stdout into a variable and include it in the DAG run's `outputs.json`:
-
-```yaml
-steps:
-  - id: get_version
-    run: cat VERSION
-    output: VERSION
-
-  - id: build_image
-    run: docker build -t myapp:${VERSION} .
-    depends: get_version
-```
-
-The captured stdout is trimmed and becomes:
-
-- `${VERSION}` for downstream steps
-- `${get_version.output}` for step-ID references
-- `version` in `outputs.json`
-
-The dollar prefix is optional:
-
-```yaml
-output: $VERSION
-```
-
-## Object Form
-
-Object form publishes structured step output instead of a flat variable:
-
-```yaml
-steps:
-  - id: inspect_build
-    run: |
-      printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
-    output:
-      version:
-        from: stdout
-        decode: json
-        select: .version
-      artifact:
-        from: stdout
-        decode: json
-        select: .artifact
-
-  - id: deploy
-    run: |
-      echo "Deploying ${inspect_build.output.version}"
-      echo "Artifact: ${inspect_build.output.artifact.url}"
-    depends: inspect_build
-```
-
-### Entry Forms
-
-#### Literal value
-
-```yaml
-output:
-  versionLabel: "ver - ${build.output.version}"
-  meta:
-    env: stg
-    approved: true
-```
-
-String leaves are expanded with normal `${...}` references. Backtick command substitution and shell expansion are not run in object-form output values.
-
-Plain objects stay literal unless they use one of the reserved long-form keys: `value`, `from`, `path`, `decode`, or `select`.
-If you need a literal object containing one of those keys, wrap it with `value:`.
-
-#### Source-backed value
-
-```yaml
-output:
-  version:
-    from: stdout
-    decode: json
-    select: .version
-
-  warning:
-    from: stderr
-    decode: json
-    select: .warning
-
-  reportPath:
-    from: file
-    path: build/report.json
-    decode: json
-    select: .path
-```
-
-### Supported Fields
-
-| Field | Description |
-|-------|-------------|
-| `value` | Literal scalar, array, or object value to publish |
-| `from` | Runtime source: `stdout`, `stderr`, or `file` |
-| `path` | File path used when `from: file` |
-| `decode` | `text`, `json`, or `yaml` |
-| `select` | jq-style path applied after `decode: json` or `decode: yaml` |
-
-`value` cannot be combined with `from`, `path`, `decode`, or `select`.
-
-### Publish-Only Steps
-
-If a step only has object-form `output:` and no executor fields, Dagu treats it as a publish-only step:
-
-```yaml
-steps:
-  - id: publish
-    output:
-      version: "${build.output.version}"
-      versionLabel: "ver - ${build.output.version}"
-```
-
-This is useful for reshaping or renaming values without a fake `echo` step.
-
-## Step References
-
-Step IDs expose several properties:
-
-- `${id.stdout}` - path to the stdout log file
-- `${id.stderr}` - path to the stderr log file
-- `${id.exit_code}` - exit code as a string
-- `${id.output}` - captured string output or the full object-form payload as compact JSON
-- `${id.outputs}` - DAG/action outputs published by that step as compact JSON
-- `${id.outputs.field}` - one field from the published DAG/action outputs
-
-Nested access works when the output value is structured JSON:
-
-```yaml
-steps:
-  - id: build
-    run: echo '{"version":"v1.2.3"}'
-    output: BUILD_JSON
-
-  - id: print_version
-    run: echo "Version: ${build.output.version}"
-    depends: build
-```
-
-For object-form output, nested access is the primary pattern:
-
-```yaml
-${inspect_build.output.version}
-${inspect_build.output.artifact.url}
-```
-
-Substring slicing still works on the final string value:
-
-```yaml
-${build.output:0:5}
-```
-
-> `${id.stdout}` and `${id.stderr}` are file paths, not file content. Use `cat ${id.stdout}` to read the content.
-
-## DAG and Action Outputs
-
-Use `stdout.outputs` when the command's stdout is the value you want to return from the DAG or action.
-
-String form captures stdout text into one output field:
-
-```yaml
-steps:
-  - id: create_ticket
-    run: ./create-ticket.sh
-    stdout:
-      outputs: ticketId
-```
-
-Object form can decode stdout as JSON or YAML. If no `field` is set, decoded JSON must be an object and each key becomes an output:
-
-```yaml
-steps:
-  - id: notify
-    run: ./notify.sh
-    stdout:
-      outputs:
-        decode: json
-```
-
-Use `fields` when stdout has more data than the boundary should expose:
-
-```yaml
-steps:
-  - id: notify
-    run: ./notify.sh
-    stdout:
-      outputs:
-        fields:
-          messageId:
-            decode: json
-            select: .id
-          status:
-            decode: json
-            select: .status
-```
-
-Use `outputs.write` when the result is assembled from prior step outputs or literal values:
-
-```yaml
-steps:
-  - id: publish
-    action: outputs.write
-    with:
-      values:
-        messageId: msg-123
-        status: sent
-```
-
-Packaged action callers read these values with `${notify.outputs.messageId}`. This is intentionally separate from `${notify.output.*}`, which is for step-scoped `output:` values.
-
-When these values are produced inside an action package workflow, Dagu validates the final action output object against the `outputs` schema in `dagu-action.yaml` after the action workflow returns a run result. `stdout.outputs` and `outputs.write` publish values; the manifest schema is what validates the action boundary. If validation fails, the parent action step fails.
-
-## Run Output Collection
-
-When a DAG run completes, Dagu writes collected outputs to `outputs.json` for the Web UI and Outputs API.
-
-Collected run outputs include string-form `output: NAME`, `stdout.outputs`, and `outputs.write`. Object-form `output:` stays step-scoped and is not collected unless the workflow explicitly republishes values through `stdout.outputs` or `outputs.write`.
-
-Example:
-
-```yaml
-steps:
-  - id: build
-    run: cat VERSION
-    output: BUILD_VERSION
-
-  - id: test
-    run: pytest --collect-only -q | tail -1
-    output: TEST_COUNT
-    depends: build
-```
-
-Result:
-
-```json
-{
-  "outputs": {
-    "buildVersion": "1.2.3",
-    "testCount": "42 tests"
-  }
-}
-```
-
-String-form `output: NAME` keys are converted from `SCREAMING_SNAKE_CASE` to `camelCase`. Keys from `stdout.outputs` and `outputs.write` are preserved.
-
-If multiple steps write the same output variable name, the last collected value wins.
-
-## Web UI and API
-
-The Web UI **Outputs** tab and the REST outputs endpoint read from `outputs.json`:
-
-```bash
-GET /api/v1/dag-runs/{name}/{dagRunId}/outputs
-```
-
-Example response:
-
-```json
-{
-  "metadata": {
-    "dagName": "my-workflow",
-    "dagRunId": "abc123",
-    "attemptId": "attempt_001",
-    "status": "succeeded",
-    "completedAt": "2024-01-15T10:30:00Z",
-    "params": "{\"env\":\"prod\"}"
-  },
-  "outputs": {
-    "version": "1.2.3",
-    "recordCount": "1000"
-  }
-}
-```
-
-Use `latest` as the run ID to fetch the most recent run's outputs.
-
-## Size Limits and Safety
-
-- Captured stdout is limited by `max_output_size` (default 1MB). Use `stdout.artifact` for large command output that should be stored as a run artifact instead of a variable.
-- Object-form `from: stdout`, `from: stderr`, and `from: file` use the same limit.
-- For large or untrusted data, write to a file and pass the path downstream instead of capturing the content.
-
-If you need secrets, use [Secrets](/writing-workflows/secrets) and avoid printing them to stdout.
-
-## Related Documentation
-
-- [Data Flow](/writing-workflows/data-flow) - Data passing patterns
-- [Variables Reference](/writing-workflows/template-variables) - `${...}` syntax and step references
-- [YAML Specification](/writing-workflows/yaml-specification) - Full field reference
-- [API Reference](/overview/api) - Outputs endpoint
+See [Artifacts](/writing-workflows/artifacts) for run artifact storage.

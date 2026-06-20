@@ -1,435 +1,184 @@
 # Variables Reference
 
-For a complete list of the automatically injected run metadata, see [Special Environment Variables](/writing-workflows/runtime-variables).
+For automatically injected run metadata, see [Special Environment Variables](/writing-workflows/runtime-variables).
 
-## Environment Variables
+## Reference Syntax
 
-### System Environment Variable Filtering
+Dagu-owned value references are scoped:
 
-Dagu filters the process environment before it builds the step execution environment.
+| Form | Meaning |
+| --- | --- |
+| `${consts.name}` | Immutable workflow constant |
+| `${params.name}` | Named runtime parameter |
+| `${env.NAME}` | Value from the current environment scope |
+| `${steps.step_id.outputs.name}` | Declared output from a completed dependency step |
 
-System environment variables are still available for expansion (`${VAR}`) while Dagu parses the DAG, but only a filtered subset is forwarded to step processes and sub-DAG executions.
+These forms are validated more precisely than bare `${NAME}` text. They let Dagu identify unknown params, missing environment values, unknown step ids, unknown output names, and missing dependencies.
 
-The built-in forwarded variables are platform-dependent:
+Bare `$NAME` and `${NAME}` are unqualified environment syntax. In `run` scripts, Dagu leaves them for the selected shell or interpreter. In fields where Dagu owns unqualified environment expansion, they read from the current environment scope.
 
-- Unix and macOS exact names: `PATH`, `HOME`, `USER`, `SHELL`, `TMPDIR`, `TERM`, `EDITOR`, `VISUAL`, `LANG`, `LC_ALL`, `LC_CTYPE`, `TZ`, `LD_LIBRARY_PATH`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
-- Windows exact names: `USERPROFILE`, `SYSTEMROOT`, `WINDIR`, `SYSTEMDRIVE`, `COMSPEC`, `PATHEXT`, `TEMP`, `TMP`, `PATH`, `PSMODULEPATH`, `HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
-- Allowed prefixes on all platforms: `DAGU_`, `DAG_`, `LC_`, `KUBERNETES_`
+## Constants
 
-`DAG_` includes the runtime variables Dagu sets for each step. `KUBERNETES_` allows in-cluster API discovery variables such as `KUBERNETES_SERVICE_HOST` and `KUBERNETES_SERVICE_PORT`.
-
-You can extend the forwarded set in server configuration with top-level `env_passthrough` and `env_passthrough_prefixes`. The matching env vars are only forwarded if they already exist in Dagu's own process environment.
-
-```yaml
-# config.yaml
-env_passthrough:
-  - SSL_CERT_FILE
-  - HTTP_PROXY
-  - HTTPS_PROXY
-  - NO_PROXY
-
-env_passthrough_prefixes:
-  - AWS_
-  - CUSTOM_CA_
-```
-
-The same settings are available through:
-
-- `DAGU_ENV_PASSTHROUGH=SSL_CERT_FILE,HTTP_PROXY,HTTPS_PROXY,NO_PROXY`
-- `DAGU_ENV_PASSTHROUGH_PREFIXES=AWS_,CUSTOM_CA_`
-
-On Unix, exact-name and prefix matching are case-sensitive. On Windows, they are case-insensitive.
-
-If a variable is not in the forwarded set, it can still be referenced during DAG parsing, but it will not appear in the step process environment unless you copy it into `env:`, `dotenv`, or `secrets:`. Use `secrets:` for credentials and other sensitive values.
-
-### Defining Environment Variables
-
-Set environment variables available to all steps:
+Use `consts` for immutable values known when the workflow is loaded.
 
 ```yaml
-env:
-  - LOG_LEVEL: debug
-  - DATA_DIR: /tmp/data
-  - API_URL: https://api.example.com
-  - AWS_REGION: ${AWS_REGION}   # Explicitly reference a non-sensitive system variable
-```
-
-**Important:** Sensitive system environment variables should normally be declared through `secrets:` rather than copied into `env:`. Explicit `env:` references are better suited to non-sensitive values.
-
-### Variable Expansion
-
-Reference other variables:
-
-```yaml
-env:
-  - BASE_DIR: ${HOME}/data
-  - INPUT_DIR: ${BASE_DIR}/input
-  - OUTPUT_DIR: ${BASE_DIR}/output
-  - CONFIG_FILE: ${INPUT_DIR}/config.yaml
-```
-
-### Unknown Variable Handling
-
-When a variable is referenced but not defined in Dagu's context, the behavior depends on the execution context:
-
-**Shell expansion enabled (default for local shell execution):**
-Unknown variables become empty strings. This is standard POSIX shell behavior.
-
-**Non-shell executors (docker, http, ssh, jq, mail, etc.):**
-OS-only variables not defined in the DAG scope are preserved as-is, letting the target environment resolve them. DAG-scoped variables (env, params, secrets, step outputs) are still expanded normally.
-
-**Template steps:**
-The `script` body is not expanded by Dagu at all, so `${VAR}` remains literal there. Pass values through `with.data` when you want Dagu to expand them before template rendering.
-This exception is for template action script bodies, not multi-line command-step `run: |` scripts.
-
-```yaml
-# Example: Non-shell executor (SSH)
-env:
-  - DEPLOY_BRANCH: main
+consts:
+  - service: api
+  - image_repo: registry.example.com/${consts.service}
 
 steps:
-  - action: ssh.run
-    with:
-      user: deploy
-      host: remote.example.com
-      command: |
-        cd $HOME/app                    # $HOME preserved — remote shell resolves it
-        git checkout ${DEPLOY_BRANCH}   # Expanded by Dagu — defined in DAG env
+  - id: print_repo
+    run: echo "${consts.image_repo}"
 ```
 
-In this example, `$HOME` is not defined in the DAG scope, so it passes through unchanged to the remote shell. `${DEPLOY_BRANCH}` is defined in the DAG `env:`, so Dagu expands it before sending.
-
-### Literal Dollar Signs
-
-In non-shell contexts (docker, http, ssh, jq, mail, etc.), you can emit a literal `$` by escaping it with a backslash:
-
-```yaml
-env:
-  - PRICE: '\$9.99'   # Becomes $9.99 at runtime
-```
-
-Notes:
-- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and `with` fields).
-- Shell-executed commands keep native shell semantics. Use shell escaping there.
-- To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
-- In YAML, single quotes preserve backslashes; with double quotes, escape the backslash (e.g., `"\\$9.99"`).
-- `template` step `script` bodies are excluded because Dagu does not process `$` there.
-
-### Loading from .env Files
-
-Load variables from dotenv files:
-
-```yaml
-# Single file
-dotenv: .env
-
-# Multiple files (loaded in order)
-dotenv:
-  - .env
-  - .env.local
-  - configs/.env.${ENVIRONMENT}
-```
-
-Example `.env` file:
-```bash
-DATABASE_URL=postgres://localhost/mydb
-API_KEY=secret123
-DEBUG=true
-```
+`consts` entries are evaluated in order. A const can reference only earlier consts.
 
 ## Parameters
 
-### Positional Parameters
-
-Define default positional parameters:
-
-```yaml
-params: first second third
-
-steps:
-  - run: echo "Args: $1 $2 $3"
-```
-
-Run with custom values:
-```bash
-dagu start workflow.yaml -- one two three
-```
-
-### Named Parameters
-
-Define named parameters with defaults:
+Use `${params.name}` for named runtime parameters.
 
 ```yaml
 params:
-  - ENVIRONMENT: dev
-  - PORT: 8080
-  - DEBUG: false
+  - name: environment
+    type: string
+    default: staging
+    enum: [dev, staging, prod]
 
 steps:
-  - run: ./server --env=${ENVIRONMENT} --port=${PORT} --debug=${DEBUG}
+  - id: deploy
+    run: ./deploy.sh --env "${params.environment}"
 ```
 
-Override at runtime:
-```bash
-dagu start workflow.yaml -- ENVIRONMENT=prod PORT=80 DEBUG=true
-```
+Parameter defaults are literal unless `eval` is used on an inline rich parameter.
 
-### Accessing Parameters as JSON
+## Environment Values
 
-Every step receives the full parameter map encoded as JSON via `DAG_PARAMS_JSON`. This value reflects the merged defaults plus any runtime overrides. Resolved DAG params are serialized as strings, and when a run is started with raw JSON parameters, the original payload is preserved. Raw JSON may be an object or an array, but named params should use an object. The variable is not set when the DAG has no parameters and none were supplied.
-
-```yaml
-steps:
-  - id: print_params
-    run: echo "Raw payload: ${DAG_PARAMS_JSON}"
-  - id: batch_size
-    action: jq.filter
-    with:
-      filter: '"Batch size: \(.batchSize // "n/a")"'
-      raw: true
-      data: ${DAG_PARAMS_JSON}
-```
-
-Use this when downstream scripts prefer structured data or when you need access to parameters that were provided as nested JSON.
-
-### Mixed Parameters
-
-Combine positional and named parameters:
-
-```yaml
-params:
-  - ENVIRONMENT: dev
-  - VERSION: latest
-
-steps:
-  - run: echo "Deploying $1 to ${ENVIRONMENT} version ${VERSION}"
-```
-
-Run with:
-```bash
-dagu start workflow.yaml -- myapp ENVIRONMENT=prod VERSION=1.2.3
-```
-
-## Command Substitution
-
-Execute commands and use their output in `env:` blocks using backticks. This runs the command at DAG load time and stores the result:
+Use `${env.NAME}` when Dagu should resolve an environment value.
 
 ```yaml
 env:
-  - TODAY: "`date +%Y-%m-%d`"
-  - HOSTNAME: "`hostname -f`"
-  - GIT_COMMIT: "`git rev-parse HEAD`"
+  - BASE_DIR: /tmp/data
+  - OUTPUT_DIR: ${env.BASE_DIR}/output
 
 steps:
-  - run: echo "Deploy on ${TODAY} from ${HOSTNAME}"
+  - id: process
+    run: ./process.sh --out "${env.OUTPUT_DIR}"
 ```
 
-**Note:** Command substitution is always supported in `env:` blocks. For DAG-level `params:`, use `eval:` on an inline rich param definition when you want `$VAR` expansion or backtick command substitution. Literal `default` values and runtime overrides from the CLI, API, and sub-DAG calls remain literal.
-
-Backticks are still part of normal runtime evaluation in fields such as `command`, `stdout`, `stderr`, sub-DAG `params`, and executor `with:` config. Multi-line command-step `run: |` scripts are the main exception: Dagu resolves `${...}` references there but leaves backticks in the script text for the selected shell or interpreter.
-
-## Output Variables
-
-### Capturing Output
-
-Capture command output to use in later steps:
+To import a host process environment value into the workflow environment, use root `env`:
 
 ```yaml
-steps:
-  - id: get_version
-    run: cat VERSION
-    output: VERSION
-  - id: build_image
-    run: docker build -t myapp:${VERSION} .
-    depends: get_version
+env:
+  - AWS_REGION: ${AWS_REGION}
 ```
 
-### Output Size Limits
+After import, prefer `${env.AWS_REGION}` in workflow fields.
 
-Control maximum output size:
+## Step Outputs
 
-```yaml
-# Global limit for all steps
-max_output_size: 5242880  # 5MB
-
-steps:
-  - run: cat large-file.json
-    output: FILE_CONTENT  # Fails if > 5MB
-```
-
-For large content that should be retained with the run, stream it to an artifact instead of capturing it in `output:`:
+Use `${steps.step_id.outputs.name}` to read a declared output from a completed dependency.
 
 ```yaml
-steps:
-  - run: ./generate-report
-    stdout:
-      artifact: reports/report.md
-```
-
-### Redirecting Output
-
-Redirect to local files instead of capturing:
-
-```yaml
-tools:
-  - astral-sh/uv@0.11.14
+type: graph
 
 steps:
-  - run: uv run --python 3.13.9 python report.py
-    stdout: /tmp/report.txt
-    stderr: /tmp/errors.log
-```
-
-Use artifact-relative stream output when the redirected content should appear in the DAG run's Artifacts tab:
-
-```yaml
-tools:
-  - astral-sh/uv@0.11.14
-
-steps:
-  - run: uv run --python 3.13.9 python report.py
-    stdout:
-      artifact: reports/report.txt
-```
-
-## JSON Path References
-
-Access nested values in JSON output:
-
-```yaml
-steps:
-  - id: get_config
+  - id: build
     run: |
-      echo '{"db": {"host": "localhost", "port": 5432}}'
-    output: CONFIG
-    
-  - id: connect_database
-    run: psql -h ${CONFIG.db.host} -p ${CONFIG.db.port}
-    depends: get_config
+      printf 'image=registry.example.com/api:v1.2.3\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: image
+
+  - id: deploy
+    depends: build
+    run: ./deploy.sh "${steps.build.outputs.image}"
 ```
 
-### Sub-workflow Output
+Rules:
 
-Access outputs from nested workflows:
+- The producing step must have an `id`.
+- The output name must be declared in the producing step's `outputs` list.
+- The producing step must complete successfully before the consuming step starts.
+- The consuming step must depend directly or transitively on the producing step.
+- Step output references do not create dependencies.
+
+## Escaping Dagu References
+
+Prefix a Dagu-owned reference with a backslash when the later runtime should receive the literal reference text.
 
 ```yaml
 steps:
-  - id: run_etl
-    action: dag.run
-    with:
-      dag: etl-workflow
-      params: "DATE=${TODAY}"
-    output: ETL_RESULT
-    
-  - id: print_etl_result
+  - id: script
     run: |
-      echo "Records processed: ${ETL_RESULT.outputs.record_count}"
-      echo "Status: ${ETL_RESULT.outputs.status}"
-    depends: run_etl
+      node - <<'JS'
+      console.log('\${steps.build.outputs.image}')
+      JS
 ```
 
-## Step ID References
+Dagu removes its escape marker and passes `${steps.build.outputs.image}` to the script as literal text.
 
-Reference step properties using IDs:
+## Shell Variables
+
+Inside `run`, unqualified `$NAME` and `${NAME}` belong to the selected shell or script interpreter.
 
 ```yaml
 steps:
-  - id: risky
-    run: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
-    continue_on: failed
-
-  - id: handle_result
+  - id: shell_example
     run: |
-      if [ "${risky.exit_code}" = "0" ]; then
-        echo "Success! Output was:"
-        cat ${risky.stdout}  # Read content from file path
-      else
-        echo "Failed with code ${risky.exit_code}"
-        cat ${risky.stderr}  # Read content from file path
-      fi
-    depends: risky
+      tmp="${TMPDIR:-/tmp}/work"
+      mkdir -p "$tmp"
+      echo "scratch=$tmp"
 ```
 
-Available properties:
-- `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
-- `${id.stdout}` - Path to stdout log file
-- `${id.stderr}` - Path to stderr log file
-- `${id.output}` - Captured string output or structured object-form payload (requires `output:` on the referenced step)
-- `${id.outputs}` - DAG/action outputs published by the step as compact JSON
-- `${id.outputs.field}` - One field from the published DAG/action outputs
+Use shell syntax for shell-local variables, shell defaults, substring operators, arrays, and command substitution that must run inside the step process.
 
-> **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content.
->
-> - To read content: use `cat ${id.stdout}`
-> - To capture output for later steps: use the `output:` field instead
-> - To store large command output as a run artifact: use `stdout.artifact` or `stderr.artifact`
-> - Substring slicing like `${id.stdout:0:5}` operates on the **file path string**, not file content
->
-> `${id.output}` returns the captured text value for string-form output, or the full published payload as compact JSON for object-form output. Nested access such as `${id.output.version}` works when the output is structured JSON. `${id.outputs.foo}` reads values published through `stdout.outputs` or `outputs.write`. If the referenced step does not have the requested output configured, the reference is not expanded and passes through as a literal. Substring slicing still works on the final string value: `${id.output:0:5}`.
+Use scoped Dagu references when the value should be resolved by Dagu before the step starts:
 
-## Variable Precedence
+```yaml
+env:
+  - OUTPUT_DIR: /tmp/out
 
-Dagu resolves variables in two places: when interpolating `${VAR}` in DAG fields,
-and when constructing the step process environment.
+steps:
+  - id: shell_and_dagu
+    run: |
+      mkdir -p "${env.OUTPUT_DIR}"
+      file="${env.OUTPUT_DIR}/result.txt"
+      echo "done" > "$file"
+```
 
-### Interpolation precedence (highest to lowest)
+## Field Behavior
 
-1. **Step-level environment**
-   ```yaml
-   steps:
-     - env:
-         - VAR: step-value
-   ```
+Common value-resolved fields include:
 
-2. **Output variables from earlier steps**
-   ```yaml
-   steps:
-     - run: echo 42
-       output: VAR
-   ```
+- root `env`
+- `dotenv` paths
+- `working_dir`
+- `preconditions[].condition`
+- `steps[].run`
+- `steps[].with` nested string values
+- `steps[].env`
+- `steps[].working_dir`
+- retry and repeat numeric string fields listed in the YAML spec
+- `steps[].parallel` strings
+- `steps[].stdout`, `steps[].stderr`, and artifact paths
+- lifecycle handler step fields
 
-3. **Secrets**
-   ```yaml
-   secrets:
-     - name: VAR
-       provider: env
-       key: VAR
-   ```
+Fields such as step identity, dependency names, parameter defaults, secret provider keys, and most root provider configuration are literal unless their owning spec opts in.
 
-4. **DAG-level environment (including dotenv)**
-   ```yaml
-   env:
-     - VAR: env-value
-   dotenv: .env
-   ```
+## Unknown References
 
-5. **Parameters (defaults + CLI overrides)**
-   ```yaml
-   params:
-     - VAR: dag-default
-   ```
+Unsupported braced text is preserved as ordinary string content.
 
-6. **Process environment fallback**
-   For shell commands, system environment variables are used if the key is not
-   set by any of the sources above, and are still subject to filtering at
-   execution time. For non-shell executors (docker, http, ssh, jq, mail, etc.),
-   OS environment is **not** used as a fallback during variable interpolation —
-   only DAG-scoped sources (levels 1–5) are checked. OS-only variables pass
-   through unchanged, letting the target environment resolve them. `template`
-   step `script` bodies are a special case: Dagu does not interpolate them at
-   all, while `with.data` values still use DAG-scoped sources.
+```yaml
+steps:
+  - id: literal_text
+    run: echo '${not.a.supported.reference}'
+```
 
-### Step process environment precedence (lowest to highest)
+Supported but unavailable references are also preserved, and inspection surfaces can report a passive notice. For example, a known step-output reference without a dependency is preserved with a `missing_dependency` notice.
 
-1. **Filtered system environment**
-2. **DAG runtime environment (params + `env` + `.env` + run metadata)**
-   If a key appears in both `params` and `env`, the `env` value wins.
-3. **Secrets**
-4. **Step-level environment**
-5. **Output variables from earlier steps**
+## Related Pages
 
-## See Also
-
-- [Writing Workflows](/writing-workflows/data-variables) - Detailed guide on using variables
-- [YAML Specification](/writing-workflows/yaml-specification) - Complete YAML format reference
-- [Configuration Reference](/server-admin/reference) - Server configuration variables
+- [Outputs](/writing-workflows/outputs)
+- [Parameters](/writing-workflows/parameters)
+- [Environment Variables](/writing-workflows/environment-variables)
+- [YAML Specification](/writing-workflows/yaml-specification)

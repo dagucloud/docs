@@ -59,7 +59,7 @@ params:
 
 steps:
   - id: inspect_account
-    run: ./scripts/inspect-account.sh --customer "${customer_id}"
+    run: ./scripts/inspect-account.sh --customer "${params.customer_id}"
     stdout:
       artifact: reports/inspection.md
 
@@ -72,9 +72,9 @@ steps:
   - id: repair_account
     run: >-
       ./scripts/repair-account.sh
-      --customer "${customer_id}"
-      --scope "${change_scope}"
-      --dry-run="${dry_run}"
+      --customer "${params.customer_id}"
+      --scope "${params.change_scope}"
+      --dry-run="${params.dry_run}"
     depends: review
     stdout:
       artifact: reports/repair.log

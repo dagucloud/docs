@@ -85,7 +85,7 @@ steps:
   - id: conditional_task_shorthand
     run: echo "Processing"
     preconditions:
-      - condition: "${ENABLE_FEATURE}"
+      - condition: "${env.ENABLE_FEATURE}"
         expected: "true"
     continue_on: skipped
 
@@ -93,7 +93,7 @@ steps:
   - id: conditional_task_object
     run: echo "Processing"
     preconditions:
-      - condition: "${ENABLE_FEATURE}"
+      - condition: "${env.ENABLE_FEATURE}"
         expected: "true"
     continue_on:
       skipped: true
@@ -211,7 +211,7 @@ steps:
   - id: fallback_method
     run: echo "Processing with fallback settings"
     preconditions:
-      - condition: "${TRY_OPTIMAL_METHOD_EXIT_CODE}"
+      - condition: "${env.TRY_OPTIMAL_METHOD_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"  # Only run if previous failed
     depends: try_optimal_method
 ```
@@ -260,7 +260,7 @@ When a step with `continue_on` fails but the DAG continues, the final status is 
 ```yaml
 handler_on:
   success:
-    run: echo "DAG completed (status: ${DAG_RUN_STATUS})"  # partially_succeeded
+    run: echo "DAG completed (status: ${env.DAG_RUN_STATUS})"  # partially_succeeded
 
 steps:
   - id: optional_step
@@ -345,7 +345,7 @@ steps:
   - id: check_secondary
     run: curl -f https://secondary.example.com/health
     preconditions:
-      - condition: "${CHECK_PRIMARY_EXIT_CODE}"
+      - condition: "${env.CHECK_PRIMARY_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"  # Only if primary failed
     depends: check_primary
 ```

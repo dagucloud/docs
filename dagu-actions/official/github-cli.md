@@ -18,7 +18,7 @@ steps:
       args: ["repo", "view", "--json", "name,description,url"]
 
   - id: print
-    run: printf '%s\n' '${repo.outputs.stdout}'
+    run: printf '%s\n' '${steps.repo.outputs.stdout}'
     depends: repo
 ```
 
@@ -43,7 +43,7 @@ steps:
         - --jq
         - .tag_name
       env:
-        GH_TOKEN: ${GH_TOKEN}
+        GH_TOKEN: ${env.GH_TOKEN}
 ```
 
 ## Inputs

@@ -12,7 +12,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${INPUT}
+      value: ${env.INPUT}
       routes:
         "exact_value": [route_a]
         "other": [route_b]
@@ -40,7 +40,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${STATUS}
+      value: ${env.STATUS}
       routes:
         "success": [handle_success]
         "re:^success.*": [handle_success_prefix]
@@ -75,13 +75,15 @@ Router target steps implicitly depend on the router step. You normally do not ne
 type: graph
 steps:
   - id: setup
-    output:
-      status: prod
+    run: |
+      printf 'status=%s\n' "prod" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: status
 
   - id: route
     action: router.route
     with:
-      value: ${setup.output.status}
+      value: ${steps.setup.outputs.status}
       routes:
         prod: [deploy_prod]
         stg: [deploy_stg]

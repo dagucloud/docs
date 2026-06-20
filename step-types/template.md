@@ -71,21 +71,23 @@ This writes to `/opt/reports/subdir/output.txt`.
 
 ## Using Data from Prior Steps
 
-Data values are expanded by Dagu before the template runs, so captured output variables work:
+Data values are expanded by Dagu before the template runs, so declared step outputs work:
 
 ```yaml
 type: graph
 steps:
   - id: producer
-    run: 'echo -n "Alice"'
-    output: NAME
+    run: |
+      printf 'name=%s\n' "Alice" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: name
 
   - id: render
     action: template.render
     with:
       template: "Hello, {{ .name }}!"
       data:
-        name: ${NAME}
+        name: ${steps.producer.outputs.name}
     output: RESULT
     depends:
       - producer

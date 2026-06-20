@@ -14,7 +14,7 @@ steps:
   - id: query_users
     action: postgres.query
     with:
-      dsn: "postgres://user:${DB_PASSWORD}@localhost:5432/mydb"
+      dsn: "postgres://user:${env.DB_PASSWORD}@localhost:5432/mydb"
       query: "SELECT id, name, email FROM users"
     output: USERS  # Capture results to variable
 ```
@@ -51,7 +51,7 @@ steps:
   - id: query
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       timeout: 30           # Query timeout in seconds
 ```
 
@@ -102,7 +102,7 @@ steps:
   - id: find_user
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       params:
         email: "user@example.com"
         status: active
@@ -120,7 +120,7 @@ steps:
   - id: find_user
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       params:
         - "user@example.com"
         - active
@@ -136,7 +136,7 @@ steps:
   - id: transfer
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       transaction: true
       query: |
         UPDATE accounts SET balance = balance - 100 WHERE id = 1;
@@ -152,7 +152,7 @@ steps:
   - id: critical_update
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       transaction: true
       isolation_level: serializable
       query: |
@@ -176,7 +176,7 @@ steps:
   - id: setup_tables
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       query: |
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
@@ -199,7 +199,7 @@ steps:
   - id: import_users
     action: postgres.import
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       import:
         input_file: /data/users.csv
         table: users
@@ -219,7 +219,7 @@ steps:
   - id: import_events
     action: postgres.import
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       import:
         input_file: /data/events.jsonl
         table: events
@@ -249,7 +249,7 @@ steps:
   - id: import_with_nulls
     action: postgres.import
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       import:
         input_file: /data/records.csv
         table: records
@@ -269,7 +269,7 @@ steps:
   - id: validate_import
     action: postgres.import
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       import:
         input_file: /data/users.csv
         table: users
@@ -285,7 +285,7 @@ steps:
   - id: export_orders
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       output_format: jsonl
       query: "SELECT * FROM orders"
     output: ORDERS
@@ -304,7 +304,7 @@ steps:
   - id: export_json
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       output_format: json
       query: "SELECT * FROM orders LIMIT 100"
 ```
@@ -320,7 +320,7 @@ steps:
   - id: export_csv
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       output_format: csv
       headers: true
       query: "SELECT id, name, email FROM users"
@@ -335,7 +335,7 @@ steps:
   - id: export_all_orders
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       streaming: true
       output_file: /data/orders-export.jsonl
       output_format: jsonl    # Use jsonl or csv for large results
@@ -356,7 +356,7 @@ steps:
   - id: exclusive_job
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       advisory_lock: "daily-aggregation"
       query: |
         DELETE FROM daily_stats WHERE date = CURRENT_DATE;
@@ -374,18 +374,21 @@ Advisory locks are session-level and automatically released when the step comple
 
 ```yaml
 name: distributed-etl
+params:
+  - REGION: us-east-1
+
 steps:
   - id: aggregate_region_data
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
-      advisory_lock: "etl-${REGION}"
+      dsn: "${env.DATABASE_URL}"
+      advisory_lock: "etl-${params.REGION}"
       transaction: true
       query: |
         -- Only one worker per region can run this
-        TRUNCATE TABLE region_summary_${REGION};
-        INSERT INTO region_summary_${REGION}
-        SELECT * FROM calculate_region_metrics('${REGION}');
+        TRUNCATE TABLE region_summary_${params.REGION};
+        INSERT INTO region_summary_${params.REGION}
+        SELECT * FROM calculate_region_metrics('${params.REGION}');
 ```
 
 ## Error Handling
@@ -395,7 +398,7 @@ steps:
   - id: resilient_query
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       timeout: 60
       query: "SELECT * FROM large_table"
     retry_policy:
@@ -416,7 +419,7 @@ steps:
   - id: acquire_lock
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       advisory_lock: "daily-etl"
       transaction: true
       query: |
@@ -426,9 +429,9 @@ steps:
   - id: import_new_data
     action: postgres.import
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       import:
-        input_file: /data/orders-${TODAY}.csv
+        input_file: /data/orders-${env.TODAY}.csv
         table: staging_orders
         has_header: true
         batch_size: 5000
@@ -438,7 +441,7 @@ steps:
   - id: transform_data
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       transaction: true
       isolation_level: repeatable_read
       query: |
@@ -454,7 +457,7 @@ steps:
   - id: generate_report
     action: postgres.query
     with:
-      dsn: "${DATABASE_URL}"
+      dsn: "${env.DATABASE_URL}"
       streaming: true
       output_file: /reports/daily-summary.json
       output_format: json

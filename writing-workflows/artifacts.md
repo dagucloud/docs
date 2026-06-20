@@ -84,10 +84,10 @@ When artifact storage is active, Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and
 steps:
   - id: write-files
     run: |
-      test -n "${DAG_RUN_ARTIFACTS_DIR}"
-      mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/images"
-      printf 'hello\n' > "${DAG_RUN_ARTIFACTS_DIR}/hello.txt"
-      cp ./chart.png "${DAG_RUN_ARTIFACTS_DIR}/images/chart.png"
+      test -n "${env.DAG_RUN_ARTIFACTS_DIR}"
+      mkdir -p "${env.DAG_RUN_ARTIFACTS_DIR}/images"
+      printf 'hello\n' > "${env.DAG_RUN_ARTIFACTS_DIR}/hello.txt"
+      cp ./chart.png "${env.DAG_RUN_ARTIFACTS_DIR}/images/chart.png"
 ```
 
 Execution mode behavior:
@@ -115,9 +115,9 @@ steps:
   - id: build-sidecars
     run: |
       set -eu
-      mkdir -p "${DAG_RUN_ARTIFACTS_DIR}/reports" "${DAG_RUN_ARTIFACTS_DIR}/images"
-      cp ./charts/service-latency.png "${DAG_RUN_ARTIFACTS_DIR}/images/service-latency.png"
-      printf 'status=ok\n' > "${DAG_RUN_ARTIFACTS_DIR}/reports/metadata.txt"
+      mkdir -p "${env.DAG_RUN_ARTIFACTS_DIR}/reports" "${env.DAG_RUN_ARTIFACTS_DIR}/images"
+      cp ./charts/service-latency.png "${env.DAG_RUN_ARTIFACTS_DIR}/images/service-latency.png"
+      printf 'status=ok\n' > "${env.DAG_RUN_ARTIFACTS_DIR}/reports/metadata.txt"
     depends: build-report
 ```
 

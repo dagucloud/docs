@@ -376,7 +376,7 @@ steps:
   - id: setup_schema
     action: sqlite.query
     with:
-      dsn: "file:${DB_PATH}"
+      dsn: "file:${env.DB_PATH}"
       query: |
         CREATE TABLE IF NOT EXISTS raw_events (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -394,9 +394,9 @@ steps:
   - id: import_events
     action: sqlite.import
     with:
-      dsn: "file:${DB_PATH}"
+      dsn: "file:${env.DB_PATH}"
       import:
-        input_file: /data/events-${TODAY}.jsonl
+        input_file: /data/events-${env.TODAY}.jsonl
         table: raw_events
         format: jsonl
         batch_size: 1000
@@ -406,7 +406,7 @@ steps:
   - id: calculate_stats
     action: sqlite.query
     with:
-      dsn: "file:${DB_PATH}"
+      dsn: "file:${env.DB_PATH}"
       file_lock: true
       transaction: true
       query: |
@@ -424,7 +424,7 @@ steps:
   - id: export_report
     action: sqlite.query
     with:
-      dsn: "file:${DB_PATH}"
+      dsn: "file:${env.DB_PATH}"
       streaming: true
       output_file: /reports/daily-stats.json
       output_format: json

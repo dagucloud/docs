@@ -50,13 +50,17 @@ Use `action: dag.enqueue` to queue another DAG from a running workflow without w
 
 ```yaml
 type: graph
+params:
+  - name: customer_id
+    required: true
+
 steps:
   - id: queue_customer_rollup
     action: dag.enqueue
     with:
       dag: customer-rollup
       params:
-        CUSTOMER_ID: ${CUSTOMER_ID}
+        customer_id: ${params.customer_id}
       queue: background
 ```
 

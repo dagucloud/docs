@@ -13,7 +13,7 @@ ssh:
   host: production.example.com
   port: 22
   key: ~/.ssh/deploy_key
-  password: ${SSH_PASSWORD}  # Optional; prefer keys
+  password: ${env.SSH_PASSWORD}  # Optional; prefer keys
   strict_host_key: true  # Default: true for security
   known_host_file: ~/.ssh/known_hosts  # Default: ~/.ssh/known_hosts
   shell: "/bin/bash -e"  # Optional: string or array syntax for shell + args (DAG-level only)
@@ -120,7 +120,7 @@ env:
 steps:
   - run: |
       cd $HOME/app              # $HOME NOT expanded — remote shell resolves it
-      git checkout ${DEPLOY_BRANCH}  # Expanded by Dagu — defined in DAG env
+      git checkout ${env.DEPLOY_BRANCH}  # Expanded by Dagu — defined in DAG env
 ```
 
 This allows you to write shell scripts that use remote variables without Dagu replacing them:
@@ -133,7 +133,7 @@ steps:
       host: app.example.com
       command: |
         for FILE in *.log; do
-          echo "Processing ${FILE}"  # ${FILE} preserved for remote shell
+          echo "Processing $FILE"  # $FILE is preserved for the remote shell
         done
 ```
 
@@ -152,7 +152,7 @@ steps:
     with:
       user: deploy
       host: app.example.com
-      command: echo "Local home was ${LOCAL_HOME}, remote home is $HOME"
+      command: echo "Local home was ${env.LOCAL_HOME}, remote home is $HOME"
 ```
 
 The same rule applies to SSH **`with` fields** (`user`, `host`, `key`, `password`, etc.). A reference like `key: $HOME/.ssh/deploy_key` will not expand `$HOME` because it is not DAG-scoped. Import it first:
@@ -164,7 +164,7 @@ env:
 ssh:
   user: deploy
   host: app.example.com
-  key: ${HOME_DIR}/.ssh/deploy_key  # Expanded — HOME_DIR is DAG-scoped
+  key: ${env.HOME_DIR}/.ssh/deploy_key
 ```
 
 The `shell` field controls whether POSIX shell expansion features (default values, parameter substitution like `${VAR:-default}`) are available — it does not affect whether OS variables are expanded.
@@ -236,7 +236,7 @@ steps:
         - systemctl status myapp
         - df -h /var/log
     preconditions:
-      - condition: "${ENV}"
+      - condition: "${env.ENV}"
         expected: "production"
 ```
 
@@ -285,7 +285,7 @@ steps:
     with:
       dag: ssh-command
       params:
-        HOST: ${ITEM}
+        HOST: ${env.ITEM}
 ---
 name: ssh-command
 
@@ -296,30 +296,31 @@ steps:
   - name: run
     action: ssh.run
     with:
-      host: ${HOST}
+      host: ${params.HOST}
       user: deploy
       key: ~/.ssh/id_rsa
       command: uptime
 ```
 
-For object items (e.g., different user per host), use `${ITEM.field}` references:
+When the same command needs a different SSH user, pass that user as a normal parameter:
 
 ```yaml
+params:
+  - SSH_USER: deploy
+
 steps:
   - name: run-on-servers
     parallel:
       items:
-        - host: server1.example.com
-          user: admin
-        - host: server2.example.com
-          user: deploy
+        - server1.example.com
+        - server2.example.com
       max_concurrent: 2
     action: dag.run
     with:
       dag: ssh-command
       params:
-        HOST: ${ITEM.host}
-        USER: ${ITEM.user}
+        HOST: ${env.ITEM}
+        USER: ${params.SSH_USER}
 ---
 name: ssh-command
 
@@ -331,8 +332,8 @@ steps:
   - name: run
     action: ssh.run
     with:
-      host: ${HOST}
-      user: ${USER}
+      host: ${params.HOST}
+      user: ${params.USER}
       key: ~/.ssh/id_rsa
       command: uptime
 ```

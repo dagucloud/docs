@@ -1,541 +1,202 @@
 # Data Flow
 
-How data moves through your workflows - from parameters to outputs, between steps, and across workflows.
+Data moves through a workflow by parameters, environment values, declared step outputs, files, and artifacts.
 
-## Overview
+Use scoped value references when Dagu owns the interpolation:
 
-Dagu provides multiple mechanisms for passing data through workflows:
-
-- Output Variables - Capture command output for use in later steps
-- Environment Variables - Define variables accessible to all steps
-- Parameters - Pass runtime values into workflows
-- File-based Passing - Redirect output to local files within the step environment
-- Artifacts - Persist large run files for preview and download
-- Persistent State - Store small JSON values across DAG runs
-- JSON Path References - Access nested data structures
-- Step ID References - Reference step properties and files
-- Sub DAG Outputs - Capture results from sub-workflows
-- DAG Run Outputs - Collect string-form outputs into a structured file for viewing and API access
-
-Use [Persistent State](/writing-workflows/persistent-state) when a later DAG run needs a previous cursor, checkpoint, snapshot, or last-seen value. Use outputs when the value is needed only inside the current run, and artifacts when the result is a file or large payload.
-
-## Output Variables
-
-Capture command output and use it in subsequent steps:
-
-```yaml
-steps:
-  - id: get_version
-    run: cat VERSION
-    output: VERSION
-
-  - id: build_image
-    run: docker build -t myapp:${VERSION} .
-    depends: get_version
+```text
+${params.name}
+${env.NAME}
+${consts.name}
+${steps.step_id.outputs.name}
 ```
 
-### How It Works
+Bare `$NAME` and `${NAME}` are shell syntax inside `run` scripts. They are still useful for shell-local variables, but examples that need Dagu validation should use the scoped form.
 
-1. Command stdout is captured (up to `max_output_size` limit)
-2. Stored in the variable name specified by `output`
-3. Available to all downstream steps via `${VARIABLE_NAME}`
-4. Trailing newlines are automatically trimmed
-5. String-form `output: NAME` values are collected into `outputs.json`; use `stdout.outputs` or `outputs.write` for explicit DAG/action outputs (see [DAG Run Outputs](#dag-run-outputs))
+## Parameters
 
-### String vs Object Form
-
-The `output` field supports both string and object forms:
+Declare runtime inputs with `params`, then read them with `${params.<name>}` in value-resolved fields.
 
 ```yaml
-steps:
-  # Simple string form
-  - id: get_version
-    run: cat VERSION
-    output: VERSION
+params:
+  - name: environment
+    type: string
+    default: dev
+    enum: [dev, staging, prod]
+  - name: batch_size
+    type: integer
+    default: 100
+    minimum: 1
 
-  # Object form publishes structured step-scoped output
-  - id: inspect_build
+steps:
+  - id: extract
     run: |
-      printf '{"version":"v1.2.3","artifact":{"url":"https://example.test/app.tgz"}}'
-    output:
-      version:
-        from: stdout
-        decode: json
-        select: .version
-      artifact:
-        from: stdout
-        decode: json
-        select: .artifact
+      ./extract.sh \
+        --env "${params.environment}" \
+        --batch-size "${params.batch_size}"
 ```
 
-String form captures stdout into one flat variable and includes it in `outputs.json`.
+Override named params at runtime:
 
-Use `output:` for small values that downstream steps need as variables. If stdout is a large report, JSON dump, Markdown document, or log file that should be visible in the run artifacts, use `stdout.artifact` instead:
-
-```yaml
-steps:
-  - id: report
-    run: ./generate-report --format markdown
-    stdout:
-      artifact: reports/report.md
+```bash
+dagu enqueue workflow.yaml -- environment=prod batch_size=500
 ```
 
-Object form publishes structured step output for `${step_id.output.*}` references. Each entry can be:
+## Environment Values
 
-- a literal value
-- `from: stdout`
-- `from: stderr`
-- `from: file`
-
-with optional `decode: json|yaml|text` and `select: .path.to.value`.
-
-### Multiple Outputs
-
-String-form `output: NAME` captures one flat variable per step. Use object-form output when one step should publish multiple structured values:
-
-```yaml
-type: graph
-steps:
-  - id: count_users
-    run: wc -l < users.txt
-    output: USER_COUNT
-
-  - id: count_orders
-    run: wc -l < orders.txt
-    output: ORDER_COUNT
-
-  - id: report
-    run: |
-      echo "Users: ${USER_COUNT}"
-      echo "Orders: ${ORDER_COUNT}"
-    depends:
-      - count_users
-      - count_orders
-```
-
-## JSON Path References
-
-Access nested values in JSON output using dot notation:
-
-```yaml
-steps:
-  - id: get_config
-    run: |
-      echo '{
-        "database": {
-          "host": "localhost",
-          "port": 5432,
-          "credentials": {
-            "username": "app_user"
-          }
-        }
-      }'
-    output: CONFIG
-    
-  - id: connect_database
-    run: |
-      psql -h ${CONFIG.database.host} \
-           -p ${CONFIG.database.port} \
-           -U ${CONFIG.database.credentials.username}
-    depends: get_config
-```
-
-### Array Access
-
-Access array elements by index:
-
-```yaml
-steps:
-  - id: get_servers
-    run: |
-      echo '[
-        {"name": "web1", "ip": "10.0.1.1"},
-        {"name": "web2", "ip": "10.0.1.2"}
-      ]'
-    output: SERVERS
-    
-  - id: ping_first_server
-    run: ping -c 1 ${SERVERS[0].ip}
-    depends: get_servers
-```
-
-## Environment Variables
-
-### DAG-Level Variables
-
-Define variables available to all steps:
+Declare workflow environment values with `env`, then read them with `${env.<NAME>}` when Dagu should resolve the value.
 
 ```yaml
 env:
   - LOG_LEVEL: debug
   - DATA_DIR: /var/data
-  - API_URL: https://api.example.com
-
-tools:
-  - astral-sh/uv@0.11.14
+  - OUTPUT_DIR: ${env.DATA_DIR}/output
 
 steps:
-  - run: uv run --python 3.13.9 python process.py --log=${LOG_LEVEL} --data=${DATA_DIR}
+  - id: process
+    run: ./process.sh --log "${env.LOG_LEVEL}" --out "${env.OUTPUT_DIR}"
 ```
 
-### Variable Expansion
-
-Reference other variables:
+When importing host process environment values into the workflow environment, the root `env` block can still use unqualified environment expansion:
 
 ```yaml
 env:
-  - BASE_DIR: ${HOME}/project
-  - DATA_DIR: ${BASE_DIR}/data
-  - OUTPUT_DIR: ${BASE_DIR}/output
-  - CONFIG_FILE: ${DATA_DIR}/config.yaml
+  - AWS_REGION: ${AWS_REGION}
+  - AWS_PROFILE: ${AWS_PROFILE}
 ```
 
-### Command Substitution
+After import, use `${env.AWS_REGION}` and `${env.AWS_PROFILE}` in workflow fields.
 
-Execute commands and use their output:
+## Step Outputs
 
-```yaml
-env:
-  - TODAY: "`date +%Y-%m-%d`"
-  - GIT_COMMIT: "`git rev-parse HEAD`"
-  - HOSTNAME: "`hostname -f`"
-
-steps:
-  - run: tar -czf backup-${TODAY}-${GIT_COMMIT}.tar.gz data/
-```
-
-## Parameters
-
-### Named Parameters
-
-Define parameters with defaults:
-
-```yaml
-params:
-  - ENVIRONMENT: dev
-  - BATCH_SIZE: 100
-  - DRY_RUN: false
-
-steps:
-  - run: |
-      echo "Processing data" \
-        --env=${ENVIRONMENT} \
-        --batch=${BATCH_SIZE} \
-        --dry-run=${DRY_RUN}
-```
-
-Override at runtime:
-```bash
-dagu start workflow.yaml -- ENVIRONMENT=prod BATCH_SIZE=500
-```
-
-### Dynamic Values
-
-Use `env:` for computed values. DAG-level `params:` are treated as literal input and do not evaluate backticks or `${VAR}`.
-
-```yaml
-env:
-  - DATE: "`date +%Y-%m-%d`"
-  - RUN_ID: "`uuidgen`"
-  - USER: "`whoami`"
-```
-
-## Step ID References
-
-Reference step properties using the `id` field:
-
-```yaml
-steps:
-  - id: risky
-    run: 'sh -c "if [ $((RANDOM % 2)) -eq 0 ]; then echo Success; else echo Failed && exit 1; fi"'
-    continue_on:
-      failure: true
-
-  - id: handle_risky_result
-    run: |
-      if [ "${risky.exit_code}" = "0" ]; then
-        echo "Success! Checking output..."
-        cat ${risky.stdout}  # Read content from the file
-      else
-        echo "Failed with code ${risky.exit_code}"
-        echo "Error log:"
-        cat ${risky.stderr}  # Read content from the file
-      fi
-    depends: risky
-```
-
-Available properties:
-- `${id.exit_code}` - Exit code of the step (as a string, e.g., `"0"` or `"1"`)
-- `${id.stdout}` - Path to stdout log file
-- `${id.stderr}` - Path to stderr log file
-- `${id.output}` - Captured string output or structured object-form payload (requires `output:` on the referenced step)
-
-> **Important**: `${id.stdout}` and `${id.stderr}` return **file paths**, not the actual output content. Use `cat ${id.stdout}` to read the content. To capture output content directly into a variable for use in subsequent steps, use the `output:` field instead.
-
-### Step Output References
-
-When a step has an `output:` field, downstream steps can access it via `${id.output}`:
+Use declared step outputs for validated data passing between steps.
 
 ```yaml
 type: graph
+
 steps:
-  - id: extract_title
-    output: RESULT
+  - id: get_version
     run: |
-      printf 'Quarterly Revenue'
+      printf 'version=%s\n' "$(cat VERSION)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
 
-  - id: extract_summary
-    output: RESULT
-    run: |
-      printf 'Revenue grew 18 percent year over year.'
-
-  - id: report
-    run: |
-      printf 'Title: %s\nSummary: %s' "${extract_title.output}" "${extract_summary.output}"
-    output: REPORT
-    depends: [extract_title, extract_summary]
+  - id: build_image
+    depends: get_version
+    run: docker build -t "myapp:${steps.get_version.outputs.version}" .
 ```
 
-String-form `${id.output}` returns the captured text value.
+The consumer must depend on the producer. Step output references do not create dependencies.
 
-Object-form `${id.output}` returns the full published object as compact JSON, and nested access works directly:
+### Multiple Outputs
 
 ```yaml
 steps:
-  - id: publish
-    output:
-      version: "v1.2.3"
-      artifact:
-        url: "https://example.test/app.tgz"
-
-  - id: print_publish_output
+  - id: inspect_build
     run: |
-      echo "Version: ${publish.output.version}"
-      echo "Artifact: ${publish.output.artifact.url}"
-    depends: publish
-```
+      printf 'version=v1.2.3\n' >> "$DAGU_OUTPUT_FILE"
+      printf 'artifact_url=https://example.test/app.tgz\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
+      - name: artifact_url
 
-`${id.output}` vs `${id.stdout}`:
-- `${id.output}` returns the captured value or published object payload.
-- `${id.stdout}` returns a **file path** to the stdout log. Use `cat ${id.stdout}` to read it.
-
-If the referenced step does not have `output:` configured, `${id.output}` is not expanded — it passes through as a literal string.
-
-Substring slicing works on the output value: `${id.output:0:5}` extracts the first 5 characters of the captured output.
-
-## Sub DAG Outputs
-
-Capture outputs from nested workflows:
-
-### Basic Child Output
-
-```yaml
-# parent.yaml
-steps:
-  - id: run_etl
-    action: dag.run
-    with:
-      dag: etl-workflow
-      params: "DATE=${TODAY}"
-    output: ETL_RESULT
-    
-  - id: print_etl_result
+  - id: deploy
+    depends: inspect_build
     run: |
-      echo "Status: ${ETL_RESULT.status}"
-      echo "Records: ${ETL_RESULT.outputs.record_count}"
-      echo "Duration: ${ETL_RESULT.outputs.duration}"
-    depends: run_etl
+      echo "Deploying ${steps.inspect_build.outputs.version}"
+      echo "Artifact: ${steps.inspect_build.outputs.artifact_url}"
 ```
 
-### Output Structure
+### JSON Output
 
-Sub DAG output contains:
-```json
-{
-  "name": "etl-workflow",
-  "params": "DATE=2024-01-15",
-  "status": "succeeded",
-  "outputs": {
-    "record_count": "1000",
-    "duration": "120s"
-  }
-}
-```
-
-### Nested DAG Outputs
-
-Access outputs from deeply nested workflows:
+Use `type: json` to require a valid JSON value.
 
 ```yaml
 steps:
-  - id: run_pipeline
-    action: dag.run
-    with:
-      dag: main-pipeline
-    output: PIPELINE
-  - id: print_pipeline_outputs
+  - id: inspect
     run: |
-      # Access nested outputs
-      echo "ETL Status: ${PIPELINE.outputs.ETL_OUTPUT.status}"
-      echo "ML Score: ${PIPELINE.outputs.ML_OUTPUT.outputs.accuracy}"
-    depends: run_pipeline
+      cat >> "$DAGU_OUTPUT_FILE" <<'EOF'
+      metadata<<JSON
+      {"image":"api","tag":"v1.2.3"}
+      JSON
+      EOF
+    outputs:
+      - name: metadata
+        type: json
+
+  - id: print_metadata
+    depends: inspect
+    run: printf '%s\n' '${steps.inspect.outputs.metadata}'
 ```
 
-## Parallel Execution Outputs
+The strict output reference reads a top-level output name. Nested output paths are not part of the strict syntax.
 
-When running parallel executions, outputs are aggregated:
+## Files
 
-```yaml
-steps:
-  - id: process_regions
-    action: dag.run
-    with:
-      dag: region-processor
-    parallel:
-      items: ["us-east", "us-west", "eu-central"]
-    output: RESULTS
-
-  - id: summarize_regions
-    run: |
-      echo "Total regions: ${RESULTS.summary.total}"
-      echo "Succeeded: ${RESULTS.summary.succeeded}"
-    depends: process_regions
-      echo "Failed: ${RESULTS.summary.failed}"
-      
-      # Access individual results
-      echo "US-East revenue: ${RESULTS.outputs[0].revenue}"
-      echo "US-West revenue: ${RESULTS.outputs[1].revenue}"
-```
-
-### Parallel Output Structure
-
-```json
-{
-  "summary": {
-    "total": 3,
-    "succeeded": 3,
-    "failed": 0
-  },
-  "results": [
-    {
-      "params": "us-east",
-      "status": "succeeded",
-      "outputs": {
-        "revenue": "1000000"
-      }
-    }
-    // ... more results
-  ],
-  "outputs": [
-    {"revenue": "1000000"},
-    {"revenue": "750000"},
-    {"revenue": "500000"}
-  ]
-}
-```
-
-## File-Based Data Passing
-
-### Output Redirection
-
-Redirect output to local files when another step reads the file from the same filesystem:
+Use files when the data is large or when another process expects a file path.
 
 ```yaml
 tools:
   - astral-sh/uv@0.11.14
 
+steps:
+  - id: generate
+    run: uv run --python 3.13.9 python generate.py > /tmp/data.json
+
+  - id: process
+    depends: generate
+    run: uv run --python 3.13.9 python process.py < /tmp/data.json
+```
+
+For run-scoped files that users should preview or download, prefer artifacts.
+
+```yaml
 steps:
   - id: generate_report
-    run: uv run --python 3.13.9 python generate_report.py
-    stdout: /tmp/report.txt
-    
-  - id: email_report
-    run: mail -s "Report" user@example.com < /tmp/report.txt
-    depends: generate_report
-```
-
-If the file is a run result that users should preview or download, stream the command output to an artifact instead:
-
-```yaml
-tools:
-  - astral-sh/uv@0.11.14
-
-steps:
-  - run: uv run --python 3.13.9 python generate_report.py
+    run: ./generate-report
     stdout:
-      artifact: reports/report.txt
+      artifact: reports/report.md
 ```
 
-### Working with Files
+## Runtime Metadata
+
+Dagu injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_LOG_FILE`, `DAG_RUN_WORK_DIR`, and `DAG_RUN_ARTIFACTS_DIR` into the step environment.
+
+Use `${env.<NAME>}` when Dagu should resolve the value before handing a field to the executor:
 
 ```yaml
 steps:
-  - id: extract_files
-    run: |
-      tar -xzf data.tar.gz -C /tmp/
-      ls /tmp/data/ > /tmp/filelist.txt
-    
-  - id: process_files
-    run: |
-      while read file; do
-        process.sh "/tmp/data/$file"
-      done < /tmp/filelist.txt
-    depends: extract_files
+  - id: archive_log
+    run: cp "${env.DAG_RUN_LOG_FILE}" "/backup/${env.DAG_RUN_ID}.log"
 ```
 
-## Special Environment Variables
+Inside a shell script, native shell syntax is also valid:
 
-Dagu automatically injects run metadata such as `DAG_RUN_ID`, `DAG_RUN_STEP_NAME`, and log file locations. See [Special Environment Variables](/writing-workflows/runtime-variables) for the complete reference.
-
-Example usage:
 ```yaml
 steps:
-  - run: |
-      echo "Backing up logs for ${DAG_NAME} run ${DAG_RUN_ID}"
-      cp ${DAG_RUN_LOG_FILE} /backup/
+  - id: archive_log
+    run: cp "$DAG_RUN_LOG_FILE" "/backup/${DAG_RUN_ID}.log"
 ```
 
-## Output Size Limits
+See [Special Environment Variables](/writing-workflows/runtime-variables) for the complete list.
 
-Control maximum output size to prevent memory issues:
+## Output Size
+
+Declared outputs are intended for small values such as ids, paths, status strings, or compact JSON. Large command output should go to a file or artifact.
 
 ```yaml
-# Set 5MB limit for all steps
-max_output_size: 5242880
+max_output_size: 1048576
 
 steps:
-  - run: cat large-file.json
-    output: DATA  # Fails if output > 5MB
-
-  - run: generate-huge-report.sh
+  - id: large_report
+    run: ./generate-huge-report
     stdout:
-      artifact: reports/huge-report.md  # Stream directly to a run artifact
+      artifact: reports/huge-report.md
 ```
 
-## Variable Resolution Order
+## Related Pages
 
-Variables are resolved with step-level taking highest precedence:
-
-1. **Step-level environment** - Overrides everything
-2. **Output variables** - From completed steps
-3. **Secrets** - From `secrets:` block
-4. **DAG-level environment** - Includes `env:` and `dotenv` files
-
-Example:
-```yaml
-env:
-  - MESSAGE: "DAG level"
-
-steps:
-  - env:
-      - MESSAGE: "Step level"  # This wins
-    run: echo "${MESSAGE}"
-```
-
-For detailed precedence rules including interpolation vs runtime environment, see [Variables Reference](/writing-workflows/template-variables#variable-precedence).
-
-## DAG Run Outputs
-
-String-form `output: NAME`, `stdout.outputs`, and `action: outputs.write` values are collected into `outputs.json` when the DAG completes. Object-form `output: {...}` stays step-scoped for `${step.output.*}` references unless you explicitly republish values through `stdout.outputs` or `outputs.write`.
-
-See [Outputs](/writing-workflows/outputs) for complete documentation on output collection, access methods, and security features.
+- [Outputs](/writing-workflows/outputs)
+- [Environment Variables](/writing-workflows/environment-variables)
+- [Parameters](/writing-workflows/parameters)
+- [Artifacts](/writing-workflows/artifacts)

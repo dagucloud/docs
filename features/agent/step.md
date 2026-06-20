@@ -256,7 +256,7 @@ See [Web Search](/features/agent/web-search) for backend setup and provider limi
 
 At least one of `with.task`, `with.prompt`, or `with.messages` is required. Validation fails if the action does not describe a task.
 
-Message content supports variable substitution with `${VAR}` syntax. Variables are evaluated at runtime via `runtime.EvalString`:
+Message content supports scoped value references. Variables are evaluated at runtime via `runtime.EvalString`:
 
 ```yaml
 params:
@@ -269,7 +269,7 @@ steps:
       messages:
         - role: user
           content: |
-            Analyze ${INPUT_FILE} and write results to ${OUTPUT_DIR}
+            Analyze ${params.INPUT_FILE} and write results to ${params.OUTPUT_DIR}
     output: RESULT
 ```
 
@@ -320,7 +320,7 @@ steps:
     output: FILE_COUNT
 
   - id: print_count
-    run: echo "Found ${FILE_COUNT} Go files"
+    run: echo "Found ${steps.count_files.outputs.FILE_COUNT} Go files"
     depends: count_files
 ```
 
@@ -412,7 +412,7 @@ steps:
       messages:
         - role: user
           content: |
-            Analyze the test coverage of ${REPO_PATH} and identify untested code paths
+            Analyze the test coverage of ${params.REPO_PATH} and identify untested code paths
     output: COVERAGE_ANALYSIS
 
   - id: write_tests
@@ -424,9 +424,9 @@ steps:
         - role: user
           content: |
             Based on this analysis:
-            ${COVERAGE_ANALYSIS}
+            ${steps.analyze_coverage.outputs.COVERAGE_ANALYSIS}
 
-            Write unit tests for the untested code paths in ${REPO_PATH}.
+            Write unit tests for the untested code paths in ${params.REPO_PATH}.
     output: TEST_RESULT
     depends: analyze_coverage
 ```
@@ -454,7 +454,7 @@ steps:
       messages:
         - role: user
           content: |
-            Execute the approved migration plan: ${MIGRATION_PLAN}
+            Execute the approved migration plan: ${steps.draft.outputs.MIGRATION_PLAN}
     depends: draft
 ```
 

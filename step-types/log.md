@@ -12,7 +12,7 @@ steps:
   - id: announce
     action: log.write
     with:
-      message: "Deploying to ${ENVIRONMENT}"
+      message: "Deploying to ${params.ENVIRONMENT}"
 ```
 
 The step writes this line to stdout:
@@ -43,13 +43,16 @@ params:
 
 steps:
   - id: version
-    run: git rev-parse --short HEAD
-    output: VERSION
+    run: |
+      version="$(git rev-parse --short HEAD)"
+      printf 'version=%s\n' "$version" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
 
   - id: announce
     action: log.write
     with:
-      message: "Deploying ${VERSION} to ${ENVIRONMENT}"
+      message: "Deploying ${steps.version.outputs.version} to ${params.ENVIRONMENT}"
     depends: version
 ```
 
@@ -65,13 +68,13 @@ params:
 
 steps:
   - id: release_line
-    action: log.write
-    with:
-      message: "release=${VERSION}"
-    output: RELEASE_LINE
+    run: |
+      printf 'release_line=%s\n' "release=${params.VERSION}" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: release_line
 
   - id: use_release_line
-    run: printf '%s\n' "${RELEASE_LINE}"
+    run: printf '%s\n' "${steps.release_line.outputs.release_line}"
     depends: release_line
 ```
 

@@ -43,8 +43,8 @@ env:
 smtp:
   host: smtp.gmail.com
   port: "587"
-  username: "${SMTP_USER}"
-  password: "${SMTP_PASS}"
+  username: "${env.SMTP_USER}"
+  password: "${env.SMTP_PASS}"
 ```
 
 For Web UI-managed notification rules, configure email delivery from [Notifications](/web-ui/notifications) instead of DAG YAML.
@@ -58,8 +58,8 @@ Override global settings per DAG:
 smtp:
   host: smtp.company.com
   port: "465"
-  username: ${SMTP_USER}
-  password: ${SMTP_PASS}
+  username: ${env.SMTP_USER}
+  password: ${env.SMTP_PASS}
 
 error_mail:
   from: dagu@company.com
@@ -133,20 +133,20 @@ steps:
         - reports@example.com
         - archive@example.com
       from: noreply@example.com
-      subject: "Daily Report - ${TODAY}"
+      subject: "Daily Report - ${env.TODAY}"
       message: |
-        Daily processing report for ${TODAY}
+        Daily processing report for ${env.TODAY}
 
         Summary:
-        - Records processed: ${RECORD_COUNT}
-        - Success rate: ${SUCCESS_RATE}%
-        - Processing time: ${DURATION}
+        - Records processed: ${env.RECORD_COUNT}
+        - Success rate: ${env.SUCCESS_RATE}%
+        - Processing time: ${env.DURATION}
 
         See attached files for details.
       attachments:
-        - /reports/daily-${TODAY}.pdf
-        - /reports/summary-${TODAY}.csv
-        - ${DAG_RUN_LOG_FILE}
+        - /reports/daily-${env.TODAY}.pdf
+        - /reports/summary-${env.TODAY}.csv
+        - ${env.DAG_RUN_LOG_FILE}
 ```
 
 ## Email Templates
@@ -156,25 +156,29 @@ steps:
 ```yaml
 steps:
   - id: generate_report
-    run: generate_report.py
-    output: REPORT_PATH
+    run: |
+      report_path="/tmp/report.pdf"
+      generate_report.py > "$report_path"
+      printf 'report_path=%s\n' "$report_path" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: report_path
 
   - id: email_report
     action: mail.send
     with:
       to: stakeholders@example.com
-      subject: "Processing Report - ${DAG_NAME}"
+      subject: "Processing Report - ${env.DAG_NAME}"
       message: |
         Automated Report Generated
 
-        DAG: ${DAG_NAME}
-        Run ID: ${DAG_RUN_ID}
+        DAG: ${env.DAG_NAME}
+        Run ID: ${env.DAG_RUN_ID}
         Status: Completed
         Time: $(date)
 
-        Report available at: ${REPORT_PATH}
+        Report available at: ${steps.generate_report.outputs.report_path}
       attachments:
-        - run: ${REPORT_PATH}
+        - run: ${steps.generate_report.outputs.report_path}
     depends: generate_report
 ```
 
@@ -189,22 +193,22 @@ handler_on:
         - oncall@example.com
         - alerts@example.com
       from: errors@example.com
-      subject: "⚠️ DAG Failed: ${DAG_NAME}"
+      subject: "DAG Failed: ${env.DAG_NAME}"
       message: |
         DAG Execution Failed
 
         Details:
-        - DAG: ${DAG_NAME}
-        - Run ID: ${DAG_RUN_ID}
+        - DAG: ${env.DAG_NAME}
+        - Run ID: ${env.DAG_RUN_ID}
         - Time: $(date)
         - Host: $(hostname)
 
         Error Summary:
-        $(tail -20 ${DAG_RUN_LOG_FILE} | grep -i error)
+        $(tail -20 ${env.DAG_RUN_LOG_FILE} | grep -i error)
 
         Full log attached.
       attachments:
-        - ${DAG_RUN_LOG_FILE}
+        - ${env.DAG_RUN_LOG_FILE}
 ```
 
 ## SMTP Providers
@@ -236,7 +240,7 @@ smtp:
   host: smtp.sendgrid.net
   port: "587"
   username: apikey
-  password: ${SENDGRID_API_KEY}
+  password: ${env.SENDGRID_API_KEY}
 ```
 
 ### AWS SES
@@ -245,8 +249,8 @@ smtp:
 smtp:
   host: email-smtp.us-east-1.amazonaws.com
   port: "587"
-  username: ${AWS_SES_SMTP_USERNAME}
-  password: ${AWS_SES_SMTP_PASSWORD}
+  username: ${env.AWS_SES_SMTP_USERNAME}
+  password: ${env.AWS_SES_SMTP_PASSWORD}
 ```
 
 ## Advanced Configuration
@@ -264,23 +268,22 @@ error_mail:
 ### Conditional Recipients
 
 ```yaml
-steps:
-  - id: check_environment
-    run: echo $ENVIRONMENT
-    output: ENV
+params:
+  - name: environment
+    default: development
 
+steps:
   - id: notify
     action: mail.send
     with:
       to: |
-        `if [ "${ENV}" = "production" ]; then
+        `if [ "${params.environment}" = "production" ]; then
           echo "prod-alerts@example.com"
         else
           echo "dev-alerts@example.com"
         fi`
-      subject: "Alert from ${ENV}"
+      subject: "Alert from ${params.environment}"
       message: "Environment-specific alert"
-    depends: check_environment
 ```
 
 ### HTML Emails
@@ -303,7 +306,7 @@ steps:
             </tr>
             <tr>
               <td>Records</td>
-              <td>${RECORD_COUNT}</td>
+              <td>${env.RECORD_COUNT}</td>
             </tr>
           </table>
         </body>

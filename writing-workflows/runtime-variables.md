@@ -77,7 +77,7 @@ steps:
     run: make build   # PWD is /app/project
 
   - id: save_artifact
-    run: cp build/output.tar.gz "${DAG_RUN_WORK_DIR}/output.tar.gz"
+    run: cp build/output.tar.gz "${env.DAG_RUN_WORK_DIR}/output.tar.gz"
     depends:
       - build
 ```
@@ -163,8 +163,8 @@ tools:
 steps:
   - id: generate_report
     run: |
-      mkdir -p "${DAG_DOCS_DIR}"
-      uv run --python 3.13.9 python generate_report.py > "${DAG_DOCS_DIR}/report.md"
+      mkdir -p "${env.DAG_DOCS_DIR}"
+      uv run --python 3.13.9 python generate_report.py > "${env.DAG_DOCS_DIR}/report.md"
 ```
 
 ## Parameter Payload (`DAG_PARAMS_JSON`)
@@ -179,13 +179,13 @@ steps:
 ```yaml
 steps:
   - id: inspect_params
-    run: echo "Full payload: ${DAG_PARAMS_JSON}"
+    run: echo "Full payload: ${env.DAG_PARAMS_JSON}"
   - id: read_environment
     action: jq.filter
     with:
       filter: '"Environment: \(.ENVIRONMENT // "dev")"'
       raw: true
-      data: ${DAG_PARAMS_JSON}
+      data: ${env.DAG_PARAMS_JSON}
 ```
 
 ## Push-back Context (`DAG_PUSHBACK`)
@@ -256,12 +256,12 @@ type: graph
 steps:
   - id: deploy
     run: |
-      echo "Deploying branch ${WEBHOOK_PAYLOAD.branch}"
-      echo "Commit: ${WEBHOOK_PAYLOAD.commit}"
+      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"Deploying branch \(.branch)"'
+      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"Commit: \(.commit)"'
       ./scripts/deploy.sh
 
   - id: notify
-    run: echo "Deployed by ${WEBHOOK_PAYLOAD.sender.login}"
+    run: printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"Deployed by \(.sender.login)"'
     depends:
       - deploy
 ```
@@ -272,15 +272,16 @@ For complex payloads with nested structures:
 steps:
   - id: process_github_push
     run: |
-      echo "Repository: ${WEBHOOK_PAYLOAD.repository.full_name}"
-      echo "Pusher: ${WEBHOOK_PAYLOAD.pusher.name}"
-      echo "First commit message: ${WEBHOOK_PAYLOAD.commits.0.message}"
+      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"Repository: \(.repository.full_name)"'
+      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"Pusher: \(.pusher.name)"'
+      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"First commit message: \(.commits[0].message)"'
 ```
 
 ### Notes
 
-- Dagu automatically parses the JSON payload and allows direct field access using dot notation.
-- For arrays, use numeric indices (e.g., `${WEBHOOK_PAYLOAD.commits.0}` for the first element).
+- Dagu exposes the JSON payload as `WEBHOOK_PAYLOAD`.
+- Parse nested payload fields with `jq`, Python, Node.js, or your shell tooling.
+- In shell scripts, read the JSON from `$WEBHOOK_PAYLOAD` instead of inlining it with `${env.WEBHOOK_PAYLOAD}` so payload quotes cannot break the script.
 - Maximum payload size defaults to 1MB and can be changed with `webhooks.max_payload_size` in the server configuration.
 - The variable is empty when the DAG is triggered by other means (scheduler, API, CLI).
 - Always validate the payload contents in your DAG before processing.
@@ -341,11 +342,11 @@ Example:
 steps:
   - id: inspect_github_context
     run: |
-      echo "event=${GITHUB_EVENT_NAME}"
-      echo "action=${GITHUB_EVENT_ACTION}"
-      echo "repo=${GITHUB_REPOSITORY}"
-      echo "pr=${GITHUB_PR_NUMBER}"
-      echo "body=${WEBHOOK_PAYLOAD.comment.body}"
+      echo "event=${env.GITHUB_EVENT_NAME}"
+      echo "action=${env.GITHUB_EVENT_ACTION}"
+      echo "repo=${env.GITHUB_REPOSITORY}"
+      echo "pr=${env.GITHUB_PR_NUMBER}"
+      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"body=\(.comment.body)"'
 ```
 
 For the full GitHub integration model, supported triggers, binding rules, and end-to-end examples, see [GitHub Integration](/github-integration/).

@@ -21,7 +21,7 @@ Define connection defaults at the DAG level to avoid repetition across steps:
 redis:
   host: localhost
   port: 6379
-  password: ${REDIS_PASSWORD}
+  password: ${env.REDIS_PASSWORD}
 
 steps:
   - id: set_value
@@ -325,7 +325,7 @@ steps:
         end
         return 1
       script_keys:
-        - "ratelimit:${USER_ID}"
+        - "ratelimit:${params.USER_ID}"
       script_args:
         - "100"   # limit
         - "60"    # window in seconds
@@ -343,7 +343,7 @@ steps:
       script_keys:
         - "input:data"
       script_args:
-        - "${PARAM}"
+        - "${params.PARAM}"
 ```
 
 ### Distributed Locking
@@ -355,11 +355,11 @@ steps:
   - id: critical_section
     action: redis.set
     with:
-      lock: "locks:resource:${RESOURCE_ID}"
+      lock: "locks:resource:${params.RESOURCE_ID}"
       lock_timeout: 30      # Lock expires after 30 seconds
       lock_retry: 10        # Retry 10 times to acquire lock
       lock_wait: 100        # Wait 100ms between retries
-      key: resource:${RESOURCE_ID}
+      key: resource:${params.RESOURCE_ID}
       value: '{"status": "processing"}'
 ```
 
@@ -371,10 +371,9 @@ steps:
     action: redis.hgetall
     with:
       key: app:config
-    output: CONFIG
 
   - id: use_config
-    run: echo "Database host is ${CONFIG}"
+    run: echo "Database host is ${steps.get_config.outputs.result}"
     depends:
       - get_config
 ```
@@ -403,7 +402,7 @@ redis:
     - sentinel1:26379
     - sentinel2:26379
     - sentinel3:26379
-  password: ${REDIS_PASSWORD}
+  password: ${env.REDIS_PASSWORD}
 ```
 
 ### Cluster
@@ -417,7 +416,7 @@ redis:
     - node1:6379
     - node2:6379
     - node3:6379
-  password: ${REDIS_PASSWORD}
+  password: ${env.REDIS_PASSWORD}
 ```
 
 ## Connection Pooling
@@ -523,7 +522,7 @@ redis:
   host: redis-12345.c1.us-east-1-2.ec2.cloud.redislabs.com
   port: 12345
   username: default
-  password: ${REDIS_CLOUD_PASSWORD}
+  password: ${env.REDIS_CLOUD_PASSWORD}
 ```
 
 ### AWS ElastiCache
@@ -541,6 +540,6 @@ redis:
 redis:
   host: my-cache.redis.cache.windows.net
   port: 6380
-  password: ${AZURE_REDIS_KEY}
+  password: ${env.AZURE_REDIS_KEY}
   tls: true
 ```

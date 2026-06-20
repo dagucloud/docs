@@ -46,6 +46,9 @@ harnesses:
       - -c
     prompt_mode: arg
 
+env:
+  - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
+
 steps:
   - id: verify_runner
     action: harness.run
@@ -107,7 +110,7 @@ steps:
       volumes:
         - .:/workspace:ro
       env:
-        - PROVIDER_API_KEY=${PROVIDER_API_KEY}
+        - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
     with:
       provider: your_provider
       prompt: |
@@ -117,6 +120,9 @@ steps:
 Root-level container:
 
 ```yaml
+env:
+  - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
+
 container:
   image: dagu-provider-runner:local
   pull_policy: never
@@ -124,7 +130,7 @@ container:
   volumes:
     - .:/workspace:ro
   env:
-    - PROVIDER_API_KEY=${PROVIDER_API_KEY}
+    - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
 ```
 
 With a root-level container, every inherited command step and CLI harness step

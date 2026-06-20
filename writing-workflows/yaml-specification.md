@@ -62,16 +62,18 @@ defaults:
 
 steps:
   - id: fetch_data
-    run: "echo '{\"count\":3}'"
-    output: RAW_JSON
+    run: |
+      printf 'raw_json={"count":3}\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: raw_json
+        type: json
 
   - id: summarize_data
     action: jq.filter
     with:
       raw: true
       filter: .count
-      data: "${RAW_JSON}"
-    output: COUNT
+      data: "${steps.fetch_data.outputs.raw_json}"
     depends: fetch_data
 
 handler_on:
@@ -80,7 +82,7 @@ handler_on:
     with:
       to: ops@example.com
       subject: "daily_report failed"
-      message: "See ${DAG_RUN_LOG_FILE}"
+      message: "See ${env.DAG_RUN_LOG_FILE}"
 ```
 
 ## Top-Level Fields
@@ -524,7 +526,7 @@ steps:
       messages:
         - role: user
           content: |
-            Summarize ${REPORT_PATH}
+            Summarize ${env.REPORT_PATH}
 ```
 
 Supported provider values in the schema are `openai`, `anthropic`, `gemini`, `google`, `openrouter`, `local`, `ollama`, `vllm`, and `llama`.
@@ -539,11 +541,14 @@ redis:
   port: 6379
   db: 0
 
+params:
+  - name: user_id
+    required: true
+
 steps:
   - action: redis.get
     with:
-      key: cache:user:${USER_ID}
-    output: CACHED_DATA
+      key: cache:user:${params.user_id}
 ```
 
 Top-level Redis fields are `url`, `host`, `port`, `password`, `username`, `db`, `tls`, `tls_skip_verify`, `mode`, `sentinel_master`, `sentinel_addrs`, `cluster_addrs`, and `max_retries`.
@@ -597,7 +602,7 @@ smtp:
   host: smtp.example.com
   port: "587"
   username: notifications@example.com
-  password: ${SMTP_PASSWORD}
+  password: ${env.SMTP_PASSWORD}
 ```
 
 `mail.send` step inputs use `message`, not `body`.
@@ -623,8 +628,8 @@ handler_on:
     action: mail.send
     with:
       to: ops@example.com
-      subject: "${DAG_NAME} failed"
-      message: "See ${DAG_RUN_LOG_FILE}"
+      subject: "${env.DAG_NAME} failed"
+      message: "See ${env.DAG_RUN_LOG_FILE}"
   exit:
     run: ./cleanup.sh
 ```
@@ -852,7 +857,7 @@ steps:
   - action: dag.run
     with:
       dag: file_processor
-      params: "FILE=${ITEM}"
+      params: "file=${env.ITEM}"
     parallel:
       items: [file1.csv, file2.csv, file3.csv]
       max_concurrent: 2
@@ -862,22 +867,24 @@ Inside each parallel child run, `ITEM` is set to the current item.
 
 ### Output
 
-String form captures trimmed stdout into an environment variable:
+Declared outputs publish validated values for later steps:
 
 ```yaml
 type: graph
 
 steps:
   - id: get_version
-    run: cat VERSION
-    output: VERSION
+    run: |
+      printf 'version=%s\n' "$(cat VERSION)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
 
   - id: build
-    run: docker build -t app:${VERSION} .
+    run: docker build -t "app:${steps.get_version.outputs.version}" .
     depends: get_version
 ```
 
-Object form publishes structured step output for `${step_id.output.*}` references:
+Use one declared output name per strict reference:
 
 ```yaml
 type: graph
@@ -919,7 +926,7 @@ steps:
   - id: deploy
     run: ./deploy.sh
     preconditions:
-      - condition: "${ENVIRONMENT}"
+      - condition: "${env.ENVIRONMENT}"
         expected: production
       - condition: "`git branch --show-current`"
         expected: main
@@ -1035,7 +1042,7 @@ steps:
 
 ## Variable Substitution
 
-Dagu resolves runtime variables such as `${VAR}` in fields that support value resolution before the field is used. In `run`, Dagu may expand known `$VAR` and `${VAR}` values from the run scope before handing the command to the selected shell; unknown shell variables remain for the shell. Dagu does not execute `$()` or backticks in `run`. Literal defaults in `params` are not executed; use `eval` when a parameter default must be computed by Dagu before steps start.
+Dagu resolves scoped references such as `${params.name}`, `${env.NAME}`, `${consts.name}`, and `${steps.step_id.outputs.name}` in fields that support value resolution before the field is used. In `run`, unqualified `$NAME` and `${NAME}` remain shell syntax. Dagu does not execute `$()` or backticks in `run`. Literal defaults in `params` are not executed; use `eval` when a parameter default must be computed by Dagu before steps start.
 
 ```yaml
 params:
@@ -1047,30 +1054,25 @@ params:
     eval: `date +%Y-%m-%d`
 
 steps:
-  - run: echo "Hello ${USER} from ${DOMAIN}"
-  - run: echo "Today is ${TODAY}"
+  - run: echo "Hello ${params.USER} from ${params.DOMAIN}"
+  - run: echo "Today is ${params.TODAY}"
   - run: echo "The shell can still run this: `date +%Y-%m-%d`"
 ```
 
-Outputs can be referenced by the output variable name or through structured output references:
+Declared step outputs are referenced through the `steps` namespace:
 
 ```yaml
 type: graph
 
 steps:
   - id: get_config
-    run: cat config.json
-    output_schema:
-      type: object
-      properties:
-        server:
-          type: object
-          properties:
-            port:
-              type: integer
+    run: |
+      printf 'port=5432\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: port
 
   - id: print_port
-    run: echo "Port is ${get_config.output.server.port}"
+    run: echo "Port is ${steps.get_config.outputs.port}"
     depends: get_config
 ```
 
@@ -1144,8 +1146,12 @@ steps:
     run: ./scripts/validate.sh
 
   - id: extract_data
-    run: uv run --python 3.13.9 python extract.py --date=${DATE}
-    output: RAW_DATA_PATH
+    run: |
+      raw_data_path="/data/raw/${params.DATE}.json"
+      uv run --python 3.13.9 python extract.py --date="${params.DATE}" --output "$raw_data_path"
+      printf 'raw_data_path=%s\n' "$raw_data_path" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: raw_data_path
     retry_policy:
       limit: 3
       interval_sec: 300
@@ -1155,7 +1161,7 @@ steps:
     action: dag.run
     with:
       dag: transform_module
-      params: "TYPE=${ITEM} INPUT=${RAW_DATA_PATH}"
+      params: "type=${env.ITEM} input=${steps.extract_data.outputs.raw_data_path}"
     parallel:
       items: [customers, orders, products]
       max_concurrent: 2
@@ -1165,12 +1171,12 @@ steps:
     container:
       image: postgres:16
       env:
-        PGPASSWORD: ${DB_PASSWORD}
-    run: psql -h ${DB_HOST} -U ${DB_USER} -f load.sql
+        PGPASSWORD: ${env.DB_PASSWORD}
+    run: psql -h "${env.DB_HOST}" -U "${env.DB_USER}" -f load.sql
     depends: transform_data
 
   - id: validate_results
-    run: uv run --python 3.13.9 python validate_results.py --date=${DATE}
+    run: uv run --python 3.13.9 python validate_results.py --date="${params.DATE}"
     mail_on_error: true
     depends: load_data
 
@@ -1181,11 +1187,11 @@ handler_on:
     action: mail.send
     with:
       to: data-team@example.com
-      subject: "ETL failed - ${DATE}"
-      message: "Check logs at ${DAG_RUN_LOG_FILE}"
+      subject: "ETL failed - ${params.DATE}"
+      message: "Check logs at ${env.DAG_RUN_LOG_FILE}"
       attach_logs: true
   exit:
-    run: ./scripts/cleanup.sh ${DATE}
+    run: ./scripts/cleanup.sh "${params.DATE}"
 
 mail_on:
   failure: true
@@ -1194,7 +1200,7 @@ smtp:
   host: smtp.company.com
   port: "587"
   username: etl-notifications@company.com
-  password: ${SMTP_PASSWORD}
+  password: ${env.SMTP_PASSWORD}
 ```
 
 ## Common Accuracy Gotchas

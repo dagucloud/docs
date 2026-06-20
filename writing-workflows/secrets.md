@@ -277,6 +277,6 @@ steps:
   - name: deploy
     run: ./deploy.sh
     env:
-      - DATABASE_URL: postgres://app:${DB_PASSWORD}@db/prod
-      - AUTH_HEADER: "Bearer ${API_KEY}"
+      - DATABASE_URL: postgres://app:${env.DB_PASSWORD}@db/prod
+      - AUTH_HEADER: "Bearer ${env.API_KEY}"
 ```

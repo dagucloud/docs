@@ -86,7 +86,7 @@ steps:
       url: https://api.example.com/search/ready
       status: 200
       headers:
-        Authorization: "Bearer ${API_TOKEN}"
+        Authorization: "Bearer ${env.API_TOKEN}"
         Content-Type: application/json
       body: '{"index":"customers"}'
 ```

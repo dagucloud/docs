@@ -87,6 +87,9 @@ Use a step-level container when only the Codex step should receive the
 workspace mount and Codex credential.
 
 ```yaml
+env:
+  - CODEX_API_KEY: ${CODEX_API_KEY}
+
 steps:
   - id: review
     action: harness.run
@@ -97,7 +100,7 @@ steps:
       volumes:
         - .:/workspace:ro
       env:
-        - CODEX_API_KEY=${CODEX_API_KEY}
+        - CODEX_API_KEY=${env.CODEX_API_KEY}
     with:
       provider: codex
       prompt: |
@@ -162,6 +165,9 @@ There are two common authentication paths:
 ### API Key
 
 ```yaml
+env:
+  - CODEX_API_KEY: ${CODEX_API_KEY}
+
 steps:
   - id: review
     action: harness.run
@@ -169,7 +175,7 @@ steps:
       image: dagu-codex-runner:local
       pull_policy: never
       env:
-        - CODEX_API_KEY=${CODEX_API_KEY}
+        - CODEX_API_KEY=${env.CODEX_API_KEY}
     with:
       provider: codex
       prompt: |

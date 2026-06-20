@@ -31,12 +31,16 @@ steps:
         last_id: 0
 
   - id: fetch
-    run: ./fetch-feed --after "${CURSOR.value.last_id}" > result.json
+    run: |
+      last_id="$(printf '%s\n' '${steps.load_cursor.outputs.value}' | jq -r .last_id)"
+      ./fetch-feed --after "$last_id" > result.json
     depends: load_cursor
 
   - id: parse_last_id
-    run: jq -r '.last_id' result.json
-    output: LAST_ID
+    run: |
+      printf 'last_id=%s\n' "$(jq -r '.last_id' result.json)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: last_id
     depends: fetch
 
   - id: save_cursor
@@ -44,11 +48,11 @@ steps:
     with:
       key: cursors/feed
       value:
-        last_id: "${LAST_ID}"
+        last_id: "${steps.parse_last_id.outputs.last_id}"
     depends: parse_last_id
 ```
 
-`state.get` writes JSON to stdout, so `output: CURSOR` captures the response and lets later steps reference fields such as `${CURSOR.value.last_id}`.
+`state.get` publishes JSON, so later steps can reference the top-level value as `${steps.load_cursor.outputs.value}` and decode nested fields in the consuming command.
 
 ## Actions
 
@@ -144,8 +148,8 @@ steps:
     with:
       key: snapshots/feed
       value:
-        count: "${COUNT}"
-        checksum: "${CHECKSUM}"
+        count: "${params.COUNT}"
+        checksum: "${params.CHECKSUM}"
 ```
 
 Fields:
@@ -167,7 +171,7 @@ steps:
     run: ./notify.sh
     depends: check_snapshot
     preconditions:
-      - condition: "${DIFF.changed}"
+      - condition: "${steps.check_snapshot.outputs.changed}"
         expected: "true"
 ```
 
@@ -299,9 +303,9 @@ steps:
     action: state.set
     with:
       key: counters/jobs
-      expected_version: "${STATE.version}"
+      expected_version: "${steps.load.outputs.version}"
       value:
-        count: "${NEXT_COUNT}"
+        count: "${params.NEXT_COUNT}"
     depends: load
 ```
 

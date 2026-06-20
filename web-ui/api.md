@@ -195,7 +195,7 @@ Fetches detailed information about a specific DAG.
     "description": "Daily data processing pipeline for warehouse ETL",
     "env": [
       "DATA_SOURCE=postgres://prod-db:5432/analytics",
-      "WAREHOUSE_URL=${WAREHOUSE_URL}"
+      "WAREHOUSE_URL=${env.WAREHOUSE_URL}"
     ],
     "log_dir": "/var/log/dagu/pipelines",
     "handler_on": {
@@ -219,7 +219,7 @@ Fetches detailed information about a specific DAG.
         "description": "Extract data from source database",
         "dir": "/app/etl",
         "command": "python",
-        "args": ["extract.py", "--date", "${date}"],
+        "args": ["extract.py", "--date", "${params.date}"],
         "stdout": "/logs/extract.out",
         "stderr": "/logs/extract.err",
         "output": "EXTRACTED_FILE",
@@ -234,7 +234,7 @@ Fetches detailed information about a specific DAG.
         "name": "transform_data",
         "id": "transform",
         "description": "Apply transformations to extracted data",
-        "command": "python transform.py --input=${EXTRACTED_FILE}",
+        "command": "python transform.py --input=${steps.extract.outputs.EXTRACTED_FILE}",
         "depends": ["extract_data"],
         "output": "TRANSFORMED_FILE",
         "repeat_policy": {
@@ -247,7 +247,7 @@ Fetches detailed information about a specific DAG.
         "name": "load_to_warehouse",
         "id": "load",
         "run": "warehouse-loader",
-        "params": "{\"file\": \"${TRANSFORMED_FILE}\", \"table\": \"fact_sales\"}",
+        "params": "{\"file\": \"${steps.transform.outputs.TRANSFORMED_FILE}\", \"table\": \"fact_sales\"}",
         "depends": ["transform_data"]
       }
     ],
@@ -1622,7 +1622,7 @@ Performs full-text search across DAG definitions. This endpoint remains availabl
       },
       "matches": [
         {
-          "line": "    command: pg_dump ${target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
+          "line": "    command: pg_dump ${params.target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
           "lineNumber": 25,
           "startLine": 20
         },
@@ -1649,7 +1649,7 @@ Performs full-text search across DAG definitions. This endpoint remains availabl
       },
       "matches": [
         {
-          "line": "      command: psql -h ${DB_HOST} -d analytics -c \"COPY data TO STDOUT\"",
+          "line": "      command: psql -h ${env.DB_HOST} -d analytics -c \"COPY data TO STDOUT\"",
           "lineNumber": 45,
           "startLine": 42
         }
@@ -1688,7 +1688,7 @@ Each result includes preview snippets plus `hasMoreMatches` and `nextMatchesCurs
       "nextMatchesCursor": "eyJmaWxlTmFtZSI6ImRhdGFiYXNlX2JhY2t1cCJ9",
       "matches": [
         {
-          "line": "    command: pg_dump ${target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
+          "line": "    command: pg_dump ${params.target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
           "lineNumber": 25,
           "startLine": 20
         }
@@ -2476,7 +2476,7 @@ curl "http://localhost:8080/api/v1/dags/search?q=database" \
       },
       "matches": [
         {
-          "line": "    command: pg_dump ${target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
+          "line": "    command: pg_dump ${params.target_db} | gzip > backup_$(date +%Y%m%d).sql.gz",
           "lineNumber": 25,
           "startLine": 20
         }
@@ -2617,7 +2617,7 @@ curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
     "name": "data_processing_pipeline",
     "group": "ETL"
   },
-  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\nlabels:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
+  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${env.WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\nlabels:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\ntype: graph\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${params.date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${steps.extract.outputs.EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${steps.transform.outputs.TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
   "errors": []
 }
 ```

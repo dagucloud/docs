@@ -41,21 +41,25 @@ steps:
 
 **File path via `with.input`**
 
-Read JSON from a file path. The path is evaluated at runtime, so step references like `${step_id.stdout}` work:
+Read JSON from a file path. The path is evaluated at runtime, so declared step outputs work:
 
 ```yaml
 type: graph
 steps:
   - id: producer
-    run: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
+    run: |
+      json_path="$DAG_RUN_WORK_DIR/items.json"
+      printf '%s\n' '{"items": [{"name": "a"}, {"name": "b"}]}' > "$json_path"
+      printf 'json_path=%s\n' "$json_path" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: json_path
 
   - id: filter
     action: jq.filter
     with:
       raw: true
-      input: "${producer.stdout}"
+      input: "${steps.producer.outputs.json_path}"
       filter: '.items[] | .name'
-    output: RESULT
     depends: producer
 ```
 
@@ -65,15 +69,19 @@ steps:
 type: graph
 steps:
   - id: producer
-    run: 'echo ''{"items": [{"name": "a"}, {"name": "b"}]}'''
+    run: |
+      json_path="$DAG_RUN_WORK_DIR/items.json"
+      printf '%s\n' '{"items": [{"name": "a"}, {"name": "b"}]}' > "$json_path"
+      printf 'json_path=%s\n' "$json_path" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: json_path
 
   - id: filter
     action: jq.filter
     with:
       raw: true
       filter: '.items[] | .name'
-      data: "file://${producer.stdout}"
-    output: RESULT
+      data: "file://${steps.producer.outputs.json_path}"
     depends: producer
 ```
 
@@ -143,19 +151,18 @@ steps:
 ```yaml
 steps:
   - id: fetch_data
-    action: http.request
-    with:
-      silent: true
-      method: GET
-      url: https://api.example.com/products
-    output: API_RESPONSE
+    run: |
+      response="$(curl -fsS https://api.example.com/products)"
+      printf 'api_response=%s\n' "$response" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: api_response
+        type: json
 
   - id: extract_in_stock
     action: jq.filter
     with:
       filter: '.products | map(select(.inventory > 0) | {id, name, price})'
-      data: ${API_RESPONSE}
-    output: IN_STOCK
+      data: ${steps.fetch_data.outputs.api_response}
     depends: fetch_data
 ```
 

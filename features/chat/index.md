@@ -77,7 +77,7 @@ steps:
 - **Extended Thinking** - Enable reasoning mode for complex tasks (Anthropic, OpenAI, Gemini)
 - **Secret Masking** - Automatic masking of sensitive values before sending to LLM
 - **Tool Calling** - Build AI agents that execute workflows as function calls
-- **Variable Substitution** - Use `${VAR}` in messages for dynamic content
+- **Variable Substitution** - Use scoped references such as `${params.topic}` in messages for dynamic content
 - **DAG-Level Defaults** - Share LLM configuration across multiple steps
 
 ## Configuration

@@ -10,14 +10,16 @@ This page covers concurrency, timeout, and queue controls. For CPU and memory ca
 
 ```yaml
 max_active_steps: 1       # Max 1 step running concurrently within the DAG
+env:
+  - FILE_LIST: file1.csv,file2.csv,file3.csv
 
 steps:
   - run: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
   - run: echo "Processing large dataset"
   - parallel:
-      items: ${FILE_LIST}
+      items: ${env.FILE_LIST}
       max_concurrent: 3  # Limit parallel I/O
-    run: echo "Processing file ${ITEM}"
+    run: echo "Processing file ${env.ITEM}"
 ```
 
 For controlling concurrent DAG instances, use global queues (see below).

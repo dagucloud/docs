@@ -165,8 +165,8 @@ steps:
     action: python-script@v1
     with:
       input:
-        tag: "${prepare_release.outputs.result.tag}"
-        channel: "${prepare_release.outputs.result.channel}"
+        tag: "${steps.prepare_release.outputs.tag}"
+        channel: "${steps.prepare_release.outputs.channel}"
       script: |
         return {
             "message": f"release {input['tag']} is ready for {input['channel']}"
@@ -174,7 +174,7 @@ steps:
     depends: prepare_release
 
   - id: print
-    run: echo "${summarize.outputs.result.message}"
+    run: echo "${steps.summarize.outputs.message}"
     depends: summarize
 ```
 
@@ -943,7 +943,7 @@ Thanks to our contributors for this release:
   ssh:
     user: deploy
     host: app.example.com
-    key: ${HOME_DIR}/.ssh/deploy_key  # Expanded — HOME_DIR is DAG-scoped
+    key: ${env.HOME_DIR}/.ssh/deploy_key
   ```
 
 - Auth by Default: The default authentication mode changed from `none` to `builtin`. New installations require creating an admin account via the `/setup` page on first visit. The JWT token secret is auto-generated and persisted to `{dataDir}/auth/token_secret` if not explicitly configured. See [RFC 018](https://github.com/dagucloud/dagu/blob/main/rfcs/draft/018-auth-by-default.md).
@@ -1176,8 +1176,8 @@ Thanks to our contributors for this release:
   ```yaml
   s3:
     region: us-east-1
-    access_key_id: ${AWS_ACCESS_KEY_ID}
-    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+    access_key_id: ${env.AWS_ACCESS_KEY_ID}
+    secret_access_key: ${env.AWS_SECRET_ACCESS_KEY}
     bucket: my-bucket
 
   steps:
@@ -1228,13 +1228,13 @@ Thanks to our contributors for this release:
   redis:
     host: localhost
     port: 6379
-    password: ${REDIS_PASSWORD}
+    password: ${env.REDIS_PASSWORD}
 
   steps:
     - id: cache_lookup
       action: redis.get
       with:
-        key: user:${USER_ID}
+        key: user:${params.USER_ID}
       output: CACHED_USER
   ```
 
@@ -1798,7 +1798,7 @@ Everyone who participated in discussions, reported feedback, or helped other use
   ```yaml
   handler_on:
     wait:
-      run: notify-slack.sh "${DAG_WAITING_STEPS}"
+      run: notify-slack.sh "${env.DAG_WAITING_STEPS}"
 
   steps:
     - action: noop
@@ -1824,7 +1824,7 @@ Everyone who participated in discussions, reported feedback, or helped other use
 
   Key features:
   - Multi-turn sessions: Steps inherit session history from dependencies
-  - Variable substitution: Message content supports `${VAR}` syntax
+  - Variable substitution: Message content supports scoped references such as `${params.name}`
   - Streaming: Response tokens are streamed to stdout by default
   - Multiple providers: `openai`, `anthropic`, `gemini`, `openrouter`, `local`
   - Automatic retry: Retries on rate limits and transient errors with exponential backoff
@@ -2826,11 +2826,11 @@ steps:
     action: dag.run
     with:
       dag: sub-dag
-      params: "INPUT=${DATA_PATH}"
+      params: "INPUT=${params.DATA_PATH}"
     output: OUT
 
   - id: use_output
-    run: echo ${OUT.outputs.RESULT}
+    run: echo ${steps.run_sub_dag.outputs.RESULT}
     depends: run_sub_dag
 ```
 
@@ -2861,17 +2861,21 @@ Execute commands or sub-DAGs in parallel with different parameters for batch pro
 ```yaml
 steps:
   - id: get_files
-    run: find /data -name "*.csv"
-    output: FILES
+    run: |
+      files="$(find /data -name "*.csv" | jq -R . | jq -s .)"
+      printf 'files=%s\n' "$files" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: files
+        type: json
 
   - id: process_files
     action: dag.run
     with:
       dag: process-file
       params:
-        FILE_NAME: ${ITEM}
+        FILE_NAME: ${env.ITEM}
     parallel:
-      items: ${FILES}
+      items: ${steps.get_files.outputs.files}
     depends: get_files
 ```
 
@@ -2954,7 +2958,7 @@ steps:
     run: check_service.sh
     repeat_policy:
       repeat: until        # NEW: Explicit mode (while/until)
-      condition: "${STATUS}"
+      condition: "${env.STATUS}"
       expected: "ready"    # Repeat UNTIL status is ready
       interval_sec: 30
       limit: 60           # Maximum attempts
@@ -3066,7 +3070,7 @@ dotenv:
 
 #### 🔗 JSON Reference Expansion
 
-Access nested JSON values with path syntax:
+Access published run outputs with strict step-output syntax:
 
 ```yaml
 steps:
@@ -3074,23 +3078,20 @@ steps:
     action: dag.run
     with:
       dag: sub_workflow
-    output: SUB_RESULT
   - id: use_output
-    run: echo "The result is ${SUB_RESULT.outputs.finalValue}"
+    run: echo "The result is ${steps.sub_workflow.outputs.final_value}"
     depends: sub_workflow
 ```
 
-If `SUB_RESULT` contains:
+If `sub_workflow` publishes this run output:
 
 ```json
 {
-  "outputs": {
-    "finalValue": "success"
-  }
+  "final_value": "success"
 }
 ```
 
-Then `${SUB_RESULT.outputs.finalValue}` expands to `success`.
+Then `${steps.sub_workflow.outputs.final_value}` expands to `success`.
 
 #### Advanced Preconditions
 
@@ -3192,7 +3193,7 @@ steps:
 ```yaml
 steps:
   - id: bash_specific
-    run: "echo ${BASH_VERSION}"
+    run: "echo $BASH_VERSION"
     with:
       shell: bash
 

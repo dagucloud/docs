@@ -27,11 +27,11 @@ steps:
         return {"total": sum(input["values"])}
 
   - id: print
-    run: echo "total=${compute.outputs.result.total}"
+    run: echo "result=${steps.compute.outputs.result}"
     depends: compute
 ```
 
-The action package owns its manifest, implementation workflow, output contract, and tool dependencies. The caller only supplies `with:` and reads `${compute.outputs.*}`.
+The action package owns its manifest, implementation workflow, output contract, and tool dependencies. The caller only supplies `with:` and reads `${steps.compute.outputs.*}`.
 
 ## Choose a Model
 
@@ -51,7 +51,7 @@ workflow.yaml     # action DAG entrypoint
 scripts/...       # helper files used by the action DAG
 ```
 
-At runtime, Dagu resolves the action reference, validates the caller's `with:` object against the manifest `inputs` schema, materializes the action workspace, runs the action DAG as a sub-DAG, collects action outputs, validates them against the manifest `outputs` schema, and exposes them to the parent workflow through `${step.outputs.*}`.
+At runtime, Dagu resolves the action reference, validates the caller's `with:` object against the manifest `inputs` schema, materializes the action workspace, runs the action DAG as a sub-DAG, collects action outputs, validates them against the manifest `outputs` schema, and exposes them to the parent workflow through `${steps.step_id.outputs.*}`.
 
 See [Execution Model](/dagu-actions/execution-model) for the exact lifecycle and distributed-worker behavior.
 

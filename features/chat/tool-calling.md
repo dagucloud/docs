@@ -317,7 +317,7 @@ params: "data table"
 steps:
   - action: postgres.query
     with:
-      dsn: ${DATABASE_URL}
+      dsn: ${env.DATABASE_URL}
       query: "INSERT INTO $2 (data) VALUES ('$1'::jsonb)"
 ```
 

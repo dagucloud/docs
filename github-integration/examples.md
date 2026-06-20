@@ -40,7 +40,7 @@ env:
 steps:
   - id: migrate
     run: |
-      ./scripts/migrate-test-db.sh "${DATABASE_URL}"
+      ./scripts/migrate-test-db.sh "${env.DATABASE_URL}"
 
   - id: integration-test
     run: |
@@ -86,18 +86,18 @@ Trigger it from a PR comment:
 ```yaml
 env:
   - name: PR_NUMBER
-    value: ${GITHUB_PR_NUMBER}
+    value: ${env.GITHUB_PR_NUMBER}
   - name: IMAGE_TAG
-    value: pr-${GITHUB_PR_NUMBER}-${GITHUB_SHA}
+    value: pr-${env.GITHUB_PR_NUMBER}-${env.GITHUB_SHA}
 
 steps:
   - id: build-image
     run: |
-      ./scripts/build-preview-image.sh "${IMAGE_TAG}"
+      ./scripts/build-preview-image.sh "${env.IMAGE_TAG}"
 
   - id: deploy-preview
     run: |
-      ./scripts/deploy-preview-env.sh "${PR_NUMBER}" "${IMAGE_TAG}"
+      ./scripts/deploy-preview-env.sh "${env.PR_NUMBER}" "${env.IMAGE_TAG}"
     depends: build-image
 ```
 
@@ -161,7 +161,7 @@ After a normal build or unit test workflow succeeds, GitHub Actions can hand off
 steps:
   - id: prepare
     run: |
-      ./scripts/checkout-target.sh "${GITHUB_SHA}"
+      ./scripts/checkout-target.sh "${env.GITHUB_SHA}"
 
   - id: soak-test
     run: |
@@ -208,7 +208,7 @@ This means:
 ```yaml
 env:
   - name: IMAGE_TAG
-    value: ${GITHUB_RELEASE_TAG}
+    value: ${env.GITHUB_RELEASE_TAG}
   - name: KUBECONFIG
     value: /etc/dagu/kubeconfig-prod
 
@@ -217,7 +217,7 @@ steps:
     run: |
       helm upgrade --install api ./deploy/chart \
         --namespace production \
-        --set image.tag="${IMAGE_TAG}"
+        --set image.tag="${env.IMAGE_TAG}"
 ```
 
 ### Runtime Data

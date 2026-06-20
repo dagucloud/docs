@@ -59,14 +59,14 @@ steps:
     action: dag.run
     with:
       dag: workflows/transform.yaml
-      params: "INPUT=${extract.output}"
+      params: "source=production"
     depends: extract
 
   - id: load
     action: dag.run
     with:
       dag: workflows/load.yaml
-      params: "DATA=${transform.output}"
+      params: "target=warehouse"
     depends: transform
 ```
 
@@ -82,13 +82,17 @@ Use `action: dag.enqueue` when the parent only needs to queue another DAG and co
 
 ```yaml
 type: graph
+params:
+  - name: date
+    default: 2026-01-01
+
 steps:
   - id: fanout_report
     action: dag.enqueue
     with:
       dag: workflows/report.yaml
       params:
-        DATE: ${DATE}
+        date: ${params.date}
       queue: background
 
   - id: continue_parent
@@ -141,10 +145,11 @@ steps:
 
 name: data-processor
 params:
-  - TYPE: "batch"
+  - name: type
+    default: batch
 steps:
   - id: extract
-    run: echo "Extracting ${TYPE} data"
+    run: echo "Extracting ${params.type} data"
 
   - id: transform
     run: echo "Transforming data"
@@ -159,25 +164,27 @@ Discover work at runtime and iterate over it in parallel.
 steps:
   - id: discover_tasks
     run: |
-      echo '["file1.csv","file2.csv","file3.csv"]'
-    output: TASK_LIST
+      printf 'tasks=file1.csv,file2.csv,file3.csv\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: tasks
 
   - id: process_tasks
     action: dag.run
     with:
       dag: worker
-      params: "FILE=${ITEM}"
+      params: "file=${env.ITEM}"
     parallel:
-      items: ${TASK_LIST}
+      items: ${steps.discover_tasks.outputs.tasks}
       max_concurrent: 1
     depends: discover_tasks
 ---
 name: worker
 params:
-  - FILE: ""
+  - name: file
+    default: ""
 steps:
   - id: process_file
-    run: echo "Processing ${FILE}"
+    run: echo "Processing ${params.file}"
 ```
 
 ### Map-Reduce Pattern
@@ -188,32 +195,31 @@ Split, map in parallel, then reduce results.
 steps:
   - id: split_chunks
     run: |
-      echo '["chunk1","chunk2","chunk3"]'
-    output: CHUNKS
+      printf 'chunks=chunk1,chunk2,chunk3\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: chunks
 
   - id: map_chunks
     action: dag.run
     with:
       dag: worker
-      params: "CHUNK=${ITEM}"
+      params: "chunk=${env.ITEM}"
     parallel:
-      items: ${CHUNKS}
+      items: ${steps.split_chunks.outputs.chunks}
       max_concurrent: 3
-    output: MAP_RESULTS
     depends: split_chunks
 
   - id: reduce_results
-    run: |
-      echo "Reducing results from ${MAP_RESULTS.outputs}"
+    run: echo "Chunk workers finished"
     depends: map_chunks
 ---
 name: worker
 params:
-  - CHUNK: ""
+  - name: chunk
+    default: ""
 steps:
   - id: process_chunk
-    run: echo "Processing ${CHUNK}"
-    output: RESULT
+    run: echo "Processing ${params.chunk}"
 ```
 
 ## Conditional Execution
@@ -226,7 +232,7 @@ Run steps only when conditions are met.
 steps:
   - run: echo "Deploying to production"
     preconditions:
-      - condition: "${ENVIRONMENT}"
+      - condition: "${env.ENVIRONMENT}"
         expected: "production"
 ```
 
@@ -238,7 +244,7 @@ When `expected` is omitted, Dagu treats `condition` as a command check. Dagu fir
       with:
         shell: bash
       preconditions:
-        - condition: "test ${DEV_PCENT} -ge ${DEV_ALERT}"
+        - condition: "test ${env.DEV_PCENT} -ge ${env.DEV_ALERT}"
   ```
 
 ### Command Output Conditions
@@ -275,9 +281,9 @@ All conditions must pass:
 steps:
   - run: echo "Deploying application"
     preconditions:
-      - condition: "${ENVIRONMENT}"
+      - condition: "${env.ENVIRONMENT}"
         expected: "production"
-      - condition: "${APPROVED}"
+      - condition: "${env.APPROVED}"
         expected: "true"
       - condition: "`date +%H`"
         expected: "re:0[8-9]|1[0-7]"  # 8 AM - 5 PM
@@ -292,7 +298,7 @@ steps:
   # Skip deployment in production environment
   - run: echo "Running experimental feature"
     preconditions:
-      - condition: "${ENVIRONMENT}"
+      - condition: "${env.ENVIRONMENT}"
         expected: "production"
         negate: true  # Runs only when NOT in production
 ```
@@ -344,7 +350,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${STATUS}
+      value: ${env.STATUS}
       routes:
         "production": [prod_handler]
         "staging": [staging_handler]
@@ -368,7 +374,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${INPUT}
+      value: ${env.INPUT}
       routes:
         "re:^apple.*": [apple_handler]
         "re:^banana.*": [banana_handler]
@@ -392,7 +398,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${INPUT}
+      value: ${env.INPUT}
       routes:
         "specific": [specific_handler]
         "re:.*": [default_handler]
@@ -416,7 +422,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${INPUT}
+      value: ${env.INPUT}
       routes:
         "trigger": [step_a, step_b]
 
@@ -435,13 +441,14 @@ Use a previous step's output as the router value:
 type: graph
 steps:
   - id: check_status
-    run: echo "success"
-    output: STATUS
+    run: printf 'status=success\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: status
 
   - id: router
     action: router.route
     with:
-      value: ${STATUS}
+      value: ${steps.check_status.outputs.status}
       routes:
         "success": [success_handler]
         "failure": [failure_handler]
@@ -467,7 +474,7 @@ steps:
   - id: category_router
     action: router.route
     with:
-      value: ${CATEGORY}
+      value: ${env.CATEGORY}
       routes:
         "electronics": [electronics_router]
         "clothing": [clothing_handler]
@@ -475,7 +482,7 @@ steps:
   - id: electronics_router
     action: router.route
     with:
-      value: ${SUBCATEGORY}
+      value: ${env.SUBCATEGORY}
       routes:
         "phone": [phone_handler]
         "laptop": [laptop_handler]
@@ -521,10 +528,11 @@ The 'until' mode repeats a step until a condition becomes true.
 ```yaml
 steps:
   - run: check-job-status.sh
-    output: STATUS
+    env:
+      - STATUS: COMPLETED
     repeat_policy:
       repeat: until
-      condition: "${STATUS}"
+      condition: "${env.STATUS}"
       expected: "COMPLETED"   # Repeat UNTIL status is COMPLETED
       interval_sec: 30
       limit: 120              # Maximum 1 hour
@@ -556,11 +564,12 @@ steps:
 #### While Condition with Output
 ```yaml
 steps:
-  - run: curl -s http://api/health
-    output: HEALTH_STATUS
+  - run: curl -sf http://api/health
+    env:
+      - HEALTH_STATUS: healthy
     repeat_policy:
       repeat: while
-      condition: "${HEALTH_STATUS}"
+      condition: "${env.HEALTH_STATUS}"
       expected: "healthy"
       interval_sec: 30
 ```
@@ -583,10 +592,11 @@ steps:
       
   # Custom backoff multiplier with until mode
   - run: check-job-status.sh
-    output: STATUS
+    env:
+      - STATUS: COMPLETED
     repeat_policy:
       repeat: until
-      condition: "${STATUS}"
+      condition: "${env.STATUS}"
       expected: "COMPLETED"
       interval_sec: 5
       backoff: 1.5         # Gentler backoff
@@ -595,10 +605,11 @@ steps:
       
   # Backoff with max interval cap
   - run: curl -s https://api.example.com/status
-    output: API_STATUS
+    env:
+      - API_STATUS: ready
     repeat_policy:
       repeat: until
-      condition: "${API_STATUS}"
+      condition: "${env.API_STATUS}"
       expected: "ready"
       interval_sec: 2
       backoff: 2.0
@@ -611,15 +622,19 @@ steps:
 
 ### Variable References in Repeat Policy
 
-The `interval_sec`, `limit`, and `max_interval_sec` fields accept variable references (`$VAR`, `${VAR}`, or backtick command substitutions) that are resolved at runtime. This lets you parameterize repeat behavior through environment variables or DAG parameters.
+The `interval_sec`, `limit`, and `max_interval_sec` fields accept scoped value references that are resolved at runtime. This lets you parameterize repeat behavior through environment variables or DAG parameters.
 
 ```yaml
+env:
+  - REPEAT_LIMIT: 10
+  - POLL_INTERVAL: 5
+
 steps:
   - run: echo "repeating"
     repeat_policy:
       repeat: true
-      limit: $REPEAT_LIMIT
-      interval_sec: ${POLL_INTERVAL}
+      limit: ${env.REPEAT_LIMIT}
+      interval_sec: ${env.POLL_INTERVAL}
 ```
 
 Command substitutions also work:
@@ -686,7 +701,7 @@ steps:
   - id: enable_feature
     run: echo "Enabling feature"
     preconditions:
-      - condition: "${FEATURE_FLAG}"
+      - condition: "${env.FEATURE_FLAG}"
         expected: "enabled"
     continue_on: skipped  # Shorthand syntax
   - id: process
@@ -730,7 +745,7 @@ steps:
   - id: simple_method
     run: echo "Processing with simple settings"
     preconditions:
-      - condition: "${TRY_ADVANCED_METHOD_EXIT_CODE}"
+      - condition: "${env.TRY_ADVANCED_METHOD_EXIT_CODE}"
         expected: "re:[1-9][0-9]*"
     depends: try_advanced_method
         
@@ -738,7 +753,7 @@ steps:
   - id: optional_feature
     run: echo "Running feature"
     preconditions:
-      - condition: "${ENABLE_FEATURE}"
+      - condition: "${env.ENABLE_FEATURE}"
         expected: "true"
     continue_on:
       skipped: true  # Continue if precondition not met
@@ -766,7 +781,7 @@ Use `negate: true` at the DAG level to skip the entire workflow when conditions 
 ```yaml
 # Skip this DAG in production
 preconditions:
-  - condition: "${ENVIRONMENT}"
+  - condition: "${env.ENVIRONMENT}"
     expected: "production"
     negate: true  # DAG runs only when NOT in production
 

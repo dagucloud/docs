@@ -2,9 +2,9 @@
 
 DAG-level `params:` define runtime inputs for a workflow. They can be overridden when the DAG is started from the CLI, API, Web UI, or a sub-DAG step.
 
-By default, parameter defaults are treated as literal values. If you want a parameter to compute its effective default at execution time, use `eval:` on an inline rich definition. `eval` uses the same expression engine as DAG `env:` and supports `$VAR` expansion plus backtick command substitution.
+By default, parameter defaults are treated as literal values. If you want a parameter to compute its effective default at execution time, use `eval:` on an inline rich definition. `eval` resolves scoped Dagu references and supports command substitution.
 
-Named parameters are injected into the step execution environment, so shell commands can read them with normal shell syntax such as `${ENVIRONMENT}`.
+Use `${params.name}` when Dagu should resolve and validate a named parameter reference.
 
 ## Supported Formats
 
@@ -168,7 +168,7 @@ params:
     default: 3
 
 steps:
-  - run: echo "Launching ${instance_count} instances"
+  - run: echo "Launching ${params.instance_count} instances"
 ```
 
 The shell sees `"3"`, not a typed integer object.
@@ -190,7 +190,7 @@ env:
 
 params:
   - name: output_dir
-    eval: "$BASE_DIR/out"
+    eval: "${env.BASE_DIR}/out"
     default: /tmp/out
   - name: today
     eval: "`date +%Y-%m-%d`"
@@ -201,7 +201,7 @@ params:
     minimum: 1
 
 steps:
-  - run: echo "${output_dir} ${today} ${workers}"
+  - run: echo "${params.output_dir} ${params.today} ${params.workers}"
 ```
 
 Behavior:
@@ -223,7 +223,7 @@ params:
   - name: year
     eval: "`date +%Y`"
   - name: report_path
-    eval: "/reports/$year/summary.csv"
+    eval: "/reports/${params.year}/summary.csv"
 ```
 
 `report_path` resolves after `year`, so it becomes `/reports/2026/summary.csv`.
@@ -250,7 +250,7 @@ params:
   - SOURCE_REF: "${HOME}/data"
 
 steps:
-  - run: echo "${DATE} ${MESSAGE} ${SOURCE_REF}"
+  - run: echo "${params.DATE} ${params.MESSAGE} ${params.SOURCE_REF}"
 ```
 
 If you want dynamic values without using param `eval`, compute them in `env:`:
@@ -271,20 +271,20 @@ tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: uv run --python 3.13.9 python processor.py --input "${INPUT_FILE}" --threads "${THREADS}" --date "${DATE}" --home "${HOME_DIR}"
+  - run: uv run --python 3.13.9 python processor.py --input "${params.INPUT_FILE}" --threads "${params.THREADS}" --date "${env.DATE}" --home "${env.HOME_DIR}"
 ```
 
-`env:` values can also reference `params:` values using `${param_name}`, since parameters are resolved before environment variables:
+`env:` values can also reference `params:` values using `${params.name}`:
 
 ```yaml
 params:
   data_dir: /tmp/foo
 
 env:
-  - FULL_PATH: "${data_dir}/output"
+  - FULL_PATH: "${params.data_dir}/output"
 
 steps:
-  - run: echo "${FULL_PATH}"  # Outputs: /tmp/foo/output
+  - run: echo "${env.FULL_PATH}"  # Outputs: /tmp/foo/output
 ```
 
 ## Runtime Overrides Stay Literal
@@ -432,5 +432,5 @@ params:
     default: enabled
 
 steps:
-  - run: echo "Deploying to ${environment} with safety mode ${safety_mode}"
+  - run: echo "Deploying to ${params.environment} with safety mode ${params.safety_mode}"
 ```

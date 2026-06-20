@@ -17,8 +17,8 @@ steps:
 The values are added to the run outputs and are available to downstream steps as:
 
 ```yaml
-${publish_result.outputs.messageId}
-${publish_result.outputs.status}
+${steps.publish_result.outputs.messageId}
+${steps.publish_result.outputs.status}
 ```
 
 When the step is inside an action package workflow, the parent workflow reads those fields from the action step:
@@ -31,7 +31,7 @@ steps:
       text: "Deploy finished"
 
   - id: audit
-    run: echo "Message: ${notify.outputs.messageId}"
+    run: echo "Message: ${steps.notify.outputs.messageId}"
     depends: notify
 ```
 

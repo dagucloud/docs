@@ -39,14 +39,17 @@ steps:
   - action: dag.run
     with:
       dag: processor
-      params: "ITEM=${ITEM}"
+      params: "item=${env.ITEM}"
     parallel:
       items: [A, B, C]
       max_concurrent: 2
 ---
 name: processor
+params:
+  - name: item
+    required: true
 steps:
-  - run: echo "Processing ${ITEM}"
+  - run: echo "Processing ${params.item}"
 ```
 
 ```mermaid
@@ -167,7 +170,7 @@ graph LR
 steps:
   - run: echo "Deploying application"
     preconditions:
-      - condition: "${ENV}"
+      - condition: "${env.ENV}"
         expected: "production"
 ```
 
@@ -254,10 +257,11 @@ flowchart TD
 ```yaml
  steps: 
   - run: echo "COMPLETED"  # Simulates job status check
-    output: JOB_STATUS
+    env:
+      - JOB_STATUS: COMPLETED
     repeat_policy:
       repeat: until        # Repeat UNTIL job completes
-      condition: "${JOB_STATUS}"
+      condition: "${env.JOB_STATUS}"
       expected: "COMPLETED"
       interval_sec: 30
       limit: 120           # Maximum 1 hour (120 attempts)
@@ -351,7 +355,7 @@ steps:
   # Run only when NOT in production
   - run: echo "Running dev task"
     preconditions:
-      - condition: "${ENVIRONMENT}"
+      - condition: "${env.ENVIRONMENT}"
         expected: "production"
         negate: true
 
@@ -393,7 +397,7 @@ steps:
   - id: router
     action: router.route
     with:
-      value: ${STATUS}
+      value: ${env.STATUS}
       routes:
         "production": [prod_handler]
         "staging": [staging_handler]
@@ -431,13 +435,14 @@ flowchart TD
 type: graph
 steps:
   - id: check_status
-    run: echo "success"
-    output: STATUS
+    run: printf 'status=success\n' >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: status
 
   - id: router
     action: router.route
     with:
-      value: ${STATUS}
+      value: ${steps.check_status.outputs.status}
       routes:
         "success": [success_handler]
         "failure": [failure_handler]
@@ -570,10 +575,11 @@ steps:
 
 name: data-processor
 params:
-  - TYPE: "batch"
+  - name: type
+    default: batch
 steps:
   - id: extract
-    run: echo "Extracting ${TYPE} data"
+    run: echo "Extracting ${params.type} data"
 
   - id: transform
     run: echo "Transforming data"
@@ -731,15 +737,18 @@ tools:
 
 steps:
   - id: split_data
-    run: uv run --python 3.13.9 python split_data.py --chunks=10
-    output: CHUNKS
+    run: |
+      chunks="$(uv run --python 3.13.9 python split_data.py --chunks=10)"
+      printf 'chunks=%s\n' "$chunks" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: chunks
 
   - action: dag.run
     with:
       dag: chunk-processor
-      params: "CHUNK=${ITEM}"
+      params: "chunk=${env.ITEM}"
     parallel:
-      items: ${CHUNKS}
+      items: ${steps.split_data.outputs.chunks}
       max_concurrent: 5
     depends: split_data
 
@@ -750,12 +759,13 @@ worker_selector:
   memory: "16G"
   cpu-cores: "8"
 params:
-  - CHUNK: ""
+  - name: chunk
+    default: ""
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: uv run --python 3.13.9 python process_chunk.py ${CHUNK}
+  - run: uv run --python 3.13.9 python process_chunk.py "${params.chunk}"
 ```
 
 ```mermaid
@@ -812,7 +822,7 @@ steps:
   - id: optional_feature
     run: echo "Enabling feature"
     preconditions:
-      - condition: "${FEATURE_FLAG}"
+      - condition: "${env.FEATURE_FLAG}"
         expected: "enabled"
     continue_on:
       skipped: true
@@ -956,15 +966,15 @@ stateDiagram-v2
 ```yaml
 env:
   - SOME_DIR: ${HOME}/batch
-  - SOME_FILE: ${SOME_DIR}/some_file
+  - SOME_FILE: ${env.SOME_DIR}/some_file
   - LOG_LEVEL: debug
   - API_KEY: ${SECRET_API_KEY}
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - working_dir: ${SOME_DIR}
-    run: uv run --python 3.13.9 python main.py ${SOME_FILE}
+  - working_dir: ${env.SOME_DIR}
+    run: uv run --python 3.13.9 python main.py "${env.SOME_FILE}"
 ```
 
 <a href="/writing-workflows/data-variables#env" class="learn-more">Learn more →</a>
@@ -986,7 +996,7 @@ dotenv:
   - .env.production
 
 steps:
-  - run: echo "Database: ${DATABASE_URL}"
+  - run: echo "Database: ${env.DATABASE_URL}"
 ```
 
 <a href="/writing-workflows/data-variables#dotenv" class="learn-more">Learn more →</a>
@@ -1008,7 +1018,7 @@ secrets:
 steps:
   - run: ./sync.sh
     env:
-      - AUTH_HEADER: "Bearer ${API_TOKEN}"
+      - AUTH_HEADER: "Bearer ${env.API_TOKEN}"
       - STRICT_MODE: "1"
 ```
 
@@ -1052,7 +1062,7 @@ tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: uv run --python 3.13.9 python main.py ${foo} ${bar} --env=${environment}
+  - run: uv run --python 3.13.9 python main.py "${params.foo}" "${params.bar}" --env="${params.environment}"
 ```
 
 <a href="/writing-workflows/data-variables#named-params" class="learn-more">Learn more →</a>
@@ -1066,10 +1076,11 @@ steps:
 ```yaml
 steps:
   - id: get_today
-    run: echo `date +%Y%m%d`
-    output: TODAY
+    run: printf 'today=%s\n' "$(date +%Y%m%d)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: today
   - id: print_today
-    run: echo "Today's date is ${TODAY}"
+    run: echo "Today's date is ${steps.get_today.outputs.today}"
     depends: get_today
 ```
 
@@ -1079,7 +1090,7 @@ steps:
 
 <div class="example-card">
 
-### Parallel Outputs Aggregation
+### Parallel Child Runs
 
 ```yaml
 steps:
@@ -1087,25 +1098,16 @@ steps:
     action: dag.run
     with:
       dag: worker
-      params: "REGION=${ITEM}"
+      params: "region=${env.ITEM}"
     parallel:
       items: [east, west, eu]
-    output: RESULTS
-
-  - id: summarize_regions
-    run: |
-      echo "Total: ${RESULTS.summary.total}"
-      echo "First region: ${RESULTS.results[0].params}"
-      echo "First output: ${RESULTS.outputs[0].value}"
-    depends: process_regions
-
 ---
 name: worker
 params:
-  - REGION: ""
+  - name: region
+    default: ""
 steps:
-  - run: echo ${REGION}
-    output: value
+  - run: echo "${params.region}"
 ```
 
 ```mermaid
@@ -1134,10 +1136,10 @@ graph TD
 ```yaml
 steps:
   - run: |
-      echo "DAG: ${DAG_NAME}"
-      echo "Run: ${DAG_RUN_ID}"
-      echo "Step: ${DAG_RUN_STEP_NAME}"
-      echo "Log: ${DAG_RUN_LOG_FILE}"
+      echo "DAG: ${env.DAG_NAME}"
+      echo "Run: ${env.DAG_RUN_ID}"
+      echo "Step: ${env.DAG_RUN_STEP_NAME}"
+      echo "Log: ${env.DAG_RUN_LOG_FILE}"
 ```
 
 <a href="/writing-workflows/template-variables#special-environment-variables" class="learn-more">Learn more →</a>
@@ -1188,14 +1190,15 @@ steps:
 
 ```yaml
 steps:
-  - id: run_sub_workflow
-    output: SUB_RESULT
-    action: dag.run
-    with:
-      dag: sub_workflow
+  - id: produce_result
+    run: |
+      printf 'final_value=%s\n' "ok" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: final_value
+
   - id: print_result
-    run: echo "Result: ${SUB_RESULT.outputs.finalValue}"
-    depends: run_sub_workflow
+    run: echo "Result: ${steps.produce_result.outputs.final_value}"
+    depends: produce_result
 ```
 
 <a href="/writing-workflows/data-variables#json-paths" class="learn-more">Learn more →</a>
@@ -1210,17 +1213,19 @@ steps:
 steps:
   - id: build
     run: |
-      echo '{"version":"v1.2.3"}'
-    output: BUILD_JSON
+      printf 'version=%s\n' "v1.2.3" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version
 
   - id: publish
-    output:
-      version: "${build.output.version}"
-      versionLabel: "ver - ${build.output.version}"
+    run: |
+      printf 'version_label=%s\n' "ver - ${steps.build.outputs.version}" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: version_label
     depends: build
 
   - id: print
-    run: echo "${publish.output.versionLabel}"
+    run: echo "${steps.publish.outputs.version_label}"
     depends: publish
 ```
 
@@ -1239,11 +1244,12 @@ tools:
 
 steps:
   - id: extract
-    run: uv run --python 3.13.9 python extract.py
-    output: DATA
+    run: |
+      printf 'data_path=%s\n' "$(uv run --python 3.13.9 python extract.py)" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: data_path
   - run: |
-      echo "Exit code: ${extract.exit_code}"
-      echo "Stdout path: ${extract.stdout}"
+      echo "Extracted data path: ${steps.extract.outputs.data_path}"
     depends: extract
 ```
 
@@ -1259,7 +1265,7 @@ steps:
 env:
   TODAY: "`date '+%Y%m%d'`"
 steps:
-  - run: echo hello, today is ${TODAY}
+  - run: echo hello, today is ${env.TODAY}
 ```
 
 <a href="/writing-workflows/data-variables#command-substitution" class="learn-more">Learn more →</a>
@@ -1460,7 +1466,7 @@ steps:
 
 `with` is validated by `input_schema`; the rendered template runs as a builtin `exec` action.
 
-Add `output_schema` when stdout should be a typed JSON contract. Invalid JSON or schema mismatches fail the step; without an explicit `output:` mapping, the validated object is available as `${step_id.output.*}`.
+Add `outputs` when a step should publish validated values for downstream steps. Downstream references then use `steps.<id>.outputs.<name>`.
 
 <a href="/dagu-actions/custom" class="learn-more">Learn more →</a>
 
@@ -1730,19 +1736,23 @@ steps:
 steps:
   # Fetch sample users from a public mock API
   - id: fetch_users
-    action: http.request
-    with:
-      method: GET
-      url: https://reqres.in/api/users
-      silent: true
-    output: API_RESPONSE
+    run: |
+      response="$(curl -fsS https://reqres.in/api/users)"
+      {
+        printf 'api_response<<JSON\n'
+        printf '%s\n' "$response"
+        printf 'JSON\n'
+      } >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: api_response
+        type: json
 
   # Extract user emails from the JSON response
   - id: extract_emails
     action: jq.filter
     with:
       filter: '.data[] | .email'
-      data: ${API_RESPONSE}
+      data: ${steps.fetch_users.outputs.api_response}
     depends: fetch_users
 ```
 
@@ -1809,8 +1819,8 @@ stateDiagram-v2
 ```yaml
 registry_auths:
   ghcr.io:
-    username: ${GITHUB_USER}
-    password: ${GITHUB_TOKEN}
+    username: ${env.GITHUB_USER}
+    password: ${env.GITHUB_TOKEN}
 
 container:
   image: ghcr.io/myorg/private-app:latest
@@ -1897,8 +1907,8 @@ steps:
 smtp:
   host: smtp.gmail.com
   port: "587"
-  username: "${SMTP_USER}"
-  password: "${SMTP_PASS}"
+  username: "${env.SMTP_USER}"
+  password: "${env.SMTP_PASS}"
 
 steps:
   - action: mail.send
@@ -1948,6 +1958,10 @@ steps:
 ### Chat with DAG-Level Config
 
 ```yaml
+params:
+  - name: topic
+    default: Dagu workflows
+
 llm:
   provider: openai
   model: gpt-4o
@@ -1960,7 +1974,7 @@ steps:
       messages:
         - role: user
           content: |
-            Explain ${TOPIC} briefly.
+            Explain ${params.topic} briefly.
 ```
 
 Steps inherit LLM config from DAG level.
@@ -2170,8 +2184,8 @@ mail_on:
 smtp:
   host: smtp.gmail.com
   port: "587"
-  username: "${SMTP_USER}"
-  password: "${SMTP_PASS}"
+  username: "${env.SMTP_USER}"
+  password: "${env.SMTP_PASS}"
 steps:
   - run: echo "Running critical job"
     mail_on_error: true
@@ -2229,7 +2243,7 @@ steps:
 ### Custom Log Directory
 
 ```yaml
-log_dir: /data/etl/logs/${DAG_NAME}
+log_dir: /data/etl/logs/daily-etl
 hist_retention_days: 90
 steps:
   - id: extract
@@ -2311,8 +2325,8 @@ otel:
   enabled: true
   endpoint: "otel-collector:4317"
   resource:
-    service.name: "dagu-${DAG_NAME}"
-    deployment.environment: "${ENV}"
+    service.name: "dagu-daily-etl"
+    deployment.environment: "production"
 tools:
   - astral-sh/uv@0.11.14
 
@@ -2458,7 +2472,7 @@ handler_on:
     run: echo "Final cleanup"
 steps:
   - id: validate_environment
-    run: echo "Validating environment: ${ENVIRONMENT}"
+    run: echo "Validating environment: ${env.ENVIRONMENT}"
 ```
 
 <a href="/writing-workflows/yaml-specification" class="learn-more">Learn more →</a>

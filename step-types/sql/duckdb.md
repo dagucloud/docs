@@ -21,7 +21,7 @@ steps:
         SELECT 42 AS answer, 'duckdb' AS engine;
 
   - id: print_result
-    run: printf '%s\n' '${query.outputs.result}'
+    run: printf '%s\n' '${steps.query.outputs.result}'
     depends: query
 ```
 
@@ -31,7 +31,7 @@ The default output format is DuckDB JSON mode, so `result` is a JSON string:
 [{"answer":42,"engine":"duckdb"}]
 ```
 
-Use `${query.outputs.result}` for small results such as counts, IDs, status rows, or compact JSON, replacing `query` with your step id. For large rowsets, write to an artifact or file instead of routing the data through action outputs.
+Use `${steps.query.outputs.result}` for small results such as counts, IDs, status rows, or compact JSON, replacing `query` with your step id. For large rowsets, write to an artifact or file instead of routing the data through action outputs.
 
 ## Existing DuckDB Files
 
@@ -146,7 +146,7 @@ steps:
     depends: update_rows
 
   - id: print_result
-    run: printf '%s\n' '${select_rows.outputs.result}'
+    run: printf '%s\n' '${steps.select_rows.outputs.result}'
     depends: select_rows
 ```
 
@@ -202,7 +202,7 @@ steps:
 
 ## Export Data
 
-For large or typed datasets, write files directly from SQL. When the target path is under `${DAG_RUN_ARTIFACTS_DIR}`, Dagu stores it as a run artifact.
+For large or typed datasets, write files directly from SQL. When the target path is under `${env.DAG_RUN_ARTIFACTS_DIR}`, Dagu stores it as a run artifact.
 
 ```yaml
 steps:
@@ -216,7 +216,7 @@ steps:
           FROM source_table
           WHERE score >= 80
         )
-        TO '${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
+        TO '${env.DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
         (FORMAT parquet);
 ```
 
@@ -234,7 +234,7 @@ steps:
           FROM source_table
           WHERE score >= 80
         )
-        TO '${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
+        TO '${env.DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
         (FORMAT parquet);
 
   - id: insert_parquet
@@ -244,7 +244,7 @@ steps:
       query: |
         INSERT INTO target_table
         SELECT *
-        FROM read_parquet('${DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet');
+        FROM read_parquet('${env.DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet');
     depends: export_parquet
 ```
 
