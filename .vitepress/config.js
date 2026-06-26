@@ -10,6 +10,7 @@ const fullSidebar = [
       { text: "What is Dagu?", link: "/overview/" },
       { text: "Architecture", link: "/overview/architecture" },
       { text: "Deployment Models", link: "/overview/deployment-models" },
+      { text: "Self-Host License", link: "/overview/self-host-license" },
       { text: "CLI", link: "/overview/cli" },
       { text: "Web UI", link: "/overview/web-ui" },
       { text: "API", link: "/overview/api" },
