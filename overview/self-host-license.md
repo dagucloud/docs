@@ -1,28 +1,34 @@
-# Community vs Licensed Self-Host
+# Deployment and License Comparison
 
-This page compares self-hosted Dagu deployments. It does not compare managed Dagu Cloud servers; managed availability and commercial terms are listed on the [pricing page](https://dagu.sh/pricing).
+This page compares the three common ways to run Dagu. It does not list prices; see the [pricing page](https://dagu.sh/pricing) for current commercial terms.
 
-| Capability | Community self-host | Licensed self-host |
-| --- | --- | --- |
-| Core workflow engine, Web UI, scheduling, executors, and workers | Included | Included |
-| Self-hosted workers | Included. Workers are not licensed separately. | Included. Workers are not licensed separately. |
-| API keys | Limited to 2 API keys. | More than 2 API keys. |
-| OIDC/SSO login | Requires an active self-host license. | Included when the license enables `sso`. |
-| User lifecycle management | Admins can list and inspect users and reset passwords. | Create, update, disable, and delete users when the license enables `rbac`. |
-| Audit logs | Requires an active self-host license that enables `audit`. | Included when the license enables `audit`. |
-| Web UI notification routing | Requires an active self-host license or trial. | Included with an active self-host license or trial. |
-| Incident routing | Requires an active self-host license or trial. | Included with an active self-host license or trial. No separate incident feature claim is required. |
-| GitHub Integration | Requires a Dagu Pro self-host license on the target server. | Included for Dagu Pro self-host targets. |
+## At a Glance
 
-## How License Checks Work
+| Capability | Community self-host | Licensed self-host | Hosted orchestrator instance |
+| --- | --- | --- | --- |
+| Core workflow orchestration | ✓ | ✓ | ✓ |
+| Web UI | ✓ | ✓ | ✓ |
+| Workers | ✓ | ✓ | ✓ |
+| Docker run action | ✓ | ✓ | △ Private workers |
+| API keys | △ Up to 2 | ✓ | ✓ |
+| OIDC/SSO | - | ✓ | ✓ |
+| User management | - | ✓ | ✓ |
+| Audit logs | - | ✓ | ✓ |
+| Notification routing | ✓ | ✓ | ✓ |
+| Incident routing | - | ✓ | ✓ |
+| GitHub Integration | - | ✓ | ✓ |
 
-Some self-host features are controlled by explicit license feature claims:
+## Notes
 
-- `sso` enables builtin OIDC/SSO login.
-- `rbac` enables creating, updating, disabling, and deleting users.
-- `audit` enables audit log access.
-
-Other self-host features use an active-license check instead of a separate feature claim. Incident routing requires an active self-host license or trial, and existing self-host licenses include it without a separate incident claim. Web UI notification routing is documented as requiring an active self-host license or trial.
+- **Workers:** run jobs outside the server. Self-hosted workers are not licensed separately.
+- **Docker run action:** run on private workers for hosted deployments.
+- **API keys:** Community self-host supports up to 2 API keys.
+- **OIDC/SSO:** login with an external identity provider.
+- **User management:** create, update, disable, and delete users.
+- **Audit logs:** review administrative and security-relevant activity.
+- **Notification routing:** send workflow events to team channels.
+- **Incident routing:** open and resolve provider incidents for failed workflows.
+- **GitHub Integration:** trigger Dagu from GitHub and report status back.
 
 ## Related Pages
 

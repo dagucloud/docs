@@ -129,7 +129,7 @@ Use it to:
 - configure per-DAG exceptions from the DAG detail page
 - test channels before relying on them in production
 
-Notification channels and Global/workspace rules require an active Dagu license or trial on self-hosted deployments. See [Notifications](/web-ui/notifications) for the full model.
+See [Notifications](/web-ui/notifications) for the full routing model.
 
 ## Incidents
 
