@@ -64,8 +64,6 @@ remote_nodes:
 
 The remote node will recognize the `dagu_` prefix and validate it as an API key, applying the key's assigned role permissions.
 
-Community self-hosted servers can create up to 2 API keys without an active self-host license. The limit applies on the server where the key is created, so multi-server deployments that need more than 2 service keys on a remote server should configure an active license on that server.
-
 ::: tip
 Use environment variables to avoid storing API keys in configuration files:
 
@@ -99,8 +97,6 @@ A common use case is managing multiple Dagu servers, each with builtin authentic
 ### Step 1: Create API Key on Server B
 
 Log into Server B and create an API key with the desired role:
-
-If Server B is a Community self-hosted install without an active license, it can create up to 2 API keys. Existing keys above that number keep working, but new key creation is blocked until enough keys are deleted or a license is configured.
 
 ```bash
 # On Server B: Create an API key for remote access

@@ -18,7 +18,7 @@ For the visual version on the website, see [Deployment models](https://dagu.sh/o
 | Model | Dagu server runs in | Workflow execution | Best for | More information |
 |-------|--------------------|--------------------|----------|------------------|
 | **Local single server** | One machine you operate. | On the same machine. | Development, small internal automation, edge devices, or a first production host. | [Quickstart](/getting-started/quickstart), [Installation](/getting-started/installation/) |
-| **Self-hosted** | Your infrastructure, using the open-source Dagu server. | On the server or on workers you operate. | Teams that want Dagu inside their own network and security boundary. Community self-hosted servers can create up to 2 API keys without an active license. | [Deployment](/server-admin/deployment/), [Distributed Execution](/server-admin/distributed/) |
+| **Self-hosted** | Your infrastructure, using the open-source Dagu server. | On the server or on workers you operate. | Teams that want Dagu inside their own network and security boundary. | [Deployment](/server-admin/deployment/), [Distributed Execution](/server-admin/distributed/) |
 | **Licensed self-hosted** | Your infrastructure, with a paid self-host license when enterprise features are needed. | On the server or on self-hosted workers. Workers are not licensed separately. | Teams that need enterprise controls such as SSO, RBAC, audit logging, more API keys, and support while keeping Dagu self-hosted. | [Self-host pricing](https://dagu.sh/pricing#self-host), [Dagu Pro](https://dagu.sh/pro) |
 | **Dagu Cloud managed server** | A dedicated managed Dagu server operated by Dagu Cloud in an isolated gVisor instance on GKE. The managed license is included. | Directly in the managed Dagu server when the workflow fits the managed runtime boundary. | Teams that want Dagu as a full managed server instead of operating the server themselves. | [Managed pricing](https://dagu.sh/pricing#managed), [Dagu Cloud](https://dagu.sh/cloud) |
 | **Hybrid managed server + hybrid workers** | Dagu Cloud operates the managed Dagu server. | Hybrid workers run inside your infrastructure and connect to the managed server. | Workflows that need managed operations but must execute Docker steps, private-network jobs, custom runtime work, or data-local processing inside your environment. | [Workers](/server-admin/distributed/workers/), [Docker action](/step-types/docker), [Deployment options](https://dagu.sh/cloud#deployment-model) |
@@ -73,7 +73,7 @@ Use this model when you want Dagu Cloud to operate the server but need selected 
 
 ## Pricing and Licensing Links
 
-- [Community self-host](https://dagu.sh/pricing#self-host): open-source Dagu for self-hosted use, with notification routing and up to 2 API keys included.
+- [Community self-host](https://dagu.sh/pricing#self-host): open-source Dagu for self-hosted use.
 - [Paid self-host licenses](https://dagu.sh/pricing#self-host): enterprise controls and more API keys for self-hosted Dagu servers.
 - [Managed Dagu Cloud](https://dagu.sh/pricing#managed): dedicated managed Dagu server with the managed license included.
 - [Contact](https://dagu.sh/contact): sizing, deployment, or security review questions.

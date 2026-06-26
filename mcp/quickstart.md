@@ -35,7 +35,7 @@ export DAGU_MCP_API_KEY=dagu_...
 
 For most self-hosted MCP clients, API keys are the recommended setup. Use a role that matches what the client should do: `viewer` is enough for read-only inspection, `operator` can run and stop workflows, and `developer` can create or edit workflows.
 
-Community self-hosted servers can create up to 2 API keys without an active self-host license. For shared teams, prefer individual keys when you need per-user auditability; use an active self-host license when that means you need more than 2 keys.
+For shared teams, prefer individual keys when you need per-user auditability.
 
 ## Connect A Client
 

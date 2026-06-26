@@ -1,9 +1,5 @@
 # Notifications
 
-::: info Availability
-Notification channels and Global/workspace rules are available in self-hosted Dagu without a license. Managed server includes the same notification routing model. [Incident Routing](/web-ui/incidents) is separate and remains a licensed self-host feature.
-:::
-
 Notifications route DAG-run events to team destinations without hard-coding Slack webhooks, email recipients, Telegram chats, or webhook endpoints in every DAG file.
 
 Use notifications for ordinary message delivery: Slack, Google Chat, email, Telegram, or custom webhooks. Use [Incident Routing](/web-ui/incidents) only for systems that manage an incident lifecycle, such as PagerDuty or SolarWinds Incident Response.

@@ -9,7 +9,7 @@ These pages focus on configuring self-hosted Dagu. Managed server includes user 
 ## Available Authentication Methods
 
 - [Builtin Authentication](./builtin) - Recommended self-host auth mode with JWT login, API keys, and role-based access
-- [API Keys](./api-keys) - Programmatic access with role-based permissions; Community installs can create up to 2 keys without an active license (requires Builtin Auth)
+- [API Keys](./api-keys) - Programmatic access with role-based permissions (requires Builtin Auth)
 - [Webhooks](./webhooks) - DAG-specific tokens for external integrations (requires Builtin Auth)
 - [Basic Authentication](./basic) - Simple username and password authentication
 - [OIDC Authentication](./oidc) - OpenID Connect / SSO under builtin auth
@@ -20,7 +20,7 @@ These pages focus on configuring self-hosted Dagu. Managed server includes user 
 
 ### Builtin Authentication (Recommended)
 
-Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu. On self-hosted Dagu, Community installs can create up to 2 API keys without an active license; creating more API keys, creating additional users, or enabling OIDC/SSO requires an active self-host license. Managed server includes those features by default. See the [pricing page](https://dagu.sh/pricing) for more details.
+Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu.
 
 ```yaml
 auth:

@@ -102,4 +102,4 @@ Then edit the generated `.mcp.json` so the API key is read from an environment v
 }
 ```
 
-Each teammate should set `DAGU_MCP_URL`, create their own Dagu API key, and export `DAGU_MCP_API_KEY` before starting Claude Code. Community self-hosted servers can create up to 2 API keys without an active license, so larger teams should configure a self-host license before issuing individual teammate keys.
+Each teammate should set `DAGU_MCP_URL`, create their own Dagu API key, and export `DAGU_MCP_API_KEY` before starting Claude Code.

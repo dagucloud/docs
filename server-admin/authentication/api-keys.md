@@ -13,13 +13,9 @@ Use an API key when you need:
 
 API keys require [Builtin Authentication](./builtin).
 
-## Community Limit
+## Creation Limits
 
-Community self-hosted installs without an active self-host license can create up to 2 API keys.
-
-The limit applies only to new key creation. Existing keys are not deleted or disabled by this limit. If an unlicensed server already has more than 2 keys, Dagu shows a warning on the API key management page and blocks new key creation until you delete enough keys or configure an active self-host license.
-
-This keeps small installations free while asking larger automation setups to support ongoing Dagu development and maintenance. See the [pricing page](https://dagu.sh/pricing#self-host) for the current self-host license options.
+If the server has an API key creation limit, the limit applies only to new key creation. Existing keys are not deleted or disabled by the limit. When the limit has already been reached, Dagu shows a warning on the API key management page and blocks new key creation until enough keys are deleted or the limit changes.
 
 ## What You Manage
 
@@ -143,7 +139,7 @@ curl -X POST http://localhost:8080/api/v1/api-keys \
 
 The response includes the key secret once. Save it before you leave the page or discard the response output.
 
-On a Community self-hosted install without an active license, `POST /api/v1/api-keys` returns `403 Forbidden` once the server already has 2 API keys.
+When the server's API key creation limit has been reached, `POST /api/v1/api-keys` returns `403 Forbidden`.
 
 ## CI/CD Example
 
@@ -198,7 +194,7 @@ Admins can list, inspect, update, and delete API keys from the UI or API.
 3. Scope keys to workspaces when possible.
 4. Limit each key to the surfaces it actually needs.
 5. Use user-owned keys for MCP clients when individual audit attribution matters.
-6. On Community installs, keep the 2-key creation limit in mind; use an active self-host license when you need broader per-service key separation.
+6. Keep any server-side key creation limit in mind when planning per-service key separation.
 7. Rotate keys regularly.
 8. Delete keys you no longer use.
 9. Store keys in your normal secret manager rather than in source control.
