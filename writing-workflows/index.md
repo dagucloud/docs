@@ -169,8 +169,6 @@ Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dag
 
 Reusable action docs live in the [Dagu Actions](/dagu-actions/) section.
 
-If your workflows are triggered from GitHub through Dagu Cloud, see the dedicated [GitHub Integration](/github-integration/) section.
-
 ## Complete Example
 
 ```yaml

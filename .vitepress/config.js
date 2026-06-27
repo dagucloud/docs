@@ -209,14 +209,6 @@ const fullSidebar = [
     ],
   },
   {
-    text: "Managed GitHub App",
-      items: [
-        { text: "Overview", link: "/github-integration/" },
-        { text: "Setup", link: "/github-integration/setup" },
-        { text: "Examples", link: "/github-integration/examples" },
-      ],
-  },
-  {
     text: "AI Agent",
     items: [
       { text: "Overview", link: "/features/agent/" },
@@ -451,7 +443,6 @@ export default withMermaid(
         "/mcp/": fullSidebar,
         "/writing-workflows/": fullSidebar,
         "/step-types/": fullSidebar,
-        "/github-integration/": fullSidebar,
         "/features/": fullSidebar,
         "/web-ui/": fullSidebar,
         "/server-admin/": fullSidebar,

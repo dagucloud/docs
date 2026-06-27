@@ -41,7 +41,7 @@ Unknown fields under the `context` namespace are preserved at runtime. Inspectio
 
 Older workflows may still contain short built-in context aliases such as `${run.id}`, `${dag.name}`, `${paths.log_file}`, or `${step.name}`. These aliases remain supported only for the exact fields that existed before the `context` namespace was introduced. New workflows and documentation should use `${context.*}`. Dagu does not reserve arbitrary descendants of the short aliases, so text such as `${step.xxx.foo}` is not a built-in context reference.
 
-Webhook payloads, webhook headers, GitHub integration variables, and parameter JSON payloads are object-valued compatibility environment variables. They are not structured `${context.*}` string references.
+Webhook payloads, webhook headers, and parameter JSON payloads are object-valued compatibility environment variables. They are not structured `${context.*}` string references.
 
 ## Availability
 
@@ -360,37 +360,3 @@ steps:
 - `Authorization` can never be forwarded.
 - When no configured headers are present on the request, `WEBHOOK_HEADERS` is `{}`.
 - Because header names often contain hyphens, parsing the JSON string directly with `jq`, Python, Node.js, or your shell tooling is usually clearer than dot-notation access.
-
-## GitHub Integration Variables
-
-When the run comes from the Dagu Cloud GitHub App integration, the workflow receives more than the raw webhook payload.
-
-In addition to `WEBHOOK_PAYLOAD` and `WEBHOOK_HEADERS`, Dagu injects GitHub-specific convenience variables such as:
-
-- `GITHUB_EVENT_NAME`
-- `GITHUB_EVENT_ACTION`
-- `GITHUB_REPOSITORY`
-- `GITHUB_SHA`
-- `GITHUB_REF`
-- `GITHUB_ACTOR`
-- `GITHUB_PR_NUMBER`
-- `GITHUB_ISSUE_NUMBER`
-- `GITHUB_COMMAND`
-- `GITHUB_RELEASE_TAG`
-- `GITHUB_WORKFLOW`
-- `GITHUB_DISPATCH_EVENT_TYPE`
-
-Example:
-
-```yaml
-steps:
-  - id: inspect_github_context
-    run: |
-      echo "event=${env.GITHUB_EVENT_NAME}"
-      echo "action=${env.GITHUB_EVENT_ACTION}"
-      echo "repo=${env.GITHUB_REPOSITORY}"
-      echo "pr=${env.GITHUB_PR_NUMBER}"
-      printf '%s\n' "$WEBHOOK_PAYLOAD" | jq -r '"body=\(.comment.body)"'
-```
-
-For the full GitHub integration model, supported triggers, binding rules, and end-to-end examples, see [GitHub Integration](/github-integration/).

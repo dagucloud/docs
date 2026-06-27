@@ -284,11 +284,6 @@ Dagu is useful anywhere existing scripts, containers, SQL jobs, operational task
     <p><strong>Why Dagu fits:</strong> remote operations get <a href="/writing-workflows/scheduling">schedules</a>, <a href="/writing-workflows/durable-execution">retries</a>, <a href="/writing-workflows/email-notifications">notifications</a>, <a href="/web-ui/incidents">incident routing</a>, and <a href="/overview/web-ui#run-history-and-logs">per-step logs</a> without requiring operators to SSH into servers for every recovery.</p>
   </div>
   <div class="overview-card overview-usecase-card">
-    <h3>GitHub-driven Workflows</h3>
-    <p><strong>Run:</strong> PR validation, preview deployments, release workflows, check reruns, <code>workflow_dispatch</code>, and <code>repository_dispatch</code> from GitHub.</p>
-    <p><strong>Why Dagu fits:</strong> <a href="/github-integration/">GitHub Integration</a> keeps GitHub as the trigger source while Dagu executes the DAG on your licensed server and reports checks, reactions, and comments back to GitHub.</p>
-  </div>
-  <div class="overview-card overview-usecase-card">
     <h3>Container and Kubernetes Workflows</h3>
     <p><strong>Run:</strong> <a href="/step-types/docker">Docker images</a>, <a href="/step-types/kubernetes">Kubernetes Jobs</a>, shell glue, and follow-up validation steps.</p>
     <p><strong>Why Dagu fits:</strong> teams can compose image-based tasks and route them to the right workers with <a href="/server-admin/distributed/worker-labels">worker labels</a> instead of building a custom control plane.</p>

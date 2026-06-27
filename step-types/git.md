@@ -182,5 +182,4 @@ Use `force: true` only when the workflow may intentionally discard local worktre
 ## See Also
 
 - [Git Sync](/server-admin/git-sync) - Server-side synchronization for DAG definitions and managed files
-- [GitHub Integration](/github-integration/) - Trigger Dagu workflows from GitHub events
 - [Shell](/step-types/shell) - Run custom Git commands when you need behavior outside `git.checkout`

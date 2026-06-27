@@ -1114,27 +1114,3 @@ h1.title {
 .dark .mermaid .flowchart-link {
   stroke: #5e6c7e !important;
 }
-
-/* GitHub integration overview diagram */
-.github-overview-diagram {
-  margin: 1.5rem 0;
-}
-
-.github-overview-diagram .mermaid {
-  overflow-x: auto;
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 14px;
-  background: var(--vp-c-bg-soft);
-}
-
-.github-overview-diagram .mermaid svg {
-  display: block;
-  min-width: 860px;
-  height: auto;
-}
-
-.github-overview-diagram .mermaid text,
-.github-overview-diagram .mermaid tspan {
-  font-size: 15px !important;
-}

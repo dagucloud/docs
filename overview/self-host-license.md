@@ -16,7 +16,6 @@ This page compares the three common ways to run Dagu. It does not list prices; s
 | Audit logs | - | ✓ | ✓ |
 | Notification routing | ✓ | ✓ | ✓ |
 | Incident routing | - | ✓ | ✓ |
-| GitHub Integration | - | ✓ | ✓ |
 
 ## Notes
 
@@ -28,7 +27,6 @@ This page compares the three common ways to run Dagu. It does not list prices; s
 - **Audit logs:** review administrative and security-relevant activity.
 - **Notification routing:** send workflow events to team channels.
 - **Incident routing:** open and resolve provider incidents for failed workflows.
-- **GitHub Integration:** trigger Dagu from GitHub and report status back.
 
 ## Related Pages
 
@@ -37,5 +35,4 @@ This page compares the three common ways to run Dagu. It does not list prices; s
 - [Audit Logging](/server-admin/server#audit-logging)
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
-- [GitHub Integration](/github-integration/)
 - [Pricing](https://dagu.sh/pricing)

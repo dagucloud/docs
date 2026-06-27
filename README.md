@@ -33,7 +33,6 @@ pnpm preview
 - `step-types/` — built-in step type references.
 - `web-ui/` — Cockpit, workspace, documents, and REST API guides.
 - `server-admin/` — server configuration, operations, authentication, and deployment guides.
-- `github-integration/` — GitHub integration setup and examples.
 - `embedding/` — embedded Dagu API and licensing notes.
 - `migration/` — migration guides from other schedulers.
 - `public/` — static assets served by VitePress.

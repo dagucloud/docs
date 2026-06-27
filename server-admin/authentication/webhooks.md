@@ -2,10 +2,6 @@
 
 Webhooks let an external caller trigger one specific DAG through `POST /api/v1/webhooks/{fileName}`. Each DAG can have at most one webhook configuration.
 
-::: tip GitHub App Integration
-If you want GitHub events to trigger Dagu through the Dagu Cloud GitHub App integration, this page is not the right feature. See [GitHub Integration](/github-integration/) for the Cloud-managed GitHub App flow, bindings, GitHub check runs, and PR/issue comment commands.
-:::
-
 Webhook management uses the normal authenticated API. Trigger requests use the webhook token instead of API keys or session JWTs.
 
 ## Requirements
