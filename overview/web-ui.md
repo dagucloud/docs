@@ -112,7 +112,10 @@ From this page you can usually:
 - start, stop, or retry runs
 - review the latest graph or timeline
 - inspect step-level status
+- inspect queued runtime conditions when the latest run is still waiting in a queue
 - move between **Latest Run**, **Spec**, **Webhook**, **Notifications**, and **History**
+
+Queued runtime conditions are shown only for queued DAG runs and explain the latest observed reason the run has not started yet. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact condition fields and reason names.
 
 ## Notifications
 

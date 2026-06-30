@@ -17,6 +17,8 @@ steps:
 
 The scheduler places this DAG into the `batch` queue. The queue's `max_concurrency` (defined in `config.yaml`) determines how many DAGs in this queue can run at the same time.
 
+When a run is waiting in `queued`, the scheduler may attach a runtime condition that explains the latest observed reason it has not started yet, such as a queue concurrency limit or a distributed worker selection issue. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact reason names and messages.
+
 ## Default Queue via Base Config
 
 Set a default queue for all DAGs using `base.yaml`:

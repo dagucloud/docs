@@ -888,6 +888,30 @@ The response includes `nextCursor` when older results are available. Repeat the 
 - 7: Waiting
 - 8: Rejected
 
+#### DAG-run Runtime Conditions
+
+`DAGRunSummary` and `DAGRunDetails` may include a `conditions` array when the DAG run status is `queued`. The current implementation emits queued runtime conditions only while the run remains queued. Conditions are omitted for non-queued statuses, and invalid `checkedAt` values are skipped when the API response is built.
+
+Each condition object has:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| type | string | Condition type. The current queued condition type is `Queued`. |
+| status | string | `True`, `False`, or `Unknown` by schema. The scheduler currently writes `True` for queued conditions. |
+| reason | string | Machine-readable reason. |
+| message | string | Human-readable explanation. |
+| checkedAt | string | RFC 3339 timestamp when the scheduler observed the condition. |
+
+Current queued condition reasons:
+
+| Reason | Meaning |
+|--------|---------|
+| `QueueConcurrencyLimitReached` | The queue's active-run concurrency limit currently has no free slot. |
+| `DispatchAdmissionPending` | A distributed dispatch reservation already exists for the run. |
+| `WorkerSelectorNotMatched` | No healthy worker matches the run's required `worker_selector`. |
+| `NoAvailableWorker` | No healthy distributed worker is available. |
+| `DispatchUnavailable` | Distributed dispatch is temporarily unavailable and the error was not classified as a worker selector mismatch or no available worker. |
+
 **Response (200)**:
 ```json
 {
@@ -935,6 +959,15 @@ The response includes `nextCursor` when older results are available. Repeat the 
       "startedAt": "",
       "finishedAt": "",
       "log": "/logs/ml_training_pipeline/20240211_143000_ml.log",
+      "conditions": [
+        {
+          "type": "Queued",
+          "status": "True",
+          "reason": "WorkerSelectorNotMatched",
+          "message": "No healthy worker matches the required worker selector; DAG-run is waiting in the queue.",
+          "checkedAt": "2024-02-11T14:31:00Z"
+        }
+      ],
       "params": "{\"model\": \"recommendation_v2\", \"dataset\": \"user_interactions\"}"
     }
   ],
@@ -1079,6 +1112,8 @@ Fetches detailed status of a specific DAG run. You can use the special value "la
 |-----------|------|-------------|
 | name | string | DAG name |
 | dagRunId | string | DAG run ID or "latest" |
+
+When the returned DAG run is still `queued`, `dagRun.conditions` can contain queued runtime conditions using the shape described in [DAG-run Runtime Conditions](#dag-run-runtime-conditions). Non-queued DAG runs omit `conditions`.
 
 **Response (200)**:
 ```json
@@ -1452,9 +1487,13 @@ Manually updates a step's execution status.
 - 0: Not started
 - 1: Running
 - 2: Failed
-- 3: Cancelled
+- 3: Aborted
 - 4: Success
 - 5: Skipped
+- 6: Partial Success
+- 7: Waiting
+- 8: Rejected
+- 9: Retrying
 
 **Response (200)**: Success
 
@@ -1956,7 +1995,7 @@ Retrieves timing and status information for all sub DAG runs within a specific D
 - `subRuns`: Array of sub DAG run details with timing information
 - `dagRunId`: Unique identifier for the sub DAG run
 - `params`: JSON string of parameters passed to the sub DAG
-- `status`: Execution status (0-6, see status values below)
+- `status`: Execution status (0-8, see status values below)
 - `statusLabel`: Human-readable status label
 - `startedAt`: ISO 8601 timestamp when the sub DAG run started
 - `finishedAt`: ISO 8601 timestamp when the sub DAG run finished (null if still running)
@@ -1965,10 +2004,12 @@ Retrieves timing and status information for all sub DAG runs within a specific D
 - 0: Not started
 - 1: Running
 - 2: Failed
-- 3: Cancelled
+- 3: Aborted
 - 4: Success
 - 5: Queued
 - 6: Partial Success
+- 7: Waiting
+- 8: Rejected
 
 **Error Response (404)**:
 ```json
@@ -2200,7 +2241,16 @@ Returns paginated items for one queue.
       "queuedAt": "2024-02-11T14:30:00Z",
       "startedAt": "",
       "finishedAt": "",
-      "log": "/logs/ml_training_pipeline/20240211_143000_def456.log"
+      "log": "/logs/ml_training_pipeline/20240211_143000_def456.log",
+      "conditions": [
+        {
+          "type": "Queued",
+          "status": "True",
+          "reason": "QueueConcurrencyLimitReached",
+          "message": "DAG-run is waiting because the queue's active-run concurrency limit has been reached.",
+          "checkedAt": "2024-02-11T14:31:00Z"
+        }
+      ]
     }
   ],
   "pagination": {
@@ -2220,6 +2270,8 @@ Returns paginated items for one queue.
   "message": "Failed to retrieve queue information"
 }
 ```
+
+Queued items use the same `conditions` field as other DAG-run summaries. Running queue items do not include queued runtime conditions.
 
 ## Additional Endpoints
 
