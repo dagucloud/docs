@@ -1,13 +1,12 @@
 # Git Sync
 
-Git Sync keeps Dagu workflows, documents, and markdown-backed agent files aligned with a Git repository.
+Git Sync keeps Dagu workflows and markdown-backed agent files aligned with a Git repository.
 
 ## What It Syncs
 
 Git Sync can track:
 
 - DAG files
-- documents under `docs/`
 - agent memory
 - skills
 - souls
@@ -23,7 +22,6 @@ Git Sync refers to each tracked file by an `itemId`. You will see that term in t
 | `memory/MEMORY.md` | `memory/MEMORY` | `memory` |
 | `skills/review/SKILL.md` | `skills/review/SKILL` | `skill` |
 | `souls/persona.md` | `souls/persona` | `soul` |
-| `docs/runbooks/deployment.md` | `docs/runbooks/deployment` | `doc` |
 
 ## Basic Configuration
 
@@ -174,5 +172,4 @@ Write operations are blocked when Git Sync is configured as read-only (`push_ena
 ## Related Pages
 
 - [Server Administration](/server-admin/)
-- [Documents](/web-ui/documents)
 - [Memory](/features/agent/memory)

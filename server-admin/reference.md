@@ -61,7 +61,6 @@ sse:
 paths:
   dags_dir: "~/.config/dagu/dags"
   alt_dags_dir: ""          # Additional read-only DAG directories
-  docs_dir: ""                # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
   tools_dir: ""              # Auto: {data_dir}/tools
@@ -300,7 +299,6 @@ All options support `DAGU_` prefix.
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
 - `DAGU_DAGS_DIR` - DAG definitions
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
-- `DAGU_DOCS_DIR` - Documents directory (default: `{dags_dir}/docs`)
 - `DAGU_ALT_DAGS_DIR` - Additional read-only DAG directories
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data

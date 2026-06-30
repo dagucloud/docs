@@ -143,7 +143,6 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | Config field | Default | Purpose |
 | --- | --- | --- |
 | `paths.dags_dir` | `~/.config/dagu/dags` | DAG definitions |
-| `paths.docs_dir` | `{dags_dir}/docs` | DAG documentation files |
 | `paths.log_dir` | `~/.local/share/dagu/logs` | DAG logs |
 | `paths.data_dir` | `~/.local/share/dagu/data` | Base directory for runtime data |
 | `paths.tools_dir` | `{data_dir}/tools` | Managed DAG tool cache |

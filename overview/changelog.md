@@ -608,11 +608,9 @@ Hotfix release to fix agent tool issues in v2.6.6.
 - feat: improve agent content navigation ([#2102](https://github.com/dagu-org/dagu/pull/2102)) [@yottahmd](https://github.com/yottahmd)
 - feat: add worker prometheus metrics ([#2104](https://github.com/dagu-org/dagu/pull/2104)) [@yottahmd](https://github.com/yottahmd)
 - feat: validate step output contracts ([#2105](https://github.com/dagu-org/dagu/pull/2105)) [@yottahmd](https://github.com/yottahmd)
-- feat(docs): expose description frontmatter metadata ([#2106](https://github.com/dagu-org/dagu/pull/2106)) [@yottahmd](https://github.com/yottahmd)
 - feat: add dagu agent command ([#2107](https://github.com/dagu-org/dagu/pull/2107)) [@yottahmd](https://github.com/yottahmd)
 - feat: add workspace base config ([#2108](https://github.com/dagu-org/dagu/pull/2108)) [@yottahmd](https://github.com/yottahmd)
 - feat: carry push-back context into AI steps ([#2109](https://github.com/dagu-org/dagu/pull/2109)) [@yottahmd](https://github.com/yottahmd)
-- feat: add agent runbook management tool ([#2112](https://github.com/dagu-org/dagu/pull/2112)) [@yottahmd](https://github.com/yottahmd)
 - Add agent DAG management tools and run watches ([#2113](https://github.com/dagu-org/dagu/pull/2113)) [@yottahmd](https://github.com/yottahmd)
 - feat: add agent web search backends ([#2119](https://github.com/dagu-org/dagu/pull/2119)) [@yottahmd](https://github.com/yottahmd)
 - feat: improve agent session list pagination ([#2126](https://github.com/dagu-org/dagu/pull/2126)) [@yottahmd](https://github.com/yottahmd)
@@ -627,12 +625,10 @@ Hotfix release to fix agent tool issues in v2.6.6.
 - fix: preserve dag-run artifact paths in index ([#2087](https://github.com/dagu-org/dagu/pull/2087)) [@yottahmd](https://github.com/yottahmd)
 - fix: load base config during validation ([#2089](https://github.com/dagu-org/dagu/pull/2089)) [@yottahmd](https://github.com/yottahmd)
 - fix: support multiline schema parameter input ([#2094](https://github.com/dagu-org/dagu/pull/2094)) [@yottahmd](https://github.com/yottahmd)
-- fix: support underscored docs and md URLs ([#2095](https://github.com/dagu-org/dagu/pull/2095)) [@yottahmd](https://github.com/yottahmd)
 - fix: preserve workspace label when creating DAGs ([#2096](https://github.com/dagu-org/dagu/pull/2096)) [@yottahmd](https://github.com/yottahmd)
 - fix: clean up step validation errors ([#2098](https://github.com/dagu-org/dagu/pull/2098)) [@yottahmd](https://github.com/yottahmd)
 - fix: keep agent modal inside viewport ([#2099](https://github.com/dagu-org/dagu/pull/2099)) [@yottahmd](https://github.com/yottahmd)
 - fix: preserve working_dir on retry restore ([#2111](https://github.com/dagu-org/dagu/pull/2111)) [@yottahmd](https://github.com/yottahmd)
-- fix: prevent duplicate runbook tab activation ([#2115](https://github.com/dagu-org/dagu/pull/2115)) [@yottahmd](https://github.com/yottahmd)
 - fix: tolerate unsupported unix socket transport ([#2117](https://github.com/dagu-org/dagu/pull/2117)) [@yottahmd](https://github.com/yottahmd)
 - fix: harden agent patch tool ([#2118](https://github.com/dagu-org/dagu/pull/2118)) [@yottahmd](https://github.com/yottahmd)
 - fix: improve built-in agent chat tooling ([#2120](https://github.com/dagu-org/dagu/pull/2120)) [@yottahmd](https://github.com/yottahmd)
@@ -648,7 +644,7 @@ Thanks to our contributors for this release:
 | --- | --- |
 | chore(deps): bump ajv from 6.12.6 to 6.15.0 in /ui in the ui-security group across 1 directory ([#2088](https://github.com/dagu-org/dagu/pull/2088)) | [@dependabot](https://github.com/dependabot) |
 | feat: make timeline show sub graph execution (when using parallel) ([#2048](https://github.com/dagu-org/dagu/issues/2048)) | [@privat-eco](https://github.com/privat-eco) (report) |
-| Bug: When I retry a step , the " working_dir" was lost and the command script can not found ([#2110](https://github.com/dagu-org/dagu/issues/2110)), Bug: In the Runbooks , It will open two tabs when you click a file name menu ([#2114](https://github.com/dagu-org/dagu/issues/2114)) | [@aigeling](https://github.com/aigeling) (report) |
+| Bug: When I retry a step , the " working_dir" was lost and the command script can not found ([#2110](https://github.com/dagu-org/dagu/issues/2110)) | [@aigeling](https://github.com/aigeling) (report) |
 | 401 Client Error ([#2116](https://github.com/dagu-org/dagu/issues/2116)) | [@zz111111](https://github.com/zz111111) (report) |
 | Graphs not rendered ([#2121](https://github.com/dagu-org/dagu/issues/2121)) | [@frafra](https://github.com/frafra) (report) |
 | docs: add GitHub issue templates and PR template ([#2124](https://github.com/dagu-org/dagu/pull/2124)) | [@zichen0116](https://github.com/zichen0116) |
@@ -933,18 +929,6 @@ Thanks to our contributors for this release:
 
 - feat: support bulk DAG-run selection and actions ([#1881](https://github.com/dagucloud/dagu/pull/1881)) [@yottahmd](https://github.com/yottahmd)
 
-### Fixed
-
-- fix(ui): restore split scrolling in REST API docs ([#1880](https://github.com/dagucloud/dagu/pull/1880)) [@yottahmd](https://github.com/yottahmd)
-
-### Contributors
-
-Thanks to our contributors for this release:
-
-| Contribution | Contributor |
-| --- | --- |
-| The new REST API is not scrollable ([#1879](https://github.com/dagucloud/dagu/issues/1879)) | [@bagemt](https://github.com/bagemt) (report) |
-
 **Full Changelog**: [v2.3.10...v2.3.11](https://github.com/dagucloud/dagu/compare/v2.3.10...v2.3.11)
 
 ## v2.3.10 (2026-03-29)
@@ -954,7 +938,6 @@ Thanks to our contributors for this release:
 - feat: add JSON Schema validation for step outputs ([#1867](https://github.com/dagucloud/dagu/pull/1867)) [@mbprabhoo](https://github.com/mbprabhoo)
 - feat: unify params and output schema handling ([#1869](https://github.com/dagucloud/dagu/pull/1869)) [@yottahmd](https://github.com/yottahmd)
 - feat: support one-off start schedules ([#1872](https://github.com/dagucloud/dagu/pull/1872)) [@yottahmd](https://github.com/yottahmd)
-- feat: add built-in REST API docs ([#1874](https://github.com/dagucloud/dagu/pull/1874)) [@yottahmd](https://github.com/yottahmd)
 
 ### Fixed
 
@@ -969,7 +952,7 @@ Thanks to our contributors for this release:
 | --- | --- |
 | feat: add JSON Schema validation for step outputs ([#1867](https://github.com/dagucloud/dagu/pull/1867)) | [@mbprabhoo](https://github.com/mbprabhoo) |
 | [BUG] cleanup_tmpfiles in installer.sh does not clear tmp dir ([#1868](https://github.com/dagucloud/dagu/issues/1868)) | [@jeremydelattre59](https://github.com/jeremydelattre59) (report) |
-| [Feature] Schedule one-off execution ([#1865](https://github.com/dagucloud/dagu/issues/1865)), [Feature] Built in REST API docs ([#1866](https://github.com/dagucloud/dagu/issues/1866)) | [@bagemt](https://github.com/bagemt) (report) |
+| [Feature] Schedule one-off execution ([#1865](https://github.com/dagucloud/dagu/issues/1865)) | [@bagemt](https://github.com/bagemt) (report) |
 | Secrets does not work with the ‘env’ provider and a scheduled DAG ([#1864](https://github.com/dagucloud/dagu/issues/1864)) | [@abylon-io](https://github.com/abylon-io) (report) |
 
 
@@ -1086,7 +1069,6 @@ Thanks to our contributors for this release:
 - fix: allow env: to reference params: values ([#1820](https://github.com/dagucloud/dagu/pull/1820)) [@yottahmd](https://github.com/yottahmd)
 - fix(ui): enable live updates for Yesterday section in cockpit ([#1825](https://github.com/dagucloud/dagu/pull/1825)) [@yottahmd](https://github.com/yottahmd)
 - fix: bound live UI reads and DAG run timeouts ([#1827](https://github.com/dagucloud/dagu/pull/1827)) [@yottahmd](https://github.com/yottahmd)
-- fix: keep doc folders alphabetical under file sorting ([#1828](https://github.com/dagucloud/dagu/pull/1828)) [@yottahmd](https://github.com/yottahmd)
 - fix: clean up failed command temp scripts ([#1829](https://github.com/dagucloud/dagu/pull/1829)) [@yottahmd](https://github.com/yottahmd)
 
 ### Contributors
@@ -1156,12 +1138,8 @@ Thanks to our contributors for this release:
 - Auto-Provision Initial Admin User: The initial admin user can now be provisioned via config (`auth.builtin.initial_admin`) or environment variables, enabling headless deployment without the `/setup` page. ([#1765](https://github.com/dagucloud/dagu/pull/1765))
 - Schedule Time Propagation: The original scheduled time is now preserved and propagated through the DAG run lifecycle, including retries and sub-DAG invocations. ([#1763](https://github.com/dagucloud/dagu/pull/1763))
 - Catchup Runs via Enqueue Path: Catchup (missed schedule) runs are now routed through the enqueue path with deterministic IDs, ensuring consistent behavior with regular scheduled runs. ([#1772](https://github.com/dagucloud/dagu/pull/1772))
-- Server-Side Sorting for Doc Tree Sidebar: The doc tree sidebar now supports server-side sorting for improved performance with large doc collections. ([#1759](https://github.com/dagucloud/dagu/pull/1759))
-- Multi-Select, Batch Delete & Keyboard Shortcuts for Doc Tree: Select multiple documents with Shift/Ctrl+click or keyboard shortcuts and delete them in bulk. ([#1756](https://github.com/dagucloud/dagu/pull/1756))
 - Helm Chart Repository: Official Helm chart published for Kubernetes deployment.
-- Discard Changes Button: Spec and doc editors now include a discard changes button to revert unsaved edits.
 - Mobile-Responsive Cockpit Layout: The cockpit kanban board uses a tabbed layout on mobile devices.
-- Doc Outline Panel State Persistence: The doc outline panel collapsed/expanded state is persisted in localStorage.
 
 ### Changed
 
@@ -1219,7 +1197,6 @@ Thanks to our contributors for this release:
 ### Fixed
 
 - SSE Endpoint Authentication: Basic auth credentials are now required for SSE (Server-Sent Events) endpoints, closing an unauthenticated access path. ([#1752](https://github.com/dagucloud/dagu/pull/1752))
-- Mermaid Dark Mode: Fixed mermaid diagram rendering in dark mode and improved code block text visibility in docs preview.
 
 ## v2.2.0 (2026-03-08)
 
@@ -1227,15 +1204,12 @@ Thanks to our contributors for this release:
 
 - Generic Approval Field for Human-in-the-Loop: Any action or `run` step now supports a top-level `approval` field for human-in-the-loop workflows. The dedicated `hitl` executor has been removed — use `approval: true` (or `approval: "custom message"`) on any step instead. Steps with approval enabled pause execution and wait for manual approval before running. ([#1743](https://github.com/dagucloud/dagu/pull/1743))
 - `DAG_RUN_WORK_DIR` Special Environment Variable: New built-in variable exposing the working directory for the current DAG run attempt. Available in all actions and `run` steps, and automatically set by the runtime. ([#1735](https://github.com/dagucloud/dagu/pull/1735))
-- `DAG_DOCS_DIR` and `DAG_PARAMS_JSON` Special Environment Variables: `DAG_DOCS_DIR` provides the path to the docs directory. `DAG_PARAMS_JSON` provides all DAG parameters as a JSON object. ([#1731](https://github.com/dagucloud/dagu/pull/1731))
 - Tags Parameter for Start and Enqueue APIs: The start and enqueue API endpoints now accept a `tags` parameter for tagging DAG runs at creation time. ([#1730](https://github.com/dagucloud/dagu/pull/1730))
 - Auto-Create Default `base.yaml` on First Run: A default `base.yaml` with comprehensive field reference comments is automatically generated when the base config file does not exist. ([#1737](https://github.com/dagucloud/dagu/pull/1737))
 - Script Error Line Annotation: When a shell script step fails, the error message now includes the content of the failing line, making it easier to diagnose script errors. Empty scripts are preserved on failure for debugging. ([#1733](https://github.com/dagucloud/dagu/pull/1733))
 - Multiline Parameter Input: The Start and Enqueue modals now support multiline text input for parameters using a textarea. ([#1742](https://github.com/dagucloud/dagu/pull/1742))
-- Copy File Path Button in Doc Editor: A button in the doc editor header lets you copy the file path to clipboard. ([#1741](https://github.com/dagucloud/dagu/pull/1741))
 - Batch Delete for Git-Sync Items: Multiple git-sync items can now be selected and deleted in bulk. ([#1736](https://github.com/dagucloud/dagu/pull/1736))
 - Cockpit Review Column: The cockpit kanban board now includes a "Review" column for DAG runs in waiting/approval status. The cockpit is now the default landing page.
-- Cockpit Toolbar on Docs Page: The CockpitToolbar is available on the Docs page for quick access to DAG preview and start actions.
 - Agent DAG Authoring Guidance: The agent system prompt now includes DAG authoring guidance for better workflow generation.
 
 ### Changed
@@ -1265,12 +1239,9 @@ Thanks to our contributors for this release:
 
 - Cockpit Workspace Kanban View: New cockpit page with workspace-based kanban board for visualizing DAG runs by date. Includes workspace selector with "All workspaces" default, localStorage persistence for selected workspace, and server-timezone-aware date handling. ([#1728](https://github.com/dagucloud/dagu/pull/1728))
 - File-Based Index for DAG and DAG Run Stores: New indexing layer for DAG and DAG run file stores, improving lookup performance. ([#1729](https://github.com/dagucloud/dagu/pull/1729))
-- `DAGU_DOCS_DIR` Environment Variable: Docs directory is now independently configurable via `DAGU_DOCS_DIR` env var or `paths.docs_dir` in config YAML (default: `{dags_dir}/docs`). Previously the docs directory was always derived from `DAGsDir`.
-- Document Management in Tabs/Editor: Per-tab dropdown menu with Close, Close Others, Close All, and Delete Document actions. Trash icon in editor header bar. Confirmation modals for bulk close when unsaved changes exist.
 
 ### Changed
 
-- Navigation Reorder: Cockpit now appears before Dashboard in navigation. Docs moved to Overview section. Base Config moved to Workflows section.
 - UI Light Mode Colors: Light mode colors aligned with the docs warm sepia palette.
 
 ### Fixed
@@ -1692,7 +1663,6 @@ Thanks to our contributors for this release:
 
 - Remote Node Management: Admin UI page for managing remote worker nodes with full CRUD operations and connection testing. REST API endpoints for remote node configuration. See [Distributed Execution](/server-admin/distributed/).
 
-- Document Management: Comprehensive document management system with full CRUD and search capabilities. Dedicated Docs page with tree navigation and Markdown rendering for project documentation alongside DAG workflows.
 
 - Git-Sync Reconciliation: Enhanced Git-sync with forget, delete, and move operations for sync item management. Cleanup functionality to remove all missing items at once. See [Git Sync](/server-admin/git-sync).
 

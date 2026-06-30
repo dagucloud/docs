@@ -1,6 +1,6 @@
 # Artifacts
 
-DAG run artifacts are arbitrary files written by a DAG run. They are separate from logs, step outputs, and managed documents.
+DAG run artifacts are arbitrary files written by a DAG run. They are separate from logs and step outputs.
 
 Dagu stores artifacts when artifact storage is enabled explicitly, or when a DAG references `DAG_RUN_ARTIFACTS_DIR`, uses an artifact action, or uses `stdout.artifact` / `stderr.artifact`.
 
@@ -209,10 +209,9 @@ The preview response reports:
 
 Artifact directories are deleted together with the corresponding DAG run during DAG run cleanup, including history-retention cleanup for root and sub-DAG runs.
 
-## Artifacts vs Outputs vs Documents
+## Artifacts vs Outputs
 
 | Feature | Stored As | Scope | UI |
 |---------|-----------|-------|----|
 | Artifacts | Arbitrary files | Per DAG run | DAG run **Artifacts** tab |
 | Outputs | Small key/value results in `outputs.json` | Per DAG run or action boundary | DAG run **Outputs** tab |
-| Documents | Markdown files under `DAG_DOCS_DIR` | Persistent across runs | **Documents** page |

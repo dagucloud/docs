@@ -44,7 +44,6 @@ Examples include:
 - `delegate`
 - `dag_def_manage`
 - `dag_run_manage`
-- `runbook_manage`
 - `remote_agent`
 - `list_contexts`
 - `web_search`

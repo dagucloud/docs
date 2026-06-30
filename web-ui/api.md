@@ -7,8 +7,6 @@
 - **OpenAPI Version**: 3.0.0
 - **Live OpenAPI Document**: `GET /api/v1/openapi.json`
 
-The web UI also includes a live API docs page at `/api-docs`. It renders the same OpenAPI document served by `/api/v1/openapi.json` using the current session. With builtin auth, the viewer pre-fills the stored bearer token for interactive requests.
-
 ### Authentication
 
 The API supports multiple authentication methods:
@@ -1700,44 +1698,6 @@ Each result includes preview snippets plus `hasMoreMatches` and `nextMatchesCurs
 }
 ```
 
-### Search Document Feed
-
-**Endpoint**: `GET /api/v1/search/docs`
-
-Returns lightweight cursor-based document search results for the global search page.
-
-**Query Parameters**:
-| Parameter | Type | Description | Required |
-|-----------|------|-------------|----------|
-| q | string | Search query | Yes |
-| limit | integer | Number of results to return (max 50) | No |
-| cursor | string | Opaque cursor returned by a previous response | No |
-| remoteNode | string | Remote node name | No |
-| workspace | `all`, `default`, or workspace name | Workspace to search. Omitted defaults to `all`. | No |
-
-This endpoint is available only when document management is enabled.
-
-**Response (200)**:
-```json
-{
-  "results": [
-    {
-      "id": "runbooks/oncall",
-      "title": "runbooks/oncall",
-      "hasMoreMatches": false,
-      "matches": [
-        {
-          "line": "Escalate to the database team when the replication lag exceeds 5 minutes.",
-          "lineNumber": 18,
-          "startLine": 16
-        }
-      ]
-    }
-  ],
-  "hasMore": false
-}
-```
-
 ### Search DAG Match Snippets
 
 **Endpoint**: `GET /api/v1/search/dags/{fileName}/matches`
@@ -1766,22 +1726,6 @@ Loads additional cursor-based snippets for one DAG search result.
   "hasMore": false
 }
 ```
-
-### Search Document Match Snippets
-
-**Endpoint**: `GET /api/v1/search/docs/matches`
-
-Loads additional cursor-based snippets for one document search result.
-
-**Query Parameters**:
-| Parameter | Type | Description | Required |
-|-----------|------|-------------|----------|
-| path | string | Document path | Yes |
-| q | string | Search query | Yes |
-| limit | integer | Number of snippets to return (max 50) | No |
-| cursor | string | Opaque cursor returned by a previous snippet response | No |
-| remoteNode | string | Remote node name | No |
-| workspace | `default` or workspace name | Workspace for the selected document result. Omitted defaults to `default`. | No |
 
 ### Event Logs
 
@@ -3738,7 +3682,7 @@ Both fields are optional. Empty string for `name` is ignored.
 
 Deletes a workspace. Requires **developer** role or above.
 
-Deleting a workspace removes the workspace record only. It does not rewrite DAG files, historical DAG runs, documents, users, or API keys.
+Deleting a workspace removes the workspace record only. It does not rewrite DAG files, historical DAG runs, users, or API keys.
 
 **Path Parameters**:
 | Parameter | Type | Description |

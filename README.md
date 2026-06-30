@@ -31,7 +31,7 @@ pnpm preview
 - `features/` — feature-focused guides.
 - `writing-workflows/` — authoring workflows and best practices.
 - `step-types/` — built-in step type references.
-- `web-ui/` — Cockpit, workspace, documents, and REST API guides.
+- `web-ui/` — Cockpit, workspace, operational pages, and REST API guides.
 - `server-admin/` — server configuration, operations, authentication, and deployment guides.
 - `embedding/` — embedded Dagu API and licensing notes.
 - `migration/` — migration guides from other schedulers.

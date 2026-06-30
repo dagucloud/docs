@@ -80,7 +80,7 @@ This is useful when a workflow should benefit from the same long-lived context a
 
 ## Git Sync
 
-If you use [Git Sync](/server-admin/git-sync), memory files can move through the same review and publish flow as DAGs and documents.
+If you use [Git Sync](/server-admin/git-sync), memory files can move through the same review and publish flow as DAGs and other agent files.
 
 ## Related Pages
 

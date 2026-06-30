@@ -1094,7 +1094,6 @@ Common structured references:
 | `${context.paths.log_file}` | Path to the DAG-run log file. |
 | `${context.paths.work_dir}` | Per-run isolated work directory path. |
 | `${context.paths.artifacts_dir}` | Per-run artifact directory when artifacts are enabled. |
-| `${context.paths.docs_dir}` | Per-DAG docs directory when configured. |
 | `${context.paths.step_stdout_file}` | Current step stdout file path. |
 | `${context.paths.step_stderr_file}` | Current step stderr file path. |
 | `${context.paths.step_output_file}` | Current step output file path for declared outputs. |
@@ -1111,7 +1110,6 @@ Common environment projections:
 | `DAG_RUN_STEP_STDERR_FILE` | Current step stderr file path. |
 | `DAG_RUN_WORK_DIR` | Per-run isolated work directory path. |
 | `DAG_RUN_ARTIFACTS_DIR` | Per-run artifact directory when artifacts are enabled. |
-| `DAG_DOCS_DIR` | Per-DAG docs directory when configured. |
 | `DAGU_OUTPUT_FILE` | Current step output file path for declared outputs. |
 | `ITEM` | Current `parallel` item. |
 

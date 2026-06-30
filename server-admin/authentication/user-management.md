@@ -78,7 +78,6 @@ Workspace access affects workspace-aware pages such as:
 - Runs
 - Cockpit
 - Search
-- Documents
 
 Items with no named workspace still appear in the **default** workspace view.
 

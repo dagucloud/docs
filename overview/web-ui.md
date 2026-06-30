@@ -24,16 +24,15 @@ Dagu's UI is organized around a few everyday jobs:
 - **Dashboard** for recent activity and trends
 - **Definitions** for the list of workflows
 - **Run details** for outputs, artifacts, logs, and retries
-- **Docs** for markdown documents and runbooks
 - **Notifications** for Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
-- **Search** for finding workflows and documents quickly
+- **Search** for finding workflows quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
 ## Workspace Selector
 
-The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, and Docs.
+The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, and Design.
 
 ![Workspace selector](/web-ui-workspace-selector-demo.png)
 
@@ -204,22 +203,6 @@ Search helps when you know roughly what you need but not exactly where it lives.
 You can search:
 
 - **DAGs** for workflow definitions
-- **Docs** for markdown content when document management is enabled
-
-## Documents
-
-The Documents page is Dagu's built-in markdown workspace for runbooks, reports, and generated documents.
-
-![Documents](/docs.png)
-
-Common workflows:
-
-- maintain team runbooks
-- keep operating notes next to workflows
-- publish run-generated markdown with `DAG_DOCS_DIR`
-- browse and preview documents by workspace
-
-See [Documents](/web-ui/documents) for the dedicated guide.
 
 ## Profiles
 
@@ -253,20 +236,6 @@ secrets:
 Registry refs resolve from the DAG's own scope first, then **Global**. A DAG in `workspace=ops` checks `ops` before global. A DAG without a workspace label uses **Global** directly.
 
 See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
-
-## API Docs
-
-The **API Docs** page exposes the REST API reference from inside the application.
-
-![API Docs](/web-ui-api-docs-demo.png)
-
-Use it when you need to:
-
-- inspect endpoints before automating a task
-- check request and response shapes
-- test ideas before wiring them into scripts or CI
-
-For the narrative API overview, see [API](/overview/api). For the full generated reference, see [Web UI API](/web-ui/api).
 
 ## System Status
 
@@ -347,6 +316,5 @@ ui:
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)
-- [Documents](/web-ui/documents)
 - [Learn the REST API](/overview/api)
 - [Server Administration](/server-admin/)

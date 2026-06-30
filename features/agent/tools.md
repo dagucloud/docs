@@ -147,8 +147,6 @@ Navigate the user to a UI page.
 - `/dag-runs` - All DAG runs
 - `/dag-runs/<name>/<run-id>` - Specific run details
 - `/queues` - Queue management
-- `/docs` - Documents page
-- `/docs/<doc-id>` - Specific document
 
 **Admin-only Pages**:
 - `/users`

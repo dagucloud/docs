@@ -169,7 +169,6 @@ The following paths are not set explicitly in the chart, but Dagu derives them f
 
 ```yaml
 paths:
-  docs_dir: /data/dags/docs
   sessions_dir: /data/agent/sessions
   remote_nodes_dir: /data/remote-nodes
   workspaces_dir: /data/workspaces

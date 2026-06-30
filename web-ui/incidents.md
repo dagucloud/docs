@@ -172,7 +172,7 @@ Most teams manage incident routing from the Web UI. Automation can use the REST 
 | Get or update workspace routing | `GET /api/v1/incident-policies/workspaces/{workspaceName}`, `PUT /api/v1/incident-policies/workspaces/{workspaceName}` |
 | Get, update, or delete DAG routing | `GET /api/v1/dags/{fileName}/incidents`, `PUT /api/v1/dags/{fileName}/incidents`, `DELETE /api/v1/dags/{fileName}/incidents` |
 
-For an interactive reference, open **API Docs** in the Web UI or visit `/api-docs`.
+For request and response details, see [REST API](/web-ui/api).
 
 ## Permissions
 

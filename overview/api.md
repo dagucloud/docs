@@ -42,7 +42,7 @@ Fetch the normalized OpenAPI document served by the current Dagu instance:
 curl http://localhost:8080/api/v1/openapi.json
 ```
 
-When authentication is enabled, `/openapi.json` requires the same auth as the rest of the API. The web UI also exposes a live viewer at `/api-docs`, which loads this document with the current session.
+When authentication is enabled, `/openapi.json` requires the same auth as the rest of the API.
 
 ### DAG Management
 
@@ -271,20 +271,14 @@ Legacy full DAG search is still available:
 curl "http://localhost:8080/api/v1/dags/search?q=database"
 ```
 
-The global search page uses cursor-based feed endpoints:
+The global search page uses cursor-based DAG feed endpoints:
 
 ```bash
 # Lightweight DAG search results
 curl "http://localhost:8080/api/v1/search/dags?q=database"
 
-# Lightweight document search results
-curl "http://localhost:8080/api/v1/search/docs?q=runbook"
-
 # Load more snippets for one DAG result
 curl "http://localhost:8080/api/v1/search/dags/example/matches?q=database&cursor=<opaque-cursor>"
-
-# Load more snippets for one document result
-curl "http://localhost:8080/api/v1/search/docs/matches?path=runbooks/oncall&q=runbook&cursor=<opaque-cursor>"
 ```
 
 The feed endpoints return lightweight results with preview matches, `hasMore`, and optional cursors for both additional results and additional snippets per result.

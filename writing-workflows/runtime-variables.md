@@ -28,7 +28,6 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.paths.log_file}` | All steps and handlers | `DAG_RUN_LOG_FILE` |
 | `${context.paths.work_dir}` | When a per-run work directory is available | `DAG_RUN_WORK_DIR` |
 | `${context.paths.artifacts_dir}` | When artifact storage is active | `DAG_RUN_ARTIFACTS_DIR` |
-| `${context.paths.docs_dir}` | When a docs directory is configured | `DAG_DOCS_DIR` |
 | `${context.paths.step_stdout_file}` | Current executable step after stdout is assigned | `DAG_RUN_STEP_STDOUT_FILE` |
 | `${context.paths.step_stderr_file}` | Current executable step after stderr is assigned | `DAG_RUN_STEP_STDERR_FILE` |
 | `${context.paths.step_output_file}` | Current step attempt after output publication is prepared | `DAGU_OUTPUT_FILE` |
@@ -68,7 +67,6 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
-| `DAG_DOCS_DIR` | All steps & handlers | Per-DAG docs directory path. Computed as `<paths.docs_dir>/<dag name>` for `default` DAGs, or `<paths.docs_dir>/<workspace>/<dag name>` when the DAG has one valid `workspace=<name>` label. Not set when `paths.docs_dir` resolves to empty. | `/var/dagu/dags/docs/ops/daily-backup` |
 | `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PARAMS_JSON` | All steps & handlers | Compatibility alias for `DAGU_PARAMS_JSON`. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
@@ -167,48 +165,6 @@ steps:
 ```
 
 See [Artifacts](/writing-workflows/artifacts) for the full configuration, API, and Web UI behavior.
-
-## Docs Directory (`DAG_DOCS_DIR`)
-
-Dagu sets `DAG_DOCS_DIR` from `paths.docs_dir`. The `paths.docs_dir` configuration defaults to `<paths.dags_dir>/docs` (see [Configuration Reference](/server-admin/reference)).
-
-For a DAG with no valid workspace label, Dagu sets:
-
-```text
-DAG_DOCS_DIR=<paths.docs_dir>/<dag name>
-```
-
-For a DAG with exactly one valid `workspace=<name>` label, Dagu sets:
-
-```text
-DAG_DOCS_DIR=<paths.docs_dir>/<workspace>/<dag name>
-```
-
-For example, a DAG named `daily-backup` with `workspace=ops` gets:
-
-```text
-/var/dagu/dags/docs/ops/daily-backup
-```
-
-Invalid or conflicting workspace labels fall back to the `default` path, `<paths.docs_dir>/<dag name>`.
-
-`DAG_DOCS_DIR` is **not set** when `paths.docs_dir` resolves to an empty string.
-
-Markdown files written under `DAG_DOCS_DIR` appear in the web UI's [Documents](/web-ui/documents) page automatically. Workspace-scoped files appear only when the matching workspace, or `all`, is selected.
-
-```yaml
-labels:
-  - workspace=ops
-
-tools:
-  - astral-sh/uv@0.11.14
-
-steps:
-  - id: generate_report
-    run: |
-      mkdir -p "${context.paths.docs_dir}"
-      uv run --python 3.13.9 python generate_report.py > "${context.paths.docs_dir}/report.md"
-```
 
 ## Parameter Payload (`DAGU_PARAMS_JSON`)
 
