@@ -175,36 +175,6 @@ handler_on:
     # timeout_sec: 300 (inherited)
 ```
 
-### Agent Defaults
-
-Use `defaults.agent` to share agent-step configuration across steps:
-
-```yaml
-defaults:
-  agent:
-    model: claude-sonnet
-    soul: reviewer
-    max_iterations: 30
-
-steps:
-  - action: agent.run
-    with:
-      messages:
-        - role: user
-          content: |
-            Review the failing workflow
-    # Inherits model, soul, and max_iterations
-
-  - action: agent.run
-    with:
-      model: claude-opus
-      messages:
-        - role: user
-          content: |
-            Summarize the review
-    # Overrides only model; still inherits soul and max_iterations
-```
-
 ### Combined Example
 
 A realistic workflow using multiple default fields with a step override:
@@ -248,5 +218,4 @@ The `defaults` field is a DAG-level field. When set in [base configuration](/ser
 
 - [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults) — Field reference
 - [Error Handling](/writing-workflows/error-handling) — `retry_policy`, `continue_on` usage
-- [Agent Step](/features/agent/step) — `agent` fields and DAG-level agent defaults
 - [Base Configuration](/server-admin/base-config) — Shared defaults across all DAGs

@@ -158,7 +158,7 @@ Every step re-executed because of push-back receives:
 
 If the current step declares `approval.input`, only those declared keys are exposed on that step. Steps without an input allowlist receive all provided push-back keys.
 
-For `action: agent.run`, `action: chat.completion`, and `action: harness.run`, Dagu also passes the push-back context directly to the executor. This means reviewer feedback is incorporated without adding DAG glue code that references `${FEEDBACK}` manually. If `approval.rewind_to` restarts an upstream AI step, that rewound AI step receives the context even if it does not declare its own `approval`.
+For `action: chat.completion` and `action: harness.run`, Dagu also passes the push-back context directly to the executor. This means reviewer feedback is incorporated without adding DAG glue code that references `${FEEDBACK}` manually. If `approval.rewind_to` restarts an upstream AI step, that rewound AI step receives the context even if it does not declare its own `approval`.
 
 Harness steps receive the previous stdout as a log file path only. Dagu does not inline the previous stdout content into the prompt or environment because harness output can be large.
 
@@ -234,7 +234,7 @@ First run: `SINCE` and `GROUPING` are unset, so the script defaults to `7d` and 
 
 ### Example: Iterating on LLM Output
 
-Use `action: chat.completion`, `action: agent.run`, or `action: harness.run` when you want Dagu to pass approval feedback to the AI step automatically. For shell commands that call an LLM CLI directly, wire the feedback environment variables into the command yourself:
+Use `action: chat.completion` or `action: harness.run` when you want Dagu to pass approval feedback to the AI step automatically. For shell commands that call an LLM CLI directly, wire the feedback environment variables into the command yourself:
 
 ```yaml
 steps:

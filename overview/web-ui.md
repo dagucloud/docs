@@ -59,23 +59,6 @@ Use it when you want to:
 
 See [Cockpit](/web-ui/cockpit) for the dedicated guide.
 
-## AI agent
-
-The built-in steward helps with workflow authoring, debugging, and day-to-day operations directly in the UI.
-
-![AI agent Chat](/agent-modal.png)
-
-Typical uses:
-
-- draft or edit DAG YAML
-- explain failures and suggest fixes
-- navigate to related pages
-- work with local files when allowed by policy
-
-Configure it from `/agent-settings`.
-
-See [AI agent](/features/agent/) for the full setup and usage guide.
-
 ## Dashboard
 
 The Dashboard gives you a broader operations view than Cockpit.

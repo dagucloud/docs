@@ -401,7 +401,7 @@ Action names in steps can refer to built-ins, local custom actions, base-config 
 | `registry_auths` | object or string | Docker registry auth configuration as a map or Docker auth JSON string. |
 | `ssh` | object | DAG-level SSH defaults. Mutually exclusive with top-level `container`. |
 | `s3` | object | DAG-level defaults for `s3.*` actions. |
-| `llm` | object | DAG-level defaults for chat and agent steps. |
+| `llm` | object | DAG-level defaults for chat completion steps. |
 | `redis` | object | DAG-level defaults for `redis.<operation>` actions. |
 | `harnesses` | object | Named harness configurations used by `harness.run`. |
 | `harness` | object | Default harness configuration used by `harness.run`. |
@@ -755,7 +755,6 @@ The parser still accepts these legacy step fields, but new workflow files should
 | `type` | `action` |
 | `call` and step `params` | `action: dag.run` with `with.dag` and `with.params` |
 | `messages`, `llm` | `action: chat.completion` with `with` |
-| `agent` | `action: agent.run` with `with` |
 | `value`, `routes` | `action: router.route` with `with` |
 
 Do not combine `run` or `action` with legacy execution fields.
@@ -766,7 +765,6 @@ Accepted built-in action names:
 
 | Action | Purpose |
 |--------|---------|
-| `agent.run` | Agent step execution. |
 | `artifact.list`, `artifact.read`, `artifact.write` | DAG-run artifact operations. |
 | `archive.create`, `archive.extract`, `archive.list` | Archive operations. |
 | `chat.completion` | LLM chat completion. |

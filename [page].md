@@ -8,7 +8,7 @@ title: What is Dagu?
   <h2>Local-first workflow orchestrator with Web UI</h2>
   <div class="tagline" style="text-align: left;">
     <p>Dagu is a lightweight, self-contained alternative to Airflow or Cron with Web UI that runs on Linux / Mac / Windows. Define DAGs in a simple, declarative YAML format. It supports shell commands, Docker containers, Kubernetes Jobs, remote commands via SSH, and more. It was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.</p>
-    <p>Start with one self-contained binary and file-backed state. No DBMS or message broker is required, and you can add queues, workers, MCP, or AI-agent steps only when your workflows need them.</p>
+    <p>Start with one self-contained binary and file-backed state. No DBMS or message broker is required, and you can add queues, workers, MCP, chat completions, or external harness steps only when your workflows need them.</p>
   </div>
 </div>
 
@@ -100,8 +100,8 @@ Understanding Dagu is easier once the main terms are clear.
 | Term | Meaning |
 |------|---------|
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
-| **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), or [AI agent task](/features/agent/step). |
-| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), or [`agent.run`](/features/agent/step). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
+| **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [sub-workflow](/writing-workflows/control-flow), [chat completion](/features/chat/), or [external CLI harness](/step-types/harness/). |
+| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), [`chat.completion`](/features/chat/), or [`harness.run`](/step-types/harness/). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
 | **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
 | **Parameter** | A declared run input with a name, type, default, description, or allowed values. Parameters power the generated Web UI start form and keep submitted values visible with the run. |
 | **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |
@@ -143,7 +143,7 @@ Teams choose Dagu when they want workflow orchestration without adopting a large
   </div>
   <div class="overview-card">
     <h3><a href="/step-types/">Native executors</a></h3>
-    <p>Run <a href="/step-types/shell">shell commands</a>, <a href="/step-types/docker">Docker containers</a>, <a href="/step-types/kubernetes">Kubernetes Jobs</a>, <a href="/step-types/ssh">SSH commands</a>, HTTP requests, SQL queries, sub-workflows, and agent steps.</p>
+    <p>Run <a href="/step-types/shell">shell commands</a>, <a href="/step-types/docker">Docker containers</a>, <a href="/step-types/kubernetes">Kubernetes Jobs</a>, <a href="/step-types/ssh">SSH commands</a>, HTTP requests, SQL queries, sub-workflows, chat completions, and external CLI harnesses.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/overview/architecture">File-backed state</a></h3>
@@ -299,9 +299,9 @@ Dagu is useful anywhere existing scripts, containers, SQL jobs, operational task
     <p><strong>Why Dagu fits:</strong> the <a href="/getting-started/installation/">single binary</a> works well on small devices while still providing visibility through the <a href="/overview/web-ui">Web UI</a>.</p>
   </div>
   <div class="overview-card overview-usecase-card">
-    <h3>AI Agent Workflows</h3>
-    <p><strong>Run:</strong> <a href="/features/agent/step">AI agent steps</a>, agent-authored <a href="/writing-workflows/yaml-specification">YAML workflows</a>, log analysis, repair steps, and <a href="/writing-workflows/approval">human-reviewed automation</a>.</p>
-    <p><strong>Why Dagu fits:</strong> workflows stay in <a href="/writing-workflows/yaml-specification">plain YAML</a>, so agents can create and debug them while humans keep <a href="/overview/web-ui#run-history-and-logs">logs</a>, <a href="/writing-workflows/approval">approvals</a>, and <a href="/getting-started/cli#history">run history</a> in one place.</p>
+    <h3>AI-Assisted Workflows</h3>
+    <p><strong>Run:</strong> external coding-agent CLIs through <a href="/step-types/harness/">harness steps</a>, <a href="/features/chat/">chat completion steps</a>, agent-authored <a href="/writing-workflows/yaml-specification">YAML workflows</a>, log analysis, report generation, and <a href="/writing-workflows/approval">human-reviewed automation</a>.</p>
+    <p><strong>Why Dagu fits:</strong> workflows stay in <a href="/writing-workflows/yaml-specification">plain YAML</a>, so agents can help create and debug them while humans keep <a href="/overview/web-ui#run-history-and-logs">logs</a>, <a href="/writing-workflows/approval">approvals</a>, and <a href="/getting-started/cli#history">run history</a> in one place.</p>
   </div>
 </div>
 
@@ -309,27 +309,25 @@ Dagu is useful anywhere existing scripts, containers, SQL jobs, operational task
 If it can run from a <a href="/step-types/shell">shell command</a>, <a href="/step-types/docker">Docker image</a>, <a href="/step-types/kubernetes">Kubernetes Job</a>, <a href="/step-types/ssh">SSH session</a>, <a href="/step-types/http">HTTP call</a>, <a href="/step-types/wait">readiness wait</a>, or <a href="/step-types/sql/">SQL query</a>, Dagu can usually orchestrate it without rewriting the underlying tool. For portable host CLIs, add <a href="/writing-workflows/tools"><code>tools</code></a> so the DAG controls the binary version too.
 :::
 
-## AI Agents and Workflow Operator
+## AI Agents and MCP
 
-Dagu includes AI features, but they build on the same self-contained workflow engine. The built-in MCP server lets MCP-capable agents read Dagu state, preview or apply workflow changes, and start, enqueue, retry, or stop runs. Agent steps and external agent CLIs can also run inside workflows, with the same scheduling, logs, retries, approvals, and run history as any other step.
+Dagu includes AI-facing workflow features, but they build on the same self-contained workflow engine. The built-in MCP server lets MCP-capable agents read Dagu state, preview or apply workflow changes, and start, enqueue, retry, or stop runs. External agent CLIs can also run inside workflows through `harness.run`, with the same scheduling, logs, retries, approvals, and run history as any other step.
 
 ```yaml
 steps:
   - id: analyze_logs
-    action: agent.run
+    action: harness.run
     with:
-      task: |
+      provider: codex
+      prompt: |
         Analyze /var/log/app/errors.log from the last hour.
         Summarize likely causes and suggest a safe recovery plan.
     output: ANALYSIS_RESULT
 ```
 
-Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in steward, so teams can ask for run status, debug failures, re-run workflows, and approve actions from chat.
-
 - [MCP Server](/mcp/) explains how agents can inspect state and operate workflows through Dagu.
-- [AI Agent Authoring](/getting-started/ai-agent) explains workflow generation and debugging with coding agents.
-- [Agent Step](/features/agent/step) explains how to run agent tasks inside DAGs.
-- [Workflow Operator](/features/bots/) explains chat-operator setup.
+- [Harness](/step-types/harness/) explains how to run external coding-agent CLIs inside DAGs.
+- [Chat & LLM](/features/chat/) explains chat completion and DAG tool-calling steps.
 
 ## Learn More
 
@@ -348,7 +346,7 @@ Workflow Operator connects Slack, Telegram, Discord, or LINE to the built-in ste
   </div>
   <div class="step-card">
     <h3><a href="/step-types/shell">Step Types</a></h3>
-    <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, wait, S3, and agent execution.</p>
+    <p>Explore command, Docker, Kubernetes, SSH, HTTP, SQL, wait, S3, chat, and harness execution.</p>
   </div>
   <div class="step-card">
     <h3><a href="/writing-workflows/tools">Tools</a></h3>

@@ -81,7 +81,7 @@ Each DAG run gets an isolated work directory. The path is set in `DAG_RUN_WORK_D
 
 **Local mode:** The directory is `<dag-run-dir>/work/`. It lives at the dag-run level (not the attempt level), so it persists across retries of the same run. It is cleaned up automatically when the dag-run is removed (e.g., by history retention).
 
-**Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). It is cleaned up when the agent process exits.
+**Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). It is cleaned up when the worker process exits.
 
 **Dry runs:** The variable is not set.
 
@@ -238,7 +238,7 @@ Notes:
 - `history` is ordered oldest to newest.
 - If the current step declares `approval.input`, the `inputs` object is filtered to that allowlist for that step.
 - If the current step does not declare `approval.input`, all provided push-back keys are exposed on that step.
-- For `agent`, `chat`, and `harness` steps, Dagu also passes this context to the executor so the step can incorporate reviewer feedback without wiring these variables into the DAG manually.
+- For `chat` and `harness` steps, Dagu also passes this context to the executor so the step can incorporate reviewer feedback without wiring these variables into the DAG manually.
 
 For approval semantics and examples, see [Approval](/writing-workflows/approval).
 

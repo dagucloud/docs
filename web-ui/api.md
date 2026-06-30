@@ -3317,7 +3317,7 @@ Publishes specified items, or all modified/untracked items if `itemIds` is omitt
 ```bash
 curl -X POST "http://localhost:8080/api/v1/sync/publish-all" \
   -H "Content-Type: application/json" \
-  -d '{"message":"Batch publish","itemIds":["my-dag","memory/MEMORY"]}'
+  -d '{"message":"Batch publish","itemIds":["my-dag","skills/review"]}'
 ```
 
 **Request Body**:
@@ -3404,17 +3404,17 @@ curl -X PUT "http://localhost:8080/api/v1/sync/config" \
 Returns local and remote content for comparison. Requires sync service to be configured.
 
 ```bash
-curl "http://localhost:8080/api/v1/sync/items/memory%2FMEMORY/diff"
+curl "http://localhost:8080/api/v1/sync/items/skills%2Freview/diff"
 ```
 
 **Response (200)**:
 ```json
 {
-  "itemId": "memory/MEMORY",
-  "filePath": "memory/MEMORY.md",
+  "itemId": "skills/review",
+  "filePath": "skills/review/SKILL.md",
   "status": "modified",
-  "localContent": "# Memory\nUpdated locally",
-  "remoteContent": "# Memory\nOriginal"
+  "localContent": "# Review\nUpdated locally",
+  "remoteContent": "# Review\nOriginal"
 }
 ```
 

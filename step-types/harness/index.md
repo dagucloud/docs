@@ -1,8 +1,8 @@
 # Harness
 
-Run coding agents as workflow steps. Harnesses can run external CLI agents or Dagu's built-in AI agent.
+Run coding agents as workflow steps. Harnesses run external CLI agents on the host or inside a container.
 
-For CLI providers, the harness executor starts a subprocess, captures stdout and stderr, and uses the process exit status as the step result. For the built-in provider, the harness executor runs the same in-process agent used by [`agent.run`](/features/agent/step).
+For CLI providers, the harness executor starts a subprocess, captures stdout and stderr, and uses the process exit status as the step result.
 
 The selected CLI attempt's binary must either be available in `PATH` or be referenced by path. Dagu resolves each CLI provider binary when that attempt runs, so a missing fallback binary does not fail a successful primary attempt.
 
@@ -14,7 +14,6 @@ Dagu has built-in support for the following providers. CLI providers are pre-con
 
 | Provider | Page |
 |----------|------|
-| Built-in Dagu agent | `builtin` |
 | [Claude Code](./claude) | `claude` |
 | [Codex](./codex) | `codex` |
 | [Copilot](./copilot) | `copilot` |
@@ -29,7 +28,7 @@ You can also define [custom harness definitions](#custom-harness-definitions) fo
 - `with.prompt` is the prompt. Harness steps accept a single command string; command arrays are rejected.
 - `with.stdin` is optional extra stdin content.
 - After DAG-level defaults are applied, the step needs a provider. Omitted provider configuration is still invalid.
-- `with.provider` may be `builtin`, a built-in CLI provider, or a name defined under top-level `harnesses:`.
+- `with.provider` may be a built-in CLI provider or a name defined under top-level `harnesses:`.
 - `with.provider` may contain scoped references such as `${env.PROVIDER}` and is resolved after interpolation at runtime.
 
 Example:
@@ -71,43 +70,7 @@ steps:
 
 On the first run, `implement` receives only the original prompt. If the reviewer pushes back with `FEEDBACK`, Dagu reruns the harness step and augments the prompt with the feedback, iteration number, and previous stdout log path.
 
-## Built-in Providers
-
-The `builtin` provider runs Dagu's in-process AI agent with the same runtime behavior as `agent.run`. It uses Agent Settings for model definitions, credentials, tool policy, web tool backend configuration, memory stores, and souls.
-
-```yaml
-steps:
-  - action: harness.run
-    with:
-      prompt: |
-        Review the current branch and return concise findings
-      provider: builtin
-      model: coder-default
-      tools:
-        enabled: [read, bash, think]
-      max_iterations: 20
-```
-
-For `provider: builtin`, supported config fields are:
-
-| Field | Type | Meaning |
-|-------|------|---------|
-| `provider` | string | Must be `builtin` |
-| `model` | string | Model ID from Agent Settings; when omitted, the global default model is used |
-| `tools` | object | Tool selection and bash policy, same shape as `agent.run` |
-| `skills` | string[] | Skill IDs available to the agent |
-| `soul` | string | Soul ID for the agent identity |
-| `memory` | object | Memory configuration, for example `{enabled: true}` |
-| `web_search` | object | Provider-native web search configuration |
-| `safe_mode` | bool | Safe mode setting |
-| `max_iterations` | int | Maximum tool-call rounds |
-| `fallback` | array | Ordered fallback provider configs |
-
-Unknown fields are rejected for `provider: builtin`. This differs from CLI providers, where unknown fields are passed through as CLI flags.
-
-When `with.stdin` is set with `provider: builtin`, Dagu appends it to the user prompt with a blank line between the prompt and stdin content.
-
-CLI built-in providers have fixed prompt placement:
+Built-in CLI providers have fixed prompt placement:
 
 | Provider | Binary | Base invocation |
 |----------|--------|-----------------|
@@ -161,7 +124,7 @@ Custom harness definition fields:
 
 Rules enforced by Dagu:
 
-- custom harness names cannot conflict with [built-in providers](#supported-providers), including `builtin`
+- custom harness names cannot conflict with [built-in providers](#supported-providers)
 - `prompt_flag` is valid only when `prompt_mode: flag`
 - unknown keys inside a harness definition are rejected
 
@@ -296,9 +259,9 @@ Top-level `harness:` provides defaults for harness steps.
 
 ```yaml
 harness:
-  provider: builtin
-  model: coder-default
-  max_iterations: 30
+  provider: claude
+  model: sonnet
+  bare: true
   fallback:
     - provider: codex
       full-auto: true
@@ -313,7 +276,8 @@ steps:
     with:
       prompt: |
         Fix the flaky integration tests
-      max_iterations: 80
+      provider: codex
+      full-auto: true
 ```
 
 Merge rules:
@@ -321,7 +285,6 @@ Merge rules:
 - DAG-level `harness:` is the base config for every harness step
 - step-level `with:` overrides primary keys from DAG-level `harness:`
 - step-level `fallback:` replaces the DAG-level fallback list; it is not merged
-- `defaults.agent` is separate and applies to `agent.run`, not `harness.run`
 
 ## Fallbacks
 

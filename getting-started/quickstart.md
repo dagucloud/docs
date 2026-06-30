@@ -226,5 +226,5 @@ steps:
 - [Step Types](/step-types/shell) — built-in executors (docker, ssh, http, wait, sql, s3, sub-DAG, ...)
 - [Examples](/writing-workflows/examples) — ready-to-adapt patterns
 - [CLI Reference](/getting-started/cli) — every command and flag
-- [AI Agent](/getting-started/ai-agent) — built-in AI agent and the Dagu skill for external AI tools
+- [MCP Quickstart](/mcp/quickstart) — connect external AI tools to a running Dagu server
 - [MCP Server](/mcp/) — connect MCP-capable clients to a running Dagu server

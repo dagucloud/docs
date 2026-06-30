@@ -354,20 +354,6 @@ dagu context use local
 dagu context test prod
 ```
 
-### `agent`
-
-Chat with the Dagu agent from the CLI using the current context.
-
-```bash
-dagu agent -p "create a DAG that backs up /var/log every night"
-dagu agent --model gpt-4.1 -p "review this workflow"
-dagu agent history
-dagu agent resume <session-id>
-dagu agent resume <session-id> -p "continue from here"
-```
-
-`dagu agent` uses the active CLI context, so use `dagu context use <name>` or `dagu --context <name> agent ...` to talk to a remote Dagu server. There is no `--server` flag on `dagu agent`.
-
 ### `server`
 
 Start the web UI server.
@@ -715,7 +701,7 @@ Provide either an item ID or `--all`, not both.
 
 ```bash
 dagu sync publish my-dag -m "Update dag"
-dagu sync publish memory/MEMORY -m "Update global memory"
+dagu sync publish skills/review -m "Update review skill"
 dagu sync publish --all -m "Batch update"
 dagu sync publish my-dag --force -m "Overwrite remote"
 ```
@@ -733,7 +719,7 @@ dagu sync discard <item-id> [options]
 
 ```bash
 dagu sync discard my-dag
-dagu sync discard memory/dags/my-dag/MEMORY -y
+dagu sync discard skills/review -y
 ```
 
 #### `sync forget`
@@ -813,7 +799,7 @@ dagu sync mv <old-id> <new-id> [options]
 - `--dry-run` - Show what would be moved without making changes
 - `-y, --yes` - Skip confirmation prompt
 
-Both source and destination must be of the same kind (both DAGs, both memory, etc.).
+Both source and destination must be of the same kind.
 
 ```bash
 dagu sync mv old-dag new-dag -m "Rename workflow"

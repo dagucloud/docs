@@ -40,7 +40,6 @@ const fullSidebar = [
       },
       { text: "Core Concepts", link: "/getting-started/concepts" },
       { text: "CLI Commands", link: "/getting-started/cli" },
-      { text: "AI Agent", link: "/getting-started/ai-agent" },
     ],
   },
   {
@@ -178,7 +177,6 @@ const fullSidebar = [
           { text: "Pi", link: "/step-types/harness/pi" },
         ],
       },
-      { text: "Agent", link: "/features/agent/step" },
       { text: "Template", link: "/step-types/template" },
       { text: "Log", link: "/step-types/log" },
       { text: "Outputs", link: "/step-types/outputs" },
@@ -204,42 +202,6 @@ const fullSidebar = [
           { text: "PostgreSQL", link: "/step-types/sql/postgresql" },
           { text: "SQLite", link: "/step-types/sql/sqlite" },
           { text: "DuckDB", link: "/step-types/sql/duckdb" },
-        ],
-      },
-    ],
-  },
-  {
-    text: "AI Agent",
-    items: [
-      { text: "Overview", link: "/features/agent/" },
-      {
-        text: "Settings",
-        collapsed: false,
-        items: [
-          { text: "Overview", link: "/features/agent/settings/" },
-          { text: "Models & Providers", link: "/features/agent/settings/models" },
-          { text: "OpenAI Subscription", link: "/features/agent/settings/openai-subscription" },
-          { text: "OpenCode", link: "/features/chat/opencode" },
-          { text: "Tool Permissions", link: "/features/agent/settings/controls" },
-          { text: "Personality", link: "/features/agent/settings/behavior" },
-        ],
-      },
-      { text: "Agent Step", link: "/features/agent/step" },
-      { text: "Web Search", link: "/features/agent/web-search" },
-      { text: "Tools Reference", link: "/features/agent/tools" },
-      { text: "Memory", link: "/features/agent/memory" },
-      { text: "Souls", link: "/features/agent/souls" },
-      { text: "Scheduling", link: "/features/agent/scheduling" },
-      { text: "Nesting", link: "/features/agent/nesting" },
-      {
-        text: "Chat Bot Settings",
-        collapsed: false,
-        items: [
-          { text: "Overview", link: "/features/bots/" },
-          { text: "Telegram", link: "/features/bots/telegram" },
-          { text: "Slack", link: "/features/bots/slack" },
-          { text: "Discord", link: "/features/bots/discord" },
-          { text: "LINE", link: "/features/bots/line" },
         ],
       },
     ],
@@ -343,7 +305,7 @@ const fullSidebar = [
 export default withMermaid(
   defineConfig({
     title: "Dagu",
-    description: "Local-first CLI and AI-agent orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
+    description: "Local-first workflow orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
     lang: "en-US",
     lastUpdated: true,
     cleanUrls: true,
@@ -354,14 +316,14 @@ export default withMermaid(
         "meta",
         {
           name: "description",
-          content: "Local-first CLI and AI-agent orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
+          content: "Local-first workflow orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
         },
       ],
       [
         "meta",
         {
           property: "og:description",
-          content: "Local-first CLI and AI-agent orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
+          content: "Local-first workflow orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
         },
       ],
       ["link", { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
@@ -430,7 +392,6 @@ export default withMermaid(
         { text: "MCP", link: "/mcp/", activeMatch: "/mcp/" },
         { text: "Writing Workflows", link: "/writing-workflows/", activeMatch: "/writing-workflows/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/step-types/" },
-        { text: "AI Agent", link: "/features/agent/", activeMatch: "/features/agent/" },
         { text: "Server Admin", link: "/server-admin/", activeMatch: "/server-admin/" },
         { text: "llms.txt", link: "https://raw.githubusercontent.com/dagu-org/dagu/main/llms.txt" },
       ],

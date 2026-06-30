@@ -4,8 +4,7 @@ Use Dagu with [OpenCode](https://opencode.ai) — a subscription service that gi
 
 This applies to both:
 
-- the Web UI steward
-- workflow steps that use `action: chat.completion` or `action: agent.run`
+- workflow steps that use `action: chat.completion`
 
 ## What Is OpenCode
 
@@ -30,21 +29,6 @@ OpenCode (`opencode.ai`) provides a unified OpenAI-compatible endpoint for a rot
 | MiMo V2.5 | `mimo-v2.5` |
 
 The model catalog may expand over time. Check [opencode.ai/docs/go](https://opencode.ai/docs/go/) for the current list.
-
-## Web UI AI agent Setup
-
-1. Go to `/agent-settings`
-2. Enable AI agent if not already on
-3. Click **Add Model**
-4. Fill in:
-   - **Provider**: `OpenCode`
-   - **Model**: e.g. `kimi-k2.6`
-   - **API Key**: your OpenCode API key
-   - **Base URL**: leave empty (defaults to `https://opencode.ai/zen/go/v1`)
-5. Enable **Supports Thinking** if the model supports it (Kimi, DeepSeek V4 Pro, GLM, Qwen)
-6. Click the star to set it as default
-
-You can also pick from the built-in presets when adding a model — OpenCode presets are listed for all supported models.
 
 ## Workflow Steps
 
@@ -98,23 +82,6 @@ steps:
     output: ANALYSIS
 ```
 
-### Agent Step
-
-```yaml
-steps:
-  - id: fix_config
-    action: agent.run
-    with:
-      model: opencode-kimi-k2-6
-      messages:
-        - role: user
-          content: |
-            Review and fix the invalid entries in /etc/app/config.yaml
-    output: RESULT
-```
-
-The `model` field here refers to the saved model ID from `/agent-settings`.
-
 ### Model Fallback
 
 Use OpenCode as a fallback alongside other providers:
@@ -146,5 +113,3 @@ OpenCode reasoning models return thinking text in a `reasoning` field. Dagu pres
 
 - [Basic Chat](/features/chat/basics)
 - [Local AI](/features/chat/local-ai)
-- [AI agent](/features/agent/)
-- [Models & Providers](/features/agent/settings/models)

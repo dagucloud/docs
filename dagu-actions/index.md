@@ -10,7 +10,7 @@ Custom Actions and Third-Party Actions use related `action:` syntax, but they ar
 | Third-Party Action | `action: owner/repo@version` | A repository outside the official `dagucloud` action set | The reusable unit is maintained outside Dagu and should be pinned by version. |
 | Custom Action | `action: release.announce` | The current DAG document or `base.yaml` | You need an inline typed wrapper around a built-in step type. |
 
-Built-in step types such as `run`, `http.request`, `docker.run`, `postgres.query`, and `agent.run` are documented separately in [Step Types](/step-types/shell). Packaged actions can use those step types internally, but they are not the same layer.
+Built-in step types such as `run`, `http.request`, `docker.run`, `postgres.query`, `chat.completion`, and `harness.run` are documented separately in [Step Types](/step-types/shell). Packaged actions can use those step types internally, but they are not the same layer.
 
 ## Quick Example
 

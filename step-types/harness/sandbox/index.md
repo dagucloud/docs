@@ -108,7 +108,7 @@ steps:
   - id: review
     action: harness.run
     container:
-      exec: agent-sandbox
+      exec: harness-sandbox
       working_dir: /workspace
     with:
       provider: your_provider
@@ -116,7 +116,7 @@ steps:
         Review the current patch.
 ```
 
-The provider binary must exist inside `agent-sandbox`.
+The provider binary must exist inside `harness-sandbox`.
 
 ## Volumes
 
@@ -149,10 +149,6 @@ Containerized harness execution is for CLI providers:
 - built-in CLI providers such as `claude`, `codex`, `copilot`, `opencode`, and
   `pi`
 - custom providers under top-level `harnesses:`
-
-`provider: builtin` is not a CLI provider and cannot run inside `container:`.
-If the selected harness attempt is `builtin` and a container is configured, the
-step fails instead of running outside the container.
 
 The containerized path does not support stdin prompt input. Do not combine
 `container:` with:

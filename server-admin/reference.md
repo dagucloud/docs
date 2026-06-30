@@ -45,10 +45,6 @@ event_store:
 webhooks:
   max_payload_size: 1048576 # Max accepted webhook payload size in bytes (default: 1MiB)
 
-# Session Storage
-session:
-  max_per_user: 100        # Max sessions per user (default: 100, 0 = unlimited)
-
 # Server-Sent Events
 sse:
   max_topics_per_connection: 20
@@ -292,9 +288,6 @@ All options support `DAGU_` prefix.
 - `DAGU_SSE_WRITE_BUFFER_SIZE` - Per-client SSE write buffer size (default: `65536`)
 - `DAGU_SSE_SLOW_CLIENT_TIMEOUT` - Timeout for slow SSE clients (default: `30s`)
 
-### Session Storage
-- `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
-
 ### Directories
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
 - `DAGU_DAGS_DIR` - DAG definitions
@@ -441,27 +434,6 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 - `DAGU_TUNNEL_RATE_LIMITING_LOGIN_ATTEMPTS` - Allowed login attempts per window
 - `DAGU_TUNNEL_RATE_LIMITING_WINDOW_SECONDS` - Login rate-limit window in seconds
 - `DAGU_TUNNEL_RATE_LIMITING_BLOCK_DURATION_SECONDS` - Login rate-limit block duration in seconds
-
-### Bots
-- `DAGU_BOTS_PROVIDER` - Bot provider (`telegram`, `slack`, `discord`, or `line`)
-- `DAGU_BOTS_SAFE_MODE` - Restrict bot actions to safe operations
-- `DAGU_BOTS_TELEGRAM_TOKEN` - Telegram bot token
-- `DAGU_BOTS_TELEGRAM_ALLOWED_CHAT_IDS` - Comma-separated allowed Telegram chat IDs
-- `DAGU_BOTS_TELEGRAM_INTERESTED_EVENT_TYPES` - Telegram event type filter
-- `DAGU_BOTS_SLACK_BOT_TOKEN` - Slack bot token
-- `DAGU_BOTS_SLACK_APP_TOKEN` - Slack app token
-- `DAGU_BOTS_SLACK_ALLOWED_CHANNEL_IDS` - Comma-separated allowed Slack channel IDs
-- `DAGU_BOTS_SLACK_INTERESTED_EVENT_TYPES` - Slack event type filter
-- `DAGU_BOTS_SLACK_RESPOND_TO_ALL` - Respond outside direct mentions in allowed channels
-- `DAGU_BOTS_DISCORD_TOKEN` - Discord bot token
-- `DAGU_BOTS_DISCORD_ALLOWED_CHANNEL_IDS` - Comma-separated allowed Discord channel IDs
-- `DAGU_BOTS_DISCORD_INTERESTED_EVENT_TYPES` - Discord event type filter
-- `DAGU_BOTS_DISCORD_RESPOND_TO_ALL` - Respond outside direct mentions in allowed channels
-- `DAGU_BOTS_LINE_CHANNEL_ACCESS_TOKEN` - LINE channel access token
-- `DAGU_BOTS_LINE_CHANNEL_SECRET` - LINE channel secret
-- `DAGU_BOTS_LINE_ALLOWED_SOURCE_IDS` - Comma-separated allowed LINE source IDs
-- `DAGU_BOTS_LINE_INTERESTED_EVENT_TYPES` - LINE event type filter
-- `DAGU_BOTS_LINE_RESPOND_TO_ALL` - Respond outside direct mentions in allowed sources
 
 ### License
 - `DAGU_LICENSE_KEY` - License key

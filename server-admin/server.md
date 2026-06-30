@@ -136,10 +136,6 @@ event_store:
 webhooks:
   max_payload_size: 1048576     # Max accepted webhook payload size in bytes (default: 1MiB)
 
-# Session Storage
-session:
-  max_per_user: 100            # Max sessions per user (default: 100, 0 = unlimited)
-
 # Queue System
 queues:
   enabled: true                 # Enable queue system (default: true)
@@ -228,9 +224,6 @@ All options support `DAGU_` prefix:
 **Event Store:**
 - `DAGU_EVENT_STORE_ENABLED` - Enable centralized event logging (default: `true`)
 - `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `3`, `0` = keep forever)
-
-**Session Storage:**
-- `DAGU_SESSION_MAX_PER_USER` - Max sessions per user (default: `100`, `0` = unlimited)
 
 ## Common Setups
 
@@ -650,7 +643,7 @@ Audit logs are written as daily records and can be reviewed in the Web UI at **S
 
 The centralized event store persists operational events such as DAG-run outcomes and LLM usage records. It is enabled by default in `dagu server` and `dagu start-all`.
 
-The `/api/v1/event-logs` endpoint reads from this store, and the chat-bot DAG-run monitors use it when available.
+The `/api/v1/event-logs` endpoint reads from this store.
 
 ### Configuration
 
@@ -687,28 +680,6 @@ export DAGU_WEBHOOKS_MAX_PAYLOAD_SIZE=2097152
 ```
 
 This controls the maximum accepted webhook request body and the serialized payload passed to the DAG as `WEBHOOK_PAYLOAD`. Very large values may still exceed operating-system limits when the payload is passed to executed steps as environment data.
-
-## Session Limits
-
-Dagu keeps agent chat history per user. To prevent unbounded growth, older sessions are cleaned up automatically when a per-user limit is exceeded.
-
-### Configuration
-
-```yaml
-session:
-  max_per_user: 100   # Max sessions per user (default: 100, 0 = unlimited)
-```
-
-Or via environment variable:
-```bash
-export DAGU_SESSION_MAX_PER_USER=50
-```
-
-### Cleanup Behavior
-
-- When a new session is created and the user exceeds the limit, the oldest sessions are deleted
-- Sub-sessions (created by delegate agents) are deleted together with their parent session and do not count toward the limit
-- Set to `0` to disable cleanup (keep all sessions)
 
 ## See Also
 
