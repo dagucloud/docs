@@ -302,5 +302,5 @@ ui:
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)
-- [Learn the REST API](/overview/api)
+- [Learn the REST API](/web-ui/api)
 - [Server Administration](/server-admin/)

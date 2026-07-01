@@ -823,14 +823,6 @@ http://localhost:8080/mcp
 
 For details, run `gh skill install --help` and see [MCP Server](/mcp/).
 
-### `migrate`
-
-Migrate legacy data to new format.
-
-```bash
-dagu migrate history  # Migrate v1.16 -> v1.17+ format
-```
-
 ### `coordinator`
 
 Start the coordinator gRPC server for distributed task execution.

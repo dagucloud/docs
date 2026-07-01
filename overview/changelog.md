@@ -3273,14 +3273,7 @@ steps:
 
 ### Migration Required
 
- **History Data Migration**: Due to internal improvements, history data from 1.16.x requires migration:
-
-```bash
-# Migrate history data
-dagu migrate history
-```
-
-After successful migration, legacy history directories are moved to `<DAGU_DATA_DIR>/history_migrated_<timestamp>` for safekeeping.
+**History Data Migration**: This release originally required history data from 1.16.x to be migrated. That legacy migration command has since been removed from current Dagu releases.
 
 ### Contributors
 
