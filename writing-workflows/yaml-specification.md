@@ -914,12 +914,17 @@ Artifact stream paths are relative to the run artifact directory. Absolute paths
 
 ### Conditions And Continuation
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `preconditions` | string or array | Conditions checked before the step executes. |
-| `continue_on` | string or object | Conditions under which the DAG continues after failure or skip. |
+| Scope | Field | Type | Description |
+|-------|-------|------|-------------|
+| DAG root | `preconditions` | string or array | Conditions checked before any normal step executes. If a condition is not met, Dagu aborts the DAG run before running steps. |
+| Step | `preconditions` | string or array | Conditions checked before the step executes. |
+| Step | `continue_on` | string or object | Conditions under which the DAG continues after failure or skip. |
 
 ```yaml
+preconditions:
+  - condition: "`date +%u`"
+    expected: "re:[1-5]"  # Run only on weekdays
+
 steps:
   - id: deploy
     run: ./deploy.sh
@@ -939,7 +944,7 @@ steps:
       mark_success: true
 ```
 
-Precondition fields:
+Precondition fields for both DAG root and step preconditions:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -948,6 +953,8 @@ Precondition fields:
 | `negate` | boolean | Invert the condition result. |
 
 If `expected` is omitted, Dagu evaluates `condition` and runs the result as a command check. Shell syntax requires a shell.
+
+For more examples, see [DAG-Level Conditions](/writing-workflows/control-flow#dag-level-conditions).
 
 ### Retry And Repeat
 
