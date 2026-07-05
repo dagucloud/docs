@@ -30,6 +30,56 @@ steps:                     # Workflow steps
 
 Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
 
+## Multiple-Step DAG
+
+Dagu runs all ready steps at the same time. In this DAG, `checkout_scripts` gets the scripts first. Then `validate` and `summarize` both wait for `extract` and run in parallel. `publish` waits for both of them.
+
+`defaults.retry_policy` gives each step the same retry policy unless that step sets its own `retry_policy`.
+
+```yaml
+defaults:
+  retry_policy:
+    limit: 2
+    interval_sec: 10
+
+working_dir: ./workspace/data-pipeline
+
+steps:
+  - id: checkout_scripts
+    action: git.checkout
+    with:
+      repository: https://github.com/example/data-pipeline.git
+      ref: v1.2.3
+      path: .
+
+  - id: extract
+    depends: checkout_scripts
+    run: ./scripts/extract.sh
+
+  - id: validate
+    depends: extract
+    run: ./scripts/validate.sh
+
+  - id: summarize
+    depends: extract
+    run: ./scripts/summarize.sh
+
+  - id: publish
+    depends: [validate, summarize]
+    run: ./scripts/publish.sh
+```
+
+```mermaid
+graph LR
+  checkout_scripts --> extract
+  extract --> validate
+  extract --> summarize
+  validate --> publish
+  summarize --> publish
+```
+
+`git.checkout` still runs on every DAG run. If `path` is empty, it clones the repository. If `path` already contains a Git repository, it fetches and checks out the requested ref instead of cloning again. If the path exists with non-Git files, the step fails. If overlapping DAG runs can use the same `working_dir`, use a per-run directory or set `max_active_runs: 1`.
+
 ## Tool Dependencies
 
 Declare external CLI dependencies with top-level `tools` when a host command step needs a reproducible binary version:
@@ -93,15 +143,9 @@ Configuration precedence: System defaults → Base config → DAG config
 
 See [Base Configuration](/server-admin/base-config) for complete documentation on all available fields.
 
-## Reusable Actions
+## Local `actions:` Definitions
 
-Use reusable actions when several workflows should share one validated interface.
-
-- Use [Custom Actions](/dagu-actions/custom) for inline wrappers around built-in step types.
-- Use [Dagu Actions](/dagu-actions/official) when a maintained `dagucloud/*` action already matches the task.
-- Use [Third-Party Actions](/dagu-actions/third-party) when a non-official repository provides the package you want to pin and call.
-
-Custom actions are defined in `actions` when you want a typed wrapper around a built-in step type.
+`actions:` defines local shortcuts for built-in steps. Put them in a DAG file or `base.yaml`. Each shortcut can define inputs and a template. Dagu expands it into a normal step before the run starts.
 
 ```yaml
 actions:
@@ -126,7 +170,14 @@ steps:
 
 The most common pattern is a `run` custom action with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal built-in step before execution. See [Custom Actions](/dagu-actions/custom) for the exact rules.
 
-Third-party actions are called directly by versioned reference:
+## Dagu Actions and Third-Party Actions
+
+Packaged actions run code from a pinned package. The caller chooses the version. The package declares its inputs, workflow, and required `tools`. Dagu installs those tool versions and runs the package workflow.
+
+- Use [Dagu Actions](/dagu-actions/official) when a maintained `dagucloud/*` action already matches the task.
+- Use [Third-Party Actions](/dagu-actions/third-party) when a non-official repository provides the package you want to pin and call.
+
+Third-party actions are called directly by versioned repository reference:
 
 ```yaml
 steps:
@@ -149,7 +200,7 @@ steps:
         return { total: input.values.reduce((sum, value) => sum + value, 0) }
 ```
 
-Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action workflow as a sub-DAG, and exposes the action outputs as JSON. See [Dagu Actions](/dagu-actions/) for the full section and [Execution Model](/dagu-actions/execution-model) for package layout, reference formats, output validation, and distributed worker behavior.
+Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action workflow as a sub-DAG, and exposes the action outputs as JSON. For details, see [Dagu Actions](/dagu-actions/) and [Action Package Execution](/dagu-actions/execution-model).
 
 ## Guide Sections
 
