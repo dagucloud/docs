@@ -23,7 +23,8 @@ steps:
 | `timeout` | Timeout in seconds | `30` |
 | `silent` | Return body only (suppress status/headers on success) | `true` |
 | `debug` | Enable debug mode (logs request/response details) | `true` |
-| `format` | Response output format. `"json"` for structured output (status code, headers, body). | `"json"` |
+| `format` | Stdout format. `"json"` writes a structured JSON object to stdout. | `"json"` |
+| `output` | File path to write the response body to instead of stdout. | `"${env.DAG_RUN_ARTIFACTS_DIR}/data.bin"` |
 | `skip_tls_verify` | Skip TLS certificate verification | `true` |
 
 ## Examples
@@ -104,7 +105,7 @@ steps:
 
 ### JSON Output Mode
 
-Use `format: "json"` to get structured JSON output including status code and headers:
+Use `format: "json"` when the response body is JSON and later steps should consume a structured stdout object:
 
 ```yaml
 steps:
@@ -120,7 +121,7 @@ steps:
 
 The legacy `json: true` boolean is still supported and behaves identically to `format: "json"`.
 
-Output format:
+On a successful response with `silent: true`, stdout contains only the parsed response body:
 
 ```json
 {
@@ -128,7 +129,7 @@ Output format:
 }
 ```
 
-Without `silent` (or `silent: false`), the output also includes status code and headers:
+Without `silent` (or on a non-2xx response), stdout also includes status code and headers:
 
 ```json
 {
@@ -139,6 +140,54 @@ Without `silent` (or `silent: false`), the output also includes status code and 
   "body": {"key": "value"}
 }
 ```
+
+When `with.output` is not set, JSON output mode parses the response body. If the response body is not valid JSON, the step fails while writing structured stdout.
+
+### File Output Mode
+
+Set `output` to download the raw response body to a file:
+
+```yaml
+steps:
+  - id: download_script
+    action: http.request
+    with:
+      method: GET
+      url: https://example.com/install.sh
+      output: "${env.DAG_RUN_ARTIFACTS_DIR}/install.sh"
+      silent: true
+
+  - id: run_script
+    run: sh "${env.DAG_RUN_ARTIFACTS_DIR}/install.sh"
+    depends: download_script
+```
+
+`with.output` is the file target for `http.request`. The top-level `output:` field still captures stdout into a step output variable for later steps.
+
+`format: "json"` and legacy `json: true` can be combined with `with.output`. In that case, the successful response body is streamed to the file as raw bytes and stdout contains JSON metadata with the `output` path instead of embedding or validating the body:
+
+```yaml
+steps:
+  - id: download_data
+    action: http.request
+    with:
+      method: GET
+      url: https://example.com/data.json
+      output: "${env.DAG_RUN_ARTIFACTS_DIR}/data.json"
+      format: "json"
+      silent: true
+    output: DOWNLOAD_METADATA
+```
+
+```json
+{
+  "output": "/path/to/artifacts/data.json"
+}
+```
+
+Relative `with.output` paths resolve from the step working directory. Parent directories are created automatically. Existing files are replaced atomically only after a successful 2xx response; non-2xx responses fail the step and do not replace the target file.
+
+When `with.output` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the downloaded file appears as a run artifact.
 
 ### Exit Codes
 
