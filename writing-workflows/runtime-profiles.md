@@ -104,6 +104,33 @@ curl -X POST "http://localhost:8080/api/v1/dags/etl.yaml/start" \
 
 The same `profileName` field is accepted by start, synchronous start, enqueue, and inline DAG-run execution endpoints.
 
+## Scheduled Runs
+
+The scheduler uses the DAG's effective default runtime profile from server-side DAG settings when it evaluates profile-scoped schedule entries:
+
+```yaml
+schedule:
+  - cron: "*/20 * * * *"
+    profile: prod
+  - cron: "30 */2 * * *"
+    profile: dev
+```
+
+You can also set a default profile for all schedule entries in the schedule map:
+
+```yaml
+schedule:
+  profile: prod
+  start:
+    - "*/20 * * * *"
+    - cron: "30 */2 * * *"
+      profile: dev
+```
+
+In these examples, a scheduler environment whose DAG default profile is `prod` activates `prod` entries. A scheduler environment whose DAG default profile is `dev` activates `dev` entries. Unscoped schedule entries are always active, and profile-scoped entries are ignored when the DAG has no default runtime profile. An entry-level `profile` overrides the inherited `schedule.profile` value.
+
+The schedule entry's `profile` field is not a per-run profile override. It is only an activation filter for the schedule entry. The run still uses the effective profile selected through the normal runtime profile path.
+
 ## Runtime Behavior
 
 When a run starts, Dagu:

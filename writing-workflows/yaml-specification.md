@@ -153,6 +153,11 @@ schedule:
   - "0 9 * * MON-FRI"
   - "0 14 * * SAT,SUN"
 
+# Object-form cron schedules
+schedule:
+  - cron: "*/20 * * * *"
+  - expression: "30 */2 * * *"
+
 # Cron with timezone
 schedule: "CRON_TZ=America/New_York 0 9 * * *"
 
@@ -169,9 +174,32 @@ schedule:
     - "0 18 * * MON-FRI"
   restart:
     - "0 12 * * MON-FRI"
+
+# Profile-scoped schedules
+schedule:
+  - cron: "*/20 * * * *"
+    profile: prod
+  - cron: "30 */2 * * *"
+    profile: dev
+
+# Profile inherited by all schedule entries
+schedule:
+  profile: prod
+  start:
+    - "*/20 * * * *"
+    - cron: "0 2 * * *"
+      profile: dev
+  stop: "0 18 * * *"
+  restart: "0 12 * * *"
 ```
 
 `at` is accepted only in a top-level `schedule` array and under `schedule.start`. `schedule.stop` and `schedule.restart` accept cron entries only. `at` timestamps must be RFC 3339 timestamps with an explicit offset or `Z`, and seconds must be `:00`.
+
+`cron` is an alias for `expression` in schedule objects. Dagu normalizes both forms to the same cron schedule.
+
+`profile` is an activation filter. A profile-scoped schedule participates in scheduling only when it matches the DAG's effective default runtime profile from the server-side DAG settings. Unscoped schedule entries are always active. If a DAG has no default runtime profile, profile-scoped entries are ignored. `profile` does not override the runtime profile used by the run.
+
+When `profile` is set directly under the `schedule` map, it is inherited by `start`, `stop`, and `restart` entries that do not set their own `profile`. An entry-level `profile` overrides the inherited value.
 
 ### Execution Control
 
