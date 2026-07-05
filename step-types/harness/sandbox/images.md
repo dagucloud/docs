@@ -37,8 +37,6 @@ For a provider smoke test, use a custom `shell` provider and call the installed
 CLI explicitly. This verifies the image without making a model request.
 
 ```yaml
-type: graph
-
 harnesses:
   shell:
     binary: sh

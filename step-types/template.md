@@ -74,7 +74,6 @@ This writes to `/opt/reports/subdir/output.txt`.
 Data values are expanded by Dagu before the template runs, so declared step outputs work:
 
 ```yaml
-type: graph
 steps:
   - id: producer
     run: |

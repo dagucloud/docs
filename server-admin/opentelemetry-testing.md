@@ -28,7 +28,6 @@ otel:
     service.version: "1.0.0"
     environment: "local"
 
-type: graph
 steps:
   - id: fetch_data
     run: echo "Fetching data..." && sleep 1
@@ -326,7 +325,6 @@ otel:
 ```bash
 # Create a DAG without OTel
 cat > perf-test-no-otel.yaml << 'EOF'
-name: perf-test
 steps:
   - id: step_1
     run: echo "Step 1"

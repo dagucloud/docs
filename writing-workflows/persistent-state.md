@@ -18,7 +18,6 @@ Persistent state values are JSON. Each stored value is normalized before it is w
 This workflow stores a cursor after each successful fetch. The next scheduled run reads the cursor before fetching again.
 
 ```yaml
-name: feed-sync
 schedule: "0 * * * *"
 
 steps:

@@ -4,6 +4,8 @@ Learn the fundamentals of writing Dagu workflows.
 
 ## Your First Workflow
 
+Details: [write your first workflow](/getting-started/quickstart#_2-write-your-first-workflow) and [run it](/getting-started/quickstart#_3-run-it).
+
 Create `hello.yaml`:
 
 ```yaml
@@ -18,26 +20,40 @@ dagu start hello.yaml
 
 ## Workflow Structure
 
-A complete workflow contains:
+Details: [typical workflow](/writing-workflows/yaml-specification#typical-workflow) and [top-level fields](/writing-workflows/yaml-specification#top-level-fields).
+
+A typical workflow uses these top-level fields:
 
 ```yaml
 # Metadata
-name: data-pipeline
 description: Process daily data
+group: Analytics
 labels: [etl, production]
 
-# Configuration  
+# Run control
 schedule: "0 2 * * *"
+working_dir: /srv/dagu/data-pipeline
+
+# Defaults for every step
+defaults:
+  retry_policy:
+    limit: 2
+    interval_sec: 30
+  timeout_sec: 600
+
+# Runtime inputs
 params:
   - DATE: "2026-03-14"
 
+# Environment
 env:
   - RUN_DATE: "`date +%Y-%m-%d`"
 
-# Steps
+# Tool versions
 tools:
   - astral-sh/uv@0.11.14
 
+# Steps
 steps:
   - id: process
     run: uv run --python 3.13.9 python process.py "${params.DATE}" "${env.RUN_DATE}"
@@ -48,50 +64,50 @@ handler_on:
     run: notify-error.sh
 ```
 
+Add `defaults` when several steps share retry, timeout, environment, or precondition settings.
+
 ## Steps
 
 The basic unit of execution.
 
+Details: [step fields](/writing-workflows/yaml-specification#step-fields).
+
 ### Step Names
+
+Details: [step identity](/writing-workflows/yaml-specification#step-identity).
 
 Step names are optional. When omitted, Dagu automatically generates names based on the action:
 
 ```yaml
 steps:
   - run: echo "First step"                  # Auto-named: cmd_1
+
   - run: |                                  # Auto-named: cmd_2
       echo "Multi-line"
       echo "Script"
+
   - id: explicit_name              # Explicit name
     run: echo "Third step"
+
   - action: http.request           # Auto-named: http_4
     with:
       method: GET
       url: https://api.example.com
+
   - action: template.render        # Auto-named: template_5
     with:
       template: "Hello, {{ .name }}!"
       data:
         name: Dagu
+
   - action: dag.run                # Auto-named: dag_6
     with:
       dag: child-workflow
 ```
 
-Auto-generated names follow the pattern `{executor}_{number}`:
-- `cmd_N` - single-line `run` steps
-- `script_N` - multi-line `run` steps
-- `http_N` - `http.request` actions
-- `template_N` - `template.render` actions
-- `dag_N` - `dag.run` actions
-- `container_N` - Docker/container actions
-- `ssh_N` - `ssh.run` actions
-- `mail_N` - `mail.send` actions
-- `jq_N` - `jq.filter` actions
-
-For parallel steps (see below), the pattern is `parallel_{group}_{executor}_{index}`.
-
 ### Shell Commands
+
+Details: [shell command steps](/step-types/shell#running-commands).
 
 Use `run` for shell commands and scripts:
 
@@ -108,7 +124,6 @@ steps:
 This is equivalent to:
 
 ```yaml
-type: graph
 tools:
   - astral-sh/uv@0.11.14
 
@@ -125,6 +140,8 @@ steps:
 ```
 
 ### Multiple Commands
+
+Details: [multiple shell commands](/step-types/shell#running-commands).
 
 Multiple commands share the same step configuration:
 
@@ -143,6 +160,7 @@ steps:
     working_dir: /app
     retry_policy:
       limit: 3
+      interval_sec: 10
 ```
 
 Instead of duplicating `env`, `working_dir`, `retry_policy`, `preconditions`, `container`, etc. across multiple steps, combine commands into one step.
@@ -154,6 +172,8 @@ Commands run in order and stop on first failure. Retries restart from the first 
 For non-shell work, use an explicit `action` and put action-specific inputs under `with`.
 
 ### Multi-line Scripts
+
+Details: [script behavior](/step-types/shell#script-behavior).
 
 ```yaml
 tools:
@@ -173,11 +193,14 @@ If you omit `shell`, Dagu uses the interpreter declared in the script's shebang 
 
 ### Shell Selection
 
+Details: [configure the shell](/step-types/shell#configure-the-shell).
+
 Set a default shell for every step at the DAG level, and override it per step when needed:
 
 ```yaml
 shell: /bin/bash                  # Default shell for the whole workflow
 shell_args: ["-e", "-u"]          # Default shell args for every run step
+
 steps:
   - id: bash_task
     run: echo "Runs with bash -e -u"
@@ -207,6 +230,8 @@ steps:
 
 ## Dependencies
 
+Details: [execution order](/writing-workflows/execution-control#execution-order).
+
 ```yaml
 tools:
   - astral-sh/uv@0.11.14
@@ -226,10 +251,11 @@ steps:
 
 ### Parallel Execution
 
+Details: [parallel execution](/writing-workflows/execution-control#parallel-execution) and [parallel with dependencies](/writing-workflows/execution-control#parallel-with-dependencies).
+
 You can run steps in parallel using explicit dependencies:
 
 ```yaml
-type: graph
 steps:
   - id: setup
     run: echo "Setup"
@@ -249,23 +275,57 @@ steps:
 
 ## Working Directory
 
-Set where commands execute:
+Details: [`working_dir` field](/writing-workflows/yaml-specification#data-environment-and-files) and [quickstart example](/getting-started/quickstart#working-directory).
+
+Set `working_dir` at the DAG level when most steps run from the same project directory. Relative paths resolve from the DAG file directory.
 
 ```yaml
+working_dir: /home/user/project
+
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - id: in_project
-    working_dir: /home/user/project
+  - id: process
     run: uv run --python 3.13.9 python main.py
 
-  - id: in_data
+  - id: inspect_input
     working_dir: /data/input
     run: ls -la
 ```
 
+Use step-level `working_dir` only for the steps that need a different directory.
+
+## Defaults
+
+Details: [step defaults](/writing-workflows/step-defaults#supported-fields) and [merge rules](/writing-workflows/step-defaults#merge-rules).
+
+Use `defaults` for settings that most steps should share. A step can override the default when it needs different behavior.
+
+```yaml
+defaults:
+  retry_policy:
+    limit: 3
+    interval_sec: 10
+  timeout_sec: 300
+  env:
+    LOG_LEVEL: info
+
+steps:
+  - id: fetch
+    run: ./fetch.sh
+
+  - id: publish
+    run: ./publish.sh
+    retry_policy:
+      limit: 1
+      interval_sec: 60
+    depends: fetch
+```
+
 ## Environment Variables
+
+Details: [DAG-level variables](/writing-workflows/environment-variables#dag-level-variables), [step-level variables](/writing-workflows/environment-variables#step-level-variables), and [variable expansion](/writing-workflows/environment-variables#variable-expansion-syntax).
 
 Define environment variables at DAG-level or step-level:
 
@@ -287,6 +347,8 @@ Dagu filters system environment variables for security. See [Environment Variabl
 
 ## Capturing Output
 
+Details: [output basics](/writing-workflows/outputs#basic-example), [output file format](/writing-workflows/outputs#output-file-format), and [output names](/writing-workflows/outputs#output-names).
+
 Store command output in variables:
 
 ```yaml
@@ -304,7 +366,11 @@ steps:
 
 ## Basic Error Handling
 
+Details: [error handling](/writing-workflows/error-handling#continue-on-conditions).
+
 ### Continue on Failure
+
+Details: [continue_on syntax](/writing-workflows/continue-on#syntax) and [failure behavior](/writing-workflows/continue-on#failure).
 
 ```yaml
 steps:
@@ -320,15 +386,20 @@ steps:
 
 ### Simple Retry
 
+Details: [step retry policy](/writing-workflows/durable-execution#step-retry-policy) and [retry backoff](/writing-workflows/execution-control#retry-with-backoff).
+
 ```yaml
 steps:
   - id: flaky_api
     run: curl https://unstable-api.com
     retry_policy:
       limit: 3
+      interval_sec: 10
 ```
 
 ## Timeouts
+
+Details: [step timeouts](/writing-workflows/execution-control#step-timeout-timeout-sec) and [timeout limits](/writing-workflows/resource-limits#timeouts).
 
 Prevent steps from running forever:
 
@@ -340,6 +411,8 @@ steps:
 ```
 
 ## Step Descriptions
+
+Details: [step identity fields](/writing-workflows/yaml-specification#step-identity).
 
 Document your steps:
 
@@ -357,10 +430,11 @@ steps:
 
 ## Labels and Organization
 
+Details: [label YAML formats](/writing-workflows/labels#yaml-formats) and [metadata fields](/writing-workflows/yaml-specification#metadata).
+
 Group related workflows:
 
 ```yaml
-name: customer-report
 labels:
   - reports
   - customer

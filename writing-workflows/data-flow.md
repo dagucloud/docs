@@ -73,8 +73,6 @@ After import, use `${env.AWS_REGION}` and `${env.AWS_PROFILE}` in workflow field
 Use declared step outputs for validated data passing between steps.
 
 ```yaml
-type: graph
-
 steps:
   - id: get_version
     run: |

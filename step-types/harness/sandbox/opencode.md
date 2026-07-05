@@ -55,8 +55,6 @@ This DAG starts a container and calls `opencode --version`. It does not make a
 model request.
 
 ```yaml
-type: graph
-
 harnesses:
   shell:
     binary: sh
@@ -118,8 +116,6 @@ Use root-level `container:` when ordinary command steps and OpenCode should
 share the same container filesystem and toolchain.
 
 ```yaml
-type: graph
-
 container:
   image: dagu-opencode-runner:local
   pull_policy: never

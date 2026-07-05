@@ -140,8 +140,6 @@ The matching `DAG_*` environment variables are still available for shell scripts
 For validated data passing between steps, declare outputs and write them to `DAGU_OUTPUT_FILE`.
 
 ```yaml
-type: graph
-
 steps:
   - id: get_config
     run: |

@@ -9,8 +9,6 @@ Dagu stores artifacts when artifact storage is enabled explicitly, or when a DAG
 For command output, prefer attaching stdout or stderr directly to an artifact:
 
 ```yaml
-name: daily-report
-
 steps:
   - id: generate-report
     run: ./generate-report --format markdown
@@ -101,8 +99,6 @@ Execution mode behavior:
 A common pattern is to stream a Markdown report to an artifact and write generated sidecar files into the artifact directory:
 
 ```yaml
-name: nightly-audit
-
 artifacts:
   enabled: true
 

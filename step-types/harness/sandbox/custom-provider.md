@@ -12,8 +12,6 @@ This DAG uses Alpine and a custom provider named `shell`. It verifies that
 `harness.run` executes inside the configured container.
 
 ```yaml
-type: graph
-
 container:
   image: alpine:3.20
   pull_policy: missing
@@ -55,8 +53,6 @@ This example assumes the runner image contains `/usr/local/bin/review-agent`.
 The CLI receives its prompt as the final command-line argument.
 
 ```yaml
-type: graph
-
 env:
   - REVIEW_AGENT_TOKEN: ${REVIEW_AGENT_TOKEN}
 

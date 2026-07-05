@@ -159,7 +159,6 @@ File locking creates a `.lock` file next to the database (e.g., `shared.db.lock`
 ### Distributed Workflow Example
 
 ```yaml
-name: cache-cleanup
 steps:
   - id: cleanup_expired
     action: sqlite.query
@@ -368,7 +367,6 @@ steps:
 ## Complete Example
 
 ```yaml
-name: local-data-pipeline
 env:
   - DB_PATH: "./data/analytics.db"
 

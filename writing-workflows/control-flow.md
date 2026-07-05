@@ -81,7 +81,6 @@ Use `action: dag.run` when the parent must wait for the child DAG to finish befo
 Use `action: dag.enqueue` when the parent only needs to queue another DAG and continue once the queue item is created. The child becomes its own top-level DAG run with status `queued`, while the parent keeps a reference to it in the sub-DAG run list for traceability.
 
 ```yaml
-type: graph
 params:
   - name: date
     default: 2026-01-01
@@ -142,7 +141,6 @@ steps:
       dag: data-processor
       params: "type=daily"
 ---
-
 name: data-processor
 params:
   - name: type
@@ -338,12 +336,11 @@ steps:
 
 ### Router Steps
 
-Route execution to different steps based on a runtime value. Router steps evaluate an expression and run all target steps whose pattern matches. Requires `type: graph`.
+Route execution to different steps based on a runtime value. Router steps evaluate an expression and run all target steps whose pattern matches. Router steps run in graph workflows, which is the default.
 
 #### Basic Routing
 
 ```yaml
-type: graph
 env:
   - STATUS: production
 steps:
@@ -367,7 +364,6 @@ steps:
 Use the `re:` prefix for pattern matching:
 
 ```yaml
-type: graph
 env:
   - INPUT: apple_pie
 steps:
@@ -391,7 +387,6 @@ steps:
 Use `re:.*` as a default fallback:
 
 ```yaml
-type: graph
 env:
   - INPUT: unknown_value
 steps:
@@ -415,7 +410,6 @@ steps:
 A single pattern can dispatch to multiple steps:
 
 ```yaml
-type: graph
 env:
   - INPUT: trigger
 steps:
@@ -438,7 +432,6 @@ steps:
 Use a previous step's output as the router value:
 
 ```yaml
-type: graph
 steps:
   - id: check_status
     run: printf 'status=success\n' >> "$DAGU_OUTPUT_FILE"
@@ -466,7 +459,6 @@ steps:
 Nest routers for multi-level decisions:
 
 ```yaml
-type: graph
 env:
   - CATEGORY: electronics
   - SUBCATEGORY: phone
@@ -499,7 +491,7 @@ steps:
 
 > **Evaluation order**: Exact matches are checked first, then regex patterns in alphabetical order, with catch-all (`re:.*`) last. All matching routes execute their targets, not just the first match.
 
-> **Constraints**: Router steps require `type: graph`. Each step can only be targeted by one route across all routers.
+> **Constraints**: Router steps run in graph workflows. Each step can only be targeted by one route across all routers.
 
 ## Repetition
 

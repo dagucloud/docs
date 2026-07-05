@@ -465,8 +465,6 @@ Supported source shapes:
 ## Complete Example
 
 ```yaml
-type: graph
-
 kubernetes:
   context: production
   namespace: batch

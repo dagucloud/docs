@@ -55,8 +55,6 @@ This DAG starts a container and calls `codex --version`. It does not call the
 Codex API.
 
 ```yaml
-type: graph
-
 harnesses:
   shell:
     binary: sh
@@ -116,8 +114,6 @@ Use root-level `container:` when ordinary command steps and Codex should share
 the same container filesystem and toolchain.
 
 ```yaml
-type: graph
-
 container:
   image: dagu-codex-runner:local
   pull_policy: never

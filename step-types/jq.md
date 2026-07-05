@@ -44,7 +44,6 @@ steps:
 Read JSON from a file path. The path is evaluated at runtime, so declared step outputs work:
 
 ```yaml
-type: graph
 steps:
   - id: producer
     run: |
@@ -66,7 +65,6 @@ steps:
 **File URL via `with.data`**
 
 ```yaml
-type: graph
 steps:
   - id: producer
     run: |

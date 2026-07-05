@@ -51,7 +51,6 @@ See [Queue Configuration](/server-admin/queues) for the full `enqueue` and `dequ
 Use `action: dag.enqueue` to queue another DAG from a running workflow without waiting for that child DAG to finish:
 
 ```yaml
-type: graph
 params:
   - name: customer_id
     required: true

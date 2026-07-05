@@ -50,7 +50,6 @@ Push-back input names are not special-cased. `FEEDBACK` is common, but any key c
 Approved inputs become environment variables in subsequent steps:
 
 ```yaml
-type: graph
 steps:
   - id: generate_plan
     run: ./generate-migration-plan.sh
@@ -70,7 +69,6 @@ steps:
 Use `call` with `approval` to gate a multi-step workflow behind a single approval point. The sub-DAG runs to completion first, then the step waits for review:
 
 ```yaml
-type: graph
 steps:
   - id: run_integration_tests
     action: dag.run
@@ -92,7 +90,6 @@ This pattern is useful when you want human review over a complex operation that 
 The reverse pattern: approve first, then trigger multi-step execution. Place approval on the step *before* a `call`:
 
 ```yaml
-type: graph
 steps:
   - id: review_config
     run: ./validate-deploy-config.sh production

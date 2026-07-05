@@ -28,8 +28,6 @@ Use root-level `container:` when command steps and harness steps should share
 the same filesystem and toolchain.
 
 ```yaml
-type: graph
-
 container:
   image: alpine:3.20
   pull_policy: missing
@@ -70,8 +68,6 @@ Use step-level `container:` when one harness attempt should receive its own
 container, mounts, and credentials.
 
 ```yaml
-type: graph
-
 harnesses:
   shell:
     binary: sh

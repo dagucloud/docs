@@ -71,7 +71,6 @@ steps:
 Control how many steps run concurrently:
 
 ```yaml
-type: graph
 max_active_steps: 2  # Run up to 2 steps in parallel
 
 steps:
@@ -205,7 +204,6 @@ steps:
 ### Parallel with Dependencies
 
 ```yaml
-type: graph
 steps:
   - id: setup
     run: echo "Setting up"

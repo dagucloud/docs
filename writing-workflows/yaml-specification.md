@@ -21,7 +21,6 @@ A workflow file defines one DAG. If `name` is omitted, Dagu uses the file name w
 ## Typical Workflow
 
 ```yaml
-name: daily_report
 description: Build a weekday report
 labels:
   env: prod
@@ -33,7 +32,6 @@ schedule:
 catchup_window: 6h
 overlap_policy: latest
 
-type: graph
 max_active_steps: 4
 timeout_sec: 3600
 
@@ -108,8 +106,6 @@ Unknown top-level fields are rejected. The accepted top-level fields are listed 
 `graph` schedules steps from their `depends` relationships.
 
 ```yaml
-type: graph
-
 steps:
   - id: fetch_a
     run: curl https://api.example.com/a
@@ -653,8 +649,6 @@ handler_on:
 Steps can be an array or a map. Array form is recommended because it preserves order clearly.
 
 ```yaml
-type: graph
-
 steps:
   - id: first
     run: echo "first"
@@ -667,8 +661,6 @@ steps:
 Map form is accepted:
 
 ```yaml
-type: graph
-
 steps:
   first:
     run: echo "first"
@@ -882,8 +874,6 @@ Inside each parallel child run, `ITEM` is set to the current item.
 Declared outputs publish validated values for later steps:
 
 ```yaml
-type: graph
-
 steps:
   - id: get_version
     run: |
@@ -899,8 +889,6 @@ steps:
 Use one declared output name per strict reference:
 
 ```yaml
-type: graph
-
 steps:
   - id: get_config
     run: cat config.json
@@ -1081,8 +1069,6 @@ steps:
 Declared step outputs are referenced through the `steps` namespace:
 
 ```yaml
-type: graph
-
 steps:
   - id: get_config
     run: |
@@ -1137,7 +1123,6 @@ See [Runtime Context and Variables](/writing-workflows/runtime-variables) for th
 ## Complete Example
 
 ```yaml
-name: production_etl
 description: Daily ETL pipeline for production data
 labels:
   env: production
@@ -1176,7 +1161,6 @@ preconditions:
   - condition: "`date +%u`"
     expected: "re:[1-5]"
 
-type: graph
 
 tools:
   - astral-sh/uv@0.11.14

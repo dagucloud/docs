@@ -390,7 +390,6 @@ flowchart TD
 ### Routing Based on Value
 
 ```yaml
-type: graph
 env:
   - STATUS: production
 steps:
@@ -432,7 +431,6 @@ flowchart TD
 ### Routing Based on Step Output
 
 ```yaml
-type: graph
 steps:
   - id: check_status
     run: printf 'status=success\n' >> "$DAGU_OUTPUT_FILE"
@@ -572,7 +570,6 @@ steps:
       dag: data-processor
       params: "type=daily"
 ---
-
 name: data-processor
 params:
   - name: type
@@ -1238,7 +1235,6 @@ steps:
 ### Step ID References
 
 ```yaml
-type: graph
 tools:
   - astral-sh/uv@0.11.14
 
@@ -2355,7 +2351,6 @@ Enable OpenTelemetry tracing for observability.
 ### Execution Control
 
 ```yaml
-type: graph
 max_active_steps: 5         # Max 5 parallel steps
 queue: "compute-queue"    # Assign to queue for concurrency control
 delay_sec: 10              # 10 second initial delay

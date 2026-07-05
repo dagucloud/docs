@@ -114,7 +114,6 @@ On first launch against an empty DAGs directory (`~/.config/dagu/dags/`), Dagu c
 ### Dependencies
 
 ```yaml
-type: graph
 steps:
   - id: extract
     run: ./extract.sh

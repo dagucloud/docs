@@ -65,8 +65,6 @@ Use root-level `container:` when ordinary steps and `harness.run` should share
 one workflow container:
 
 ```yaml
-type: graph
-
 container:
   image: alpine:3.20
   pull_policy: missing
@@ -107,8 +105,6 @@ Use step-level `container:` when the harness attempt should get its own image,
 mounts, and environment:
 
 ```yaml
-type: graph
-
 harnesses:
   shell:
     binary: sh

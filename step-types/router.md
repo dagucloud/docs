@@ -5,7 +5,6 @@ Route execution to different steps based on a value. Routers are graph-only cont
 ## Basic Usage
 
 ```yaml
-type: graph
 env:
   - INPUT: exact_value
 steps:
@@ -33,7 +32,6 @@ When `INPUT=exact_value`, only `route_a` runs. The `route_b` step is skipped.
 Routes are matched against `with.value`.
 
 ```yaml
-type: graph
 env:
   - STATUS: success_code
 steps:
@@ -72,7 +70,6 @@ Rules:
 Router target steps implicitly depend on the router step. You normally do not need to repeat `depends: router`.
 
 ```yaml
-type: graph
 steps:
   - id: setup
     run: |

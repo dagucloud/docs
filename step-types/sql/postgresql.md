@@ -373,7 +373,6 @@ Advisory locks are session-level and automatically released when the step comple
 ### Distributed Workflow Example
 
 ```yaml
-name: distributed-etl
 params:
   - REGION: us-east-1
 
@@ -411,7 +410,6 @@ steps:
 ## Complete Example
 
 ```yaml
-name: etl-pipeline
 env:
   - DATABASE_URL: "postgres://etl:secret@db.example.com:5432/analytics"
 

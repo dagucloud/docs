@@ -273,7 +273,6 @@ steps:
 Dependent steps see the actual status unless `mark_success` is used:
 
 ```yaml
-type: graph
 steps:
   - id: step_a
     run: exit 1

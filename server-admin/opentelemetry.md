@@ -15,7 +15,6 @@ When OpenTelemetry is enabled, Dagu creates:
 ### Basic Configuration
 
 ```yaml
-name: my-workflow
 otel:
   enabled: true
   endpoint: "localhost:4317"  # OTLP gRPC endpoint
@@ -137,7 +136,6 @@ otel:
     deployment.environment: "production"
 
 # my-workflow.yaml (inherits base configuration)
-name: my-workflow
 otel:
   resource:
     service.name: "dagu-${context.dag.name}"  # Override specific attributes

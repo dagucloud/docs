@@ -45,7 +45,6 @@ Use letters, numbers, underscores, and hyphens. Avoid spaces, slashes, dots, and
 A workflow belongs to a named workspace when its DAG labels include `workspace=<name>`:
 
 ```yaml
-name: daily-report
 labels:
   - workspace=ops
   - team=platform

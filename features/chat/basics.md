@@ -197,8 +197,6 @@ steps:
 Steps automatically inherit session history from their dependencies:
 
 ```yaml
-type: graph
-
 steps:
   - id: setup
     action: chat.completion
@@ -388,8 +386,6 @@ steps:
 Use a chat step to classify input, then route based on the response:
 
 ```yaml
-type: graph
-
 params:
   - USER_REQUEST: "The app crashes on startup"
 

@@ -13,8 +13,6 @@ The producing step must have an `id`, declare each output name in `outputs`, and
 ## Basic Example
 
 ```yaml
-type: graph
-
 steps:
   - id: get_version
     run: |

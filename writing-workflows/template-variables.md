@@ -120,8 +120,6 @@ Short forms such as `${run.id}`, `${dag.name}`, `${paths.log_file}`, and `${step
 Use `${steps.step_id.outputs.name}` to read a declared output from a completed dependency.
 
 ```yaml
-type: graph
-
 steps:
   - id: build
     run: |

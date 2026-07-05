@@ -251,8 +251,6 @@ When a DAG is triggered via a [webhook](/server-admin/authentication/webhooks), 
 Access payload fields directly using Dagu's JSON field access syntax:
 
 ```yaml
-name: webhook-triggered-dag
-type: graph
 steps:
   - id: deploy
     run: |

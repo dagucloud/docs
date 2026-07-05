@@ -36,8 +36,6 @@ If `message` does not end with a newline, Dagu appends one.
 `message` is evaluated like other executor configuration fields, so it can reference params, DAG environment variables, secrets, and outputs from previous steps.
 
 ```yaml
-type: graph
-
 params:
   - ENVIRONMENT: staging
 
@@ -61,8 +59,6 @@ steps:
 Because `log` writes to stdout, you can capture the message with `output:` and reuse it later.
 
 ```yaml
-type: graph
-
 params:
   - VERSION: v1.2.3
 

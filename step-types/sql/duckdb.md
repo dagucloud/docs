@@ -11,8 +11,6 @@ Use `action: duckdb@v1`. Older built-in forms such as `duckdb.query` and `duckdb
 ## Basic Usage
 
 ```yaml
-type: graph
-
 steps:
   - id: query
     action: duckdb@v1
@@ -38,8 +36,6 @@ Use `${steps.query.outputs.result}` for small results such as counts, IDs, statu
 Use `database` to run SQL against an existing DuckDB file:
 
 ```yaml
-type: graph
-
 steps:
   - id: query_existing_db
     action: duckdb@v1
@@ -52,8 +48,6 @@ steps:
 Use `workdir` when the database path or files referenced by SQL should be resolved relative to a directory:
 
 ```yaml
-type: graph
-
 steps:
   - id: query_project_db
     action: duckdb@v1
@@ -86,8 +80,6 @@ steps:
 For tightly coupled operations, run multiple SQL statements in one action. This keeps them in one DuckDB process and lets you control the transaction boundary:
 
 ```yaml
-type: graph
-
 steps:
   - id: update_metrics
     action: duckdb@v1
@@ -112,8 +104,6 @@ steps:
 For separate DAG visibility, use multiple action steps against the same database file and connect them with `depends`:
 
 ```yaml
-type: graph
-
 steps:
   - id: insert_rows
     action: duckdb@v1
@@ -255,8 +245,6 @@ In distributed shared-nothing mode, an artifact path may be worker-local while t
 If the query result should be stored as a file instead of action output, call the pinned DuckDB CLI directly and attach stdout to an artifact:
 
 ```yaml
-type: graph
-
 tools:
   - duckdb/duckdb@v1.5.2
 

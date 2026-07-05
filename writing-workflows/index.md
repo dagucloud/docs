@@ -128,7 +128,6 @@ DAGs automatically inherit these settings:
 
 ```yaml
 # my-workflow.yaml
-
 # Inherits all base settings
 # Can override specific values:
 env:

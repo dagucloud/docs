@@ -105,8 +105,6 @@ steps:
 ### Multi-turn Session
 
 ```yaml
-type: graph
-
 steps:
   - id: setup
     action: chat.completion

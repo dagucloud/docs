@@ -542,7 +542,6 @@ A production-ready base configuration:
 
 ```yaml
 # ~/.config/dagu/base.yaml
-
 # Environment defaults
 env:
   - TZ=UTC
