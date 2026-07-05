@@ -30,7 +30,7 @@ steps:
 | `local` | (none) | `http://localhost:11434/v1` |
 
 ::: tip
-The `local` provider works with any OpenAI-compatible API including Ollama, vLLM, and LM Studio. Provider aliases `ollama`, `vllm`, and `llama` also map to `local`.
+The parser also accepts provider aliases: `google` maps to `gemini`; `ollama`, `vllm`, and `llama` map to `local`; and `zhipu`, `zhipuai`, and `glm` map to `zai`.
 :::
 
 For detailed setup and troubleshooting, especially for Ollama base URLs and Web UI agent configuration, see [Local AI](/features/chat/local-ai). For OpenCode subscription setup and available models, see [OpenCode](/features/chat/opencode).
@@ -458,7 +458,7 @@ The `classify` step analyzes the request and outputs a category. The router then
 
 ## Error Handling
 
-The chat executor automatically retries on transient errors:
+The chat executor configures each provider HTTP client with these retry settings for transient errors:
 
 - **Timeout**: 5 minutes per request
 - **Max retries**: 3
@@ -467,6 +467,8 @@ The chat executor automatically retries on transient errors:
 - **Backoff multiplier**: 2.0
 
 Retryable errors include rate limits (429), server errors (5xx), and network timeouts.
+
+Dagu also wraps each logical chat request with a bounded retry layer for transient response and stream interruptions. That wrapper uses 3 attempts, a 1 second initial delay, a 2 second maximum delay, and the same 2.0 backoff multiplier.
 
 ## Model Fallback
 

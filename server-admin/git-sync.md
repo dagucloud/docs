@@ -66,6 +66,17 @@ git_sync:
     ssh_passphrase: ${SSH_PASSPHRASE}
 ```
 
+For SSH servers that require a username other than `git`, put the username in
+the repository URL:
+
+```yaml
+git_sync:
+  repository: deploy@git.example.com:your-org/dags.git
+  auth:
+    type: ssh
+    ssh_key_path: /home/user/.ssh/id_ed25519
+```
+
 ## Everyday Workflow
 
 Most teams use Git Sync in this order:

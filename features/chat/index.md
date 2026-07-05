@@ -68,11 +68,12 @@ steps:
 | `gemini` | `GOOGLE_API_KEY` | Gemini 1.5, Gemini 2 |
 | `openrouter` | `OPENROUTER_API_KEY` | 100+ models via OpenRouter |
 | `zai` | `ZAI_API_KEY` | GLM-5, GLM-4.6 |
+| `opencode` | `OPENCODE_API_KEY` | Kimi, DeepSeek, GLM, Qwen, MiMo |
 | `local` | (none) | Ollama, vLLM, LM Studio (OpenAI-compatible) |
 
 ## Key Features
 
-- **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, Z.AI, and local models
+- **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, OpenRouter, Z.AI, OpenCode, and local models
 - **Session History** - Automatic message inheritance between dependent steps
 - **Extended Thinking** - Enable reasoning mode for complex tasks (Anthropic, OpenAI, Gemini)
 - **Secret Masking** - Automatic masking of sensitive values before sending to LLM

@@ -5,7 +5,7 @@ The chat executor supports function calling (also known as tool use), allowing t
 ## How It Works
 
 1. Define tool DAGs with `name`, `description`, and `params`
-2. Reference tools in `llm.tools` array
+2. Reference tools in the `with.tools` array
 3. LLM automatically calls tools when needed
 4. Tool results feed back into session
 5. Process repeats until termination condition is met

@@ -529,7 +529,7 @@ steps:
             Summarize ${env.REPORT_PATH}
 ```
 
-Supported provider values in the schema are `openai`, `anthropic`, `gemini`, `google`, `openrouter`, `local`, `ollama`, `vllm`, and `llama`.
+Supported provider values are `openai`, `openai-codex`, `anthropic`, `gemini`, `google`, `openrouter`, `zai`, `zhipu`, `zhipuai`, `glm`, `opencode`, `local`, `ollama`, `vllm`, and `llama`.
 
 LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`.
 

@@ -448,7 +448,7 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 
 ### Git Sync
 - `DAGU_GITSYNC_ENABLED` - Enable git sync (default: `false`)
-- `DAGU_GITSYNC_REPOSITORY` - Remote repository URL
+- `DAGU_GITSYNC_REPOSITORY` - Remote repository URL. For SSH servers that require a username other than `git`, include it in the URL, for example `deploy@git.example.com:org/dags.git`.
 - `DAGU_GITSYNC_BRANCH` - Branch to sync (default: `main`)
 - `DAGU_GITSYNC_PATH` - Subdirectory in repo (default: `""`)
 - `DAGU_GITSYNC_PUSH_ENABLED` - Enable push operations (default: `true`)

@@ -124,6 +124,18 @@ steps:
 ```
 
 Use `ssh_passphrase` when the private key is encrypted.
+Use `username` when the SSH username is not embedded in the repository URL.
+
+```yaml
+steps:
+  - id: checkout_over_ssh
+    action: git.checkout
+    with:
+      repository: ssh://git.example.com/example/private-repo.git
+      path: ./repos/private-repo
+      username: deploy
+      ssh_key_path: /home/dagu/.ssh/deploy_key
+```
 
 ## Configuration
 
@@ -135,7 +147,7 @@ Use `ssh_passphrase` when the private key is encrypted.
 | `depth` | integer | No | `0` | Shallow clone/fetch depth. `0` means full history. |
 | `force` | boolean | No | `false` | Force checkout when the existing worktree has local changes. |
 | `token` | string | No | - | HTTPS token for repository authentication. |
-| `username` | string | No | `git` when `password` is set | HTTPS username for password authentication. |
+| `username` | string | No | `git` when needed | Username for HTTPS password authentication or SSH key authentication. |
 | `password` | string | No | - | HTTPS password for repository authentication. |
 | `ssh_key_path` | string | No | - | Path to an SSH private key. |
 | `ssh_passphrase` | string | No | - | Passphrase for `ssh_key_path`. |
