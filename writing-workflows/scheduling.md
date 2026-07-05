@@ -134,38 +134,15 @@ Use `profile` when the same DAG file should have different schedules in differen
 
 ```yaml
 schedule:
-  - cron: "*/20 * * * *"
+  - expression: "*/20 * * * *"
     profile: prod
-  - cron: "30 */2 * * *"
+  - expression: "30 */2 * * *"
     profile: dev
 steps:
   - run: ./sync-data.sh
 ```
 
-You can also set `profile` once on the `schedule` map. That value is inherited by `start`, `stop`, and `restart` entries that do not set their own `profile`:
-
-```yaml
-schedule:
-  profile: prod
-  start:
-    - "*/20 * * * *"
-    - cron: "0 2 * * *"
-      profile: dev
-  stop: "0 18 * * *"
-  restart: "0 12 * * *"
-steps:
-  - run: ./sync-data.sh
-```
-
-`cron` is an alias for `expression` in schedule objects:
-
-```yaml
-schedule:
-  - expression: "0 2 * * *"
-    profile: prod
-```
-
-`profile` is an activation filter. The scheduler evaluates a profile-scoped entry only when it matches the DAG's effective default runtime profile from the server-side DAG settings. Unscoped schedule entries are always active. If the DAG has no default runtime profile, profile-scoped entries are ignored. An entry-level `profile` overrides the `schedule.profile` inherited value.
+`profile` is an activation filter. The scheduler evaluates a profile-scoped entry only when it matches the DAG's effective default runtime profile from the server-side DAG settings. Unscoped schedule entries are always active. If the DAG has no default runtime profile, profile-scoped entries are ignored.
 
 The `profile` field does not override the runtime profile used by the run. It only controls whether the schedule entry is active for that scheduler environment.
 
