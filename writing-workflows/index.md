@@ -205,7 +205,7 @@ steps:
 
   - id: process
     parallel: [users, orders, products]
-    run: uv run --python 3.13.9 python process.py --type="${env.ITEM}" --date="${env.DATE}"
+    run: uv run --python 3.13.9 python process.py --type="${ITEM}" --date="${env.DATE}"
     depends: validate
 
   - id: report
@@ -241,7 +241,7 @@ steps:
     with:
       dag: process-file
 
-      params: "file=${env.ITEM}"
+      params: "file=${ITEM}"
 ---
 # A child workflow for processing each file
 # This can be in a same file separated by `---` or in a separate file

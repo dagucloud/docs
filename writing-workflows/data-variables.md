@@ -205,7 +205,7 @@ Publish a small artifact path as an output only when a later step needs the path
 steps:
   - id: write_report
     run: |
-      path="${env.DAG_RUN_ARTIFACTS_DIR}/reports/report.md"
+      path="${context.paths.artifacts_dir}/reports/report.md"
       mkdir -p "$(dirname "$path")"
       ./generate-report > "$path"
       printf 'report_path=%s\n' "$path" >> "$DAGU_OUTPUT_FILE"

@@ -19,7 +19,7 @@ steps:
   - parallel:
       items: ${env.FILE_LIST}
       max_concurrent: 3  # Limit parallel I/O
-    run: echo "Processing file ${env.ITEM}"
+    run: echo "Processing file ${ITEM}"
 ```
 
 For controlling concurrent DAG instances, use global queues (see below).

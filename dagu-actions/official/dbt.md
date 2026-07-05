@@ -19,8 +19,8 @@ steps:
       requirements:
         - dbt-duckdb==1.10.1
       command: build
-      targetPath: ${env.DAG_RUN_ARTIFACTS_DIR}/dbt-target
-      logPath: ${env.DAG_RUN_ARTIFACTS_DIR}/dbt-logs
+      targetPath: ${context.paths.artifacts_dir}/dbt-target
+      logPath: ${context.paths.artifacts_dir}/dbt-logs
 
   - id: print_summary
     run: |

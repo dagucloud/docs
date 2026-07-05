@@ -16,7 +16,7 @@ steps:
     with:
       overwrite: true
       args: >-
-        -i input.mov -c:v libx264 -c:a aac "${env.DAG_RUN_ARTIFACTS_DIR}/converted/output.mp4"
+        -i input.mov -c:v libx264 -c:a aac "${context.paths.artifacts_dir}/converted/output.mp4"
 ```
 
 `args` is the FFmpeg or ffprobe argument string excluding the executable name. It is parsed into argv by the action wrapper, not by a shell. For exact argument boundaries, pass a JSON array string:
@@ -76,7 +76,7 @@ steps:
 | `truncated` | Object with `stdout` and `stderr` booleans. |
 | `error` | Error object when validation or process startup fails. |
 
-Do not use action outputs to carry large media data. Write media files under `${env.DAG_RUN_ARTIFACTS_DIR}`, a shared mounted path, or object storage.
+Do not use action outputs to carry large media data. Write media files under `${context.paths.artifacts_dir}`, a shared mounted path, or object storage.
 
 ## Related
 

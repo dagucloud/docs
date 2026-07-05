@@ -30,7 +30,7 @@ steps:
 ```
 
 ::: tip Output Destination
-Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture small results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file. When `output_file` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the file appears as a run artifact.
+Query results are written to **stdout** by default. Use `output: VAR_NAME` to capture small results into an environment variable for use in subsequent steps. For large results, use `streaming: true` with `output_file` to write directly to a file. When `output_file` references `${context.paths.artifacts_dir}`, artifact storage is auto-enabled and the file appears as a run artifact.
 :::
 
 Use `postgres.query` or `sqlite.query` for built-in SQL queries. Use `postgres.import` or `sqlite.import` to load CSV, TSV, or JSONL files into a table.
@@ -250,7 +250,7 @@ steps:
     with:
       dsn: "${env.DATABASE_URL}"
       streaming: true
-      output_file: "${env.DAG_RUN_ARTIFACTS_DIR}/export.jsonl"
+      output_file: "${context.paths.artifacts_dir}/export.jsonl"
       output_format: jsonl    # Use jsonl or csv for streaming
       query: "SELECT * FROM large_table"
 ```
@@ -260,7 +260,7 @@ steps:
 - Avoid `output_format: json` - it buffers all rows in memory before writing
 - Set `max_rows` as a safety limit for unbounded queries
 - Use `streaming: true` with `output_file` to write directly to disk
-- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${env.DAG_RUN_ARTIFACTS_DIR}/export.jsonl`; this reference auto-enables artifact storage.
+- `output_file` is an explicit target path. Existing files at that path can be replaced, so prefer run-scoped paths such as `${context.paths.artifacts_dir}/export.jsonl`; this reference auto-enables artifact storage.
 :::
 
 ## Error Handling
@@ -298,7 +298,7 @@ steps:
     with:
       dag: run-migration
       params:
-        SCHEMA: ${env.ITEM}
+        SCHEMA: ${ITEM}
 ---
 name: run-migration
 
@@ -330,7 +330,7 @@ steps:
     with:
       dag: run-migration
       params:
-        DSN: ${env.ITEM}
+        DSN: ${ITEM}
 ---
 name: run-migration
 

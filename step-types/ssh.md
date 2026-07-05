@@ -285,7 +285,7 @@ steps:
     with:
       dag: ssh-command
       params:
-        HOST: ${env.ITEM}
+        HOST: ${ITEM}
 ---
 name: ssh-command
 
@@ -319,7 +319,7 @@ steps:
     with:
       dag: ssh-command
       params:
-        HOST: ${env.ITEM}
+        HOST: ${ITEM}
         USER: ${params.SSH_USER}
 ---
 name: ssh-command

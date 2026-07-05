@@ -157,7 +157,7 @@ otel:
 
 steps:
   - id: extract
-    run: echo "Extracting from ${env.SOURCE}"
+    run: echo "Extracting from ${params.SOURCE}"
     output: EXTRACTED_DATA
   - id: transform
     run: echo "Transforming data" && echo "/tmp/data.csv"

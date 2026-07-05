@@ -869,7 +869,7 @@ steps:
   - action: dag.run
     with:
       dag: file_processor
-      params: "file=${env.ITEM}"
+      params: "file=${ITEM}"
     parallel:
       items: [file1.csv, file2.csv, file3.csv]
       max_concurrent: 2
@@ -1112,7 +1112,7 @@ Common structured references:
 | `${context.trigger.type}` | Trigger type. |
 | `${context.paths.log_file}` | Path to the DAG-run log file. |
 | `${context.paths.work_dir}` | Per-run isolated work directory path. |
-| `${context.paths.artifacts_dir}` | Per-run artifact directory when artifacts are enabled. |
+| `${context.paths.artifacts_dir}` | Per-run artifact directory. References auto-enable artifact storage unless disabled explicitly. |
 | `${context.paths.step_stdout_file}` | Current step stdout file path. |
 | `${context.paths.step_stderr_file}` | Current step stderr file path. |
 | `${context.paths.step_output_file}` | Current step output file path for declared outputs. |
@@ -1201,7 +1201,7 @@ steps:
     action: dag.run
     with:
       dag: transform_module
-      params: "type=${env.ITEM} input=${steps.extract_data.outputs.raw_data_path}"
+      params: "type=${ITEM} input=${steps.extract_data.outputs.raw_data_path}"
     parallel:
       items: [customers, orders, products]
       max_concurrent: 2

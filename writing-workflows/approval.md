@@ -362,7 +362,7 @@ Execute custom logic when the workflow enters wait status:
 handler_on:
   wait:
     run: |
-      echo "Waiting steps: ${env.DAG_WAITING_STEPS}"
+      echo "Waiting steps: $DAG_WAITING_STEPS"
       curl -X POST https://slack.com/webhook \
         -d '{"text": "Approval required for ${context.dag.name}"}'
 

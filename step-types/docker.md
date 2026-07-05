@@ -655,7 +655,7 @@ steps:
     with:
       dag: run-tests
       params:
-        IMAGE: ${env.ITEM}
+        IMAGE: ${ITEM}
 ---
 name: run-tests
 
@@ -683,7 +683,7 @@ steps:
     with:
       dag: build-target
       params:
-        PLATFORM: ${env.ITEM}
+        PLATFORM: ${ITEM}
 ---
 name: build-target
 

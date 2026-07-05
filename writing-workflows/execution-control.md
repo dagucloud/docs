@@ -13,7 +13,7 @@ steps:
   - action: dag.run
     with:
       dag: file-processor
-      params: "file=${env.ITEM}"
+      params: "file=${ITEM}"
     parallel:
       items:
         - file1.csv
@@ -38,7 +38,7 @@ steps:
   - action: dag.run
     with:
       dag: file-processor
-      params: "file=${env.ITEM}"
+      params: "file=${ITEM}"
     parallel:
       items: ${env.FILE_LIST}
       max_concurrent: 2  # Process max 2 files at a time
@@ -61,7 +61,7 @@ steps:
   - action: dag.run
     with:
       dag: file-processor
-      params: "file=${env.ITEM}"
+      params: "file=${ITEM}"
     parallel: ${steps.list_files.outputs.files}
     depends: list_files
 ```

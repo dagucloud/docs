@@ -24,7 +24,7 @@ steps:
 | `silent` | Return body only (suppress status/headers on success) | `true` |
 | `debug` | Enable debug mode (logs request/response details) | `true` |
 | `format` | Stdout format. `"json"` writes a structured JSON object to stdout. | `"json"` |
-| `output` | File path to write the response body to instead of stdout. | `"${env.DAG_RUN_ARTIFACTS_DIR}/data.bin"` |
+| `output` | File path to write the response body to instead of stdout. | `"${context.paths.artifacts_dir}/data.bin"` |
 | `skip_tls_verify` | Skip TLS certificate verification | `true` |
 
 ## Examples
@@ -105,7 +105,7 @@ steps:
 
 ### JSON Output Mode
 
-Use `format: "json"` when the response body is JSON and later steps should consume a structured stdout object:
+Use `format: "json"` only when later steps should consume the HTTP response through structured stdout:
 
 ```yaml
 steps:
@@ -119,9 +119,7 @@ steps:
     output: RESPONSE
 ```
 
-The legacy `json: true` boolean is still supported and behaves identically to `format: "json"`.
-
-On a successful response with `silent: true`, stdout contains only the parsed response body:
+The response body must be valid JSON. On a successful response with `silent: true`, stdout contains only the parsed body:
 
 ```json
 {
@@ -141,7 +139,7 @@ Without `silent` (or on a non-2xx response), stdout also includes status code an
 }
 ```
 
-When `with.output` is not set, JSON output mode parses the response body. If the response body is not valid JSON, the step fails while writing structured stdout.
+If the response body is not valid JSON, the step fails.
 
 ### File Output Mode
 
@@ -154,40 +152,20 @@ steps:
     with:
       method: GET
       url: https://example.com/install.sh
-      output: "${env.DAG_RUN_ARTIFACTS_DIR}/install.sh"
-      silent: true
+      output: "${context.paths.artifacts_dir}/install.sh"
 
   - id: run_script
-    run: sh "${env.DAG_RUN_ARTIFACTS_DIR}/install.sh"
+    run: sh "${context.paths.artifacts_dir}/install.sh"
     depends: download_script
 ```
 
 `with.output` is the file target for `http.request`. The top-level `output:` field still captures stdout into a step output variable for later steps.
 
-`format: "json"` and legacy `json: true` can be combined with `with.output`. In that case, the successful response body is streamed to the file as raw bytes and stdout contains JSON metadata with the `output` path instead of embedding or validating the body:
-
-```yaml
-steps:
-  - id: download_data
-    action: http.request
-    with:
-      method: GET
-      url: https://example.com/data.json
-      output: "${env.DAG_RUN_ARTIFACTS_DIR}/data.json"
-      format: "json"
-      silent: true
-    output: DOWNLOAD_METADATA
-```
-
-```json
-{
-  "output": "/path/to/artifacts/data.json"
-}
-```
+`with.output` always writes only the response body bytes to the file. Status lines and headers are stdout output only.
 
 Relative `with.output` paths resolve from the step working directory. Parent directories are created automatically. Existing files are replaced atomically only after a successful 2xx response; non-2xx responses fail the step and do not replace the target file.
 
-When `with.output` references `DAG_RUN_ARTIFACTS_DIR`, artifact storage is auto-enabled and the downloaded file appears as a run artifact.
+When `with.output` references `${context.paths.artifacts_dir}`, artifact storage is auto-enabled and the downloaded file appears as a run artifact.
 
 ### Exit Codes
 
@@ -260,7 +238,7 @@ steps:
     with:
       dag: http-check
       params:
-        URL: ${env.ITEM}
+        URL: ${ITEM}
 ---
 name: http-check
 
@@ -289,7 +267,7 @@ steps:
     with:
       dag: send-webhook
       params:
-        URL: ${env.ITEM}
+        URL: ${ITEM}
 ---
 name: send-webhook
 

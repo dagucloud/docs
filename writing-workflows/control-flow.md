@@ -53,7 +53,7 @@ steps:
     action: dag.run
     with:
       dag: workflows/extract.yaml
-      params: "SOURCE=production"
+      params: "source=production"
 
   - id: transform
     action: dag.run
@@ -140,7 +140,7 @@ steps:
   - action: dag.run
     with:
       dag: data-processor
-      params: "TYPE=daily"
+      params: "type=daily"
 ---
 
 name: data-processor
@@ -172,7 +172,7 @@ steps:
     action: dag.run
     with:
       dag: worker
-      params: "file=${env.ITEM}"
+      params: "file=${ITEM}"
     parallel:
       items: ${steps.discover_tasks.outputs.tasks}
       max_concurrent: 1
@@ -203,7 +203,7 @@ steps:
     action: dag.run
     with:
       dag: worker
-      params: "chunk=${env.ITEM}"
+      params: "chunk=${ITEM}"
     parallel:
       items: ${steps.split_chunks.outputs.chunks}
       max_concurrent: 3

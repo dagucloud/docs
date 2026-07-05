@@ -2,7 +2,7 @@
 
 DAG run artifacts are arbitrary files written by a DAG run. They are separate from logs and step outputs.
 
-Dagu stores artifacts when artifact storage is enabled explicitly, or when a DAG references `DAG_RUN_ARTIFACTS_DIR`, uses an artifact action, or uses `stdout.artifact` / `stderr.artifact`.
+Dagu stores artifacts when artifact storage is enabled explicitly, or when a DAG references `${context.paths.artifacts_dir}`, uses an artifact action, or uses `stdout.artifact` / `stderr.artifact`.
 
 ## DAG Configuration
 
@@ -32,12 +32,12 @@ Supported fields:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `artifacts.enabled` | boolean | Explicitly enables or disables per-run artifact storage. When omitted, Dagu auto-enables storage for `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, and artifact stream outputs. |
+| `artifacts.enabled` | boolean | Explicitly enables or disables per-run artifact storage. When omitted, Dagu auto-enables storage for `${context.paths.artifacts_dir}` references, artifact actions, and artifact stream outputs. |
 | `artifacts.dir` | string | Optional base directory for this DAG's artifacts. When omitted, Dagu uses the global `paths.artifact_dir`. |
 
-`artifacts.dir` alone does not enable artifact storage for a DAG with no `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, or artifact stream outputs. Set `artifacts.enabled: true` when you need artifact storage active without one of those auto-enable triggers.
+`artifacts.dir` alone does not enable artifact storage for a DAG with no `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. Set `artifacts.enabled: true` when you need artifact storage active without one of those auto-enable triggers.
 
-If `artifacts.enabled: false` is set explicitly, using `artifact.*`, `stdout.artifact`, or `stderr.artifact` is invalid. References to `DAG_RUN_ARTIFACTS_DIR` also stay disabled, so the variable is not set.
+If `artifacts.enabled: false` is set explicitly, using `artifact.*`, `stdout.artifact`, or `stderr.artifact` is invalid. References to `${context.paths.artifacts_dir}` also stay disabled, so the artifact path is not set.
 
 ## Global Configuration
 
@@ -78,18 +78,16 @@ Example:
 
 ## Runtime Variable
 
-When artifact storage is active, Dagu sets `DAG_RUN_ARTIFACTS_DIR` for steps and lifecycle handlers. Artifact storage is active when enabled explicitly or auto-enabled by a `DAG_RUN_ARTIFACTS_DIR` reference, artifact action, or artifact stream output.
-
-In value-resolved fields, `${context.paths.artifacts_dir}` resolves to the same path after artifact storage is active. Keep using `DAG_RUN_ARTIFACTS_DIR` references, `artifact.*`, `stdout.artifact`, or `stderr.artifact` when you want artifact storage to be auto-enabled by the DAG definition.
+When artifact storage is active, `${context.paths.artifacts_dir}` resolves to the per-run artifact path in value-resolved fields, and Dagu sets `DAG_RUN_ARTIFACTS_DIR` for processes. Artifact storage is active when enabled explicitly or auto-enabled by a `${context.paths.artifacts_dir}` reference, artifact action, or artifact stream output.
 
 ```yaml
 steps:
   - id: write-files
     run: |
-      test -n "${env.DAG_RUN_ARTIFACTS_DIR}"
-      mkdir -p "${env.DAG_RUN_ARTIFACTS_DIR}/images"
-      printf 'hello\n' > "${env.DAG_RUN_ARTIFACTS_DIR}/hello.txt"
-      cp ./chart.png "${env.DAG_RUN_ARTIFACTS_DIR}/images/chart.png"
+      test -n "${context.paths.artifacts_dir}"
+      mkdir -p "${context.paths.artifacts_dir}/images"
+      printf 'hello\n' > "${context.paths.artifacts_dir}/hello.txt"
+      cp ./chart.png "${context.paths.artifacts_dir}/images/chart.png"
 ```
 
 Execution mode behavior:
@@ -117,9 +115,9 @@ steps:
   - id: build-sidecars
     run: |
       set -eu
-      mkdir -p "${env.DAG_RUN_ARTIFACTS_DIR}/reports" "${env.DAG_RUN_ARTIFACTS_DIR}/images"
-      cp ./charts/service-latency.png "${env.DAG_RUN_ARTIFACTS_DIR}/images/service-latency.png"
-      printf 'status=ok\n' > "${env.DAG_RUN_ARTIFACTS_DIR}/reports/metadata.txt"
+      mkdir -p "${context.paths.artifacts_dir}/reports" "${context.paths.artifacts_dir}/images"
+      cp ./charts/service-latency.png "${context.paths.artifacts_dir}/images/service-latency.png"
+      printf 'status=ok\n' > "${context.paths.artifacts_dir}/reports/metadata.txt"
     depends: build-report
 ```
 

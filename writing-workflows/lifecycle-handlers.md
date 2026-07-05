@@ -32,7 +32,7 @@ handler_on:
   abort:
     run: rollback.sh --lock "${env.LOCK_NAME}"
   wait:
-    run: notify-approvers.sh "${env.DAG_WAITING_STEPS}" # runs when waiting for approval
+    run: notify-approvers.sh "$DAG_WAITING_STEPS" # runs when waiting for approval
   exit:
     run: rm -rf "/tmp/${context.run.id}" # always runs
 
@@ -131,7 +131,7 @@ When using [approval steps](/writing-workflows/approval), notify stakeholders:
 ```yaml
 handler_on:
   wait:
-    run: notify-slack.sh "Approval needed: ${env.DAG_WAITING_STEPS}"
+    run: notify-slack.sh "Approval needed: $DAG_WAITING_STEPS"
 
 steps:
   - id: deploy_staging

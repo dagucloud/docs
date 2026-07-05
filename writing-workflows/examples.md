@@ -39,7 +39,7 @@ steps:
   - action: dag.run
     with:
       dag: processor
-      params: "item=${env.ITEM}"
+      params: "item=${ITEM}"
     parallel:
       items: [A, B, C]
       max_concurrent: 2
@@ -570,7 +570,7 @@ steps:
   - action: dag.run
     with:
       dag: data-processor
-      params: "TYPE=daily"
+      params: "type=daily"
 ---
 
 name: data-processor
@@ -746,7 +746,7 @@ steps:
   - action: dag.run
     with:
       dag: chunk-processor
-      params: "chunk=${env.ITEM}"
+      params: "chunk=${ITEM}"
     parallel:
       items: ${steps.split_data.outputs.chunks}
       max_concurrent: 5
@@ -1098,7 +1098,7 @@ steps:
     action: dag.run
     with:
       dag: worker
-      params: "region=${env.ITEM}"
+      params: "region=${ITEM}"
     parallel:
       items: [east, west, eu]
 ---
@@ -2472,7 +2472,7 @@ handler_on:
     run: echo "Final cleanup"
 steps:
   - id: validate_environment
-    run: echo "Validating environment: ${env.ENVIRONMENT}"
+    run: echo "Validating environment: ${params.ENVIRONMENT}"
 ```
 
 <a href="/writing-workflows/yaml-specification" class="learn-more">Learn more →</a>

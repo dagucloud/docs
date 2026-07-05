@@ -66,7 +66,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human approval. | `approval-step,review-step` |
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
-| `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `DAG_RUN_ARTIFACTS_DIR` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
+| `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PARAMS_JSON` | All steps & handlers | Compatibility alias for `DAGU_PARAMS_JSON`. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
@@ -123,16 +123,16 @@ steps:
       - build
 ```
 
-## Artifacts Directory (`DAG_RUN_ARTIFACTS_DIR`)
+## Artifacts Directory (`${context.paths.artifacts_dir}`)
 
-`DAG_RUN_ARTIFACTS_DIR` is set when the DAG enables artifact storage explicitly:
+`${context.paths.artifacts_dir}` is available, and `DAG_RUN_ARTIFACTS_DIR` is set for processes, when the DAG enables artifact storage explicitly:
 
 ```yaml
 artifacts:
   enabled: true
 ```
 
-It is also set when artifact storage is auto-enabled by a `DAG_RUN_ARTIFACTS_DIR` reference, `artifact.*`, `stdout.artifact`, or `stderr.artifact`. If `artifacts.enabled: false` is set explicitly, artifact actions and artifact stream outputs are invalid, and `DAG_RUN_ARTIFACTS_DIR` is not set.
+Artifact storage is also auto-enabled by a `${context.paths.artifacts_dir}` reference, `artifact.*`, `stdout.artifact`, or `stderr.artifact`. If `artifacts.enabled: false` is set explicitly, artifact actions and artifact stream outputs are invalid, and the artifact path is not set.
 
 The path uses the same per-run layout as `log_dir`:
 
@@ -149,7 +149,7 @@ Base directory resolution:
 Execution mode behavior:
 
 - **Local** and **shared-filesystem distributed** execution use the final artifact directory directly.
-- **Shared-nothing distributed** workers receive a temporary worker-local directory in `DAG_RUN_ARTIFACTS_DIR`. Dagu uploads its contents to the coordinator when the attempt finishes.
+- **Shared-nothing distributed** workers receive a temporary worker-local artifact directory. Dagu uploads its contents to the coordinator when the attempt finishes.
 
 Example:
 

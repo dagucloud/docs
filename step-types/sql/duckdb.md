@@ -202,7 +202,7 @@ steps:
 
 ## Export Data
 
-For large or typed datasets, write files directly from SQL. When the target path is under `${env.DAG_RUN_ARTIFACTS_DIR}`, Dagu stores it as a run artifact.
+For large or typed datasets, write files directly from SQL. When the target path is under `${context.paths.artifacts_dir}`, Dagu stores it as a run artifact.
 
 ```yaml
 steps:
@@ -216,7 +216,7 @@ steps:
           FROM source_table
           WHERE score >= 80
         )
-        TO '${env.DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
+        TO '${context.paths.artifacts_dir}/exports/selected_rows.parquet'
         (FORMAT parquet);
 ```
 
@@ -234,7 +234,7 @@ steps:
           FROM source_table
           WHERE score >= 80
         )
-        TO '${env.DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet'
+        TO '${context.paths.artifacts_dir}/exports/selected_rows.parquet'
         (FORMAT parquet);
 
   - id: insert_parquet
@@ -244,7 +244,7 @@ steps:
       query: |
         INSERT INTO target_table
         SELECT *
-        FROM read_parquet('${env.DAG_RUN_ARTIFACTS_DIR}/exports/selected_rows.parquet');
+        FROM read_parquet('${context.paths.artifacts_dir}/exports/selected_rows.parquet');
     depends: export_parquet
 ```
 

@@ -1,8 +1,8 @@
 # Artifact
 
-Write, read, and list DAG-run artifacts without referencing `DAG_RUN_ARTIFACTS_DIR` directly. Use `artifact.write` for explicit artifact content, and use `stdout.artifact` / `stderr.artifact` on command steps when the command stream itself should become the artifact.
+Write, read, and list DAG-run artifacts. Use `artifact.write` for explicit artifact content, and use `stdout.artifact` / `stderr.artifact` on command steps when the command stream itself should become the artifact.
 
-Using an `artifact.*` action or artifact stream output automatically enables artifact storage for the DAG. If `artifacts.enabled: false` is set explicitly, artifact actions and artifact stream outputs are invalid. References to `DAG_RUN_ARTIFACTS_DIR` also auto-enable artifact storage, but command streams are usually clearer with `stdout.artifact` or `stderr.artifact`. After artifact storage is active, value-resolved fields can read the same path with `${context.paths.artifacts_dir}`.
+Using an `artifact.*` action, artifact stream output, or `${context.paths.artifacts_dir}` reference automatically enables artifact storage for the DAG. If `artifacts.enabled: false` is set explicitly, artifact actions and artifact stream outputs are invalid.
 
 ## Command Stream Output
 

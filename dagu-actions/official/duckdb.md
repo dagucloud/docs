@@ -55,7 +55,7 @@ steps:
 |-------|-------------|
 | `result` | Raw DuckDB stdout in the selected format. |
 
-Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${env.DAG_RUN_ARTIFACTS_DIR}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`. The CLI is pinned through Dagu `tools`, which is powered by aqua from the aquaproj project:
+Use action output only for small results. For large rowsets, write to a run artifact from SQL with `COPY ... TO '${context.paths.artifacts_dir}/...'`, or call the pinned DuckDB CLI directly and attach stdout with `stdout.artifact`. The CLI is pinned through Dagu `tools`, which is powered by aqua from the aquaproj project:
 
 ```yaml
 tools:
