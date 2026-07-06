@@ -101,7 +101,7 @@ Runtime overrides from the CLI, API, and sub-DAG calls stay literal.
 
 ## Parameter JSON Payload
 
-Every step receives the merged parameter payload through `DAGU_PARAMS_JSON`. `DAG_PARAMS_JSON` is also set for compatibility. Use `${env.DAGU_PARAMS_JSON}` when passing that JSON to a value-resolved action field.
+Every step receives the merged parameter payload through `DAG_PARAMS_JSON`. Use `${env.DAG_PARAMS_JSON}` when passing that JSON to a value-resolved action field.
 
 ```yaml
 params:
@@ -114,10 +114,10 @@ steps:
     with:
       filter: '"Environment: \(.environment // "dev")"'
       raw: true
-      data: ${env.DAGU_PARAMS_JSON}
+      data: ${env.DAG_PARAMS_JSON}
 ```
 
-Inside shell scripts, `$DAGU_PARAMS_JSON` is available as a process environment variable.
+Inside shell scripts, `$DAG_PARAMS_JSON` is available as a process environment variable.
 
 ## Built-In Run Context
 

@@ -67,8 +67,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
-| `DAGU_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
-| `DAG_PARAMS_JSON` | All steps & handlers | Compatibility alias for `DAGU_PARAMS_JSON`. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
+| `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
 | `DAG_PUSHBACK_ITERATION` | Steps re-executed after approval push-back only | Current push-back iteration as a plain integer string. Not set on the initial execution. | `2` |
 | `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` | Rewound steps that had stdout before reset | Absolute path to the previous stdout log for the current step. Dagu passes the path instead of inlining stdout because logs can be large. | `/var/log/dagu/report/draft.stdout.log` |
@@ -166,9 +165,9 @@ steps:
 
 See [Artifacts](/writing-workflows/artifacts) for the full configuration, API, and Web UI behavior.
 
-## Parameter Payload (`DAGU_PARAMS_JSON`)
+## Parameter Payload (`DAG_PARAMS_JSON`)
 
-`DAGU_PARAMS_JSON` contains the resolved parameters serialized as JSON. `DAG_PARAMS_JSON` is also set for compatibility. Neither variable is set when the DAG has no parameters and none were supplied at runtime.
+`DAG_PARAMS_JSON` contains the resolved parameters serialized as JSON. It is not set when the DAG has no parameters and none were supplied at runtime.
 
 - Defaults declared in the DAG plus CLI/API overrides are merged into a single JSON object.
 - Resolved DAG params are serialized as strings, even when inline param definitions use `integer`, `number`, or `boolean` types.
@@ -179,13 +178,13 @@ See [Artifacts](/writing-workflows/artifacts) for the full configuration, API, a
 steps:
   - id: inspect_params
     run: |
-      printf '%s\n' "$DAGU_PARAMS_JSON"
+      printf '%s\n' "$DAG_PARAMS_JSON"
   - id: read_environment
     action: jq.filter
     with:
       filter: '"Environment: \(.ENVIRONMENT // "dev")"'
       raw: true
-      data: ${env.DAGU_PARAMS_JSON}
+      data: ${env.DAG_PARAMS_JSON}
 ```
 
 ## Push-back Context (`DAG_PUSHBACK`)

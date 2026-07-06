@@ -178,7 +178,7 @@ Top-level inline JSON Schema and `params.schema` use the same runtime validation
 - named overrides are parsed and validated against the schema
 - positional overrides are rejected
 - defaults from the schema are merged before validation
-- shell-visible runtime values and `DAGU_PARAMS_JSON` remain string-based
+- shell-visible runtime values and `DAG_PARAMS_JSON` remain string-based
 
 ## Dynamic Defaults with `eval`
 
@@ -230,7 +230,7 @@ params:
 
 ## Parameter JSON Payload
 
-Every step receives the merged parameter payload through `DAGU_PARAMS_JSON`.
+Every step receives the merged parameter payload through `DAG_PARAMS_JSON`.
 
 - For resolved DAG parameters, the JSON payload remains a string-only object such as `{"instance_count":"3","debug":"false"}`.
 - Raw JSON input may be supplied as either an object or an array. For named parameters, prefer a JSON object such as `{"region":"us-west-2","count":"5"}`.

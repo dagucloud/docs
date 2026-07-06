@@ -113,7 +113,7 @@ steps:
     run: ./scripts/notify.sh "${params.text}"
 ```
 
-For structured input, read `DAGU_PARAMS_JSON` or pass an explicit JSON string and decode it in the action workflow. `DAG_PARAMS_JSON` remains available as a compatibility alias.
+For structured input, read `DAG_PARAMS_JSON` or pass an explicit JSON string and decode it in the action workflow.
 
 Schema `default` values are validated as part of the schema, but they are not applied to the caller's `with:` object before parameters are passed.
 
