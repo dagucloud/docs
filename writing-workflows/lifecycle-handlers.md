@@ -8,8 +8,8 @@ Lifecycle handlers let you run extra steps after the main DAG completes. Use the
 |---------|---------|-------------------|
 | `init` | Runs before any workflow steps (after DAG-level preconditions pass) | Setup tasks, acquire locks, validate environment |
 | `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continue_on`) | Deliver success notifications, enqueue downstream jobs |
-| `failure` | The DAG ended with `failed` or `rejected` status (precondition failure) | Page on-call, collect diagnostics |
-| `abort` | A stop request interrupted the run (manual stop, queue eviction, timeout cancellation) | Roll back partial work, release locks |
+| `failure` | The DAG ended with `failed` or `rejected` status, including DAG-level precondition evaluation errors | Page on-call, collect diagnostics |
+| `abort` | The run was aborted by a stop request, queue eviction, timeout cancellation, or unmet DAG-level precondition | Roll back partial work, release locks |
 | `wait` | The DAG has paused waiting for human approval | Notify approvers, send Slack messages |
 | `exit` | Always runs after the status-specific handler finishes (including when it fails or is skipped) | File system clean-up, archival tasks |
 

@@ -950,11 +950,11 @@ Precondition fields for both DAG root and step preconditions:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `condition` | string | Expression or command check. |
-| `expected` | string | Expected value or regex pattern with `re:`. |
+| `condition` | string | Runtime value when `expected` is set; command text when `expected` is omitted. |
+| `expected` | string | Optional exact value or regex pattern with `re:`. |
 | `negate` | boolean | Invert the condition result. |
 
-If `expected` is omitted, Dagu evaluates `condition` and runs the result as a command check. Shell syntax requires a shell.
+If `expected` is set, Dagu compares the resolved `condition` value with `expected`. Command substitution in `condition` using backticks or `$()` is allowed in this value-match form. If `expected` is omitted, Dagu runs the resolved `condition` as a command check. Shell syntax in a command check is interpreted only by the selected shell.
 
 For more examples, see [DAG-Level Conditions](/writing-workflows/control-flow#dag-level-conditions).
 

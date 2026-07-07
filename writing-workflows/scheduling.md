@@ -406,7 +406,6 @@ schedule: "*/30 8-17 * * MON-FRI"  # Every 30 min, 8AM-5PM weekdays
 schedule: "0 23 28-31 * *"  # 11 PM on last days of month
 preconditions:
   - condition: '[ $(date +%d -d tomorrow) -eq 1 ]'
-    expected: "true"
 ```
 
 ### Maintenance Windows

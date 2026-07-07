@@ -487,13 +487,12 @@ steps:
 
 ### Preconditions
 
-Set global preconditions that all DAGs must satisfy:
+Set root preconditions that all DAGs using this base config must satisfy:
 
 ```yaml
 # base.yaml
 preconditions:
   - condition: "test -f /data/system-ready"
-    expected: "true"
 ```
 
 ### Secrets

@@ -223,8 +223,7 @@ Fetches detailed information about a specific DAG.
         "output": "EXTRACTED_FILE",
         "preconditions": [
           {
-            "condition": "test -f /data/ready.flag",
-            "expected": ""
+            "condition": "test -f /data/ready.flag"
           }
         ]
       },
@@ -254,8 +253,7 @@ Fetches detailed information about a specific DAG.
     "preconditions": [
       {
         "condition": "`date +%u`",
-        "expected": "re:[1-5]",
-        "error": "Pipeline only runs on weekdays"
+        "expected": "re:[1-5]"
       }
     ],
     "max_active_runs": 1,
@@ -1334,7 +1332,7 @@ Fetches the execution log for a DAG run.
 **Response (200)**:
 ```json
 {
-  "content": "2024-02-11 14:00:00 INFO DAG data_processing_pipeline started\n2024-02-11 14:00:00 INFO Run ID: 20240211_140000_abc123\n2024-02-11 14:00:00 INFO Parameters: {\"date\": \"2024-02-11\", \"env\": \"production\", \"batch_size\": 5000}\n2024-02-11 14:00:00 INFO Checking preconditions...\n2024-02-11 14:00:01 INFO Precondition passed: Weekday check (current day: 7)\n2024-02-11 14:00:01 INFO Starting step: extract_data\n2024-02-11 14:00:30 INFO [extract_data] Executing: python extract.py --date 2024-02-11\n2024-02-11 14:15:45 INFO [extract_data] Step completed successfully\n2024-02-11 14:15:45 INFO [extract_data] Output saved to variable: EXTRACTED_FILE = /tmp/extracted_20240211.csv\n2024-02-11 14:15:45 INFO Starting step: transform_data\n2024-02-11 14:15:45 INFO [transform_data] Executing: python transform.py --input=/tmp/extracted_20240211.csv\n2024-02-11 14:30:20 INFO [transform_data] Step completed successfully\n2024-02-11 14:30:20 INFO [transform_data] Output saved to variable: TRANSFORMED_FILE = /tmp/transformed_20240211.csv\n2024-02-11 14:30:20 INFO Starting step: load_to_warehouse\n2024-02-11 14:30:20 INFO [load_to_warehouse] Running sub DAG: warehouse-loader\n2024-02-11 14:30:20 INFO [load_to_warehouse] Sub DAG started with ID: sub_20240211_143020_xyz456\n2024-02-11 14:45:30 INFO [load_to_warehouse] Sub DAG completed successfully\n2024-02-11 14:45:30 INFO Executing onSuccess handler: notify_success\n2024-02-11 14:45:32 INFO [notify_success] Handler completed\n2024-02-11 14:45:32 INFO Executing onExit handler: cleanup\n2024-02-11 14:45:35 INFO [cleanup] Handler completed\n2024-02-11 14:45:35 INFO DAG completed successfully\n",
+  "content": "2024-02-12 14:00:00 INFO DAG data_processing_pipeline started\n2024-02-12 14:00:00 INFO Run ID: 20240212_140000_abc123\n2024-02-12 14:00:00 INFO Parameters: {\"date\": \"2024-02-12\", \"env\": \"production\", \"batch_size\": 5000}\n2024-02-12 14:00:00 INFO Checking preconditions...\n2024-02-12 14:00:01 INFO Precondition passed: Weekday check (current day: 1)\n2024-02-12 14:00:01 INFO Starting step: extract_data\n2024-02-12 14:00:30 INFO [extract_data] Executing: python extract.py --date 2024-02-12\n2024-02-12 14:15:45 INFO [extract_data] Step completed successfully\n2024-02-12 14:15:45 INFO [extract_data] Output saved to variable: EXTRACTED_FILE = /tmp/extracted_20240212.csv\n2024-02-12 14:15:45 INFO Starting step: transform_data\n2024-02-12 14:15:45 INFO [transform_data] Executing: python transform.py --input=/tmp/extracted_20240212.csv\n2024-02-12 14:30:20 INFO [transform_data] Step completed successfully\n2024-02-12 14:30:20 INFO [transform_data] Output saved to variable: TRANSFORMED_FILE = /tmp/transformed_20240212.csv\n2024-02-12 14:30:20 INFO Starting step: load_to_warehouse\n2024-02-12 14:30:20 INFO [load_to_warehouse] Running sub DAG: warehouse-loader\n2024-02-12 14:30:20 INFO [load_to_warehouse] Sub DAG started with ID: sub_20240212_143020_xyz456\n2024-02-12 14:45:30 INFO [load_to_warehouse] Sub DAG completed successfully\n2024-02-12 14:45:30 INFO Executing onSuccess handler: notify_success\n2024-02-12 14:45:32 INFO [notify_success] Handler completed\n2024-02-12 14:45:32 INFO Executing onExit handler: cleanup\n2024-02-12 14:45:35 INFO [cleanup] Handler completed\n2024-02-12 14:45:35 INFO DAG completed successfully\n",
   "lineCount": 22,
   "totalLines": 156,
   "hasMore": true,
@@ -2613,7 +2611,7 @@ curl "http://localhost:8080/api/v1/dags/data-processing-pipeline/spec" \
     "name": "data_processing_pipeline",
     "group": "ETL"
   },
-  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${env.WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\nlabels:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\n    error: Pipeline only runs on weekdays\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${params.date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${steps.extract.outputs.EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${steps.transform.outputs.TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
+  "spec": "name: data_processing_pipeline\ngroup: ETL\nschedule:\n  - \"0 2 * * *\"\n  - \"0 14 * * *\"\ndescription: Daily data processing pipeline for warehouse ETL\nenv:\n  - DATA_SOURCE=postgres://prod-db:5432/analytics\n  - WAREHOUSE_URL=${env.WAREHOUSE_URL}\nlog_dir: /var/log/dagu/pipelines\nhist_retention_days: 30\nmax_active_runs: 1\nmax_active_steps: 5\nparams:\n  - date\n  - env\n  - batch_size=1000\nlabels:\n  - production\n  - etl\n  - daily\npreconditions:\n  - condition: \"`date +%u`\"\n    expected: \"re:[1-5]\"\nsteps:\n  - name: extract_data\n    id: extract\n    description: Extract data from source database\n    dir: /app/etl\n    command: python\n    args:\n      - extract.py\n      - --date\n      - ${params.date}\n    stdout: /logs/extract.out\n    stderr: /logs/extract.err\n    output: EXTRACTED_FILE\n    preconditions:\n      - condition: test -f /data/ready.flag\n  - name: transform_data\n    id: transform\n    description: Apply transformations to extracted data\n    command: python transform.py --input=${steps.extract.outputs.EXTRACTED_FILE}\n    depends:\n      - extract_data\n    output: TRANSFORMED_FILE\n    mail_on_error: true\n  - name: load_to_warehouse\n    id: load\n    run: warehouse-loader\n    params: |\n      file: ${steps.transform.outputs.TRANSFORMED_FILE}\n      table: fact_sales\n    depends:\n      - transform_data\nhandler_on:\n  success:\n    command: notify.sh 'Pipeline completed successfully'\n  failure:\n    command: alert.sh 'Pipeline failed' high\n  exit:\n    command: cleanup_temp_files.sh\n",
   "errors": []
 }
 ```
