@@ -507,7 +507,8 @@ export default withMermaid(
       nav: [
         { text: "QuickStart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|self-host-license|contributing|changelog)|getting-started/|migration/)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
-        { text: "Workflows", link: "/writing-workflows/", activeMatch: "/writing-workflows/" },
+        { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/writing-workflows/(?!examples/)" },
+        { text: "Examples", link: "/writing-workflows/examples/", activeMatch: "^/writing-workflows/examples/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/(step-types|dagu-actions)/" },
         { text: "Operation", link: "/server-admin/", activeMatch: "/server-admin/" },
         { text: "AI", link: "/mcp/", activeMatch: "/(mcp|features|embedding)/" },
