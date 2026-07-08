@@ -69,7 +69,6 @@ Configuration fields can be overridden with `DAGU_` environment variables. Neste
 export DAGU_HOST=0.0.0.0
 export DAGU_PORT=8080
 export DAGU_DAGS_DIR=/opt/dagu/dags
-export DAGU_DOCS_DIR=/opt/dagu/docs
 export DAGU_DATA_DIR=/var/lib/dagu/data
 export DAGU_DAG_STATE_DIR=/var/lib/dagu/data/dag-state
 
@@ -84,7 +83,6 @@ Common examples:
 | `DAGU_PORT` | `port` | Web UI port |
 | `DAGU_PUBLIC_URL` | `public_url` | External URL used in generated links |
 | `DAGU_DAGS_DIR` | `paths.dags_dir` | DAG definition directory |
-| `DAGU_DOCS_DIR` | `paths.docs_dir` | Docs Markdown directory |
 | `DAGU_DATA_DIR` | `paths.data_dir` | Data directory used by derived stores |
 | `DAGU_LOG_DIR` | `paths.log_dir` | Log directory |
 | `DAGU_ARTIFACT_DIR` | `paths.artifact_dir` | DAG-run artifact directory |
@@ -145,7 +143,6 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | Config field | Default | Purpose |
 | --- | --- | --- |
 | `paths.dags_dir` | `~/.config/dagu/dags` | DAG definitions |
-| `paths.docs_dir` | `{dags_dir}/docs` | Docs Markdown files |
 | `paths.log_dir` | `~/.local/share/dagu/logs` | DAG logs |
 | `paths.data_dir` | `~/.local/share/dagu/data` | Base directory for runtime data |
 | `paths.tools_dir` | `{data_dir}/tools` | Managed DAG tool cache |

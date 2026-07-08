@@ -59,7 +59,6 @@ const fullSidebar = [
           { text: "Workspaces", link: "/web-ui/workspaces" },
           { text: "Profiles", link: "/web-ui/profiles" },
           { text: "Secrets", link: "/web-ui/secrets" },
-          { text: "Docs", link: "/web-ui/documents" },
         ],
       },
       {

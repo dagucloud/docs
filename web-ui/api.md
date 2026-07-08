@@ -1735,44 +1735,6 @@ Each result includes preview snippets plus `hasMoreMatches` and `nextMatchesCurs
 }
 ```
 
-### Search Document Feed
-
-**Endpoint**: `GET /api/v1/search/docs`
-
-Returns lightweight cursor-based document search results for the global search page.
-
-**Query Parameters**:
-| Parameter | Type | Description | Required |
-|-----------|------|-------------|----------|
-| q | string | Search query | Yes |
-| limit | integer | Number of results to return (max 50) | No |
-| cursor | string | Opaque cursor returned by a previous response | No |
-| remoteNode | string | Remote node name | No |
-| workspace | `all`, `default`, or workspace name | Workspace to search. Omitted defaults to `all`. | No |
-
-This endpoint is available when Docs is enabled.
-
-**Response (200)**:
-```json
-{
-  "results": [
-    {
-      "id": "operations/deployment",
-      "title": "Deployment Checklist",
-      "hasMoreMatches": false,
-      "matches": [
-        {
-          "line": "Run migrations before deploying the application.",
-          "lineNumber": 18,
-          "startLine": 16
-        }
-      ]
-    }
-  ],
-  "hasMore": false
-}
-```
-
 ### Search DAG Match Snippets
 
 **Endpoint**: `GET /api/v1/search/dags/{fileName}/matches`
@@ -1796,36 +1758,6 @@ Loads additional cursor-based snippets for one DAG search result.
       "line": "description: Weekly database backup job",
       "lineNumber": 3,
       "startLine": 1
-    }
-  ],
-  "hasMore": false
-}
-```
-
-### Search Document Match Snippets
-
-**Endpoint**: `GET /api/v1/search/docs/matches`
-
-Loads additional cursor-based snippets for one document search result.
-
-**Query Parameters**:
-| Parameter | Type | Description | Required |
-|-----------|------|-------------|----------|
-| path | string | Document path | Yes |
-| q | string | Search query | Yes |
-| limit | integer | Number of snippets to return (max 50) | No |
-| cursor | string | Opaque cursor returned by a previous snippet response | No |
-| remoteNode | string | Remote node name | No |
-| workspace | `default` or workspace name | Workspace for the selected document result. Omitted defaults to `default`. | No |
-
-**Response (200)**:
-```json
-{
-  "matches": [
-    {
-      "line": "Run migrations before deploying the application.",
-      "lineNumber": 18,
-      "startLine": 16
     }
   ],
   "hasMore": false
