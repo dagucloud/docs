@@ -209,6 +209,7 @@ handler_on:
 | `${context.dag.name}` / `DAG_NAME` | Name of the executing DAG |
 | `${context.run.id}` / `DAG_RUN_ID` | Unique identifier for this run |
 | `${context.paths.log_file}` / `DAG_RUN_LOG_FILE` | Path to the log file |
+| `${context.paths.docs_dir}` / `DAG_DOCS_DIR` | Per-DAG Docs directory path when Docs is configured |
 | `${context.run.status}` / `DAG_RUN_STATUS` | Current status for the handler surface |
 | `${context.step.name}` / `DAG_RUN_STEP_NAME` | Name of the handler step |
 

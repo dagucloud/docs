@@ -105,6 +105,7 @@ Common references include:
 | `${context.paths.log_file}` | Aggregated DAG-run log file path |
 | `${context.paths.work_dir}` | Per-run work directory path |
 | `${context.paths.artifacts_dir}` | Artifact directory path when artifact storage is active |
+| `${context.paths.docs_dir}` | Per-DAG Docs directory path when Docs is configured |
 | `${context.paths.step_stdout_file}` | Current step stdout file path |
 | `${context.paths.step_stderr_file}` | Current step stderr file path |
 | `${context.paths.step_output_file}` | Current step output file path for declared outputs |

@@ -57,6 +57,7 @@ sse:
 paths:
   dags_dir: "~/.config/dagu/dags"
   alt_dags_dir: ""          # Additional read-only DAG directories
+  docs_dir: ""              # Auto: {dags_dir}/docs
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
   tools_dir: ""              # Auto: {data_dir}/tools
@@ -293,6 +294,7 @@ All options support `DAGU_` prefix.
 - `DAGU_DAGS_DIR` - DAG definitions
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
 - `DAGU_ALT_DAGS_DIR` - Additional read-only DAG directories
+- `DAGU_DOCS_DIR` - Docs Markdown directory (default: `{dags_dir}/docs`)
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
 - `DAGU_TOOLS_DIR` - Managed DAG tool cache (default: `{data_dir}/tools`)
@@ -704,6 +706,7 @@ peer:
 
 ### Auto-generated Paths
 When not specified, these paths are automatically derived:
+- `paths.docs_dir`: `{paths.dags_dir}/docs` - Stores Docs Markdown files
 - `paths.artifact_dir`: `{paths.data_dir}/artifacts` - Stores DAG run artifacts
 - `paths.tools_dir`: `{paths.data_dir}/tools` - Stores managed DAG tool cache, locks, manifests, and shims
 - `paths.dag_state_dir`: `{paths.data_dir}/dag-state` - Stores persistent DAG state values

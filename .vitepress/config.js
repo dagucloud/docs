@@ -222,6 +222,7 @@ const fullSidebar = [
       { text: "Notifications", link: "/web-ui/notifications" },
       { text: "Incident Routing", link: "/web-ui/incidents" },
       { text: "Profiles", link: "/web-ui/profiles" },
+      { text: "Docs", link: "/web-ui/documents" },
       { text: "REST API", link: "/web-ui/api" },
     ],
   },

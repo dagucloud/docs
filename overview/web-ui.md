@@ -24,15 +24,16 @@ Dagu's UI is organized around a few everyday jobs:
 - **Dashboard** for recent activity and trends
 - **Definitions** for the list of workflows
 - **Run details** for outputs, artifacts, logs, and retries
+- **Docs** for Markdown documents and generated reports
 - **Notifications** for Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
-- **Search** for finding workflows quickly
+- **Search** for finding workflows and documents quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
 ## Workspace Selector
 
-The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, and Design.
+The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, and Docs.
 
 ![Workspace selector](/web-ui-workspace-selector-demo.png)
 
@@ -189,6 +190,22 @@ Search helps when you know roughly what you need but not exactly where it lives.
 You can search:
 
 - **DAGs** for workflow definitions
+- **Docs** for Markdown content
+
+## Docs
+
+Docs is Dagu's built-in Markdown workspace for operational notes, generated reports, handoff notes, and other documents tied to workflows.
+
+![Docs](/docs.png)
+
+Use it to:
+
+- create and edit Markdown from the Web UI
+- publish generated Markdown with `DAG_DOCS_DIR`
+- browse and preview documents by workspace
+- search document content from Docs or global search
+
+See [Docs](/web-ui/documents) for configuration, generated documents, API endpoints, and Git Sync behavior.
 
 ## Profiles
 
@@ -302,5 +319,6 @@ ui:
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
 - [Secrets](/web-ui/secrets)
+- [Docs](/web-ui/documents)
 - [Learn the REST API](/web-ui/api)
 - [Server Administration](/server-admin/)

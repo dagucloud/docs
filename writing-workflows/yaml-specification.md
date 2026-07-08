@@ -1099,6 +1099,7 @@ Common structured references:
 | `${context.paths.log_file}` | Path to the DAG-run log file. |
 | `${context.paths.work_dir}` | Per-run isolated work directory path. |
 | `${context.paths.artifacts_dir}` | Per-run artifact directory. References auto-enable artifact storage unless disabled explicitly. |
+| `${context.paths.docs_dir}` | Per-DAG Docs directory path when Docs is configured. |
 | `${context.paths.step_stdout_file}` | Current step stdout file path. |
 | `${context.paths.step_stderr_file}` | Current step stderr file path. |
 | `${context.paths.step_output_file}` | Current step output file path for declared outputs. |
