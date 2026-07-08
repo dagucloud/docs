@@ -94,8 +94,24 @@ const fullSidebar = [
         link: "/writing-workflows/examples/",
         collapsed: false,
         items: [
-          { text: "All Examples", link: "/writing-workflows/examples/" },
-          { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
+          { text: "Overview", link: "/writing-workflows/examples/" },
+          { text: "Basic Examples", link: "/writing-workflows/examples/basic" },
+          { text: "Control Flow", link: "/writing-workflows/examples/control-flow" },
+          { text: "Reliability", link: "/writing-workflows/examples/reliability" },
+          { text: "Data & Variables", link: "/writing-workflows/examples/data-variables" },
+          { text: "Scripts & Runtime", link: "/writing-workflows/examples/scripts-runtime" },
+          { text: "Actions & Integrations", link: "/writing-workflows/examples/actions-integrations" },
+          { text: "Scheduling & Queues", link: "/writing-workflows/examples/scheduling-queues" },
+          { text: "Operations", link: "/writing-workflows/examples/operations" },
+          {
+            text: "AI Examples",
+            link: "/writing-workflows/examples/ai",
+            collapsed: false,
+            items: [
+              { text: "Chat & LLM", link: "/writing-workflows/examples/ai" },
+              { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
+            ],
+          },
         ],
       },
       {
