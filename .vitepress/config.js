@@ -89,7 +89,15 @@ const fullSidebar = [
           { text: "Tags", link: "/writing-workflows/tags" },
         ],
       },
-      { text: "Examples", link: "/writing-workflows/examples/" },
+      {
+        text: "Examples",
+        link: "/writing-workflows/examples/",
+        collapsed: false,
+        items: [
+          { text: "All Examples", link: "/writing-workflows/examples/" },
+          { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
+        ],
+      },
       {
         text: "Data Flow",
         collapsed: true,

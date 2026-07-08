@@ -2,6 +2,10 @@
 
 Quick reference for all Dagu features. Each example is minimal and copy-paste ready.
 
+## Focused Examples
+
+- [Harness Run Examples](/writing-workflows/examples/harness-run) - Run Codex, OpenCode, and Pi as workflow steps.
+
 ## Basic Workflows
 
 <div class="examples-grid">
