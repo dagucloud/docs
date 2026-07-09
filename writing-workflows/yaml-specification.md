@@ -924,7 +924,7 @@ Artifact stream paths are relative to the run artifact directory. Absolute paths
 
 ```yaml
 preconditions:
-  - condition: "`date +%u`"
+  - eval: "$(date +%u)"
     expected: "re:[1-5]"  # Run only on weekdays
 
 steps:
@@ -933,7 +933,7 @@ steps:
     preconditions:
       - condition: "${env.ENVIRONMENT}"
         expected: production
-      - condition: "`git branch --show-current`"
+      - eval: "$(git branch --show-current)"
         expected: main
 
   - id: optional
@@ -950,11 +950,12 @@ Precondition fields for both DAG root and step preconditions:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `condition` | string | Runtime value when `expected` is set; command text when `expected` is omitted. |
-| `expected` | string | Optional exact value or regex pattern with `re:`. |
+| `condition` | string | Value to compare when `expected` is set, or command text when `expected` is omitted. |
+| `eval` | string | Dynamic expression evaluated before comparing with `expected`; use for command substitution. |
+| `expected` | string | Required with `eval`; optional with `condition`. Exact value or regex pattern with `re:`. |
 | `negate` | boolean | Invert the condition result. |
 
-If `expected` is set, Dagu compares the resolved `condition` value with `expected`. Command substitution in `condition` using backticks or `$()` is allowed in this value-match form. If `expected` is omitted, Dagu runs the resolved `condition` as a command check. Shell syntax in a command check is interpreted only by the selected shell.
+Each precondition must set `condition` or `eval`, not both. Use `condition` with `expected` for literal or value-resolved comparisons. In that form, Dagu resolves scoped references such as `${env.NAME}` but leaves `$()` and backticks as ordinary text. Use `eval` with `expected` when the compared value must be computed at runtime, including command substitution. When `expected` is omitted, only `condition` is valid and Dagu runs the resolved `condition` as a command check. Shell syntax in a command check is interpreted only by the selected shell.
 
 For more examples, see [DAG-Level Conditions](/writing-workflows/control-flow#dag-level-conditions).
 
@@ -1158,7 +1159,7 @@ container:
     - ./scripts:/scripts:ro
 
 preconditions:
-  - condition: "`date +%u`"
+  - eval: "$(date +%u)"
     expected: "re:[1-5]"
 
 

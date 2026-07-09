@@ -148,7 +148,7 @@ steps:
   - id: deploy
     run: ./deploy.sh
     preconditions:
-      - condition: "`git branch --show-current`"
+      - eval: "$(git branch --show-current)"
         expected: "main"
     # Must satisfy both: ENVIRONMENT=production AND branch=main
 ```

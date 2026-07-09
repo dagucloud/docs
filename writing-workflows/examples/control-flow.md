@@ -163,7 +163,7 @@ steps:
 
 ```yaml
 preconditions:
-  - condition: "`date +%u`"
+  - eval: "$(date +%u)"
     expected: "re:[1-5]"  # Weekdays only
 
 steps:
@@ -204,7 +204,7 @@ steps:
   # Run only on weekends
   - run: echo "Weekend maintenance"
     preconditions:
-      - condition: "`date +%u`"
+      - eval: "$(date +%u)"
         expected: "re:[1-5]"  # Weekdays
         negate: true          # Invert: run on weekends
 ```

@@ -234,6 +234,8 @@ steps:
         expected: "production"
 ```
 
+With `expected`, `condition` compares the resolved string value. Backticks and `$()` stay literal in this form; use `eval` when the compared value must be computed dynamically.
+
 When `expected` is omitted, Dagu treats `condition` as a command check. Dagu first replaces variables in the condition string. If a shell is configured, the result runs through that shell. Without a shell, Dagu executes the resulting string directly, so shell syntax requires an active shell.
 
   ```yaml
@@ -251,7 +253,7 @@ When `expected` is omitted, Dagu treats `condition` as a command check. Dagu fir
 steps:
   - run: echo "Deploying application"
     preconditions:
-      - condition: "`git branch --show-current`"
+      - eval: "$(git branch --show-current)"
         expected: "main"
 ```
 
@@ -262,14 +264,11 @@ steps:
   # Run only on weekdays
   - run: echo "Running batch job"
     preconditions:
-      - condition: "`date +%u`"
+      - eval: "$(date +%u)"
         expected: "re:[1-5]"  # Monday-Friday
 ```
 
-**Note**: When using regex patterns with command outputs, be aware that:
-- Lines over 64KB are automatically handled with larger buffers  
-- If the total output exceeds `max_output_size` (default 1MB), the step will fail with an error and the output variable won't be set
-- For `continue_on.output` patterns in log files, lines up to `max_output_size` can be matched
+**Note**: Use `eval` only with `expected`. For plain exit-code checks, omit `expected` and keep the command in `condition`.
 
 ### Multiple Conditions
 
@@ -283,7 +282,7 @@ steps:
         expected: "production"
       - condition: "${env.APPROVED}"
         expected: "true"
-      - condition: "`date +%H`"
+      - eval: "$(date +%H)"
         expected: "re:0[8-9]|1[0-7]"  # 8 AM - 5 PM
 ```
 
@@ -319,7 +318,7 @@ steps:
   # Skip on weekends
   - run: echo "Running weekday job"
     preconditions:
-      - condition: "`date +%u`"
+      - eval: "$(date +%u)"
         expected: "re:[67]"  # 6=Saturday, 7=Sunday
         negate: true         # Runs when NOT weekend
 ```
@@ -759,7 +758,7 @@ See the [Continue On Reference](/writing-workflows/continue-on) for complete doc
 
 ```yaml
 preconditions:
-  - condition: "`date +%u`"
+  - eval: "$(date +%u)"
     expected: "re:[1-5]"  # Weekdays only
 
 steps:
@@ -784,7 +783,7 @@ steps:
 ```yaml
 # Run maintenance only outside business hours
 preconditions:
-  - condition: "`date +%H`"
+  - eval: "$(date +%H)"
     expected: "re:0[9]|1[0-7]"  # 9 AM - 5 PM
     negate: true                # Runs when NOT during business hours
 
