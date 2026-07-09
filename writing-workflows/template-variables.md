@@ -201,7 +201,7 @@ Common value-resolved fields include:
 - `steps[].stdout`, `steps[].stderr`, and artifact paths
 - lifecycle handler step fields
 
-Root and step `preconditions[].eval` first resolve scoped references, then run dynamic evaluation before comparing the result with `expected`; it is valid only when `expected` is set.
+Root and step `preconditions[].eval` first resolve scoped references, then run dynamic evaluation before comparing the result with `expected`; it is valid only when `expected` is set. Dynamic evaluation supports both `$(command)` and `` `command` `` command substitution.
 
 Fields such as step identity, dependency names, parameter defaults, secret provider keys, and most root provider configuration are literal unless their owning spec opts in.
 

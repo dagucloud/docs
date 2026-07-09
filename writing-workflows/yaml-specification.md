@@ -933,7 +933,7 @@ steps:
     preconditions:
       - condition: "${env.ENVIRONMENT}"
         expected: production
-      - eval: "$(git branch --show-current)"
+      - eval: "`git branch --show-current`"
         expected: main
 
   - id: optional
@@ -951,11 +951,11 @@ Precondition fields for both DAG root and step preconditions:
 | Field | Type | Description |
 |-------|------|-------------|
 | `condition` | string | Value to compare when `expected` is set, or command text when `expected` is omitted. |
-| `eval` | string | Dynamic expression evaluated before comparing with `expected`; use for command substitution. |
+| `eval` | string | Dynamic expression evaluated before comparing with `expected`; command substitution can use `$()` or backticks. |
 | `expected` | string | Required with `eval`; optional with `condition`. Exact value or regex pattern with `re:`. |
 | `negate` | boolean | Invert the condition result. |
 
-Each precondition must set `condition` or `eval`, not both. Use `condition` with `expected` for literal or value-resolved comparisons. In that form, Dagu resolves scoped references such as `${env.NAME}` but leaves `$()` and backticks as ordinary text. Use `eval` with `expected` when the compared value must be computed at runtime, including command substitution. When `expected` is omitted, only `condition` is valid and Dagu runs the resolved `condition` as a command check. Shell syntax in a command check is interpreted only by the selected shell.
+Each precondition must set `condition` or `eval`, not both. Use `condition` with `expected` for literal or value-resolved comparisons. In that form, Dagu resolves scoped references such as `${env.NAME}` but leaves `$()` and backticks as ordinary text. Use `eval` with `expected` when the compared value must be computed at runtime; both `$(command)` and `` `command` `` command substitution are supported. When `expected` is omitted, only `condition` is valid and Dagu runs the resolved `condition` as a command check. Shell syntax in a command check is interpreted only by the selected shell.
 
 For more examples, see [DAG-Level Conditions](/writing-workflows/control-flow#dag-level-conditions).
 

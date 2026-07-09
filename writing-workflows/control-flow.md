@@ -257,6 +257,16 @@ steps:
         expected: "main"
 ```
 
+`eval` accepts both `$()` and backtick command substitution. The `$()` form is usually easier to read and quote, but the backtick form is also valid:
+
+```yaml
+steps:
+  - run: echo "Deploying application"
+    preconditions:
+      - eval: "`git branch --show-current`"
+        expected: "main"
+```
+
 ### Regex Matching
 
 ```yaml
