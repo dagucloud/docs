@@ -220,4 +220,5 @@ Older workflows may still use unscoped variables such as `${FOO}`, legacy step r
 - [Outputs](/writing-workflows/outputs)
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Parameters](/writing-workflows/parameters)
+- [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping)
 - [Runtime Context and Variables](/writing-workflows/runtime-variables)

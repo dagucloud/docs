@@ -129,7 +129,8 @@ const fullSidebar = [
         items: [
           { text: "Runtime Profiles", link: "/writing-workflows/runtime-profiles" },
           { text: "Runtime Variables", link: "/writing-workflows/runtime-variables" },
-          { text: "Template Variables", link: "/writing-workflows/template-variables" },
+          { text: "Variables Reference", link: "/writing-workflows/template-variables" },
+          { text: "Quoting & Escaping", link: "/writing-workflows/quoting-and-escaping" },
           { text: "Data & Variables", link: "/writing-workflows/data-variables" },
           { text: "Tools", link: "/writing-workflows/tools" },
         ],

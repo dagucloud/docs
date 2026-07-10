@@ -267,10 +267,15 @@ Scoped Dagu references work in value-resolved fields. Shell variable syntax is s
 | `${context.run.id}` | Dagu-managed built-in run context reference | `${context.run.id}` -> `20241012_040000_c1f4b2` |
 | `$VAR` | Simple substitution | `$HOME` → `/home/user` |
 | `${VAR}` | Shell or unqualified environment syntax | `${HOME}` -> `/home/user` |
-| `'$VAR'` | Single-quoted (no expansion) | `'$VAR'` → `'$VAR'` |
+| `'$VAR'` | Unqualified reference inside retained single quotes | Preserved during Dagu environment expansion |
 | `\$` | Literal dollar (non-shell only) | `\$9.99` → `$9.99` |
 
 **Notes:**
+- YAML quote delimiters are removed before Dagu evaluates a field. Shell-style
+  single quotes protect an unqualified `$VAR` or `${VAR}` only when the quote
+  characters remain in the parsed field text. They do not protect Dagu-owned
+  references such as `${env.VAR}`. See
+  [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping).
 - `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and `with` fields).
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
 - To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
@@ -412,5 +417,6 @@ For sensitive values that should be selected together with a runtime environment
 
 - [Data & Variables](/writing-workflows/data-variables) - Complete data handling guide
 - [Variables Reference](/writing-workflows/template-variables) - Full variable syntax reference
+- [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping) - How YAML, Dagu, and shell evaluation interact
 - [Runtime Context and Variables](/writing-workflows/runtime-variables) - Built-in `${context.*}` references and `DAG_*` projections
 - [Secrets](/writing-workflows/secrets) - Secure secret management

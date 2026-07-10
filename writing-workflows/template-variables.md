@@ -1,6 +1,8 @@
 # Variables Reference
 
 For Dagu-managed run metadata, see [Runtime Context and Variables](/writing-workflows/runtime-variables).
+For the interaction between YAML quotes, Dagu resolution, and shell quoting,
+see [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping).
 
 ## Reference Syntax
 
@@ -155,6 +157,12 @@ steps:
 
 Dagu removes its escape marker and passes `${steps.build.outputs.image}` to the script as literal text.
 
+Single quotes alone do not escape Dagu-owned references. They protect
+unqualified `$NAME` and `${NAME}` only when the quote characters remain after
+YAML parsing. See
+[Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping)
+for examples.
+
 ## Shell Variables
 
 Inside `run`, unqualified `$NAME` and `${NAME}` belong to the selected shell or script interpreter.
@@ -224,4 +232,5 @@ Unknown fields under the reserved `context` namespace are also preserved. Inspec
 - [Outputs](/writing-workflows/outputs)
 - [Parameters](/writing-workflows/parameters)
 - [Environment Variables](/writing-workflows/environment-variables)
+- [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping)
 - [YAML Specification](/writing-workflows/yaml-specification)
