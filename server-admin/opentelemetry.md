@@ -40,9 +40,9 @@ otel:
   timeout: 30s     # Export timeout
   resource:
     # Resource attributes (all optional)
-    service.name: "dagu-${context.dag.name}"  # Default value
+    service.name: "dagu-${DAG_NAME}"
     service.version: "1.0.0"
-    deployment.environment: "${env.ENVIRONMENT}"
+    deployment.environment: "production"
     # Custom attributes
     team: "data-engineering"
     cost_center: "analytics"
@@ -58,6 +58,11 @@ otel:
 | `insecure` | Allow insecure connections | `false` |
 | `timeout` | Export timeout duration | No default |
 | `resource` | Resource attributes map | `{}` |
+
+OTel resource attribute strings use environment-style expansion when the
+tracer is created. `${DAG_NAME}` is the current DAG name; other unqualified
+names read the Dagu process environment. Scoped workflow references such as
+`${context.dag.name}` and `${env.NAME}` are not supported inside `resource`.
 
 ## Endpoint Configuration
 
@@ -138,7 +143,7 @@ otel:
 # my-workflow.yaml (inherits base configuration)
 otel:
   resource:
-    service.name: "dagu-${context.dag.name}"  # Override specific attributes
+    service.name: "dagu-${DAG_NAME}"  # Override specific attributes
 steps:
   - run: echo "Processing with telemetry"
 ```
@@ -176,7 +181,7 @@ otel:
   headers:
     Authorization: "Bearer ${env.OTEL_TOKEN}"
   resource:
-    service.name: "dagu-${context.dag.name}"
+    service.name: "dagu-${DAG_NAME}"
     deployment.environment: "production"
-    service.version: "${env.VERSION}"
+    service.version: "${VERSION}"
 ```

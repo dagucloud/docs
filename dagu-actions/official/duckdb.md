@@ -18,7 +18,9 @@ steps:
         SELECT 42 AS answer, 'duckdb' AS engine;
 
   - id: print
-    run: printf '%s\n' '${steps.query.outputs.result}'
+    env:
+      - QUERY_RESULT: ${steps.query.outputs.result}
+    run: printf '%s\n' "$QUERY_RESULT"
     depends: query
 ```
 

@@ -374,7 +374,9 @@ Advisory locks are session-level and automatically released when the step comple
 
 ```yaml
 params:
-  - REGION: us-east-1
+  - name: REGION
+    default: us_east_1
+    pattern: "^[a-z0-9_]+$"
 
 steps:
   - id: aggregate_region_data
@@ -383,12 +385,17 @@ steps:
       dsn: "${env.DATABASE_URL}"
       advisory_lock: "etl-${params.REGION}"
       transaction: true
+      params:
+        region: ${params.REGION}
       query: |
         -- Only one worker per region can run this
         TRUNCATE TABLE region_summary_${params.REGION};
         INSERT INTO region_summary_${params.REGION}
-        SELECT * FROM calculate_region_metrics('${params.REGION}');
+        SELECT * FROM calculate_region_metrics(:region);
 ```
+
+`REGION` is validated before it is inserted into an SQL identifier. The value
+passed to `calculate_region_metrics` uses a bound query parameter.
 
 ## Error Handling
 

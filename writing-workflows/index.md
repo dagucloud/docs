@@ -19,9 +19,11 @@ params:                    # Runtime parameters
     default: 25
     minimum: 1
     maximum: 100
+  - name: DATE
+    eval: "`date +%Y-%m-%d`"
 
 env:                       # Environment variables
-  - DATE: "`date +%Y-%m-%d`"
+  - DATE: ${params.DATE}
   - DATA_DIR: /tmp/data
 
 steps:                     # Workflow steps
@@ -232,9 +234,11 @@ params:
   - name: DRY_RUN
     type: boolean
     default: false
+  - name: DATE
+    eval: "`date +%Y-%m-%d`"
 
 env:
-  - DATE: "`date +%Y-%m-%d`"
+  - DATE: ${params.DATE}
   - DATA_DIR: /tmp/data/${env.DATE}
 
 tools:
@@ -253,14 +257,21 @@ steps:
       failure: false
     depends: download
 
-  - id: process
-    parallel: [users, orders, products]
-    run: uv run --python 3.13.9 python process.py --type="${ITEM}" --date="${env.DATE}"
+  - id: process_users
+    run: uv run --python 3.13.9 python process.py --type=users --date="${env.DATE}"
+    depends: validate
+
+  - id: process_orders
+    run: uv run --python 3.13.9 python process.py --type=orders --date="${env.DATE}"
+    depends: validate
+
+  - id: process_products
+    run: uv run --python 3.13.9 python process.py --type=products --date="${env.DATE}"
     depends: validate
 
   - id: report
     run: uv run --python 3.13.9 python report.py --date="${env.DATE}"
-    depends: process
+    depends: [process_users, process_orders, process_products]
 
 handler_on:
   failure:

@@ -43,11 +43,13 @@ defaults:
 
 # Runtime inputs
 params:
-  - DATE: "2026-03-14"
+  - name: DATE
+    eval: "`date +%Y-%m-%d`"
+    default: "2026-03-14"
 
 # Environment
 env:
-  - RUN_DATE: "`date +%Y-%m-%d`"
+  - RUN_DATE: ${params.DATE}
 
 # Tool versions
 tools:

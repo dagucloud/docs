@@ -24,7 +24,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "dagu-${context.dag.name}"
+    service.name: "dagu-${DAG_NAME}"
     service.version: "1.0.0"
     environment: "local"
 
@@ -100,7 +100,7 @@ otel:
   endpoint: "localhost:4317"
   insecure: true
   resource:
-    service.name: "dagu-${context.dag.name}"
+    service.name: "dagu-${DAG_NAME}"
     service.version: "2.0.0"
     deployment.environment: "testing"
     team: "platform"
@@ -123,22 +123,22 @@ otel:
 steps:
   - run: echo "Starting parent workflow"
 
-  - id: run-etl
+  - id: run_etl
     action: dag.run
     with:
       dag: child-etl.yaml
       params: "SOURCE=production DATE=2024-01-01"
 
-  - id: run-analytics
+  - id: run_analytics
     action: dag.run
     with:
       dag: child-analytics.yaml
-      params: "INPUT=${run-etl.output}"
-    depends: run-etl
+      params: "INPUT=/tmp/data.csv"
+    depends: run_etl
 
   - id: complete_parent
     run: echo "Parent workflow complete"
-    depends: run-analytics
+    depends: run_analytics
 ```
 
 ### 2. Create Sub DAGs
@@ -385,9 +385,9 @@ otel:
     Authorization: "Bearer ${env.OTEL_TOKEN}"
   timeout: 30s
   resource:
-    service.name: "dagu-${context.dag.name}"
-    service.version: "${env.APP_VERSION}"
-    deployment.environment: "${env.ENVIRONMENT}"
+    service.name: "dagu-${DAG_NAME}"
+    service.version: "${APP_VERSION}"
+    deployment.environment: "${ENVIRONMENT}"
 steps:
   - run: echo "Testing production setup"
 ```

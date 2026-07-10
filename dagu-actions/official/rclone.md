@@ -18,7 +18,9 @@ steps:
       source: /data/input
 
   - id: print
-    run: printf '%s\n' '${steps.list_files.outputs.stdout}'
+    env:
+      - FILE_LIST: ${steps.list_files.outputs.stdout}
+    run: printf '%s\n' "$FILE_LIST"
     depends: list_files
 ```
 

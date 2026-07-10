@@ -638,14 +638,20 @@ steps:
       interval_sec: ${env.POLL_INTERVAL}
 ```
 
-Command substitutions also work:
+Repeat-policy numeric fields do not execute command substitutions. Compute a
+dynamic integer through an inline parameter `eval`, then reference it:
 
 ```yaml
+params:
+  - name: repeat_limit
+    type: integer
+    eval: "`printf 3`"
+
 steps:
   - run: echo "repeating"
     repeat_policy:
       repeat: true
-      limit: "`echo 3`"
+      limit: ${params.repeat_limit}
       interval_sec: 0
 ```
 

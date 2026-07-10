@@ -80,7 +80,7 @@ Run system commands and scripts with the default action.
 ## Script Behavior
 
 - A multi-line `run:` block is prepared as temporary script input, executed as one script, and removed after the step finishes. Do not depend on the prepared script path or directory.
-- Dagu resolves `${...}` references in the script before it starts. Backticks remain in the script text; the selected shell or interpreter defines what they mean.
+- Dagu resolves scoped references such as `${params.name}` and `${env.NAME}` before the script starts. Unqualified `$NAME` and `${NAME}`, backticks, and `$()` remain for the selected shell or interpreter.
 - If you omit a step-level `shell` and the script starts with a shebang at the first character (`#!/usr/bin/env python3`, `#!/bin/bash`, etc.), that interpreter runs the script.
 - Without a shebang, the resolved shell runs the script file. When Dagu provides the default Unix shell, it appends `-e` so the script stops on the first failing command (step-level shells are left unchanged).
 - Multi-line `run` strings (using a YAML `|` block) are executed as a script rather than split into args.

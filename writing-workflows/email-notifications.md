@@ -176,7 +176,7 @@ steps:
         DAG: ${context.dag.name}
         Run ID: ${context.run.id}
         Status: Completed
-        Time: $(date)
+        Attempt started: ${context.attempt.started_at}
 
         Report available at: ${steps.generate_report.outputs.report_path}
       attachments:
@@ -202,11 +202,8 @@ handler_on:
         Details:
         - DAG: ${context.dag.name}
         - Run ID: ${context.run.id}
-        - Time: $(date)
-        - Host: $(hostname)
-
-        Error Summary:
-        $(tail -20 ${context.paths.log_file} | grep -i error)
+        - Attempt started: ${context.attempt.started_at}
+        - Log: ${context.paths.log_file}
 
         Full log attached.
       attachments:
@@ -273,20 +270,26 @@ error_mail:
 params:
   - name: environment
     default: development
+    enum: [development, production]
+  - name: alert_recipient
+    eval: |
+      $(if [ "${params.environment}" = "production" ]; then
+        printf '%s' "prod-alerts@example.com"
+      else
+        printf '%s' "dev-alerts@example.com"
+      fi)
 
 steps:
   - id: notify
     action: mail.send
     with:
-      to: |
-        `if [ "${params.environment}" = "production" ]; then
-          echo "prod-alerts@example.com"
-        else
-          echo "dev-alerts@example.com"
-        fi`
+      to: ${params.alert_recipient}
       subject: "Alert from ${params.environment}"
       message: "Environment-specific alert"
 ```
+
+Command substitution runs in `params[].eval`, not in mail fields. The enum on
+`environment` also constrains the value inserted into the shell expression.
 
 ### HTML Emails
 

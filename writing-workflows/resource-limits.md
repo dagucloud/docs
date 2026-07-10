@@ -16,10 +16,20 @@ env:
 steps:
   - run: sh -c "echo Starting heavy computation; sleep 3; echo Completed"
   - run: echo "Processing large dataset"
-  - parallel:
+  - action: dag.run
+    with:
+      dag: process-file
+      params: "file=${ITEM}"
+    parallel:
       items: ${env.FILE_LIST}
       max_concurrent: 3  # Limit parallel I/O
-    run: echo "Processing file ${ITEM}"
+---
+name: process-file
+params:
+  - name: file
+    required: true
+steps:
+  - run: echo "Processing file ${params.file}"
 ```
 
 For controlling concurrent DAG instances, use global queues (see below).

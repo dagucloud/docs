@@ -303,16 +303,17 @@ steps:
 
 <div class="example-card">
 
-### Command Substitution
+### Computed Parameter
 
 ```yaml
-env:
-  TODAY: "`date '+%Y%m%d'`"
+params:
+  - name: today
+    eval: "`date '+%Y%m%d'`"
 steps:
-  - run: echo hello, today is ${env.TODAY}
+  - run: echo hello, today is ${params.today}
 ```
 
-<a href="/writing-workflows/data-variables#command-substitution" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/parameters#dynamic-defaults-with-eval" class="learn-more">Learn more →</a>
 
 </div>
 

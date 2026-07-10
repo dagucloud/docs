@@ -252,7 +252,6 @@ hist_retention_days: 90   # Keep history for 90 days
 env:
   - LOG_LEVEL: info
   - DATA_DIR: /data/analytics
-  - DATE: "`date '+%Y-%m-%d'`"
 params:
   - name: ENVIRONMENT
     type: string
@@ -260,6 +259,8 @@ params:
   - name: DRY_RUN
     type: boolean
     default: false
+  - name: DATE
+    eval: "`date '+%Y-%m-%d'`"
 mail_on:
   failure: true
 smtp:

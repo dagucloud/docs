@@ -117,6 +117,9 @@ Inside the action workflow, publish caller-visible outputs with `stdout.outputs`
 Use `stdout.outputs` when a command writes the result object to stdout:
 
 ```yaml
+params:
+  - text
+
 steps:
   - id: classify
     run: ./classify.sh "${params.text}"
@@ -128,13 +131,26 @@ steps:
 Use `outputs.write` when the action workflow assembles the result from parameters, previous steps, or literal values:
 
 ```yaml
+params:
+  - text
+
 steps:
+  - id: send
+    run: ./scripts/notify.sh "${params.text}"
+    stdout:
+      outputs:
+        fields:
+          messageId:
+            decode: json
+            select: .id
+
   - id: publish
     action: outputs.write
     with:
       values:
         messageId: ${steps.send.outputs.messageId}
         status: sent
+    depends: send
 ```
 
 Do not use object-form `output:` to return action results to the caller. Object-form `output:` is step-scoped inside the action workflow. To cross the action boundary, publish values with `stdout.outputs` or `outputs.write`.

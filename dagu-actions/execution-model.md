@@ -93,6 +93,9 @@ Dagu rejects unsafe Git ref syntax such as whitespace, `..`, `@{`, shell metacha
 The caller passes input through `with:`:
 
 ```yaml
+params:
+  - BUILD_ID: "42"
+
 steps:
   - id: notify
     action: acme/dagu-action-notify@v1.2.0
@@ -153,6 +156,9 @@ Action outputs are the values returned to the caller. Publish them with `stdout.
 Use `stdout.outputs` when a command writes the result object to stdout:
 
 ```yaml
+params:
+  - text
+
 steps:
   - id: send
     run: ./scripts/notify.sh "${params.text}"
@@ -167,13 +173,26 @@ steps:
 Use `outputs.write` when the package workflow assembles the result from earlier values:
 
 ```yaml
+params:
+  - text
+
 steps:
+  - id: send
+    run: ./scripts/notify.sh "${params.text}"
+    stdout:
+      outputs:
+        fields:
+          messageId:
+            decode: json
+            select: .id
+
   - id: publish
     action: outputs.write
     with:
       values:
         messageId: ${steps.send.outputs.messageId}
         status: sent
+    depends: send
 ```
 
 Do not use object-form `output:` to return values to the caller. Object-form `output:` is only step-scoped inside the package workflow. To cross the action boundary, use `stdout.outputs` or `outputs.write`.

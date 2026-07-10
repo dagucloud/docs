@@ -177,7 +177,9 @@ steps:
 
   - id: print_metadata
     depends: inspect
-    run: printf '%s\n' '${steps.inspect.outputs.metadata}'
+    env:
+      - METADATA: ${steps.inspect.outputs.metadata}
+    run: printf '%s\n' "$METADATA"
 ```
 
 Strict step-output references address declared top-level output names. Nested paths inside a JSON output are not a strict reference form.

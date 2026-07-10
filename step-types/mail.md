@@ -106,7 +106,7 @@ steps:
         Deployment completed:
         - Environment: ${params.ENVIRONMENT}
         - Version: ${params.VERSION}
-        - Time: `date`
+        - Attempt started: ${context.attempt.started_at}
 ```
 
 ### Success/Failure Notifications

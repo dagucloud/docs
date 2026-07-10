@@ -308,6 +308,10 @@ steps:
 Execute Lua scripts for complex operations:
 
 ```yaml
+params:
+  - name: USER_ID
+    required: true
+
 steps:
   - id: rate_limit
     action: redis.eval
@@ -335,6 +339,10 @@ steps:
 Or load from a file:
 
 ```yaml
+params:
+  - name: PARAM
+    required: true
+
 steps:
   - id: complex_operation
     action: redis.command
@@ -351,6 +359,10 @@ steps:
 Acquire a lock before executing critical operations:
 
 ```yaml
+params:
+  - name: RESOURCE_ID
+    required: true
+
 steps:
   - id: critical_section
     action: redis.set

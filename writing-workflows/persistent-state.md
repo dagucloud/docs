@@ -30,8 +30,10 @@ steps:
         last_id: 0
 
   - id: fetch
+    env:
+      - CURSOR_JSON: ${steps.load_cursor.outputs.value}
     run: |
-      last_id="$(printf '%s\n' '${steps.load_cursor.outputs.value}' | jq -r .last_id)"
+      last_id="$(printf '%s\n' "$CURSOR_JSON" | jq -r .last_id)"
       ./fetch-feed --after "$last_id" > result.json
     depends: load_cursor
 
@@ -140,6 +142,13 @@ Output:
 Compares a new JSON value with the stored value. By default it writes the new value when it changed.
 
 ```yaml
+params:
+  - name: COUNT
+    type: integer
+    required: true
+  - name: CHECKSUM
+    required: true
+
 steps:
   - id: check_snapshot
     action: state.diff
@@ -290,6 +299,11 @@ Use that form only when you intentionally want to couple to another DAG's privat
 State entries have monotonically increasing versions. Use `expected_version` when two runs may update the same key at the same time.
 
 ```yaml
+params:
+  - name: NEXT_COUNT
+    type: integer
+    required: true
+
 steps:
   - id: load
     action: state.get

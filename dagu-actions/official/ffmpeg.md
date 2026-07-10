@@ -43,7 +43,9 @@ steps:
         -v error -print_format json -show_format -show_streams /data/video.mp4
 
   - id: print_probe
-    run: printf '%s\n' '${steps.inspect.outputs.stdout}'
+    env:
+      - PROBE_OUTPUT: ${steps.inspect.outputs.stdout}
+    run: printf '%s\n' "$PROBE_OUTPUT"
     depends: inspect
 ```
 

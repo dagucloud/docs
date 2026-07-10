@@ -19,7 +19,9 @@ steps:
         SELECT 42 AS answer, 'duckdb' AS engine;
 
   - id: print_result
-    run: printf '%s\n' '${steps.query.outputs.result}'
+    env:
+      - QUERY_RESULT: ${steps.query.outputs.result}
+    run: printf '%s\n' "$QUERY_RESULT"
     depends: query
 ```
 
@@ -136,7 +138,9 @@ steps:
     depends: update_rows
 
   - id: print_result
-    run: printf '%s\n' '${steps.select_rows.outputs.result}'
+    env:
+      - QUERY_RESULT: ${steps.select_rows.outputs.result}
+    run: printf '%s\n' "$QUERY_RESULT"
     depends: select_rows
 ```
 

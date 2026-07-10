@@ -70,7 +70,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 ## Script Behavior (Windows)
 
 - A `run:` block is prepared as temporary script input and removed after the step finishes. Do not depend on the prepared script path or directory.
-- Dagu resolves `${...}` references in the script before it starts. Backticks remain in the script text; the selected shell or interpreter defines what they mean.
+- Dagu resolves scoped references such as `${params.name}` and `${env.NAME}` before the script starts. Unqualified environment syntax and command syntax remain for the selected interpreter; use PowerShell, `cmd.exe`, or another selected interpreter's native variable syntax.
 - With PowerShell/pwsh, the script runs through PowerShell file execution. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup so cmdlet errors stop execution and text handling is stable. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
 - When both `shell` and a multi-line `run` block are set, the shell value is used as the interpreter.
 

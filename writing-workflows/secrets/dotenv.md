@@ -40,13 +40,17 @@ Dagu looks up relative dotenv paths in this order:
 
 Absolute paths and `~` paths are resolved directly.
 
-The dotenv path string is evaluated before lookup with OS environment expansion and command substitution. For example:
+The dotenv path string supports environment and scoped value references before
+lookup. It does not execute command substitutions. For example:
 
 ```yaml
 dotenv:
   - ${HOME}/.config/my-app/.env
-  - "`pwd`/.env.local"
+  - ${PROJECT_DIR}/.env.local
 ```
+
+`HOME` and `PROJECT_DIR` are read from the Dagu process environment. A backtick
+or `$()` expression in a dotenv path remains literal path text.
 
 Missing dotenv files in a DAG are ignored. Parse errors are logged as warnings and the run continues.
 

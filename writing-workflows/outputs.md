@@ -89,7 +89,9 @@ steps:
 
   - id: print_metadata
     depends: inspect
-    run: printf '%s\n' '${steps.inspect.outputs.metadata}'
+    env:
+      - METADATA: ${steps.inspect.outputs.metadata}
+    run: printf '%s\n' "$METADATA"
 ```
 
 Step output references read top-level declared output names. Nested output paths such as `${steps.inspect.outputs.metadata.tag}` are not part of the strict reference syntax.

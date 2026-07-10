@@ -78,10 +78,14 @@ The following fields are inherited from base configuration:
 Define variables accessible to all steps in a workflow:
 
 ```yaml
+params:
+  - name: timestamp
+    eval: "`date +%Y%m%d_%H%M%S`"
+
 env:
   - DATA_DIR: /var/data
   - OUTPUT_DIR: ${env.DATA_DIR}/output
-  - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
+  - TIMESTAMP: ${params.timestamp}
 
 tools:
   - astral-sh/uv@0.11.14
@@ -171,18 +175,31 @@ steps:
   - run: echo "${env.FULL}"  # Outputs: /data/subdir/file.txt
 ```
 
-### Command Substitution
+### Computed Values
 
-Execute commands at DAG load time using backticks:
+Environment entries do not execute backticks or `$()` command substitutions.
+Use an inline parameter `eval` when a value must be computed before steps start,
+then project the result into `env`:
 
 ```yaml
+params:
+  - name: today
+    eval: "`date +%Y-%m-%d`"
+  - name: git_commit
+    eval: "`git rev-parse --short HEAD`"
+  - name: hostname
+    eval: "`hostname -f`"
+
 env:
-  - TODAY: "`date +%Y-%m-%d`"
-  - GIT_COMMIT: "`git rev-parse --short HEAD`"
-  - HOSTNAME: "`hostname -f`"
+  - TODAY: ${params.today}
+  - GIT_COMMIT: ${params.git_commit}
+  - HOSTNAME: ${params.hostname}
 ```
 
-This load-time substitution applies to configuration fields that Dagu evaluates as data, such as `env:`, `dotenv:` paths, and inline param `eval:` values. Runtime step fields such as `command`, `stdout`, `stderr`, sub-DAG `params`, and executor `with:` config still use normal runtime evaluation, including backticks. Command-step `script` is narrower: Dagu replaces variables there but leaves backticks for the shell.
+Dynamic evaluation is limited to fields that explicitly opt in, currently inline
+parameter `eval` and precondition `eval`. Other value-resolved fields preserve
+backticks and `$()` as text. In `run`, the selected shell or script interpreter
+may execute that preserved syntax later.
 
 ### Referencing System Variables
 
@@ -236,12 +253,19 @@ steps:
     depends: [normal_processing, debug_processing]
 ```
 
-Step-level variables support the same features as DAG-level:
+Step-level variables support the same reference-resolution behavior as
+DAG-level variables:
 
 ```yaml
+params:
+  - name: hostname
+    eval: "`hostname -f`"
+  - name: timestamp
+    eval: "`date +%Y%m%d_%H%M%S`"
+
 env:
   - DATA_DIR: /data
-  - HOSTNAME: "`hostname -f`"
+  - HOSTNAME: ${params.hostname}
 
 tools:
   - astral-sh/uv@0.11.14
@@ -250,7 +274,7 @@ steps:
   - id: process_data
     env:
       - INPUT_PATH: ${env.DATA_DIR}/input
-      - TIMESTAMP: "`date +%Y%m%d_%H%M%S`"
+      - TIMESTAMP: ${params.timestamp}
       - WORKER_ID: worker_${env.HOSTNAME}
     run: uv run --python 3.13.9 python process.py
 ```
@@ -268,7 +292,6 @@ Scoped Dagu references work in value-resolved fields. Shell variable syntax is s
 | `$VAR` | Simple substitution | `$HOME` → `/home/user` |
 | `${VAR}` | Shell or unqualified environment syntax | `${HOME}` -> `/home/user` |
 | `'$VAR'` | Unqualified reference inside retained single quotes | Preserved during Dagu environment expansion |
-| `\$` | Literal dollar (non-shell only) | `\$9.99` → `$9.99` |
 
 **Notes:**
 - YAML quote delimiters are removed before Dagu evaluates a field. Shell-style
@@ -276,9 +299,7 @@ Scoped Dagu references work in value-resolved fields. Shell variable syntax is s
   characters remain in the parsed field text. They do not protect Dagu-owned
   references such as `${env.VAR}`. See
   [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping).
-- `\$` is only unescaped when Dagu is the final evaluator (non-shell executors and `with` fields).
 - Shell-executed commands keep native shell semantics. Use shell escaping there.
-- To get a literal `$$` in non-shell contexts, escape both dollars: `\$\$`.
 
 ### Unknown Variable Handling
 
@@ -286,17 +307,22 @@ What happens when a variable is not defined depends on the execution context:
 
 | Context | Behavior | Example |
 |---------|----------|---------|
-| Local shell execution (default) | Unknown vars become empty | `$UNDEFINED` → `` |
-| Non-shell executors (docker, http, ssh, jq, mail, etc.) | OS-only vars preserved as-is | `$HOME` → `$HOME` |
+| POSIX shell execution | An unset variable normally expands to empty | `$UNDEFINED` → `` |
+| Dagu-expanded action and executor fields | Unknown unqualified references remain literal | `$HOME` → `$HOME` |
+| SSH or container command text | Preserved text may be expanded by the remote shell or container process | `$HOME` is resolved remotely |
+| HTTP, mail, and other fields with no later variable-aware runtime | Preserved text remains literal content | `$HOME` → `$HOME` |
 | `template` step `script` | Dagu skips variable expansion entirely | `${HOME}` → `${HOME}` |
 
-For non-shell executors, OS-only variables not defined in the DAG scope pass through unchanged to the target environment (container, remote shell, etc.), which resolves them. DAG-scoped variables (env, params, secrets, step outputs) are still expanded normally.
+General action and executor fields expand values from the current DAG or step
+environment scope. An unresolved unqualified reference is preserved, but only a
+later variable-aware runtime can expand it. Import host values through root
+`env` and use scoped `${env.NAME}` references when Dagu should resolve them.
 
 `template` steps are stricter: the `script` body is never expanded by Dagu, so `${VAR}` remains literal there. If you want expanded values in a template step, pass them through `with.data`.
 
-### Shell Expansion Syntax (Local Execution Only)
+### POSIX Shell Expansion Syntax
 
-When executing commands locally with the default shell executor, Dagu uses POSIX shell expansion via [mvdan.cc/sh](https://github.com/mvdan/sh). These patterns work only in that context:
+When `run` uses a POSIX shell, that shell can evaluate forms such as:
 
 | Pattern | Description |
 |---------|-------------|
@@ -306,11 +332,15 @@ When executing commands locally with the default shell executor, Dagu uses POSIX
 | `${VAR:+alternate}` | Use `alternate` if VAR is set and non-empty |
 | `${VAR:offset:length}` | Substring extraction |
 
-These patterns do **not** work for non-shell executors (docker, http, ssh, jq, mail, etc.). In those cases, only basic `$VAR` and `${VAR}` syntax is supported, and OS-only variables pass through unchanged to the target environment. `template` steps are stricter still: their `script` body is not expanded at all.
+These are shell expressions, not general Dagu value-reference forms. Whether a
+preserved expression works in SSH or container command text depends on the
+remote shell or container process. HTTP, mail, and other non-shell fields do not
+evaluate these expressions. Template bodies are left to the template engine.
 
-### Escaped Backticks
+### Backticks in Shell Commands
 
-To use literal backticks without command substitution:
+In `run`, Dagu leaves backticks for the selected shell or interpreter. Escape
+them according to that runtime when literal backticks are required:
 
 ```yaml
 run: echo "Literal backtick: \`not a command\`"

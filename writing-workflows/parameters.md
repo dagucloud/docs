@@ -253,25 +253,28 @@ steps:
   - run: echo "${params.DATE} ${params.MESSAGE} ${params.SOURCE_REF}"
 ```
 
-If you want dynamic values without using param `eval`, compute them in `env:`:
+Use param `eval` for computed values. Environment entries resolve references but
+do not execute command substitutions:
 
 ```yaml
-env:
-  - DATE: "`date +%Y-%m-%d`"
-  - HOME_DIR: "${HOME}"
-
 params:
+  - name: DATE
+    eval: "`date +%Y-%m-%d`"
+    default: "2026-03-14"
   - INPUT_FILE: data.csv
   - name: THREADS
     type: integer
     default: 4
     minimum: 1
 
+env:
+  - HOME_DIR: "${HOME}"
+
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: uv run --python 3.13.9 python processor.py --input "${params.INPUT_FILE}" --threads "${params.THREADS}" --date "${env.DATE}" --home "${env.HOME_DIR}"
+  - run: uv run --python 3.13.9 python processor.py --input "${params.INPUT_FILE}" --threads "${params.THREADS}" --date "${params.DATE}" --home "${env.HOME_DIR}"
 ```
 
 `env:` values can also reference `params:` values using `${params.name}`:

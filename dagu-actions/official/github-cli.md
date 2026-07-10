@@ -18,7 +18,9 @@ steps:
       args: ["repo", "view", "--json", "name,description,url"]
 
   - id: print
-    run: printf '%s\n' '${steps.repo.outputs.stdout}'
+    env:
+      - REPO_JSON: ${steps.repo.outputs.stdout}
+    run: printf '%s\n' "$REPO_JSON"
     depends: repo
 ```
 
