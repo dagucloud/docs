@@ -114,17 +114,7 @@ const fullSidebar = [
         ],
       },
       {
-        text: "Data Flow",
-        collapsed: true,
-        items: [
-          { text: "Data Flow", link: "/writing-workflows/data-flow" },
-          { text: "Outputs", link: "/writing-workflows/outputs" },
-          { text: "Persistent State", link: "/writing-workflows/persistent-state" },
-          { text: "Artifacts", link: "/writing-workflows/artifacts" },
-        ],
-      },
-      {
-        text: "Runtime",
+        text: "Variables & Runtime",
         collapsed: true,
         items: [
           { text: "Runtime Profiles", link: "/writing-workflows/runtime-profiles" },
@@ -133,6 +123,16 @@ const fullSidebar = [
           { text: "Quoting & Escaping", link: "/writing-workflows/quoting-and-escaping" },
           { text: "Data & Variables", link: "/writing-workflows/data-variables" },
           { text: "Tools", link: "/writing-workflows/tools" },
+        ],
+      },
+      {
+        text: "Data Flow",
+        collapsed: true,
+        items: [
+          { text: "Data Flow", link: "/writing-workflows/data-flow" },
+          { text: "Outputs", link: "/writing-workflows/outputs" },
+          { text: "Persistent State", link: "/writing-workflows/persistent-state" },
+          { text: "Artifacts", link: "/writing-workflows/artifacts" },
         ],
       },
       {
