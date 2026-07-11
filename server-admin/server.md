@@ -191,7 +191,7 @@ All options support `DAGU_` prefix:
 
 *Builtin Auth (RBAC):*
 - `DAGU_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
-- `DAGU_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`)
+- `DAGU_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`, maximum: `8760h` / 365 days)
 
 *Basic Auth:*
 - `DAGU_AUTH_BASIC_USERNAME` - Basic auth username

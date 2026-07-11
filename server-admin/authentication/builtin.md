@@ -76,6 +76,8 @@ Common TTL examples:
 
 You can also combine units: `1h30m`, `2h45m30s`
 
+The maximum token TTL is `8760h` (365 days). Values above this limit are rejected during startup validation.
+
 ### Environment Variables
 
 ```bash
@@ -83,7 +85,7 @@ export DAGU_AUTH_MODE=builtin  # default — can be omitted
 
 # Optional - token settings
 export DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret-key  # auto-generated if not set
-export DAGU_AUTH_TOKEN_TTL=24h  # default: 24h
+export DAGU_AUTH_TOKEN_TTL=24h  # default: 24h; maximum: 8760h
 
 # Optional - auto-create admin on first startup (both required together)
 export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
