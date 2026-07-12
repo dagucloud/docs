@@ -237,6 +237,18 @@ const fullSidebar = [
             ],
           },
           {
+            text: "LLM",
+            link: "/step-types/llm/",
+            collapsed: true,
+            items: [
+              { text: "Overview", link: "/step-types/llm/" },
+              { text: "Providers & Endpoints", link: "/step-types/llm/providers" },
+              { text: "Reliability", link: "/step-types/llm/reliability" },
+              { text: "Outputs & Routing", link: "/step-types/llm/outputs" },
+              { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
+            ],
+          },
+          {
             text: "SQL",
             link: "/step-types/sql/",
             collapsed: true,
