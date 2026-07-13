@@ -4,6 +4,8 @@ The Profiles page manages runtime profiles: named sets of variables and secrets 
 
 Use profiles when the same DAG should run against different environments without changing the DAG YAML. For example, a single workflow can run with the `dev`, `staging`, or `prod` profile.
 
+Profiles change the variables and secrets supplied to a run. They do not create separate schedulers, local execution environments, or worker pools. Use [separate Dagu deployments](/server-admin/deployment/multi-environment) when development, staging, and production require infrastructure or security isolation.
+
 ![Profiles page showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
 
 ## What A Profile Contains
@@ -91,3 +93,4 @@ This also applies to profile default layers. Default-layer secret entries should
 - [Workflow Secrets](/writing-workflows/secrets)
 - [Workspaces](/web-ui/workspaces)
 - [User Management](/server-admin/authentication/user-management)
+- [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

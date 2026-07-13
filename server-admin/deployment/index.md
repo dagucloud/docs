@@ -2,6 +2,7 @@
 
 Choose your deployment method:
 
+- [Multi-Environment Deployments](./multi-environment.md) - Isolate development, staging, and production while promoting workflows with Git Sync
 - [macOS](./macos.md) - Install as a macOS service
 - [Linux Systemd](./systemd.md) - Install as a systemd service
 - [Docker Images](./docker-images.md) - Choose the right container tag

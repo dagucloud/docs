@@ -2,7 +2,9 @@
 
 ## Multi-Environment
 
-By setting up remote nodes, you can run workflows on different Dagu server environments (e.g., development, staging, production) in a single Dagu server Web UI.
+By setting up remote nodes, you can access separate Dagu deployments, such as development, staging, and production, from one Dagu Web UI. Each remote deployment keeps its own scheduler, workers, storage, credentials, and runtime configuration.
+
+See [Multi-Environment Deployments](/server-admin/deployment/multi-environment) for the recommended isolation and Git Sync promotion model.
 
 ```yaml
 remote_nodes:
@@ -40,5 +42,6 @@ API keys provide fine-grained role-based permissions (admin, manager, developer,
 ## See Also
 
 - [Server Configuration](/server-admin/server)
+- [Multi-Environment Deployments](/server-admin/deployment/multi-environment)
 - [Remote Nodes Authentication](/server-admin/authentication/remote-nodes)
 - [API Keys](/server-admin/authentication/api-keys)

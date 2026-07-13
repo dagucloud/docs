@@ -175,7 +175,9 @@ Write operations are blocked when Git Sync is configured as read-only (`push_ena
 - Manage Git Sync through the UI, CLI, or API rather than editing its internal state directly.
 - Pull before publishing when multiple people or systems may change the same repository.
 - Use clear commit messages because Git Sync publishes normal Git commits.
+- For staging and production, prefer read-only Git Sync configurations and promote reviewed workflow versions between environment branches. See [Multi-Environment Deployments](/server-admin/deployment/multi-environment).
 
 ## Related Pages
 
 - [Server Administration](/server-admin/)
+- [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

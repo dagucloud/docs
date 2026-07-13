@@ -4,6 +4,8 @@ Runtime profiles let you choose a named set of environment variables and secrets
 
 A runtime profile is not part of the DAG YAML. It is selected at run time from the Web UI, CLI, or REST API. The selected profile name is recorded in run history, and the profile values are resolved when each run attempt starts.
 
+Runtime profiles are configuration overlays within a Dagu deployment. They do not isolate the scheduler, local execution host, coordinator, workers, queues, or storage. Run [separate Dagu deployments](/server-admin/deployment/multi-environment) when development, staging, and production require independent execution boundaries.
+
 ## When To Use Runtime Profiles
 
 Use runtime profiles when values are shared across many runs or when the operator should choose the environment at launch time:
@@ -249,3 +251,4 @@ Secret values are write-only. Profile responses include the secret entry key, ki
 - [Workflow Secrets](/writing-workflows/secrets)
 - [Runtime Context and Variables](/writing-workflows/runtime-variables)
 - [Web UI Profiles](/web-ui/profiles)
+- [Multi-Environment Deployments](/server-admin/deployment/multi-environment)
