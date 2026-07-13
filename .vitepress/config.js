@@ -2,6 +2,17 @@ import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { issueLinksPlugin } from "./theme/plugins/issueLinks.js";
 
+const llmItems = [
+  { text: "Overview", link: "/step-types/llm/" },
+  { text: "Providers & Endpoints", link: "/step-types/llm/providers" },
+  { text: "Local Models", link: "/step-types/llm/local-models" },
+  { text: "OpenCode", link: "/step-types/llm/opencode" },
+  { text: "Reliability", link: "/step-types/llm/reliability" },
+  { text: "Outputs & Routing", link: "/step-types/llm/outputs" },
+  { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
+  { text: "Tool Calling", link: "/features/chat/tool-calling" },
+];
+
 // Define the complete sidebar structure
 const fullSidebar = [
   {
@@ -240,15 +251,7 @@ const fullSidebar = [
             text: "LLM (chat.completion)",
             link: "/step-types/llm/",
             collapsed: true,
-            items: [
-              { text: "Overview", link: "/step-types/llm/" },
-              { text: "Providers & Endpoints", link: "/step-types/llm/providers" },
-              { text: "Local Models", link: "/step-types/llm/local-models" },
-              { text: "OpenCode", link: "/step-types/llm/opencode" },
-              { text: "Reliability", link: "/step-types/llm/reliability" },
-              { text: "Outputs & Routing", link: "/step-types/llm/outputs" },
-              { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
-            ],
+            items: llmItems,
           },
           {
             text: "SQL",
@@ -440,11 +443,7 @@ const fullSidebar = [
         text: "Chat & LLM",
         link: "/features/chat/",
         collapsed: true,
-        items: [
-          { text: "Overview", link: "/features/chat/" },
-          { text: "Completion Reference", link: "/step-types/llm/" },
-          { text: "Tool Calling", link: "/features/chat/tool-calling" },
-        ],
+        items: llmItems,
       },
       {
         text: "Embedding Dagu",
