@@ -1,168 +1,30 @@
-# Chat & AI Agents
+# Chat & LLM
 
-Execute Large Language Model (LLM) requests and build AI agents that can use tools to perform actions.
+Dagu can call language models from workflows, let models invoke DAGs as tools, or run external agent CLIs. This section helps choose the right approach; exact `chat.completion` syntax lives in the [LLM action reference](/step-types/llm/).
 
-## Capabilities
+## Choose an Approach
 
-| Feature | Description |
-|---------|-------------|
-| [Basic Chat](/features/chat/basics) | Simple LLM sessions with OpenAI, Anthropic, Gemini, Z.AI, and more |
-| [Local AI](/features/chat/local-ai) | Code-backed setup and troubleshooting for Ollama and other OpenAI-compatible local servers |
-| [Tool Calling](/features/chat/tool-calling) | AI agents that execute DAG workflows as tools during sessions |
+| Goal | Use |
+|------|-----|
+| Send prompts or message lists directly to a model provider | [`chat.completion`](/step-types/llm/) |
+| Let a model call DAG workflows as functions | [Tool Calling](/features/chat/tool-calling) |
+| Run an external coding-agent CLI inside a workflow | [`harness.run`](/step-types/harness/) |
+| Let an external AI client inspect and operate Dagu | [MCP Server](/mcp/) |
 
-## Quick Start
+## LLM Completions
 
-### Simple Chat
+Use `action: chat.completion` for provider API calls, multi-turn sessions, model fallback, reasoning, web search, and response routing.
 
-```yaml
-steps:
-  - action: chat.completion
-    with:
-      provider: openai
-      model: gpt-4o
-      messages:
-        - role: user
-          content: |
-            What is 2+2?
-    output: ANSWER
-```
+- [LLM Completion](/step-types/llm/) — quick start and complete field reference
+- [Providers & Endpoints](/step-types/llm/providers) — credentials, shared defaults, and compatible endpoints
+- [Local Models](/step-types/llm/local-models) — Ollama, vLLM, and LM Studio
+- [OpenCode](/step-types/llm/opencode) — OpenCode provider setup
+- [Outputs & Routing](/step-types/llm/outputs) — sessions, captured responses, artifacts, and branching
+- [Reasoning & Web Search](/step-types/llm/reasoning-web-search) — provider reasoning and search capabilities
+- [Reliability](/step-types/llm/reliability) — provider retries and model fallback
 
-### AI Agent with Tools
+## Agents and Tools
 
-```yaml
-# Main DAG that uses tools
-steps:
-  - action: chat.completion
-    with:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
-      tools:
-        - calculator
-      messages:
-        - role: user
-          content: |
-            What is 15 times 23?
+[Tool calling](/features/chat/tool-calling) turns selected DAGs into functions that a model can invoke during a completion. Use it when the model should choose and sequence workflow operations.
 
----
-# Tool DAG definition
-name: calculator
-description: "Perform basic arithmetic operations"
-params: "operation a b"
-
-steps:
-  - id: calculate
-    run: |
-      case "$1" in
-        multiply) echo $(($2 * $3)) ;;
-        *) echo "Unknown operation" ;;
-      esac
-    output: RESULT
-```
-
-## Supported Providers
-
-| Provider | Environment Variable | Models |
-|----------|---------------------|--------|
-| `openai` | `OPENAI_API_KEY` | GPT-3.5, GPT-4, GPT-4o |
-| `anthropic` | `ANTHROPIC_API_KEY` | Claude 3, Claude 4, Claude Sonnet |
-| `gemini` | `GOOGLE_API_KEY` | Gemini 1.5, Gemini 2 |
-| `openrouter` | `OPENROUTER_API_KEY` | 100+ models via OpenRouter |
-| `zai` | `ZAI_API_KEY` | GLM-5, GLM-4.6 |
-| `opencode` | `OPENCODE_API_KEY` | Kimi, DeepSeek, GLM, Qwen, MiMo |
-| `local` | (none) | Ollama, vLLM, LM Studio (OpenAI-compatible) |
-
-## Key Features
-
-- **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, OpenRouter, Z.AI, OpenCode, and local models
-- **Session History** - Automatic message inheritance between dependent steps
-- **Extended Thinking** - Enable reasoning mode for complex tasks (Anthropic, OpenAI, Gemini)
-- **Secret Masking** - Automatic masking of sensitive values before sending to LLM
-- **Tool Calling** - Build AI agents that execute workflows as function calls
-- **Variable Substitution** - Use scoped references such as `${params.topic}` in messages for dynamic content
-- **DAG-Level Defaults** - Share LLM configuration across multiple steps
-
-## Configuration
-
-### Basic LLM Config
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `provider` | string | required | LLM provider (`openai`, `anthropic`, `gemini`, `zai`, etc.) |
-| `model` | string | required | Model identifier |
-| `temperature` | float | provider default | Response randomness (0.0-2.0) |
-| `max_tokens` | int | provider default | Maximum tokens to generate |
-| `stream` | bool | `true` | Stream response tokens |
-
-### Tool Calling Config
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `tools` | string[] | `[]` | DAG names to expose as callable tools |
-| `max_tool_iterations` | int | `10` | Maximum tool calling loops |
-
-## Examples
-
-### Multi-turn Session
-
-```yaml
-steps:
-  - id: setup
-    action: chat.completion
-    with:
-      provider: openai
-      model: gpt-4o
-      system: |
-        You are a math tutor.
-      messages:
-        - role: user
-          content: |
-            What is 2+2?
-
-  - id: followup
-    action: chat.completion
-    with:
-      provider: openai
-      model: gpt-4o
-      messages:
-        - role: user
-          content: |
-            Now multiply that by 3.
-    depends: setup
-```
-
-The `followup` step automatically inherits session history from `setup`.
-
-### DAG-Level Configuration
-
-```yaml
-# Share LLM config across all chat steps
-llm:
-  provider: anthropic
-  model: claude-sonnet-4-20250514
-  temperature: 0.7
-
-steps:
-  - action: chat.completion
-    with:
-      messages:
-        - role: user
-          content: |
-            Explain quantum computing
-
-  - action: chat.completion
-    with:
-      messages:
-        - role: user
-          content: |
-            Now explain it to a 5-year-old
-```
-
-Both steps inherit the DAG-level LLM configuration.
-
-## See Also
-
-- [Basic Chat](/features/chat/basics) - Complete reference for simple LLM sessions
-- [Local AI](/features/chat/local-ai) - Detailed setup notes for Ollama and other local OpenAI-compatible servers
-- [Tool Calling](/features/chat/tool-calling) - Build AI agents with DAG-based tools
-- [Secrets](/writing-workflows/secrets) - Secure handling of API keys
-- [Variables](/writing-workflows/template-variables) - Dynamic content in messages
+Use [`harness.run`](/step-types/harness/) instead when the workflow should launch an external agent such as Claude Code, Codex, Copilot, or OpenCode. Use the [MCP server](/mcp/) for the inverse relationship: an external AI client connects to Dagu and operates workflows through Dagu's tools and resources.

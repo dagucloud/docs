@@ -333,5 +333,5 @@ The LLM orchestrates the multi-step data pipeline by calling tools in sequence.
 
 ## See Also
 
-- [Basic Chat](/features/chat/basics) - Simple LLM sessions without tools
+- [LLM Completion](/step-types/llm/) - Completion configuration and sessions
 - [Chat Overview](/features/chat/) - All chat capabilities and providers

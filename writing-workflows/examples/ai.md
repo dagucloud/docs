@@ -51,7 +51,7 @@ steps:
 
 Steps inherit LLM config from DAG level.
 
-<a href="/features/chat/#dag-level-configuration" class="learn-more">Learn more →</a>
+<a href="/step-types/llm/providers#dag-level-defaults" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -85,7 +85,7 @@ steps:
 
 Steps inherit session history from previous steps.
 
-<a href="/features/chat/#multi-turn-session" class="learn-more">Learn more →</a>
+<a href="/step-types/llm/outputs#sessions" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -110,7 +110,7 @@ steps:
 
 Enable deeper reasoning for complex tasks.
 
-<a href="/features/chat/basics#extended-thinking-mode" class="learn-more">Learn more →</a>
+<a href="/step-types/llm/reasoning-web-search#reasoning" class="learn-more">Learn more →</a>
 
 </div>
 

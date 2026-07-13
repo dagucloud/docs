@@ -13,7 +13,15 @@ The `thinking` object accepts:
 | `budget_tokens` | integer | provider-specific | Explicit reasoning token budget. |
 | `include_in_output` | boolean | `false` | Reserved. The current chat providers do not consistently apply this field. |
 
-Support and accepted limits depend on the provider and model. See [Basic Chat](/features/chat/basics#thinking-configuration-thinking-field) for provider behavior.
+Support and accepted limits depend on the provider and model:
+
+| Provider | Mapping |
+|----------|---------|
+| Anthropic | Uses a reasoning token budget. |
+| OpenAI | Uses reasoning effort. Sampling fields unsupported by a reasoning model are omitted. |
+| Gemini | Uses a thinking level or token budget, depending on the model. |
+| OpenRouter | Maps the common settings to its unified reasoning configuration. |
+| Local | Sends standard chat-completion fields; local-provider reasoning controls are not currently serialized. |
 
 ## Web Search
 
@@ -52,4 +60,3 @@ If a DAG whose tool name is `web_search` is also listed in `tools`, Dagu disable
 - [LLM Completion](/step-types/llm/) for basic usage and configuration
 - [Providers & Endpoints](/step-types/llm/providers) for provider credentials and endpoints
 - [Tool Calling](/features/chat/tool-calling) for exposing DAGs as model tools
-

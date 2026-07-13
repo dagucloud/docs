@@ -1,0 +1,6 @@
+/features/chat/basics /step-types/llm/ 301
+/features/chat/basics/ /step-types/llm/ 301
+/features/chat/local-ai /step-types/llm/local-models 301
+/features/chat/local-ai/ /step-types/llm/local-models 301
+/features/chat/opencode /step-types/llm/opencode 301
+/features/chat/opencode/ /step-types/llm/opencode 301

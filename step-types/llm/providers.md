@@ -95,7 +95,6 @@ If an action sets any LLM configuration field under `with`, its action-level LLM
 ## Related
 
 - [LLM Completion](/step-types/llm/) for basic usage and the configuration reference
-- [Local AI](/features/chat/local-ai) for Ollama and other OpenAI-compatible local servers
-- [OpenCode](/features/chat/opencode) for OpenCode setup and models
+- [Local Models](/step-types/llm/local-models) for Ollama and other OpenAI-compatible local servers
+- [OpenCode](/step-types/llm/opencode) for OpenCode setup and models
 - [Reasoning & Web Search](/step-types/llm/reasoning-web-search) for provider-specific capabilities
-

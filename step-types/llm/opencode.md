@@ -2,9 +2,7 @@
 
 Use Dagu with [OpenCode](https://opencode.ai) — a subscription service that gives you access to Kimi, DeepSeek, GLM, Qwen, MiMo, and other models through a single OpenAI-compatible API.
 
-This applies to both:
-
-- workflow steps that use `action: chat.completion`
+This guide covers workflow steps that use `action: chat.completion` with the OpenCode provider.
 
 ## What Is OpenCode
 
@@ -111,5 +109,6 @@ OpenCode reasoning models return thinking text in a `reasoning` field. Dagu pres
 
 ## Related Pages
 
-- [Basic Chat](/features/chat/basics)
-- [Local AI](/features/chat/local-ai)
+- [LLM Completion](/step-types/llm/)
+- [Providers & Endpoints](/step-types/llm/providers)
+- [Local Models](/step-types/llm/local-models)

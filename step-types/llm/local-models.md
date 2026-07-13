@@ -1,10 +1,8 @@
-# Local AI
+# Local Models
 
 Use Dagu with local model servers such as Ollama, vLLM, or LM Studio when they expose an OpenAI-compatible chat API.
 
-This applies to both:
-
-- workflow steps that use `action: chat.completion`
+This guide covers workflow steps that use `action: chat.completion` with a local model provider.
 
 ## What Dagu Expects
 
@@ -101,4 +99,5 @@ Check where Dagu is actually running. If Dagu runs in Docker, Kubernetes, or on 
 
 ## Related Pages
 
-- [Basic Chat](/features/chat/basics)
+- [LLM Completion](/step-types/llm/)
+- [Providers & Endpoints](/step-types/llm/providers)

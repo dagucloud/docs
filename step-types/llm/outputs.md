@@ -146,9 +146,37 @@ Later steps can use the file path `${context.paths.artifacts_dir}/reports/incide
 
 The completed session is saved with the DAG run, including the provider, model, and token usage reported for assistant messages. A chat action also inherits session history from the steps in its `depends` list, which enables multi-step conversations.
 
+```yaml
+steps:
+  - id: first_question
+    action: chat.completion
+    with:
+      provider: openai
+      model: gpt-4o
+      system: |
+        Answer as a math tutor.
+      prompt: What is 2+2?
+
+  - id: followup
+    depends: [first_question]
+    action: chat.completion
+    with:
+      provider: openai
+      model: gpt-4o
+      prompt: Now multiply that result by 3.
+```
+
+Session inheritance follows these rules:
+
+- History is transitive because every chat step saves its inherited messages, its own messages, and the response.
+- Histories from multiple dependencies are merged in the order listed in `depends`.
+- Only the first system message is kept when inherited histories contain several system messages.
+- Retries continue with the session already attached to the DAG run.
+
+When approval push-back re-executes a chat step, Dagu restores the previous conversation and appends the reviewer feedback as the next user message. The workflow does not need to add `${FEEDBACK}` to its messages. See [Approval push-back](/writing-workflows/approval#push-back-environment) for the feedback environment values.
+
 ## Related
 
 - [LLM Completion](/step-types/llm/) for basic usage and configuration
 - [Router](/step-types/router) for complete routing behavior
 - [Outputs](/writing-workflows/outputs) and [Artifacts](/writing-workflows/artifacts) for general data-flow behavior
-

@@ -71,9 +71,9 @@ Values registered as Dagu secrets are masked before messages are sent to the pro
 
 ## Next Steps
 
+- [Chat & LLM](/features/chat/) for choosing between completions, tool calling, external agent harnesses, and MCP
 - [Providers & Endpoints](/step-types/llm/providers) for credentials, OpenRouter, local models, custom endpoints, and shared defaults
 - [Reliability](/step-types/llm/reliability) for model fallback and failure retries
 - [Outputs & Routing](/step-types/llm/outputs) for consuming responses, artifacts, sessions, and conditional branches
 - [Reasoning & Web Search](/step-types/llm/reasoning-web-search) for model reasoning and provider search capabilities
 - [Tool Calling](/features/chat/tool-calling) for exposing DAGs as model tools
-
