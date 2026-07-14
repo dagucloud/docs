@@ -559,7 +559,11 @@ Creates and starts a DAG run with optional parameters.
 
 **Endpoint**: `POST /api/v1/dags/{fileName}/start-sync`
 
-Creates and starts a DAG run, waits for it to complete (or timeout), and returns the full execution details. This is useful for automation scripts and CI/CD pipelines that need to wait for a DAG to finish before proceeding.
+::: warning Deprecated
+Use `POST /api/v1/dags/{fileName}/start` for new integrations, then monitor the DAG run through the DAG-run status API or SSE. This endpoint remains available for backward compatibility.
+:::
+
+Creates and starts a DAG run, waits for it to complete (or timeout), and returns the full execution details.
 
 **Request Body**:
 ```json
