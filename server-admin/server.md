@@ -42,7 +42,7 @@ access_log_mode: "all"     # Access log mode: "all" (default), "non-public", or 
 headless: false           # Run without Web UI
 check_updates: true       # Automatic web UI update checks (default: true)
 metrics: "private"        # Metrics endpoint access: "private" (default) or "public"
-cors_allowed_origins: []  # Explicit CORS origins; empty = allow all without credentials (default)
+cors_allowed_origins: []  # Empty disables cross-origin browser access (default)
 
 # Directory Paths (must be under "paths" key)
 paths:
@@ -175,7 +175,7 @@ All options support `DAGU_` prefix:
 - `DAGU_ACCESS_LOG_MODE` - Access log mode: `all` (default), `non-public`, or `none`
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
-- `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`); when empty, all origins are allowed without credentials
+- `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`). An empty value disables cross-origin browser access. An explicit `*` allows any origin without credentials and emits a security warning.
 
 **Paths:**
 - `DAGU_HOME` - Set all paths
@@ -225,6 +225,27 @@ All options support `DAGU_` prefix:
 - `DAGU_EVENT_STORE_ENABLED` - Enable centralized event logging (default: `true`)
 - `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `3`, `0` = keep forever)
 
+## Cross-Origin Browser Access
+
+Cross-origin browser access is disabled by default. Same-origin Web UI requests and clients that do not send an `Origin` header, such as the CLI, continue to work normally.
+
+Configure trusted browser application origins explicitly to allow credentialed requests:
+
+```yaml
+cors_allowed_origins:
+  - "https://app.example.com"
+  - "https://admin.example.com"
+```
+
+To intentionally allow any website to make cross-origin requests, configure the wildcard explicitly:
+
+```yaml
+cors_allowed_origins:
+  - "*"
+```
+
+Wildcard access does not allow credentials and emits a security warning at startup. With `auth.mode: none`, any website can execute workflows through the browser, so use the wildcard only when that exposure is intentional. The initial builtin-auth setup endpoint (`/api/v1/auth/setup`) never accepts cross-origin requests, including when the wildcard is configured.
+
 ## Common Setups
 
 ### Development
@@ -262,7 +283,7 @@ Before exposing Dagu beyond a single-user localhost setup, review these controls
 - **Use TLS or a trusted reverse proxy.** If Dagu binds to `0.0.0.0`, pair that with TLS termination and network-level controls rather than exposing the port broadly.
 - **Secure distributed traffic.** For coordinator and worker traffic that crosses host or network boundaries, configure peer TLS or mTLS. See [Distributed Transport Security](/server-admin/distributed/transport-security).
 - **Treat host executors as privileged.** Docker socket mounts, root containers, host bind mounts, and shell-capable workflows should be treated as administrative access to the machine that runs Dagu.
-- **Restrict CORS origins for embedded deployments.** If the Dagu UI is embedded in or accessed alongside another web application, set `cors_allowed_origins` to the explicit list of allowed origins. The default (allow all, no credentials) is safe for standalone deployments.
+- **Allow only trusted cross-origin applications.** Cross-origin browser access is disabled by default. Configure explicit origins only when another browser application must access Dagu, and avoid `*`, especially with `auth.mode: none`.
 
 Example production-focused baseline:
 
