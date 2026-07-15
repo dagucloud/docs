@@ -379,8 +379,8 @@ steps:
   <a href="https://discord.gg/gpahPUjGRk" class="community-link">
     <span class="icon">Discord</span>
   </a>
-  <a href="https://bsky.app/profile/dagu-sh.bsky.social" class="community-link">
-    <span class="icon">Bluesky</span>
+  <a href="https://x.com/yohamta" class="community-link">
+    <span class="icon">X (Product updates)</span>
   </a>
   <a href="https://github.com/dagu-org/dagu/issues" class="community-link">
     <span class="icon">Issues</span>
