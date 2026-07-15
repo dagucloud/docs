@@ -1,5 +1,5 @@
 import DefaultTheme from 'vitepress/theme'
-import { onMounted, watch, nextTick } from 'vue'
+import { nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import './style.css'
 
@@ -23,6 +23,12 @@ function selectOSTab() {
   })
 }
 
+function starCtaLocation(anchor, route) {
+  if (anchor.closest('.VPNav')) return 'navigation'
+  if (route.path.includes('/getting-started/quickstart')) return 'quickstart'
+  return 'content'
+}
+
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
@@ -30,8 +36,25 @@ export default {
   },
   setup() {
     const route = useRoute()
+    const trackGitHubStarClick = (event) => {
+      if (!(event.target instanceof Element)) return
+
+      const anchor = event.target.closest('a')
+      if (!anchor || !anchor.textContent?.includes('Star Dagu')) return
+
+      window.posthog?.capture?.('github_star_cta_clicked', {
+        surface: 'docs',
+        location: starCtaLocation(anchor, route),
+      })
+    }
+
     onMounted(() => {
       selectOSTab()
+      document.addEventListener('click', trackGitHubStarClick)
+    })
+
+    onUnmounted(() => {
+      document.removeEventListener('click', trackGitHubStarClick)
     })
 
     // Re-run when navigating to a new page

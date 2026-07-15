@@ -107,6 +107,10 @@ dagu start-all
 
 Visit <http://localhost:8080>. The UI shows live run status, logs per step, execution history, and a YAML editor.
 
+::: tip Using Dagu?
+Star Dagu on GitHub to bookmark the repository and signal your support: [★ Star Dagu on GitHub](https://github.com/dagucloud/dagu).
+:::
+
 On first launch against an empty DAGs directory (`~/.config/dagu/dags/`), Dagu creates a set of example workflows (`example-01-basic-sequential.yaml` through `example-06-container-workflow.yaml`). Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable.
 
 ## Core pieces

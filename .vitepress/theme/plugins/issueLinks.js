@@ -22,7 +22,7 @@ export function issueLinksPlugin(md) {
         const issueNum = num1 || num2;
         const prefix = match.startsWith('(') ? '(' : '';
         const suffix = match.endsWith(')') ? ')' : '';
-        return `${prefix}<a href="https://github.com/dagu-org/dagu/issues/${issueNum}" target="_blank" rel="noopener">#${issueNum}</a>${suffix}`;
+        return `${prefix}<a href="https://github.com/dagucloud/dagu/issues/${issueNum}" target="_blank" rel="noopener">#${issueNum}</a>${suffix}`;
       }
     );
     

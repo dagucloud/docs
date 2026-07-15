@@ -548,7 +548,8 @@ export default withMermaid(
         { text: "Actions", link: "/step-types/shell", activeMatch: "/(step-types|dagu-actions)/" },
         { text: "Operation", link: "/server-admin/", activeMatch: "/server-admin/" },
         { text: "AI", link: "/mcp/", activeMatch: "/(mcp|features|embedding)/" },
-        { text: "llms.txt", link: "https://raw.githubusercontent.com/dagu-org/dagu/main/llms.txt" },
+        { text: "★ Star Dagu", link: "https://github.com/dagucloud/dagu" },
+        { text: "llms.txt", link: "https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt" },
       ],
 
       sidebar: {

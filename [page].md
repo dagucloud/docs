@@ -373,8 +373,8 @@ steps:
 ## Community
 
 <div class="community-links">
-  <a href="https://github.com/dagu-org/dagu" class="community-link">
-    <span class="icon">GitHub</span>
+  <a href="https://github.com/dagucloud/dagu" class="community-link">
+    <span class="icon">★ Star Dagu on GitHub</span>
   </a>
   <a href="https://discord.gg/gpahPUjGRk" class="community-link">
     <span class="icon">Discord</span>
@@ -382,7 +382,7 @@ steps:
   <a href="https://x.com/yohamta" class="community-link">
     <span class="icon">X (Product updates)</span>
   </a>
-  <a href="https://github.com/dagu-org/dagu/issues" class="community-link">
+  <a href="https://github.com/dagucloud/dagu/issues" class="community-link">
     <span class="icon">Issues</span>
   </a>
 </div>
