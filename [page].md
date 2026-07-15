@@ -380,7 +380,7 @@ steps:
     <span class="icon">Discord</span>
   </a>
   <a href="https://x.com/yohamta" class="community-link">
-    <span class="icon">X (Product updates)</span>
+    <span class="icon">Follow on X for product updates</span>
   </a>
   <a href="https://github.com/dagucloud/dagu/issues" class="community-link">
     <span class="icon">Issues</span>
