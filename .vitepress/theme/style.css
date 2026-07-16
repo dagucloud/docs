@@ -1,183 +1,181 @@
 /* ════════════════════════════════════════════════════════════
-   "Discovery One" — docs flight deck.
-   The documentation counterpart of the marketing site: a dark
-   instrument bay (and its clinical daylight twin) lit by HAL red
-   as the single focal accent, CRT amber as the operational voice
-   (links, labels, kickers), instrument cyan for cool data, and a
-   teal "nominal" status. Deliberately NOT green; deliberately not
-   the old sepia. Code is always a CRT readout — dark in both modes.
+   "Kiln" — the dagu.sh brand system, docs edition.
+   Two material families: warm cream paper for daylight, matte
+   ink (#0B0D12 · #1A1C23) for dark. One violet (#7C6EF4) as the
+   single accent, signal green (#22C55E) for status, and amber
+   kept only as phosphor inside code and terminal surfaces.
+   Code is always an ink panel — dark in both modes.
    ════════════════════════════════════════════════════════════ */
 
-/* ───────────────────────── LIGHT — daylight flight deck ───────────────────────── */
+/* ───────────────────────── LIGHT — the cream room ───────────────────────── */
 :root {
   /* Motif accents (semantic, per-mode). */
-  --deck-red: #d83a30;          /* HAL red — focal CTA / live */
-  --deck-red-hover: #c2342b;
-  --deck-amber: #a25f00;        /* CRT amber — operational: links, labels */
-  --deck-amber-bright: #cf8b1f;
-  --deck-cyan: #0e7f90;         /* instrument cyan — cool data */
-  --deck-violet: #6d4fd0;
-  --deck-teal: #0e8f7c;         /* "nominal" status */
-  --deck-glow-red: 0 8px 22px rgba(216, 58, 48, 0.22);
-  --deck-glow-amber: 0 8px 20px rgba(162, 95, 0, 0.18);
-  --deck-grid: rgba(40, 70, 110, 0.06);
-  --deck-crt-bg: #05070b;
-  --deck-crt-text: #d6e2ea;
+  --kiln-violet: #5d4fe0;        /* focal accent — CTAs, links, active */
+  --kiln-violet-hover: #4b3dd1;
+  --kiln-violet-soft: #7c6ef4;
+  --kiln-green: #178a44;         /* signal — success, prompts */
+  --kiln-amber: #a06315;         /* phosphor — code-surface accents only */
+  --kiln-danger: #c03a31;
+  --kiln-glow-violet: 0 8px 22px rgba(93, 79, 224, 0.20);
+  --kiln-glow-green: 0 8px 20px rgba(23, 138, 68, 0.16);
+  --kiln-grid: rgba(11, 13, 18, 0.05);
+  --kiln-code-bg: #08090e;
+  --kiln-code-text: #dddcd4;
+  --kiln-code-amber: #e2a566;
 
-  /* Brand = amber operational voice (links, active states). */
-  --vp-c-brand-1: #9a5a00;
-  --vp-c-brand-2: #7f4a00;
-  --vp-c-brand-3: #8a5200;
-  --vp-c-brand-soft: rgba(162, 95, 0, 0.10);
+  /* Brand = violet voice (links, active states). */
+  --vp-c-brand-1: #5d4fe0;
+  --vp-c-brand-2: #4b3dd1;
+  --vp-c-brand-3: #4335c2;
+  --vp-c-brand-soft: rgba(124, 110, 244, 0.12);
   --vp-c-brand: var(--vp-c-brand-1);
-  --vp-c-brand-light: #b06f0c;
-  --vp-c-brand-lighter: #cf8b1f;
+  --vp-c-brand-light: #6f61ee;
+  --vp-c-brand-lighter: #8f83f6;
   --vp-c-brand-dark: var(--vp-c-brand-2);
   --vp-c-brand-darker: var(--vp-c-brand-3);
 
-  --vp-c-accent: var(--deck-red);
-  --vp-c-success: var(--deck-teal);
-  --vp-c-warning: #b06f0c;
-  --vp-c-danger: var(--deck-red);
+  --vp-c-accent: var(--kiln-violet);
+  --vp-c-success: var(--kiln-green);
+  --vp-c-warning: #96690f;
+  --vp-c-danger: var(--kiln-danger);
 
-  /* Surfaces — clinical cool white, instrument-panel greys. */
-  --vp-c-bg: #f6f8fc;
-  --vp-c-bg-alt: #eef2f8;
-  --vp-c-bg-soft: #ffffff;
-  --vp-c-bg-mute: #e6ecf4;
+  /* Surfaces — warm cream paper. */
+  --vp-c-bg: #f4f2ed;
+  --vp-c-bg-alt: #efece4;
+  --vp-c-bg-soft: #fbfaf6;
+  --vp-c-bg-mute: #eae6db;
 
-  /* Type — cool near-black. */
-  --vp-c-text-1: #0e141d;
-  --vp-c-text-2: #48566a;
-  --vp-c-text-3: #7a899c;
+  /* Type — warm near-ink. */
+  --vp-c-text-1: #14161b;
+  --vp-c-text-2: #4c4f58;
+  --vp-c-text-3: #83868f;
 
-  /* Bezels & seams. */
-  --vp-c-divider: #d3dbe8;
-  --vp-c-divider-light: #e4e9f1;
-  --vp-c-gutter: #d3dbe8;
+  /* Hairlines & seams. */
+  --vp-c-divider: #e0dcd0;
+  --vp-c-divider-light: #e9e5da;
+  --vp-c-gutter: #e0dcd0;
 
-  /* Focal buttons stay HAL red in both modes. */
+  /* Focal buttons stay violet in both modes. */
   --vp-button-brand-border: transparent;
   --vp-button-brand-text: #ffffff;
-  --vp-button-brand-bg: var(--deck-red);
+  --vp-button-brand-bg: var(--kiln-violet);
   --vp-button-brand-hover-border: transparent;
   --vp-button-brand-hover-text: #ffffff;
-  --vp-button-brand-hover-bg: var(--deck-red-hover);
+  --vp-button-brand-hover-bg: var(--kiln-violet-hover);
   --vp-button-brand-active-border: transparent;
   --vp-button-brand-active-text: #ffffff;
-  --vp-button-brand-active-bg: var(--deck-red-hover);
+  --vp-button-brand-active-bg: var(--kiln-violet-hover);
 
-  /* Code = CRT readout (dark even under daylight). */
-  --vp-code-block-bg: var(--deck-crt-bg);
-  --vp-code-copy-code-bg: #0e131b;
-  --vp-code-copy-code-hover-bg: #141b27;
-  --vp-code-copy-code-active-text: var(--deck-crt-text);
-  --vp-code-tab-divider: rgba(120, 150, 190, 0.14);
-  --vp-code-tab-text-color: #8a99ab;
-  --vp-code-tab-hover-text-color: #d6e2ea;
-  --vp-code-tab-active-text-color: #ffb454;
-  --vp-code-tab-active-bar-color: #ffb454;
+  /* Code = ink panel (dark even on cream). */
+  --vp-code-block-bg: var(--kiln-code-bg);
+  --vp-code-copy-code-bg: #12141b;
+  --vp-code-copy-code-hover-bg: #1a1c23;
+  --vp-code-copy-code-active-text: var(--kiln-code-text);
+  --vp-code-tab-divider: rgba(148, 138, 247, 0.16);
+  --vp-code-tab-text-color: #8a8d99;
+  --vp-code-tab-hover-text-color: #dddcd4;
+  --vp-code-tab-active-text-color: var(--kiln-code-amber);
+  --vp-code-tab-active-bar-color: var(--kiln-code-amber);
 
-  /* Custom blocks — GO / CAUTION / FAULT / DATA. */
-  --vp-custom-block-tip-border: rgba(14, 143, 124, 0.4);
-  --vp-custom-block-tip-text: #0c6b5d;
-  --vp-custom-block-tip-bg: rgba(14, 143, 124, 0.08);
-  --vp-custom-block-tip-code-bg: var(--deck-crt-bg);
-  --vp-custom-block-warning-border: rgba(176, 111, 12, 0.4);
-  --vp-custom-block-warning-text: #8a5200;
-  --vp-custom-block-warning-bg: rgba(176, 111, 12, 0.08);
-  --vp-custom-block-warning-code-bg: var(--deck-crt-bg);
-  --vp-custom-block-danger-border: rgba(216, 58, 48, 0.4);
-  --vp-custom-block-danger-text: #b32a21;
-  --vp-custom-block-danger-bg: rgba(216, 58, 48, 0.07);
-  --vp-custom-block-danger-code-bg: var(--deck-crt-bg);
-  --vp-custom-block-info-border: rgba(14, 127, 144, 0.34);
-  --vp-custom-block-info-text: #0b6573;
-  --vp-custom-block-info-bg: rgba(14, 127, 144, 0.07);
-  --vp-custom-block-info-code-bg: var(--deck-crt-bg);
+  /* Custom blocks — TIP / WARNING / DANGER / INFO. */
+  --vp-custom-block-tip-border: rgba(23, 138, 68, 0.38);
+  --vp-custom-block-tip-text: #116636;
+  --vp-custom-block-tip-bg: rgba(23, 138, 68, 0.08);
+  --vp-custom-block-tip-code-bg: var(--kiln-code-bg);
+  --vp-custom-block-warning-border: rgba(150, 105, 15, 0.4);
+  --vp-custom-block-warning-text: #7c5407;
+  --vp-custom-block-warning-bg: rgba(150, 105, 15, 0.08);
+  --vp-custom-block-warning-code-bg: var(--kiln-code-bg);
+  --vp-custom-block-danger-border: rgba(192, 58, 49, 0.4);
+  --vp-custom-block-danger-text: #a32e26;
+  --vp-custom-block-danger-bg: rgba(192, 58, 49, 0.07);
+  --vp-custom-block-danger-code-bg: var(--kiln-code-bg);
+  --vp-custom-block-info-border: rgba(93, 79, 224, 0.32);
+  --vp-custom-block-info-text: #4a3fb8;
+  --vp-custom-block-info-bg: rgba(93, 79, 224, 0.07);
+  --vp-custom-block-info-code-bg: var(--kiln-code-bg);
 
   /* Typography. */
-  --vp-font-family-base: "Inter", ui-sans-serif, system-ui, -apple-system,
-    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
-    sans-serif;
+  --vp-font-family-base: "Hanken Grotesk", ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif;
   --vp-font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular,
     "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
     monospace;
-  --vp-font-family-display: "Space Grotesk", var(--vp-font-family-base);
+  --vp-font-family-display: "Hanken Grotesk", var(--vp-font-family-base);
 
-  /* Hero signage gradient — red focal into amber. */
-  --brand-gradient: linear-gradient(120deg, var(--deck-red) 0%, var(--deck-amber-bright) 100%);
+  /* Hero signage gradient — violet range, quiet. */
+  --brand-gradient: linear-gradient(120deg, var(--kiln-violet) 0%, var(--kiln-violet-soft) 100%);
 }
 
-/* ───────────────────────── DARK — the void ───────────────────────── */
+/* ───────────────────────── DARK — the ink room ───────────────────────── */
 .dark {
-  --deck-red: #ff3b30;
-  --deck-red-hover: #ff584d;
-  --deck-amber: #ffb454;
-  --deck-amber-bright: #ffc06a;
-  --deck-cyan: #36d3e0;
-  --deck-violet: #b18cff;
-  --deck-teal: #2fd3b6;
-  --deck-glow-red: 0 0 24px rgba(255, 59, 48, 0.42);
-  --deck-glow-amber: 0 0 22px rgba(255, 180, 84, 0.3);
-  --deck-grid: rgba(120, 150, 190, 0.06);
+  --kiln-violet: #7c6ef4;
+  --kiln-violet-hover: #948af7;
+  --kiln-violet-soft: #a89ff8;
+  --kiln-green: #22c55e;
+  --kiln-amber: #d9a03c;
+  --kiln-danger: #ef5350;
+  --kiln-glow-violet: 0 0 24px rgba(124, 110, 244, 0.38);
+  --kiln-glow-green: 0 0 22px rgba(34, 197, 94, 0.26);
+  --kiln-grid: rgba(148, 138, 247, 0.055);
 
-  --vp-c-brand-1: #ffb454;
-  --vp-c-brand-2: #e89b3e;
-  --vp-c-brand-3: #cf8730;
-  --vp-c-brand-soft: rgba(255, 180, 84, 0.14);
-  --vp-c-brand-light: #ffc06a;
-  --vp-c-brand-lighter: #ffd49a;
+  --vp-c-brand-1: #a89ff8;
+  --vp-c-brand-2: #948af7;
+  --vp-c-brand-3: #7c6ef4;
+  --vp-c-brand-soft: rgba(124, 110, 244, 0.14);
+  --vp-c-brand-light: #b7b0f9;
+  --vp-c-brand-lighter: #c9c3fb;
 
-  --vp-c-success: #2fd3b6;
-  --vp-c-warning: #ffb454;
-  --vp-c-danger: #ff4d3d;
+  --vp-c-success: #22c55e;
+  --vp-c-warning: #d9a03c;
+  --vp-c-danger: #ef5350;
 
-  /* Void & panel surfaces. */
-  --vp-c-bg: #07090e;
-  --vp-c-bg-alt: #0a0e15;
-  --vp-c-bg-soft: #0e131b;
-  --vp-c-bg-mute: #141b27;
+  /* Ink surfaces. */
+  --vp-c-bg: #0b0d12;
+  --vp-c-bg-alt: #0e1016;
+  --vp-c-bg-soft: #12141b;
+  --vp-c-bg-mute: #1a1c23;
 
-  --vp-c-text-1: #eef2f7;
-  --vp-c-text-2: #99a6b6;
-  --vp-c-text-3: #5e6c7e;
+  --vp-c-text-1: #f2f1ec;
+  --vp-c-text-2: #a2a5ad;
+  --vp-c-text-3: #6d707b;
 
-  --vp-c-divider: #1b2230;
-  --vp-c-divider-light: #141b27;
-  --vp-c-gutter: #04050a;
+  --vp-c-divider: #1e212b;
+  --vp-c-divider-light: #1a1c23;
+  --vp-c-gutter: #07080c;
 
-  /* Custom blocks on the void. */
-  --vp-custom-block-tip-border: rgba(47, 211, 182, 0.36);
-  --vp-custom-block-tip-text: #6ee7cf;
-  --vp-custom-block-tip-bg: rgba(47, 211, 182, 0.08);
-  --vp-custom-block-warning-border: rgba(255, 180, 84, 0.36);
-  --vp-custom-block-warning-text: #ffc987;
-  --vp-custom-block-warning-bg: rgba(255, 180, 84, 0.08);
-  --vp-custom-block-danger-border: rgba(255, 77, 61, 0.4);
-  --vp-custom-block-danger-text: #ff8d82;
-  --vp-custom-block-danger-bg: rgba(255, 77, 61, 0.08);
-  --vp-custom-block-info-border: rgba(54, 211, 224, 0.3);
-  --vp-custom-block-info-text: #7fe3ed;
-  --vp-custom-block-info-bg: rgba(54, 211, 224, 0.07);
+  /* Custom blocks on ink. */
+  --vp-custom-block-tip-border: rgba(34, 197, 94, 0.36);
+  --vp-custom-block-tip-text: #7ce0a4;
+  --vp-custom-block-tip-bg: rgba(34, 197, 94, 0.08);
+  --vp-custom-block-warning-border: rgba(217, 160, 60, 0.36);
+  --vp-custom-block-warning-text: #e8bd76;
+  --vp-custom-block-warning-bg: rgba(217, 160, 60, 0.08);
+  --vp-custom-block-danger-border: rgba(239, 83, 80, 0.4);
+  --vp-custom-block-danger-text: #f59391;
+  --vp-custom-block-danger-bg: rgba(239, 83, 80, 0.08);
+  --vp-custom-block-info-border: rgba(148, 138, 247, 0.3);
+  --vp-custom-block-info-text: #b7b0f9;
+  --vp-custom-block-info-bg: rgba(124, 110, 244, 0.08);
 }
 
-/* ───────────────────────── Ambient bay lighting (dark only) ───────────────────────── */
+/* ───────────────────────── Ambient room lighting (dark only) ───────────────────────── */
 .dark .VPContent {
   background-image:
-    radial-gradient(circle at 14% -8%, rgba(54, 211, 224, 0.05), transparent 28%),
-    radial-gradient(circle at 88% -6%, rgba(255, 59, 48, 0.045), transparent 24%);
+    radial-gradient(circle at 14% -8%, rgba(124, 110, 244, 0.06), transparent 28%),
+    radial-gradient(circle at 88% -6%, rgba(34, 197, 94, 0.035), transparent 24%);
   background-repeat: no-repeat;
 }
 
-/* ───────────────────────── Signage type ───────────────────────── */
+/* ───────────────────────── Display type ───────────────────────── */
 .vp-doc h1,
 .vp-doc h2,
 .VPHero .name,
 .VPHomeHero .name,
 h1.title {
   font-family: var(--vp-font-family-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.028em;
 }
 
 .VPHero .name {
@@ -187,27 +185,27 @@ h1.title {
   -webkit-text-fill-color: transparent;
 }
 
-/* ───────────────────────── CRT code readout ───────────────────────── */
+/* ───────────────────────── Ink code panels ───────────────────────── */
 .vp-doc [class*="language-"] {
-  border: 1px solid #11202b;
-  border-radius: 8px;
+  border: 1px solid #1e212b;
+  border-radius: 12px;
 }
 .vp-doc [class*="language-"] > span.lang {
-  color: #5d6f7e;
+  color: #62656f;
 }
 .vp-doc [class*="language-"] .line-number {
-  color: rgba(214, 226, 234, 0.28) !important;
+  color: rgba(221, 220, 212, 0.28) !important;
 }
 .vp-doc [class*="language-"] code {
-  --vp-code-line-highlight-color: rgba(255, 180, 84, 0.1);
+  --vp-code-line-highlight-color: rgba(124, 110, 244, 0.12);
   /* Base readout color for untokenized text (plaintext blocks, tree art).
      Shiki token spans carry their own inline color and still win. The code
      surface is dark in both modes, so this must stay light in both. */
-  color: var(--deck-crt-text);
+  color: var(--kiln-code-text);
 }
-/* Inline code — instrument cyan on a faint inset. */
+/* Inline code — violet voice on a faint inset. */
 .vp-doc :not(pre) > code {
-  color: var(--deck-cyan);
+  color: var(--vp-c-brand-1);
   background-color: var(--vp-c-bg-mute);
   border: 1px solid var(--vp-c-divider);
 }
@@ -223,23 +221,23 @@ h1.title {
   letter-spacing: 0.02em;
 }
 .vp-code-group .tabs label:hover {
-  color: var(--deck-amber);
+  color: var(--vp-c-brand-1);
 }
 
-/* ───────────────────────── Buttons — flight-deck controls ───────────────────────── */
+/* ───────────────────────── Buttons ───────────────────────── */
 .VPButton.brand {
-  background-color: var(--deck-red);
+  background-color: var(--kiln-violet);
   border-color: transparent;
   color: #fff;
 }
 .VPButton.brand:hover {
-  background-color: var(--deck-red-hover);
+  background-color: var(--kiln-violet-hover);
 }
 .dark .VPButton.brand {
-  box-shadow: var(--deck-glow-red);
+  box-shadow: var(--kiln-glow-violet);
 }
 
-/* ───────────────────────── Sidebar instrument rails ───────────────────────── */
+/* ───────────────────────── Sidebar rails ───────────────────────── */
 .VPSidebar {
   scrollbar-width: thin;
   scrollbar-color: var(--vp-c-divider) transparent;
@@ -258,15 +256,15 @@ h1.title {
 /* ───────────────────────── Cards ───────────────────────── */
 .feature-card {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem;
   background: var(--vp-c-bg-soft);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .feature-card:hover {
-  border-color: var(--deck-amber);
-  box-shadow: var(--deck-glow-amber);
+  border-color: var(--kiln-violet);
+  box-shadow: var(--kiln-glow-violet);
 }
 
 .feature-card.noninteractive-card {
@@ -288,14 +286,14 @@ h1.title {
 
 .example-card {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1rem;
   background: var(--vp-c-bg-soft);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .example-card:hover {
-  border-color: var(--deck-amber);
+  border-color: var(--kiln-violet);
 }
 
 .example-card h3 {
@@ -328,17 +326,17 @@ h1.title {
 /* Custom container for workflow visualization */
 .workflow-visualizer {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1rem;
   margin: 1rem 0;
   background-color: var(--vp-c-bg-soft);
 }
 
-/* ───────────────────────── Terminal / CRT readout blocks ───────────────────────── */
+/* ───────────────────────── Terminal / ink readout blocks ───────────────────────── */
 .interactive-terminal {
-  background-color: var(--deck-crt-bg);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  background-color: var(--kiln-code-bg);
+  border: 1px solid #1e212b;
+  border-radius: 12px;
   padding: 1rem;
   margin: 1rem 0;
   font-family: var(--vp-font-family-mono);
@@ -346,17 +344,17 @@ h1.title {
 }
 
 .terminal-command {
-  color: var(--deck-crt-text);
+  color: var(--kiln-code-text);
   margin: 0.5rem 0;
 }
 
 .terminal-command::before {
   content: "$ ";
-  color: #ff6a5e;
+  color: #22c55e;
 }
 
 .terminal-output {
-  color: #9fb0bd;
+  color: #8a8d99;
   margin: 0.5rem 0 0.5rem 1rem;
 }
 
@@ -385,7 +383,7 @@ h1.title {
 }
 
 .comparison-table .feature-yes {
-  color: var(--deck-teal);
+  color: var(--vp-c-success);
   font-weight: 600;
 }
 
@@ -416,23 +414,23 @@ h1.title {
   display: inline-block;
   padding: 0.75rem 1.5rem;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   transition: all 0.2s;
 }
 
 .hero-actions .VPButton.brand {
-  background-color: var(--deck-red);
+  background-color: var(--kiln-violet);
   color: white;
 }
 
 .hero-actions .VPButton.brand:hover {
-  background-color: var(--deck-red-hover);
+  background-color: var(--kiln-violet-hover);
   transform: translateY(-1px);
 }
 
 .dark .hero-actions .VPButton.brand {
-  box-shadow: var(--deck-glow-red);
+  box-shadow: var(--kiln-glow-violet);
 }
 
 .hero-actions .VPButton.alt {
@@ -442,8 +440,8 @@ h1.title {
 }
 
 .hero-actions .VPButton.alt:hover {
-  border-color: var(--deck-cyan);
-  color: var(--deck-cyan);
+  border-color: var(--kiln-violet);
+  color: var(--vp-c-brand-1);
 }
 
 /* Features grid */
@@ -476,7 +474,7 @@ h1.title {
 
 .real-world-usecase {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.25rem;
   background: var(--vp-c-bg-soft);
 }
@@ -512,16 +510,16 @@ h1.title {
 
 .step-card {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem;
   background: var(--vp-c-bg-soft);
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .step-card:hover {
-  border-color: var(--deck-amber);
+  border-color: var(--kiln-violet);
   transform: translateY(-2px);
-  box-shadow: var(--deck-glow-amber);
+  box-shadow: var(--kiln-glow-violet);
 }
 
 .step-card h3 {
@@ -561,7 +559,7 @@ h1.title {
   max-width: 24ch;
   font-size: 2.15rem;
   line-height: 1.12;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.028em;
   font-family: var(--vp-font-family-display);
   color: var(--vp-c-text-1);
 }
@@ -573,13 +571,13 @@ h1.title {
   line-height: 1.7;
 }
 
-/* Instrument kicker — amber mono with a leading status tick. */
+/* Kicker — violet mono with a leading status tick. */
 .overview-kicker {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  color: var(--deck-amber);
+  color: var(--vp-c-brand-1);
   font-family: var(--vp-font-family-mono);
   font-size: 0.72rem;
   font-weight: 600;
@@ -592,8 +590,8 @@ h1.title {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: var(--deck-amber);
-  box-shadow: 0 0 8px var(--deck-amber);
+  background: var(--kiln-green);
+  box-shadow: 0 0 8px var(--kiln-green);
 }
 
 .overview-actions {
@@ -609,7 +607,7 @@ h1.title {
   justify-content: center;
   min-height: 42px;
   padding: 0.65rem 1rem;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 650;
   text-decoration: none !important;
@@ -619,17 +617,17 @@ h1.title {
 .vp-doc .overview-button-primary,
 .vp-doc .overview-button-primary:visited {
   border: 1px solid transparent;
-  background: var(--deck-red);
+  background: var(--kiln-violet);
   color: #ffffff;
 }
 
 .vp-doc .overview-button-primary:hover {
-  background: var(--deck-red-hover);
+  background: var(--kiln-violet-hover);
   color: #ffffff;
 }
 
 .dark .vp-doc .overview-button-primary {
-  box-shadow: var(--deck-glow-red);
+  box-shadow: var(--kiln-glow-violet);
 }
 
 .vp-doc .overview-button-secondary,
@@ -640,18 +638,18 @@ h1.title {
 }
 
 .vp-doc .overview-button-secondary:hover {
-  border-color: var(--deck-cyan);
-  color: var(--deck-cyan);
+  border-color: var(--kiln-violet);
+  color: var(--vp-c-brand-1);
 }
 
-/* Command card — a CRT console panel framed by amber registration brackets. */
+/* Command card — an ink console panel framed by violet registration brackets. */
 .overview-command-card {
   position: relative;
   overflow: hidden;
   width: 100%;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--deck-crt-bg);
+  border-radius: 12px;
+  background: var(--kiln-code-bg);
   box-shadow: var(--vp-shadow-3, 0 12px 32px rgba(0, 0, 0, 0.28));
 }
 
@@ -661,7 +659,7 @@ h1.title {
   position: absolute;
   width: 16px;
   height: 16px;
-  border-color: var(--deck-amber);
+  border-color: var(--kiln-violet-soft);
   border-style: solid;
   opacity: 0.55;
   pointer-events: none;
@@ -675,8 +673,8 @@ h1.title {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(120, 150, 190, 0.14);
-  color: var(--deck-crt-text);
+  border-bottom: 1px solid rgba(148, 138, 247, 0.14);
+  color: var(--kiln-code-text);
   font-family: var(--vp-font-family-mono);
   font-size: 0.74rem;
   letter-spacing: 0.08em;
@@ -684,7 +682,7 @@ h1.title {
 }
 
 .overview-command-header span + span {
-  color: var(--deck-amber);
+  color: var(--kiln-code-amber);
 }
 
 .overview-code-lines {
@@ -696,7 +694,7 @@ h1.title {
 
 .overview-code-lines span {
   min-height: 1.35em;
-  color: var(--deck-crt-text);
+  color: var(--kiln-code-text);
   font-family: var(--vp-font-family-mono);
   font-size: 0.82rem;
   line-height: 1.65;
@@ -708,8 +706,8 @@ h1.title {
   gap: 0.35rem;
   margin: 2rem 0;
   padding: 1rem 1.25rem;
-  border-left: 4px solid var(--deck-red);
-  border-radius: 8px;
+  border-left: 4px solid var(--kiln-violet);
+  border-radius: 12px;
   background: var(--vp-c-bg-soft);
 }
 
@@ -733,7 +731,7 @@ h1.title {
 .overview-card,
 .overview-mode-card {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--vp-c-bg-soft);
 }
 
@@ -742,7 +740,7 @@ h1.title {
 }
 
 .overview-panel-accent {
-  border-color: rgba(255, 180, 84, 0.45);
+  border-color: rgba(124, 110, 244, 0.45);
   background: var(--vp-c-brand-soft);
 }
 
@@ -778,7 +776,7 @@ h1.title {
   min-height: 54px;
   padding: 0.65rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-1);
   font-family: var(--vp-font-family-mono);
@@ -900,8 +898,8 @@ h1.title {
 
 .logo-container:hover {
   transform: translateY(-2px);
-  box-shadow: var(--deck-glow-red);
-  border-color: var(--deck-red);
+  box-shadow: var(--kiln-glow-violet);
+  border-color: var(--kiln-violet);
 }
 
 .logo-icon {
@@ -912,13 +910,13 @@ h1.title {
 
 .logo-text {
   font-size: 3rem;
-  font-weight: 800;
+  font-weight: 700;
   font-family: var(--vp-font-family-display);
   background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.028em;
   line-height: 1.2;
   display: inline-block;
   padding: 0.1em 0;
@@ -947,15 +945,15 @@ h1.title {
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 10px;
   text-decoration: none;
   color: var(--vp-c-text-1);
   transition: all 0.2s ease;
 }
 
 .community-link:hover {
-  border-color: var(--deck-amber);
-  color: var(--deck-amber);
+  border-color: var(--kiln-violet);
+  color: var(--vp-c-brand-1);
   transform: translateY(-1px);
 }
 
@@ -964,9 +962,9 @@ h1.title {
 }
 
 /* ════════════════════════════════════════════════════════════
-   Mermaid — flight-deck schematics.
-   Light: white panels, cool-grey bezels, near-black labels.
-   Dark:  instrument panels on the void, clinical-white labels.
+   Mermaid — brand schematics.
+   Light: cream panels, warm hairlines, near-ink labels.
+   Dark:  ink panels, hairline bezels, warm-white labels.
    ════════════════════════════════════════════════════════════ */
 
 /* Labels — light mode */
@@ -986,30 +984,30 @@ h1.title {
 .mermaid .taskTextOutsideRight,
 .mermaid .taskTextOutsideLeft,
 .mermaid .activeText {
-  fill: #1a2230 !important;
-  color: #1a2230 !important;
+  fill: #1c1e25 !important;
+  color: #1c1e25 !important;
   font-family: var(--vp-font-family-base) !important;
 }
 
 .mermaid * {
-  color: #1a2230 !important;
+  color: #1c1e25 !important;
 }
 
 .mermaid svg text,
 .mermaid svg g text {
-  fill: #1a2230 !important;
+  fill: #1c1e25 !important;
 }
 
 .mermaid tspan,
 [id^="mermaid-"] tspan,
 .mermaid .actor > tspan,
 [id^="mermaid-"] .actor > tspan {
-  fill: #1a2230 !important;
+  fill: #1c1e25 !important;
   stroke: none !important;
 }
 
-.mermaid text[fill]:not([fill="#1a2230"]) {
-  fill: #1a2230 !important;
+.mermaid text[fill]:not([fill="#1c1e25"]) {
+  fill: #1c1e25 !important;
 }
 
 /* Labels — dark mode */
@@ -1029,24 +1027,24 @@ h1.title {
 .dark .mermaid .taskTextOutsideRight,
 .dark .mermaid .taskTextOutsideLeft,
 .dark .mermaid .activeText {
-  fill: #eef2f7 !important;
-  color: #eef2f7 !important;
+  fill: #f2f1ec !important;
+  color: #f2f1ec !important;
 }
 
 .dark .mermaid * {
-  color: #eef2f7 !important;
+  color: #f2f1ec !important;
 }
 
 .dark .mermaid svg text,
 .dark .mermaid svg g text {
-  fill: #eef2f7 !important;
+  fill: #f2f1ec !important;
 }
 
 .dark .mermaid tspan,
 .dark [id^="mermaid-"] tspan,
 .dark .mermaid .actor > tspan,
 .dark [id^="mermaid-"] .actor > tspan {
-  fill: #eef2f7 !important;
+  fill: #f2f1ec !important;
   stroke: none !important;
 }
 
@@ -1060,15 +1058,15 @@ h1.title {
 .mermaid .actor rect,
 .mermaid .participant rect,
 .mermaid .participant-box {
-  fill: #ffffff !important;
-  stroke: #c3cdde !important;
+  fill: #fbfaf6 !important;
+  stroke: #cdc8b9 !important;
   stroke-width: 1.5px !important;
 }
 
 .mermaid .note rect,
 .mermaid .note-box {
-  fill: #eef2f8 !important;
-  stroke: var(--deck-amber) !important;
+  fill: #efece4 !important;
+  stroke: var(--kiln-violet) !important;
   stroke-width: 1.4px !important;
 }
 
@@ -1077,7 +1075,7 @@ h1.title {
 .mermaid .actor-line,
 .mermaid .edgePath .path,
 .mermaid .flowchart-link {
-  stroke: #7a899c !important;
+  stroke: #83868f !important;
 }
 
 /* Nodes & boxes — dark mode */
@@ -1094,16 +1092,16 @@ h1.title {
 .dark [id^="mermaid-"] rect,
 .dark [id^="mermaid-"] .actor rect,
 .dark [id^="mermaid-"] .participant rect {
-  fill: #0e131b !important;
-  stroke: #2d3744 !important;
+  fill: #12141b !important;
+  stroke: #2c3040 !important;
   stroke-width: 1.5px !important;
 }
 
 .dark .mermaid .note rect,
 .dark .mermaid .note-box,
 .dark [id^="mermaid-"] .note rect {
-  fill: #141b27 !important;
-  stroke: rgba(255, 180, 84, 0.5) !important;
+  fill: #1a1c23 !important;
+  stroke: rgba(148, 138, 247, 0.5) !important;
   stroke-width: 1.4px !important;
 }
 
@@ -1112,5 +1110,5 @@ h1.title {
 .dark .mermaid .actor-line,
 .dark .mermaid .edgePath .path,
 .dark .mermaid .flowchart-link {
-  stroke: #5e6c7e !important;
+  stroke: #6d707b !important;
 }

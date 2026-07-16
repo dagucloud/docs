@@ -457,6 +457,85 @@ const fullSidebar = [
   },
 ];
 
+// "Kiln" code theme — phosphor amber keys, signal-green strings, violet
+// functions on an ink panel. Used for both light and dark modes.
+const kilnCodeTheme = {
+  name: "kiln-ink",
+  type: "dark",
+  colors: {
+    "editor.background": "#08090e",
+    "editor.foreground": "#dddcd4",
+  },
+  settings: [
+    { settings: { background: "#08090e", foreground: "#dddcd4" } },
+    {
+      scope: ["comment", "punctuation.definition.comment"],
+      settings: { foreground: "#62656f" },
+    },
+    {
+      scope: [
+        "string",
+        "string.quoted",
+        "punctuation.definition.string",
+        "markup.inline.raw",
+      ],
+      settings: { foreground: "#8fd9a8" },
+    },
+    {
+      scope: [
+        "keyword",
+        "storage.type",
+        "storage.modifier",
+        "entity.name.tag",
+        "support.type.property-name",
+        "keyword.operator.assignment",
+      ],
+      settings: { foreground: "#e2a566" },
+    },
+    {
+      scope: [
+        "constant.numeric",
+        "constant.language",
+        "constant.character.escape",
+        "keyword.other.unit",
+      ],
+      settings: { foreground: "#d8b4fe" },
+    },
+    {
+      scope: [
+        "entity.name.function",
+        "support.function",
+        "meta.function-call.generic",
+      ],
+      settings: { foreground: "#a89ff8" },
+    },
+    {
+      scope: ["variable", "variable.other", "variable.parameter"],
+      settings: { foreground: "#dddcd4" },
+    },
+    {
+      scope: ["variable.other.readwrite", "punctuation"],
+      settings: { foreground: "#dddcd4" },
+    },
+    {
+      scope: ["entity.name.type", "support.class", "support.type"],
+      settings: { foreground: "#948af7" },
+    },
+    {
+      scope: ["markup.heading"],
+      settings: { foreground: "#e2a566" },
+    },
+    {
+      scope: ["markup.bold"],
+      settings: { fontStyle: "bold" },
+    },
+    {
+      scope: ["markup.italic"],
+      settings: { fontStyle: "italic" },
+    },
+  ],
+};
+
 export default withMermaid(
   defineConfig({
     title: "Dagu",
@@ -496,7 +575,7 @@ export default withMermaid(
         "link",
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
         },
       ],
       [
@@ -548,7 +627,6 @@ export default withMermaid(
         { text: "Actions", link: "/step-types/shell", activeMatch: "/(step-types|dagu-actions)/" },
         { text: "Operation", link: "/server-admin/", activeMatch: "/server-admin/" },
         { text: "AI", link: "/mcp/", activeMatch: "/(mcp|features|embedding)/" },
-        { text: "★ Star Dagu", link: "https://github.com/dagucloud/dagu" },
         { text: "llms.txt", link: "https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt" },
       ],
 
@@ -602,11 +680,11 @@ export default withMermaid(
     },
 
     markdown: {
-      // Code is a CRT readout in both modes — same dark token set on a
-      // void background, so light mode renders dark code blocks too.
+      // Code is an ink panel in both modes — same warm token set on an
+      // ink background, so light mode renders dark code blocks too.
       theme: {
-        light: "github-dark",
-        dark: "github-dark",
+        light: kilnCodeTheme,
+        dark: kilnCodeTheme,
       },
       lineNumbers: true,
       config: (md) => {
