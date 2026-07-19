@@ -41,7 +41,7 @@ Use this model when you want to keep the server, workers, secrets, logs, and wor
 
 ### Managed server
 
-<img src="/deployment-models/managed.gif" alt="Dagu server deployment with managed Web UI, API, scheduler, coordinator, runtime, and persistent storage in an isolated gVisor instance on GKE." style="width: 100%; border-radius: 8px; border: 1px solid var(--vp-c-divider); margin: 16px 0 24px;" />
+<img src="/deployment-models/managed.gif" alt="Dagu Cloud deployment where your team connects over HTTPS to a managed Dagu server with isolated runtime and storage." style="width: 100%; border-radius: 8px; border: 1px solid var(--vp-c-divider); margin: 16px 0 24px;" />
 
 Dagu Cloud is a full managed Dagu server, not only a coordinator. Dagu Cloud operates the server components and the backing storage for history, logs, and scheduling data. It can run workflows directly when they fit the managed runtime boundary. The managed server is provisioned as a dedicated isolated gVisor instance on GKE, and the managed license is included.
 
