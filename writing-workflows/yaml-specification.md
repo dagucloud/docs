@@ -782,6 +782,7 @@ Accepted built-in action names:
 | `exec` | Direct process execution without shell parsing. |
 | `file.copy`, `file.delete`, `file.list`, `file.mkdir`, `file.move`, `file.read`, `file.stat`, `file.write` | File operations. |
 | `git.checkout` | Clone or update a Git repository. |
+| `git.worktree.add`, `git.worktree.remove` | Create, reuse, and remove linked worktrees in a local Git repository. See [Git](/step-types/git#linked-worktrees). |
 | `harness.run` | CLI coding-agent harness execution. |
 | `http.request` | HTTP requests. |
 | `jq.filter` | jq transforms. |
