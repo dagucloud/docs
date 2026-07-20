@@ -62,7 +62,7 @@ auth:
       default_role: viewer
       default_workspace_access: none
       require_mapping: true
-      sync_access: true
+      skip_org_role_sync: false
       group_mappings:
         dagu-admins: admin
       workspace_mappings:
@@ -104,7 +104,7 @@ accounts, so do not change it during routine proxy upgrades.
 | `role_mapping.workspace_mappings` | No | `{}` | Exact proxy group names mapped to workspace grants. |
 | `role_mapping.default_workspace_access` | No | `none` | Gives an unmatched user access to `all` or `none` of the named workspaces. |
 | `role_mapping.require_mapping` | No | `true` | Denies login when no global or workspace mapping matches. At least one mapping must be configured when enabled. |
-| `role_mapping.sync_access` | No | `true` | Recalculates role and workspace access at every login. |
+| `role_mapping.skip_org_role_sync` | No | `false` | When `true`, preserves existing role and workspace access instead of recalculating them on subsequent logins. |
 
 The `source` value may contain up to 128 Unicode characters. It cannot have surrounding whitespace or control characters.
 Header names must be valid HTTP field names. `Authorization`, `Cookie`, and `Host` cannot be used as identity headers, and
@@ -125,7 +125,7 @@ export DAGU_AUTH_PROXY_AUTO_SIGNUP=true
 export DAGU_AUTH_PROXY_DEFAULT_ROLE=viewer
 export DAGU_AUTH_PROXY_DEFAULT_WORKSPACE_ACCESS=none
 export DAGU_AUTH_PROXY_REQUIRE_MAPPING=true
-export DAGU_AUTH_PROXY_SYNC_ACCESS=true
+export DAGU_AUTH_PROXY_SKIP_ORG_ROLE_SYNC=false
 ```
 
 Mappings use JSON objects:
@@ -159,10 +159,11 @@ higher.
 Users with no named-workspace grants can still see unlabelled workflows in the `default` workspace view. Workspace access is
 data scoping within one Dagu installation, not tenant isolation.
 
-By default, Dagu synchronizes a proxy user's role and workspace access at every login. The Web UI marks that authorization
-as proxy-managed; API edits remain possible but the next login can overwrite them. Set `sync_access: false` to preserve the
-authorization assigned when the account was first provisioned. `require_mapping` remains a login gate even when access
-synchronization is disabled.
+By default, `skip_org_role_sync` is `false`, so Dagu recalculates a proxy user's role and workspace access from the current
+group mappings at every login. The Web UI marks that authorization as proxy-managed; API edits remain possible, but the next
+login can overwrite them. Set `skip_org_role_sync: true` to preserve the existing role and workspace access on subsequent
+logins. `require_mapping` remains a login gate even when synchronization is skipped. New users always receive the current
+mapping when their account is created.
 
 ## Configure the proxy trust boundary
 
@@ -252,7 +253,7 @@ auth:
       defaultRole: viewer
       defaultWorkspaceAccess: none
       requireMapping: true
-      syncAccess: true
+      skipOrgRoleSync: false
       groupMappings:
         dagu-admins: admin
       workspaceMappings:
@@ -301,7 +302,7 @@ Typical endpoint responses are:
   the account.
 - Deleting a user allows the same proxy identity to be provisioned again when `auto_signup` is `true`. Disable the account
   for durable denial.
-- Mapping changes take effect on the next proxy login when `sync_access` is `true`.
+- Mapping changes take effect on the next proxy login when `skip_org_role_sync` is `false`.
 - After initial rollout, `auto_signup` can be disabled to admit only identities that have already been provisioned.
 
 Keep the local recovery administrator behind a network-restricted operator path that removes identity headers and denies

@@ -135,7 +135,7 @@ auth:
       workspace_mappings: {}
       default_workspace_access: "none"
       require_mapping: true
-      sync_access: true
+      skip_org_role_sync: false
 
 # TLS/HTTPS
 tls:
@@ -392,7 +392,10 @@ source, mapping behavior, and rollout guidance.
 - `DAGU_AUTH_PROXY_WORKSPACE_MAPPINGS` - Group-to-workspace-grant mappings as a JSON object
 - `DAGU_AUTH_PROXY_DEFAULT_WORKSPACE_ACCESS` - Unmatched-user workspace access (`all` or `none`; default: `none`)
 - `DAGU_AUTH_PROXY_REQUIRE_MAPPING` - Deny login when no group mapping matches (default: `true`)
-- `DAGU_AUTH_PROXY_SYNC_ACCESS` - Recalculate role and workspace access at each login (default: `true`)
+- `DAGU_AUTH_PROXY_SKIP_ORG_ROLE_SYNC` - Preserve existing role and workspace access on subsequent logins instead of
+  recalculating them (default: `false`)
+
+With the default proxy setting, role and workspace access are recalculated from the current group mappings at every login.
 
 ### TLS/HTTPS
 - `DAGU_CERT_FILE` - SSL certificate
