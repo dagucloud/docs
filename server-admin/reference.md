@@ -342,12 +342,14 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `true`)
 - `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
 - `DAGU_AUTH_OIDC_GROUP_MAPPINGS` - OIDC group-to-role mappings
+- `DAGU_AUTH_OIDC_WORKSPACE_MAPPINGS` - OIDC group-to-workspace grants as a JSON object
+- `DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS` - Unmapped-user workspace access (`all` or `none`, default: `all`)
 - `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Email domains allowed to authenticate (comma-separated)
 - `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text (default: `Login with SSO`)
 - `DAGU_AUTH_OIDC_GROUPS_CLAIM` - JWT claim containing group membership (default: `groups`)
 - `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_PATH` - jq expression for role extraction
-- `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_STRICT` - Deny login when no valid role found (default: `false`)
-- `DAGU_AUTH_OIDC_SKIP_ORG_ROLE_SYNC` - Only assign role on first login (default: `false`)
+- `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_STRICT` - Deny login when neither a global nor workspace mapping matches (default: `false`)
+- `DAGU_AUTH_OIDC_SKIP_ORG_ROLE_SYNC` - Only assign role and workspace access on first login (default: `false`)
 
 ### TLS/HTTPS
 - `DAGU_CERT_FILE` - SSL certificate

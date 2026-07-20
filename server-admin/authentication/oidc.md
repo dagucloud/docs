@@ -14,6 +14,7 @@ For most self-hosted deployments, enable OIDC under builtin auth. This gives you
 - Dagu user management and role-based access
 - API key management
 - Role mapping from IdP groups
+- Workspace-scoped access from IdP groups
 - Auto-signup for new users (enabled by default)
 
 ```yaml
@@ -47,7 +48,7 @@ dagu start-all
 
 OIDC is automatically enabled when the required fields (`client_id`, `client_secret`, `client_url`, `issuer`) are configured. No separate `enabled` flag is needed.
 
-See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for advanced settings such as `allowed_domains`, `whitelist`, and IdP role mapping.
+See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for advanced settings such as `allowed_domains`, `whitelist`, global role mapping, and workspace-scoped group mapping.
 
 ## Callback URL
 
@@ -67,6 +68,8 @@ https://dagu.example.com/oidc-callback
 
 - [Google](oidc-google) - Google Workspace / Cloud Identity
 - [Auth0](oidc-auth0) - Hosted identity platform
+- [Okta](oidc-okta) - Group-name claims with filtered assignment
+- [Microsoft Entra ID](oidc-entra) - Stable group Object ID claims
 - [Keycloak](oidc-keycloak) - Open source identity provider
 
 ## Removed: Standalone OIDC Mode

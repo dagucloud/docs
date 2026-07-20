@@ -358,6 +358,8 @@ const fullSidebar = [
           { text: "OIDC", link: "/server-admin/authentication/oidc" },
           { text: "OIDC - Google", link: "/server-admin/authentication/oidc-google" },
           { text: "OIDC - Auth0", link: "/server-admin/authentication/oidc-auth0" },
+          { text: "OIDC - Okta", link: "/server-admin/authentication/oidc-okta" },
+          { text: "OIDC - Entra ID", link: "/server-admin/authentication/oidc-entra" },
           { text: "OIDC - Keycloak", link: "/server-admin/authentication/oidc-keycloak" },
           { text: "TLS/HTTPS", link: "/server-admin/authentication/tls" },
           { text: "Remote Nodes", link: "/server-admin/authentication/remote-nodes" },

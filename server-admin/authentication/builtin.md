@@ -398,34 +398,54 @@ oidc:
   whitelist: ["partner@external.com", "contractor@other.com"]
 ```
 
-### Role Mapping
+### Role and Workspace Mapping
 
-Map IdP groups to Dagu roles for automatic role assignment:
+Map IdP groups to global roles or workspace-scoped roles during OIDC login:
 
 ```yaml
 oidc:
   role_mapping:
-    default_role: viewer           # Role when no mapping matches (default: viewer)
+    default_role: viewer           # Global role for an unmatched `all` fallback
     groups_claim: groups           # Claim containing user's groups
     group_mappings:
-      admins: admin               # IdP group -> Dagu role
-      developers: developer
-      ops: operator
-      everyone: viewer
-    role_attribute_strict: false    # Deny login if no role matched
-    skip_org_role_sync: false        # Sync roles on every login
+      dagu-org-admins: admin       # IdP group -> org-wide Dagu role
+    workspace_mappings:
+      payments-team:
+        - workspace: payments
+          role: developer
+      sre-team:
+        - workspace: infra
+          role: operator
+    default_workspace_access: none # all (compatible default) or none
+    role_attribute_strict: false    # Deny login if no global or workspace mapping matched
+    skip_org_role_sync: false       # Sync role and workspace access on every login
 ```
 
 **Role Mapping Options:**
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `default_role` | Role assigned when no mapping matches | `viewer` |
+| `default_role` | Global role for unmatched users when the fallback is `all` and strict mode is off | `viewer` |
 | `groups_claim` | JWT claim containing group membership | `groups` |
 | `group_mappings` | Map of IdP group names to Dagu roles | None |
+| `workspace_mappings` | Map of IdP group names to workspace/role grant lists | None |
+| `default_workspace_access` | Access for users with no global or workspace match (`all` or `none`) | `all` |
 | `role_attribute_path` | jq expression for advanced role extraction | None |
-| `role_attribute_strict` | Deny login when no valid role is found | `false` |
-| `skip_org_role_sync` | Only assign role on first login | `false` |
+| `role_attribute_strict` | Deny login when neither a global nor workspace mapping matches | `false` |
+| `skip_org_role_sync` | Only assign role and workspace access on first login | `false` |
+
+Group names are matched exactly and case-sensitively. A jq or `group_mappings` match completely replaces workspace mappings: the user receives that global role across all workspaces, even when it is lower than a role from a matching workspace grant. Do not map a catch-all group globally when workspace scoping is intended. Without a global match, all matching workspace grant lists are merged; the highest role wins when multiple groups grant the same workspace. Workspace-scoped users always have global role `viewer`, and `admin` is not valid as a workspace role.
+
+`default_workspace_access: all` preserves the compatible behavior for unmapped users and applies `default_role`. Set it to `none` for multi-team deployments: an unmapped user is forced to global `viewer` and has no access to named workspaces. Unlabelled DAGs are still governed by the global `viewer` role, so label resources that require team isolation.
+
+When `workspace_mappings` is non-empty, or when `default_workspace_access` is explicitly `none`, OIDC is the source of truth for workspace access. Manual API edits to an OIDC user's role or workspace access are overwritten on the next successful OIDC login. Set `skip_org_role_sync: true` to keep first-login assignments instead; the users UI then leaves role and workspace access editable. If a configured workspace does not exist, the grant remains dormant and login emits a warning; creating that workspace later activates the grant.
+
+The JSON environment variable form is intended for container deployments:
+
+```bash
+export DAGU_AUTH_OIDC_WORKSPACE_MAPPINGS='{"payments-team":[{"workspace":"payments","role":"developer"}]}'
+export DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS=none
+```
 
 **Example with jq expression:**
 
@@ -441,8 +461,10 @@ role_mapping:
 2. Redirected to OIDC provider for authentication
 3. After successful authentication, Dagu validates the token
 4. If `auto_signup` is enabled and user doesn't exist, a new user is created
-5. Role is determined by `role_mapping` (if configured) or `role_mapping.default_role`
+5. Role and workspace access are determined by `role_mapping`
 6. User receives a JWT token for the Dagu session
+
+Membership changes take effect when an OIDC login triggers synchronization. After a successful sync, all existing Dagu sessions observe the stored role and workspace access on their next request.
 
 ### Notes
 

@@ -53,7 +53,19 @@ docker compose -f docker-compose-keycloak.yml up -d
    - Go to Clients > dagu-client > Credentials
    - Copy the Client Secret
 
-### 3. Create Test User
+### 3. Add the Groups Claim
+
+Add the standard **Group Membership** protocol mapper to the Dagu client's dedicated client scope:
+
+- Token Claim Name: `groups`
+- Add to ID token: enabled
+- Full group path: enabled
+
+Full paths avoid collisions between groups with the same leaf name. With this setting, mapping keys include the leading slash, such as `/Engineering/Backend`.
+
+See Keycloak's [group-to-token mapping documentation](https://www.keycloak.org/docs/latest/server_admin/#mapping-groups-to-tokens) for the current protocol-mapper settings.
+
+### 4. Create Test User
 
 1. Users > Add user
 2. Username: `testuser`
@@ -63,7 +75,7 @@ docker compose -f docker-compose-keycloak.yml up -d
 6. Credentials tab > Set password
 7. Temporary: OFF
 
-### 4. Configure Dagu
+### 5. Configure Dagu
 
 #### YAML Configuration
 
@@ -83,6 +95,13 @@ auth:
       - "openid"
       - "profile"
       - "email"
+    role_mapping:
+      groups_claim: groups
+      default_workspace_access: none
+      workspace_mappings:
+        /Engineering/Backend:
+          - workspace: backend
+            role: developer
 ```
 
 #### Environment Variables
@@ -151,3 +170,5 @@ dagu start-all
 - Client authentication must be enabled for confidential clients
 - Development mode (`start-dev`) is insecure - use production mode for real deployments
 - Default token lifespan is 5 minutes (configurable in realm settings)
+- Moving or renaming a group changes its full-path claim and requires a matching Dagu configuration update
+- Verify a real ID token contains the exact `groups` strings used by `workspace_mappings`
