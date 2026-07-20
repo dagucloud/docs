@@ -13,7 +13,7 @@ Use user management when you need to:
 - create accounts for teammates
 - assign roles such as `admin`, `manager`, `developer`, `operator`, or `viewer`
 - limit access to specific workspaces
-- reset passwords
+- reset builtin-user passwords
 - disable or remove accounts
 
 Most teams do this from the Web UI at `/users`.
@@ -100,6 +100,9 @@ If you need strict tenant separation rather than scoped visibility inside one in
 2. Choose **Reset Password**
 3. Enter the new password
 
+Password reset is available only for builtin users. OIDC users authenticate through their identity provider, so Dagu
+does not offer password reset or password change actions for them.
+
 ### Disable A User
 
 Disable the account when you want to preserve history and ownership but block sign-in.
@@ -119,8 +122,8 @@ All user-management endpoints require admin access. On self-hosted Dagu, create,
 | Get one user | `GET /api/v1/users/{userId}` |
 | Update user | `PATCH /api/v1/users/{userId}` |
 | Delete user | `DELETE /api/v1/users/{userId}` |
-| Reset another user's password | `POST /api/v1/users/{userId}/reset-password` |
-| Change your own password | `POST /api/v1/auth/change-password` |
+| Reset a builtin user's password | `POST /api/v1/users/{userId}/reset-password` |
+| Change your own builtin password | `POST /api/v1/auth/change-password` |
 
 ### Create A User With Access Everywhere
 
@@ -159,8 +162,9 @@ curl -X POST http://localhost:8080/api/v1/users \
 ## Password Rules
 
 - minimum length: **8 characters**
-- users can change their own password after signing in
-- admins can reset passwords for other users
+- builtin users can change their own password after signing in
+- admins can reset passwords for other builtin users
+- OIDC users cannot use or set a Dagu password
 
 Use a password manager or SSO/OIDC for larger teams.
 

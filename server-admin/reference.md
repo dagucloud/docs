@@ -115,6 +115,7 @@ auth:
       default_role: "viewer"
       group_mappings: {}       # OIDC group to global Dagu role map
       workspace_mappings: {}   # OIDC group to workspace grant lists
+      # Required when workspace_mappings is non-empty; defaults to "all" otherwise
       default_workspace_access: "all"
     allowed_domains: []       # Restrict by email domain
     button_label: "Login with SSO"

@@ -202,7 +202,7 @@ Workspace-scoped users retain the global `viewer` role. Resources without a work
 3. Confirm that login succeeds.
 4. Confirm that no named workspace grant is assigned.
 
-As an administrator, open the Dagu users page and edit `unmapped-user`. The account should show **Managed by SSO**, while rename, disable, and re-enable operations remain available even though the user has no workspace grants.
+As an administrator, open the Dagu users page and edit `unmapped-user`. The account should show **Managed by SSO**, while rename, disable, and re-enable operations remain available even though the user has no workspace grants. Password reset is not available for OIDC users; use a separate builtin administrator for recovery access.
 
 ### Grant revocation and restoration
 
@@ -213,6 +213,7 @@ As an administrator, open the Dagu users page and edit `unmapped-user`. The acco
 5. Sign in to Dagu again and confirm that the grant returns.
 
 Authorization is recomputed at successful OIDC login because `skip_org_role_sync` is `false`.
+If Dagu cannot persist changed workspace authorization, it rejects the login instead of issuing a session with the previous policy.
 
 Dagu does not observe the Keycloak membership change until that login occurs. After the login stores the new policy, any
 other Dagu sessions for the same user use the updated workspace access on their next request.

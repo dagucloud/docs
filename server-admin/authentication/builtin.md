@@ -10,7 +10,7 @@ This page covers self-hosted Dagu. Creating additional API keys beyond the confi
 
 - **JWT Authentication**: Secure token-based authentication
 - **Initial Admin Bootstrap**: Create the first admin through config, environment variables, or the setup page
-- **Password Management**: Users can change their own passwords; admins can reset any user's password
+- **Password Management**: Builtin users can change their own passwords; admins can reset builtin users' passwords
 - **API Key Management**: Create and manage API keys for programmatic access with role-based permissions
 - **User Management**: List and inspect users, reset passwords, and, with an active self-host license, create, update, disable, and delete users through the web UI and API
 - **Role-Based Access Control**: Five roles with different permission levels
@@ -158,6 +158,9 @@ curl -H "Authorization: Bearer eyJhbG..." \
 
 ### Change Password (Self)
 
+This endpoint is available to builtin users. OIDC users authenticate through their identity provider and receive `403`
+if they call it directly.
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/change-password \
   -H "Authorization: Bearer eyJhbG..." \
@@ -186,7 +189,7 @@ curl -X POST http://localhost:8080/api/v1/users \
 ### Update User
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/users/{user-id} \
+curl -X PATCH http://localhost:8080/api/v1/users/{user-id} \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"role": "manager"}'
@@ -194,8 +197,10 @@ curl -X PUT http://localhost:8080/api/v1/users/{user-id} \
 
 ### Reset User Password (Admin)
 
+This endpoint resets builtin users only. It returns `403` for OIDC users.
+
 ```bash
-curl -X PUT http://localhost:8080/api/v1/users/{user-id}/password \
+curl -X POST http://localhost:8080/api/v1/users/{user-id}/reset-password \
   -H "Authorization: Bearer eyJhbG..." \
   -H "Content-Type: application/json" \
   -d '{"newPassword": "new-secure-pass"}'
@@ -417,6 +422,9 @@ oidc:
 ```
 
 Global mappings apply across all workspaces and take precedence over workspace mappings. With `default_workspace_access: none`, an unmatched user receives no named workspace grants.
+Use global mappings for organization-wide users such as administrators. A global match always replaces workspace mappings,
+even when the global role is `viewer` and a workspace mapping would grant a higher role. When `workspace_mappings` is
+non-empty, `default_workspace_access` must be set explicitly to either `all` or `none`.
 
 See [OIDC Workspace Access](/server-admin/authentication/oidc-workspace-access) for evaluation order, fallbacks, synchronization, environment variables, and rollout guidance.
 
@@ -432,17 +440,18 @@ See [OIDC Workspace Access](/server-admin/authentication/oidc-workspace-access) 
 Membership changes take effect when an OIDC login triggers synchronization. Dagu does not query the identity provider on
 ordinary API requests. After a successful sync, all existing Dagu sessions observe the stored role and workspace access on
 their next request. Until another OIDC login occurs, an existing session continues to use the last stored authorization.
+If Dagu cannot save changed workspace authorization, it denies the login and leaves the stored policy unchanged.
 
 ### Notes
 
 - OIDC users are managed alongside local users in the same user database
-- OIDC users can also authenticate with their Dagu password if one is set
+- OIDC users authenticate through OIDC and cannot use the builtin password login
 - Admin users can manage all users (OIDC and local) from the web UI
 - The callback URL is `{client_url}/oidc-callback`
 
-::: warning OIDC passwords bypass IdP synchronization
-Builtin password login does not fetch current OIDC groups. If access must always pass through the identity provider, do not
-set or reset Dagu passwords for OIDC users. Keep emergency access in a separate local administrator account instead.
+::: info Keep a separate recovery administrator
+Administrators cannot set or reset passwords for OIDC users. Keep emergency access in a separate builtin administrator
+account instead.
 :::
 
 ## Comparison with Other Auth Methods

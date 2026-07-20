@@ -40,11 +40,14 @@ Dagu evaluates mappings in this order:
 4. If nothing matches and `role_attribute_strict` is `true`, login is denied.
 5. If nothing matches and strict mode is off, `default_workspace_access` determines the fallback.
 
-Role priority is `admin`, `manager`, `developer`, `operator`, then `viewer`.
+Within global group mappings, and when merging grants for the same workspace, role priority is `admin`, `manager`, `developer`, `operator`, then `viewer`. This priority does not combine global and workspace mappings: a global match always wins first.
 
 ::: warning Global mappings replace workspace mappings
 A jq or `group_mappings` match takes precedence over every workspace mapping. The user receives the matched global role across all workspaces, even if a workspace mapping would have assigned a higher role. Do not configure a catch-all global group when workspace isolation is intended.
 :::
+
+Use global mappings for organization-wide users, such as Dagu administrators. For example, a user matching global
+`viewer` and workspace `payments: developer` receives global `viewer`; the workspace `developer` grant is not added.
 
 A jq expression is evaluated before group mappings. An expression that always returns a valid role, including `viewer`, prevents both group and workspace mappings from being evaluated.
 
@@ -57,9 +60,9 @@ When strict mode is off, the fallback behaves as follows:
 | `all` | Apply `default_role` across all workspaces |
 | `none` | Assign global `viewer` and no named workspace grants |
 
-`all` is the compatible default. When `workspace_mappings` is non-empty, always set `default_workspace_access` explicitly.
-Omitting it uses `all`, which can silently grant every workspace to an unmatched user. `default_role` is used only for an
-unmatched `all` fallback.
+`all` is the compatible default only when `workspace_mappings` is empty. When `workspace_mappings` is non-empty,
+`default_workspace_access` is required and Dagu rejects the configuration if it is omitted. `default_role` is used only
+for an unmatched `all` fallback.
 
 Use `none` when named workspaces must be isolated by default. Unlabelled DAGs remain governed by the global `viewer` role, so label resources that require workspace isolation.
 
@@ -137,6 +140,7 @@ With the default `skip_org_role_sync: false`:
 - Administrators can still rename, disable, re-enable, or delete the account.
 - Existing sessions use the currently stored role and workspace access on their next request.
 - An existing user is denied login if strict mapping no longer finds a match.
+- If Dagu cannot save changed workspace authorization, login is denied and the previously stored policy remains unchanged.
 
 Dagu learns about an IdP membership change only when an OIDC login runs. Once that login stores the new authorization,
 all existing Dagu sessions use it on their next request. Until another OIDC login occurs, an existing session can continue
@@ -144,10 +148,9 @@ using the last stored authorization; the next login normally occurs when its Dag
 
 Set `skip_org_role_sync: true` to keep the authorization assigned at the user's first login. Subsequent logins do not update it, and the users page leaves role and workspace access editable.
 
-::: warning Local passwords are a separate login path
-An administrator can set a Dagu password for an OIDC user. That user can then sign in through the builtin login form, which
-does not fetch current IdP groups or run OIDC authorization synchronization. Do not set or reset passwords for OIDC users
-when all access must pass through the identity provider. Use a separate local administrator account for recovery access.
+::: info OIDC users authenticate through the identity provider
+OIDC users cannot sign in through the builtin password form, and administrators cannot set or reset their Dagu passwords.
+Keep recovery access in a separate builtin administrator account.
 :::
 
 ## Configuration Reference
@@ -158,7 +161,7 @@ when all access must pass through the identity provider. Use a separate local ad
 | `groups_claim` | ID-token claim containing group membership | `groups` |
 | `group_mappings` | IdP group names mapped to global Dagu roles | None |
 | `workspace_mappings` | IdP group names mapped to workspace and role grant lists | None |
-| `default_workspace_access` | Unmatched-user fallback: `all` applies `default_role` globally; `none` denies access to named workspaces | `all` |
+| `default_workspace_access` | Unmatched-user fallback: `all` applies `default_role` globally; `none` denies access to named workspaces. Required when `workspace_mappings` is non-empty | `all` when `workspace_mappings` is empty |
 | `role_attribute_path` | jq expression for extracting a global role | None |
 | `role_attribute_strict` | Deny login when neither a global nor workspace mapping matches | `false` |
 | `skip_org_role_sync` | Keep first-login authorization instead of synchronizing on subsequent logins | `false` |
@@ -171,6 +174,8 @@ Workspace mappings use a JSON object whose keys are IdP groups:
 export DAGU_AUTH_OIDC_WORKSPACE_MAPPINGS='{"payments-team":[{"workspace":"payments","role":"developer"}]}'
 export DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS=none
 ```
+
+Set both variables together. Supplying workspace mappings without an explicit fallback is rejected.
 
 The JSON value must be one object. Unknown grant fields, malformed JSON, blank group names, empty grant lists, invalid workspace names, duplicate workspaces within a group, invalid roles, and workspace-scoped `admin` roles are rejected during configuration loading.
 
@@ -192,4 +197,4 @@ See the [configuration reference](/server-admin/reference#oidc-auth) for the rem
 5. Before enabling strict mode, test every existing OIDC user and confirm each token contains a matching value.
 6. Test a globally mapped user, each workspace group, overlapping groups, an unmapped user, malformed group claims, and membership revocation.
 7. Confirm unlabelled resources do not contain data that requires workspace isolation.
-8. If IdP-only login is required, confirm OIDC users do not have Dagu passwords and keep recovery access in a separate local administrator account.
+8. Confirm recovery access uses a separate builtin administrator account.

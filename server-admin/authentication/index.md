@@ -20,7 +20,7 @@ These pages focus on configuring self-hosted Dagu. Managed server includes user 
 
 ### Builtin Authentication (Recommended)
 
-Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes, API keys, and the role-based access model used by self-hosted Dagu.
+Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes for builtin users, API keys, and the role-based access model used by self-hosted Dagu.
 
 ```yaml
 auth:
