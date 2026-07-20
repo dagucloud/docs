@@ -4,6 +4,9 @@ Map identity-provider groups to organization-wide roles or workspace-scoped role
 
 This guide assumes [builtin authentication with OIDC](/server-admin/authentication/oidc) is already configured. OIDC/SSO for self-hosted Dagu requires an active self-host license.
 
+Complete builtin admin setup before testing a mapping. Dagu does not allow OIDC login while the user store is empty, so an
+OIDC-mapped account cannot become the first user or bypass creation of the recovery administrator.
+
 ## Configuration
 
 The following example gives organization-wide access to Dagu administrators, limits the payments and SRE teams to their workspaces, and gives unmatched users no access to named workspaces:
@@ -190,11 +193,11 @@ See the [configuration reference](/server-admin/reference#oidc-auth) for the rem
 
 ## Rollout Checklist
 
-1. Decode a real test login's ID token and record the exact group values.
-2. Configure only the groups Dagu needs.
-3. Explicitly set `default_workspace_access` when using `workspace_mappings`, and decide whether unmatched users should receive all workspaces or no named workspaces.
-4. Avoid catch-all global mappings when workspace isolation is required.
-5. Before enabling strict mode, test every existing OIDC user and confirm each token contains a matching value.
-6. Test a globally mapped user, each workspace group, overlapping groups, an unmapped user, malformed group claims, and membership revocation.
-7. Confirm unlabelled resources do not contain data that requires workspace isolation.
-8. Confirm recovery access uses a separate builtin administrator account.
+1. Create and verify a separate builtin recovery administrator.
+2. Decode a real test login's ID token and record the exact group values.
+3. Configure only the groups Dagu needs.
+4. Explicitly set `default_workspace_access` when using `workspace_mappings`, and decide whether unmatched users should receive all workspaces or no named workspaces.
+5. Avoid catch-all global mappings when workspace isolation is required.
+6. Before enabling strict mode, test every existing OIDC user and confirm each token contains a matching value.
+7. Test a globally mapped user, each workspace group, overlapping groups, an unmapped user, malformed group claims, and membership revocation.
+8. Confirm unlabelled resources do not contain data that requires workspace isolation.

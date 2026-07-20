@@ -170,6 +170,9 @@ make build
 .local/bin/dagu start-all
 ```
 
+The configured `initial_admin` is created before OIDC is used. If it is omitted, open `/setup` and create the builtin
+administrator first; Dagu redirects OIDC login to `/setup` while the user store is empty.
+
 ## 7. Create the Test Workspace
 
 Sign in with an existing Dagu administrator or the configured initial administrator.

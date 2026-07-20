@@ -127,6 +127,10 @@ The server emits a warning at startup if the password matches a known weak value
 2. Create your initial admin account with a username and password
 3. After setup, you are automatically authenticated and redirected to the dashboard
 
+OIDC sign-in remains unavailable while the user store is empty. Complete one of these builtin admin setup options before
+using SSO. This ensures that every deployment starts with a local administrator and prevents a non-admin OIDC user from
+completing initial setup. Retain the builtin administrator for recovery.
+
 ## API Access
 
 ### Login
@@ -308,6 +312,9 @@ Builtin authentication supports OIDC/SSO login, allowing users to authenticate v
 ### Enabling OIDC
 
 OIDC is **automatically enabled** when all required fields (`client_id`, `client_secret`, `client_url`, `issuer`) are configured. No explicit `enabled` flag is needed.
+
+Create the initial builtin administrator before signing in with OIDC. Dagu redirects both `/oidc-login` and an in-progress
+OIDC callback to `/setup` while the user store is empty.
 
 ```yaml
 auth:

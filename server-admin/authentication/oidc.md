@@ -48,6 +48,10 @@ dagu start-all
 
 OIDC is automatically enabled when the required fields (`client_id`, `client_secret`, `client_url`, `issuer`) are configured. No separate `enabled` flag is needed.
 
+Before the first SSO login, create the initial builtin administrator through `/setup` or `builtin.initial_admin`. OIDC login
+and callback endpoints redirect to `/setup` while the user store is empty. Keep this local administrator as the recovery
+path when the identity provider is unavailable.
+
 See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for settings such as `allowed_domains` and `whitelist`. See [OIDC Workspace Access](oidc-workspace-access) for global role mapping, workspace-scoped group mapping, fallbacks, and synchronization.
 
 ## Callback URL
