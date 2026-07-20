@@ -357,6 +357,7 @@ const fullSidebar = [
           { text: "Basic Auth", link: "/server-admin/authentication/basic" },
           { text: "OIDC", link: "/server-admin/authentication/oidc" },
           { text: "OIDC Workspace Access", link: "/server-admin/authentication/oidc-workspace-access" },
+          { text: "OIDC Workspace Test (Keycloak)", link: "/server-admin/authentication/oidc-workspace-access-keycloak" },
           { text: "OIDC - Google", link: "/server-admin/authentication/oidc-google" },
           { text: "OIDC - Auth0", link: "/server-admin/authentication/oidc-auth0" },
           { text: "OIDC - Okta", link: "/server-admin/authentication/oidc-okta" },

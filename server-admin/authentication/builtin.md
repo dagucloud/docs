@@ -429,7 +429,9 @@ See [OIDC Workspace Access](/server-admin/authentication/oidc-workspace-access) 
 5. Role and workspace access are determined by `role_mapping`
 6. User receives a JWT token for the Dagu session
 
-Membership changes take effect when an OIDC login triggers synchronization. After a successful sync, all existing Dagu sessions observe the stored role and workspace access on their next request.
+Membership changes take effect when an OIDC login triggers synchronization. Dagu does not query the identity provider on
+ordinary API requests. After a successful sync, all existing Dagu sessions observe the stored role and workspace access on
+their next request. Until another OIDC login occurs, an existing session continues to use the last stored authorization.
 
 ### Notes
 
@@ -437,6 +439,11 @@ Membership changes take effect when an OIDC login triggers synchronization. Afte
 - OIDC users can also authenticate with their Dagu password if one is set
 - Admin users can manage all users (OIDC and local) from the web UI
 - The callback URL is `{client_url}/oidc-callback`
+
+::: warning OIDC passwords bypass IdP synchronization
+Builtin password login does not fetch current OIDC groups. If access must always pass through the identity provider, do not
+set or reset Dagu passwords for OIDC users. Keep emergency access in a separate local administrator account instead.
+:::
 
 ## Comparison with Other Auth Methods
 

@@ -57,11 +57,18 @@ When strict mode is off, the fallback behaves as follows:
 | `all` | Apply `default_role` across all workspaces |
 | `none` | Assign global `viewer` and no named workspace grants |
 
-`all` is the compatible default. `default_role` is used only for an unmatched `all` fallback.
+`all` is the compatible default. When `workspace_mappings` is non-empty, always set `default_workspace_access` explicitly.
+Omitting it uses `all`, which can silently grant every workspace to an unmatched user. `default_role` is used only for an
+unmatched `all` fallback.
 
 Use `none` when named workspaces must be isolated by default. Unlabelled DAGs remain governed by the global `viewer` role, so label resources that require workspace isolation.
 
 Set `role_attribute_strict: true` when an unmapped user must not be allowed to sign in at all. Strict mode takes precedence over both fallback values.
+
+::: warning Test every existing user before enabling strict mode
+Strict mode applies on every OIDC login, including users that already exist in Dagu. If their current token no longer
+contains a matching role or workspace group, login is denied instead of retaining their previously stored authorization.
+:::
 
 ## Workspace Grant Rules
 
@@ -131,7 +138,17 @@ With the default `skip_org_role_sync: false`:
 - Existing sessions use the currently stored role and workspace access on their next request.
 - An existing user is denied login if strict mapping no longer finds a match.
 
+Dagu learns about an IdP membership change only when an OIDC login runs. Once that login stores the new authorization,
+all existing Dagu sessions use it on their next request. Until another OIDC login occurs, an existing session can continue
+using the last stored authorization; the next login normally occurs when its Dagu JWT expires.
+
 Set `skip_org_role_sync: true` to keep the authorization assigned at the user's first login. Subsequent logins do not update it, and the users page leaves role and workspace access editable.
+
+::: warning Local passwords are a separate login path
+An administrator can set a Dagu password for an OIDC user. That user can then sign in through the builtin login form, which
+does not fetch current IdP groups or run OIDC authorization synchronization. Do not set or reset passwords for OIDC users
+when all access must pass through the identity provider. Use a separate local administrator account for recovery access.
+:::
 
 ## Configuration Reference
 
@@ -161,6 +178,7 @@ See the [configuration reference](/server-admin/reference#oidc-auth) for the rem
 
 ## Provider Guides
 
+- [Test workspace access locally with Keycloak](oidc-workspace-access-keycloak)
 - [Okta group claims](oidc-okta)
 - [Microsoft Entra ID group claims](oidc-entra)
 - [Keycloak group claims](oidc-keycloak)
@@ -169,7 +187,9 @@ See the [configuration reference](/server-admin/reference#oidc-auth) for the rem
 
 1. Decode a real test login's ID token and record the exact group values.
 2. Configure only the groups Dagu needs.
-3. Decide whether unmatched users should receive all workspaces, no named workspaces, or be denied login.
+3. Explicitly set `default_workspace_access` when using `workspace_mappings`, and decide whether unmatched users should receive all workspaces or no named workspaces.
 4. Avoid catch-all global mappings when workspace isolation is required.
-5. Test a globally mapped user, each workspace group, overlapping groups, an unmapped user, and membership revocation.
-6. Confirm unlabelled resources do not contain data that requires workspace isolation.
+5. Before enabling strict mode, test every existing OIDC user and confirm each token contains a matching value.
+6. Test a globally mapped user, each workspace group, overlapping groups, an unmapped user, malformed group claims, and membership revocation.
+7. Confirm unlabelled resources do not contain data that requires workspace isolation.
+8. If IdP-only login is required, confirm OIDC users do not have Dagu passwords and keep recovery access in a separate local administrator account.

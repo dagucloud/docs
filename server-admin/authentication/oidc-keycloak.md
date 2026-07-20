@@ -2,6 +2,8 @@
 
 Configure Dagu with Keycloak as OIDC provider.
 
+For a complete local smoke test covering the current Keycloak client UI, group claims, mapped and unmapped users, and grant revocation, see [Test OIDC Workspace Access with Keycloak](oidc-workspace-access-keycloak).
+
 ::: info Deployment Model
 This guide applies to self-hosted Dagu using builtin auth + OIDC. Managed server includes authentication features by default, so you do not configure Keycloak through `config.yaml` there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
 :::
