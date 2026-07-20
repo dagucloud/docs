@@ -61,7 +61,7 @@ auth:
     role_mapping:
       default_role: viewer
       default_workspace_access: none
-      require_mapping: true
+      require_mapping: false
       skip_org_role_sync: false
       group_mappings:
         dagu-admins: admin
@@ -103,7 +103,7 @@ accounts, so do not change it during routine proxy upgrades.
 | `role_mapping.group_mappings` | No | `{}` | Exact proxy group names mapped to global Dagu roles. |
 | `role_mapping.workspace_mappings` | No | `{}` | Exact proxy group names mapped to workspace grants. |
 | `role_mapping.default_workspace_access` | No | `none` | Gives an unmatched user access to `all` or `none` of the named workspaces. |
-| `role_mapping.require_mapping` | No | `true` | Denies login when no global or workspace mapping matches. At least one mapping must be configured when enabled. |
+| `role_mapping.require_mapping` | No | `false` | When `true`, denies login unless a global or workspace mapping matches. At least one mapping must be configured when enabled. |
 | `role_mapping.skip_org_role_sync` | No | `false` | When `true`, preserves existing role and workspace access instead of recalculating them on subsequent logins. |
 
 The `source` value may contain up to 128 Unicode characters. It cannot have surrounding whitespace or control characters.
@@ -124,7 +124,7 @@ export DAGU_AUTH_PROXY_HEADERS_GROUPS=X-Auth-Request-Groups
 export DAGU_AUTH_PROXY_AUTO_SIGNUP=true
 export DAGU_AUTH_PROXY_DEFAULT_ROLE=viewer
 export DAGU_AUTH_PROXY_DEFAULT_WORKSPACE_ACCESS=none
-export DAGU_AUTH_PROXY_REQUIRE_MAPPING=true
+export DAGU_AUTH_PROXY_REQUIRE_MAPPING=false
 export DAGU_AUTH_PROXY_SKIP_ORG_ROLE_SYNC=false
 ```
 
@@ -152,6 +152,10 @@ Mapping evaluation follows these rules:
 4. Otherwise, `default_workspace_access` controls the fallback. `all` grants `default_role` everywhere; `none` grants no
    named workspaces and keeps the top-level role at `viewer`.
 
+Because `require_mapping` defaults to `false`, unmatched users are allowed to log in. `default_workspace_access: none`
+gives them a top-level `viewer` role with no named-workspace grants; `all` applies `default_role` globally. Set
+`require_mapping: true` explicitly to reject unmatched users.
+
 Role priority is `admin`, `manager`, `developer`, `operator`, then `viewer`. An `admin` role cannot be scoped to one
 workspace. A global mapping takes precedence over every workspace mapping, even when the workspace role would otherwise be
 higher.
@@ -162,8 +166,8 @@ data scoping within one Dagu installation, not tenant isolation.
 By default, `skip_org_role_sync` is `false`, so Dagu recalculates a proxy user's role and workspace access from the current
 group mappings at every login. The Web UI marks that authorization as proxy-managed; API edits remain possible, but the next
 login can overwrite them. Set `skip_org_role_sync: true` to preserve the existing role and workspace access on subsequent
-logins. `require_mapping` remains a login gate even when synchronization is skipped. New users always receive the current
-mapping when their account is created.
+logins. When enabled, `require_mapping` remains a login gate even when synchronization is skipped. New users always receive
+the current mapping when their account is created.
 
 ## Configure the proxy trust boundary
 
@@ -252,7 +256,7 @@ auth:
     roleMapping:
       defaultRole: viewer
       defaultWorkspaceAccess: none
-      requireMapping: true
+      requireMapping: false
       skipOrgRoleSync: false
       groupMappings:
         dagu-admins: admin
@@ -279,7 +283,7 @@ Test the positive path and every trust boundary before exposing Dagu:
 - A valid proxy session creates or resolves the expected user and applies the expected role and workspace access.
 - A forged user or groups header sent to the public endpoint is rejected or overwritten by the proxy.
 - Direct access to the UI service from an unrelated host or pod is denied.
-- A user without a matching group mapping is denied when `require_mapping` is enabled.
+- A user without a matching global or workspace mapping is denied when `require_mapping` is enabled.
 - A disabled Dagu user cannot sign in even when the proxy still authenticates that identity.
 - The local recovery administrator can sign in only through its restricted recovery path.
 
