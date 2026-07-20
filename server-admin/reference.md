@@ -350,7 +350,7 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role assigned across all workspaces when no mapping matches and `DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS=all` (default: `viewer`)
 - `DAGU_AUTH_OIDC_GROUP_MAPPINGS` - OIDC group-to-role mappings
 - `DAGU_AUTH_OIDC_WORKSPACE_MAPPINGS` - OIDC group-to-workspace grants as a JSON object
-- `DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS` - Unmapped-user workspace access (`all` or `none`, default: `all`)
+- `DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS` - Unmapped-user workspace access (`all` or `none`); required with workspace mappings, otherwise defaults to `all`
 - `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Email domains allowed to authenticate (comma-separated)
 - `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text (default: `Login with SSO`)
 - `DAGU_AUTH_OIDC_GROUPS_CLAIM` - JWT claim containing group membership (default: `groups`)

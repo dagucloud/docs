@@ -1,97 +1,28 @@
 # Authentication
 
-Configure authentication and access control for your Dagu instance.
+Choose an authentication method for your Dagu instance.
 
-::: info Deployment Model
-These pages focus on configuring self-hosted Dagu. Managed server includes user management, OIDC/SSO, audit logging, incident SaaS integration by default, so you typically do not need to configure those features manually there. See the [pricing page](https://dagu.sh/pricing) for more details.
+::: info Deployment model
+These pages cover self-hosted Dagu. Managed server includes user management and SSO, so its authentication is configured
+outside `config.yaml`. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
-## Available Authentication Methods
+## Choose an authentication method
 
-- [Builtin Authentication](./builtin) - Recommended self-host auth mode with JWT login, API keys, and role-based access
-- [API Keys](./api-keys) - Programmatic access with role-based permissions (requires Builtin Auth)
-- [Webhooks](./webhooks) - DAG-specific tokens for external integrations (requires Builtin Auth)
-- [Basic Authentication](./basic) - Simple username and password authentication
-- [OIDC Authentication](./oidc) - OpenID Connect / SSO under builtin auth
-- [TLS/HTTPS](./tls) - Encrypted connections
-- [Remote Nodes](./remote-nodes) - Multi-instance authentication
+| Method | Use it when |
+|--------|-------------|
+| [Builtin](./builtin) | You need multiple users, roles, API keys, or OIDC. This is the recommended self-hosted mode. |
+| [Builtin + OIDC](./oidc) | Users should sign in through an OpenID Connect provider. Self-hosted SSO requires an active license. |
+| [Basic](./basic) | A single shared account is enough and you do not need user management. |
+| `none` | Authentication is handled outside Dagu or the instance is isolated. |
 
-## Quick Start
+Builtin authentication is the default. On a new installation, create the first builtin administrator through `/setup` or
+`auth.builtin.initial_admin`. Dagu requires this administrator before it allows OIDC sign-in.
 
-### Builtin Authentication (Recommended)
+## Related access controls
 
-Builtin auth is the recommended authentication mode for self-hosted Dagu. It supports JWT-based login, initial admin bootstrap, password changes for builtin users, API keys, and the role-based access model used by self-hosted Dagu.
-
-```yaml
-auth:
-  mode: builtin  # default — can be omitted
-  builtin:
-    token:
-      secret: your-secure-random-secret  # auto-generated if not set
-      ttl: 24h
-    initial_admin:              # optional — skip the setup page
-      username: admin
-      password: your-secure-password
-```
-
-Or via environment variables:
-
-```bash
-export DAGU_AUTH_MODE=builtin
-export DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret
-# Optional — auto-create admin on first startup
-export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
-export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
-```
-
-### Basic Authentication
-
-Simple single-user authentication without user management.
-
-```yaml
-auth:
-  mode: basic
-  basic:
-    username: admin
-    password: secure-password
-```
-
-### OIDC Authentication
-
-**Recommended: Builtin + OIDC** for self-hosted SSO:
-
-On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Managed server includes authentication features by default. See the [pricing page](https://dagu.sh/pricing) for more details.
-
-```yaml
-auth:
-  mode: builtin
-  builtin:
-    token:
-      secret: your-jwt-secret
-  oidc:
-    client_id: "your-client-id"
-    client_secret: "your-client-secret"
-    client_url: "http://localhost:8080"
-    issuer: "https://accounts.google.com"
-    auto_signup: true
-    role_mapping:
-      default_role: viewer
-```
-
-**Standalone OIDC** (removed — use Builtin + OIDC instead):
-
-> Standalone OIDC mode (`auth.mode: oidc`) has been removed. Use builtin + OIDC mode above for SSO with user management.
-
-## Choosing an Authentication Method
-
-| Method | Use Case |
-|--------|----------|
-| **Builtin** | Self-hosted JWT login, admin bootstrap, password changes, and API keys |
-| **Builtin + OIDC** | Self-hosted SSO with auto-signup and role mapping; requires a self-host license on self-hosted Dagu and is included in managed server |
-| **API Keys** | CI/CD pipelines, automation with role-based access (requires Builtin Auth) |
-| **Webhooks** | External integrations (GitHub, Slack, CI/CD) to trigger specific DAGs (requires Builtin Auth) |
-| **Basic** | Single user, simple setup, no user management needed |
-
-## Environment Variables
-
-All authentication methods support environment variable configuration. See individual authentication type documentation for details.
+- [User management](./user-management) covers roles, workspace access, and password operations.
+- [API keys](./api-keys) provide role-based access for automation.
+- [Webhooks](./webhooks) use DAG-specific tokens for external triggers.
+- [TLS/HTTPS](./tls) secures browser and API connections.
+- [Remote nodes](./remote-nodes) covers authentication between Dagu instances.

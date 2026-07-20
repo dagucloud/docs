@@ -33,7 +33,7 @@ auth:
 
 Group names are exact and case-sensitive. Use the exact strings emitted in the ID token.
 
-## Evaluation Order
+## Evaluation order
 
 Dagu evaluates mappings in this order:
 
@@ -43,18 +43,15 @@ Dagu evaluates mappings in this order:
 4. If nothing matches and `role_attribute_strict` is `true`, login is denied.
 5. If nothing matches and strict mode is off, `default_workspace_access` determines the fallback.
 
-Within global group mappings, and when merging grants for the same workspace, role priority is `admin`, `manager`, `developer`, `operator`, then `viewer`. This priority does not combine global and workspace mappings: a global match always wins first.
+Within one mapping type, role priority is `admin`, `manager`, `developer`, `operator`, then `viewer`.
 
 ::: warning Global mappings replace workspace mappings
-A jq or `group_mappings` match takes precedence over every workspace mapping. The user receives the matched global role across all workspaces, even if a workspace mapping would have assigned a higher role. Do not configure a catch-all global group when workspace isolation is intended.
+A `role_attribute_path` or `group_mappings` match assigns one role across all workspaces and stops evaluation. For example,
+a user matching global `viewer` and workspace `payments: developer` receives global `viewer`; the workspace grant is not
+added. Do not use a catch-all global mapping when workspace isolation is intended.
 :::
 
-Use global mappings for organization-wide users, such as Dagu administrators. For example, a user matching global
-`viewer` and workspace `payments: developer` receives global `viewer`; the workspace `developer` grant is not added.
-
-A jq expression is evaluated before group mappings. An expression that always returns a valid role, including `viewer`, prevents both group and workspace mappings from being evaluated.
-
-## Unmatched Users
+## Unmatched users
 
 When strict mode is off, the fallback behaves as follows:
 
@@ -76,13 +73,12 @@ Strict mode applies on every OIDC login, including users that already exist in D
 contains a matching role or workspace group, login is denied instead of retaining their previously stored authorization.
 :::
 
-## Workspace Grant Rules
+## Workspace grant rules
 
 - Workspace-scoped users always have global role `viewer`.
 - `admin` cannot be assigned as a workspace-scoped role.
 - A group may grant access to multiple workspaces.
 - Several groups may grant the same workspace; the highest role wins.
-- Final grants are stored in deterministic workspace-name order.
 - A workspace does not need to exist when the mapping is configured. The grant remains dormant, login emits a warning, and creating the workspace later activates it.
 
 Example with overlapping grants:
@@ -104,7 +100,7 @@ role_mapping:
 
 A user in both groups receives `developer` in `platform` and `operator` in `incidents`.
 
-## Global Role Mapping
+## Global mapping examples
 
 Use `group_mappings` for groups that should have organization-wide access:
 
@@ -131,7 +127,7 @@ role_mapping:
 
 Returning `empty` allows evaluation to continue to `group_mappings` and `workspace_mappings`. Returning a valid role stops evaluation and grants that role globally.
 
-## Synchronization and User Management
+## Synchronization and user management
 
 OIDC manages workspace access when `workspace_mappings` is non-empty or `default_workspace_access` is explicitly `none`.
 
@@ -156,7 +152,7 @@ OIDC users cannot sign in through the builtin password form, and administrators 
 Keep recovery access in a separate builtin administrator account.
 :::
 
-## Configuration Reference
+## Configuration reference
 
 | Field | Description | Default |
 |-------|-------------|---------|
@@ -169,7 +165,7 @@ Keep recovery access in a separate builtin administrator account.
 | `role_attribute_strict` | Deny login when neither a global nor workspace mapping matches | `false` |
 | `skip_org_role_sync` | Keep first-login authorization instead of synchronizing on subsequent logins | `false` |
 
-## Environment Variables
+## Environment variables
 
 Workspace mappings use a JSON object whose keys are IdP groups:
 
@@ -184,14 +180,14 @@ The JSON value must be one object. Unknown grant fields, malformed JSON, blank g
 
 See the [configuration reference](/server-admin/reference#oidc-auth) for the remaining OIDC environment variables.
 
-## Provider Guides
+## Provider guides
 
 - [Test workspace access locally with Keycloak](oidc-workspace-access-keycloak)
 - [Okta group claims](oidc-okta)
 - [Microsoft Entra ID group claims](oidc-entra)
 - [Keycloak group claims](oidc-keycloak)
 
-## Rollout Checklist
+## Rollout checklist
 
 1. Create and verify a separate builtin recovery administrator.
 2. Decode a real test login's ID token and record the exact group values.

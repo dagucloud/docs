@@ -18,9 +18,9 @@ This setup is for local testing only. Keycloak development mode and the example 
 ## Prerequisites
 
 - Docker
-- Dagu available at `http://localhost:8080`
+- a Dagu binary or source checkout
+- port `8080` available for Dagu
 - an active self-host license for OIDC/SSO
-- an existing Dagu workspace, or permission to create one
 
 ## 1. Start Keycloak
 
@@ -157,6 +157,9 @@ auth:
       skip_org_role_sync: false
 ```
 
+The example creates the builtin administrator at startup. If `initial_admin` is omitted, open `/setup` and create the
+administrator before using OIDC.
+
 Start Dagu:
 
 ```bash
@@ -169,9 +172,6 @@ When testing a source checkout, build the current branch and run its binary inst
 make build
 .local/bin/dagu start-all
 ```
-
-The configured `initial_admin` is created before OIDC is used. If it is omitted, open `/setup` and create the builtin
-administrator first; Dagu redirects OIDC login to `/setup` while the user store is empty.
 
 ## 7. Create the Test Workspace
 
@@ -205,7 +205,8 @@ Workspace-scoped users retain the global `viewer` role. Resources without a work
 3. Confirm that login succeeds.
 4. Confirm that no named workspace grant is assigned.
 
-As an administrator, open the Dagu users page and edit `unmapped-user`. The account should show **Managed by SSO**, while rename, disable, and re-enable operations remain available even though the user has no workspace grants. Password reset is not available for OIDC users; use a separate builtin administrator for recovery access.
+As an administrator, open the Dagu users page and edit `unmapped-user`. The account should show **Managed by SSO**.
+Rename, disable, and re-enable remain available, but password reset does not. Use the builtin administrator for recovery.
 
 ### Grant revocation and restoration
 
@@ -215,11 +216,9 @@ As an administrator, open the Dagu users page and edit `unmapped-user`. The acco
 4. Add the user back to `payments-team` in Keycloak.
 5. Sign in to Dagu again and confirm that the grant returns.
 
-Authorization is recomputed at successful OIDC login because `skip_org_role_sync` is `false`.
-If Dagu cannot persist changed workspace authorization, it rejects the login instead of issuing a session with the previous policy.
-
-Dagu does not observe the Keycloak membership change until that login occurs. After the login stores the new policy, any
-other Dagu sessions for the same user use the updated workspace access on their next request.
+With `skip_org_role_sync: false`, Dagu applies membership changes at the next OIDC login. If it cannot save the new policy,
+the login is rejected. See [OIDC workspace access](oidc-workspace-access#synchronization-and-user-management) for session
+behavior and failure handling.
 
 ## Verify the Token Claim
 

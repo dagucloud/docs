@@ -1,28 +1,33 @@
-# OIDC Authentication
+# OIDC authentication
 
-::: info Deployment Model
-This page covers OIDC/SSO setup for self-hosted Dagu. On self-hosted Dagu, OIDC/SSO login requires an active self-host license. Managed server includes authentication features by default, so you do not configure OIDC through `config.yaml` there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
+Configure OpenID Connect under builtin authentication to add SSO while retaining Dagu user management, roles, and API
+keys.
+
+::: info Deployment model and license
+This page covers self-hosted Dagu. OIDC/SSO requires an active self-host license. Managed server includes authentication
+features and does not use this `config.yaml` setup. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
-OpenID Connect (OIDC) is configured under builtin auth mode.
+## Before enabling OIDC
 
-## Recommended: Builtin + OIDC
+Create the first builtin administrator through `/setup` or `auth.builtin.initial_admin`. Dagu redirects OIDC login and
+callback requests to `/setup` while the user store is empty. Keep this administrator as a recovery account for
+identity-provider outages.
 
-For most self-hosted deployments, enable OIDC under builtin auth. This gives you:
+## Configuration
 
-- SSO/OIDC login
-- Dagu user management and role-based access
-- API key management
-- Role mapping from IdP groups
-- Workspace-scoped access from IdP groups
-- Auto-signup for new users (enabled by default)
+OIDC is enabled when `client_id`, `client_secret`, `client_url`, and `issuer` are all set. There is no separate `enabled`
+field.
 
 ```yaml
 auth:
   mode: builtin
   builtin:
     token:
-      secret: your-jwt-secret
+      secret: your-secure-random-secret-key
+    initial_admin:  # omit to create the administrator through /setup
+      username: admin
+      password: your-secure-password
   oidc:
     client_id: your-client-id
     client_secret: your-client-secret
@@ -34,9 +39,13 @@ auth:
       default_role: viewer
 ```
 
+Environment-variable configuration uses the same values:
+
 ```bash
 export DAGU_AUTH_MODE=builtin
-export DAGU_AUTH_TOKEN_SECRET=your-jwt-secret
+export DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret-key
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
 export DAGU_AUTH_OIDC_CLIENT_ID=your-client-id
 export DAGU_AUTH_OIDC_CLIENT_SECRET=your-client-secret
 export DAGU_AUTH_OIDC_CLIENT_URL=https://dagu.example.com
@@ -46,65 +55,77 @@ export DAGU_AUTH_OIDC_SCOPES=openid,profile,email
 dagu start-all
 ```
 
-OIDC is automatically enabled when the required fields (`client_id`, `client_secret`, `client_url`, `issuer`) are configured. No separate `enabled` flag is needed.
-
-Before the first SSO login, create the initial builtin administrator through `/setup` or `builtin.initial_admin`. OIDC login
-and callback endpoints redirect to `/setup` while the user store is empty. Keep this local administrator as the recovery
-path when the identity provider is unavailable.
-
-See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for settings such as `allowed_domains` and `whitelist`. See [OIDC Workspace Access](oidc-workspace-access) for global role mapping, workspace-scoped group mapping, fallbacks, and synchronization.
+If the builtin administrator already exists, omit the two `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_*` variables.
 
 ## Callback URL
 
-Register this callback URL with your provider:
+Register this redirect URI with the provider:
 
-```txt
+```text
 {client_url}/oidc-callback
 ```
 
-For example:
+For example, `https://dagu.example.com/oidc-callback`.
 
-```txt
-https://dagu.example.com/oidc-callback
-```
+## User provisioning and access filters
 
-## Common OIDC Providers
+`auto_signup` controls whether a first-time OIDC identity creates a Dagu user. It defaults to `true`. When disabled, only
+OIDC identities already stored in Dagu can sign in.
 
-- [Google](oidc-google) - Google Workspace / Cloud Identity
-- [Auth0](oidc-auth0) - Hosted identity platform
-- [Okta](oidc-okta) - Group-name claims with filtered assignment
-- [Microsoft Entra ID](oidc-entra) - Stable group Object ID claims
-- [Keycloak](oidc-keycloak) - Open source identity provider
-
-## Removed: Standalone OIDC Mode
-
-> Standalone OIDC mode (`auth.mode: oidc`) has been removed. Use builtin + OIDC instead.
-
-## Migrating from Older Configs
-
-If you previously used `auth.mode: oidc`, migrate to builtin + OIDC:
+Use `allowed_domains` and `whitelist` to restrict who can sign in:
 
 ```yaml
 auth:
-  mode: builtin
-  builtin:
-    token:
-      secret: your-jwt-secret
   oidc:
-    client_id: your-client-id
-    client_secret: your-client-secret
-    client_url: https://dagu.example.com
-    issuer: https://auth.example.com
-    auto_signup: true
-    role_mapping:
-      default_role: viewer
+    allowed_domains: ["company.com"]
+    whitelist: ["partner@external.com"]
 ```
 
-This preserves SSO login while adding Dagu's user management, role-based access, and API key support.
+An address is accepted when it matches either list. If neither setting is configured, any email accepted by the provider is
+allowed. Environment variables use comma-separated values:
 
-## Notes
+```bash
+export DAGU_AUTH_OIDC_ALLOWED_DOMAINS=company.com,subsidiary.com
+export DAGU_AUTH_OIDC_WHITELIST=partner@external.com
+```
 
-- HTTPS is recommended in production for secure cookies
-- The provider must support OpenID Connect Discovery
-- Minimum required scopes are `openid`, `profile`, and `email`
-- State and nonce parameters are used to protect the login flow
+| Field | Purpose | Default |
+|-------|---------|---------|
+| `scopes` | OAuth2 scopes requested from the provider | `openid`, `profile`, `email` |
+| `auto_signup` | Create users on their first OIDC login | `true` |
+| `allowed_domains` | Allowed email domains | unrestricted |
+| `whitelist` | Individually allowed email addresses | none |
+| `button_label` | Text shown on the SSO button | `Login with SSO` |
+
+## Role and workspace mapping
+
+`role_mapping` can assign an organization-wide role or workspace-specific grants from IdP claims. Global mappings take
+precedence over workspace mappings. When `workspace_mappings` is non-empty, set `default_workspace_access` explicitly to
+`all` or `none`.
+
+See [OIDC workspace access](./oidc-workspace-access) for evaluation order, strict mode, synchronization, and provider group
+claims.
+
+## Provider guides
+
+- [Google](./oidc-google)
+- [Auth0](./oidc-auth0)
+- [Okta](./oidc-okta)
+- [Microsoft Entra ID](./oidc-entra)
+- [Keycloak](./oidc-keycloak)
+- [Local workspace-access test with Keycloak](./oidc-workspace-access-keycloak)
+
+## Behavior and security
+
+- The provider must support OpenID Connect Discovery.
+- Use HTTPS in production so the transient OIDC cookies are sent securely.
+- Dagu validates state and nonce values during the login flow.
+- OIDC users cannot use, set, or reset a Dagu password.
+- Group and role changes are applied when the user completes another OIDC login, not on ordinary API requests.
+
+## Migrate from standalone OIDC mode
+
+Standalone `auth.mode: oidc` has been removed. Change the mode to `builtin`, configure a builtin token secret and initial
+administrator, and keep the existing `auth.oidc` provider settings.
+
+See [Builtin authentication](./builtin) for the initial administrator and token configuration.
