@@ -91,7 +91,8 @@ auth:
     # Builtin-specific fields (only used when mode: builtin)
     auto_signup: true                 # Auto-create users on first login
     role_mapping:
-      default_role: "viewer"          # Role for new users
+      # Used for unmatched users when default_workspace_access is "all"
+      default_role: "viewer"
     allowed_domains: ["company.com"]  # Allowed email domains
     button_label: "Login with SSO"    # SSO button text
 

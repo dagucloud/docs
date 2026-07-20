@@ -24,4 +24,6 @@ auth:
 
 Decode a real test login's ID token and confirm `groups` contains the expected Object IDs. Test a mapped user, multiple mapped groups, an unmapped user, and membership revocation.
 
+See [OIDC Workspace Access](oidc-workspace-access) for mapping precedence, unmatched-user fallbacks, synchronization, and rollout guidance.
+
 See Microsoft's [group claim configuration](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims) and [token claim reference](https://learn.microsoft.com/en-us/entra/identity-platform/access-token-claims-reference).

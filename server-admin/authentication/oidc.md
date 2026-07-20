@@ -48,7 +48,7 @@ dagu start-all
 
 OIDC is automatically enabled when the required fields (`client_id`, `client_secret`, `client_url`, `issuer`) are configured. No separate `enabled` flag is needed.
 
-See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for advanced settings such as `allowed_domains`, `whitelist`, global role mapping, and workspace-scoped group mapping.
+See [Builtin Authentication - OIDC/SSO Login](/server-admin/authentication/builtin#oidcsso-login) for settings such as `allowed_domains` and `whitelist`. See [OIDC Workspace Access](oidc-workspace-access) for global role mapping, workspace-scoped group mapping, fallbacks, and synchronization.
 
 ## Callback URL
 

@@ -111,8 +111,11 @@ auth:
     # Builtin-specific settings (only when mode=builtin)
     auto_signup: true         # Auto-create users on first login
     role_mapping:
-      default_role: "viewer"  # Role for new users
-      group_mappings: {}      # OIDC group to Dagu role map
+      # Used for unmatched users when default_workspace_access is "all"
+      default_role: "viewer"
+      group_mappings: {}       # OIDC group to global Dagu role map
+      workspace_mappings: {}   # OIDC group to workspace grant lists
+      default_workspace_access: "all"
     allowed_domains: []       # Restrict by email domain
     button_label: "Login with SSO"
 
@@ -331,6 +334,9 @@ All options support `DAGU_` prefix.
 
 #### OIDC Auth
 OIDC settings (used under builtin auth mode, auto-enabled when all required fields are set):
+
+See [OIDC Workspace Access](/server-admin/authentication/oidc-workspace-access) for mapping evaluation, fallback, and synchronization behavior.
+
 - `DAGU_AUTH_OIDC_CLIENT_ID` - OAuth2 client ID from your OIDC provider
 - `DAGU_AUTH_OIDC_CLIENT_SECRET` - OAuth2 client secret
 - `DAGU_AUTH_OIDC_CLIENT_URL` - Base URL of your Dagu instance (for callback)
@@ -340,7 +346,7 @@ OIDC settings (used under builtin auth mode, auto-enabled when all required fiel
 
 Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_AUTH_OIDC_AUTO_SIGNUP` - Auto-create users on first OIDC login (default: `true`)
-- `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role for auto-created users (default: `viewer`)
+- `DAGU_AUTH_OIDC_DEFAULT_ROLE` - Role assigned across all workspaces when no mapping matches and `DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS=all` (default: `viewer`)
 - `DAGU_AUTH_OIDC_GROUP_MAPPINGS` - OIDC group-to-role mappings
 - `DAGU_AUTH_OIDC_WORKSPACE_MAPPINGS` - OIDC group-to-workspace grants as a JSON object
 - `DAGU_AUTH_OIDC_DEFAULT_WORKSPACE_ACCESS` - Unmapped-user workspace access (`all` or `none`, default: `all`)

@@ -32,4 +32,6 @@ auth:
 
 Decode a real test login's ID token and confirm `groups` contains the exact, case-sensitive strings used as mapping keys. Test a mapped user, multiple mapped groups, an unmapped user, and membership revocation.
 
+See [OIDC Workspace Access](oidc-workspace-access) for mapping precedence, unmatched-user fallbacks, synchronization, and rollout guidance.
+
 See Okta's [groups claim guide](https://developer.okta.com/docs/guides/customize-tokens-groups-claim/main/) and [static allowlist guide](https://developer.okta.com/docs/guides/customize-tokens-static/main/).

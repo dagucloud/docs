@@ -104,6 +104,8 @@ auth:
             role: developer
 ```
 
+See [OIDC Workspace Access](oidc-workspace-access) for mapping precedence, unmatched-user fallbacks, synchronization, and rollout guidance.
+
 #### Environment Variables
 
 ```bash
