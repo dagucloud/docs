@@ -120,6 +120,23 @@ auth:
     allowed_domains: []       # Restrict by email domain
     button_label: "Login with SSO"
 
+  # Proxy authentication (enabled under builtin mode)
+  proxy:
+    enabled: false
+    source: ""                # Optional identity namespace
+    login_label: "Continue with SSO"
+    headers:
+      user: "X-Auth-Request-User"
+      groups: "X-Auth-Request-Groups"
+    auto_signup: true
+    role_mapping:
+      default_role: "viewer"
+      group_mappings: {}
+      workspace_mappings: {}
+      default_workspace_access: "none"
+      require_mapping: true
+      sync_access: true
+
 # TLS/HTTPS
 tls:
   cert_file: "/path/to/cert.pem"
@@ -357,6 +374,25 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_PATH` - jq expression for role extraction
 - `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_STRICT` - Deny login when neither a global nor workspace mapping matches (default: `false`)
 - `DAGU_AUTH_OIDC_SKIP_ORG_ROLE_SYNC` - Only assign role and workspace access on first login (default: `false`)
+
+#### Proxy Authentication
+
+Proxy authentication settings are used under builtin auth mode. See
+[Proxy authentication](/server-admin/authentication/proxy) for the network trust contract, optional identity
+source, mapping behavior, and rollout guidance.
+
+- `DAGU_AUTH_PROXY_ENABLED` - Enable proxy authentication (default: `false`)
+- `DAGU_AUTH_PROXY_SOURCE` - Optional identity namespace (default: empty)
+- `DAGU_AUTH_PROXY_LOGIN_LABEL` - Login-page option text (default: `Continue with SSO`)
+- `DAGU_AUTH_PROXY_HEADERS_USER` - Header containing the stable user identity
+- `DAGU_AUTH_PROXY_HEADERS_GROUPS` - Header containing CSV group names
+- `DAGU_AUTH_PROXY_AUTO_SIGNUP` - Create users on first login (default: `true`)
+- `DAGU_AUTH_PROXY_DEFAULT_ROLE` - Global fallback role (default: `viewer`)
+- `DAGU_AUTH_PROXY_GROUP_MAPPINGS` - Group-to-global-role mappings as a JSON object
+- `DAGU_AUTH_PROXY_WORKSPACE_MAPPINGS` - Group-to-workspace-grant mappings as a JSON object
+- `DAGU_AUTH_PROXY_DEFAULT_WORKSPACE_ACCESS` - Unmatched-user workspace access (`all` or `none`; default: `none`)
+- `DAGU_AUTH_PROXY_REQUIRE_MAPPING` - Deny login when no group mapping matches (default: `true`)
+- `DAGU_AUTH_PROXY_SYNC_ACCESS` - Recalculate role and workspace access at each login (default: `true`)
 
 ### TLS/HTTPS
 - `DAGU_CERT_FILE` - SSL certificate

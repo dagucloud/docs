@@ -1,7 +1,8 @@
 # Builtin authentication
 
 Builtin authentication is the default and recommended mode for self-hosted Dagu. It provides individual user accounts,
-JWT sessions, role-based access, and API keys. OIDC can be added without changing the authentication mode.
+JWT sessions, role-based access, and API keys. OIDC or proxy authentication can be added without changing the
+authentication mode.
 
 ::: info License requirements
 Builtin login and the first administrator do not require a license. Creating, updating, and deleting additional users,
@@ -143,5 +144,6 @@ configuration. If they remain, Dagu ignores them while users exist.
 - [User management](./user-management)
 - [API keys](./api-keys)
 - [OIDC authentication](./oidc)
+- [Proxy authentication](./proxy)
 - [OIDC workspace access](./oidc-workspace-access)
 - [TLS/HTTPS](./tls)

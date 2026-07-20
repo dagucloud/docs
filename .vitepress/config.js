@@ -356,6 +356,7 @@ const fullSidebar = [
           { text: "Webhooks", link: "/server-admin/authentication/webhooks" },
           { text: "Basic Auth", link: "/server-admin/authentication/basic" },
           { text: "OIDC", link: "/server-admin/authentication/oidc" },
+          { text: "Proxy Authentication", link: "/server-admin/authentication/proxy" },
           { text: "OIDC Workspace Access", link: "/server-admin/authentication/oidc-workspace-access" },
           { text: "OIDC Workspace Test (Keycloak)", link: "/server-admin/authentication/oidc-workspace-access-keycloak" },
           { text: "OIDC - Google", link: "/server-admin/authentication/oidc-google" },

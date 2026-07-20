@@ -11,8 +11,9 @@ outside `config.yaml`. See the [pricing page](https://dagu.sh/pricing) for curre
 
 | Method | Use it when |
 |--------|-------------|
-| [Builtin](./builtin) | You need multiple users, roles, API keys, or OIDC. This is the recommended self-hosted mode. |
+| [Builtin](./builtin) | You need multiple users, roles, API keys, OIDC, or proxy authentication. This is the recommended self-hosted mode. |
 | [Builtin + OIDC](./oidc) | Users should sign in through an OpenID Connect provider. Self-hosted SSO requires an active license. |
+| [Builtin + proxy authentication](./proxy) | An authenticating reverse proxy is the only network path to Dagu and should supply user identity headers. Self-hosted SSO requires an active license. |
 | [Basic](./basic) | A single shared account is enough and you do not need user management. |
 | `none` | Authentication is handled outside Dagu or the instance is isolated. |
 
@@ -22,6 +23,7 @@ Builtin authentication is the default. On a new installation, create the first b
 ## Related access controls
 
 - [User management](./user-management) covers roles, workspace access, and password operations.
+- [Proxy authentication](./proxy) covers header-based identity, network isolation, and proxy-managed access.
 - [API keys](./api-keys) provide role-based access for automation.
 - [Webhooks](./webhooks) use DAG-specific tokens for external triggers.
 - [TLS/HTTPS](./tls) secures browser and API connections.

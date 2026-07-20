@@ -100,8 +100,8 @@ If you need strict tenant separation rather than scoped visibility inside one in
 2. Choose **Reset Password**
 3. Enter the new password
 
-Password reset is available only for builtin users. OIDC users authenticate through their identity provider, so Dagu
-does not offer password reset or password change actions for them.
+Password reset is available only for builtin users. OIDC and proxy users authenticate outside Dagu, so Dagu does
+not offer password reset or password change actions for them.
 
 ### Disable A User
 
@@ -164,7 +164,7 @@ curl -X POST http://localhost:8080/api/v1/users \
 - minimum length: **8 characters**
 - builtin users can change their own password after signing in
 - admins can reset passwords for other builtin users
-- OIDC users cannot use or set a Dagu password
+- OIDC and proxy users cannot use or set a Dagu password
 
 Use a password manager or SSO/OIDC for larger teams.
 
@@ -173,4 +173,5 @@ Use a password manager or SSO/OIDC for larger teams.
 - [Builtin Authentication](./builtin)
 - [API Keys](./api-keys)
 - [OIDC / SSO](./oidc)
+- [Proxy authentication](./proxy)
 - [Workspaces](/web-ui/workspaces)
