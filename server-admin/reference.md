@@ -375,30 +375,27 @@ Builtin-specific OIDC settings (only used when `auth.mode=builtin`):
 - `DAGU_AUTH_OIDC_ROLE_ATTRIBUTE_STRICT` - Deny login when neither a global nor workspace mapping matches (default: `false`)
 - `DAGU_AUTH_OIDC_SKIP_ORG_ROLE_SYNC` - Only assign role and workspace access on first login (default: `false`)
 
-#### Proxy Authentication
+#### Proxy authentication
 
-Proxy authentication settings are used under builtin auth mode. See
-[Proxy authentication](/server-admin/authentication/proxy) for the network trust contract, optional identity
-source, mapping behavior, and rollout guidance.
+These settings add proxy login to builtin auth mode. See
+[Proxy authentication](/server-admin/authentication/proxy) for configuration,
+identity headers, access mapping, and network requirements.
 
 - `DAGU_AUTH_PROXY_ENABLED` - Enable proxy authentication (default: `false`)
 - `DAGU_AUTH_PROXY_SOURCE` - Optional identity namespace (default: empty)
 - `DAGU_AUTH_PROXY_BUTTON_LABEL` - Login-page option text (default: `Continue with SSO`)
 - `DAGU_AUTH_PROXY_HEADERS_USER` - Header containing the stable user identity
-- `DAGU_AUTH_PROXY_HEADERS_GROUPS` - Header containing CSV group names
+- `DAGU_AUTH_PROXY_HEADERS_GROUPS` - Header containing CSV group names; required when mappings are configured
 - `DAGU_AUTH_PROXY_AUTO_SIGNUP` - Create users on first login (default: `true`)
 - `DAGU_AUTH_PROXY_DEFAULT_ROLE` - Global fallback role when default workspace access is `all` (default: `viewer`)
 - `DAGU_AUTH_PROXY_GROUP_MAPPINGS` - Group-to-global-role mappings as a JSON object
 - `DAGU_AUTH_PROXY_WORKSPACE_MAPPINGS` - Group-to-workspace-grant mappings as a JSON object
 - `DAGU_AUTH_PROXY_DEFAULT_WORKSPACE_ACCESS` - Unmatched-user workspace access (`all` or `none`; default: `none`)
 - `DAGU_AUTH_PROXY_REQUIRE_MAPPING` - Deny login when no global or workspace mapping matches (default: `false`)
-- `DAGU_AUTH_PROXY_SKIP_ORG_ROLE_SYNC` - Preserve existing role and workspace access on subsequent logins instead of
-  recalculating them (default: `false`)
+- `DAGU_AUTH_PROXY_SKIP_ORG_ROLE_SYNC` - Keep stored role and workspace access on later logins (default: `false`)
 
-By default, unmatched proxy users can log in. `default_workspace_access: none` gives them a top-level `viewer` role with no
-named-workspace grants; `all` applies `default_role` globally. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` explicitly to
-reject them. Role and workspace access are recalculated from the current group mappings at every login unless organization
-role synchronization is skipped.
+By default, unmatched users can sign in with `viewer` and no named-workspace
+grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 
 ### TLS/HTTPS
 - `DAGU_CERT_FILE` - SSL certificate

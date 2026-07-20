@@ -13,7 +13,7 @@ outside `config.yaml`. See the [pricing page](https://dagu.sh/pricing) for curre
 |--------|-------------|
 | [Builtin](./builtin) | You need multiple users, roles, API keys, OIDC, or proxy authentication. This is the recommended self-hosted mode. |
 | [Builtin + OIDC](./oidc) | Users should sign in through an OpenID Connect provider. Self-hosted SSO requires an active license. |
-| [Builtin + proxy authentication](./proxy) | An authenticating reverse proxy is the only network path to Dagu and should supply user identity headers. Self-hosted SSO requires an active license. |
+| [Builtin + proxy authentication](./proxy) | A reverse proxy authenticates users and is the only network path to Dagu. Self-hosted SSO requires an active license. |
 | [Basic](./basic) | A single shared account is enough and you do not need user management. |
 | `none` | Authentication is handled outside Dagu or the instance is isolated. |
 
