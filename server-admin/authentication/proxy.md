@@ -53,7 +53,7 @@ auth:
   mode: builtin
   proxy:
     enabled: true
-    login_label: Continue with Corporate SSO
+    button_label: Continue with Corporate SSO
     headers:
       user: X-Auth-Request-User
       groups: X-Auth-Request-Groups
@@ -95,7 +95,7 @@ accounts, so do not change it during routine proxy upgrades.
 |-------|----------|---------|---------|
 | `enabled` | No | `false` | Enables the proxy login endpoint and login-page option. |
 | `source` | No | empty | Stable namespace combined with the user-header value to identify an account. |
-| `login_label` | No | `Continue with SSO` | Text shown for the proxy authentication option on the login page. |
+| `button_label` | No | `Continue with SSO` | Text shown for the proxy authentication option on the login page. |
 | `headers.user` | When enabled | none | Header containing the stable user identifier. |
 | `headers.groups` | With group or workspace mappings | none | Header containing group names. |
 | `auto_signup` | No | `true` | Creates an account when a proxy identity signs in for the first time. |
@@ -118,7 +118,7 @@ Scalar settings have direct environment-variable equivalents:
 export DAGU_AUTH_MODE=builtin
 export DAGU_AUTH_PROXY_ENABLED=true
 # DAGU_AUTH_PROXY_SOURCE is optional
-export DAGU_AUTH_PROXY_LOGIN_LABEL='Continue with Corporate SSO'
+export DAGU_AUTH_PROXY_BUTTON_LABEL='Continue with Corporate SSO'
 export DAGU_AUTH_PROXY_HEADERS_USER=X-Auth-Request-User
 export DAGU_AUTH_PROXY_HEADERS_GROUPS=X-Auth-Request-Groups
 export DAGU_AUTH_PROXY_AUTO_SIGNUP=true
@@ -244,7 +244,7 @@ auth:
   proxy:
     enabled: true
     # source: corporate-sso  # optional
-    loginLabel: Continue with Corporate SSO
+    buttonLabel: Continue with Corporate SSO
     headers:
       user: X-Auth-Request-User
       groups: X-Auth-Request-Groups

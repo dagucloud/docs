@@ -124,7 +124,7 @@ auth:
   proxy:
     enabled: false
     source: ""                # Optional identity namespace
-    login_label: "Continue with SSO"
+    button_label: "Continue with SSO"
     headers:
       user: "X-Auth-Request-User"
       groups: "X-Auth-Request-Groups"
@@ -383,7 +383,7 @@ source, mapping behavior, and rollout guidance.
 
 - `DAGU_AUTH_PROXY_ENABLED` - Enable proxy authentication (default: `false`)
 - `DAGU_AUTH_PROXY_SOURCE` - Optional identity namespace (default: empty)
-- `DAGU_AUTH_PROXY_LOGIN_LABEL` - Login-page option text (default: `Continue with SSO`)
+- `DAGU_AUTH_PROXY_BUTTON_LABEL` - Login-page option text (default: `Continue with SSO`)
 - `DAGU_AUTH_PROXY_HEADERS_USER` - Header containing the stable user identity
 - `DAGU_AUTH_PROXY_HEADERS_GROUPS` - Header containing CSV group names
 - `DAGU_AUTH_PROXY_AUTO_SIGNUP` - Create users on first login (default: `true`)
