@@ -784,6 +784,7 @@ Accepted built-in action names:
 | `git.checkout` | Clone or update a Git repository. |
 | `git.worktree.add`, `git.worktree.remove` | Create, reuse, and remove linked worktrees in a local Git repository. See [Git](/step-types/git#linked-worktrees). |
 | `harness.run` | CLI coding-agent harness execution. |
+| `human.task` | Wait for acknowledgement or typed operator input in a root DAG. |
 | `http.request` | HTTP requests. |
 | `jq.filter` | jq transforms. |
 | `k8s.run`, `kubernetes.run` | Kubernetes job execution. |
@@ -846,6 +847,47 @@ steps:
 ```
 
 `dag.run` waits for the child DAG to finish. `dag.enqueue` waits only until the child run is persisted and queued. `dag.enqueue` accepts the same `with.dag` and `with.params` inputs as `dag.run`, plus `with.queue`.
+
+### Human Task
+
+`action: human.task` defines a processless step that enters `Waiting` until an operator completes it through the local CLI.
+
+```yaml
+steps:
+  - id: release_review
+    action: human.task
+    with:
+      prompt: Choose the release target
+      form:
+        type: object
+        properties:
+          environment:
+            type: string
+            enum: [staging, production]
+          replicas:
+            type: integer
+            minimum: 1
+            default: 2
+        required: [environment]
+
+  - id: deploy
+    depends: release_review
+    run: ./deploy.sh '${steps.release_review.outputs.environment}'
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Explicit step ID used by completion commands and output references. |
+| `with.prompt` | string | Yes | Non-empty operator instructions. Value references are resolved when the task opens. |
+| `with.form` | object | No | Flat typed input schema. Omit for acknowledgement-only tasks. |
+
+The form root supports `type: object`, `title`, `description`, `properties`, `required`, and `additionalProperties`. `additionalProperties` defaults to `false`. Declared properties support `string`, `integer`, `number`, and `boolean`, using the same scalar constraints and string coercion as [typed parameters](/writing-workflows/parameters). Nested declared objects and arrays are invalid.
+
+Each declared form property automatically becomes `${steps.<id>.outputs.<property>}`. Do not author `outputs` on a human task. Optional properties without a submitted value or default remain absent, and undeclared properties never become outputs.
+
+Human tasks are allowed only in root DAGs. A root DAG containing one may run locally or on a distributed worker, but a human task cannot be used in a child DAG, `foreach.steps`, or a lifecycle handler. Execution, retry, repeat, timeout, container, step-level worker selector, approval, and authored output fields are not supported on the same step.
+
+See [Human Tasks](/writing-workflows/human-tasks) for completion commands, waiting and resume behavior, distributed execution, and the comparison with approval gates.
 
 ### Parallel Child DAG Runs
 

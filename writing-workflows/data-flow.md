@@ -132,6 +132,31 @@ steps:
 
 The strict output reference reads a top-level output name. Nested output paths are not part of the strict syntax.
 
+### Human Task Outputs
+
+A [human task](/writing-workflows/human-tasks) derives outputs from its declared form properties. The workflow does not write `DAGU_OUTPUT_FILE` or declare `outputs` on the step.
+
+```yaml
+steps:
+  - id: choose_region
+    action: human.task
+    with:
+      prompt: Choose the deployment region
+      form:
+        type: object
+        properties:
+          region:
+            type: string
+            enum: [us-east-1, eu-west-1]
+        required: [region]
+
+  - id: deploy
+    depends: choose_region
+    run: ./deploy.sh '${steps.choose_region.outputs.region}'
+```
+
+Only declared properties become outputs. The consumer must depend directly or transitively on the human-task step; the output reference does not create the dependency.
+
 ## Files
 
 Use files when the data is large or when another process expects a file path.

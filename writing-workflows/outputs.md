@@ -8,7 +8,7 @@ The current validated reference form is:
 ${steps.<step_id>.outputs.<output_name>}
 ```
 
-The producing step must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`.
+For command steps, the producer must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`. Built-in actions can provide their own output contract. For example, a [human task](/writing-workflows/human-tasks) derives outputs from its form properties and publishes the validated operator input without an authored `outputs` field or `DAGU_OUTPUT_FILE`.
 
 ## Basic Example
 
@@ -30,6 +30,8 @@ This is more explicit than a bare `${VERSION}` reference:
 - `get_version` declares that it publishes `version`
 - `build_image` declares the dependency that makes the output available
 - Dagu can report a passive notice if the step id, output name, or dependency is wrong
+
+Human-task outputs use the same `${steps.<step_id>.outputs.<output_name>}` reference and dependency rules. See [Human Tasks](/writing-workflows/human-tasks#generated-step-outputs) for the generated-output behavior.
 
 ## Output File Format
 

@@ -2,6 +2,16 @@
 
 Add `approval` to any step to pause execution after the step completes and wait for human review.
 
+If the workflow should wait without running a command first, use a [human task](/writing-workflows/human-tasks) instead.
+
+| Behavior | Human task | Approval gate |
+|----------|------------|---------------|
+| Definition | Standalone `action: human.task` step | `approval` attached to an executable step |
+| Before waiting | Runs no process | Runs the step first |
+| Result | Completion succeeds the step | Approve, reject, or push back |
+| Rewind | Not supported | Supported with `rewind_to` |
+| Collected values | Typed form properties become step outputs | Inputs become approval or push-back environment values |
+
 ## Usage
 
 ```yaml

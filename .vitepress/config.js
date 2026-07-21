@@ -154,6 +154,7 @@ const fullSidebar = [
           { text: "Scheduling", link: "/writing-workflows/scheduling" },
           { text: "Execution Control", link: "/writing-workflows/execution-control" },
           { text: "Queue Assignment", link: "/writing-workflows/queues" },
+          { text: "Human Tasks", link: "/writing-workflows/human-tasks" },
           { text: "Approval Gates", link: "/writing-workflows/approval" },
         ],
       },

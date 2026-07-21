@@ -5,7 +5,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - Both formats: `start`, `stop`, `status`, `retry`
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
-- Local management commands: `profile`
+- Local-only commands: `profile`, `human-task complete`
 
 ## Global Options
 
@@ -179,6 +179,48 @@ dagu retry --run-id=20240101_120000 my-workflow
 ```
 
 Retries inherit the original run's runtime profile. `dagu retry` does not accept `--profile`.
+
+### `human-task complete`
+
+Complete a waiting [human task](/writing-workflows/human-tasks) in a root DAG run.
+
+```bash
+dagu human-task complete [options] DAG_NAME_OR_FILE
+```
+
+**Options:**
+
+- `--run-id, -r` - Root DAG-run ID containing the waiting task (required)
+- `--step` - Explicit human-task step ID (required)
+- `--input key=value` - String input, repeatable for multiple properties
+- `--inputs-json object` - Typed input as one JSON object
+
+```bash
+# Complete an acknowledgement-only task
+dagu human-task complete \
+  --run-id maintenance-42 \
+  --step maintenance_started \
+  maintenance.yaml
+
+# Submit values that are coerced using the form schema
+dagu human-task complete \
+  --run-id release-42 \
+  --step release_review \
+  --input environment=production \
+  --input replicas=3 \
+  release.yaml
+
+# Submit typed JSON values
+dagu human-task complete \
+  --run-id release-42 \
+  --step release_review \
+  --inputs-json '{"environment":"production","replicas":3,"notify":false}' \
+  release.yaml
+```
+
+`--input` and `--inputs-json` are mutually exclusive. Omitting both submits an empty object. The command matches `--step` against the explicit step `id`, not its display name.
+
+This command only supports the local CLI context because it accesses the DAG-run store directly. The root run itself may have executed locally or on a distributed worker. When the last waiting task is completed, Dagu resumes the same run automatically; a distributed resume requires the scheduler to be running.
 
 ### `status`
 

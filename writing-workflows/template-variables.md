@@ -137,7 +137,7 @@ steps:
 Rules:
 
 - The producing step must have an `id`.
-- The output name must be declared in the producing step's `outputs` list.
+- The output name must belong to the producing step's output contract, either through its `outputs` list or outputs supplied by its action.
 - The producing step must complete successfully before the consuming step starts.
 - The consuming step must depend directly or transitively on the producing step.
 - Step output references do not create dependencies.

@@ -137,7 +137,7 @@ The matching `DAG_*` environment variables are still available for shell scripts
 
 ## Step Outputs
 
-For validated data passing between steps, declare outputs and write them to `DAGU_OUTPUT_FILE`.
+For command steps, declare outputs and write them to `DAGU_OUTPUT_FILE`. Built-in actions can publish outputs directly; [human tasks](/writing-workflows/human-tasks#generated-step-outputs), for example, derive their output contract from form properties.
 
 ```yaml
 steps:

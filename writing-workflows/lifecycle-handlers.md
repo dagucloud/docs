@@ -10,10 +10,10 @@ Lifecycle handlers let you run extra steps after the main DAG completes. Use the
 | `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continue_on`) | Deliver success notifications, enqueue downstream jobs |
 | `failure` | The DAG ended with `failed` or `rejected` status, including DAG-level precondition evaluation errors | Page on-call, collect diagnostics |
 | `abort` | The run was aborted by a stop request, queue eviction, timeout cancellation, or unmet DAG-level precondition | Roll back partial work, release locks |
-| `wait` | The DAG has paused waiting for human approval | Notify approvers, send Slack messages |
+| `wait` | The DAG has paused waiting for approval or human-task completion | Notify operators, send Slack messages |
 | `exit` | Always runs after the status-specific handler finishes (including when it fails or is skipped) | File system clean-up, archival tasks |
 
-Only the handlers you define are executed. The `init` handler runs first (before any steps), then the main steps execute, then the status-specific handler runs (if present), and finally the `exit` handler runs last. The `wait` handler is special: it runs when the workflow pauses for approval, before the workflow completes.
+Only the handlers you define are executed. The `init` handler runs first (before any steps), then the main steps execute, then the status-specific handler runs (if present), and finally the `exit` handler runs last. The `wait` handler is special: it runs when the workflow pauses for human input, before the workflow completes.
 
 ## Basic Definition
 
@@ -32,7 +32,7 @@ handler_on:
   abort:
     run: rollback.sh --lock "${env.LOCK_NAME}"
   wait:
-    run: notify-approvers.sh "$DAG_WAITING_STEPS" # runs when waiting for approval
+    run: notify-operators.sh "$DAG_WAITING_STEPS" # runs when waiting for human input
   exit:
     run: rm -rf "/tmp/${context.run.id}" # always runs
 
@@ -124,9 +124,9 @@ handler_on:
       find "/tmp/${context.run.id}" -maxdepth 1 -type f -delete
 ```
 
-### Notify on Wait (Approval)
+### Notify on Wait
 
-When using [approval steps](/writing-workflows/approval), notify stakeholders:
+When using [human tasks](/writing-workflows/human-tasks) or [approval gates](/writing-workflows/approval), notify stakeholders:
 
 ```yaml
 handler_on:
@@ -134,15 +134,21 @@ handler_on:
     run: notify-slack.sh "Approval needed: $DAG_WAITING_STEPS"
 
 steps:
-  - id: deploy_staging
-    run: ./deploy.sh staging
-    approval:
-      prompt: "Approve production?"
+  - id: choose_target
+    action: human.task
+    with:
+      prompt: "Choose the production deployment target"
+      form:
+        type: object
+        properties:
+          target:
+            type: string
+        required: [target]
   - id: deploy_prod
     run: ./deploy.sh production
-    depends: deploy_staging
+    depends: choose_target
 ```
 
-The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of step names currently waiting for approval.
+The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of step names currently waiting for human input.
 
 For the complete schema, refer to the [YAML specification](/writing-workflows/yaml-specification#lifecycle-handlers). Combine handlers with the techniques from [Error Handling](/writing-workflows/error-handling) and [Data & Variables](/writing-workflows/data-variables) to build robust workflow lifecycles.

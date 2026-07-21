@@ -215,9 +215,10 @@ Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dag
 8. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
 9. **[Persistent State](/writing-workflows/persistent-state)** - Cursors, checkpoints, and previous values across DAG runs
 10. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
-11. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
-12. **[Runtime Profiles](/writing-workflows/runtime-profiles)** - Per-run profile selection for variables and secrets
-13. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
+11. **[Human Tasks](/writing-workflows/human-tasks)** - Pause for acknowledgement or typed operator input
+12. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
+13. **[Runtime Profiles](/writing-workflows/runtime-profiles)** - Per-run profile selection for variables and secrets
+14. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
 
 Reusable action docs live in the [Dagu Actions](/dagu-actions/) section.
 
