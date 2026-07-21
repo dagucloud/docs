@@ -1515,6 +1515,92 @@ Manually updates a step's execution status.
 }
 ```
 
+## Human Task Endpoints
+
+These endpoints complete standalone [`action: human.task`](/writing-workflows/human-tasks) steps. They operate on root DAG runs regardless of whether the run executes locally or on a distributed worker. The caller needs permission to execute DAGs in the run's workspace.
+
+### Complete Human Task
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/human-tasks/{stepId}/complete`
+
+Validates typed input against the form stored with the run, then durably completes the human-task step. The request body is the form input object itself, not an `inputs` wrapper.
+
+**Request Body**:
+
+```json
+{
+  "environment": "production",
+  "replicas": 3,
+  "notify": true
+}
+```
+
+Send `{}` for an acknowledgement-only task. The request body is limited to 16 MiB.
+
+**Response (200)**:
+
+```json
+{
+  "dagName": "release-workflow",
+  "dagRunId": "20260720_120000",
+  "stepId": "review",
+  "alreadyCompleted": false,
+  "queued": true,
+  "remainingWaitingSteps": 0
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dagName` | string | Name of the root DAG. |
+| `dagRunId` | string | Concrete DAG-run ID. |
+| `stepId` | string | Explicit ID of the completed human-task step. |
+| `alreadyCompleted` | boolean | Whether identical input had already completed this task. |
+| `queued` | boolean | Whether this request durably added the DAG-run retry to the queue. |
+| `remainingWaitingSteps` | integer | Number of manual steps that still need input. |
+
+If another manual step is waiting, Dagu stores this completion and returns `queued: false`. When none remain, Dagu always enqueues a retry of the same DAG run; completion never starts the DAG immediately. A repeated request with the same canonical input is idempotent. Different input for an already completed task returns a conflict.
+
+**Error Responses**:
+
+- `400`: The body is not a JSON object or does not satisfy the stored form.
+- `404`: The DAG run or human-task step does not exist or is not visible to the caller.
+- `409`: The task is not actionable, the run changed concurrently, or prior input conflicts.
+- `413`: The request body exceeds 16 MiB.
+- `503`: The completion was stored, but the DAG-run retry could not be queued.
+
+A `503` with error code `human_task_resume_failed` includes `completionStored: true` and `resumePending: true` in `details`. Do not ask the operator to re-enter the form. Retry only the queue operation with the endpoint below.
+
+### Retry Human Task Resume Queue
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/human-tasks/resume`
+
+Queues a recoverable human-task checkpoint after completion was stored but the original enqueue attempt failed. This endpoint has no request body and never needs the previously submitted form values.
+
+**Response (200)**:
+
+```json
+{
+  "dagName": "release-workflow",
+  "dagRunId": "20260720_120000",
+  "queued": true
+}
+```
+
+The operation is safe to retry. `queued` is `false` when the retry is already queued or the run has already resumed.
+
+**Error Responses**:
+
+- `404`: The DAG run does not exist or is not visible to the caller.
+- `409`: Manual steps still need input, or the run has no completed human-task checkpoint to resume.
+- `503`: The queue attempt failed again and remains retryable.
+
+## Approval Endpoints
+
+::: info Separate manual-step APIs
+The approve, reject, and push-back endpoints below resolve executable steps configured with `approval`. They do not operate on `action: human.task`.
+:::
+
 ### Approve Step
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/approve`

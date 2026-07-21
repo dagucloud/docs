@@ -1,6 +1,6 @@
 # Control Flow Examples
 
-Examples for conditions, human input, repetition, routing, DAG composition, and worker placement.
+Examples for human tasks, conditions, repetition, routing, DAG composition, and worker placement.
 
 <div class="examples-grid">
 
@@ -54,7 +54,7 @@ steps:
         required: [environment]
 
   - id: deploy
-    depends: release_review
+    depends: [release_review]
     run: ./deploy.sh '${steps.release_review.outputs.environment}'
 ```
 
@@ -67,7 +67,7 @@ dagu human-task complete \
   release.yaml
 ```
 
-The first command exits after the run reaches `Waiting`. Completing the task resumes the same run and makes the validated form value available to `deploy`.
+The first command exits after the run reaches `Waiting`. Completing the task enqueues the same run, and the scheduler resumes it with the validated form value available to `deploy`.
 
 <a href="/writing-workflows/human-tasks" class="learn-more">Learn more →</a>
 

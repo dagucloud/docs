@@ -5,7 +5,7 @@ Use these examples as copy-paste starting points for common Dagu workflow patter
 ## Workflow Basics
 
 - [Basic Examples](/writing-workflows/examples/basic) - Sequential steps, parallel child runs, multi-command steps, pinned tools, and dependency modes.
-- [Control Flow](/writing-workflows/examples/control-flow) - Conditions, human tasks, repetition, routing, nested workflows, and worker placement.
+- [Control Flow](/writing-workflows/examples/control-flow) - Human tasks, conditions, repetition, routing, nested workflows, and worker placement.
 - [Reliability](/writing-workflows/examples/reliability) - Continue-on behavior, retries, backoff, and lifecycle handlers.
 
 ## Data & Runtime

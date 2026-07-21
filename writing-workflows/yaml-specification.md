@@ -850,7 +850,7 @@ steps:
 
 ### Human Task
 
-`action: human.task` defines a processless step that enters `Waiting` until an operator completes it through the local CLI.
+`action: human.task` defines a processless step that enters `Waiting` until an operator completes it through the Web UI, REST API, or local CLI.
 
 ```yaml
 steps:
@@ -871,7 +871,7 @@ steps:
         required: [environment]
 
   - id: deploy
-    depends: release_review
+    depends: [release_review]
     run: ./deploy.sh '${steps.release_review.outputs.environment}'
 ```
 
@@ -887,7 +887,7 @@ Each declared form property automatically becomes `${steps.<id>.outputs.<propert
 
 Human tasks are allowed only in root DAGs. A root DAG containing one may run locally or on a distributed worker, but a human task cannot be used in a child DAG, `foreach.steps`, or a lifecycle handler. Execution, retry, repeat, timeout, container, step-level worker selector, approval, and authored output fields are not supported on the same step.
 
-See [Human Tasks](/writing-workflows/human-tasks) for completion commands, waiting and resume behavior, distributed execution, and the comparison with approval gates.
+After no manual steps remain waiting, Dagu always enqueues the same DAG run; completion never starts it immediately. See [Human Tasks](/writing-workflows/human-tasks) for examples, completion surfaces, persistence, queue recovery, distributed execution, and the comparison with approval gates.
 
 ### Parallel Child DAG Runs
 

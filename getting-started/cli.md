@@ -182,7 +182,7 @@ Retries inherit the original run's runtime profile. `dagu retry` does not accept
 
 ### `human-task complete`
 
-Complete a waiting [human task](/writing-workflows/human-tasks) in a root DAG run.
+Complete a waiting [`human.task`](/writing-workflows/human-tasks) step and enqueue the same DAG run when no other manual steps remain waiting.
 
 ```bash
 dagu human-task complete [options] DAG_NAME_OR_FILE
@@ -220,7 +220,7 @@ dagu human-task complete \
 
 `--input` and `--inputs-json` are mutually exclusive. Omitting both submits an empty object. The command matches `--step` against the explicit step `id`, not its display name.
 
-This command only supports the local CLI context because it accesses the DAG-run store directly. The root run itself may have executed locally or on a distributed worker. When the last waiting task is completed, Dagu resumes the same run automatically; a distributed resume requires the scheduler to be running.
+The command is local-only and rejects remote CLI contexts, but the target root DAG run may have executed locally or on a distributed worker. Human tasks are not supported in sub-DAGs. After the last manual step is completed, every run is enqueued; completion never starts it immediately. Keep the scheduler running so the queued run can resume. See [Human Tasks](/writing-workflows/human-tasks#completing-a-task-from-the-cli) for form validation, persistence, idempotency, and recovery behavior.
 
 ### `status`
 

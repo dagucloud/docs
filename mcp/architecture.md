@@ -35,6 +35,8 @@ Dagu exposes a small tool surface by design:
 
 This keeps client instructions stable and avoids exposing every REST endpoint as a separate MCP tool.
 
+The tool boundary does not include human-task completion. MCP can author and start a root DAG containing [`action: human.task`](/writing-workflows/human-tasks), locally or on a distributed worker, and it can read the resulting run state. Complete a waiting task through the Web UI, REST API, or local `dagu human-task complete` command. Human tasks are not supported in sub-DAGs.
+
 ## Resource Boundary
 
 The MCP server exposes resource templates for current Dagu state:

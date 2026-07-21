@@ -23,7 +23,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Cockpit** for a live board of recent runs
 - **Dashboard** for recent activity and trends
 - **Definitions** for the list of workflows
-- **Run details** for outputs, artifacts, logs, and retries
+- **Run details** for human tasks, approvals, outputs, artifacts, logs, and retries
 - **Notifications** for Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
@@ -143,10 +143,13 @@ When you open a specific run, Dagu shows the full execution view.
 This is where you troubleshoot and verify results:
 
 - **Status** for the graph and step table
+- **Human tasks** for completing acknowledgement prompts and typed forms when operator input is required
 - **Timeline** for execution ordering and duration
 - **Outputs** for collected output values
 - **Artifacts** for generated files
 - **Logs** for the run and each step
+
+When a run is waiting on [`action: human.task`](/writing-workflows/human-tasks), Dagu opens the **Human tasks** tab automatically. Complete each generated form there. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
 
 The dedicated outputs view is also available inside the run screen:
 

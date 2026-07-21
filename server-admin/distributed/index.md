@@ -182,6 +182,12 @@ export DAGU_DEFAULT_EXECUTION_MODE=distributed
 
 When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `worker_selector`. DAGs with a `worker_selector` are always dispatched to a matching worker regardless of this setting.
 
+### Human Tasks on Distributed Workers
+
+Root DAGs containing [`action: human.task`](/writing-workflows/human-tasks) use normal dispatch rules. They may select a worker with a label-based DAG-level `worker_selector`, follow `default_execution_mode: distributed`, or remain local.
+
+When a worker reaches a human task, it persists the final `waiting` state and releases the run. The Web UI, REST API, or local CLI can store the form input in the root run. Once no manual steps remain waiting, Dagu enqueues the same run through the scheduler. This is the same queue-based resume path used for local runs; completion never starts a run directly. The scheduler must remain available. Human tasks are prohibited in sub-DAGs.
+
 ### Force Local Execution
 
 If `default_execution_mode` is `distributed` but you need a specific DAG to always run locally (e.g., a lightweight health-check), use `worker_selector: local`:

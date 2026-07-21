@@ -28,7 +28,7 @@ Cockpit groups runs by date and status:
 | --- | --- |
 | **Queued** | Runs waiting to start. |
 | **Running** | Runs currently executing. |
-| **Review** | Runs paused for approval. |
+| **Review** | Local or distributed root runs paused for approval or human-task input. Open the run to complete the generated human-task form. |
 | **Done** | Successful or partially successful runs. |
 | **Failed** | Failed, aborted, or rejected runs. |
 

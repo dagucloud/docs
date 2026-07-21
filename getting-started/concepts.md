@@ -302,21 +302,28 @@ See [Wait](/step-types/wait) for more details.
 
 ### Human Task
 
-Pause a root DAG for acknowledgement or typed operator input before downstream steps continue:
+Pause a root DAG for an acknowledgement or validated typed input:
 
 ```yaml
 steps:
-  - id: confirm_maintenance
+  - id: release_settings
     action: human.task
     with:
-      prompt: Confirm that maintenance has started
+      prompt: Choose the deployment target
+      form:
+        type: object
+        properties:
+          environment:
+            type: string
+            enum: [staging, production]
+        required: [environment]
 
-  - id: continue_maintenance
-    depends: confirm_maintenance
-    run: ./continue-maintenance.sh
+  - id: deploy
+    depends: [release_settings]
+    run: ./deploy.sh '${steps.release_settings.outputs.environment}'
 ```
 
-Complete the waiting task with `dagu human-task complete`. See [Human Tasks](/writing-workflows/human-tasks) for typed forms, generated outputs, and resume behavior.
+The Web UI renders the form, and submitted values become step outputs. See [Human Tasks](/writing-workflows/human-tasks) for acknowledgement-only tasks, richer schemas, API and CLI completion, and queue-based recovery.
 
 ### Custom Actions
 

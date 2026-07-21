@@ -86,11 +86,11 @@ In this example, the DAG turns an existing account-repair runbook into a reviewe
   <span>Validate</span>
   <span>Schedule or Run</span>
   <span>Monitor</span>
-  <span>Retry or Approve</span>
+  <span>Retry, Approve, or Complete</span>
   <span>Notify and Audit</span>
 </div>
 
-During a run, Dagu resolves dependencies, starts ready steps, captures stdout and stderr, tracks status, applies retry rules, pauses for human tasks or approvals, stores artifacts, and updates the Web UI in real time.
+During a run, Dagu resolves dependencies, starts ready steps, captures stdout and stderr, tracks status, applies retry rules, pauses for approvals or [human input](/writing-workflows/human-tasks), stores artifacts, and updates the Web UI in real time.
 
 ## Core Terminology
 
@@ -100,7 +100,7 @@ Understanding Dagu is easier once the main terms are clear.
 |------|---------|
 | **DAG** | A workflow file written in [YAML](/writing-workflows/yaml-specification). Steps run according to dependencies, so the execution order is explicit. |
 | **Step** | One unit of work. A step can run a [command](/step-types/shell), [container](/step-types/docker), [SSH command](/step-types/ssh), [HTTP request](/step-types/http), [SQL query](/step-types/sql/), [readiness wait](/step-types/wait), [human task](/writing-workflows/human-tasks), [sub-workflow](/writing-workflows/control-flow), [chat completion](/features/chat/), or [external CLI harness](/step-types/harness/). |
-| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`human.task`](/writing-workflows/human-tasks), [`s3.upload`](/step-types/s3), [`chat.completion`](/features/chat/), or [`harness.run`](/step-types/harness/). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
+| **Action** | The kind of work a step runs, such as [`run`](/step-types/shell), [`docker.run`](/step-types/docker), [`kubernetes.run`](/step-types/kubernetes), [`ssh.run`](/step-types/ssh), [`http.request`](/step-types/http), [`human.task`](/writing-workflows/human-tasks), [`postgres.query`](/step-types/sql/postgresql), [`wait.http`](/step-types/wait), [`s3.upload`](/step-types/s3), [`chat.completion`](/features/chat/), or [`harness.run`](/step-types/harness/). You can also define [custom actions](/dagu-actions/custom), call [third-party actions](/dagu-actions/third-party), or use [official actions](/dagu-actions/official) such as [`duckdb@v1`](/dagu-actions/official/duckdb). |
 | **Dagu Action** | A versioned action package such as [`python-script@v1`](/dagu-actions/official/python-script), [`duckdb@v1`](/dagu-actions/official/duckdb), or [`ffmpeg@v1`](/dagu-actions/official/ffmpeg). |
 | **Parameter** | A declared run input with a name, type, default, description, or allowed values. Parameters power the generated Web UI start form and keep submitted values visible with the run. |
 | **Tool** | A pinned CLI package declared with [`tools`](/writing-workflows/tools). Dagu installs these before the run so host command steps use the expected binary version. |

@@ -109,3 +109,5 @@ Stop a run:
 ```
 
 When a run can be identified, `dagu_execute` returns resource links for run details and logs. Clients that support subscriptions can subscribe to the returned run resource.
+
+`dagu_execute` can start or enqueue a root DAG containing human tasks, locally or on a distributed worker, but it cannot complete a waiting human task. Use the [Web UI](/writing-workflows/human-tasks#web-ui), [REST API](/web-ui/api#human-task-endpoints), or local [`dagu human-task complete`](/getting-started/cli#human-task-complete) command. Human-task completion is not available through MCP, including `dagu_execute` retry or stop actions.

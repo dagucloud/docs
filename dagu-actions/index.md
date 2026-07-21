@@ -2,15 +2,16 @@
 
 Dagu Actions are official reusable action packages maintained by the `dagucloud` organization. They let a workflow call a maintained package with a short versioned reference such as `python-script@v1` or `duckdb@v1`.
 
-Custom Actions and Third-Party Actions use related `action:` syntax, but they are different concepts:
+Built-in, Custom, and Third-Party Actions use related `action:` syntax, but they are different concepts:
 
 | Model | Call shape | Where it lives | Use when |
 |-------|------------|----------------|----------|
+| Built-in Action | [`action: human.task`](/writing-workflows/human-tasks) | The Dagu binary | The capability is part of Dagu itself, such as collecting durable human input. |
 | Dagu Action | `action: python-script@v1` | A maintained `dagucloud/*` repository | Dagu already provides the reusable package you need. |
 | Third-Party Action | `action: owner/repo@version` | A repository outside the official `dagucloud` action set | The reusable unit is maintained outside Dagu and should be pinned by version. |
 | Custom Action | `action: release.announce` | The current DAG document or `base.yaml` | You need an inline typed wrapper around a built-in step type. |
 
-Built-in step types such as `run`, `http.request`, `docker.run`, `postgres.query`, `chat.completion`, and `harness.run` are documented separately in [Step Types](/step-types/shell). Packaged actions can use those step types internally, but they are not the same layer.
+Built-in step types such as `run`, [`human.task`](/writing-workflows/human-tasks), `http.request`, `docker.run`, `postgres.query`, `chat.completion`, and `harness.run` are documented separately under **Built-in Actions**. Packaged actions can use those step types internally, but they are not the same layer.
 
 ## Quick Example
 
@@ -34,6 +35,8 @@ steps:
 The action package owns its manifest, implementation workflow, output contract, and tool dependencies. The caller only supplies `with:` and reads `${steps.compute.outputs.*}`.
 
 ## Choose a Model
+
+Use a built-in action when Dagu provides the capability directly. For example, [`human.task`](/writing-workflows/human-tasks) pauses a root DAG for durable typed input and has dedicated Web UI, REST API, and CLI completion surfaces.
 
 Use a Dagu Action first when it matches the task. Dagu Actions are maintained in the `dagucloud` organization and can be called with `name@version`.
 
