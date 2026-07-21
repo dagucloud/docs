@@ -45,6 +45,48 @@ steps:
       bare: true
 ```
 
+## Structured JSON Output
+
+Use the step-level `output_schema` field when downstream steps require stdout to
+contain exactly one JSON object with a known shape:
+
+```yaml
+steps:
+  - id: analyze
+    action: harness.run
+    with:
+      provider: codex
+      prompt: |
+        Analyze the authentication code.
+        Return only one JSON object with `summary` and `risk` fields.
+    output_schema:
+      type: object
+      additionalProperties: false
+      required: [summary, risk]
+      properties:
+        summary:
+          type: string
+        risk:
+          type: string
+          enum: [low, medium, high]
+```
+
+After the successful harness attempt exits, Dagu decodes its complete stdout as
+one JSON value and validates it against the schema. The step fails if stdout is
+empty, contains non-JSON output or multiple JSON values, or does not match the
+schema. `output_schema` belongs on the step, not under `with`, and works with
+both built-in providers and custom harness definitions.
+
+`output_schema` validates output; it does not instruct the agent to generate
+JSON. Tell the agent to return only JSON, or use an appropriate provider-native
+structured-output option. Provider options such as `with.format: json`,
+`with.output_format: json`, and `with.json: true` are passed through as CLI
+flags. They are not portable Dagu options, and a provider may use them to emit a
+JSONL event stream rather than one final JSON document.
+
+See the [`output_schema` workflow specification](/writing-workflows/yaml-specification#output)
+for the general step-level contract.
+
 ## Approval Push-back
 
 Harness steps automatically receive approval push-back context when they are rewound and re-executed. Dagu appends a push-back context block to the prompt with:
