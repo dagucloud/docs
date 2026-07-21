@@ -84,7 +84,9 @@ structured-output option. Provider options such as `with.format: json`,
 flags. They are not portable Dagu options, and a provider may use them to emit a
 JSONL event stream rather than one final JSON document.
 
-See the [`output_schema` workflow specification](/writing-workflows/yaml-specification#output)
+See the [validated JSON harness example](/writing-workflows/examples/harness-run#validated-json-result)
+for an end-to-end workflow and the
+[`output_schema` workflow specification](/writing-workflows/yaml-specification#output)
 for the general step-level contract.
 
 ## Approval Push-back

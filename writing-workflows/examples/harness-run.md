@@ -40,6 +40,47 @@ steps:
       interval_sec: 30
 ```
 
+## Validated JSON Result
+
+Ask the agent for one JSON object, validate the complete stdout, and use the
+decoded fields in a downstream step.
+
+```yaml
+steps:
+  - id: analyze_auth
+    action: harness.run
+    with:
+      provider: codex
+      prompt: |
+        Review the authentication code.
+        Return only one JSON object in this form:
+        {"summary":"...", "risk":"low|medium|high"}
+        Do not include Markdown fences or any other text.
+    output_schema:
+      type: object
+      additionalProperties: false
+      required: [summary, risk]
+      properties:
+        summary:
+          type: string
+        risk:
+          type: string
+          enum: [low, medium, high]
+
+  - id: report_result
+    depends: [analyze_auth]
+    action: log.write
+    with:
+      message: |
+        Risk: ${analyze_auth.output.risk}
+        ${analyze_auth.output.summary}
+```
+
+`output_schema` validates output after the harness exits successfully. The step
+fails if stdout includes logs, Markdown fences, JSONL events, or data that does
+not match the schema. This is a step-level feature, so it works with both
+built-in providers and custom harness definitions.
+
 ## OpenCode Implementation Plan
 
 Use the artifact directory for handoff between a setup step and the agent. OpenCode model names use `provider/model` format.
