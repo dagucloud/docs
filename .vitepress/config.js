@@ -218,6 +218,7 @@ const fullSidebar = [
               { text: "Docker", link: "/step-types/docker" },
               { text: "Kubernetes", link: "/step-types/kubernetes" },
               { text: "Wait", link: "/step-types/wait" },
+              { text: "Human Task", link: "/writing-workflows/human-tasks" },
               { text: "Router", link: "/step-types/router" },
               { text: "Log", link: "/step-types/log" },
             ],

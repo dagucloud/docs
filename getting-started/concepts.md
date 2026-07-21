@@ -300,6 +300,24 @@ steps:
 
 See [Wait](/step-types/wait) for more details.
 
+### Human Task
+
+Pause a root DAG for acknowledgement or typed operator input before downstream steps continue:
+
+```yaml
+steps:
+  - id: confirm_maintenance
+    action: human.task
+    with:
+      prompt: Confirm that maintenance has started
+
+  - id: continue_maintenance
+    depends: confirm_maintenance
+    run: ./continue-maintenance.sh
+```
+
+Complete the waiting task with `dagu human-task complete`. See [Human Tasks](/writing-workflows/human-tasks) for typed forms, generated outputs, and resume behavior.
+
 ### Custom Actions
 
 Define reusable actions in `actions` when you want a typed wrapper around a built-in step type:

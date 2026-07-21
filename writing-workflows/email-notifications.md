@@ -92,7 +92,7 @@ wait_mail:
 mail_on:
   success: true    # Email on successful completion
   failure: true    # Email on failure
-  wait: true       # Email when waiting for human approval
+  wait: true       # Email when waiting for human input
 ```
 
 ### Step-Level Errors
@@ -106,7 +106,7 @@ steps:
 
 ### Wait Status Notifications
 
-Send notifications when a DAG is waiting for human approval:
+Send notifications when a DAG is waiting for [human-task completion](/writing-workflows/human-tasks) or an [approval decision](/writing-workflows/approval):
 
 ```yaml
 mail_on:
@@ -116,11 +116,11 @@ wait_mail:
   from: dagu@company.com
   to:
     - approvers@company.com
-  prefix: "[APPROVAL REQUIRED]"
+  prefix: "[ACTION REQUIRED]"
   attach_logs: false
 ```
 
-This is useful for workflows that require human approval before continuing execution. The email will include details about the DAG and which steps are waiting.
+This is useful for workflows that require human input before continuing execution. The email includes details about the DAG and which steps are waiting.
 
 ## Mail Action
 
