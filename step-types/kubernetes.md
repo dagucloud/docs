@@ -156,6 +156,8 @@ steps:
 | `termination_grace_period_seconds` | Pod shutdown grace period in seconds | cluster default |
 
 `image_pull_policy` is case-insensitive. When omitted, Dagu leaves it unset.
+`fallback` is not supported because Kubernetes has no equivalent policy that
+tries the registry first and uses a local image only when the pull fails.
 `termination_grace_period_seconds` must be non-negative.
 
 ### Environment

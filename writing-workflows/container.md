@@ -291,7 +291,7 @@ container: my-running-container  # Exec into existing container with defaults
 container:
   name: my-workflow-container # Custom container name (optional)
   image: ubuntu:22.04        # Required for image mode
-  pull_policy: missing        # always | missing | never
+  pull_policy: missing       # always | missing | never | fallback
   volumes:                   # Volume mounts
     - /host:/container
   env:                       # Environment variables
@@ -344,6 +344,17 @@ container:
 | `log_pattern` | N/A | Not allowed | Optional |
 | `restart_policy` | N/A | Not allowed | Optional |
 | `keep_container` | N/A | Not allowed | Optional |
+
+### Pull Policy
+
+`pull_policy` defaults to `missing` in image mode.
+
+| Value | Behavior |
+|-------|----------|
+| `always` | Pull the image before starting the container. |
+| `missing` | Pull only when a compatible local image is not available. |
+| `never` | Use a compatible local image without contacting the registry. |
+| `fallback` | Try to pull first, then use a compatible local image if the pull fails. The workflow fails if neither succeeds. |
 
 ### Validation and Errors
 

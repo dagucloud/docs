@@ -476,6 +476,7 @@ Rules:
 - Object form must set exactly one of `exec` or `image`.
 - Exec mode allows only `exec`, `user`, `working_dir`, `env`, and `shell`.
 - Image mode requires `image` and accepts the remaining container fields.
+- Image mode `pull_policy` accepts `always`, `missing`, `never`, or `fallback` and defaults to `missing`. `fallback` tries the registry first, then uses a compatible local image if the pull fails.
 - Container `shell` is array form only.
 - Relative host paths in `volumes` resolve from the DAG `working_dir`.
 - The container runtime is selected by the Dagu process environment

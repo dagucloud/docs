@@ -168,7 +168,7 @@ container: my-running-container  # Exec into existing container
 container:
   image: alpine:latest        # Required: container image
   name: my-container          # Optional: custom container name
-  pull_policy: missing         # always | missing | never
+  pull_policy: missing        # always | missing | never | fallback
   working_dir: /app            # Working directory inside the container
   user: "1000:1000"           # User and group
   platform: linux/amd64       # Target platform
@@ -211,6 +211,29 @@ container:
 | `network` | Not allowed | Optional |
 | `platform` | Not allowed | Optional |
 | `keep_container` | Not allowed | Optional |
+
+### Image Pull Policy
+
+`pull_policy` defaults to `missing` in image mode.
+
+| Value | Behavior |
+|-------|----------|
+| `always` | Pull the image before starting the container. |
+| `missing` | Pull only when a compatible local image is not available. |
+| `never` | Use a compatible local image without contacting the registry. |
+| `fallback` | Try to pull first, then use a compatible local image if the pull fails. The step fails if neither succeeds. |
+
+For `action: docker.run`, use the `pull` field under `with`:
+
+```yaml
+steps:
+  - id: resilient_job
+    action: docker.run
+    with:
+      image: ghcr.io/example/job:latest
+      pull: fallback
+      command: ./run-job
+```
 
 ### Volume Source Paths
 
