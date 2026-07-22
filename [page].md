@@ -6,7 +6,7 @@ title: What is Dagu?
 
 <div class="tagline" style="text-align: center;">
   <div class="tagline" style="text-align: left;">
-    <p>Dagu is a lightweight, self-contained alternative to Airflow or Cron with Web UI that runs on Linux / Mac / Windows. Define DAGs in a simple, declarative YAML format. It supports shell commands, Docker containers, Kubernetes Jobs, remote commands via SSH, and more. It was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.</p>
+    <p>Dagu is a local-first workflow engine for ops automation and AI-assisted operations. It is open source and self-hostable, and runs on Linux / Mac / Windows. Define DAGs in a declarative YAML format. It supports shell commands, Docker containers, Kubernetes Jobs, remote commands via SSH, and more. Existing scripts and tools stay as they are, and Dagu adds scheduling, retries, approvals, logs, and run history around them.</p>
     <p>Start with one self-contained binary and file-backed state. No DBMS or message broker is required, and you can add queues, workers, MCP, chat completions, or external harness steps only when your workflows need them.</p>
   </div>
 </div>
@@ -29,9 +29,9 @@ Credentials: `demouser` / `demouser`
 
 ## Motivation
 
-In complex systems often have implicit dependencies between jobs. When there are hundreds of cron jobs on a server, it can be difficult to keep track of these dependencies and to determine which job to rerun if one fails. It can also be a hassle to SSH into a server to view logs and manually rerun shell scripts one by one. Dagu aims to solve these problems by allowing you to explicitly visualize and manage pipeline dependencies as a DAG, and by providing a web UI for checking dependencies, execution status, and logs and for rerunning or stopping jobs with a simple mouse click.
+Complex systems often have implicit dependencies between jobs. When there are hundreds of cron jobs on a server, it can be difficult to keep track of these dependencies and to determine which job to rerun if one fails. It can also be a hassle to SSH into a server to view logs and manually rerun shell scripts one by one. Dagu aims to solve these problems by allowing you to explicitly visualize and manage pipeline dependencies as a DAG, and by providing a web UI for checking dependencies, execution status, and logs and for rerunning or stopping jobs with a simple mouse click.
 
-There are many existing tools such as Airflow, Prefect, and Temporal, but many of these require you to write code in a programming language like Python to define your DAG. For many systems, there may already be complex jobs with hundreds of thousands of lines of code. Adding another layer of complexity on top of these codes can reduce maintainability. Dagu was designed to be easy to use, self-contained, and require no coding, making it ideal for small teams.
+There are many existing tools such as Airflow, Prefect, and Temporal, but many of these require you to write code in a programming language like Python to define your DAG. For many systems, there may already be complex jobs with hundreds of thousands of lines of code. Adding another layer of complexity on top of these codes can reduce maintainability. Dagu was designed to be self-contained and declarative: workflows stay in YAML, existing jobs run unchanged, and no additional code framework is required.
 
 With declarative YAML syntax with MCP integration, AI agents can create and modify reproducible workflows with human oversight, making Dagu a great fit for AI-assisted automation.
   
@@ -268,7 +268,7 @@ Dagu is useful anywhere existing scripts, containers, SQL jobs, operational task
     <p><strong>Why Dagu fits:</strong> daily data workflows stay declarative, run close to private data, remain easy to inspect in the <a href="/overview/web-ui">Web UI</a>, and are straightforward to <a href="/writing-workflows/durable-execution">retry</a> when one step fails.</p>
   </div>
   <div class="overview-card overview-usecase-card">
-    <h3>Cron and Legacy Script Management</h3>
+    <h3>Legacy Scripts and Scheduled Jobs</h3>
     <p><strong>Run:</strong> existing <a href="/step-types/shell">shell scripts</a>, Python scripts, <a href="/step-types/http">HTTP calls</a>, and <a href="/writing-workflows/scheduling">scheduled jobs</a> without rewriting them.</p>
     <p><strong>Why Dagu fits:</strong> <a href="/getting-started/concepts">dependencies</a>, <a href="/overview/web-ui#run-history-and-logs">logs</a>, <a href="/writing-workflows/durable-execution">retries</a>, and <a href="/getting-started/cli#history">run history</a> become visible in the <a href="/overview/web-ui">Web UI</a> instead of being hidden across crontabs and server log files.</p>
   </div>

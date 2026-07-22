@@ -546,7 +546,7 @@ const kilnCodeTheme = {
 export default withMermaid(
   defineConfig({
     title: "Dagu",
-    description: "Local-first workflow orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
+    description: "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.",
     lang: "en-US",
     lastUpdated: true,
     cleanUrls: true,
@@ -557,14 +557,14 @@ export default withMermaid(
         "meta",
         {
           name: "description",
-          content: "Local-first workflow orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
+          content: "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.",
         },
       ],
       [
         "meta",
         {
           property: "og:description",
-          content: "Local-first workflow orchestration that runs anywhere. Declarative YAML, single binary, air-gapped ready.",
+          content: "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.",
         },
       ],
       ["meta", { property: "og:image", content: "https://docs.dagu.sh/og.png" }],
