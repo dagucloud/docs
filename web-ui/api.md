@@ -1519,6 +1519,8 @@ Manually updates a step's execution status.
 
 These endpoints complete standalone [`action: human.task`](/writing-workflows/human-tasks) steps. They operate on root DAG runs regardless of whether the run executes locally or on a distributed worker. The caller needs permission to execute DAGs in the run's workspace.
 
+After completion, DAG-run node responses expose the actor as `humanTaskCompletedBy` and `humanTaskCompletedById`. These fields may be absent on older runs or when authentication is disabled.
+
 ### Complete Human Task
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/human-tasks/{stepId}/complete`
@@ -1600,6 +1602,8 @@ The operation is safe to retry. `queued` is `false` when the retry is already qu
 ::: info Separate manual-step APIs
 The approve, reject, and push-back endpoints below resolve executable steps configured with `approval`. They do not operate on `action: human.task`.
 :::
+
+DAG-run node responses expose actor names and IDs in `approvedBy`/`approvedById`, `rejectedBy`/`rejectedById`, and each `pushBackHistory` entry's `by`/`byId`. These fields may be absent on older runs or when authentication is disabled.
 
 ### Approve Step
 

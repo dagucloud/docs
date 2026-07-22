@@ -385,6 +385,7 @@ The command only supports the local CLI context. It validates the submitted valu
 ## Idempotency and Recovery
 
 - Completing a human task stores the validated input in the DAG-run status. The step finish time records when it completed.
+- The completion record includes the subject name and ID when available. Web UI and REST API completions use the authenticated user; the local CLI uses the OS username and an `os:<uid>` ID. Older runs and unauthenticated requests may omit this attribution.
 - Repeating the same completion with the same canonical input is idempotent.
 - Trying to complete an already completed task with different input is rejected with a conflict.
 - If another manual step is still waiting, the input remains stored and the DAG stays `Waiting`.

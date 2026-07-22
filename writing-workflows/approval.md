@@ -309,6 +309,8 @@ When steps enter `Waiting` status, an **Approval** tab appears in the DAG run vi
 - The current approval iteration count (if pushed back)
 - Push-back history entries with iteration, actor, timestamp, and filtered inputs
 
+The run details show the actor name for approval, rejection, and push-back operations. When an actor ID is available, hover over the name to view it.
+
 To reject all waiting steps at once, use the **Reject** button in the DAG run action bar (replaces the Stop button when the DAG is in `Waiting` status). An optional rejection reason can be provided.
 
 ### REST API
@@ -343,6 +345,8 @@ For sub-DAG runs, use the sub-DAG variants:
 POST /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/approve
 POST /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/reject
 ```
+
+DAG-run node responses expose actor names and IDs in `approvedBy`/`approvedById`, `rejectedBy`/`rejectedById`, and each `pushBackHistory` entry's `by`/`byId`. IDs may be absent on older runs or when authentication is disabled.
 
 ## Email Notifications
 
@@ -399,6 +403,7 @@ The following information is recorded:
 |-------|-------------|
 | `rejectedAt` | Timestamp of the rejection |
 | `rejectedBy` | Username of the person who rejected (if authenticated) |
+| `rejectedById` | ID of the person who rejected (if authenticated) |
 | `rejectionReason` | Optional reason provided during rejection |
 
 ## Limitations
