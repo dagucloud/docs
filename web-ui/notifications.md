@@ -54,11 +54,19 @@ Open **Notifications > Channels** to create destinations before adding rules.
 | **Slack** | Send messages through a Slack incoming webhook. |
 | **Email** | Send to one or more recipients through the configured SMTP transport. |
 | **Generic Webhook** | POST a structured payload to an incident system, chat relay, or internal service. |
-| **Telegram** | Send messages through a Telegram bot token and chat ID. |
+| **Telegram** | Send messages through a Telegram bot token and chat ID, optionally targeting a forum topic. |
 
 For Google Chat or another chat service without a dedicated channel type, use a generic webhook when the receiver can accept Dagu's JSON payload, or point the generic webhook at a small relay that converts the payload into that service's expected format.
 
 Channel secrets such as webhook URLs, HMAC secrets, SMTP passwords, and bot tokens are stored encrypted. The UI shows redacted previews after save.
+
+### Telegram Forum Topics
+
+To send notifications to a specific topic in a Telegram forum group, set the optional **Topic ID** on the Telegram channel. Dagu sends this value as Telegram's `message_thread_id`.
+
+The topic ID must be a positive integer. Leave it blank for regular chats or to keep the existing Telegram delivery behavior. To find the ID, inspect a Bot API update for a message posted in the topic and use the message's [`message_thread_id`](https://core.telegram.org/bots/api#message).
+
+After saving the channel, use the **Test** action to confirm that the bot can post to the selected chat and topic.
 
 ### Email Delivery
 
