@@ -282,6 +282,7 @@ const fullSidebar = [
                   { text: "Hermes Agent", link: "/step-types/harness/hermes" },
                   { text: "OpenCode", link: "/step-types/harness/opencode" },
                   { text: "Pi", link: "/step-types/harness/pi" },
+                  { text: "Custom Harness", link: "/step-types/harness/#custom-harness-definitions" },
                 ],
               },
               {
