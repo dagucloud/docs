@@ -47,12 +47,13 @@ Workers send execution status to the coordinator via the `ReportStatus` gRPC cal
 
 ### Log Streaming
 
-Workers stream stdout/stderr to the coordinator via the `StreamLogs` gRPC call:
+Workers stream step stdout/stderr and scheduler logs to the coordinator via the `StreamLogs` gRPC call:
 
-1. Worker buffers log output in 32KB chunks
-2. Worker sends `LogChunk` messages with sequence numbers
-3. Coordinator writes to local log files, flushing every 64KB
-4. Worker sends final marker when execution completes
+1. The worker batches small amounts of output for about two seconds to reduce gRPC traffic
+2. A full buffer is sent without waiting for the batching interval
+3. The coordinator appends each `LogChunk` to its local log files as it arrives
+4. The Web UI can display the streamed output while the run is still active
+5. The worker flushes remaining output and sends a final marker when execution completes
 
 Log streaming is best-effort: failures don't fail the step execution. Some logs may be lost if network issues occur during streaming.
 
@@ -321,10 +322,11 @@ For TLS, mTLS, and certificate requirements for coordinator gRPC traffic, see [D
 
 ### Log Streaming Protocol
 
-| Parameter | Value |
-|-----------|-------|
-| Worker buffer size | 32KB |
-| Coordinator flush threshold | 64KB |
+| Behavior | Value |
+|----------|-------|
+| Sparse output batching | About 2 seconds |
+| Full buffer | Sent immediately |
+| Execution completion | Remaining output is sent before the final marker |
 | Stream type | Bidirectional gRPC stream |
 
 Log chunks include:
