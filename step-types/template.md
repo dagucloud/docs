@@ -2,15 +2,15 @@
 
 # Template
 
-Render Go templates with structured data. `action: template.render` processes `with.template` as a [Go `text/template`](https://pkg.go.dev/text/template) and writes the result to stdout or a file. It is useful for generating configuration files, reports, or any text output from structured data without spawning a shell.
+Render Go templates with structured data. `action: template.render` processes literal text from `with.template` or dynamically sourced text from `with.template_ref` as a [Go `text/template`](https://pkg.go.dev/text/template), then writes the result to stdout or a file. It is useful for generating configuration files, reports, or any text output from structured data without spawning a shell.
 
 ## How It Works
 
-1. The `with.template` field is parsed as a Go template.
+1. Template text comes from `with.template` or the scoped Dagu reference in `with.template_ref`.
 2. Data from `with.data` is passed to the template as the root context (`.`).
 3. The rendered output is written to stdout (capturable with `output:`), or to a file if `with.output` is set.
 
-Dagu skips all variable expansion (`${VAR}`, command substitution, etc.) on the template body. The template engine is the sole evaluator — `${VAR}` literals in your template are preserved as-is. Data values in `with.data` **are** expanded by Dagu before being passed to the template, so `${VAR}` in data values works normally.
+Dagu skips all value resolution (`${env.NAME}`, `${params.name}`, command substitution, etc.) on a literal `with.template` body. The template engine is the sole evaluator, so value references in the template are preserved as-is. `with.template_ref` resolves one complete scoped reference once and uses its value as the template body; references inside that value are also preserved. Data values in `with.data` **are** resolved by Dagu before being passed to the template.
 
 ## `with` Fields
 
@@ -18,7 +18,8 @@ Dagu skips all variable expansion (`${VAR}`, command substitution, etc.) on the 
 |-------|------|----------|-------------|
 | `data` | object | No | Key-value pairs accessible as `{{ .key }}` in the template. Values can be strings, numbers, lists, or nested objects. |
 | `output` | string | No | File path to write the rendered output to. If empty, output goes to stdout. Relative paths resolve against the step's `working_dir`. |
-| `template` | string | Yes | Template text rendered by the template executor. |
+| `template` | string | One of `template` or `template_ref` | Literal template text rendered by the template executor. |
+| `template_ref` | string | One of `template` or `template_ref` | One complete scoped Dagu reference that resolves to template text at runtime. |
 
 ## Basic Example
 
@@ -35,6 +36,68 @@ steps:
 ```
 
 `RESULT` captures `hello, world!`.
+
+## Using Environment Values
+
+Pass environment values through `with.data` using the scoped `${env.NAME}` syntax, then reference the corresponding data key in the template:
+
+```yaml
+env:
+  - FOO: world
+
+steps:
+  - id: render
+    action: template.render
+    with:
+      template: "Hello, {{ .foo }}!"
+      data:
+        foo: ${env.FOO}
+    output: RESULT
+```
+
+`RESULT` captures `Hello, world!`.
+
+Putting `${env.FOO}` directly in `with.template` preserves it as literal text. Environment access is not exposed as a template function, so `{{ env "FOO" }}` is unavailable. See [Variables Reference](/writing-workflows/template-variables) for other scoped value sources.
+
+## Using a Dynamic Template
+
+Use `with.template_ref` when the template text itself comes from an environment value, parameter, constant, prior-step output, foreach value, or runtime context:
+
+```yaml
+env:
+  - MESSAGE_TEMPLATE: "Hello, {{ .name }}!"
+
+steps:
+  - id: render
+    action: template.render
+    with:
+      template_ref: ${env.MESSAGE_TEMPLATE}
+      data:
+        name: Alice
+    output: RESULT
+```
+
+`RESULT` captures `Hello, Alice!`.
+
+`template_ref` must be exactly one canonical scoped reference, such as `${env.MESSAGE_TEMPLATE}`, `${params.template}`, or `${steps.fetch.outputs.template}`. Bare names, mixed text, and setting both `template` and `template_ref` are rejected. The reference must resolve to a non-empty string when the step starts.
+
+Resolution is single-pass. If the referenced value contains `${env.OTHER}`, that text remains literal in the Go template:
+
+```yaml
+params:
+  - name: template
+    default: 'Hello, {{ .name }}! ${env.OTHER}'
+
+steps:
+  - id: render
+    action: template.render
+    with:
+      template_ref: ${params.template}
+      data:
+        name: Alice
+```
+
+This renders `Hello, Alice! ${env.OTHER}`.
 
 ## Writing to a File
 
