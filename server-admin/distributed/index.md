@@ -35,6 +35,8 @@ See [Workers](./workers/) for configuration reference and deployment details.
 
 DAG definitions do not need to be shared in either mode — they are transmitted to workers via gRPC when tasks are dispatched.
 
+In shared-nothing mode, workers stream step and scheduler logs to the coordinator while a run is active, so they can be viewed before the run finishes. Small bursts are briefly batched to reduce gRPC traffic, and any remaining output is sent when execution completes.
+
 ## How Dispatch Decisions Work
 
 Every server-side execution path in Dagu — API, scheduler, queue, and sub-DAG steps — uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior for runs handled by the server and queue processor.
