@@ -79,7 +79,7 @@ When you start or enqueue a workflow from Cockpit while a named workspace is sel
 
 ## Secrets in Workspaces
 
-The Secrets page supports global and workspace scopes. A Dagu-managed secret with ref `database/password` in `finance` is different from a secret with the same ref in `data-platform`.
+The **DAG Secret Refs** tab on the **Profiles & Secrets** page supports global and workspace scopes. A Dagu-managed secret with ref `database/password` in `finance` is different from a secret with the same ref in `data-platform`.
 
 DAGs resolve registry refs from their own workspace:
 
@@ -92,15 +92,15 @@ secrets:
     ref: database/password
 ```
 
-Do not include the workspace name in the ref. Select the workspace in the Web UI, create `database/password` there, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Global** secret scope.
+Do not include the workspace name in the ref. Select the workspace in the Web UI, open **Profiles & Secrets**, create `database/password` from **DAG Secret Refs**, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Global** secret scope.
 
 Global secrets are workspace-less values. A workflow in `finance` checks `finance` first, then **Global**. It never reads another named workspace.
 
-See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
+See [DAG Secret Refs](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
 
 ## Profile Defaults in Workspaces
 
-The Profiles page supports workspace runtime profile defaults. These are variables and profile-owned secrets that apply automatically to DAGs in a named workspace.
+The **Profiles** tab on the **Profiles & Secrets** page supports workspace runtime profile defaults. These are variables and profile-owned secrets that apply automatically to DAGs in a named workspace.
 
 A DAG in `workspace=finance` receives:
 
@@ -177,7 +177,7 @@ For request and response details, see [REST API](/web-ui/api).
 - [Cockpit](/web-ui/cockpit)
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
-- [Secrets](/web-ui/secrets)
+- [DAG Secret Refs](/web-ui/secrets)
 - [Profiles](/web-ui/profiles)
 - [User Management](/server-admin/authentication/user-management)
 - [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

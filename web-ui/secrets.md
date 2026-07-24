@@ -1,8 +1,8 @@
-# Secrets
+# DAG Secret Refs
 
-The standalone Secrets page lets admins and managers create and rotate Dagu-managed secrets that are referenced directly from DAG YAML.
+The **DAG Secret Refs** tab on the **Profiles & Secrets** page lets admins and managers create and rotate Dagu-managed secrets that are referenced directly from DAG YAML.
 
-For named runtime environments selected when a run starts, or for Global/workspace runtime profile defaults, use [Profiles](/web-ui/profiles). Profile secret entries are created and rotated from the Profiles page, even though Dagu stores their values in the managed secret store internally.
+For named runtime environments selected when a run starts, or for Global/workspace runtime profile defaults, use the [Profiles](/web-ui/profiles) tab on the same page. Profile secret entries are created and rotated from the Profiles tab, even though Dagu stores their values in the managed secret store internally.
 
 Secrets created here are referenced from DAG YAML with `ref`:
 
@@ -18,7 +18,7 @@ The DAG receives `DB_PASSWORD` as an environment variable when the run starts. T
 
 Secrets can be global or workspace-scoped. The same ref can exist globally and in multiple workspace scopes with different values.
 
-| Secret scope | Secrets page behavior |
+| Secret scope | DAG Secret Refs behavior |
 | --- | --- |
 | **Global** | Manage workspace-less secrets available to all DAGs as a fallback |
 | **Named workspace** | Manage secrets for DAGs with `labels: [workspace=<name>]` |
@@ -33,7 +33,7 @@ Do not include the scope or workspace name in the ref. A DAG in `workspace=payme
 
 ## Create A Secret
 
-1. Open the standalone **Secrets** page.
+1. Open **Profiles & Secrets** and select the **DAG Secret Refs** tab.
 2. Select **Global** or a named workspace.
 3. Click **Add Secret**.
 4. Keep provider set to **Dagu Managed**.
@@ -69,9 +69,9 @@ See [Workflow Secrets](/writing-workflows/secrets) for the full YAML behavior an
 
 ## Profile-Owned Secrets
 
-Runtime profile secret entries are profile-owned. This includes entries on named profiles, Global profile defaults, and workspace profile defaults. Manage those values from **Profiles** so the profile entry and its backing secret stay in sync.
+Runtime profile secret entries are profile-owned. This includes entries on named profiles, Global profile defaults, and workspace profile defaults. Manage those values from the **Profiles** tab so the profile entry and its backing secret stay in sync.
 
-Do not create a standalone secret with the same intent and then expect a runtime profile to pick it up by ref. Standalone secrets are resolved only when DAG YAML references them with `secrets[].ref`.
+Do not create a DAG secret ref with the same intent and then expect a runtime profile to pick it up by ref. DAG secret refs are resolved only when DAG YAML references them with `secrets[].ref`.
 
 ## Storage
 

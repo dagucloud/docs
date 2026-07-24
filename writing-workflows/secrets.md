@@ -235,7 +235,7 @@ Masking is not a process sandbox. The step process receives the raw secret in it
 ## Provider Pages
 
 - [Runtime Profiles](/writing-workflows/runtime-profiles)
-- [Web UI Secrets](/web-ui/secrets)
+- [Web UI DAG Secret Refs](/web-ui/secrets)
 - [Dotenv Loading](/writing-workflows/secrets/dotenv)
 - [`env` Provider](/writing-workflows/secrets/env-provider)
 - [`file` Provider](/writing-workflows/secrets/file-provider)

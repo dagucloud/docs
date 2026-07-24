@@ -59,9 +59,9 @@ Profile names must be lowercase slugs. A valid name starts with a lowercase lett
 
 ## Create A Profile
 
-From the Web UI, open **Profiles** and create a profile such as `prod`. Add variables and secrets from the profile details table.
+From the Web UI, open **Profiles & Secrets**, select the **Profiles** tab, and create a profile such as `prod`. Add variables and secrets from the profile details table.
 
-![Profiles page showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
+![Profiles tab showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
 
 From the CLI, profile management is local to the configured Dagu home. Remote CLI contexts do not manage profiles; use the Web UI or REST API on the remote server instead.
 
@@ -184,7 +184,7 @@ secrets:
 
 Use standalone `secrets:` refs when the DAG should always resolve the same named secret from YAML. Use runtime profile secrets when the operator chooses the runtime environment for a run.
 
-Do not manage profile-owned backing secrets as standalone application secrets. Create and rotate them through the Profiles page, profile CLI, or profile API so the profile entry and secret value stay consistent.
+Do not manage profile-owned backing secrets as DAG secret refs. Create and rotate them through the **Profiles** tab on the **Profiles & Secrets** page, profile CLI, or profile API so the profile entry and secret value stay consistent.
 
 ## REST API
 

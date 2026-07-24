@@ -193,9 +193,13 @@ You can search:
 
 - **DAGs** for workflow definitions
 
-## Profiles
+## Profiles & Secrets
 
-The Profiles page manages named runtime profiles for DAG runs. A profile groups non-secret variables and write-only secret values, then makes that group selectable from the start and enqueue dialogs.
+The Profiles & Secrets page separates runtime configuration into two tabs.
+
+### Profiles
+
+The **Profiles** tab manages named runtime profiles for DAG runs. A profile groups non-secret variables and write-only secret values, then makes that group selectable from the start and enqueue dialogs.
 
 Use profiles when the same DAG should run against different environments, such as `dev`, `staging`, or `prod`, without changing the DAG YAML.
 
@@ -203,9 +207,9 @@ Run history and run details show the selected profile name when a profile was us
 
 See [Profiles](/web-ui/profiles) for the Web UI workflow and [Runtime Profiles](/writing-workflows/runtime-profiles) for CLI, API, permission, and retry behavior.
 
-## Secrets
+### DAG Secret Refs
 
-The standalone Secrets page manages encrypted Dagu-managed secret values for a selected scope. These secrets are referenced directly from DAG YAML with `secrets[].ref`.
+The **DAG Secret Refs** tab manages encrypted Dagu-managed secret values for a selected scope. These secrets are referenced directly from DAG YAML with `secrets[].ref`.
 
 Use it to:
 
@@ -224,7 +228,7 @@ secrets:
 
 Registry refs resolve from the DAG's own scope first, then **Global**. A DAG in `workspace=ops` checks `ops` before global. A DAG without a workspace label uses **Global** directly.
 
-See [Secrets](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
+See [DAG Secret Refs](/web-ui/secrets) for the Web UI workflow and [Workflow Secrets](/writing-workflows/secrets) for the YAML reference.
 
 ## System Status
 
@@ -301,9 +305,9 @@ ui:
 
 - [Workspaces](/web-ui/workspaces)
 - [Cockpit](/web-ui/cockpit)
-- [Profiles](/web-ui/profiles)
+- [Profiles and profile-owned secrets](/web-ui/profiles)
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
-- [Secrets](/web-ui/secrets)
+- [DAG Secret Refs](/web-ui/secrets)
 - [Learn the REST API](/web-ui/api)
 - [Server Administration](/server-admin/)

@@ -69,7 +69,7 @@ const fullSidebar = [
           { text: "Cockpit", link: "/web-ui/cockpit" },
           { text: "Workspaces", link: "/web-ui/workspaces" },
           { text: "Profiles", link: "/web-ui/profiles" },
-          { text: "Secrets", link: "/web-ui/secrets" },
+          { text: "DAG Secret Refs", link: "/web-ui/secrets" },
         ],
       },
       {

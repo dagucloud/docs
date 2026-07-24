@@ -1,12 +1,12 @@
 # Profiles
 
-The Profiles page manages runtime profiles: named sets of variables and secrets that can be selected when starting or enqueueing a DAG run.
+The **Profiles** tab on the **Profiles & Secrets** page manages runtime profiles: named sets of variables and secrets that can be selected when starting or enqueueing a DAG run.
 
 Use profiles when the same DAG should run against different environments without changing the DAG YAML. For example, a single workflow can run with the `dev`, `staging`, or `prod` profile.
 
 Profiles change the variables and secrets supplied to a run. They do not create separate schedulers, local execution environments, or worker pools. Use [separate Dagu deployments](/server-admin/deployment/multi-environment) when development, staging, and production require infrastructure or security isolation.
 
-![Profiles page showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
+![Profiles tab showing runtime profiles and their variable and secret entries](/runtime-profiles-management.png)
 
 ## What A Profile Contains
 
@@ -27,8 +27,8 @@ Profiles can also define default entries that apply before a run-specific profil
 
 | Layer | Applies to | Managed from |
 | --- | --- | --- |
-| Global defaults | Every DAG run | **Profiles** page, Global defaults row |
-| Workspace defaults | DAGs with `labels: [workspace=<name>]` | **Profiles** page while that workspace is selected |
+| Global defaults | Every DAG run | **Profiles** tab, Global defaults row |
+| Workspace defaults | DAGs with `labels: [workspace=<name>]` | **Profiles** tab while that workspace is selected |
 | Selected profile | Runs that choose a named profile | The named profile row |
 
 Defaults are not selectable profiles. They are fallback entries that Dagu resolves automatically when a run starts. A DAG in `workspace=ops` receives Global defaults, then `ops` workspace defaults, then the selected profile if one was chosen. A DAG without a workspace label receives only Global defaults before the selected profile.
@@ -45,7 +45,7 @@ Admins manage Global defaults. Workspace defaults require permission to write co
 
 ## Create A Profile
 
-1. Open **Profiles**.
+1. Open **Profiles & Secrets** and select the **Profiles** tab.
 2. Click **Add Profile**.
 3. Enter a lowercase profile name such as `prod`.
 4. Add an optional description.
@@ -81,15 +81,16 @@ Retries always inherit the original run's profile. The retry dialog does not all
 
 ## Relationship To Secrets
 
-The standalone Secrets feature manages registry secrets referenced directly from DAG YAML with `secrets[].ref`.
+The **DAG Secret Refs** tab manages registry secrets referenced directly from DAG YAML with `secrets[].ref`.
 
-Runtime profile secrets are different: they belong to a runtime profile and should be created or rotated from the Profiles page. Dagu stores their values in the managed secret store internally, but the profile remains the user-facing owner of those values.
+Runtime profile secrets are different: they belong to a runtime profile and should be created or rotated from the **Profiles** tab. Dagu stores their values in the managed secret store internally, but the profile remains the user-facing owner of those values.
 
-This also applies to profile default layers. Default-layer secret entries should be created, rotated, and deleted from **Profiles**, not from the standalone Secrets page.
+This also applies to profile default layers. Default-layer secret entries should be created, rotated, and deleted from the **Profiles** tab, not from **DAG Secret Refs**.
 
 ## Related
 
 - [Runtime Profiles](/writing-workflows/runtime-profiles)
+- [DAG Secret Refs](/web-ui/secrets)
 - [Workflow Secrets](/writing-workflows/secrets)
 - [Workspaces](/web-ui/workspaces)
 - [User Management](/server-admin/authentication/user-management)
