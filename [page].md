@@ -206,6 +206,10 @@ Most teams that land here are not looking for a workflow platform. Their scripts
 
 Dagu keeps workflow structure in one YAML file next to the tools that do the work. Nothing moves into a framework, so your scripts keep working with or without Dagu. The YAML is what adds a dependency graph, retries, per-step logs, history, and a Web UI to every run.
 
+## The Dagu mascot
+
+The degu (*Octodon degus*), a small rodent native to Chile related to chinchillas and porcupines, serves as the Dagu project mascot. It aptly symbolizes Dagu's characteristics, such as simplicity, industry, and self-sufficiency. Degus reflect Dagu's mission to run schedules, retries, and everyday automation efficiently, without external databases or heavyweight frameworks. The name also echoes "DAG," Dagu's core unit of work. The degu crafts a brand identity that reflects the project's core principles.
+
 ## Choose your next step
 
 <div class="next-steps">
