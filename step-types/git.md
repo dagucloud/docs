@@ -164,7 +164,7 @@ steps:
 
 ### Checkout outputs
 
-The action publishes a JSON result. Later steps can read fields through the checkout step's declared outputs.
+The action writes a JSON result to stdout. Capture it with `output:` and read fields from the captured value.
 
 ```yaml
 steps:
@@ -174,9 +174,10 @@ steps:
       repository: https://github.com/example/app.git
       ref: main
       path: ./repos/app
+    output: CHECKOUT
 
   - id: print_commit
-    run: echo "Checked out ${steps.checkout_source.outputs.commit}"
+    run: echo "Checked out ${CHECKOUT.commit}"
     depends: checkout_source
 ```
 

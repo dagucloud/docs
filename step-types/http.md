@@ -120,9 +120,10 @@ steps:
       method: GET
       url: https://api.example.com/user
       silent: true
+    output: USER
 
   - id: process
-    run: echo "${steps.get_user.outputs.body}" | jq '.email'
+    run: echo "$USER" | jq '.email'
     depends: get_user
 ```
 

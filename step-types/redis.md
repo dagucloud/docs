@@ -383,9 +383,10 @@ steps:
     action: redis.hgetall
     with:
       key: app:config
+    output: CONFIG
 
   - id: use_config
-    run: echo "Database host is ${steps.get_config.outputs.result}"
+    run: echo "Database host is ${CONFIG.host}"
     depends:
       - get_config
 ```

@@ -146,13 +146,14 @@ steps:
       data: |
         name,age
         Alice,30
+    output: USERS
 
   - id: first_name
     action: data.pick
     with:
       from: json
       select: '.[0].name'
-      data: ${steps.users.outputs.result}
+      data: ${USERS}
       raw: true
     depends: users
 ```
