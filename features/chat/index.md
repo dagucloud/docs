@@ -31,6 +31,6 @@ Use `action: chat.completion` for provider API calls, multi-turn sessions, model
 
 [Tool calling](/features/chat/tool-calling) turns selected DAGs into functions that a model can invoke during a completion. Use it when the model should choose and sequence workflow operations.
 
-[Agent DAGs](/writing-workflows/agent) go one step further: `type: agent` makes the model the scheduler, picking one declared step per turn until every stated goal is settled. The [Agent DAG examples](/writing-workflows/examples/agent) build the feature up capability by capability.
+[Agent DAGs](/writing-workflows/agent) go one step further: `type: agent` makes the model the scheduler, picking one or more independent declared steps per turn until every stated goal is settled. The [Agent DAG examples](/writing-workflows/examples/agent) build the feature up capability by capability.
 
 Use [`harness.run`](/step-types/harness/) instead when the workflow should launch a supported external coding-agent CLI such as Claude Code, Codex, Gemini CLI, Cursor, or DeepSeek Harness. Use the [MCP server](/mcp/) for the inverse relationship: an external AI client connects to Dagu and operates workflows through Dagu's tools and resources.

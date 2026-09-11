@@ -3,8 +3,8 @@
 A `graph` or `chain` workflow says *what runs in what order*. An **Agent DAG**
 says *what must be true when the run is finished* and lets an LLM decide the
 order. Steps stop being a plan and become a catalog of actions;
-`tasks` state the goals; each turn the model picks one action, watches what
-happens, and picks again until every goal is settled.
+`tasks` state the goals; each turn the model picks one or more independent
+actions, watches what happens, and picks again until every goal is settled.
 
 That inversion is what the type buys. The order can follow from what earlier
 steps revealed, a failure becomes information rather than an abort, and a run
@@ -109,15 +109,22 @@ target workflow's own description. Two built-in tools are always present:
 `set_task_status` settles a task with a reason, and `ask_user` puts a question
 to a person.
 
-Each turn the model calls exactly one tool. The action runs, a short report of
-the outcome comes back as the next observation, and the model decides again.
-The run ends once no task is open; the model then replies with a short summary
-instead of a tool call.
+Each turn the model can call one action or a batch of distinct, independent
+actions. A batch runs concurrently, bounded by `max_active_steps`; `0` leaves
+the batch unlimited and `1` makes it serial. Dagu waits for the entire batch,
+then returns one short observation per action in the order the model called
+them. The run ends once no task is open; the model then replies with a short
+summary instead of a tool call.
+
+`set_task_status` and `ask_user` are control calls and must be called alone.
+Mixing a control call into an action batch, repeating an action in the same
+batch, or including any invalid call rejects the whole batch without starting
+an action.
 
 ```mermaid
 graph LR
-    P[Model picks one tool] --> A[Action runs]
-    A --> O[Report observed]
+    P[Model picks actions] --> A[Independent actions run]
+    A --> O[Ordered reports observed]
     O --> P
     P -->|set_task_status| T[Task settled]
     T --> P
@@ -127,6 +134,47 @@ graph LR
 Ordering belongs to the agent, so `depends` is not allowed, and neither
 are router steps. Steps the agent never chose are marked skipped when the
 run finishes.
+
+### Parallel action batches
+
+Use `max_active_steps` when an agent may discover several independent checks
+at once but the run must respect a resource limit:
+
+```yaml
+type: agent
+max_active_steps: 2
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+llm:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+
+steps:
+  - name: check_disk
+    description: Check disk capacity.
+    run: df -h
+  - name: check_load
+    description: Check system load.
+    run: uptime
+  - name: check_processes
+    description: Report the heaviest processes.
+    run: ps aux
+
+tasks:
+  - name: checked
+    description: Finished when disk, load, and processes have all been checked.
+```
+
+Every member resolves variables before any member starts. Siblings therefore
+see only outputs from earlier turns, never outputs produced by the same batch.
+A failed member does not cancel its siblings; all outcomes return to the model
+as observations. If one or more actions wait for human input, completed sibling
+results remain withheld until every waiting member is resolved, including
+across process restarts.
 
 ## Tasks
 

@@ -62,7 +62,7 @@ tasks:
     description: Finished when both disk and load have been checked.
 ```
 
-No `depends` anywhere, and none allowed: ordering belongs to the model now. Each turn it picks one action, observes the output, and decides again; the run records the decision timeline and full transcript. The steps themselves stay deterministic commands, which is the point: the model chooses *what runs*, never *what the commands are*.
+No `depends` anywhere, and none allowed: ordering belongs to the model now. Each turn it picks one action or a batch of independent actions, observes the ordered outputs after the batch settles, and decides again; the run records the decision timeline and full transcript. The steps themselves stay deterministic commands, which is the point: the model chooses *what runs*, never *what the commands are*. `max_active_steps` bounds batch concurrency.
 
 [Agent DAGs](/writing-workflows/agent) is the full reference; the [Agent DAG examples](/writing-workflows/examples/agent) build every capability step by step, including failure recovery and asking a person.
 

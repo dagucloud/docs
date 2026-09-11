@@ -229,7 +229,7 @@ schedule:
 |-------|------|-------------|---------|
 | `queue` | string | Global queue name from `config.yaml`. If omitted, Dagu uses the DAG's local queue. | DAG name |
 | `max_active_runs` | integer | Deprecated per-DAG run concurrency field. Local queues are FIFO with concurrency 1; use global queues for concurrency control. | `1` |
-| `max_active_steps` | integer | Maximum number of concurrently running steps inside one DAG run. `0` means unlimited. | `0` |
+| `max_active_steps` | integer | Maximum number of concurrently running steps inside one DAG run, including action batches selected by an Agent DAG. `0` means unlimited. | `0` |
 | `timeout_sec` | integer | Whole-DAG timeout in seconds. `0` means no timeout. | `0` |
 | `delay_sec` | integer | Initial delay before execution starts, in seconds. | `0` |
 | `max_clean_up_time_sec` | integer | Maximum cleanup time after termination, in seconds. | `5` |

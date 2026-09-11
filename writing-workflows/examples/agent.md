@@ -1,6 +1,6 @@
 # Agent DAG Examples
 
-An Agent DAG (`type: agent`) declares what a run must achieve instead of the order steps run in. Steps become a catalog of actions, `tasks` state the goals, and an LLM picks one action per turn until every goal is settled.
+An Agent DAG (`type: agent`) declares what a run must achieve instead of the order steps run in. Steps become a catalog of actions, `tasks` state the goals, and an LLM picks one or more independent actions per turn until every goal is settled.
 
 This page builds up the feature one capability at a time. Every example runs as-is with an `OPENROUTER_API_KEY` exported; swap the `llm` block for [any configured provider](/step-types/llm/providers), and see the [LLM configuration fields](/step-types/llm/#configuration) for everything the block accepts (model fallback, `system`, `temperature`, `thinking`, and more). For the full semantics behind these examples, see [Agent DAGs](/writing-workflows/agent).
 
@@ -48,15 +48,17 @@ Each step is offered to the model as a function-calling tool, named after the st
 
 ```mermaid
 graph LR
-    P[Model picks one action] --> R[Action runs]
-    R --> O[Outcome observed]
+    P[Model picks actions] --> R[Independent actions run]
+    R --> O[Ordered outcomes observed]
     O --> P
     P -->|no task left open| F[Run concludes]
 ```
 
-Each turn the model picks exactly one action. The step runs, a bounded tail of its stdout and stderr comes back as the observation, and the model decides again. When no task is left open, the run concludes.
+Each turn the model may pick one action or several distinct, independent actions. A batch runs concurrently, a bounded tail of each action's stdout and stderr comes back in call order, and the model decides again. Set `max_active_steps` on the DAG to cap concurrent actions; `0` is unlimited and `1` is serial. `set_task_status` and `ask_user` must each be called alone.
 
 Steps declare no `depends`, and may not: ordering belongs to the agent. The run page records the order that was actually chosen as a decision timeline, and the **Chat** tab holds the full transcript.
+
+Actions in the same batch cannot consume one another's outputs. Each member sees outputs completed before the turn began. If one action fails, its siblings continue; if one waits for a person, the batch's observations are delivered together only after every waiting action is resolved.
 
 ## Judgment and reporting
 

@@ -16,11 +16,12 @@ Each turn, the agent makes one completion request built from two parts:
   answer a person has given so far, and the rules of the loop. Task
   descriptions and collected answers are therefore paid for on every turn, not
   once.
-- **The conversation history.** One assistant message per decision (the tool
-  call the model made), one tool result per observation, plus any reminders the
-  loop injected. New observations enter at bounded size. When observation aging
-  is active, older tool results are replaced with deterministic one-line
-  summaries while their tool-call structure stays intact.
+- **The conversation history.** One assistant message per decision (containing
+  every tool call the model made), one tool result per action observation, plus
+  any reminders the loop injected. New observations enter at bounded size.
+  When observation aging is active, older tool results are replaced with
+  deterministic one-line summaries while their tool-call structure stays
+  intact.
 
 Until aging starts, requests grow with every turn: an observation added on turn
 10 of a 40-turn run may be resent 30 times. That is why
@@ -90,6 +91,7 @@ The safeguards reduce risk, but input size still matters:
 | Limit | Default | Configurable | When hit |
 |---|---|---|---|
 | Turns per run | 50 | `llm.max_tool_iterations` | Run fails, naming the tasks still open. |
+| Concurrent actions per turn | Unlimited | `max_active_steps` | Extra valid actions wait for a slot; `1` runs the batch serially. |
 | Runs per action | 5 | No | The call is refused with an error the model reads; the run continues. |
 | Questions per run | 5 | No | `ask_user` is refused; the model is told to decide with what it has. |
 | Silent turns | 1 reminder | No | A second consecutive turn without a tool call fails the run. |
@@ -123,6 +125,20 @@ Every turn is a single non-streaming completion. The request carries the
 model, the conversation, `temperature`, `max_tokens`, `top_p`, and the action
 catalog as tools. `llm.stream` and `llm.thinking` are not applied to decision
 calls. `llm.max_tokens` caps one reply, not the run.
+
+A successful reply may contain one action call or several distinct action
+calls. Dagu validates a multi-call reply as one unit before starting anything.
+Every call must name a valid workflow action, no action may repeat, and the
+per-action run limit must still have room. Control calls (`set_task_status` and
+`ask_user`) are valid only as the sole call. If validation fails, every call
+gets the same rejection and the batch has no side effects.
+
+For a valid batch, every member's runtime context is resolved from the state at
+the start of the turn, so sibling outputs are unavailable. Execution is bounded
+by `max_active_steps`; failures do not cancel siblings. Events and tool results
+are recorded in model call order after all members settle. If a member waits,
+the complete ordered batch is persisted and no result is appended until every
+waiting member finishes.
 
 The array form of `llm.model` is an ordered fallback chain:
 
