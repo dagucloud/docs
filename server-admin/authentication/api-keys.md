@@ -42,6 +42,7 @@ The full secret is shown only once when you create the key.
 7. Choose the accepted surfaces
 8. Choose user-owned or service-account attribution
 9. Create the key and store the secret immediately
+10. For a key that accepts the `mcp` surface, click **Copy MCP setup prompt**
 
 ## Use An API Key
 
@@ -71,6 +72,12 @@ API keys can be scoped to the public interfaces that should accept them.
 Use an MCP-only key for an AI tool that should operate through MCP but should not call the REST API directly. Use both surfaces when the same automation identity needs both REST and MCP.
 
 Legacy API keys created before surface metadata existed are treated as both `rest_api` and `mcp` for compatibility.
+
+## Connect An MCP Client
+
+The dialog that reveals a new secret also offers **Copy MCP setup prompt** when the key accepts the `mcp` surface. The button copies instructions for an AI coding agent that already carry this server's MCP endpoint and the new key, so the agent can write the connection settings in whatever format its own client expects.
+
+The button appears only on that dialog, because Dagu never stores the plaintext secret. To set up a client later, follow [MCP Clients](/mcp/clients/) and supply the key yourself.
 
 ## Attribution
 
