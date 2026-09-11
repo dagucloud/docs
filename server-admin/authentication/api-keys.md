@@ -77,6 +77,8 @@ Legacy API keys created before surface metadata existed are treated as both `res
 
 The dialog that reveals a new secret also offers **Copy MCP setup prompt** when the key accepts the `mcp` surface. The button copies instructions for an AI coding agent that already carry this server's MCP endpoint and the new key, so the agent can write the connection settings in whatever format its own client expects.
 
+The endpoint in the prompt is built from the address you are using in the browser, because Dagu does not publish its configured public URL to the web UI. If your MCP client reaches Dagu at a different address, edit the URL after pasting. The button is hidden while a remote node is selected, since a key created there belongs to that node's server rather than this one.
+
 The button appears only on that dialog, because Dagu never stores the plaintext secret. To set up a client later, follow [MCP Clients](/mcp/clients/) and supply the key yourself.
 
 ## Attribution
