@@ -390,6 +390,63 @@ Live scheduled runs are also blocked while a catchup run is queued for the same 
 
 At most 1000 missed runs are buffered per DAG. If more than 1000 runs were missed, only the 1000 most recent are replayed.
 
+## Pausing the Scheduler
+
+Suspending a single DAG stops that DAG only. To freeze every scheduled run at once, for a maintenance window or an incident, pause the scheduler.
+
+Pause and resume from **System Status** in the web UI, or through the API:
+
+```bash
+# Pause
+curl -X POST "http://localhost:8080/api/v1/services/scheduler/pause" \
+     -H "Authorization: Bearer $DAGU_API_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"paused": true, "reason": "database migration"}'
+
+# Resume
+curl -X POST "http://localhost:8080/api/v1/services/scheduler/pause" \
+     -H "Authorization: Bearer $DAGU_API_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"paused": false}'
+```
+
+Pausing requires the admin role, because it affects every workspace. Any authenticated user can read the state, and while the scheduler is paused a banner appears on every page showing who paused it and why.
+
+The flag is stored under `data_dir` at `scheduler/paused.json`, so it survives a restart. A paused scheduler stays paused until someone resumes it.
+
+### What a pause changes
+
+A pause has the same effect as suspending every DAG by hand:
+
+| Trigger | While paused |
+|---------|--------------|
+| Schedule | No runs are created |
+| Catchup | No runs are replayed |
+| Auto-retry | No retries are enqueued |
+| Manual, webhook, sub-DAG | Unaffected |
+
+The scheduler process keeps running. Queue processing, zombie detection, and notification delivery continue, which is why pausing is preferable to stopping the process.
+
+### What is discarded
+
+Two kinds of work are dropped rather than deferred. Both match how per-DAG suspension already behaves, but a pause applies them to every DAG at once.
+
+**Queued scheduled runs are aborted.** A run that the scheduler had already queued is marked `Aborted` with the reason `dag schedule suspended before dispatch` and removed from its queue.
+
+**Catchup windows are erased.** The replay watermark advances while the scheduler is paused, so a pause of any length consumes that much of every DAG's [catchup window](#catchup-missed-run-replay). Nothing replays when you resume. Pause for two hours with `catchup_window: "6h"` and those two hours are gone, not queued.
+
+A pause that outlasts `scheduler.retry_failure_window` (24 hours by default) also ages failed runs out of the retry candidate set, so their [automatic retries](/writing-workflows/durable-execution) never happen.
+
+[One-off schedules](#one-off-schedules) are the exception. A pending one-off stays pending and fires late once the scheduler resumes.
+
+::: tip
+If missed runs matter more than a clean freeze, suspend the specific DAGs instead. Suspension and pausing discard catchup identically, but suspending a short list keeps the rest of your schedules replaying normally.
+:::
+
+### After resuming
+
+Scheduling picks up from the next tick. Slots that fell inside the paused window are not backfilled. While paused, `NEXT_RUN` reads `-` in `dagu ls` and the next-run column is empty in the web UI.
+
 ## Queue Management
 
 Control concurrent executions using global queues:

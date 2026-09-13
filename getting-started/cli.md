@@ -319,7 +319,7 @@ dagu ls -t -r
 dagu ls -H batch-
 ```
 
-`NEXT_RUN` follows the scheduler's recorded projection for both display and sorting. Suspended DAGs and profile-scoped schedules that are inactive for the DAG's effective default profile show `-`. A pending one-off schedule keeps its scheduled timestamp after it becomes overdue until the scheduler marks it consumed. See [Scheduling](/writing-workflows/scheduling) for schedule behavior and profile activation rules.
+`NEXT_RUN` follows the scheduler's recorded projection for both display and sorting. Suspended DAGs and profile-scoped schedules that are inactive for the DAG's effective default profile show `-`, as does every DAG while the [scheduler is paused](/writing-workflows/scheduling#pausing-the-scheduler). A pending one-off schedule keeps its scheduled timestamp after it becomes overdue until the scheduler marks it consumed. See [Scheduling](/writing-workflows/scheduling) for schedule behavior and profile activation rules.
 
 `dagu ls` is local-only. If a remote CLI context is selected, target the built-in local context explicitly:
 

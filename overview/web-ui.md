@@ -280,6 +280,8 @@ This page helps you verify:
 
 If you use distributed execution, this is the first place to look when workers appear missing or overloaded.
 
+Administrators can also pause the scheduler here, which stops scheduled runs for every DAG without stopping the process. While it is paused, a banner appears on every page showing who paused it and why, so anyone can see why nothing is starting. See [Pausing the Scheduler](/writing-workflows/scheduling#pausing-the-scheduler).
+
 ## Admin Pages
 
 Depending on your role and license, the navigation can also include pages such as:

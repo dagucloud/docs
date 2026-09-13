@@ -56,6 +56,49 @@ Checks the health status of the Dagu server.
 - `uptime`: Server uptime in seconds
 - `timestamp`: Current server time
 
+### Get Scheduler Pause State
+
+**Endpoint**: `GET /api/v1/services/scheduler/pause`
+
+Reports whether scheduler-driven run creation is paused. Readable by any authenticated user.
+
+**Response (200)**:
+```json
+{
+  "paused": true,
+  "pausedAt": "2024-02-11T16:30:45Z",
+  "pausedBy": "admin",
+  "reason": "database migration"
+}
+```
+
+**Response Fields**:
+- `paused`: Whether the scheduler is currently paused
+- `pausedAt`: RFC3339 timestamp of the pause, omitted when running
+- `pausedBy`: User who paused the scheduler, omitted when running
+- `reason`: Operator-supplied explanation, omitted when running or not given
+
+### Pause or Resume the Scheduler
+
+**Endpoint**: `POST /api/v1/services/scheduler/pause`
+
+Pauses or resumes scheduled run creation for every DAG at once. Admin only.
+
+**Request Body**:
+```json
+{
+  "paused": true,
+  "reason": "database migration"
+}
+```
+
+- `paused` (required): Target state
+- `reason` (optional): Shown in the web UI banner while paused, up to 512 characters
+
+**Response (200)**: Success
+
+Manual, webhook, and sub-DAG runs keep working while paused. Queued scheduled runs are aborted and catchup windows are discarded rather than deferred. See [Pausing the Scheduler](/writing-workflows/scheduling#pausing-the-scheduler) for the full behavior.
+
 ### OpenAPI Document
 
 **Endpoint**: `GET /api/v1/openapi.json`
@@ -2791,6 +2834,26 @@ curl "http://localhost:8080/api/v1/queues" \
 # Load queued items from one queue
 curl "http://localhost:8080/api/v1/queues/default/items?type=queued&page=1&perPage=20" \
      -H "Authorization: Bearer your-token"
+```
+
+### Pause/Resume the Scheduler
+
+```bash
+# Pause every schedule
+curl -X POST "http://localhost:8080/api/v1/services/scheduler/pause" \
+     -H "Authorization: Bearer $DAGU_API_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"paused": true, "reason": "database migration"}'
+
+# Check the current state
+curl "http://localhost:8080/api/v1/services/scheduler/pause" \
+     -H "Authorization: Bearer $DAGU_API_TOKEN"
+
+# Resume
+curl -X POST "http://localhost:8080/api/v1/services/scheduler/pause" \
+     -H "Authorization: Bearer $DAGU_API_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"paused": false}'
 ```
 
 ### Suspend/Resume DAG Scheduling
