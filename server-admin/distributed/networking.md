@@ -68,6 +68,8 @@ The coordinator health port and worker health port are separate HTTP endpoints f
 
 Do not route workers to `8091` or `8092`; workers need the coordinator gRPC port.
 
+Setting `worker.health-port=0` disables only the worker's local HTTP `/health` endpoint. It does not disable coordinator polling, heartbeats, or other gRPC traffic. Likewise, `coordinator.health-port=0` disables only the coordinator's HTTP health endpoint. The coordinator health server listens on `:8091` by default, binding all interfaces independently of `coordinator.host`; changing `coordinator.host` changes the gRPC listener only.
+
 ## Required Dagu Settings
 
 On the coordinator, configure:
@@ -118,6 +120,8 @@ dagu coordinator \
 ## Private Networks, VPNs, and Overlay Networks
 
 Private networks, VPNs, and overlay networks use the same default pattern: workers dial a coordinator address that is routable inside that network.
+
+The coordinator gRPC bind address defaults to `127.0.0.1`, so Tailnet membership alone does not expose the coordinator. For direct Tailnet access, set `--coordinator.host=0.0.0.0` or bind to the coordinator's Tailscale interface address.
 
 Examples of valid coordinator addresses:
 
@@ -210,6 +214,23 @@ Use the same local port as the coordinator port. Dagu includes the coordinator o
 
 This pattern is intended for deployments where every remote worker reaches the coordinator through its own local SSH forward. Do not mix it with workers that need to reach the coordinator directly unless they have a route for the same advertised address.
 
+## SSH Reverse Port Forwarding
+
+If the coordinator host can open an SSH session to the worker host, use a reverse forward instead. Keep this session open on the coordinator host:
+
+```bash
+ssh -N -R 50055:127.0.0.1:50055 <user>@<worker-host>
+```
+
+This opens `127.0.0.1:50055` on the worker host and forwards it to the coordinator's loopback gRPC port. Use the same loopback coordinator settings and worker command shown for [SSH local forwarding](#ssh-local-port-forwarding):
+
+```bash
+dagu worker \
+  --worker.coordinators=127.0.0.1:50055
+```
+
+Only coordinator port `50055` needs forwarding. Choose local or reverse forwarding based on which host can authenticate to the other; do not run both for the same worker.
+
 ## Transport Security
 
 The default peer transport is h2c (`peer.insecure=true`). That is convenient for local testing or trusted isolated networks, but it does not provide Dagu-level encryption or peer identity.
@@ -257,7 +278,7 @@ Confirm that Serve is using raw TCP forwarding:
 tailscale serve --tcp=50055 tcp://localhost:50055
 ```
 
-HTTP and HTTPS Serve modes are for HTTP services. They do not turn Dagu coordinator gRPC into an HTTP service.
+If the worker reports `error reading server preface: EOF` and keeps retrying, Tailscale Serve is likely using HTTP or HTTPS mode against the gRPC port. HTTP and HTTPS Serve modes are for HTTP services; replace them with the raw TCP command above.
 
 ## See Also
 
