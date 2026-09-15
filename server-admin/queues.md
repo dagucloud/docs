@@ -76,8 +76,9 @@ The scheduler stores only the latest queued condition. If the same reason and me
 
 ## Scheduled Runs and Queues
 
-A DAG assigned to a queue defined in `config.yaml` has its scheduled runs
-enqueued rather than started as the schedule fires. The queue's
+A DAG assigned to a queue defined in `config.yaml` — by its own `queue` field or
+by one inherited from `base.yaml` — has its scheduled runs enqueued rather than
+started as the schedule fires. The queue's
 `max_concurrency` therefore bounds every run of the DAGs that share it, and a
 run waits in `queued` until a slot is free.
 
