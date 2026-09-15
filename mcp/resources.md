@@ -90,6 +90,9 @@ Dagu sends a resource update notification when the run reaches a terminal state:
 - `partial success`
 - `rejected`
 
+Dagu also notifies when the run stops at a waiting checkpoint, and keeps
+watching the resource so the later terminal state is notified as well.
+
 Clients without resource subscription support should poll `dagu_read` with `target=run` and the same `name` and `dagRunId`.
 
 ## MCP App Run Inspector

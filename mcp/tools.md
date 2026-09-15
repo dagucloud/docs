@@ -233,7 +233,7 @@ Use `dagu_execute` for run control.
 | `labels` | Labels as `key=value` or key-only strings for `start` and `enqueue` |
 | `stepName` | Optional step name for retry |
 | `includeDownstream` | With `stepName`, retry that step and every reachable descendant |
-| `wait` | Wait for the identified run to reach a terminal state |
+| `wait` | Wait for the identified run to reach a terminal state or a waiting checkpoint |
 | `waitTimeoutSeconds` | Wait limit from 1 to 300 seconds; requires `wait` and defaults to 60 |
 
 Start a stored DAG:

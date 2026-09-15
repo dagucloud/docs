@@ -59,7 +59,7 @@ The MCP server exposes resource templates for current Dagu state:
 | `dagu://runs/{name}/{dagRunId}/sub/{subRunId}/steps/{stepName}/logs` | Standard output and standard error for one child-run step |
 | `dagu://reference/{topic}` | Built-in MCP guidance bundled with the server |
 
-Clients can subscribe to run resources. Dagu watches subscribed runs and sends a resource update notification when a run reaches a terminal state. Wiki page resources are read on demand; successful Wiki page mutations continue to notify the Web UI through the existing Wiki API notifier.
+Clients can subscribe to run resources. Dagu watches subscribed runs and sends a resource update notification when a run reaches a terminal state or stops at a waiting checkpoint. Wiki page resources are read on demand; successful Wiki page mutations continue to notify the Web UI through the existing Wiki API notifier.
 
 The `dagu://docs` resource family remains registered as a deprecated alias for older clients.
 
