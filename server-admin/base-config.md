@@ -134,6 +134,20 @@ From lowest to highest priority:
 3. Individual DAG file
 4. Runtime parameters (CLI or API)
 
+### Saved Runs
+
+Retries, restarts, and queued runs preserve captured base settings, except for
+SMTP. They reload SMTP from the current global and workspace `base.yaml` files,
+then apply overrides from the original DAG YAML. Changes to other base settings,
+such as `env` or notification recipients, do not replace their captured values.
+
+If a run has no captured base configuration, it uses the current base
+configuration in full. An explicitly empty captured configuration (`{}`) only
+reloads SMTP.
+
+See [Run Snapshots and Retries](/writing-workflows/email-notifications#run-snapshots-and-retries)
+for credential storage limits, SMTP removal, and upgrade requirements.
+
 ## Configuration Fields
 
 ### Environment Variables

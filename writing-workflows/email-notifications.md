@@ -130,6 +130,35 @@ applies when a child switches a password-based base configuration to OAuth.
 Repeat the complete SMTP identity and credentials in an override. Dagu does not
 merge a username from one configuration with OAuth credentials from another.
 
+## Run Snapshots and Retries
+
+SMTP inherited from global or workspace `base.yaml` is omitted from newly
+written run snapshots (`dag.json`). Retries, restarts, and queued runs use the
+current base SMTP configuration and apply any SMTP overrides from the original
+DAG YAML. This applies to local and distributed execution. Workers receive the
+effective base configuration with the dispatched task; they do not need a local
+`base.yaml` file.
+
+If neither the current base configuration nor the original DAG provides SMTP,
+notification emails are not sent. Removing base SMTP therefore does not prevent
+a retry from running. A `mail.send` step still reports an error if it cannot
+deliver its message.
+
+Other captured base settings, including `env`, notification recipients, and
+`mail_on`, remain unchanged. Updating SMTP does not reload saved environment
+values. See [Saved Runs](/server-admin/base-config#saved-runs) for runs without
+captured base configuration.
+
+::: warning Credential storage scope
+The original DAG YAML remains in the snapshot, including any SMTP credentials
+written directly in it. Values stored in `env`, distributed task payloads, and
+workspace bundles can also retain credentials. Existing history files and
+backups are not rewritten.
+:::
+
+Upgrade the CLI, API server, and scheduler together so that all processes reading
+run snapshots can reload base SMTP.
+
 ## Email Triggers
 
 ### Success/Failure/Wait Emails
