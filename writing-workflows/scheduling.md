@@ -306,7 +306,9 @@ If `queues.enabled` is `false`, the scheduler logs a warning per DAG that has `c
 
 ### Dispatch via enqueue
 
-Catchup runs are dispatched through the queue system, not started directly. For each missed interval, the scheduler:
+Catchup runs are dispatched through the queue system, not started directly. So
+are the scheduled runs of a DAG assigned to a queue defined in `config.yaml`,
+whether the DAG names that queue itself or inherits it from `base.yaml`. For each missed interval, the scheduler:
 
 1. Generates a deterministic run ID from the DAG name and scheduled time
 2. Checks if a run with that ID already exists (`FindAttempt`): if so, skips it

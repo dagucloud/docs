@@ -15,7 +15,7 @@ steps:
     run: echo "Processing batch"
 ```
 
-The scheduler places this DAG into the `batch` queue. The queue's `max_concurrency` (defined in `config.yaml`) determines how many DAGs in this queue can run at the same time.
+The scheduler places this DAG into the `batch` queue. The queue's `max_concurrency` (defined in `config.yaml`) determines how many DAGs in this queue can run at the same time. Scheduled runs, catch-up runs, retries, and runs added with `dagu enqueue` all wait for a free slot in that queue.
 
 When a run is waiting in `queued`, the scheduler may attach a runtime condition that explains the latest observed reason it has not started yet, such as a queue concurrency limit or a distributed worker selection issue. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact reason names and messages.
 
@@ -34,7 +34,7 @@ See [Base Configuration](/server-admin/base-config) for how base config merging 
 
 ## Behavior Without a Queue
 
-When a DAG does not set `queue` (and no base config default exists), it runs in a local queue named after the DAG itself. Local queues have a fixed concurrency of 1, meaning only one instance of that DAG runs at a time.
+When a DAG does not set `queue` (and no base config default exists), it runs in a local queue named after the DAG itself. Local queues have a fixed concurrency of 1, meaning only one instance of that DAG runs at a time, and the scheduler starts its runs directly instead of enqueueing them.
 
 ## Overriding at Enqueue Time
 

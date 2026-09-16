@@ -74,6 +74,17 @@ There is no `QueueAccepted` condition. A run's `queued` status and queue entry a
 
 The scheduler stores only the latest queued condition. If the same reason and message are already present, the scheduler refreshes `checkedAt` only when the new observation is at least one minute newer than the stored observation. Older observations do not replace newer ones.
 
+## Scheduled Runs and Queues
+
+A DAG assigned to a queue defined in `config.yaml` — by its own `queue` field or
+by one inherited from `base.yaml` — has its scheduled runs enqueued rather than
+started as the schedule fires. The queue's
+`max_concurrency` therefore bounds every run of the DAGs that share it, and a
+run waits in `queued` until a slot is free.
+
+A DAG with no `queue` field uses a local queue, and the scheduler starts its
+runs directly.
+
 ## Catchup Runs and Queues
 
 Catchup runs (missed run replay) are dispatched through the queue system. When the scheduler detects missed cron intervals for a DAG with `catchup_window` set, it enqueues each interval as a queue item with a deterministic run ID. The queue processor then executes them in order.
