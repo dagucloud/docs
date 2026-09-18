@@ -367,9 +367,16 @@ dagu retry --run-id=<root-run-id> my-workflow
 
 # Retry a single step inside a persisted child run
 dagu retry --run-id=<root-run-id> --sub-run-id=<child-run-id> --step=build my-workflow
+
+# Retry the child step even if its step preconditions are no longer met
+dagu retry --run-id=<root-run-id> --sub-run-id=<child-run-id> --step=build --bypass-preconditions my-workflow
 ```
 
 `--sub-run-id` requires `--step`. Retry targets the root run: a child run cannot be retried as if it were a top-level run. See [Durable Execution](/writing-workflows/durable-execution).
+
+`--bypass-preconditions` works for child runs executed locally or dispatched to a worker. It requires a local CLI context; selecting a remote server with `--context` does not support this flag. The coordinator and workers must run a version that supports the flag.
+
+Add `--downstream` to retry and bypass step preconditions for reachable descendants inside the selected child DAG. Unrelated steps and sibling child runs retain their previous state. DAG-level preconditions and lifecycle handlers still apply. The bypass lasts only for this retry; see the [CLI reference](/getting-started/cli#retry).
 
 The REST API exposes child runs under the root run:
 

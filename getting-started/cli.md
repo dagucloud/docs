@@ -172,7 +172,7 @@ dagu restart --run-id=20240101_120000 etl  # Restart a specific running DAG-run
 
 ### `retry`
 
-Retry a failed DAG execution.
+Retry a previous DAG run using the same run ID.
 
 ```bash
 dagu retry [options] DAG_NAME_OR_FILE
@@ -180,10 +180,26 @@ dagu retry [options] DAG_NAME_OR_FILE
 
 **Options:**
 - `--run-id, -r` - Run to retry (required)
+- `--step` - Retry only the named step
+- `--downstream` - Also retry reachable descendants of `--step`; requires `--step`
+- `--sub-run-id` - Select a persisted child run containing `--step`; requires `--step`
+- `--bypass-preconditions` - Skip step preconditions for the selected retry steps; requires `--step` and a local CLI context
 
 ```bash
 dagu retry --run-id=20240101_120000 my-workflow
+
+# Retry a step whose precondition is no longer satisfied
+dagu retry --run-id=20240101_120000 --step=upload --bypass-preconditions my-workflow
+
+# Also retry its downstream steps, bypassing their step preconditions
+dagu retry --run-id=20240101_120000 --step=upload --downstream --bypass-preconditions my-workflow
 ```
+
+For example, an upload step may fail before a 10 AM cutoff and become ready to retry after that cutoff. A normal retry checks the time precondition again and skips the step. `--bypass-preconditions` allows that retry to execute.
+
+The override applies only to this retry. Unrelated steps, lifecycle handlers, and DAG-level preconditions keep their normal behavior. The workflow definition is unchanged, and a later retry without the flag checks preconditions again.
+
+`--bypass-preconditions` is unavailable with a remote CLI context. A local-context retry can still target a child run hosted on a worker; see [retrying child runs](/writing-workflows/sub-dags#observing-and-retrying-child-runs).
 
 Retries inherit the original run's runtime profile. `dagu retry` does not accept `--profile`.
 
