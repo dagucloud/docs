@@ -20,6 +20,8 @@ Output: `"John Doe"`
 
 | Field | Description |
 |-------|-------------|
+| `filter` | jq expression to evaluate. Required. |
+| `args` | Named jq variables. Values retain their YAML types. Supplying this map, including `{}`, makes `filter` literal jq source. |
 | `raw` | Output raw strings without JSON encoding (like `jq -r`). Default: `false`. |
 | `input` | File path to read JSON input from. Mutually exclusive with `data`. |
 | `data` | Inline JSON value or file URL string to provide as jq input. Mutually exclusive with `input`. |
@@ -111,6 +113,108 @@ Output:
 alice@example.com
 bob@example.com
 ```
+
+## Named Arguments
+
+::: info Unreleased
+Named arguments require a Dagu build containing PR #2782. This feature is not yet available on Dagu main.
+
+https://github.com/dagucloud/dagu/pull/2782
+:::
+
+Use `with.args` to pass values into a filter as `$name` variables:
+
+```yaml
+steps:
+  - id: filter
+    action: jq.filter
+    with:
+      filter: '.items[] | select(. > $minimum)'
+      data: {items: [1, 5, 10]}
+      raw: true
+      args:
+        minimum: 4
+```
+
+Output:
+
+```text
+5
+10
+```
+
+Arguments accept strings, numbers, booleans, null, objects, and arrays. Numeric
+YAML values remain numbers; quoted numbers remain strings. Nested string values
+can use Dagu references, just like other `with` values.
+
+When `args` is present, the entire filter is literal jq source. Dagu does not
+expand `$name` or `${...}` inside the filter, even inside jq strings. This also
+applies to multiline filters and `args: {}`. Pass workflow values through `args`.
+Steps that omit `args` keep their existing filter interpolation behavior.
+
+Argument keys may include one leading `$`: `name` and `$name` both bind `$name`.
+Supplying both is an error. Invalid jq variable names and references to undeclared
+jq variables fail when the filter is compiled.
+
+### Parameters and Environment Variables
+
+String references remain strings after resolution. Convert numeric parameter,
+environment, or captured-output values with `tonumber` before comparing them to
+JSON numbers:
+
+```yaml
+params:
+  - MIN_PRICE: '4'
+env:
+  CATEGORY: fruit
+steps:
+  - id: filter
+    action: jq.filter
+    with:
+      filter: |
+        .items[] |
+        select(.price > ($min_price | tonumber) and .category == $category) |
+        .name
+      data:
+        items:
+          - {name: apple, price: 5, category: fruit}
+          - {name: pear, price: 3, category: fruit}
+          - {name: carrot, price: 8, category: vegetable}
+      raw: true
+      args:
+        min_price: ${params.MIN_PRICE}
+        category: ${env.CATEGORY}
+```
+
+Output: `apple`
+
+To pass a literal dollar reference as an argument, escape its dollar sign:
+`args: {text: '\$CATEGORY'}` passes the string `$CATEGORY`.
+
+### Previous Step Output
+
+```yaml
+steps:
+  - id: producer
+    action: jq.filter
+    with:
+      filter: .minimum
+      data: {minimum: 42}
+      raw: true
+    output: MINIMUM
+
+  - id: filter
+    depends: [producer]
+    action: jq.filter
+    with:
+      filter: '.items[] | select(. > ($minimum | tonumber))'
+      data: {items: [1, 5, 40, 50]}
+      raw: true
+      args:
+        minimum: ${producer.output}
+```
+
+Output from `filter`: `50`
 
 ## Examples
 
