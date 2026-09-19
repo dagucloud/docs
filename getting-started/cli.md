@@ -199,6 +199,8 @@ For example, an upload step may fail before a 10 AM cutoff and become ready to r
 
 The override applies only to this retry. Unrelated steps, lifecycle handlers, and DAG-level preconditions keep their normal behavior. The workflow definition is unchanged, and a later retry without the flag checks preconditions again.
 
+Retrying a parent step does not bypass preconditions inside its child DAGs, including automatic child step retries. Use `--sub-run-id` with `--step` to target a step inside a child DAG.
+
 `--bypass-preconditions` is unavailable with a remote CLI context. A local-context retry can still target a child run hosted on a worker; see [retrying child runs](/writing-workflows/sub-dags#observing-and-retrying-child-runs).
 
 Retries inherit the original run's runtime profile. `dagu retry` does not accept `--profile`.
