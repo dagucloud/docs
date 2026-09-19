@@ -384,6 +384,16 @@ When the same variable is defined at multiple levels, the highest-precedence val
 
 For detailed precedence rules, see [Variables Reference - Precedence](/writing-workflows/template-variables#variable-precedence).
 
+## Child DAG Runs
+
+A child run started by `action: dag.run` gets its own environment: its own DAG
+`env`, plus whatever the step passed through `params`. A child dispatched to a
+worker starts with nothing else.
+
+Use the step field `pass_env` when a child needs a parent value that is not part
+of its parameter contract. It never passes secrets — the child declares those
+itself. See [Passing Environment Values](/writing-workflows/sub-dags#passing-environment-values).
+
 ## Security Considerations
 
 ### System Environment Filtering

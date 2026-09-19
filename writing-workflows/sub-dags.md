@@ -127,6 +127,101 @@ with:
 
 Runtime overrides passed this way stay literal in the child. See [Parameters](/writing-workflows/parameters).
 
+## Passing Environment Values
+
+`params` is the normal way to give a child its inputs. When a child needs a
+value that is not part of its parameter contract, a step can hand it over with
+`pass_env`:
+
+```yaml
+steps:
+  - name: call-child
+    action: dag.run
+    with:
+      dag: child
+    pass_env: [BUILD_ID, REGION]
+```
+
+`pass_env: true` passes the values the parent workflow declared, rather than a
+named list:
+
+```yaml
+steps:
+  - name: call-child
+    action: dag.run
+    with:
+      dag: child
+    pass_env: true
+```
+
+### What This Is For
+
+A child that runs in the parent's process already observes the parent's
+environment. `pass_env` governs what reaches a child that runs **somewhere
+else** — a child dispatched to a worker starts with only its own definition.
+
+So `pass_env` adds values for a remote child. It is not a filter: a name list
+does not restrict what a local child can see.
+
+### What Each Form Carries
+
+`pass_env: [NAMES]` resolves each name against the environment visible to the
+calling step, so a name can come from the DAG `env`, a step `env`, or a
+predecessor step's output. A name that does not resolve is skipped with a
+warning.
+
+`pass_env: true` carries the values the workflow itself declared. It reads the
+run environment, so it does not include step `env` entries or step outputs, and
+it never carries:
+
+| Excluded | Why |
+|----------|-----|
+| Secrets | See below |
+| Host values such as `HOME`, `TMPDIR`, `DOCKER_HOST` | They describe the machine running the parent |
+| Dagu values such as `DAG_RUN_ID`, `DAG_RUN_WORK_DIR` | The child resolves its own |
+| Params | The child owns its params; the step passes them with `params` |
+| Runtime profile values | The child resolves its own profile |
+
+Neither form carries a name reserved by Dagu, a name managed by `tools` such as
+`PATH`, or a name that is not a valid environment variable name.
+
+### Secrets Are Not Passed
+
+`pass_env` refuses to pass a secret. Naming a secret the workflow declares fails
+validation; a value that is a secret for another reason fails the step.
+
+Declare the secret in the child instead:
+
+```yaml
+# child.yaml
+secrets:
+  - name: API_TOKEN
+    provider: env
+    key: PROD_API_TOKEN
+steps:
+  - run: ./deploy.sh
+```
+
+The child then resolves it through the secret provider, masks it in its own
+logs, and keeps the value out of the coordinator's dispatch record. A child on a
+worker resolves it through the coordinator, which authorizes the request against
+that run's lease.
+
+The refusal sees only what the calling run itself holds as a secret. A value a
+run received from *its* parent arrives as ordinary run environment, so declare
+secrets where they are used rather than relying on one reaching a nested run.
+
+### Limits
+
+`pass_env` is not supported with `action: dag.enqueue`. A queued child reads its
+own environment when it is dequeued, so these values cannot reach it.
+
+Passed values are resolved when the parent step starts the child. Retrying or
+restarting re-runs the parent step and resolves them again. A child resumed
+directly from its own state — approving a gate inside it, pushing a step back,
+resuming an agent session — does not receive them, and a later step reads
+`${NAME}` as plain text.
+
 ## Reading Child Results
 
 A `dag.run` step writes the child run result to stdout as JSON. Capture it with `output:`:
@@ -305,6 +400,12 @@ Sub-DAGs do not inherit `handler_on` from base configuration. Without this, a pa
 ### Tools
 
 Managed `tools` are scoped to one DAG run. A child that uses a pinned external command must declare its own `tools`. See [Tools](/writing-workflows/tools#sub-dags).
+
+### Environment Values
+
+A child dispatched to a worker starts with its own DAG `env` and the `params`
+the step passed. To hand it anything else, use `pass_env`. See [Passing
+Environment Values](#passing-environment-values).
 
 ### What Does Carry Over
 

@@ -812,6 +812,7 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `timeout_sec` | integer | Step timeout in seconds. |
 | `container` | string or object | Step-level container override. |
 | `worker_selector` | object | Step-level distributed worker selector. |
+| `pass_env` | boolean or array | Parent environment values handed to a child run. Not supported with `action: dag.enqueue`. |
 
 `run` and `action` are mutually exclusive.
 
