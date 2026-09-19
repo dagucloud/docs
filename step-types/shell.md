@@ -75,6 +75,19 @@ Run system commands and scripts with the default action.
       with:
         shell: python3
   ```
+- **Standard input from a file**: set `stdin` to a path when the command reads from standard input.
+  ```yaml
+  steps:
+    - id: fetch
+      run: ./fetch-report
+    - id: summarize
+      depends: fetch
+      stdin: ${fetch.stdout}
+      run: ./summarize
+  ```
+  `stdin` takes a file path, never inline content, and `${step_id.stdout}` is the path to that step's captured stdout file. A leading `~` expands and a relative path resolves against the step working directory. Each command in a multi-command step reads the file from its start. See [Standard Input](/writing-workflows/data-flow#standard-input).
+
+  Harness steps have a separate `with.stdin` that takes inline text instead; see [Harness](/step-types/harness/).
 - **Working directory and env**: set `working_dir` and `env` on the step (or DAG defaults) to control context.
 
 ## Script Behavior

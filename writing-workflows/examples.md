@@ -10,7 +10,7 @@ Use these examples as copy-paste starting points for common Dagu workflow patter
 
 ## Data & Runtime
 
-- [Data & Variables](/writing-workflows/examples/data-variables) - Environment variables, dotenv files, secrets, parameters, outputs, runtime context, and artifacts.
+- [Data & Variables](/writing-workflows/examples/data-variables) - Environment variables, dotenv files, secrets, parameters, outputs, standard input, runtime context, and artifacts.
 - [Scripts & Runtime](/writing-workflows/examples/scripts-runtime) - Shell scripts, Python scripts, distributed file dependencies, working directories, shell selection, and reproducible runtimes.
 
 ## Integrations & Operations

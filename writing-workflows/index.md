@@ -245,6 +245,7 @@ Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-type
 |---|---|
 | Learn step fields, scripts, dependencies, and defaults | [Workflow Basics](/writing-workflows/basics) |
 | Pass parameters, outputs, and files between steps | [Data & Variables](/writing-workflows/data-variables) |
+| Feed a previous step's output file into a command's standard input | [Standard Input](/writing-workflows/data-flow#standard-input) |
 | Send DAG-local scripts and configuration to distributed workers | [File Dependencies](/writing-workflows/file-dependencies) |
 | Reuse unchanged file-producing steps across runs | [Build Workflows](/writing-workflows/incremental-workflows) |
 | Add conditions, loops, parallel iteration, or sub-DAGs | [Control Flow](/writing-workflows/control-flow) |

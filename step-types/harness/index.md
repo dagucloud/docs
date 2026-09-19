@@ -37,7 +37,7 @@ You can also define [custom harness definitions](#custom-harness-definitions) fo
 ## Step Contract
 
 - `with.prompt` is the prompt. Harness steps accept a single command string; command arrays are rejected.
-- `with.stdin` is optional extra stdin content.
+- `with.stdin` is optional extra stdin content. It is inline text, not a file path. The step-level [`stdin`](/writing-workflows/data-flow#standard-input) field, which names a file, applies to `run` steps and is rejected on harness steps.
 - After DAG-level defaults are applied, the step needs a provider. Omitted provider configuration is still invalid.
 - `with.provider` may be a built-in CLI provider or a name defined under top-level `harnesses:`.
 - `with.provider` may contain scoped references such as `${env.PROVIDER}` and is resolved after interpolation at runtime.

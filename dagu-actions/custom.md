@@ -192,8 +192,8 @@ Allowed call-site fields are workflow-control fields:
 
 ```text
 id, name, description, depends, continue_on, retry_policy, repeat_policy,
-mail_on_error, preconditions, signal_on_stop, env, timeout_sec, stdout,
-stderr, log_output, worker_selector, output, approval
+mail_on_error, preconditions, signal_on_stop, env, timeout_sec, stdin,
+stdout, stderr, log_output, worker_selector, output, approval
 ```
 
 Execution fields belong in the action template, not at the call site. A custom action call uses only:

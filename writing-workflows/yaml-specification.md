@@ -802,6 +802,7 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `dependencies` | string or array | DAG-relative files, directories, or glob patterns to transfer for distributed execution. |
 | `working_dir` | string | Step working directory. |
 | `env` | array or object | Step-specific environment variables. |
+| `stdin` | string | File path piped to the step command's standard input. Only `run` steps accept it. |
 | `stdout` | string or object | Redirect stdout to a file, artifact, or run outputs. |
 | `stderr` | string or object | Redirect stderr to a file or artifact. |
 | `log_output` | string | Step-level log output mode. |
@@ -815,6 +816,8 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `pass_env` | boolean or array | Parent environment values handed to a child run. Not supported with `action: dag.enqueue`. |
 
 `run` and `action` are mutually exclusive.
+
+`stdin` names a file, not inline content. A leading `~` expands, and a relative path resolves against the step working directory. The path is value-resolved before the command starts, and unlike `run`, a path that resolves to nothing or still carries a reference fails the step. See [Standard Input](/writing-workflows/data-flow#standard-input).
 
 `dependencies` accepts literal paths relative to the authored DAG file. Each declaration must match at dispatch time. Exact files, directories, and glob patterns are supported. See [File Dependencies](/writing-workflows/file-dependencies) for transfer behavior, examples, validation rules, and bundle limits.
 

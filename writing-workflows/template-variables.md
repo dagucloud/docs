@@ -233,7 +233,7 @@ Common value-resolved fields include:
 - `steps[].working_dir`
 - retry and repeat numeric string fields listed in the YAML spec
 - `steps[].parallel` strings
-- `steps[].stdout`, `steps[].stderr`, and artifact paths
+- `steps[].stdin`, `steps[].stdout`, `steps[].stderr`, and artifact paths
 - lifecycle handler step fields
 
 Root and step `preconditions[].eval` first resolve scoped references, then run dynamic evaluation before comparing the result with `expected`; it is valid only when `expected` is set. Dynamic evaluation supports both `$(command)` and `` `command` `` command substitution.
@@ -251,6 +251,8 @@ steps:
 ```
 
 Supported but unavailable references are also preserved, and inspection surfaces can report a passive notice. For example, a known step-output reference without a dependency is preserved with a `missing_dependency` notice.
+
+`steps[].stdin` is the exception. A path that still carries a supported reference, or that resolves to an empty value, fails the step instead of being preserved, because an empty standard input is indistinguishable from an unset field. See [Standard Input](/writing-workflows/data-flow#standard-input).
 
 Unknown fields under the reserved `context` namespace are also preserved. Inspection surfaces can report them with an `unknown_context_field` notice, so `${context.run.unknown}` stays as text at runtime but can still be surfaced as a documentation or validation issue.
 

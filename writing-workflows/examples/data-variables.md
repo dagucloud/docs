@@ -313,6 +313,34 @@ flowchart TD
 
 <div class="example-card">
 
+### Pipe a File to Standard Input
+
+```yaml
+steps:
+  - id: fetch
+    run: echo '{"id":42,"status":"ready"}'
+
+  - id: summarize
+    depends: fetch
+    stdin: ${fetch.stdout}
+    run: jq .status
+```
+
+```mermaid
+flowchart LR
+    F["fetch · stdout file"] --> S["summarize · stdin"]
+    S --> O["jq .status"]
+    style F stroke:lightblue,stroke-width:1.6px,color:#333
+    style S stroke:orange,stroke-width:1.6px,color:#333
+    style O stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/writing-workflows/data-flow#standard-input" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### JSON Path References
 
 ```yaml

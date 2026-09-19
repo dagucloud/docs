@@ -1,6 +1,6 @@
 # Data Flow
 
-Data moves through a workflow by parameters, environment values, declared step outputs, files, and artifacts.
+Data moves through a workflow by parameters, environment values, declared step outputs, files, standard input, and artifacts.
 
 Use scoped value references when Dagu owns the interpolation:
 
@@ -186,6 +186,91 @@ steps:
       artifact: reports/report.md
 ```
 
+## Standard Input
+
+Use `stdin` when a command reads from standard input rather than from a path argument.
+It names a file, and Dagu pipes that file's contents to the step process.
+
+```yaml
+steps:
+  - id: generate
+    run: ./generate > data.json
+
+  - id: process
+    depends: generate
+    stdin: data.json
+    run: ./process
+```
+
+Without `stdin`, the same wiring needs a shell redirect inside `run`, which means the
+step depends on the selected shell and on quoting the path correctly. A step that does
+not set `stdin` receives empty standard input.
+
+`${step_id.stdout}` is the path to that step's captured stdout file, not the text it
+printed. That makes it the natural source for `stdin`, and it removes the
+`cat "${step_id.stdout}" | command` pattern:
+
+```yaml
+steps:
+  - id: fetch
+    run: ./fetch-report
+
+  - id: summarize
+    depends: fetch
+    stdin: ${fetch.stdout}
+    run: ./summarize
+```
+
+### Path Resolution
+
+The path is value-resolved before the command starts.
+
+- A leading `~` expands to the user home directory.
+- A relative path resolves against the step working directory, not the workflow file
+  directory.
+- `$NAME` resolves from the step environment scope. The host process environment is not
+  a fallback, which matches `stdout` and `stderr`.
+
+Each entry of an array-form `run` reads the file from its start, so every command in the
+step sees the same content.
+
+```yaml
+steps:
+  - id: inspect
+    stdin: payload.json
+    run:
+      - jq .id
+      - jq .status
+```
+
+### Which Steps Accept It
+
+Only `run` steps accept `stdin`. Any other action rejects it when the workflow is built,
+so a mistake surfaces at `dagu validate` rather than at run time.
+
+- `ssh` does not accept it. The remote shell reads its own script from the session's
+  standard input channel, so there is no free channel for a file.
+- A root-level `container:` makes every step that inherits it a container step, so no
+  step in that workflow accepts `stdin`.
+- Harness steps use `with.stdin`, which is inline text rather than a file path. See
+  [Harness](/step-types/harness/).
+
+### When It Fails
+
+The step fails, rather than quietly running with empty standard input, when:
+
+- the file cannot be opened for reading
+- the path resolves to an empty value
+- the path still carries an unresolved reference
+
+That last case is the opposite of `run`, where an unresolved reference is preserved as
+literal text. A silently empty standard input is indistinguishable from an unset field,
+so `stdin` reports the problem instead.
+
+A step that a [build workflow](/writing-workflows/incremental-workflows) may reuse cannot
+be referenced through `${step_id.stdout}` at all, because a reused step produces no new
+stdout file. Use a declared path output as the `stdin` source instead.
+
 ## Runtime Metadata
 
 Dagu exposes run metadata through the canonical `${context.*}` namespace and also projects selected values into the step environment.
@@ -229,3 +314,5 @@ steps:
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Parameters](/writing-workflows/parameters)
 - [Artifacts](/writing-workflows/artifacts)
+- [Shell](/step-types/shell)
+- [Template Variables](/writing-workflows/template-variables)
