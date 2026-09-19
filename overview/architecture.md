@@ -100,6 +100,8 @@ Dagu follows the XDG Base Directory specification for file organization:
 │   │   └── my-workflow/
 │   │       ├── item_high_20240315_120000_123Z_priority1.json  # High priority
 │   │       └── item_low_20240315_120030_456Z_batch1.json      # Low priority
+│   ├── suspend/       # Workflow suspend flags
+│   │   └── my-workflow.suspend
 │   └── proc/          # Process heartbeat files for liveness detection
 │       └── {proc_group}/
 │           └── {dag_name}/
@@ -114,8 +116,6 @@ Dagu follows the XDG Base Directory specification for file organization:
 │               ├── step1.stdout.log
 │               ├── step1.stderr.log
 │               └── status.yaml
-├── suspend/           # Workflow suspend flags
-│   └── my-workflow.suspend
 └── scheduler/         # Scheduler coordination
     └── locks/         # Directory-based locks for HA
         └── .dagu_lock.<hostname@pid>.<timestamp>/

@@ -2,6 +2,8 @@
 
 Configure Dagu server settings.
 
+For suspend flag paths and upgrade behavior, see [Suspend Flag Upgrades](./reference#suspend-flag-upgrades).
+
 ## Configuration Methods
 
 Precedence order:
@@ -55,7 +57,7 @@ paths:
   log_dir: "~/.local/share/dagu/logs"                # Log files
   data_dir: "~/.local/share/dagu/data"               # Application data
   tools_dir: ""                                      # Auto: {data_dir}/tools
-  suspend_flags_dir: "~/.local/share/dagu/suspend"    # Suspend flags
+  suspend_flags_dir: ""                              # Auto: {data_dir}/suspend
   admin_logs_dir: "~/.local/share/dagu/logs/admin"    # Admin logs
   event_store_dir: ""                                 # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"            # Base configuration

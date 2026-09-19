@@ -48,8 +48,8 @@ After installation, Dagu uses these paths by default. These are the main locatio
 
 ~/.local/share/dagu/
 ├── logs/          # Per-run execution logs
-├── data/          # Run history and state
-└── suspend/       # Suspend flags
+└── data/          # Run history and state
+    └── suspend/   # Suspend flags
 ```
 
 Override any path with environment variables:

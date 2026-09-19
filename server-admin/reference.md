@@ -68,7 +68,7 @@ paths:
   tools_dir: ""              # Auto: {data_dir}/tools
   artifact_dir: ""           # Auto: {data_dir}/artifacts
   dag_state_dir: ""           # Auto: {data_dir}/dag-state
-  suspend_flags_dir: "~/.local/share/dagu/suspend"
+  suspend_flags_dir: ""      # Auto: {data_dir}/suspend
   admin_logs_dir: "~/.local/share/dagu/logs/admin"
   event_store_dir: ""        # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"
@@ -338,7 +338,7 @@ All options support `DAGU_` prefix.
 - `DAGU_TOOLS_DIR` - Managed DAG tool cache (default: `{data_dir}/tools`)
 - `DAGU_ARTIFACT_DIR` - DAG run artifact directory (default: `{data_dir}/artifacts`)
 - `DAGU_DAG_STATE_DIR` - Persistent DAG state directory (default: `{data_dir}/dag-state`)
-- `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags
+- `DAGU_SUSPEND_FLAGS_DIR` - Suspend flags (default: `{data_dir}/suspend`)
 - `DAGU_ADMIN_LOG_DIR` - Admin logs
 - `DAGU_EVENT_STORE_DIR` - Centralized event log directory (default: `{admin_logs_dir}/events`)
 - `DAGU_BASE_CONFIG` - Base configuration
@@ -652,14 +652,14 @@ Dagu exposes workflow metadata through canonical `${context.*}` references and s
 │   │   ├── audit/     # Audit logs (daily JSONL files)
 │   │   └── events/    # Centralized event logs
 │   └── <dag name>/    # Per-DAG run logs
-├── data/              # Application data
-│   ├── artifacts/     # DAG run artifacts
-│   ├── dag-runs/      # DAG run history
-│   ├── queue/         # Queue data
-│   ├── proc/          # Process data
-│   ├── contexts/      # CLI remote contexts
-│   └── service-registry/  # Service registry data
-└── suspend/           # DAG suspend flags
+└── data/              # Application data
+    ├── artifacts/     # DAG run artifacts
+    ├── dag-runs/      # DAG run history
+    ├── queue/         # Queue data
+    ├── proc/          # Process data
+    ├── contexts/      # CLI remote contexts
+    ├── suspend/       # DAG suspend flags
+    └── service-registry/  # Service registry data
 ```
 
 ### With DAGU_HOME
@@ -677,8 +677,8 @@ $DAGU_HOME/
 │   ├── queue/         # Queue data
 │   ├── proc/          # Process data
 │   ├── contexts/      # CLI remote contexts
+│   ├── suspend/       # DAG suspend flags
 │   └── service-registry/  # Service registry data
-├── suspend/           # DAG suspend flags
 ├── config.yaml        # Main configuration
 └── base.yaml          # Shared DAG defaults
 ```
@@ -795,6 +795,7 @@ When not specified, these paths are automatically derived:
 - `paths.artifact_dir`: `{paths.data_dir}/artifacts` - Stores DAG run artifacts
 - `paths.tools_dir`: `{paths.data_dir}/tools` - Stores managed DAG tool cache, locks, manifests, and shims
 - `paths.dag_state_dir`: `{paths.data_dir}/dag-state` - Stores persistent DAG state values
+- `paths.suspend_flags_dir`: `{paths.data_dir}/suspend` - Stores DAG suspend flags
 - `paths.dag_runs_dir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
 - `paths.dag_run_work_dir`: `{paths.data_dir}/dag-run-work` - Stores per-run working directories
 - `paths.queue_dir`: `{paths.data_dir}/queue` - Stores queue data
@@ -802,6 +803,19 @@ When not specified, these paths are automatically derived:
 - `paths.contexts_dir`: `{paths.data_dir}/contexts` - Stores CLI remote contexts
 - `paths.event_store_dir`: `{paths.admin_logs_dir}/events` - Stores centralized event logs
 - `paths.executable`: Current executable path - Auto-detected from running process
+
+### Suspend Flag Upgrades
+
+Suspend flags default to `{paths.data_dir}/suspend`, so processes sharing the data directory share suspension state. Explicit `paths.suspend_flags_dir` settings, including `DAGU_SUSPEND_FLAGS_DIR` and legacy configuration keys, keep their configured location and disable legacy fallback and migration. A configured path outside `data_dir` produces a warning; all servers and schedulers must use the same suspension directory.
+
+When using the default path, Dagu also reads flags from the previous default location: `suspend/` under the selected Dagu home (`DAGU_HOME`, `--dagu-home`, or an existing `~/.dagu`), or `$XDG_DATA_HOME/dagu/suspend` (normally `~/.local/share/dagu/suspend`) for XDG layouts. After acquiring leadership, the scheduler copies those flags into the new directory before processing runs. Startup retains the original flags. Suspending a DAG writes its new flag before removing its legacy flag; resuming removes both.
+
+For upgrades:
+
+- Make the same legacy flags available to all servers and schedulers. Reconcile any separate per-host flag directories first.
+- Upgrade all processes before changing suspension state. Running older processes that write legacy flags alongside upgraded processes is unsupported.
+- Include the legacy directory in backups until scheduler migration completes. Processes need permission to remove legacy flags when suspension state changes.
+- For rollback, explicitly configure the older version to use the new shared suspend directory; retained legacy flags alone may no longer reflect the current state.
 
 ## Supported Log Encodings
 

@@ -1165,7 +1165,7 @@ $DAGU_HOME/
 ├── dags/              # DAG definitions
 ├── logs/              # All log files
 ├── data/              # Application data
-├── suspend/           # DAG suspend flags
+│   └── suspend/       # DAG suspend flags
 ├── config.yaml        # Main configuration
 └── base.yaml          # Shared DAG defaults
 ```
