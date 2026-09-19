@@ -1118,10 +1118,12 @@ Precondition fields for both DAG root and step preconditions:
 |-------|------|-------------|
 | `condition` | string | Value to compare when `expected` is set, or command text when `expected` is omitted. |
 | `eval` | string | Dynamic expression evaluated before comparing with `expected`; command substitution can use `$()` or backticks. |
-| `expected` | string | Required with `eval`; optional with `condition`. Exact value or regex pattern with `re:`. |
+| `expected` | string | Required with `eval`; optional with `condition`. Exact value, regex pattern with `re:`, or numeric comparison with `num:`. |
 | `negate` | boolean | Invert the condition result. |
 
 Each precondition must set `condition` or `eval`, not both. Use `condition` with `expected` for literal or value-resolved comparisons. In that form, Dagu resolves scoped references such as `${env.NAME}` but leaves `$()` and backticks as ordinary text. Use `eval` with `expected` when the compared value must be computed at runtime; both `$(command)` and `` `command` `` command substitution are supported. When `expected` is omitted, only `condition` is valid and Dagu runs the resolved `condition` as a command check. Shell syntax in a command check is interpreted only by the selected shell.
+
+`expected` supports two prefixes: `re:` for a Go regular expression, and `num:` for a numeric comparison using `>`, `>=`, `<`, or `<=`. A `num:` threshold may be a single whole value reference, such as `num:>=${threshold}`. A value that is not a number fails the step rather than skipping it. See [Numeric Comparison](/writing-workflows/control-flow#numeric-comparison).
 
 For more examples, see [DAG-Level Conditions](/writing-workflows/control-flow#dag-level-conditions).
 
@@ -1158,7 +1160,7 @@ steps:
 | `max_interval_sec` | integer or string | Maximum repetition interval. |
 | `limit` | integer or string | Maximum number of executions. |
 | `condition` | string | Condition to evaluate. |
-| `expected` | string | Expected value or pattern. |
+| `expected` | string | Exact value, regex pattern with `re:`, or numeric comparison with `num:`. |
 | `exit_code` | array | Exit codes that trigger repeat. |
 
 ```yaml

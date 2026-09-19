@@ -132,6 +132,7 @@ steps:
 - **Regex patterns**: Must start with `re:` prefix (e.g., `re:^ERROR.*`)
 - Patterns are matched against each line of **stdout only** (stderr is not checked)
 - Matching is case-sensitive
+- The `num:` numeric-comparison prefix is **not** supported here. It would be matched as literal text and never match. Numeric comparison applies to `preconditions` and router routes. See [Numeric Comparison](/writing-workflows/control-flow#numeric-comparison)
 
 ### `mark_success`
 

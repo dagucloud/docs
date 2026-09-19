@@ -204,7 +204,7 @@ steps:
     run: ./deploy.sh production
 ```
 
-Exact values and `re:` regular-expression patterns can each select one or more target steps. See [Router](/step-types/router).
+Exact values, `re:` regular-expression patterns, and `num:` numeric comparisons can each select one or more target steps. See [Router](/step-types/router).
 
 ### Run a coding agent
 

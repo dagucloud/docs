@@ -62,8 +62,50 @@ Rules:
 
 - A plain key is an exact match.
 - A key prefixed with `re:` is a Go regular expression.
+- A key prefixed with `num:` is a numeric comparison, using `>`, `>=`, `<`, or `<=`.
 - Every matching route runs, not just the first match.
 - Use `re:.*` as a default route.
+
+## Numeric Routes
+
+A `num:` key compares the value as a number rather than as text. Keep the routes mutually
+exclusive and exactly one target runs:
+
+```yaml
+type: graph
+env:
+  - SCORE: "0.95"
+steps:
+  - id: router
+    action: router.route
+    with:
+      value: ${env.SCORE}
+      routes:
+        "num:>=0.9": [auto_approve]
+        "num:<0.9": [needs_review]
+
+  - id: auto_approve
+    run: echo "Approved automatically"
+
+  - id: needs_review
+    run: echo "Sent for review"
+```
+
+A threshold can be a variable, written as the whole number:
+`"num:>=${threshold}"`. See
+[Numeric Comparison](/writing-workflows/control-flow#numeric-comparison) for the full
+comparison rules, which are shared with preconditions.
+
+::: warning A numeric route fails the run on a non-numeric value
+When a workflow declares any `num:` route and the value is not a number, the router step
+itself fails and no target runs. That includes a target whose pattern matches the text and
+a `re:.*` catch-all, so a catch-all cannot be used as a safety net for non-numeric
+input.
+:::
+
+Because every matching route runs, a catch-all added beside numeric routes runs as well.
+And no single pattern expresses a middle band such as `0.1 < x < 0.9`, since a route
+carries one pattern; put those bounds on the target step as two preconditions instead.
 
 ## Route Dependencies
 

@@ -247,6 +247,10 @@ When `expected` is omitted, Dagu treats `condition` as a command check. Dagu fir
         - condition: "test ${env.DEV_PCENT} -ge ${env.DEV_ALERT}"
   ```
 
+For a numeric comparison you no longer need a shell. See
+[Numeric Comparison](#numeric-comparison), which compares the values directly and works
+the same way on Windows.
+
 ### Command Output Conditions
 
 ```yaml
@@ -279,6 +283,87 @@ steps:
 ```
 
 **Note**: Use `eval` only with `expected`. For plain exit-code checks, omit `expected` and keep the command in `condition`.
+
+### Numeric Comparison
+
+Use the `num:` prefix to compare numbers instead of text. The operators are `>`, `>=`,
+`<`, and `<=`:
+
+```yaml
+steps:
+  - id: score
+    run: echo 0.87
+    output: CONFIDENCE
+
+  - id: handle_automatically
+    depends: score
+    preconditions:
+      - condition: "${CONFIDENCE}"
+        expected: "num:>=0.8"
+    run: echo "Confident enough to handle without review"
+```
+
+Both sides are compared as numbers, so `0.9` is greater than `0.45` even though the text
+`"0.9"` sorts after `"0.45"`. This replaces shelling out to `test` or `awk`, which also
+makes the check portable to Windows runners.
+
+There is no `==` operator. Exact string matching already covers equality, and comparing
+floating-point numbers for equality is unreliable.
+
+The threshold can come from a variable, so one workflow can carry a different bar per
+environment:
+
+```yaml
+params:
+  - threshold: "0.8"
+steps:
+  - id: score
+    run: echo 0.87
+    output: CONFIDENCE
+
+  - id: handle_automatically
+    depends: score
+    preconditions:
+      - condition: "${CONFIDENCE}"
+        expected: "num:>=${threshold}"
+    run: echo "Above the configured bar"
+```
+
+A threshold reference must be the whole number and nothing else: `num:>=${threshold}` is
+valid, `num:>=0.${threshold}` is not. Any reference form that works in `condition` works
+here, including `${params.threshold}`, `${env.THRESHOLD}`, and `$THRESHOLD`.
+
+::: warning A value that is not a number fails the step
+A comparison that simply does not hold skips the step, exactly like any other unmet
+precondition. But a value that is not a number at all, such as empty text or an
+unresolved reference, is an evaluation error and **fails** the step instead.
+
+That is deliberate: a numeric gate that silently stopped gating would let work through
+unchecked. If a value may legitimately be missing, guard it with a separate precondition
+first.
+:::
+
+Numeric matching reads the whole value, not one line at a time as literal and regex
+matching do. Surrounding whitespace is ignored, so trailing newlines are fine, but a
+multi-line value is never a number.
+
+Combine two bounds to gate on a range, since conditions are combined with AND:
+
+```yaml
+steps:
+  - id: score
+    run: echo 0.5
+    output: CONFIDENCE
+
+  - id: human_review
+    depends: score
+    preconditions:
+      - condition: "${CONFIDENCE}"
+        expected: "num:<0.9"
+      - condition: "${CONFIDENCE}"
+        expected: "num:>0.1"
+    run: echo "Middle band, send to a human"
+```
 
 ### Multiple Conditions
 
@@ -391,6 +476,45 @@ steps:
     run: echo "Banana route"
 ```
 
+#### Numeric Routes
+
+A route pattern accepts `num:` as well, so a run can branch on a number. Keep the routes
+mutually exclusive and exactly one target runs:
+
+```yaml
+type: graph
+env:
+  - SCORE: "0.95"
+steps:
+  - id: router
+    action: router.route
+    with:
+      value: ${env.SCORE}
+      routes:
+        "num:>=0.9": [auto_approve]
+        "num:<0.9": [needs_review]
+
+  - id: auto_approve
+    run: echo "Approved automatically"
+
+  - id: needs_review
+    run: echo "Sent for review"
+```
+
+> **Note**: no single route pattern expresses a middle band such as `0.1 < x < 0.9`,
+> because a route carries one pattern. Put the bounds on the target step as two
+> preconditions instead, as shown in [Numeric Comparison](#numeric-comparison).
+
+::: warning A numeric route fails the run on a non-numeric value
+When a workflow declares any `num:` route and the value is not a number, the router step
+itself fails and **no** target runs. That includes a target whose pattern matches the text
+and a `re:.*` catch-all. A routing decision that cannot be evaluated is not partly carried
+out.
+
+So a catch-all cannot be used as a safety net for non-numeric input. Make sure the value
+is a number before routing on it.
+:::
+
 #### Catch-All Route
 
 Use `re:.*` as a default fallback:
@@ -498,7 +622,7 @@ steps:
     run: echo "Clothing"
 ```
 
-> **Evaluation order**: Exact matches are checked first, then regex patterns in alphabetical order, with catch-all (`re:.*`) last. All matching routes execute their targets, not just the first match.
+> **Evaluation order**: Exact and `num:` matches are checked first, then regex patterns in alphabetical order, with catch-all (`re:.*`) last. All matching routes execute their targets, not just the first match.
 
 > **Constraints**: Router steps run in graph workflows. Each step can only be targeted by one route across all routers.
 
@@ -538,6 +662,25 @@ steps:
       interval_sec: 30
       limit: 120              # Maximum 1 hour
 ```
+
+`repeat_policy.expected` accepts the same `re:` and `num:` prefixes as a precondition, so
+a step can wait for a number to cross a threshold:
+
+```yaml
+steps:
+  - id: wait_for_backlog_to_drain
+    run: queue-depth.sh
+    output: DEPTH
+    repeat_policy:
+      repeat: until
+      condition: "${DEPTH}"
+      expected: "num:<=10"    # Repeat UNTIL the backlog is 10 or fewer
+      interval_sec: 30
+      limit: 120
+```
+
+> **Note**: always set `limit` on an `until` repeat. Without it the step repeats
+> indefinitely while the condition stays unmet.
 
 ### Conditional Repeat Patterns
 
@@ -700,6 +843,10 @@ steps:
     run: echo "Processing"
     depends: validate
 ```
+
+> **Note**: `continue_on.output` takes literal substrings and `re:` patterns only. The
+> `num:` prefix is not supported here and would be matched as literal text, so it would
+> never match. Numeric comparison applies to `preconditions` and router routes.
 
 ### Continue on Skipped
 
