@@ -587,6 +587,45 @@ steps:
     run: echo "Handling failure"
 ```
 
+#### Routing on a Model Decision
+
+Classify with [`decision.evaluate`](/step-types/decision) and route on the answer. The options are declared as `criteria`, so the route keys and the option names are the same list:
+
+```yaml
+type: graph
+steps:
+  - id: classify
+    action: decision.evaluate
+    with:
+      provider: openrouter
+      model: typesafe/jev-1.13
+      state: The checkout page returns a 500 after the payment step.
+      questions:
+        department:
+          type: choice
+          instructions: Which department should handle this?
+          criteria:
+            billing: Charges and refunds
+            engineering: Bugs and outages
+
+  - id: route
+    action: router.route
+    with:
+      value: ${classify.output.answers.department.choice}
+      routes:
+        billing: [handle_billing]
+        engineering: [handle_engineering]
+    depends: classify
+
+  - id: handle_billing
+    run: echo "Billing queue"
+
+  - id: handle_engineering
+    run: echo "Engineering queue"
+```
+
+Each answer also carries a confidence, so a numeric route or precondition can send the uncertain cases to a person instead. See [Numeric Comparison](#numeric-comparison).
+
 #### Chained Routers
 
 Nest routers for multi-level decisions:

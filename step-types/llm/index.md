@@ -16,6 +16,7 @@ graph LR
 - **A model call inside a step**: `action: chat.completion` sends a prompt or message list; the response streams to stdout. This page.
 - **Workflows as functions**: a completion with `tools` can call your DAGs, with arguments derived from their `params`. See [Tool Calling](/features/chat/tool-calling).
 - **A model deciding what runs**: `type: agent` inverts control; steps become a catalog and the model picks one or more independent actions per turn until the goals are met. See [Agent DAGs](/writing-workflows/agent) and the [Agent DAG examples](/writing-workflows/examples/agent).
+- **Typed answers instead of prose**: `action: decision.evaluate` asks a model several questions about the same material and returns a selected option, a score, or a probability, each with its own confidence. See [Decision Steps](/step-types/decision).
 - **A coding agent as a step**: `harness.run` launches supported coding-agent CLIs such as Claude Code, Codex, Gemini CLI, Cursor, or DeepSeek Harness inside a workflow. See [Harness](/step-types/harness/).
 - **AI operating Dagu**: the [MCP server](/mcp/) is the inverse relationship; an external AI client inspects workflows, starts runs, and reads results.
 
@@ -117,6 +118,8 @@ See [Tool Calling](/features/chat/tool-calling).
 ```
 
 Constrain the model to known labels and keep an explicit fallback route; a response that matches no route runs no handler. See [Router](/step-types/router).
+
+When the answer is a label rather than prose, [`decision.evaluate`](/step-types/decision) does this without the hand-constraining: the options are declared as `criteria`, the answer is always one of them, and it comes back with a confidence you can gate on with a [numeric comparison](/writing-workflows/control-flow#numeric-comparison).
 
 **Extended reasoning.** `thinking` maps to the provider's reasoning controls:
 

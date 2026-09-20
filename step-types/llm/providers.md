@@ -1,6 +1,6 @@
 # Providers & Endpoints
 
-Configure provider credentials, custom endpoints, local models, and shared LLM defaults for `action: chat.completion`.
+Configure provider credentials, custom endpoints, local models, and shared LLM defaults for `action: chat.completion`. The credential rules on this page also apply to [`decision.evaluate`](/step-types/decision), which resolves its key the same way but connects to its own decision endpoints.
 
 ## Providers and Credentials
 
@@ -15,6 +15,7 @@ By default, Dagu reads credentials from the provider's standard environment vari
 | `zai` | `ZAI_API_KEY` |
 | `opencode` | `OPENCODE_API_KEY` |
 | `local` | None |
+| `typesafe` | `TYPESAFE_API_KEY` |
 
 Provider aliases include `google` for `gemini`; `ollama`, `vllm`, and `llama` for `local`; and `zhipu`, `zhipuai`, and `glm` for `zai`.
 

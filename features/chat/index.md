@@ -12,6 +12,7 @@ Dagu can call language models from workflows, let models invoke DAGs as tools, o
 |------|-----|
 | Send prompts or message lists directly to a model provider | [`chat.completion`](/step-types/llm/) |
 | Let a model call DAG workflows as functions | [Tool Calling](/features/chat/tool-calling) |
+| Get typed answers to several questions about the same material | [`decision.evaluate`](/step-types/decision) |
 | Let a model decide which step runs next until stated goals are met | [Agent DAGs](/writing-workflows/agent) |
 | Run an external coding-agent CLI inside a workflow | [`harness.run`](/step-types/harness/) |
 | Let an external AI client inspect and operate Dagu | [MCP Server](/mcp/) |

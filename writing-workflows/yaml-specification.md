@@ -885,6 +885,7 @@ Accepted built-in action names:
 | `dag.run` | Run a child DAG synchronously. |
 | `dag.enqueue` | Enqueue a child DAG asynchronously. |
 | `data.convert`, `data.pick` | Data conversion and selection helpers. |
+| `decision.evaluate` | Typed model answers for classification, scoring, and yes/no questions. |
 | `docker.run` | Docker executor. |
 | `exec` | Direct process execution without shell parsing. |
 | `file.copy`, `file.delete`, `file.list`, `file.mkdir`, `file.move`, `file.read`, `file.stat`, `file.write` | File operations. |

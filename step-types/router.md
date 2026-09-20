@@ -138,4 +138,5 @@ steps:
 ## Related
 
 - [Control Flow](/writing-workflows/control-flow)
+- [Decision](/step-types/decision)
 - [YAML Specification](/writing-workflows/yaml-specification)

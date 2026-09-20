@@ -1,6 +1,6 @@
 # AI Examples
 
-Chat completions with OpenRouter and a secret-managed key, DAG-level defaults with a custom endpoint, response reuse, sessions, extended thinking, workflows as tools, and model fallback. Every example runs as-is with an `OPENROUTER_API_KEY` exported. Cards that omit `secrets` and `llm` assume the setup block from the first card.
+Chat completions with OpenRouter and a secret-managed key, DAG-level defaults with a custom endpoint, response reuse, sessions, extended thinking, workflows as tools, model fallback, and typed decisions that route on confidence. Every example runs as-is with an `OPENROUTER_API_KEY` exported. Cards that omit `secrets` and `llm` assume the setup block from the first card.
 
 <div class="examples-grid">
 
@@ -291,6 +291,68 @@ flowchart LR
 ```
 
 <a href="/writing-workflows/examples/agent" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Route on a Typed Decision
+
+```yaml
+type: graph
+steps:
+  - id: classify
+    action: decision.evaluate
+    with:
+      provider: openrouter
+      model: typesafe/jev-1.13
+      state: Please refund my duplicate charge.
+      questions:
+        refund:
+          type: noul
+          instructions: Is the customer asking for a refund?
+
+  - id: triage
+    action: router.route
+    with:
+      value: ${classify.output.answers.refund.noul}
+      routes:
+        "num:>=0.9": [auto_approve]
+        "num:<=0.1": [auto_reject]
+    depends: classify
+
+  - id: auto_approve
+    run: echo "Refund approved"
+
+  - id: auto_reject
+    run: echo "Not a refund request"
+
+  - id: human_review
+    preconditions:
+      - condition: ${classify.output.answers.refund.noul}
+        expected: "num:<0.9"
+      - condition: ${classify.output.answers.refund.noul}
+        expected: "num:>0.1"
+    run: echo "Needs a human"
+    depends: classify
+```
+
+A `noul` question answers yes or no as a probability, so the confident ends route automatically and the middle band goes to a person. A route carries one pattern, so the middle band states both bounds as preconditions instead.
+
+```mermaid
+flowchart LR
+    C["classify · decision.evaluate"] --> T{"noul"}
+    T -->|">= 0.9"| A["auto_approve"]
+    T -->|"<= 0.1"| R["auto_reject"]
+    T -->|"between"| H["human_review"]
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:lime,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+    style H stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/decision" class="learn-more">Learn more →</a>
 
 </div>
 

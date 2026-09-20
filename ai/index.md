@@ -31,6 +31,7 @@ flowchart LR
 |---|---|---|
 | Send a prompt or message list to a model provider | `action: chat.completion` | [LLM Steps](/step-types/llm/) |
 | Let a model call your DAGs as functions | `with.tools` on a completion | [Tool Calling](/features/chat/tool-calling) |
+| Get typed answers to several questions about the same material, then branch | `action: decision.evaluate` | [Decision Steps](/step-types/decision) |
 | Run Claude Code, Codex, Copilot, or another agent CLI as a step | `action: harness.run` | [Harness Steps](/step-types/harness/) |
 | Let a model decide which declared step runs next | `type: agent` | [Agent DAGs](/writing-workflows/agent) |
 | Let an external AI client inspect and control a running server | Built-in MCP endpoint | [MCP](/mcp/) |
@@ -136,7 +137,7 @@ flowchart LR
 
 ### Supported providers
 
-Eight providers are built in. Set `llm.provider`, and the default endpoint and credential variable are configured automatically. Both can be overridden with `base_url` and `api_key_name`.
+Eight providers are built in for `action: chat.completion`. Set `llm.provider`, and the default endpoint and credential variable are configured automatically. Both can be overridden with `base_url` and `api_key_name`.
 
 | Provider | `provider:` | Models | API key |
 |---|---|---|---|
@@ -150,6 +151,8 @@ Eight providers are built in. Set `llm.provider`, and the default endpoint and c
 | Local | `local` | Whatever the local server hosts | None |
 
 Aliases: `google` for `gemini`; `ollama`, `vllm`, and `llama` for `local`; `zhipu`, `zhipuai`, and `glm` for `zai`.
+
+[Decision steps](/step-types/decision) have their own provider list, `openrouter` and `typesafe`, because they call a decision API rather than a chat completion endpoint.
 
 ### Local models
 
