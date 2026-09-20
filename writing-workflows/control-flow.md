@@ -234,7 +234,7 @@ steps:
         expected: "production"
 ```
 
-With `expected`, `condition` compares the resolved string value. Backticks and `$()` stay literal in this form; use `eval` when the compared value must be computed dynamically.
+With `expected`, `condition` compares the resolved string value, or a number when `expected` uses the `num:` prefix described in [Numeric Comparison](#numeric-comparison). Backticks and `$()` stay literal in this form; use `eval` when the compared value must be computed dynamically.
 
 When `expected` is omitted, Dagu treats `condition` as a command check. Dagu first replaces variables in the condition string. If a shell is configured, the result runs through that shell. Without a shell, Dagu executes the resulting string directly, so shell syntax requires an active shell.
 
