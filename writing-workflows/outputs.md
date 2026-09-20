@@ -8,7 +8,7 @@ The current validated reference form is:
 ${steps.<step_id>.outputs.<output_name>}
 ```
 
-For value outputs from command steps, the producer must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`. Built-in actions can provide their own output contract. For example, a [human task](/writing-workflows/human-tasks) derives outputs from its form properties and publishes the validated operator input without an authored `outputs` field or `DAGU_OUTPUT_FILE`.
+For value outputs from command steps, the producer must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`. Built-in actions can provide their own output contract. For example, a [human task](/writing-workflows/human-tasks) derives outputs from its form properties and publishes the validated operator input without an authored `outputs` field or `DAGU_OUTPUT_FILE`, and a [decision step](/step-types/decision) publishes its answers the same way.
 
 A [build workflow](/writing-workflows/incremental-workflows) can instead declare `path` on an output. The command writes the file to `${outputs.<name>}`, and dependent steps receive its final absolute path through `${steps.<id>.outputs.<name>}`. Path outputs are not written to `DAGU_OUTPUT_FILE`.
 
@@ -99,6 +99,8 @@ steps:
 ```
 
 Step output references read top-level declared output names. Nested output paths such as `${steps.inspect.outputs.metadata.tag}` are not part of the strict reference syntax.
+
+The separate `${<step_id>.output.<path>}` form reads into a step's captured JSON output and does accept a path, which is how a [decision step](/step-types/decision) exposes `${classify.output.answers.department.choice}`. It resolves against captured output rather than a declared output name, so the two forms are not interchangeable.
 
 ## Dependency Requirement
 

@@ -157,6 +157,34 @@ steps:
 
 Only declared properties become outputs. The consumer must depend directly or transitively on the human-task step; the output reference does not create the dependency.
 
+### Decision Outputs
+
+A [decision step](/step-types/decision) publishes `answers`, `model`, and `usage` from the provider response, also without `DAGU_OUTPUT_FILE` or a declared `outputs` field.
+
+```yaml
+type: graph
+steps:
+  - id: classify
+    action: decision.evaluate
+    with:
+      provider: openrouter
+      model: typesafe/jev-1.13
+      state: I was charged twice.
+      questions:
+        department:
+          type: choice
+          instructions: Which department should handle this?
+          criteria:
+            billing: Charges and refunds
+            other: Anything else
+
+  - id: notify
+    depends: classify
+    run: ./notify.sh '${classify.output.answers.department.choice}'
+```
+
+Those three names are readable as strict references such as `${steps.classify.outputs.answers}`. Reaching a field inside an answer needs the `${classify.output....}` path form shown above.
+
 ## Files
 
 Use files when the data is large or when another process expects a file path.
