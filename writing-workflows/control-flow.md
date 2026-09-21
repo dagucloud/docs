@@ -887,8 +887,10 @@ steps:
 ```
 
 > **Note**: `continue_on.output` takes literal substrings and `re:` patterns only. The
-> `num:` prefix is not supported here and would be matched as literal text, so it would
-> never match. Numeric comparison applies to `preconditions` and router routes.
+> `num:` prefix is rejected when the workflow loads, because matching here reads one line
+> at a time while a numeric comparison reads a whole value. Numeric comparison applies to
+> `preconditions` and router routes. To match output that begins with `num:`, write it as
+> a regex, such as `re:num:>=5`.
 
 ### Continue on Skipped
 
