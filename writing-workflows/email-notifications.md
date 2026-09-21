@@ -487,6 +487,8 @@ steps:
           </table>
         </body>
         </html>
-      headers:
-        Content-Type: text/html
 ```
+
+`mail.send` always sends the message body as `text/html`, so the content type
+does not need to be declared. Adding `attachments` switches the message to
+`multipart/mixed` automatically.
