@@ -129,10 +129,10 @@ steps:
 
 **Pattern Matching Rules:**
 - **Literal patterns**: Matched as substrings (e.g., "WARNING" matches "WARNING: Low memory")
-- **Regex patterns**: Must start with `re:` prefix (e.g., `re:^ERROR.*`)
+- **Regex patterns**: Must start with `re:` prefix (e.g., `re:^ERROR.*`). A pattern that is not a valid regular expression is rejected when the workflow loads
 - Patterns are matched against each line of **stdout only** (stderr is not checked)
 - Matching is case-sensitive
-- The `num:` numeric-comparison prefix is **not** supported here. It would be matched as literal text and never match. Numeric comparison applies to `preconditions` and router routes. See [Numeric Comparison](/writing-workflows/control-flow#numeric-comparison)
+- The `num:` numeric-comparison prefix is **not** supported here and is rejected when the workflow loads. Matching here reads one line at a time, while a numeric comparison reads a whole value. Numeric comparison applies to `preconditions` and router routes. See [Numeric Comparison](/writing-workflows/control-flow#numeric-comparison). To match output that begins with `num:`, write it as a regex, such as `re:num:>=5`
 
 ### `mark_success`
 
