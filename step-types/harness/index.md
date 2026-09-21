@@ -29,8 +29,9 @@ Dagu has built-in support for the following providers. Each adapter is pre-confi
 | Droid | `droid` | `droid exec "<prompt>" [flags]` | Folded into the prompt |
 | Amp | `amp` | `amp -x "<prompt>" [flags]` | Piped to stdin |
 | DeepSeek Harness | `deepseek` | `dsh --profile headless [flags] "<prompt>"` | Folded into the prompt |
+| Kilo Code | `kilo` | `kilo run "<prompt>" --auto [flags]` | Piped to stdin |
 
-Codex enables `skip_git_repo_check` by default, Cursor defaults to `output_format: text`, and Goose defaults to `quiet: true`. Explicit values under `with` override these defaults. The `deepseek` adapter targets the official DeepSeek Harness `dsh` CLI in its headless profile; it does not select DeepSeek as another harness's model backend.
+Codex enables `skip_git_repo_check` by default, Cursor defaults to `output_format: text`, Goose defaults to `quiet: true`, and Kilo Code defaults to `auto: true` so the agent runs unattended. Explicit values under `with` override these defaults. The `deepseek` adapter targets the official DeepSeek Harness `dsh` CLI in its headless profile; it does not select DeepSeek as another harness's model backend.
 
 You can also define [custom harness definitions](#custom-harness-definitions) for any CLI agent. The [Hermes Agent guide](./hermes) is a complete custom-provider example.
 
