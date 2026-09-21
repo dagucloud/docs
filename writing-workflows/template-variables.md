@@ -144,6 +144,8 @@ Rules:
 - The consuming step must depend directly or transitively on the producing step.
 - Step output references do not create dependencies.
 
+The looser `${step_id.outputs}` form reads the payload a step published on its outputs channel, including payloads that are not objects, and accepts a JSON path with array indexes. A [`parallel` step](/writing-workflows/sub-dags#reading-child-outputs-without-capturing-the-aggregate) publishes an array of per-child outputs there, read as `${fanout.outputs}` or `${fanout.outputs[0].NAME}`. See [Outputs](/writing-workflows/outputs#json-outputs) for how this form differs from the strict one.
+
 ## Build File Paths
 
 In a `type: build` workflow, `${inputs.name}` resolves to a declared input's absolute final path. `${outputs.name}` resolves to a fresh staging path and is available only while the owning command or shell attempt executes. After a successful commit or reuse, `${steps.step_id.outputs.name}` exposes the final output path to dependencies.

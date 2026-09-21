@@ -102,6 +102,8 @@ Step output references read top-level declared output names. Nested output paths
 
 The separate `${<step_id>.output.<path>}` form reads into a step's captured JSON output and does accept a path, which is how a [decision step](/step-types/decision) exposes `${classify.output.answers.department.choice}`. It resolves against captured output rather than a declared output name, so the two forms are not interchangeable.
 
+The matching `${<step_id>.outputs<path>}` form reads into the payload a step published on its outputs channel, which need not be an object. A [`parallel` step](/writing-workflows/sub-dags#reading-child-outputs-without-capturing-the-aggregate) publishes an array there, so `${fanout.outputs}` is the whole array and `${fanout.outputs[0].NAME}` is one entry's value. Array indexes are valid in both path forms.
+
 ## Dependency Requirement
 
 Step output references do not create dependencies. The consuming step must depend directly or transitively on the producing step.

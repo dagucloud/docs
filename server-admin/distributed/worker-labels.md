@@ -93,6 +93,26 @@ Step-level `worker_selector` is only valid on actions that launch sub-DAGs:
 
 Setting `worker_selector` on an unsupported action produces a validation error.
 
+### Routing Each Parallel Item to Its Own Worker
+
+A step-level `worker_selector` resolves per child run on a [`parallel`](/writing-workflows/sub-dags#running-children-in-parallel) step, with the item available as `${ITEM}`, so one fan-out can pin each item to a different worker:
+
+```yaml
+steps:
+  - id: drain
+    action: dag.run
+    with:
+      dag: drain-host
+      params:
+        mode: safe
+    worker_selector:
+      host: ${ITEM}
+    parallel:
+      items: [server-a, server-b, server-c]
+```
+
+Items that resolve to identical child parameters and differ only by selector still become separate child runs, one per item.
+
 ## `worker_selector: local`
 
 Setting `worker_selector` to the string `"local"` (case-insensitive) forces the DAG to run on the main instance, regardless of the `default_execution_mode` setting. This sets `ForceLocal=true` in the dispatch decision.

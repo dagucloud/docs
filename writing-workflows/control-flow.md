@@ -208,7 +208,7 @@ steps:
     depends: split_chunks
 
   - id: reduce_results
-    run: echo "Chunk workers finished"
+    run: printf '%s\n' "${map_chunks.outputs}" | jq '[.[].ROWS | tonumber] | add'
     depends: map_chunks
 ---
 name: worker
@@ -217,8 +217,11 @@ params:
     default: ""
 steps:
   - id: process_chunk
-    run: echo "Processing ${params.chunk}"
+    run: ./process.sh "${params.chunk}"
+    output: ROWS
 ```
+
+`${map_chunks.outputs}` is the JSON array of each successful child's outputs, in item order, so the reduce step reads the mapped values directly instead of writing them to shared files. See [Reading Child Outputs](/writing-workflows/sub-dags#reading-child-outputs-without-capturing-the-aggregate) for the ordering and failure rules.
 
 ## Conditional Execution
 

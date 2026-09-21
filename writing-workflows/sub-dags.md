@@ -328,7 +328,47 @@ The captured aggregate is JSON:
     run: echo "${RESULTS.summary.succeeded} of ${RESULTS.summary.total} succeeded"
 ```
 
-`outputs` contains only the successful child runs, so its indexes do not line up with the item list. Do not infer item identity from array position; include the item in each child's own output instead.
+`results` follows `parallel.items` order. `outputs` follows the same order with the failed child runs removed, so `outputs[N]` is the Nth successful child rather than the Nth item. When every child succeeds the two line up; when any child fails, later indexes shift. Include the item in each child's own output when a consumer must identify it regardless of failures.
+
+### Reading Child Outputs Without Capturing the Aggregate
+
+A finished `parallel` step also publishes the collected child outputs on its step outputs channel, so a later step in the same DAG reads them without capturing and parsing the aggregate:
+
+```yaml
+steps:
+  - id: fanout
+    action: dag.run
+    with:
+      dag: file-processor
+      params:
+        file: ${ITEM}
+    parallel:
+      items: [a.csv, b.csv, c.csv]
+
+  - id: reduce
+    depends: fanout
+    run: |
+      echo "all: ${fanout.outputs}"
+      echo "first: ${fanout.outputs[0].PROCESSED}"
+```
+
+`${fanout.outputs}` is a JSON array of per-child output maps:
+
+```json
+[{ "PROCESSED": "a.csv" }, { "PROCESSED": "b.csv" }, { "PROCESSED": "c.csv" }]
+```
+
+Rules:
+
+| Rule | Behavior |
+|------|----------|
+| Ordering | Follows `parallel.items`. A child that more than one item produces takes the position of the first of those items. |
+| Failed children | Contribute no entry, so indexes shift as described above. |
+| Empty outputs | A successful child that published nothing contributes `{}`, keeping the remaining positions stable. |
+| Contents | Merges the child's `output:` variables with values it published through `outputs.write` or `stdout.outputs`. |
+| Scope | Readable only inside the DAG that declares the step. The array does not merge into the run's collected outputs or into a calling DAG's `${step.outputs}`, because it has no names to merge under. |
+
+The channel stays empty when no child run succeeds, and when the collected array exceeds [`max_output_size`](/writing-workflows/data-flow#output-size). Dagu logs a warning and the step still succeeds. An empty channel leaves `${fanout.outputs}` in the command as literal text, which most shells reject as a bad substitution, so guard the reference or capture the aggregate instead when children are expected to fail.
 
 Discovering work at runtime uses the same shape:
 
