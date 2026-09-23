@@ -417,6 +417,7 @@ const fullSidebar = [
             ],
           },
           { text: "LLM", link: "/step-types/llm/" },
+          { text: "Browser", link: "/step-types/browser" },
           {
             text: "SQL",
             link: "/step-types/sql/",
