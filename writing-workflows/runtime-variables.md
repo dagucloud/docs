@@ -34,7 +34,7 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.paths.step_output_file}` | Current step attempt after output publication is prepared | `DAGU_OUTPUT_FILE` |
 | `${context.profile.name}` | Runs with a selected runtime profile | None |
 | `${context.profile.resolved_at}` | Runs with a resolved runtime profile timestamp | None |
-| `${context.pushback.iteration}` | Steps re-executed after approval push-back | `DAG_PUSHBACK_ITERATION` |
+| `${context.pushback.iteration}` | Steps re-executed after an approval or human-task push-back | `DAG_PUSHBACK_ITERATION` |
 | `${context.pushback.previous_stdout_file}` | Rewound steps that had stdout before reset | `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` |
 
 Unknown fields under the `context` namespace are preserved at runtime. Inspection surfaces can report them with an `unknown_context_field` notice. Text outside supported Dagu-owned namespaces, such as `${not.a.supported.reference}`, is preserved as ordinary string content.
@@ -46,7 +46,7 @@ Webhook payloads, webhook headers, and parameter JSON payloads are object-valued
 ## Availability
 
 - **Step execution**: Every step receives the run-level variables plus a step-specific name and log file paths while it executes.
-- **Push-back re-executions**: Steps re-executed because of approval push-back also receive `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the provided push-back inputs as individual environment variables. If the step had stdout before it was rewound, Dagu also provides `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`.
+- **Push-back re-executions**: Steps re-executed because of an approval or [human-task](/writing-workflows/human-tasks#requesting-changes) push-back also receive `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the provided push-back inputs as individual environment variables. If the step had stdout before it was rewound, Dagu also provides `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`.
 - **Lifecycle handlers**: `onInit`, `onExit`, `onSuccess`, `onFailure`, `onAbort`, and `onWait` handlers inherit the same variables. They additionally receive the `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for human input.
 - **Nested contexts**: When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
 
@@ -70,8 +70,8 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_WIKI_DIR` | All steps & handlers | Absolute path to the current DAG's Wiki page directory. Named-workspace DAGs include the workspace directory. | `/opt/dagu/dags/wiki/platform/daily-backup` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory during distributed execution. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
-| `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
-| `DAG_PUSHBACK_ITERATION` | Steps re-executed after approval push-back only | Current push-back iteration as a plain integer string. Not set on the initial execution. | `2` |
+| `DAG_PUSHBACK` | Steps re-executed after an approval or human-task push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
+| `DAG_PUSHBACK_ITERATION` | Steps re-executed after an approval or human-task push-back only | Current push-back iteration as a plain integer string. Not set on the initial execution. | `2` |
 | `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` | Rewound steps that had stdout before reset | Absolute path to the previous stdout log for the current step. Dagu passes the path instead of inlining stdout because logs can be large. | `/var/log/dagu/report/draft.stdout.log` |
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. | `{"branch":"main","commit":"abc123"}` |
 | `WEBHOOK_HEADERS` | Webhook-triggered runs only | JSON object containing the allow-listed request headers configured by `webhook.forward_headers`. Header names are lowercase and values are arrays of strings. | `{"x-github-event":["push"]}` |
@@ -225,7 +225,7 @@ steps:
 
 ## Push-back Context (`DAG_PUSHBACK`)
 
-`DAG_PUSHBACK` is set only when a step is executing as part of a push-back / rewind cycle for an `approval` step.
+`DAG_PUSHBACK` is set only when a step is executing as part of a push-back / rewind cycle for an `approval` step or a `human.task` with `with.push_back`. For a human task, the inputs are its declared feedback properties.
 
 - It is not set on the first execution before any push-back happens.
 - It is available to every step that was reset and later re-executed within the rewound scope.

@@ -37,7 +37,7 @@ This keeps client instructions stable and avoids exposing every REST endpoint as
 
 The deprecated `dagu_create_doc` and `dagu_edit_doc` prompts forward to the Wiki prompts.
 
-The tool boundary does not include human-task completion. MCP can author and start a root DAG containing [`action: human.task`](/writing-workflows/human-tasks), locally or on a distributed worker, and it can read the resulting run state. Complete a waiting task through the Web UI, REST API, or local `dagu human-task complete` command. Human tasks are not supported in sub-DAGs.
+The tool boundary does not include human-task completion or push-back. MCP can author and start a root DAG containing [`action: human.task`](/writing-workflows/human-tasks), locally or on a distributed worker, and it can read the resulting run state. Complete or push back a waiting task through the Web UI, REST API, or local `dagu human-task complete` and `dagu human-task push-back` commands. Human tasks are not supported in sub-DAGs.
 
 ## Resource Boundary
 

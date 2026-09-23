@@ -94,10 +94,10 @@ Human tasks and [approval gates](/writing-workflows/approval) both pause a DAG, 
 |---|---|---|
 | Execution | Standalone processless step | Runs a command or action first, then waits |
 | Collected values | Typed form values published as step outputs | Approval inputs exposed as environment variables |
-| Resolution | Complete | Approve, reject, or push back and rewind |
+| Resolution | Complete, or push back and rewind with `with.push_back` | Approve, reject, or push back and rewind |
 | Completion surfaces | Web UI, REST API, local CLI | Web UI and REST API |
 
-Use a human task to collect data or require an acknowledgement before later work starts. Use approval when a person must review the output of an executable step and may reject it or send it back for revision.
+Use a human task to collect data or require an acknowledgement before later work starts. A human task with [`with.push_back`](#requesting-changes) can also send the work back to an upstream step with structured feedback. Use approval when a person must review the output of the executable step it is attached to and may reject it.
 
 ## Step ID and Output References
 
@@ -136,6 +136,52 @@ steps:
 ```
 
 The resolved prompt is stored with the run, so the Web UI and API show the text that the operator actually saw.
+
+## Artifacts
+
+`with.artifacts` is an optional list of artifact paths to show the operator as review context. Each path is relative to the run's artifact directory, and the Web UI renders a preview of each one beside the prompt:
+
+```yaml
+steps:
+  - id: test
+    run: ./run-tests.sh
+    stdout:
+      artifact: reports/test-report.html
+
+  - id: review
+    action: human.task
+    depends: [test]
+    with:
+      prompt: The test report is attached. Approve the release?
+      artifacts:
+        - reports/test-report.html
+```
+
+Paths are value-resolved when the task opens, from the same scope as the prompt, so an entry can name an artifact that a dependency produced:
+
+```yaml
+params:
+  - name: environment
+    default: production
+
+steps:
+  - id: review
+    action: human.task
+    with:
+      prompt: Review the deployment plan
+      artifacts:
+        - "plans/${params.environment}.md"
+```
+
+Rules:
+
+- Each path must be relative. Absolute paths, `~`, and parent-directory (`..`) segments are rejected.
+- The resolved path is checked again under the same rules, so a parameter cannot inject `..` or an absolute path. A path that resolves to an unsafe value fails the step without opening the task.
+- Two entries that resolve to the same path are shown once.
+- Referencing an artifact does not enable artifact storage. A step still has to write it, through `stdout.artifact` or an [`artifact.*` action](/writing-workflows/artifacts).
+- Referenced artifacts are review context only. A missing or unavailable artifact does not block completion or change resume behavior.
+
+`dagu status` lists the resolved paths alongside the prompt.
 
 ## Form Schema
 
@@ -233,6 +279,81 @@ form:
 The canonical submitted input and generated step outputs are subject to the DAG's `max_output_size` limit.
 
 An undeclared property accepted through `additionalProperties: true` is stored with the submitted input but does not become a step output.
+
+## Requesting Changes
+
+Add `with.push_back` when the reviewer may send the work back instead of completing the task. A push-back reruns an upstream step and every step after it with the reviewer's feedback, then opens the task again.
+
+```yaml
+steps:
+  - id: implement
+    action: harness.run
+    with:
+      provider: codex
+      prompt: Implement the requested change
+
+  - id: test
+    depends: [implement]
+    run: make test
+
+  - id: review
+    depends: [test]
+    action: human.task
+    with:
+      prompt: Review the implementation
+      push_back:
+        rewind_to: implement
+        form:
+          type: object
+          required: [feedback]
+          properties:
+            feedback:
+              type: string
+              title: What should change?
+
+  - id: publish
+    depends: [review]
+    run: ./publish.sh
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `rewind_to` | Yes | ID or name of the step that runs again first. It must be a step the task depends on directly or transitively. |
+| `form` | No | Flat feedback form with the same rules as `with.form`, except that `additionalProperties` must stay `false`. Omit it when the reviewer only sends the work back. |
+
+In the Web UI, select **Request changes**, fill in the feedback form, and submit it. From the CLI:
+
+```bash
+dagu human-task push-back \
+  --run-id <run-id> \
+  --step review \
+  --input feedback="Add coverage for the empty input case" \
+  <root-dag-name>
+```
+
+A push-back performs these operations in order:
+
+1. Validate the feedback against `push_back.form`.
+2. Reset `rewind_to` and every step that depends on it, including the task, to `Not Started`. Their previous results are discarded, including the input of completed human tasks and the decisions of approval steps among them.
+3. Record the push-back iteration, the feedback, and the push-back history on every reset step.
+4. Queue the same DAG run. If another step is still waiting, the run is queued only when the rewind target can run and no step is failed, aborted, rejected, or retrying.
+
+Each rewound step receives the feedback through the same push-back context as [approval push-back](/writing-workflows/approval#push-back-environment):
+
+- `DAG_PUSHBACK_ITERATION` and `${context.pushback.iteration}`
+- `DAG_PUSHBACK`, a JSON payload with the latest feedback and the full history
+- one environment variable per feedback property, such as `feedback`
+- `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`, when the step produced stdout before
+
+`harness.run` and `chat.completion` steps also receive the feedback in their prompt, so an AI step can revise its work without extra wiring. Feedback values are strings; `integer`, `number`, and `boolean` properties are passed as JSON text.
+
+When the rewound steps finish, the task opens again with its prompt and artifacts resolved anew, so it shows the new results. The reviewer can complete it or push it back again. The Web UI shows the iteration and the earlier push-backs on the task, and `dagu status` prints the iteration.
+
+Pass the iteration you reviewed to avoid pushing back a task that already reopened, for example `--expected-iteration 0` for the first review. The Web UI does this automatically. A mismatch fails with a conflict and changes nothing.
+
+If Dagu cannot queue the run, the push-back is undone, the task stays open, and the same request can be repeated.
+
+Undeclared feedback is rejected because every feedback property becomes an environment variable of the rewound steps.
 
 ## Examples
 
@@ -430,7 +551,7 @@ The command only supports the local CLI context. It validates the submitted valu
 - If enqueueing fails after the input is stored, use **Retry queue**, call the resume endpoint, or repeat the identical CLI completion command. The form does not need to be entered again.
 - Retrying the whole DAG or an individual human-task step cannot bypass a pending human-task checkpoint.
 
-Human tasks have no reject, push-back, or rewind operation. Stop the DAG if it should not continue.
+Human tasks have no reject operation. Stop the DAG if it should not continue, or use [push-back](#requesting-changes) to send the work back.
 
 ## Scheduling and Distributed Execution
 
@@ -451,15 +572,15 @@ A human task cannot be combined with executable or process-oriented step feature
 - stdout, stderr, log, `output`, `output_schema`, or authored `outputs` settings
 - mail-on-error settings
 
-Human tasks are not allowed in sub-DAGs, inside `foreach.steps`, or in lifecycle handlers.
+Human tasks are not allowed in sub-DAGs, inside `foreach.steps`, or in lifecycle handlers. `with.push_back` is not allowed in `type: agent` DAGs.
 
-`dagu dry` resolves the prompt and completes the human task without waiting. This validates the workflow without requiring operator input.
+`dagu dry` resolves the prompt and artifact paths and completes the human task without waiting. This validates the workflow without requiring operator input.
 
-Human-task completion is available through the Web UI, REST API, and local CLI. MCP can author, start, and inspect runs containing human tasks, but it does not currently expose a completion operation.
+Human-task completion and push-back are available through the Web UI, REST API, and local CLI. MCP can author, start, and inspect runs containing human tasks, but it does not currently expose a completion or push-back operation.
 
 ## See Also
 
-- [REST API](/web-ui/api#human-task-endpoints): Completion and queue-recovery endpoints
+- [REST API](/web-ui/api#human-task-endpoints): Completion, push-back, and queue-recovery endpoints
 - [CLI Reference](/getting-started/cli#human-task-complete): Local completion command
 - [Outputs](/writing-workflows/outputs): Referencing values in later steps
 - [Approval](/writing-workflows/approval): Reviewing executable step output with approve, reject, and push-back

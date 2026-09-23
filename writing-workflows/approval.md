@@ -8,8 +8,8 @@ If the workflow should wait without running a command first, use a [human task](
 |----------|------------|---------------|
 | Definition | Standalone `action: human.task` step | `approval` attached to an executable step |
 | Before waiting | Runs no process | Runs the step first |
-| Result | Completion succeeds the step | Approve, reject, or push back |
-| Rewind | Not supported | Supported with `rewind_to` |
+| Result | Complete, or push back when `with.push_back` is set | Approve, reject, or push back |
+| Rewind | Supported with `with.push_back.rewind_to` | Supported with `rewind_to` |
 | Collected values | Typed form properties become step outputs | Inputs become approval or push-back environment values |
 
 ## Usage
@@ -121,7 +121,7 @@ steps:
 
 Push-back resets a waiting step to `Not Started` and re-executes it. By default, the approval step itself is rerun. If `approval.rewind_to` is configured, Dagu resets that earlier step and all of its transitive dependents instead. This is useful when a step's output needs revision and the reviewer wants to restart from an earlier preparation step.
 
-Push-back is only available on steps with the `approval` field.
+On executable steps, push-back is only available with the `approval` field. A [human task](/writing-workflows/human-tasks#requesting-changes) can push back through `with.push_back`, which uses the same reset and push-back context.
 
 ### How Push-back Works
 

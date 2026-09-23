@@ -1612,7 +1612,7 @@ Manually updates a step's execution status.
 
 ## Human Task Endpoints
 
-These endpoints complete standalone [`action: human.task`](/writing-workflows/human-tasks) steps. They operate on root DAG runs regardless of whether the run executes locally or on a distributed worker. The caller needs permission to execute DAGs in the run's workspace.
+These endpoints complete or push back standalone [`action: human.task`](/writing-workflows/human-tasks) steps. They operate on root DAG runs regardless of whether the run executes locally or on a distributed worker. The caller needs permission to execute DAGs in the run's workspace.
 
 After completion, DAG-run node responses expose the actor as `humanTaskCompletedBy` and `humanTaskCompletedById`. These fields may be absent on older runs or when authentication is disabled.
 
@@ -1694,10 +1694,68 @@ The operation is safe to retry. `queued` is `false` when the retry is already qu
 - `409`: Manual steps are still waiting and no step is ready to run, or the run has no completed human-task checkpoint to resume.
 - `503`: The queue attempt failed again and remains retryable.
 
+### Push Back Human Task
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/human-tasks/{stepId}/push-back`
+
+Sends a waiting human task that declares [`with.push_back`](/writing-workflows/human-tasks#requesting-changes) back to its rewind target. Dagu validates the feedback against the stored push-back form, then atomically resets the rewind target and every step that depends on it, including the task, with the feedback as push-back context. The request body is the feedback object itself, not an `inputs` wrapper.
+
+**Query Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `expectedIteration` | integer | Optional. Push-back iteration of the task the caller reviewed, `0` before the first push-back. A different current iteration returns `409` without changes. |
+
+**Request Body**:
+
+```json
+{
+  "feedback": "Add coverage for the empty input case"
+}
+```
+
+Send `{}` when the task declares no push-back form. The request body is limited to 16 MiB.
+
+**Response (200)**:
+
+```json
+{
+  "dagName": "review-loop",
+  "dagRunId": "20260720_120000",
+  "stepId": "review",
+  "rewindTo": "implement",
+  "iteration": 1,
+  "queued": true,
+  "resumeRequested": true
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `dagName` | string | Name of the root DAG. |
+| `dagRunId` | string | Concrete DAG-run ID. |
+| `stepId` | string | Explicit ID of the pushed-back human-task step. |
+| `rewindTo` | string | Name of the step that runs again first. |
+| `iteration` | integer | Push-back iteration this request recorded. |
+| `queued` | boolean | Whether this request durably added the DAG-run retry to the queue. |
+| `resumeRequested` | boolean | Whether the run was ready to resume, whether this request or a concurrent one queued it. `false` when the run keeps waiting for another step. |
+
+Push-back is not idempotent: each successful request starts a new iteration. Send `expectedIteration` so that a repeated or stale request fails instead of pushing back a task that already reopened.
+
+**Error Responses**:
+
+- `400`: The body is not a JSON object, does not satisfy the stored push-back form, or the task declares no `with.push_back`.
+- `404`: The DAG run or human-task step does not exist or is not visible to the caller.
+- `409`: The task is not open, is at a different push-back iteration, or the run changed concurrently.
+- `413`: The request body exceeds 16 MiB.
+- `503`: The DAG-run retry could not be queued, so the push-back was undone. The task stays open and the same request can be retried.
+
+A `503` with error code `human_task_resume_failed` includes `pushBackApplied: false` in `details`.
+
 ## Approval Endpoints
 
 ::: info Separate manual-step APIs
-The approve, reject, and push-back endpoints below resolve executable steps configured with `approval`. They do not operate on `action: human.task`.
+The approve, reject, and push-back endpoints below resolve executable steps configured with `approval`. They do not operate on `action: human.task`; use [Push Back Human Task](#push-back-human-task) instead.
 :::
 
 DAG-run node responses expose actor names and IDs in `approvedBy`/`approvedById`, `rejectedBy`/`rejectedById`, and each `pushBackHistory` entry's `by`/`byId`. These fields may be absent on older runs or when authentication is disabled.

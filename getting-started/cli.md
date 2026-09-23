@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`
 
 ## Global Options
 
@@ -246,6 +246,33 @@ dagu human-task complete \
 `--input` and `--inputs-json` are mutually exclusive. Omitting both submits an empty object. The command matches `--step` against the explicit step `id`, not its display name.
 
 The command is local-only and rejects remote CLI contexts, but the target root DAG run may have executed locally or on a distributed worker. Human tasks are not supported in sub-DAGs. After the last manual step is completed, every run is enqueued; completion never starts it immediately. Keep the scheduler running so the queued run can resume. See [Human Tasks](/writing-workflows/human-tasks#completing-a-task-from-the-cli) for form validation, persistence, idempotency, and recovery behavior.
+
+### `human-task push-back`
+
+Send a waiting [`human.task`](/writing-workflows/human-tasks#requesting-changes) step that declares `with.push_back` back to its rewind target. The rewind target and every step after it run again with the feedback, then the task opens again.
+
+```bash
+dagu human-task push-back [options] DAG_NAME
+```
+
+**Options:**
+
+- `--run-id, -r` - Root DAG-run ID containing the waiting task (required)
+- `--step` - Explicit human-task step ID (required)
+- `--input key=value` - String feedback value, repeatable for multiple properties
+- `--inputs-json object` - Typed feedback as one JSON object
+- `--expected-iteration n` - Fail unless the task is at this push-back iteration (`0` before the first push-back)
+
+```bash
+dagu human-task push-back \
+  --run-id review-42 \
+  --step review \
+  --input feedback="Add coverage for the empty input case" \
+  --expected-iteration 0 \
+  review-loop
+```
+
+Feedback is validated against `with.push_back.form` with the same parsing rules as completion. The command prints `Pushed back human task <step> to <target>;` followed by whether the DAG-run was queued for resume or remains waiting. If the run cannot be queued, the push-back is undone and the command can be repeated. Like `human-task complete`, the command is local-only.
 
 ### `status`
 
