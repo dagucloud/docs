@@ -103,7 +103,7 @@ for the general step-level contract.
 
 ## Approval Push-back
 
-Harness steps automatically receive approval push-back context when they are rewound and re-executed. Dagu appends a push-back context block to the prompt with:
+Harness steps automatically receive push-back context from an approval or a [human task](/writing-workflows/human-tasks#requesting-changes) when they are rewound and re-executed. Dagu appends a push-back context block to the prompt with:
 
 - the current push-back iteration
 - reviewer-provided feedback inputs, such as `FEEDBACK`

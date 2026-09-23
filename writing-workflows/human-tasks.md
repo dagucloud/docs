@@ -336,7 +336,7 @@ A push-back performs these operations in order:
 1. Validate the feedback against `push_back.form`.
 2. Reset `rewind_to` and every step that depends on it, including the task, to `Not Started`. In a `type: build` DAG, a step that consumes a declared output path of a reset step counts as depending on it. Their previous results are discarded, including the input of completed human tasks and the decisions of approval steps among them.
 3. Record the push-back iteration, the feedback, and the push-back history on every reset step. The new iteration is one more than the highest iteration among the reset steps, so a step's iteration only increases.
-4. Store the push-back, then queue the same DAG run. If another step is still waiting, the run is queued only when the rewind target can run and no step is failed, aborted, rejected, or retrying.
+4. Store the push-back, then queue the same DAG run. If another step is still waiting, the run is queued only when the rewind target can run, declares no build `inputs`, and no step is failed, aborted, rejected, or retrying. Otherwise the push-back stays stored and the run is queued once no manual step is waiting.
 
 Each rewound step receives the feedback through the same push-back context as [approval push-back](/writing-workflows/approval#push-back-environment):
 
@@ -353,7 +353,7 @@ When the rewound steps finish, the task opens again with its prompt and artifact
 
 Pass the iteration you reviewed to avoid pushing back a task that already reopened, for example `--expected-iteration 0` for the first review. The Web UI does this automatically. A mismatch fails with a conflict and changes nothing.
 
-The push-back is stored before the run is queued. If queueing fails, the run stays `Waiting` with its resume pending: select **Retry queue** in the Web UI, call the [resume endpoint](/web-ui/api#retry-human-task-resume-queue), or repeat the identical push-back. Until the task opens again, an identical repeat only retries the queue, and a push-back with different feedback is rejected with a conflict.
+The push-back is stored before the run is queued. If queueing fails, the run stays `Waiting` with its resume pending: select **Retry queue** in the Web UI, call the [resume endpoint](/web-ui/api#retry-human-task-resume-queue), or repeat the identical push-back. Until the task opens again, an identical repeat, including the same expected iteration, only retries the queue, and a push-back with different feedback is rejected with a conflict.
 
 Undeclared feedback is rejected because every feedback property becomes an environment variable of the rewound steps.
 

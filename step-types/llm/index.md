@@ -165,7 +165,7 @@ The completed session is saved with the DAG run, including the provider, model, 
 - Only the first system message is kept when inherited histories contain several.
 - Retries continue with the session already attached to the DAG run.
 
-When [approval push-back](/writing-workflows/approval#push-back-environment) re-executes a chat step, Dagu restores the previous conversation and appends the reviewer feedback as the next user message; the workflow does not need to wire `${FEEDBACK}` itself.
+When [approval push-back](/writing-workflows/approval#push-back-environment) or [human-task push-back](/writing-workflows/human-tasks#requesting-changes) re-executes a chat step, Dagu restores the previous conversation and appends the reviewer feedback as the next user message; the workflow does not need to wire `${FEEDBACK}` itself.
 
 ## Configuration
 

@@ -326,7 +326,7 @@ steps:
     run: ./deploy.sh '${steps.release_settings.outputs.environment}'
 ```
 
-The Web UI renders the form, and submitted values become step outputs. See [Human Tasks](/writing-workflows/human-tasks) for acknowledgement-only tasks, richer schemas, API and CLI completion, and queue-based recovery.
+The Web UI renders the form, and submitted values become step outputs. See [Human Tasks](/writing-workflows/human-tasks) for acknowledgement-only tasks, richer schemas, API and CLI completion, push-back, and queue-based recovery.
 
 ### Custom Actions
 

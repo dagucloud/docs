@@ -245,7 +245,7 @@ dagu human-task complete \
 
 `--input` and `--inputs-json` are mutually exclusive. Omitting both submits an empty object. The command matches `--step` against the explicit step `id`, not its display name.
 
-The command is local-only and rejects remote CLI contexts, but the target root DAG run may have executed locally or on a distributed worker. Human tasks are not supported in sub-DAGs. After the last manual step is completed, every run is enqueued; completion never starts it immediately. Keep the scheduler running so the queued run can resume. See [Human Tasks](/writing-workflows/human-tasks#completing-a-task-from-the-cli) for form validation, persistence, idempotency, and recovery behavior.
+The command is local-only and rejects remote CLI contexts, but the target root DAG run may have executed locally or on a distributed worker. Human tasks are not supported in sub-DAGs. Each resume enqueues the run; completion never starts it immediately. Keep the scheduler running so the queued run can resume. See [Human Tasks](/writing-workflows/human-tasks#completing-a-task-from-the-cli) for form validation, persistence, idempotency, and recovery behavior.
 
 ### `human-task push-back`
 

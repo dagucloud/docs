@@ -1674,7 +1674,7 @@ A `503` with error code `human_task_resume_failed` includes `completionStored: t
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/human-tasks/resume`
 
-Queues a recoverable human-task checkpoint after completion was stored but the original enqueue attempt failed. This endpoint has no request body and never needs the previously submitted form values.
+Queues a recoverable human-task checkpoint after a completion or push-back was stored but the original enqueue attempt failed. This endpoint has no request body and never needs the previously submitted form values or feedback.
 
 **Response (200)**:
 
@@ -1691,7 +1691,7 @@ The operation is safe to retry. `queued` is `false` when the retry is already qu
 **Error Responses**:
 
 - `404`: The DAG run does not exist or is not visible to the caller.
-- `409`: Manual steps are still waiting and no step is ready to run, or the run has no completed human-task checkpoint to resume.
+- `409`: Manual steps are still waiting and no step is ready to run, or the run has no completed human-task checkpoint or stored push-back to resume.
 - `503`: The queue attempt failed again and remains retryable.
 
 ### Push Back Human Task
@@ -1740,7 +1740,7 @@ Send `{}` when the task declares no push-back form. The request body is limited 
 | `iteration` | integer | Push-back iteration the push-back recorded. |
 | `alreadyPushedBack` | boolean | Whether identical feedback had already pushed the task back and the task has not opened again. |
 | `queued` | boolean | Whether this request durably added the DAG-run retry to the queue. |
-| `resumeRequested` | boolean | Whether the run was ready to resume, whether this request or a concurrent one queued it. `false` when the run keeps waiting for another step. |
+| `resumeRequested` | boolean | Whether the run was ready to resume, whether this request or a concurrent one queued it. `false` when the run keeps waiting for another step or has already left `Waiting`. |
 
 The push-back is stored before the run is queued. Until the task opens again, an identical repeated request only retries the queue and returns `alreadyPushedBack: true`; different feedback returns `409`. After the task reopens, a new request starts a new iteration, so send `expectedIteration` to make a stale request fail instead of pushing back a task that already reopened. Feedback is limited to 16 KiB as JSON.
 
