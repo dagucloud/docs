@@ -63,7 +63,8 @@ steps:
       url: https://portal.vendor.com/billing
       browser:
         profile: vendor
-        allowed_domains: [portal.vendor.com]
+        # Every host the site loads from, including CDNs and sign-in pages.
+        allowed_domains: ["*.vendor.com"]
       variables:
         user: ${VENDOR_USER}
         password: ${VENDOR_PASSWORD}
@@ -119,7 +120,16 @@ Any operation can also set:
 | `selector` | `when: {selector: "#cookie-banner"}` | A CSS selector matches a visible element. |
 | `url` | `expect: {url: /billing}` | The current URL contains it. |
 
-Fixed checks (`text`, `selector`, `url`) make no model call and give the same answer on every run, so prefer them for monitoring. A fixed `expect` is retried until the operation timeout, because the page may still be updating.
+Fixed checks (`text`, `selector`, `url`) make no model call and give the same answer on every run, so prefer them for monitoring. A `selector` check holds when any matching element is visible.
+
+A fixed `when` reads the page once, right after the previous operation. When the page may still be loading, add `within` so the check keeps reading until the condition holds or the window ends:
+
+```yaml
+- ask: {prompt: Enter the code, as: otp}
+  when: {text: Verification code, within: 10s}
+```
+
+A fixed `expect` keeps reading until `within`, or the operation timeout when `within` is not set.
 
 ## Model
 
@@ -192,7 +202,7 @@ Browser steps store files as [run artifacts](/writing-workflows/artifacts) under
 | `each` | After every operation, plus the `final` ones. |
 | `never` | None. `screenshot` operations still save. |
 
-Files the page downloads are saved under `browser/<step id>/downloads/` with the name the site suggests. After each operation the step waits for running downloads, up to that operation's timeout, and before it ends it waits a few seconds for a late download to begin. A canceled download, or one that does not finish in time, fails the step. Downloaded files appear in the timeline.
+Files the page downloads are saved under `browser/<step id>/downloads/` with the name the site suggests. Only `act` and `goto` start downloads. Once one has run, the step waits for running downloads after every operation, and before it ends or pauses for an `ask` it waits a few seconds for a late download to begin. A download may run for the longest timeout of the acts and gotos run so far; give a large export's act a long `timeout`. A canceled download, or one still running at that timeout, fails the step. Downloaded files appear in the timeline.
 
 With `artifacts.enabled: false`, no screenshots are saved, a `screenshot` operation fails, and the browser refuses downloads.
 
@@ -230,7 +240,7 @@ do:
       prompt: Enter the 6-digit code sent to your phone
       as: otp
       timeout: 15m
-    when: {text: Verification code}
+    when: {text: Verification code, within: 10s}
   - act: Type %otp% into the code field and submit
     when: {text: Verification code}
 ```
@@ -244,8 +254,8 @@ Answers are stored in the run's history, like other human input. Use `ask` for s
 ## Safety
 
 - Page content is untrusted and is sent to the model. A hostile page, or content other users posted on an allowed site, can try to steer an `act`, for example into typing `%password%` into the wrong field. Use variables only on pages you trust, keep instructions specific, and follow sensitive acts with an `expect`.
-- `browser.allowed_domains` limits every request the page makes, including scripts, images, and API calls, so list the hosts a site loads resources from. `example.com` matches only that host; `*.example.com` matches its subdomains but not `example.com`.
-- Dagu rejects a `goto` or `url` outside the list, and after every operation fails the step if a redirect or a click left the allowed domains.
+- The browser runtime applies `browser.allowed_domains` to the page's HTTP(S) requests, including scripts, images, and API calls, so list the CDN and sign-in hosts a site loads from. WebSocket connections are not covered, and the runtime's check has a known bypass. `example.com` matches only that host; `*.example.com` matches its subdomains but not `example.com`.
+- Dagu itself checks only the page URL: it rejects a `goto` or `url` outside the list, and after every operation fails the step if a redirect or a click left the allowed domains.
 - The browser runs with the permissions of the Dagu process.
 
 ## Distributed Mode
@@ -264,7 +274,7 @@ The step's **Agent** tab shows each operation with its status, token use, screen
 | `browser.executable` | Chrome or Chromium binary. |
 | `browser.viewport` | `{width, height}` in pixels. |
 | `browser.proxy` | Proxy server URL. Authenticated proxies are not supported. |
-| `browser.allowed_domains` | Hosts the page may reach. |
+| `browser.allowed_domains` | Hosts the page's HTTP(S) requests may reach. |
 | `browser.screenshots` | `on_failure`, `final`, `each`, or `never`. |
 | `browser.profile` | Persistent profile name. |
 
