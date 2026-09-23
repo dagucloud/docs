@@ -1725,6 +1725,7 @@ Send `{}` when the task declares no push-back form. The request body is limited 
   "stepId": "review",
   "rewindTo": "implement",
   "iteration": 1,
+  "alreadyPushedBack": false,
   "queued": true,
   "resumeRequested": true
 }
@@ -1736,21 +1737,22 @@ Send `{}` when the task declares no push-back form. The request body is limited 
 | `dagRunId` | string | Concrete DAG-run ID. |
 | `stepId` | string | Explicit ID of the pushed-back human-task step. |
 | `rewindTo` | string | Name of the step that runs again first. |
-| `iteration` | integer | Push-back iteration this request recorded. |
+| `iteration` | integer | Push-back iteration the push-back recorded. |
+| `alreadyPushedBack` | boolean | Whether identical feedback had already pushed the task back and the task has not opened again. |
 | `queued` | boolean | Whether this request durably added the DAG-run retry to the queue. |
 | `resumeRequested` | boolean | Whether the run was ready to resume, whether this request or a concurrent one queued it. `false` when the run keeps waiting for another step. |
 
-Push-back is not idempotent: each successful request starts a new iteration. Send `expectedIteration` so that a repeated or stale request fails instead of pushing back a task that already reopened.
+The push-back is stored before the run is queued. Until the task opens again, an identical repeated request only retries the queue and returns `alreadyPushedBack: true`; different feedback returns `409`. After the task reopens, a new request starts a new iteration, so send `expectedIteration` to make a stale request fail instead of pushing back a task that already reopened. Feedback is limited to 16 KiB as JSON.
 
 **Error Responses**:
 
-- `400`: The body is not a JSON object, does not satisfy the stored push-back form, or the task declares no `with.push_back`.
+- `400`: The body is not a JSON object, does not satisfy the stored push-back form, exceeds 16 KiB as recorded feedback, or the task declares no `with.push_back`.
 - `404`: The DAG run or human-task step does not exist or is not visible to the caller.
-- `409`: The task is not open, is at a different push-back iteration, or the run changed concurrently.
+- `409`: The task is not open, is at a different push-back iteration, was already pushed back with different feedback, or the run changed concurrently.
 - `413`: The request body exceeds 16 MiB.
-- `503`: The DAG-run retry could not be queued, so the push-back was undone. The task stays open and the same request can be retried.
+- `503`: The push-back was stored, but the DAG-run retry could not be queued.
 
-A `503` with error code `human_task_resume_failed` includes `pushBackApplied: false` in `details`.
+A `503` with error code `human_task_resume_failed` includes `pushBackStored: true` and `resumePending: true` in `details`. Retry the same request or the [resume endpoint](#retry-human-task-resume-queue); neither pushes the task back again.
 
 ## Approval Endpoints
 

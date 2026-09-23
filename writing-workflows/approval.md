@@ -164,7 +164,9 @@ Every step re-executed because of push-back receives:
 - `DAG_PUSHBACK_ITERATION`, the current push-back count as a plain integer string
 - `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`, when the current step had a stdout log before it was reset
 
-If the current step declares `approval.input`, only those declared keys are exposed on that step. Steps without an input allowlist receive all provided push-back keys.
+If the current step declares `approval.input`, only those declared keys from an approval push-back are exposed on that step. Steps without an input allowlist receive all provided push-back keys. Feedback from a [human-task push-back](/writing-workflows/human-tasks#requesting-changes) holds only declared feedback properties and reaches every rewound step.
+
+Push-back inputs are passed as environment variables, so the inputs of one push-back, encoded as one JSON object, are limited to 16 KiB. A larger push-back is rejected with `400` before the run changes.
 
 For `action: chat.completion` and `action: harness.run`, Dagu also passes the push-back context directly to the executor. This means reviewer feedback is incorporated without adding DAG glue code that references `${FEEDBACK}` manually. If `approval.rewind_to` restarts an upstream AI step, that rewound AI step receives the context even if it does not declare its own `approval`.
 

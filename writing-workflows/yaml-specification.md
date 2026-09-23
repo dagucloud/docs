@@ -989,7 +989,7 @@ steps:
 | `with.prompt` | string | Yes | Non-empty operator instructions. Value references are resolved when the task opens. |
 | `with.form` | object | No | Flat typed input schema. Omit for acknowledgement-only tasks. |
 | `with.artifacts` | array | No | Artifact-relative paths shown to the operator as review context. Value references are resolved when the task opens. |
-| `with.push_back.rewind_to` | string | With `push_back` | ID or name of an upstream step the task depends on. A push-back reruns it and every step after it, then opens the task again. |
+| `with.push_back.rewind_to` | string | With `push_back` | ID or name of an upstream step the task depends on. A push-back reruns it and every step that depends on it, then opens the task again. |
 | `with.push_back.form` | object | No | Flat feedback schema with the `with.form` rules. `additionalProperties` must stay `false`. |
 
 The form root supports `type: object`, `title`, `description`, `properties`, `required`, and `additionalProperties`. `additionalProperties` defaults to `false`. Declared properties support `string`, `integer`, `number`, and `boolean`, using the same scalar constraints and string coercion as [typed parameters](/writing-workflows/parameters). Nested declared objects and arrays are invalid.

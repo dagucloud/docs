@@ -232,6 +232,7 @@ steps:
 - Dagu also injects the provided push-back keys as individual environment variables on those steps.
 - `DAG_PUSHBACK_ITERATION` provides the same iteration count as a plain value for scripts that do not need the full JSON payload.
 - `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE` points to the current step's previous stdout log when one exists. Dagu never inlines the previous stdout content into this variable.
+- `DAG_PUSHBACK` stays within 30 KiB. When the full history does not fit, it keeps the most recent entries that fit; the run status keeps the full history.
 
 Example payload:
 

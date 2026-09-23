@@ -249,7 +249,7 @@ The command is local-only and rejects remote CLI contexts, but the target root D
 
 ### `human-task push-back`
 
-Send a waiting [`human.task`](/writing-workflows/human-tasks#requesting-changes) step that declares `with.push_back` back to its rewind target. The rewind target and every step after it run again with the feedback, then the task opens again.
+Send a waiting [`human.task`](/writing-workflows/human-tasks#requesting-changes) step that declares `with.push_back` back to its rewind target. The rewind target and every step that depends on it, directly or transitively, run again with the feedback, then the task opens again.
 
 ```bash
 dagu human-task push-back [options] DAG_NAME
@@ -272,7 +272,7 @@ dagu human-task push-back \
   review-loop
 ```
 
-Feedback is validated against `with.push_back.form` with the same parsing rules as completion. The command prints `Pushed back human task <step> to <target>;` followed by whether the DAG-run was queued for resume or remains waiting. If the run cannot be queued, the push-back is undone and the command can be repeated. Like `human-task complete`, the command is local-only.
+Feedback is validated against `with.push_back.form` with the same parsing rules as completion and is limited to 16 KiB as JSON. The command prints `Pushed back human task <step> to <target>;` followed by whether the DAG-run was queued for resume or remains waiting. The push-back is stored before the run is queued; if queueing fails, run the same command again. Until the task opens again, an identical repeat only retries the queue and prints `Human task <step> was already pushed back to <target>`. Like `human-task complete`, the command is local-only.
 
 ### `status`
 
