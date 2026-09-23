@@ -207,7 +207,7 @@ Retries inherit the original run's runtime profile. `dagu retry` does not accept
 
 ### `human-task complete`
 
-Complete a waiting [`human.task`](/writing-workflows/human-tasks) step and enqueue the same DAG run when no other manual steps remain waiting.
+Complete a waiting [`human.task`](/writing-workflows/human-tasks) step and enqueue the same DAG run when the completion unblocks a step or no other manual steps remain waiting.
 
 ```bash
 dagu human-task complete [options] DAG_NAME_OR_FILE

@@ -184,7 +184,7 @@ This is where you troubleshoot and verify results:
 
 Build step status shows the reuse decision, reason, and explanation. A reused materialization also links to the run that produced it.
 
-When a run is waiting on [`action: human.task`](/writing-workflows/human-tasks), Dagu opens the **Human tasks** tab automatically. Complete each generated form there. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
+When a run is waiting on [`action: human.task`](/writing-workflows/human-tasks), Dagu opens the **Human tasks** tab automatically. Complete each generated form there. While the run is queued or running, open tasks stay visible but read-only, and typed input is kept. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
 
 The dedicated outputs view is also available inside the run screen:
 

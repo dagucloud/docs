@@ -995,7 +995,7 @@ Each declared form property automatically becomes `${steps.<id>.outputs.<propert
 
 Human tasks are allowed only in root DAGs. A root DAG containing one may run locally or on a distributed worker, but a human task cannot be used in a child DAG, `foreach.steps`, or a lifecycle handler. Execution, retry, repeat, timeout, container, step-level worker selector, approval, and authored output fields are not supported on the same step.
 
-After no manual steps remain waiting, Dagu always enqueues the same DAG run; completion never starts it immediately. See [Human Tasks](/writing-workflows/human-tasks) for examples, completion surfaces, persistence, queue recovery, distributed execution, and the comparison with approval gates.
+When a completion unblocks a step or no manual steps remain waiting, Dagu enqueues the same DAG run; completion never starts it immediately. See [Human Tasks](/writing-workflows/human-tasks) for examples, completion surfaces, persistence, queue recovery, distributed execution, and the comparison with approval gates.
 
 ### Parallel Child DAG Runs
 

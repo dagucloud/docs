@@ -1643,7 +1643,8 @@ Send `{}` for an acknowledgement-only task. The request body is limited to 16 Mi
   "stepId": "review",
   "alreadyCompleted": false,
   "queued": true,
-  "remainingWaitingSteps": 0
+  "remainingWaitingSteps": 0,
+  "resumeRequested": true
 }
 ```
 
@@ -1655,8 +1656,9 @@ Send `{}` for an acknowledgement-only task. The request body is limited to 16 Mi
 | `alreadyCompleted` | boolean | Whether identical input had already completed this task. |
 | `queued` | boolean | Whether this request durably added the DAG-run retry to the queue. |
 | `remainingWaitingSteps` | integer | Number of manual steps that still need input. |
+| `resumeRequested` | boolean | Whether this request found the DAG run waiting and ready to resume, whether it queued the resume or a concurrent request queued it first. `false` when the run keeps waiting or has already left `Waiting`. |
 
-If another manual step is waiting, Dagu stores this completion and returns `queued: false`. When none remain, Dagu always enqueues a retry of the same DAG run; completion never starts the DAG immediately. A repeated request with the same canonical input is idempotent. Different input for an already completed task returns a conflict.
+Dagu enqueues a retry of the same DAG run when the completion unblocks a step or no manual steps remain waiting; completion never starts the DAG immediately. A step counts as unblocked when every dependency lets it run, it declares no build inputs, and no step in the run has failed or been aborted. Otherwise Dagu stores the completion and returns `queued: false` and `resumeRequested: false`. While a resumed attempt is queued or running, completing another open task returns `409`. A repeated request with the same canonical input is idempotent. Different input for an already completed task returns a conflict.
 
 **Error Responses**:
 
@@ -1689,7 +1691,7 @@ The operation is safe to retry. `queued` is `false` when the retry is already qu
 **Error Responses**:
 
 - `404`: The DAG run does not exist or is not visible to the caller.
-- `409`: Manual steps still need input, or the run has no completed human-task checkpoint to resume.
+- `409`: Manual steps are still waiting and no step is ready to run, or the run has no completed human-task checkpoint to resume.
 - `503`: The queue attempt failed again and remains retryable.
 
 ## Approval Endpoints

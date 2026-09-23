@@ -36,7 +36,7 @@ Start or enqueue the DAG normally. When it reaches `review`, the DAG and step en
 2. Open the **Human tasks** tab. Dagu selects it automatically when input is required.
 3. Fill in the generated form and select **Complete task**.
 
-The form uses the resolved schema stored with that run. Editing the source YAML after the task opens does not change that waiting task. Completing a task requires permission to execute DAGs in its workspace.
+The form uses the resolved schema stored with that run. Editing the source YAML after the task opens does not change that waiting task. Completing a task requires permission to execute DAGs in its workspace. While the run is queued or running, open tasks stay visible but read-only, and any input already typed is kept until the run is waiting again.
 
 ### Local CLI
 
@@ -71,13 +71,16 @@ Completing a task performs these operations in order:
 
 1. Validate the input against the resolved form stored with the DAG run.
 2. Persist the canonical input and generated outputs, then mark the step `Succeeded`.
-3. Keep the DAG `Waiting` while any other manual step still needs input.
-4. When no manual steps remain waiting, enqueue a retry of the same DAG run.
-5. Let the scheduler consume the queue and continue from the persisted checkpoint.
+3. Enqueue a retry of the same DAG run when the completion unblocks a step or no manual steps remain waiting. Otherwise, keep the DAG `Waiting`.
+4. Let the scheduler consume the queue and continue from the persisted checkpoint.
 
-The final completion always uses the queue, for both local and distributed runs. It never starts the DAG immediately in the completion request. This gives every resumed run the same queue, concurrency, scheduler, and worker-selection behavior.
+A completion unblocks a step when that step has not started, every dependency succeeded or was skipped in a way that lets dependents continue, and at least one dependency is a completed human task. The resumed run executes the unblocked branch and returns to `Waiting` while other tasks stay open. While any step in the run is failed or aborted, or when the unblocked step declares build `inputs`, completion keeps the DAG `Waiting` until no manual steps remain, so failed steps are retried once.
 
-The resumed attempt uses the DAG snapshot and human-task form stored with the run. It does not reload a changed source file before continuing from the checkpoint.
+Every resume uses the queue, for both local and distributed runs. It never starts the DAG immediately in the completion request. This gives every resumed run the same queue, concurrency, scheduler, and worker-selection behavior.
+
+The resumed attempt uses the DAG snapshot and human-task form stored with the run. It does not reload a changed source file before continuing from the checkpoint. Open tasks keep the prompt and artifact paths they were presented with.
+
+While a resumed attempt is queued or running, other open tasks cannot be completed: the CLI and REST API return a conflict, and the Web UI shows them read-only. They become actionable again when the run returns to `Waiting`. Each resumed attempt checks DAG-level preconditions again, runs `handler_on.init` again, and runs `handler_on.wait` again when it returns to `Waiting`. If a resumed attempt fails or is aborted before then, retry the DAG run to make the open tasks actionable again; completed input is kept.
 
 The submitted input is committed before enqueueing. If the queue is temporarily unavailable, the completion endpoint returns `503`, the DAG remains recoverable, and the Web UI displays **Retry queue**. The same operation can be retried through the [resume endpoint](/web-ui/api#retry-human-task-resume-queue) without resubmitting the form values. CLI users can repeat the identical completion command; Dagu recognizes the stored input and retries the enqueue.
 
@@ -329,7 +332,7 @@ steps:
 
 ### Parallel Reviewers
 
-Independent human tasks can wait at the same time. Completing one stores its input, but the DAG remains `Waiting` and is not enqueued until the other waiting task is also complete.
+Independent human tasks can wait at the same time. Here `deploy` depends on both reviews, so completing one stores its input and the DAG stays `Waiting` until the other review is also complete.
 
 ```yaml
 type: graph
@@ -356,6 +359,40 @@ steps:
     depends: [security_review, release_manager]
     run: ./deploy.sh '${steps.security_review.outputs.risk}'
 ```
+
+### Independent Review Branches
+
+When a step depends on only one of several open tasks, completing that task resumes the run for its branch while the other task stays open.
+
+```yaml
+type: graph
+
+steps:
+  - id: build
+    run: ./build.sh
+
+  - id: security_review
+    depends: [build]
+    action: human.task
+    with:
+      prompt: Record the security review
+
+  - id: publish_report
+    depends: [security_review]
+    run: ./publish-report.sh
+
+  - id: release_manager
+    depends: [build]
+    action: human.task
+    with:
+      prompt: Confirm the release window
+
+  - id: deploy
+    depends: [publish_report, release_manager]
+    run: ./deploy.sh
+```
+
+Completing `security_review` enqueues the run. `publish_report` runs, and the DAG returns to `Waiting` on `release_manager`. Completing `release_manager` enqueues the run again, and `deploy` runs.
 
 ## Completing a Task from the CLI
 
@@ -388,8 +425,8 @@ The command only supports the local CLI context. It validates the submitted valu
 - The completion record includes the subject name and ID when available. Web UI and REST API completions use the authenticated user; the local CLI uses the OS username and an `os:<uid>` ID. Older runs and unauthenticated requests may omit this attribution.
 - Repeating the same completion with the same canonical input is idempotent.
 - Trying to complete an already completed task with different input is rejected with a conflict.
-- If another manual step is still waiting, the input remains stored and the DAG stays `Waiting`.
-- When no manual steps remain waiting, completion always enqueues the same DAG run.
+- If the completion unblocks no step and another manual step is still waiting, the input remains stored and the DAG stays `Waiting`.
+- When the completion unblocks a step or no manual steps remain waiting, completion always enqueues the same DAG run.
 - If enqueueing fails after the input is stored, use **Retry queue**, call the resume endpoint, or repeat the identical CLI completion command. The form does not need to be entered again.
 - Retrying the whole DAG or an individual human-task step cannot bypass a pending human-task checkpoint.
 
@@ -399,7 +436,7 @@ Human tasks have no reject, push-back, or rewind operation. Stop the DAG if it s
 
 Only root DAGs can contain human tasks. A root DAG containing a human task can run on the main Dagu instance or on a distributed worker. Normal DAG-level routing applies: a label-based `worker_selector` selects a matching worker, `worker_selector: local` forces local execution, and `default_execution_mode: distributed` dispatches an otherwise unselected root DAG.
 
-When any run reaches a human task, it persists the final `Waiting` status and releases the attempt. After all manual input is complete, Dagu enqueues the same run. The scheduler later starts the next attempt locally or dispatches it to a matching worker according to the normal routing rules.
+When any run reaches a human task, it persists the final `Waiting` status and releases the attempt. Each resume enqueues the same run. The scheduler later starts the next attempt locally or dispatches it to a matching worker according to the normal routing rules.
 
 Human tasks are rejected in DAGs invoked through `dag.run`, `dag.enqueue`, or `parallel`, regardless of whether the child would otherwise run locally or remotely.
 
