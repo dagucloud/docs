@@ -62,15 +62,15 @@ steps:
     with:
       url: https://portal.vendor.com/billing
       browser:
-        profile: vendor
         # Every host the site loads from, including CDNs and sign-in pages.
         allowed_domains: ["*.vendor.com"]
       variables:
         user: ${VENDOR_USER}
         password: ${VENDOR_PASSWORD}
       do:
-        - act: Sign in with %user% and %password%
-          when: {selector: "form#login"}
+        - act: Type %user% into the email field
+        - act: Type %password% into the password field
+        - act: Click the Sign in button
         - expect: {text: Invoices}
         - extract:
             instruction: The most recent invoice
@@ -93,7 +93,7 @@ steps:
 | Operation | Value | Effect |
 |-----------|-------|--------|
 | `goto` | URL | Navigate the current tab. |
-| `act` | Instruction, or `{instruction, cache}` | Perform an action described in natural language: click, type, select, scroll, press a key. |
+| `act` | Instruction, or `{instruction, cache}` | Perform one action described in natural language: click, type, select, scroll, press a key. |
 | `extract` | `{instruction, schema}` | Extract data from the page. The schema must be a JSON Schema with `type: object`. |
 | `expect` | [Condition](#conditions) | Fail the step unless the condition holds. |
 | `wait` | `{selector}` or `{duration}` | Wait until a CSS selector is visible, or pause, such as `2s`. |
@@ -106,6 +106,10 @@ Any operation can also set:
 |-------|-------------|
 | `when` | A [condition](#conditions) checked once before the operation. The operation is skipped unless it holds. |
 | `timeout` | Maximum time for the operation, such as `30s`. Defaults to `2m`. |
+
+An `act` performs a single action. "Sign in with %user% and %password%" types into one field and stops, so write one act per field and one for the button.
+
+A browser that stops responding fails the step instead of hanging it: an operation is abandoned a few seconds after its `timeout`, and a screenshot or page check after 30 seconds.
 
 `with.url` is opened before the first operation.
 
@@ -153,6 +157,8 @@ steps:
 
 A list of models under `model` is tried in order for each request. Every request asks the model for a tool call whose parameters are the expected JSON. A provider or model without tool calling works only if it replies with plain JSON text, so choose a model that follows tool-call schemas reliably. Small local models often pick the wrong element.
 
+If every `act` fails with `No action found` while the element is plainly on the page, the model is likely answering "no element" for every request. The schema allows `null` for "no match", and some models always choose it; `google/gemini-2.5-flash` through OpenRouter does, while newer Gemini Flash models, `gpt-4.1-mini`, and `claude-haiku-4.5` pick the element. Try another model.
+
 ## Secrets and Variables
 
 Declare secrets under `secrets:`, put them in `with.variables`, and reference them as `%name%` in `act` instructions. The browser types the value; the model sees only the name.
@@ -171,7 +177,8 @@ steps:
       variables:
         password: ${PORTAL_PASSWORD}
       do:
-        - act: Type %password% into the password field and sign in
+        - act: Type %password% into the password field
+        - act: Click the Sign in button
 ```
 
 - Do not write `${PORTAL_PASSWORD}` inside an instruction. The step fails before starting a browser when a model-bound text contains the value of a declared secret of four or more characters. Values that only come from `env:` are not treated as secrets.
@@ -186,9 +193,10 @@ When the step succeeds with outputs, stdout is one JSON object of them, so `outp
 
 ```text
 [start] goto "https://portal.vendor.com/billing" (completed, 0 tokens, 800ms)
-[1/4] act "Sign in with %user% and %password%" → fill xpath=/html[1]/body[1]/form[1]/input[1] %user%; … (cache-hit, 0 tokens, 400ms)
-[3/4] extract "The most recent invoice" → {"invoice_number":"INV-8812","total":412.5} (completed, 1204 tokens, 2.1s)
-[4/4] download "invoice-8812.pdf" → browser/invoice/downloads/invoice-8812.pdf (completed, 0 tokens, 0s)
+[1/6] act "Type %user% into the email field" → fill xpath=/html[1]/body[1]/form[1]/input[1] %user% (cache-hit, 0 tokens, 300ms)
+[4/6] expect "text \"Invoices\"" → the page text contains "Invoices" (completed, 0 tokens, 0s)
+[5/6] extract "The most recent invoice" → {"invoice_number":"INV-8812","total":412.5} (completed, 1204 tokens, 2.1s)
+[6/6] download "invoice-8812.pdf" → browser/invoice/downloads/invoice-8812.pdf (completed, 0 tokens, 0s)
 ```
 
 ## Screenshots and Downloads
@@ -205,6 +213,14 @@ Browser steps store files as [run artifacts](/writing-workflows/artifacts) under
 Files the page downloads are saved under `browser/<step id>/downloads/` with the name the site suggests. Only `act` and `goto` start downloads. Once one has run, the step waits for running downloads after every operation, and before it ends or pauses for an `ask` it waits a few seconds for a late download to begin. A download may run for the longest timeout of the acts and gotos run so far; give a large export's act a long `timeout`. A canceled download, or one still running at that timeout, fails the step. Downloaded files appear in the timeline.
 
 With `artifacts.enabled: false`, no screenshots are saved, a `screenshot` operation fails, and the browser refuses downloads.
+
+## Dialogs
+
+The step accepts every JavaScript dialog a page opens, so a dialog never blocks the page: `alert`, `confirm`, and `beforeunload` are accepted, and a `prompt` is answered with its default text. An act that raises "Are you sure?" therefore goes through. Each accepted dialog appears in the step log and the timeline after the operation that opened it:
+
+```text
+[2/3] dialog "Delete the row?" → accepted confirm (completed, 0 tokens, 0s)
+```
 
 ## Replay Cache
 
@@ -223,11 +239,15 @@ with:
   browser:
     profile: vendor
   do:
-    - act: Sign in with %user% and %password%
+    - act: Type %user% into the email field
+      when: {selector: "form#login"}
+    - act: Type %password% into the password field
+      when: {selector: "form#login"}
+    - act: Click the Sign in button
       when: {selector: "form#login"}
 ```
 
-Profiles are stored on the host that runs the step. Runs that use the same profile run one at a time. A run fails immediately when another run is waiting for input with the same profile open.
+The sign-in acts run only while the login form is showing. Profiles are stored on the host that runs the step. Runs that use the same profile run one at a time. A run fails immediately when another run is waiting for input with the same profile open.
 
 ## Human Input
 
@@ -235,7 +255,9 @@ Profiles are stored on the host that runs the step. Runs that use the same profi
 
 ```yaml
 do:
-  - act: Sign in with %user% and %password%
+  - act: Type %user% into the email field
+  - act: Type %password% into the password field
+  - act: Click the Sign in button
   - ask:
       prompt: Enter the 6-digit code sent to your phone
       as: otp
@@ -256,6 +278,7 @@ Answers are stored in the run's history, like other human input. Use `ask` for s
 - Page content is untrusted and is sent to the model. A hostile page, or content other users posted on an allowed site, can try to steer an `act`, for example into typing `%password%` into the wrong field. Use variables only on pages you trust, keep instructions specific, and follow sensitive acts with an `expect`.
 - The browser runtime applies `browser.allowed_domains` to the page's HTTP(S) requests, including scripts, images, and API calls, so list the CDN and sign-in hosts a site loads from. WebSocket connections are not covered, and the runtime's check has a known bypass. `example.com` matches only that host; `*.example.com` matches its subdomains but not `example.com`.
 - Dagu itself checks only the page URL: it rejects a `goto` or `url` outside the list, and after every operation fails the step if a redirect or a click left the allowed domains.
+- Dialogs are accepted automatically, so an act that clicks the wrong button also confirms it. Keep instructions for destructive actions specific and check the result with an `expect`.
 - The browser runs with the permissions of the Dagu process.
 
 ## Distributed Mode
@@ -264,7 +287,7 @@ Browser steps run on the worker that picks them up, which needs Chrome. Profiles
 
 ## Web UI
 
-The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, and downloads, and holds pending questions.
+The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, downloads, and accepted dialogs, and holds pending questions.
 
 ## Browser Options
 
