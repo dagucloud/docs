@@ -40,7 +40,7 @@ Do not include the scope or workspace name in the ref. A DAG in `workspace=payme
 5. Enter a ref such as `prod/db-password`. Refs use lowercase slug segments separated by `/`.
 6. Enter the value and save.
 
-The value is write-only. After saving, the API and UI return metadata such as ref, status, version, and timestamps, but not the plaintext value.
+The value is write-only. After saving, the API and UI return metadata such as ref, status, version, and timestamps, but not the plaintext value. On the Dagu host, [`dagu secret resolve`](/getting-started/cli#secret) prints it.
 
 ## Rotate A Secret
 

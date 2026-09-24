@@ -225,7 +225,7 @@ Dagu-managed registry values are stored by Dagu in the internal secret store und
 <data_dir>/secrets
 ```
 
-The file-backed implementation stores secret metadata and encrypted value versions. Plaintext values are write-only through the API and Web UI: after saving, Dagu does not return the value in API responses. Values are decrypted only when a run resolves the secret.
+The file-backed implementation stores secret metadata and encrypted value versions. Plaintext values are write-only through the API and Web UI: after saving, Dagu does not return the value in API responses. Values are decrypted only when a run resolves the secret or [`dagu secret resolve`](/getting-started/cli#secret) reads it on the host.
 
 The encryption key is resolved from the same data directory. Back up the data directory securely if you rely on Dagu-managed secrets.
 

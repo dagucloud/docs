@@ -741,6 +741,22 @@ The `profile` command is local-only. Use [Profiles in the Web UI](/web-ui/profil
 
 See [Runtime Profiles](/writing-workflows/runtime-profiles) for behavior, permissions, and retry rules.
 
+### `secret`
+
+Read secrets from the local Dagu data directory.
+
+```bash
+dagu secret resolve <ref> [--workspace <name>]
+```
+
+`resolve` prints the current value of a [DAG secret ref](/web-ui/secrets) to stdout without a trailing newline. With `--workspace`, it checks that workspace first and then Global, like a DAG run. Disabled, missing, and empty secrets fail.
+
+```bash
+export OPENAI_API_KEY="$(dagu secret resolve prod/openai-api-key)"
+```
+
+The `secret` command is local-only. The Web UI and REST API do not return secret values.
+
 ### `dequeue`
 
 Remove a DAG from the execution queue.
