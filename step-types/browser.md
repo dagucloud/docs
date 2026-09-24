@@ -58,6 +58,10 @@ secrets:
     provider: env
     key: VENDOR_PASSWORD
 
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
+
 steps:
   - id: invoice
     action: browser.run
@@ -170,6 +174,10 @@ secrets:
   - name: PORTAL_PASSWORD
     provider: env
     key: PORTAL_PASSWORD
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
 
 steps:
   - id: login
