@@ -10,15 +10,28 @@ Dagu publishes multiple container images to GitHub Container Registry at `ghcr.i
 | `alpine`, `<version>-alpine` | Alpine 3.22 | `apk` | Musl-based image with `bash`, `sudo`, `jq`, `tzdata` | Minimal footprint, Alpine-only environments |
 | `dev`, `<version>-dev` | Ubuntu 24.04 | `apt` | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) and Chromium for [browser steps](/step-types/browser) | Local development, browser steps, or workflows that need compilers/SDKs baked in |
 
-Only the `dev` image includes a browser: Playwright's Chromium on amd64 and arm64. The arm/v7 `dev` image has no browser. Chromium keeps its sandbox, which Docker's default seccomp profile blocks, so run the image with [`seccomp-chromium.json`](https://github.com/dagucloud/dagu/blob/main/deploy/docker/seccomp-chromium.json), Docker's default profile plus the user-namespace calls the sandbox needs:
+Only the `dev` image includes a browser: Playwright's Chromium on amd64 and arm64. The arm/v7 `dev` image has no browser.
+
+Chromium keeps its sandbox, which Docker's default seccomp profile blocks. The image carries a profile that lets the sandbox start, and the Compose setup in [`deploy/docker/browser`](https://github.com/dagucloud/dagu/tree/main/deploy/docker/browser) applies it together with a 1 GB `/dev/shm`:
 
 ```bash
-docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu \
+mkdir dagu-browser && cd dagu-browser
+curl -fsSLO https://raw.githubusercontent.com/dagucloud/dagu/main/deploy/docker/browser/compose.yaml
+docker run --rm ghcr.io/dagucloud/dagu:dev cat /usr/share/dagu/seccomp-chromium.json > seccomp-chromium.json
+docker compose up -d
+```
+
+Open `http://localhost:8080` and create the first admin account. With `docker run`, pass the same two options:
+
+```bash
+docker run -d -p 8080:8080 -v dagu-data:/var/lib/dagu \
   --security-opt seccomp=./seccomp-chromium.json --shm-size=1g \
   ghcr.io/dagucloud/dagu:dev
 ```
 
-In Compose, set `security_opt: ["seccomp=./seccomp-chromium.json"]` and `shm_size: 1gb`; Docker's 64 MB `/dev/shm` is too small for Chromium. The profile applies to every process in the container, not only Chromium: it lets DAG steps call `clone`, `setns`, and `unshare` without argument filters, so use it only when you trust the DAG steps in that container. Do not add `apparmor=unconfined`: on hosts that restrict unprivileged user namespaces, such as Ubuntu 24.04, it stops the sandbox from starting. Without the profile, a browser step fails at launch. To run without the sandbox instead, see [Browser requirements](/step-types/browser#requirements).
+The profile is Docker's default profile plus the `clone`, `setns`, and `unshare` calls the sandbox needs. It applies to every process in the container, not only Chromium, so use it only when you trust the DAG steps in that container. Do not add `apparmor=unconfined`: on hosts that restrict unprivileged user namespaces, such as Ubuntu 24.04, it stops the sandbox from starting. Without the profile, a browser step fails at launch.
+
+Where the sandbox cannot start, for example in a cluster that does not accept a custom seccomp profile, set `DAGU_BROWSER_SANDBOX=false` to turn it off; see [Browser requirements](/step-types/browser#requirements).
 
 > Prefer pinning to a specific version tag (`ghcr.io/dagucloud/dagu:<version>`) for reproducible deployments.
 
