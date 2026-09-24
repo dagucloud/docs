@@ -703,6 +703,7 @@ When enabled, the following events are recorded:
 - **User Management**: User creation, updates, deletion
 - **API Keys**: Key creation, updates, deletion
 - **Webhooks**: Webhook creation, deletion, token regeneration
+- **Secrets**: Secret changes and [`dagu secret resolve`](/getting-started/cli#secret) reads
 - **Terminal**: Shell command executions
 
 ### Retention

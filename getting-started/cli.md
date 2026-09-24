@@ -749,11 +749,13 @@ Read secrets from the local Dagu data directory.
 dagu secret resolve <ref> [--workspace <name>]
 ```
 
-`resolve` prints the current value of a [DAG secret ref](/web-ui/secrets) to stdout without a trailing newline. With `--workspace`, it checks that workspace first and then Global, like a DAG run. Disabled, missing, and empty secrets fail.
+`resolve` prints the current value of a [DAG secret ref](/web-ui/secrets) to stdout without a trailing newline. With `--workspace`, it checks that workspace first and then Global, like a DAG run. It fails for an unknown workspace and for disabled, missing, or empty secrets.
 
 ```bash
 export OPENAI_API_KEY="$(dagu secret resolve prod/openai-api-key)"
 ```
+
+Each read is recorded in the [audit log](/server-admin/server#audit-logging) when audit logging is enabled. If the entry cannot be written, the value is not printed.
 
 The `secret` command is local-only. The Web UI and REST API do not return secret values.
 
