@@ -450,7 +450,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 ### Execution
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
 - `DAGU_DEFAULT_SHELL` - Default shell for command steps. When unset, Dagu falls back to `$SHELL`, then `sh`.
-- `DAGU_BROWSER_SANDBOX` - Set to `false` to turn off Chromium's sandbox for every browser that [browser steps](/step-types/browser) start on this host (default: `true`). Use it only where the sandbox cannot start; see [Browser requirements](/step-types/browser#requirements).
+- `DAGU_BROWSER_SANDBOX` - Set to `false` to turn off Chromium's sandbox for every browser that [browser steps](/step-types/browser) start on this host (default: `true`). Use it only where the sandbox cannot start; see [Browser requirements](/step-types/browser#requirements). With the sandbox on, a browser step fails when `CI` is set or Dagu runs as root on Linux, because the browser would run without the sandbox there.
 - `DAGU_CONTAINER_RUNTIME` - Container runtime for root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`. Valid values: `docker` (default) or `podman`.
 - `DAGU_PODMAN_HOST` - Podman's Docker-compatible API socket when `DAGU_CONTAINER_RUNTIME=podman` (default: `unix:///run/podman/podman.sock`).
 

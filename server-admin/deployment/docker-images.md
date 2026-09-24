@@ -21,10 +21,10 @@ docker run --rm ghcr.io/dagucloud/dagu:dev cat /usr/share/dagu/seccomp-chromium.
 docker compose up -d
 ```
 
-Open `http://localhost:8080` and create the first admin account. With `docker run`, pass the same two options:
+Open `http://localhost:8080` and create the first admin account. Both examples listen on localhost only, because the first visitor creates the admin account. With `docker run`, pass the same two options:
 
 ```bash
-docker run -d -p 8080:8080 -v dagu-data:/var/lib/dagu \
+docker run -d -p 127.0.0.1:8080:8080 -v dagu-data:/var/lib/dagu \
   --security-opt seccomp=./seccomp-chromium.json --shm-size=1g \
   ghcr.io/dagucloud/dagu:dev
 ```
