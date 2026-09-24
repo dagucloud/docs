@@ -7,7 +7,7 @@ Browser steps are powered by the [Stagehand](https://github.com/browserbase/stag
 ## Requirements
 
 - Google Chrome or Chromium installed on the host that runs the step. Dagu uses `browser.executable`, then `CHROME_PATH`, then a standard install location. Of the container images, only [`dev`](/server-admin/deployment/docker-images) includes Chromium, on amd64 and arm64.
-- Where Chrome's sandbox is unavailable, such as a container that runs Dagu as a non-root user, add flags for every browser on the host with `browser.args` in the [Dagu config](/server-admin/reference) or `DAGU_BROWSER_ARGS`, for example `--no-sandbox,--disable-dev-shm-usage`. The `dev` image sets these. Without the sandbox, a page that exploits the browser runs with the permissions of the Dagu process, so keep it to containers. A DAG cannot set these flags.
+- In a container, Chrome's sandbox needs a seccomp profile that allows user namespaces; run the `dev` image with its [Chromium profile](/server-admin/deployment/docker-images). Where the sandbox cannot start at all, `--no-sandbox` turns it off: add it for every browser on the host with `browser.args` in the [Dagu config](/server-admin/reference) or `DAGU_BROWSER_ARGS`. Without the sandbox, a page that exploits the browser runs with the permissions of the Dagu process, which in the Dagu images has `sudo`, so use it only for sites you trust. A DAG cannot set these flags.
 - A model configured with a DAG-level `llm` block or `with.llm`. Use a model that follows tool-call schemas reliably.
 
 ## Quick Start
