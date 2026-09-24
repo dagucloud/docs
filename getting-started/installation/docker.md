@@ -136,7 +136,7 @@ For AI and coding-agent CLI sandboxes, see
 | `latest` | Latest stable release |
 | `<version>` | Specific release, such as `2.11.1` |
 | `alpine`, `<version>-alpine` | Alpine-based runtime image |
-| `dev`, `<version>-dev` | Development image with compilers, SDKs, and common CLI tools |
+| `dev`, `<version>-dev` | Development image with compilers, SDKs, common CLI tools, and Chromium for [browser steps](/step-types/browser) (amd64 and arm64; see [Docker Images](/server-admin/deployment/docker-images) for the run options) |
 
 Full list: [Docker Images](/server-admin/deployment/docker-images).
 
