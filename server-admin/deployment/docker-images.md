@@ -8,7 +8,9 @@ Dagu publishes multiple container images to GitHub Container Registry at `ghcr.i
 | --- | --- | --- | --- | --- |
 | `latest`, `<version>` | Ubuntu 24.04 | `apt` | Core runtime + `ca-certificates`, `curl`, `git`, `jq`, `openssh-client`, `sudo`, `tini`, `tzdata`, `unzip` | General deployments; closest to production defaults |
 | `alpine`, `<version>-alpine` | Alpine 3.22 | `apk` | Musl-based image with `bash`, `sudo`, `jq`, `tzdata` | Minimal footprint, Alpine-only environments |
-| `dev`, `<version>-dev` | Ubuntu 24.04 | `apt` | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) | Local development or workflows that need compilers/SDKs baked in |
+| `dev`, `<version>-dev` | Ubuntu 24.04 | `apt` | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) and Chromium for [browser steps](/step-types/browser) | Local development, browser steps, or workflows that need compilers/SDKs baked in |
+
+Only the `dev` image includes a browser. It installs Playwright's Chromium on amd64 and arm64 and sets `DAGU_BROWSER_ARGS=--no-sandbox,--disable-dev-shm-usage`, because the image runs Dagu as a non-root user, where Chromium's sandbox is unavailable. The arm/v7 `dev` image has no browser.
 
 > Prefer pinning to a specific version tag (`ghcr.io/dagucloud/dagu:<version>`) for reproducible deployments.
 

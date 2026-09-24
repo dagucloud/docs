@@ -178,6 +178,10 @@ env_passthrough:
 env_passthrough_prefixes:
   - AWS_
 
+# Browser steps
+browser:
+  args: []                  # Extra flags for every browser this host starts, such as --no-sandbox in a container
+
 # Queues
 queues:
   enabled: true          # Default: true
@@ -446,6 +450,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 ### Execution
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
 - `DAGU_DEFAULT_SHELL` - Default shell for command steps. When unset, Dagu falls back to `$SHELL`, then `sh`.
+- `DAGU_BROWSER_ARGS` - Comma-separated flags added to every browser that [browser steps](/step-types/browser) start on this host, such as `--no-sandbox,--disable-dev-shm-usage` in a container. Use `browser.args` in the config file for a flag that contains a comma.
 - `DAGU_CONTAINER_RUNTIME` - Container runtime for root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`. Valid values: `docker` (default) or `podman`.
 - `DAGU_PODMAN_HOST` - Podman's Docker-compatible API socket when `DAGU_CONTAINER_RUNTIME=podman` (default: `unix:///run/podman/podman.sock`).
 
