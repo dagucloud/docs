@@ -880,6 +880,7 @@ Accepted built-in action names:
 |--------|---------|
 | `artifact.list`, `artifact.read`, `artifact.write` | DAG-run artifact operations. |
 | `archive.create`, `archive.extract`, `archive.list` | Archive operations. |
+| `browser.extract`, `browser.run` | Browser automation in a local Chrome. See [Browser](/step-types/browser). |
 | `chat.completion` | LLM chat completion. |
 | `container.run` | Container executor. |
 | `dag.run` | Run a child DAG synchronously. |
