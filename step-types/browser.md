@@ -6,6 +6,7 @@ Browser steps are powered by the [Stagehand](https://github.com/browserbase/stag
 
 ## Requirements
 
+- A Dagu version newer than v2.17.0.
 - Google Chrome or Chromium installed on the host that runs the step. Dagu uses `browser.executable`, then `CHROME_PATH`, then a standard install location. Of the container images, only [`dev`](/server-admin/deployment/docker-images) includes Chromium, on amd64 and arm64.
 - In a container, Chrome's sandbox needs a seccomp profile that allows user namespaces. Run the `dev` image with its [Compose setup](/server-admin/deployment/docker-images), which applies the bundled profile. Where the sandbox cannot start at all, `browser.sandbox: false` in the [Dagu config](/server-admin/reference) or `DAGU_BROWSER_SANDBOX=false` turns it off for every browser on the host. Without the sandbox, a page that exploits the browser runs with the permissions of the Dagu process, which in the Dagu images has `sudo`, so use it only for sites you trust. A DAG cannot change this setting. With the sandbox on, a browser step fails when `CI` is set or Dagu runs as root on Linux, because the browser would run without the sandbox there; set `DAGU_BROWSER_SANDBOX=false` to allow it.
 - A model configured with a DAG-level `llm` block or `with.llm`. Use a model that follows tool-call schemas reliably.
@@ -158,7 +159,7 @@ steps:
 
 A list of models under `model` is tried in order for each request. Every request asks the model for a tool call whose parameters are the expected JSON. A provider or model without tool calling works only if it replies with plain JSON text, so choose a model that follows tool-call schemas reliably. Small local models often pick the wrong element.
 
-If every `act` fails with `No action found` while the element is plainly on the page, the model is likely answering "no element" for every request. The schema allows `null` for "no match", and some models always choose it; `google/gemini-2.5-flash` through OpenRouter does, while newer Gemini Flash models, `gpt-4.1-mini`, and `claude-haiku-4.5` pick the element. Try another model.
+If an `act` fails with "the model (...) answered that no element on the page matches the instruction" while the element is plainly on the page, the model is answering "no element" for every request. The schema allows `null` for "no match", and some models always choose it; `google/gemini-2.5-flash` through OpenRouter does, while newer Gemini Flash models, `gpt-4.1-mini`, and `claude-haiku-4.5` pick the element. Try another model. See [Troubleshooting](#troubleshooting).
 
 ## Secrets and Variables
 
@@ -185,6 +186,22 @@ steps:
 - Do not write `${PORTAL_PASSWORD}` inside an instruction. The step fails before starting a browser when a model-bound text contains the value of a declared secret of four or more characters. Values that only come from `env:` are not treated as secrets.
 - A `%name%` must be a `with.variables` key or the `as` of an earlier `ask`; anything else fails validation.
 - Declared secrets and `ask` answers of four or more characters are masked in text sent to the model, in the step log, and in the timeline. Plain variables are not masked.
+
+## What Is Sent to the Model
+
+Each model request carries:
+
+- the operation's instruction, or the statement a model-judged condition checks;
+- a list of the page's elements with their roles and visible text;
+- the `extract` schema, and for an `act`, the names of the available variables.
+
+Requests never carry:
+
+- the values of `with.variables` or `ask` answers; the model sees `%name%`;
+- what the browser typed into fields;
+- screenshots.
+
+Declared secrets and `ask` answers of four or more characters are replaced with `*******` wherever they appear in a request, including in the page text. Plain variables are not masked, so a value the page displays, such as a signed-in user name, reaches the model unless it comes from a declared secret. Secrets can come from any [secret provider](/writing-workflows/secrets). The model provider's API key only authenticates the request.
 
 ## Outputs
 
@@ -301,6 +318,22 @@ The step's **Agent** tab shows each operation with its status, token use, screen
 | `browser.allowed_domains` | Hosts the page's HTTP(S) requests may reach. |
 | `browser.screenshots` | `on_failure`, `final`, `each`, or `never`. |
 | `browser.profile` | Persistent profile name. |
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `the model (...) answered that no element on the page matches the instruction` | The element is not on the page, or the model answers "no match" for every request. | Look at the failure screenshot. If the element is there, [try another model](#model); otherwise reword the instruction or open the right page first. |
+| `Chrome installation not found; set CHROME_PATH` | No Chrome or Chromium on the host that runs the step. | Install Chrome, set `CHROME_PATH` or `browser.executable`, or use the `dev` image. |
+| `the browser sandbox is on, but the browser runtime turns it off because CI is set` (or `when running as root`) | The browser would run without its sandbox. | Run Dagu as a non-root user without `CI`, or set `DAGU_BROWSER_SANDBOX=false`. |
+| `Chrome exited before its debugging port was ready` | On Linux, usually a sandbox that cannot start, as under Docker's default seccomp profile. | Run the `dev` image with its [Compose setup](/server-admin/deployment/docker-images), or set `DAGU_BROWSER_SANDBOX=false`. |
+| `... is outside browser.allowed_domains` or `the page navigated away` | A `goto`, redirect, or click left the allowed hosts. | Add the host, including sign-in and CDN hosts, or fix the instruction. |
+| `contains the value of secret ...` | A declared secret is written in an instruction. | Pass it in `with.variables` and reference it as `%name%`. |
+| `act references %name%, which is not in with.variables or an earlier ask` | A misspelled or missing variable. | Add it to `with.variables` or fix the name. |
+| `download of ... did not finish within ...` | The download ran longer than the longest `act` or `goto` timeout. | Raise the `timeout` of the act that starts it. |
+| `the browser did not respond within ...` | The page stopped responding. | Check the page; raise `timeout` for slow pages. |
+| `browser profile "..." is held by DAG run ..., which is waiting for input` | Another run holds the profile while it waits for an answer. | Answer or cancel that run. |
+| `ask operations are not supported on Windows` | The browser cannot outlive the step process on Windows. | Run the step on Linux or macOS. |
 
 ## Not Supported Yet
 

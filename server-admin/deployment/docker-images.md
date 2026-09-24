@@ -10,7 +10,7 @@ Dagu publishes multiple container images to GitHub Container Registry at `ghcr.i
 | `alpine`, `<version>-alpine` | Alpine 3.22 | `apk` | Musl-based image with `bash`, `sudo`, `jq`, `tzdata` | Minimal footprint, Alpine-only environments |
 | `dev`, `<version>-dev` | Ubuntu 24.04 | `apt` | Adds build tools (`git`, `curl/wget`, `zip/unzip`, `build-essential`, `python3/pip`, `openjdk-17`, `nodejs/npm`, `jq`, `tzdata`) and Chromium for [browser steps](/step-types/browser) | Local development, browser steps, or workflows that need compilers/SDKs baked in |
 
-Only the `dev` image includes a browser: Playwright's Chromium on amd64 and arm64. The arm/v7 `dev` image has no browser.
+Only the `dev` image includes a browser: Playwright's Chromium on amd64 and arm64, in releases newer than v2.17.0. The arm/v7 `dev` image has no browser.
 
 Chromium keeps its sandbox, which Docker's default seccomp profile blocks. The image carries a profile that lets the sandbox start, and the Compose setup in [`deploy/docker/browser`](https://github.com/dagucloud/dagu/tree/main/deploy/docker/browser) applies it together with a 1 GB `/dev/shm`:
 
