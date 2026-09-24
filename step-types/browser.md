@@ -256,7 +256,7 @@ An `act` records the actions it performed, and the recordings are kept when the 
 - The cache covers `act` only. `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
 - A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one; when the `expect` fails, the replay is dropped.
 - Disable the cache with `with.cache: false`, or for one operation with `act: {instruction: ..., cache: false}`.
-- `dagu browser cache clear <dag>` removes the recordings of every step of a DAG, or of one step with `--step <id>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Both work on the host they run on.
+- `dagu browser cache clear <dag>` removes the recordings of every step of a DAG, or of one step with `--step <id>`. The REST API does the same with `DELETE /api/v1/dags/{fileName}/browser-cache`, optionally with `?step=<id>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Each clears only the cache on the host that handles it.
 
 ## Trying One Step
 
