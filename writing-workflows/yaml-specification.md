@@ -1088,6 +1088,8 @@ steps:
 
 Artifact stream paths are relative to the run artifact directory. Absolute paths, Windows drive paths, and paths containing `..` are rejected. Artifact stream outputs auto-enable artifacts unless `artifacts.enabled: false` is set.
 
+Each execution attempt replaces the artifact, so after retries or repetitions it holds only the latest attempt's output. `stdout.artifact` and `stderr.artifact` must resolve to different files. See [Artifacts](/writing-workflows/artifacts#stream-output-to-artifacts).
+
 ### Conditions And Continuation
 
 | Scope | Field | Type | Description |

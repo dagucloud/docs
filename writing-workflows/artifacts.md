@@ -131,6 +131,10 @@ steps:
 
 Artifact stream paths are relative to the DAG-run artifact directory. Parent directories are created automatically. Absolute paths, Windows drive paths, and paths containing `..` are rejected.
 
+Each execution attempt replaces the artifact. After a `retry_policy` retry, a `repeat_policy` repetition, or `dagu retry`, the file holds only the latest attempt's output. A step that does not run, for example because a precondition skips it, leaves the existing artifact unchanged. String-form file redirects such as `stdout: ./out.log` append instead.
+
+`stdout` and `stderr` cannot write to the same artifact file, even when the two paths are spelled differently. Use `log_output: merged` to combine the streams in the step log.
+
 Use this when the command output is the artifact. Use string-form `output: NAME` only for small values such as IDs, counts, and version strings.
 
 ## Web UI
