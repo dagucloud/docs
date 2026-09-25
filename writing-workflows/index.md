@@ -77,10 +77,11 @@ There is no separate parallel-execution configuration. Parallelism follows direc
 Use the CLI while developing a workflow:
 
 ```bash
-dagu validate pipeline.yaml  # Check the YAML
-dagu dry pipeline.yaml       # Show the execution plan
-dagu start pipeline.yaml     # Run it now
-dagu history pipeline        # List recent runs
+dagu validate pipeline.yaml             # Check the YAML
+dagu dry pipeline.yaml                  # Show the execution plan
+dagu start pipeline.yaml                # Run it now
+dagu start --only report pipeline.yaml  # Run one step on its own
+dagu history pipeline                   # List recent runs
 ```
 
 Start the server to inspect the same workflows in the Web UI:

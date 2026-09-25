@@ -123,6 +123,24 @@ steps:
 
 If `deploy` omits `depends: build`, Dagu preserves `${steps.build.outputs.image}` and inspection surfaces can report a `missing_dependency` notice.
 
+## Running One Step
+
+`dagu start --only deploy` runs `deploy` without the steps before it; they are recorded as skipped. The outputs `deploy` reads then come from one of two places:
+
+```bash
+# Reuse the outputs a finished run recorded
+dagu start --only deploy --outputs-from 20260925_101500 pipeline.yaml
+
+# Supply the value yourself
+dagu start --only deploy --output build.image=registry.example.com/app:dev pipeline.yaml
+```
+
+- `--outputs-from` carries the outputs of steps that succeeded in that run, and copies its work directory.
+- `--output <step>.<name>=<value>` sets one output of a skipped step, and wins over `--outputs-from`. The name must be declared by the step's `outputs` unless the step declares none, and a `type: json` output needs valid JSON. The step needs an `id`, since references address steps by ID.
+- With neither, `${steps.build.outputs.image}` stays unresolved, as for any output that was never published.
+
+The REST API takes the same selection as `steps`, `outputsFromRunId`, and `outputs`; see [Start DAG](/web-ui/api#start-dag).
+
 ## Output Names
 
 Output names must match:

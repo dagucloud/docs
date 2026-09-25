@@ -256,6 +256,16 @@ A successful `act` records the actions it performed. The next run of the same st
 - A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one.
 - Disable the cache with `with.cache: false`, or for one operation with `act: {instruction: ..., cache: false}`.
 
+## Trying One Step
+
+While you reword `act` instructions or adjust `expect` conditions, run the browser step on its own instead of the whole workflow:
+
+```bash
+dagu start --only checkout workflow.yaml
+```
+
+The other steps are recorded as skipped, and the run keeps the workflow's name, so the replay cache and `browser.profile` apply as in a full run. With a profile, a site stays signed in, so the step does not need the sign-in steps before it. When the step reads an earlier step's output, take it from a finished run with `--outputs-from <run-id>`, or set it with `--output <step>.<name>=<value>`. See [Running One Step](/writing-workflows/outputs#running-one-step).
+
 ## Profiles
 
 `browser.profile` keeps cookies and storage across runs, so a site stays signed in:

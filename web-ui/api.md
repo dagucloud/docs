@@ -585,6 +585,22 @@ Creates and starts a DAG run with optional parameters.
 | dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
+| steps | string[] | Run only these steps, by step name or ID. Every other step is recorded as skipped and does not run. Not supported for agent DAGs | No |
+| outputsFromRunId | string | Finished DAG-run of the same DAG whose step outputs and work directory are carried into the skipped steps. Only steps that succeeded there contribute outputs. Requires `steps` | No |
+| outputs | object | Outputs of skipped steps, keyed by step name or ID and then by output name, with string values. Wins over `outputsFromRunId`. Requires `steps` | No |
+
+> **Tip:** Set `steps` to try one step against the current definition without re-running the steps before it. The run is recorded like any other under the DAG's name. A skipped step's outputs come from `outputsFromRunId` or `outputs`; without them, references to those outputs stay unresolved. Retrying a failed selected-steps run follows normal retry rules, so steps downstream of the failed one run too.
+
+For example, to run `fetch` with a token its upstream `login` step would normally publish:
+
+```json
+{
+  "steps": ["fetch"],
+  "outputs": {"login": {"token": "abc123"}}
+}
+```
+
+An `outputs` entry must name a skipped step. The name must be declared by the step's `outputs`, unless the step declares none, and a `type: json` output needs valid JSON. Naming the step's `output: VAR` sets that variable instead. Invalid entries return `400`. The audit log records output names but not values.
 
 > **Tip:** Overriding the DAG name changes the identifier used for queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
 
@@ -1064,6 +1080,9 @@ Inline specifications have no source directory, so they cannot supply [file depe
 | dagRunId | string | Explicit run identifier. If omitted, one is generated | No |
 | singleton | boolean | When true, aborts with `409` if the DAG already has active or queued runs | No |
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
+| steps | string[] | Run only these steps, by step name or ID; every other step is recorded as skipped. See [Start DAG](#start-dag) | No |
+| outputsFromRunId | string | Finished DAG-run of the same DAG whose step outputs feed the skipped steps. Requires `steps` | No |
+| outputs | object | Outputs of skipped steps, keyed by step and then output name. Requires `steps` | No |
 
 **Response (200)**:
 ```json

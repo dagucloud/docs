@@ -112,8 +112,18 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
 - `--profile` - Runtime profile to apply to this run
 - `--no-reuse` - Recompute eligible build steps instead of reusing prior materializations
+- `--only` - Run only this step (name or ID); repeatable. Every other step is recorded as skipped
+- `--outputs-from` - Finished run of the same DAG whose step outputs and work directory feed the steps selected by `--only`
+- `--output` - Output of a step skipped by `--only`, as `<step>.<name>=<value>`; repeatable, and wins over `--outputs-from`
 
 > **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
+
+> **Note:** `--only` starts a new run of the current definition, with its env, secrets, and params, under the DAG's own name. Only the selected steps run. Lifecycle handlers and preconditions apply as usual.
+> - A skipped step's outputs come from `--outputs-from`, `--output`, or neither. Without them, a `${steps.<id>.outputs.<name>}` reference to a skipped step stays unresolved.
+> - With `--outputs-from`, only steps that succeeded in that run contribute outputs, and their work-directory files are copied into the new run.
+> - `--output` sets a declared output, or any name when the step declares none. Naming the step's `output: VAR` sets that variable instead. See [Running One Step](/writing-workflows/outputs#running-one-step).
+> - `--only` cannot be combined with `--from-run-id`, `--parent`, or `--root`, and is not supported for agent DAGs.
+> - Retrying a failed `--only` run follows normal retry rules, so steps downstream of the failed step run too; use `dagu retry --step` to re-run one step.
 
 ```bash
 # Basic run
@@ -136,6 +146,15 @@ dagu start --name my_custom_name my-workflow.yaml
 
 # Clone parameters from a historic run
 dagu start --from-run-id 20241031_235959 example-dag.yaml
+
+# Run one step on its own
+dagu start --only scrape example-dag.yaml
+
+# Run two steps with the outputs of an earlier run
+dagu start --only test --only report --outputs-from 20241031_235959 example-dag.yaml
+
+# Run one step with an upstream output supplied by hand
+dagu start --only fetch --output login.token=abc123 example-dag.yaml
 ```
 
 ### `stop`
