@@ -177,3 +177,31 @@ steps:
 ```
 
 The parent DAG's dispatch decision and each child's dispatch decision are evaluated independently. See [Distributed Execution - Sub-DAG Dispatch](/server-admin/distributed/#sub-dag-dispatch) for details.
+
+## Example: Desktop Workers
+
+[Computer steps](/step-types/computer) operate the desktop of the worker that runs them. Run a worker in the logged-in session of each desktop host, check the host with `dagu computer check`, and label the worker:
+
+```bash
+# On the Windows host, in the user's session
+dagu computer check
+dagu worker --worker.labels desktop=finance
+```
+
+Route computer DAGs with a DAG-level selector; a step-level `worker_selector` on `computer.run` is a validation error:
+
+```yaml
+worker_selector:
+  desktop: finance
+
+llm:
+  provider: anthropic
+  model: claude-opus-5
+
+steps:
+  - id: post
+    action: computer.run
+    with:
+      do:
+        - act: Post invoice INV-0001 in the ERP client
+```

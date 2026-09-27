@@ -418,6 +418,7 @@ const fullSidebar = [
           },
           { text: "LLM", link: "/step-types/llm/" },
           { text: "Browser", link: "/step-types/browser" },
+          { text: "Computer", link: "/step-types/computer" },
           {
             text: "SQL",
             link: "/step-types/sql/",
