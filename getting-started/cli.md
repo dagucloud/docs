@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `computer check`, `computer cache clear`
 
 ## Global Options
 
@@ -515,7 +515,7 @@ dagu rm [options] DAG
 - `--force, -f` - Skip the confirmation prompt
 - `--dry-run` - Preview deletions without changing history or the definition
 
-History removal also deletes the logs and artifact directories recorded for each removed run. Active runs are preserved. Definition removal is refused while the DAG has an active local or distributed run.
+History removal also deletes the logs and artifact directories recorded for each removed run. Removing all history, without `--older-than`, also clears the DAG's [browser](/step-types/browser#replay-cache) and [computer](/step-types/computer#replay-cache) replay caches on this host; `--dry-run` lists them. Active runs are preserved. Definition removal is refused while the DAG has an active local or distributed run.
 
 With `--definition`, identify the DAG by its filename, file stem, or configured path. If the YAML `name` differs from its filename, Dagu resolves the definition first and removes history under the configured DAG name.
 
@@ -695,6 +695,43 @@ dagu dry etl.yaml -- DATE=2024-01-01  # With parameters
 dagu dry --name my_custom_name my-workflow.yaml  # Override DAG name
 dagu dry --profile prod my-workflow.yaml
 dagu dry --no-reuse report-pipeline.yaml
+```
+
+### `computer check`
+
+Check that [computer steps](/step-types/computer) can capture the screen and send input on this host. Run it as the same user and in the same session as the worker that runs computer steps.
+
+```bash
+dagu computer check
+```
+
+On macOS, the command also asks macOS to show its Screen Recording prompt. Grant Screen Recording and Accessibility to the application that starts Dagu, such as Terminal, or to the `dagu` binary when it runs on its own. On Windows, the worker must run in a logged-in user session, not as a service, and the screen must stay unlocked.
+
+**Output:**
+```
+System:  darwin
+Display: 3024x1964 pixels
+Ready:   computer steps can operate this desktop
+```
+
+When the desktop cannot be automated, the command prints a `Problem:` line for each missing condition and exits nonzero.
+
+### `computer cache clear`
+
+Clear the recorded `act` operations that computer steps replay, so the next run asks the model again.
+
+```bash
+dagu computer cache clear [options] DAG
+```
+
+**Options:**
+- `--step` - Clear only the step with this ID, or its name when the step has no ID
+
+Without `--step`, every step of the DAG is cleared. The cache lives on the host that ran the step; in distributed mode, run the command on the worker.
+
+```bash
+dagu computer cache clear invoices
+dagu computer cache clear invoices --step post
 ```
 
 ### `enqueue`
@@ -880,7 +917,7 @@ dagu cleanup [options] DAG_NAME
 - `--dry-run` - Preview what would be deleted without actually deleting
 - `--yes, -y` - Skip confirmation prompt
 
-Active runs (running, queued) are never deleted for safety.
+Active runs (running, queued) are never deleted for safety. With the default `--retention-days 0`, it also clears the DAG's browser and computer replay caches on this host, like `dagu rm --history`.
 
 ```bash
 # Deprecated: delete all history

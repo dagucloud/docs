@@ -340,7 +340,7 @@ dagu rm -H --older-than 30d my-workflow
 dagu rm -H --definition my-workflow.yaml
 ```
 
-The command preserves active runs and prompts before deleting unless `--force` is set. Definition removal is refused while the DAG has an active local or distributed run.
+The command preserves active runs and prompts before deleting unless `--force` is set. Removing all history, without `--older-than`, also clears the DAG's browser and computer replay caches on this host. Definition removal is refused while the DAG has an active local or distributed run.
 
 #### Viewing Run History
 
