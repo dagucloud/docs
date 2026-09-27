@@ -137,6 +137,21 @@ The act fails when:
 - the model provider asks a person to confirm the next actions and `with.on_confirmation` is `fail` (the default). With `allow`, the actions run and the approval is sent with the next screenshot. To keep a person in the loop, put an [`ask`](#human-input) before such an act instead;
 - the operation timeout passes.
 
+## When a Person Uses the Desktop
+
+A desktop that runs computer steps is often one a person also works at. Before a step launches an application, replays a recorded turn, or starts an act, it waits until nobody has touched the mouse or keyboard for `with.idle` (default `15s`), and logs `Waiting until nobody has used the desktop for 15s`. Input the step sent itself does not count, and neither does input from the computer step that used the desktop before it.
+
+When a person uses the desktop while the model is choosing its next actions, those actions are not run, because they were chosen for a screen that may have changed. The step waits for the idle period again and sends the model the new screen with a note saying why. Skipped actions do not count toward `max_actions`.
+
+The waiting counts toward the operation's `timeout`. An operation whose timeout passes while someone keeps working fails with `a person kept using the desktop until the operation timed out`. On a dedicated host, `idle: 0` turns the waiting off:
+
+```yaml
+with:
+  idle: 0
+  do:
+    - act: Post the invoice
+```
+
 ## Conditions
 
 `expect` and `when` take a statement the model judges against a screenshot:
@@ -233,7 +248,7 @@ With `artifacts.enabled: false`, no screenshots are saved and a `screenshot` ope
 
 With `with.cache` true (the default), an `act` records each screen the model saw and the actions it chose on it. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the display size match, and each screen, including the area around each click, still looks as recorded. The log marks a full replay `cache-hit`. When a screen differs or an action fails, the model continues from the current screen, the new actions are recorded, and the operation is marked `healed`.
 
-- Recordings are kept only when the whole step succeeds. When an operation fails after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of a model request, the screen capture, a launch, or an `ask`, or a canceled run, leaves them.
+- Recordings are kept only when the whole step succeeds. When an operation fails after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of a model request, the screen capture, a launch, or an `ask`, a person using the desktop, or a canceled run, leaves them.
 - A replay follows the step's current settings: it hands the task to the model before a recorded turn that would exceed `max_actions`, or that the model provider asked a person to confirm while `on_confirmation` is not `allow`.
 - Typed text is recorded with its `%name%` placeholders, never the values.
 - A replay repeats recorded input whenever the screens match. Disable the cache for acts that must not repeat blindly, such as a payment, with `act: {instruction: ..., cache: false}`, or for the whole step with `with.cache: false`.
@@ -286,18 +301,18 @@ It exits nonzero and prints a `Problem:` line for each missing condition.
 
 **macOS**
 
-- Grant **Screen Recording** and **Accessibility** in System Settings > Privacy & Security to the application that starts Dagu, such as Terminal, or to the `dagu` binary when it runs on its own. `dagu computer check` also asks macOS to show the Screen Recording prompt.
+- Grant **Screen Recording** and **Accessibility** in System Settings > Privacy & Security to the application that starts Dagu, such as Terminal, or to the `dagu` binary when it runs on its own. `dagu computer check` also asks macOS to show the Screen Recording and Accessibility prompts for the permissions that are missing.
 - macOS ties the grants to the binary. After replacing an unsigned `dagu` binary, grant them again.
-- Keep the user logged in and the screen unlocked: turn off automatic screen lock and sleep for the display.
+- Keep the user logged in and turn off the automatic screen lock. While a step uses the desktop, Dagu keeps the display and the Mac awake, but a screen that locks, or another user's session taking the display, fails the step.
 
 **Windows**
 
 - Run Dagu in the user's logged-in session, for example from Task Scheduler with **Run only when user is logged on**, or from the Startup folder. A Windows service runs in session 0, which has no desktop.
-- Sign the user in automatically and turn off the screen lock. A locked screen or a secure prompt stops the step.
+- Sign the user in automatically and turn off the screen lock. While a step uses the desktop, Dagu keeps the display and the system awake, but a locked screen or a secure prompt fails the step.
 - Over Remote Desktop, a minimized or disconnected session stops rendering. Use the console session, or keep the remote window open.
 - Input cannot reach windows that run as administrator, such as UAC prompts, unless Dagu runs elevated too.
 
-One computer step at a time uses a host's desktop. A step that finds the desktop in use waits for it and logs `Waiting for another computer step to finish using the desktop`.
+One computer step at a time uses a user's desktop, across every Dagu process that user runs on the host, even ones with different data directories. A step that finds the desktop in use waits for it and logs `Waiting for another computer step to finish using the desktop`.
 
 ## Distributed Mode
 
@@ -325,6 +340,7 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `mode` | `auto`, `native`, or `generic`. See [Model](#model). |
 | `max_actions` | Actions an `act` may perform. Defaults to `50`. |
 | `on_confirmation` | `fail` (default) or `allow`, for model provider confirmation requests. |
+| `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `15s`; `0` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
 | `screenshots` | `on_failure`, `final`, `each`, or `never`. |
 | `cache` | Record and replay acts. Defaults to `true`. |
 | `llm` | Model configuration that replaces the DAG-level `llm` block. |
@@ -345,6 +361,9 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `desktop automation is supported on macOS and Windows only` | The step ran on another system. | Route the DAG to a macOS or Windows worker with `worker_selector`. |
 | `the process runs in session 0, which has no desktop` | Dagu runs as a Windows service. | Run the worker in a logged-in user session. See [Setting Up a Desktop Host](#setting-up-a-desktop-host). |
 | `the input desktop is not accessible; the screen may be locked` | The Windows screen is locked or a secure prompt is shown. | Unlock the screen and turn off the screen lock. |
+| `the screen is locked; unlock it and keep it unlocked while computer steps run` | The Mac screen locked before or during the step. | Unlock it and turn off the automatic screen lock. |
+| `another user's session has the display; switch back to this user` | Fast user switching moved the Mac's display to another user. | Switch back to the user that runs Dagu. |
+| `a person kept using the desktop until the operation timed out` | Someone used the mouse or keyboard for the whole operation timeout. | Run the step when the desktop is free, raise `timeout`, or set `idle: 0` on a dedicated host. |
 | `Screen Recording permission is missing` or `Accessibility permission is missing` | macOS has not granted the permission to the process that runs Dagu. | Grant it in System Settings > Privacy & Security, then restart Dagu. |
 | `SendInput delivered ... events; the target may run elevated or the desktop is locked` | The target window runs as administrator, or the screen locked. | Run Dagu elevated, or keep the screen unlocked. |
 | `the task needed more than max_actions (...) actions` | The act is too large, or the model is going in circles. | Split the task into smaller acts, or raise `max_actions`. |
