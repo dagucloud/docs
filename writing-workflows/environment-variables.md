@@ -375,7 +375,9 @@ When the same variable is defined at multiple levels, the highest-precedence val
 
 | Level | Precedence | Description |
 |-------|------------|-------------|
-| Step `env:` | Highest | Step-specific variables |
+| Container `env:` | Highest | The step's container, or the DAG-level container |
+| Container `env_file` | ↑ | Variables from the same container's dotenv files |
+| Step `env:` | ↑ | Step-specific variables |
 | Output variables | ↑ | From previous steps (`output:` field) |
 | Secrets | ↑ | From `secrets:` block |
 | DAG `env:` + `dotenv` | ↑ | Workflow-level variables |

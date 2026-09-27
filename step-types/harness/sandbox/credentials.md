@@ -38,6 +38,10 @@ steps:
 `PROVIDER_API_KEY=${env.PROVIDER_API_KEY}` is evaluated by Dagu before the container
 starts. The value must be available to the Dagu process that executes the run.
 
+To load keys from a dotenv file instead, set `container.env_file`. The file must
+exist on the host that runs the step. See
+[Environment Files](/writing-workflows/container#environment-files).
+
 ## Mounted Credential Directories
 
 Some CLIs store login state in files. Mount the directory the CLI reads, then

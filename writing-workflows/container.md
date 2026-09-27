@@ -125,6 +125,33 @@ steps:
     depends: wait_for_postgres
 ```
 
+### Environment Files
+
+`env_file` loads variables from one or more dotenv files into the container:
+
+```yaml
+container:
+  image: postgres:16
+  env_file:
+    - .env.postgres
+    - .env.local
+  env:
+    - POSTGRES_DB=myapp
+
+steps:
+  - run: pg_isready -U postgres
+```
+
+- `env_file` accepts one path or a list. Files are read in order, and a later file overrides an earlier one.
+- `env` entries override file variables with the same name. Step `env:` values sit below both.
+- Relative paths are searched in the working directory, then in the DAG file's directory. Absolute and `~` paths also work. References such as `${env.ENV_NAME}` in a path resolve before the file is read.
+- Files use the same dotenv syntax as top-level `dotenv`, not Docker's `--env-file` format. Surrounding quotes are removed, and `$VAR` or `${VAR}` in unquoted or double-quoted values expands from variables defined earlier in the same file. Single-quoted values stay literal. Dagu does not resolve `${env.*}`, `${params.*}`, or other Dagu references in file contents.
+- File variables are also available to Dagu references in the step, such as `${NAME}` in `run`, as `env` entries are.
+- Unlike `dotenv`, a missing or unreadable file fails the step. For a DAG-level container, it fails the run.
+- Files are read on the host that runs the step. In distributed mode, the file must exist on the worker.
+
+Top-level `dotenv` loads variables into the DAG environment. `env_file` loads them only into the selected container.
+
 ## Private Registry Authentication
 
 ```yaml
@@ -303,6 +330,7 @@ container:
     - /host:/container
   env:                       # Environment variables
     - KEY=value
+  env_file: .env.container   # dotenv file(s) loaded before env
   working_dir: /app           # Working directory
   user: "1000:1000"          # User/group
   platform: linux/amd64      # Platform
@@ -326,6 +354,7 @@ container:
   working_dir: /app            # Optional: override working directory
   env:                        # Optional: additional environment variables
     - DEBUG=true
+  env_file: .env.exec         # Optional: dotenv file(s) loaded before env
   shell: ["/bin/sh", "-c"]    # Shell wrapper for step commands
 ```
 
@@ -338,6 +367,7 @@ container:
 | `user` | N/A | Optional | Optional |
 | `working_dir` | N/A | Optional | Optional |
 | `env` | N/A | Optional | Optional |
+| `env_file` | N/A | Optional | Optional |
 | `shell` | N/A | Optional | Optional |
 | `name` | N/A | Not allowed | Optional |
 | `pull_policy` | N/A | Not allowed | Optional |
@@ -383,7 +413,7 @@ container:
 **Exec mode:**
 - The container must exist and be running; Dagu waits up to 120 seconds for the container to be running.
 - Fields like `volumes`, `ports`, `network`, `pull_policy`, etc. cannot be used with `exec` (they're only valid when creating a new container).
-- Only `user`, `working_dir`, `env`, and `shell` can override the container's defaults.
+- Only `user`, `working_dir`, `env`, `env_file`, and `shell` can override the container's defaults.
 
 **Shell field:**
 - Non-empty array: first element is shell path, last element is command flag (e.g., `-c`)

@@ -187,6 +187,7 @@ container:
   env:
     - MY_VAR=value
     - API_KEY=${env.API_KEY}
+  env_file: .env.container    # dotenv file(s); env entries win
   volumes:
     - ./data:/data            # Bind mount
     - /host/path:/container/path:ro
@@ -205,7 +206,10 @@ container:
   working_dir: /app            # Optional: override working directory
   env:                        # Optional: additional environment variables
     - DEBUG=true
+  env_file: .env.exec         # Optional: dotenv file(s); env entries win
 ```
+
+`env_file` accepts one path or a list and uses dotenv syntax. A missing file fails the step. See [Environment Files](/writing-workflows/container#environment-files) for path lookup and precedence.
 
 #### Field Availability
 
@@ -216,6 +220,7 @@ container:
 | `user` | Optional | Optional |
 | `working_dir` | Optional | Optional |
 | `env` | Optional | Optional |
+| `env_file` | Optional | Optional |
 | `name` | Not allowed | Optional |
 | `pull_policy` | Not allowed | Optional |
 | `volumes` | Not allowed | Optional |
@@ -362,7 +367,7 @@ steps:
 
 - **Container must exist**: The specified container must exist and be running. Dagu waits up to 120 seconds for the container to be in running state.
 - **Invalid fields**: Fields like `volumes`, `ports`, `network`, `pull_policy`, `name`, etc. cannot be used with `exec` and will cause validation errors.
-- **Allowed overrides**: Only `user`, `working_dir`, and `env` can be specified to override the container's defaults.
+- **Allowed overrides**: Only `user`, `working_dir`, `env`, `env_file`, and `shell` can be specified to override the container's defaults.
 
 ### DAG-Level Startup Options
 

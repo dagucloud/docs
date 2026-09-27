@@ -515,8 +515,9 @@ container:
 Rules:
 
 - Object form must set exactly one of `exec` or `image`.
-- Exec mode allows only `exec`, `user`, `working_dir`, `env`, and `shell`.
+- Exec mode allows only `exec`, `user`, `working_dir`, `env`, `env_file`, and `shell`.
 - Image mode requires `image` and accepts the remaining container fields.
+- `env_file` is a string or array of dotenv files loaded into the container. Later files override earlier ones, `env` overrides file values, and a missing file fails the run. Relative paths resolve from the working directory, then the DAG file's directory. See [Environment Files](/writing-workflows/container#environment-files).
 - Image mode `pull_policy` accepts `always`, `missing`, `never`, or `fallback` and defaults to `missing`. `fallback` tries the registry first, then uses a compatible local image if the pull fails.
 - Container `shell` is array form only.
 - Relative host paths in `volumes` resolve from the DAG `working_dir`.
