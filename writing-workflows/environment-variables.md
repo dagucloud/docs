@@ -72,6 +72,7 @@ The following fields are inherited from base configuration:
 | `hist_retention_days` | History retention |
 | `handler_on` | Lifecycle handlers |
 | `smtp` | Email configuration |
+| `mail_accounts` | Mail accounts (a DAG entry replaces the base entry for the same address) |
 
 ## DAG-Level Variables
 

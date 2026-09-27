@@ -2,6 +2,8 @@
 
 Send emails from your workflows for notifications, alerts, and reports.
 
+`mail.send` sends through the DAG-level `smtp` block, or through a [mail account](/step-types/mailbox#mail-accounts) named with `mailbox`, which can also reply to email it received. See [Send Through a Mail Account](#send-through-a-mail-account).
+
 ## Basic Usage
 
 ```yaml
@@ -66,8 +68,9 @@ smtp:
     client_secret: "${env.SMTP_CLIENT_SECRET}"
 ```
 
-Supported provider values are `microsoft`, `google_service_account`, and
-`google_refresh`. See [Email Notifications](/writing-workflows/email-notifications#smtp-providers)
+Supported `smtp.oauth` provider values are `microsoft`, `google_service_account`,
+and `google_refresh`. A mail account takes `google_refresh` or
+`microsoft_refresh` instead; see [Mailbox](/step-types/mailbox#oauth). See [Email Notifications](/writing-workflows/email-notifications#smtp-providers)
 for the required fields, Google examples, provider authorization steps, and
 SMTP inheritance behavior.
 
@@ -85,6 +88,32 @@ smtp:
   port: "587"
   username: "${env.SMTP_USER}"
   password: "${env.SMTP_PASS}"
+```
+
+## Send Through a Mail Account
+
+With `with.mailbox`, `mail.send` uses that account's SMTP server and sign-in from [`mail_accounts`](/step-types/mailbox#mail-accounts) instead of the `smtp` block, and `from` defaults to the account's address. `with.in_reply_to` makes the message a threaded reply to an email the account received; see [Send and Reply](/step-types/mailbox#send-and-reply).
+
+```yaml
+secrets:
+  - name: REPORTS_MAIL_PASSWORD
+    ref: mail/reports
+
+mail_accounts:
+  reports@example.com:
+    provider: google
+    password: ${REPORTS_MAIL_PASSWORD}
+
+steps:
+  - id: send_report
+    action: mail.send
+    with:
+      mailbox: reports@example.com
+      to: team@example.com
+      subject: Weekly Report
+      message: The weekly report is attached.
+      attachments:
+        - report.pdf
 ```
 
 ## Examples

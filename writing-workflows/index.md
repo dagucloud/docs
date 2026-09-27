@@ -238,7 +238,7 @@ steps:
 
 The run enters `Waiting` at `confirm` and releases its worker slot. Complete the task from the Web UI, REST API, or CLI to resume the same run. See [Human Tasks](/writing-workflows/human-tasks).
 
-Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-types/sql/), [Kubernetes jobs](/step-types/kubernetes), [S3](/step-types/s3), [Git](/step-types/git), files, archives, templates, and persistent state.
+Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-types/sql/), [Kubernetes jobs](/step-types/kubernetes), [S3](/step-types/s3), [Git](/step-types/git), [mailboxes](/step-types/mailbox), files, archives, templates, and persistent state.
 
 ## Find the next topic
 

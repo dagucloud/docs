@@ -105,6 +105,28 @@ mail_on:
 # Result: failure=false, success=false (not inherited)
 ```
 
+**Per-address fields** (`mail_accounts`) - A DAG entry replaces the base entry for the same address as a whole, compared case-insensitively; other base entries are inherited:
+
+```yaml
+# base.yaml
+mail_accounts:
+  support@example.com:
+    provider: google
+    password: ${SUPPORT_MAIL_PASSWORD}
+  billing@example.com:
+    provider: google
+    password: ${BILLING_MAIL_PASSWORD}
+
+# my-dag.yaml
+mail_accounts:
+  support@example.com:
+    imap:
+      host: mail.example.com
+    password: ${SUPPORT_IMAP_PASSWORD}
+# Result: support@example.com uses the DAG's server and password only;
+# billing@example.com is inherited
+```
+
 **Boolean fields** - the DAG overrides only when it sets the field explicitly:
 
 ```yaml
@@ -289,6 +311,27 @@ DAG that overrides it must provide a complete replacement; individual SMTP
 fields are not merged across OAuth and password identities. See
 [Email Notifications](/writing-workflows/email-notifications#smtp-providers)
 for all providers and their authorization prerequisites.
+
+### Mail Accounts
+
+Define the mailboxes that `mail.search`, `mail.organize`, and `mail.send` with `mailbox` can use in every DAG:
+
+```yaml
+# base.yaml
+secrets:
+  - name: SUPPORT_MAIL_TOKEN
+    ref: mail/support-token
+
+mail_accounts:
+  support@contoso.com:
+    provider: microsoft
+    oauth:
+      provider: microsoft_refresh
+      client_id: 00000000-0000-0000-0000-000000000000
+      refresh_token: ${SUPPORT_MAIL_TOKEN}
+```
+
+A DAG that defines the same address replaces the whole entry. `mail_accounts` is separate from `smtp`, which notifications keep using. See [Mailbox](/step-types/mailbox#mail-accounts) for every field.
 
 ### Execution Defaults
 
@@ -745,4 +788,5 @@ steps:
 - [Environment Variables](/writing-workflows/environment-variables) - Variable handling in workflows
 - [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) - Handler details
 - [Email Notifications](/writing-workflows/email-notifications) - Email setup guide
+- [Mailbox](/step-types/mailbox) - Mail accounts and the mailbox actions
 - [Configuration Reference](/server-admin/reference) - Complete field reference

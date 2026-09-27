@@ -408,6 +408,7 @@ const fullSidebar = [
             items: [
               { text: "HTTP", link: "/step-types/http" },
               { text: "Mail", link: "/step-types/mail" },
+              { text: "Mailbox", link: "/step-types/mailbox" },
               { text: "SSH", link: "/step-types/ssh" },
               { text: "SFTP", link: "/step-types/sftp" },
               { text: "Git", link: "/step-types/git" },

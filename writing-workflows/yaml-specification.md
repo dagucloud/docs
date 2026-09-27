@@ -453,6 +453,7 @@ Action names in steps can refer to built-ins, local custom actions, base-config 
 | `s3` | object | DAG-level defaults for `s3.*` actions. |
 | `llm` | object | DAG-level defaults for chat completion steps, or the decision model and context controls for an Agent DAG. |
 | `redis` | object | DAG-level defaults for `redis.<operation>` actions. |
+| `mail_accounts` | object | Mail accounts keyed by email address, used by `mail.search`, `mail.organize`, and `mail.send` with `mailbox`. See [Mailbox](/step-types/mailbox#mail-accounts). |
 | `harnesses` | object | Named harness configurations used by `harness.run`. |
 | `harness` | object | Default harness configuration used by `harness.run`. |
 | `kubernetes` | object | DAG-level defaults for explicit `k8s.run` and `kubernetes.run` steps. |
@@ -899,7 +900,7 @@ Accepted built-in action names:
 | `jq.filter` | jq transforms. |
 | `k8s.run`, `kubernetes.run` | Kubernetes job execution. |
 | `log.write` | Write a log message. |
-| `mail.send` | Send email. |
+| `mail.organize`, `mail.search`, `mail.send` | Find, organize, and send email. See [Mailbox](/step-types/mailbox) and [Mail](/step-types/mail). |
 | `noop` | Placeholder step. |
 | `outputs.write` | Write run-level or action outputs. |
 | `postgres.query`, `postgres.import` | PostgreSQL query/import actions. |
@@ -1429,7 +1430,7 @@ steps:
 - Top-level `resources` is not accepted by the current YAML parser.
 - Step IDs cannot contain hyphens. Use underscores.
 - `max_active_steps` defaults to `0`, which means unlimited step concurrency inside one DAG run.
-- `mail.send` uses `message`, not `body`.
+- `mail.send` uses `message`, not `body`. With `mailbox`, it sends through that account in `mail_accounts` instead of `smtp`.
 - `type: chain` forbids explicit `depends` and router steps.
 - `run` and `action` are mutually exclusive.
 - `output_schema` is an inline JSON Schema object, not a file path.

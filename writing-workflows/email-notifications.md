@@ -226,6 +226,10 @@ steps:
         - ${context.paths.log_file}
 ```
 
+::: info Sending from a mailbox
+With `with.mailbox`, `mail.send` sends through that account in `mail_accounts` instead of `smtp`, and can reply to an email the account received; see [Mailbox](/step-types/mailbox#send-and-reply). Notifications from `mail_on`, `error_mail`, `info_mail`, and `wait_mail` always use `smtp`.
+:::
+
 ## Email Templates
 
 ### Processing Report

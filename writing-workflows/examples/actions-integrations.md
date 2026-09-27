@@ -1,6 +1,6 @@
 # Actions & Integrations Examples
 
-Examples for custom actions, containers, Kubernetes, SSH, HTTP, jq, archive extraction, and mail.
+Examples for custom actions, containers, Kubernetes, SSH, HTTP, jq, archive extraction, mail, and mailboxes.
 
 <div class="examples-grid">
 
@@ -615,6 +615,66 @@ flowchart LR
 ```
 
 <a href="/step-types/mail" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Process Incoming Email
+
+```yaml
+secrets:
+  - name: SUPPORT_MAIL_PASSWORD
+    ref: mail/support
+
+mail_accounts:
+  support@example.com:
+    provider: google
+    password: ${SUPPORT_MAIL_PASSWORD}
+
+schedule: "*/5 * * * *"
+
+steps:
+  - id: find
+    action: mail.search
+    with:
+      mailbox: support@example.com
+      unread: true
+
+  - id: each
+    depends: find
+    foreach:
+      items: ${steps.find.outputs.messages}
+      as: email
+      key: ${foreach.email.id}
+      max_concurrent: 1
+      steps:
+        - id: ticket
+          run: ./create-ticket.sh "$SUBJECT"
+          env:
+            - SUBJECT: ${foreach.email.subject}
+
+        - id: done
+          depends: ticket
+          action: mail.organize
+          with:
+            mailbox: support@example.com
+            emails: ${foreach.email.id}
+            mark: read
+```
+
+Each email is marked read after its ticket exists, so one that fails stays unread and is retried on the next run.
+
+```mermaid
+flowchart LR
+  F[Find unread email] --> T[Create ticket]
+  T --> D[Mark read]
+  style F stroke:lightblue,stroke-width:1.6px,color:#333
+  style T stroke:lightblue,stroke-width:1.6px,color:#333
+  style D stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/mailbox" class="learn-more">Learn more →</a>
 
 </div>
 
