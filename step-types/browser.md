@@ -250,11 +250,13 @@ The step accepts every JavaScript dialog a page opens, so a dialog never blocks 
 
 ## Replay Cache
 
-A successful `act` records the actions it performed. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the page URL (without query or fragment) match. When a replay fails because the page changed, the step asks the model again, records the new actions, and marks the operation `healed` in the log.
+An `act` records the actions it performed, and the recordings are kept when the step succeeds. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the page URL (without query or fragment) match. When a replay fails because the page changed, the step asks the model again, records the new actions, and marks the operation `healed` in the log.
 
+- Recordings are kept only when the whole step succeeds. When an operation fails on the page after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of the model, the browser, a download, or an `ask`, or a canceled run, leaves them.
 - The cache covers `act` only. `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
-- A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one.
+- A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one; when the `expect` fails, the replay is dropped.
 - Disable the cache with `with.cache: false`, or for one operation with `act: {instruction: ..., cache: false}`.
+- `dagu browser cache clear <dag>` removes the recordings of every step of a DAG, or of one step with `--step <id>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Both work on the host they run on.
 
 ## Trying One Step
 
@@ -319,7 +321,7 @@ Answers are stored in the run's history, like other human input. Use `ask` for s
 
 ## Distributed Mode
 
-Browser steps run on the worker that picks them up, which needs Chrome. Profiles and the replay cache are stored on that worker, so pin steps that rely on them with `worker_selector`. An answered `ask` resumes on the worker that holds the browser.
+Browser steps run on the worker that picks them up, which needs Chrome. Profiles and the replay cache are stored on that worker, so pin DAGs that rely on them with a DAG-level `worker_selector` and [worker labels](/server-admin/distributed/worker-labels). An answered `ask` resumes on the worker that holds the browser.
 
 ## Web UI
 

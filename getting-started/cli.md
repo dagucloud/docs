@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `computer check`, `computer cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `computer check`, `computer cache clear`
 
 ## Global Options
 
@@ -695,6 +695,24 @@ dagu dry etl.yaml -- DATE=2024-01-01  # With parameters
 dagu dry --name my_custom_name my-workflow.yaml  # Override DAG name
 dagu dry --profile prod my-workflow.yaml
 dagu dry --no-reuse report-pipeline.yaml
+```
+
+### `browser cache clear`
+
+Clear the recorded `act` operations that [browser steps](/step-types/browser#replay-cache) replay, so the next run asks the model again.
+
+```bash
+dagu browser cache clear [options] DAG
+```
+
+**Options:**
+- `--step` - Clear only the step with this ID, or its name when the step has no ID
+
+Without `--step`, every step of the DAG is cleared. The cache lives on the host that ran the step; in distributed mode, run the command on the worker.
+
+```bash
+dagu browser cache clear billing
+dagu browser cache clear billing --step login
 ```
 
 ### `computer check`
