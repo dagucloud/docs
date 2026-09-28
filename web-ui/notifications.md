@@ -217,6 +217,8 @@ Failed steps: {{run.failed_steps}}
 
 Email channels also support separate subject and body templates.
 
+Email bodies and Slack messages escape token values, so an error that contains `<`, `>`, or `&` shows as written instead of being read as markup or a Slack mention. Markup written in the template itself is kept.
+
 ## DAG Run Links
 
 Default notification messages include a DAG-run link when Dagu can build an externally reachable Web UI URL.
