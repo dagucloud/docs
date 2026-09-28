@@ -720,10 +720,13 @@ dagu browser cache clear billing --step login
 Check that [computer steps](/step-types/computer) can capture the screen and send input on this host. Run it as the same user and in the same session as the worker that runs computer steps.
 
 ```bash
-dagu computer check
+dagu computer check [--format json]
 ```
 
-On macOS, the command also asks macOS to show its Screen Recording prompt. Grant Screen Recording and Accessibility to the application that starts Dagu, such as Terminal, or to the `dagu` binary when it runs on its own. On Windows, the worker must run in a logged-in user session, not as a service, and the screen must stay unlocked.
+**Options:**
+- `--format`, `-f` - Output format: `text` (default) or `json`
+
+On macOS, the command also asks macOS to show the Screen Recording and Accessibility prompts for the permissions that are missing. Grant Screen Recording and Accessibility to the application that starts Dagu, such as Terminal, or to the `dagu` binary when it runs on its own. On Windows, the worker must run in a logged-in user session, not as a service, and the screen must stay unlocked.
 
 **Output:**
 ```
@@ -733,6 +736,37 @@ Ready:   computer steps can operate this desktop
 ```
 
 When the desktop cannot be automated, the command prints a `Problem:` line for each missing condition and exits nonzero.
+
+With `--format json`, it prints one object for programs to read, and exits nonzero the same way:
+
+```json
+{
+  "os": "darwin",
+  "width": 3024,
+  "height": 1964,
+  "ready": false,
+  "problems": [
+    {
+      "code": "accessibility",
+      "message": "Accessibility permission is missing; grant it in System Settings > Privacy & Security > Accessibility"
+    }
+  ]
+}
+```
+
+`width` and `height` are `0` when the display size is unknown, and `problems` is empty when `ready` is `true`. Each problem has one of these codes:
+
+| Code | Meaning |
+|------|---------|
+| `unsupported` | The system is not macOS or Windows. |
+| `load_failed` | The macOS system frameworks could not be loaded. |
+| `no_session` | There is no graphical login session (macOS). |
+| `other_session` | Another user's session has the display (macOS). |
+| `service_session` | The process runs as a Windows service, in session 0. |
+| `screen_locked` | The screen is locked, or on Windows a secure prompt is shown. |
+| `screen_recording` | Screen Recording permission is missing (macOS). |
+| `accessibility` | Accessibility permission is missing (macOS). |
+| `no_display` | The display size is unavailable. |
 
 ### `computer cache clear`
 

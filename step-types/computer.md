@@ -139,7 +139,7 @@ The act fails when:
 
 ## When a Person Uses the Desktop
 
-A desktop that runs computer steps is often one a person also works at. Before a step launches an application, replays a recorded turn, or starts an act, it waits until nobody has touched the mouse or keyboard for `with.idle` (default `15s`), and logs `Waiting until nobody has used the desktop for 15s`. Input the step sent itself does not count, and neither does input from the computer step that used the desktop before it.
+A desktop that runs computer steps is often one a person also works at. Before a step launches an application, replays a recorded turn, or starts an act, it waits until nobody has touched the mouse or keyboard for `with.idle` (default `15s`), and logs `Waiting until nobody has used the desktop for 15s`. On the step's timeline, this wait is a `waiting` event named `person`. Input the step sent itself does not count, and neither does input from the computer step that used the desktop before it.
 
 When a person uses the desktop while the model is choosing its next actions, those actions are not run, because they were chosen for a screen that may have changed. The step waits for the idle period again and sends the model the new screen with a note saying why. Skipped actions do not count toward `max_actions`.
 
@@ -297,7 +297,7 @@ Display: 3024x1964 pixels
 Ready:   computer steps can operate this desktop
 ```
 
-It exits nonzero and prints a `Problem:` line for each missing condition.
+It exits nonzero and prints a `Problem:` line for each missing condition. With `--format json` it prints the same result as JSON, with a code for each problem, for tools that prepare desktop hosts; see the [CLI reference](/getting-started/cli#computer-check).
 
 **macOS**
 
@@ -312,7 +312,7 @@ It exits nonzero and prints a `Problem:` line for each missing condition.
 - Over Remote Desktop, a minimized or disconnected session stops rendering. Use the console session, or keep the remote window open.
 - Input cannot reach windows that run as administrator, such as UAC prompts, unless Dagu runs elevated too.
 
-One computer step at a time uses a user's desktop, across every Dagu process that user runs on the host, even ones with different data directories. A step that finds the desktop in use waits for it and logs `Waiting for another computer step to finish using the desktop`.
+One computer step at a time uses a user's desktop, across every Dagu process that user runs on the host, even ones with different data directories. A step that finds the desktop in use waits for it and logs `Waiting for another computer step to finish using the desktop`, recorded on its timeline as a `waiting` event named `desktop`.
 
 ## Distributed Mode
 
