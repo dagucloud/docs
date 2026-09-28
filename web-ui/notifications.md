@@ -186,7 +186,7 @@ Common tokens:
 | <code v-pre>{{dag.name}}</code> or <code v-pre>{{dagName}}</code> | DAG name |
 | <code v-pre>{{run.id}}</code> or <code v-pre>{{dagRunId}}</code> | DAG run ID |
 | <code v-pre>{{run.status}}</code> or <code v-pre>{{status}}</code> | Run status |
-| <code v-pre>{{run.error}}</code> or <code v-pre>{{error}}</code> | Error message, when present |
+| <code v-pre>{{run.error}}</code> or <code v-pre>{{error}}</code> | Run error. When the run has none, the failed steps' errors as `step: message`, one per line |
 | <code v-pre>{{run.failed_steps}}</code> | Comma-separated failed steps |
 | <code v-pre>{{run.partially_succeeded_steps}}</code> | Comma-separated partially succeeded steps |
 | <code v-pre>{{run.aborted_steps}}</code> | Comma-separated aborted steps |
@@ -216,6 +216,8 @@ Failed steps: {{run.failed_steps}}
 ```
 
 Email channels also support separate subject and body templates.
+
+Email bodies and Slack messages escape token values, so an error that contains `<`, `>`, or `&` shows as written instead of being read as markup or a Slack mention. Markup written in the template itself is kept.
 
 ## DAG Run Links
 

@@ -113,7 +113,7 @@ Common tokens:
 | <code v-pre>{{dag.name}}</code> or <code v-pre>{{dagName}}</code> | DAG name |
 | <code v-pre>{{run.id}}</code> or <code v-pre>{{dagRunId}}</code> | DAG run ID |
 | <code v-pre>{{run.status}}</code> or <code v-pre>{{status}}</code> | Run status |
-| <code v-pre>{{run.error}}</code> or <code v-pre>{{error}}</code> | Error message, when present |
+| <code v-pre>{{run.error}}</code> or <code v-pre>{{error}}</code> | Run error. When the run has none, the failed steps' errors as `step: message`, one per line |
 | <code v-pre>{{run.path}}</code> or <code v-pre>{{runPath}}</code> | Relative Web UI path for the DAG run |
 | <code v-pre>{{run.url}}</code> or <code v-pre>{{runUrl}}</code> | Absolute Web UI URL for the DAG run, when `public_url` is configured |
 | <code v-pre>{{run.link}}</code> or <code v-pre>{{runLink}}</code> | `Run: ...` line when an absolute run URL is available |
