@@ -64,7 +64,39 @@ Rules:
 - A key prefixed with `re:` is a Go regular expression.
 - A key prefixed with `num:` is a numeric comparison, using `>`, `>=`, `<`, or `<=`.
 - Every matching route runs, not just the first match.
+- A step can be listed under more than one route. It runs once when any of those routes
+  matches, and is skipped when none does.
 - Use `re:.*` as a default route.
+
+## One Step Under Several Routes
+
+List a step under each route that should run it:
+
+```yaml
+type: graph
+params:
+  - OP: UPDATE
+steps:
+  - id: router
+    action: router.route
+    with:
+      value: ${OP}
+      routes:
+        INSERT: [generate_thumbnails, index_object]
+        UPDATE: [generate_thumbnails]
+
+  - id: generate_thumbnails
+    run: echo "Generating thumbnails"
+
+  - id: index_object
+    run: echo "Indexing new object"
+```
+
+With `OP=UPDATE`, `generate_thumbnails` runs once and `index_object` is skipped. With
+`OP=INSERT`, both run. Any other value skips both.
+
+A step targeted by two different router steps runs only when a route of each router
+matches.
 
 ## Numeric Routes
 
@@ -104,8 +136,11 @@ input.
 :::
 
 Because every matching route runs, a catch-all added beside numeric routes runs as well.
-And no single pattern expresses a middle band such as `0.1 < x < 0.9`, since a route
-carries one pattern; put those bounds on the target step as two preconditions instead.
+
+To send both ends of a range to one step, list it under two numeric routes, such as
+`"num:<0.1": [needs_review]` and `"num:>0.9": [needs_review]`. A middle band such as
+`0.1 < x < 0.9` has no route form, since routes listing the same step match when either
+one does; put those bounds on the target step as two preconditions instead.
 
 ## Route Dependencies
 

@@ -504,9 +504,11 @@ steps:
     run: echo "Sent for review"
 ```
 
-> **Note**: no single route pattern expresses a middle band such as `0.1 < x < 0.9`,
-> because a route carries one pattern. Put the bounds on the target step as two
-> preconditions instead, as shown in [Numeric Comparison](#numeric-comparison).
+> **Note**: listing one step under two numeric routes, such as `num:<0.1` and
+> `num:>0.9`, sends both ends of a range to it. A middle band such as `0.1 < x < 0.9`
+> has no route form, because routes listing the same step match when either one does.
+> Put the bounds on the target step as two preconditions instead, as shown in
+> [Numeric Comparison](#numeric-comparison).
 
 ::: warning A numeric route fails the run on a non-numeric value
 When a workflow declares any `num:` route and the value is not a number, the router step
@@ -561,6 +563,30 @@ steps:
 
   - id: step_b
     run: echo "Step B"
+```
+
+#### One Step Under Several Routes
+
+A step can be listed under more than one route. It runs once when any of those routes
+matches:
+
+```yaml
+params:
+  - OP: UPDATE
+steps:
+  - id: router
+    action: router.route
+    with:
+      value: ${OP}
+      routes:
+        INSERT: [generate_thumbnails, index_object]
+        UPDATE: [generate_thumbnails]
+
+  - id: generate_thumbnails
+    run: echo "Generating thumbnails"
+
+  - id: index_object
+    run: echo "Indexing new object"
 ```
 
 #### Routing Based on Step Output
@@ -666,7 +692,7 @@ steps:
 
 > **Evaluation order**: Exact and `num:` matches are checked first, then regex patterns in alphabetical order, with catch-all (`re:.*`) last. All matching routes execute their targets, not just the first match.
 
-> **Constraints**: Router steps run in graph workflows. Each step can only be targeted by one route across all routers.
+> **Constraints**: Router steps run in graph workflows. A step targeted by more than one router step runs only when a route of each router matches.
 
 ## Repetition
 
