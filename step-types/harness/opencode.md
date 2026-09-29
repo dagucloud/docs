@@ -10,7 +10,7 @@ For containerized Dagu runs, see [Run OpenCode in a Container](./sandbox/opencod
 
 ## Managed Sessions
 
-Built-in OpenCode harness steps use a host-owned OpenCode server session by default when launched by a standalone Dagu server, by `dagu start-all`, or on a distributed worker. The run page gets an **Agent** tab with the live timeline, tool activity, changed files, token usage, and native controls for permission requests and questions. Each managed step has its own conversation by default; when a run has multiple managed steps, choose the conversation by step name in the Agent tab. When OpenCode needs an answer, the step and DAG-run enter `waiting`; answering resumes the same session.
+Built-in OpenCode harness steps use a host-owned OpenCode server session by default when launched by a standalone Dagu server, by `dagu start-all`, or on a distributed worker. The run page gets an **Agent** tab with the live timeline, tool activity, changed files, token usage, and native controls for permission requests and questions. Each managed step has its own conversation by default; when a run has multiple managed steps, choose the conversation by step name in the Agent tab. When OpenCode needs an answer, the step enters `waiting`, and the DAG-run enters `waiting` once no other step is running. Answering resumes the same session. While other steps of the run are still running, answering and starting a clean session are rejected; try again after they finish. In a root run, answering resumes the run even while other manual steps keep waiting. If the DAG belongs to an enabled [global queue](/server-admin/queues), the resume goes through the scheduler; use `dagu start-all` so the scheduler shares the server's OpenCode host.
 
 ```yaml
 steps:

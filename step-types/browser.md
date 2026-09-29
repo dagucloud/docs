@@ -305,7 +305,7 @@ do:
     when: {text: Verification code}
 ```
 
-The step enters **Waiting** with the question in the step's **Agent** tab. The browser stays open. Answering resumes the step in the same browser at the next operation, with the answer available as `%otp%`. If an act needs an answer whose `ask` was skipped, the step fails instead of typing `%otp%`. Rejecting the question fails the step. The browser stays open for `timeout` (default `1h`); after that, the answer fails the step and **Start clean session** runs the step again from the beginning.
+The step enters **Waiting** with the question in the step's **Agent** tab. The browser stays open. Answering resumes the step in the same browser at the next operation, with the answer available as `%otp%`. If an act needs an answer whose `ask` was skipped, the step fails instead of typing `%otp%`. While other steps of the run are still running, answering is rejected; try again after they finish. Rejecting the question fails the step. The browser stays open for `timeout` (default `1h`); after that, the answer fails the step and **Start clean session** runs the step again from the beginning.
 
 Answers are stored in the run's history, like other human input. Use `ask` for short-lived codes, not long-term secrets.
 

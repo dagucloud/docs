@@ -280,7 +280,7 @@ do:
     when: A verification code prompt is shown
 ```
 
-The step enters **Waiting** with the question in the step's **Agent** tab. The desktop stays as it is, and other computer steps can use it while the step waits. Answering resumes the step on the same host at the next operation, with the answer available as `%otp%` and the outputs extracted before the pause. Like a variable, the answer reaches the model only as the placeholder, so the model cannot act on what it says; it can only type it.
+The step enters **Waiting** with the question in the step's **Agent** tab. The desktop stays as it is, and other computer steps can use it while the step waits. Answering resumes the step on the same host at the next operation, with the answer available as `%otp%` and the outputs extracted before the pause. Like a variable, the answer reaches the model only as the placeholder, so the model cannot act on what it says; it can only type it. While other steps of the run are still running, answering is rejected; try again after they finish.
 
 Rejecting the question fails the step, so an `ask` before an act that is hard to undo works as an approval gate. An answer after `timeout` (default `1h`) fails the step, and **Start clean session** runs the step again from the first operation.
 

@@ -1785,7 +1785,7 @@ DAG-run node responses expose actor names and IDs in `approvedBy`/`approvedById`
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/approve`
 
-Approves a step that is in Waiting status. If the step's `approval.input` defines input fields, the provided `inputs` are available as environment variables in subsequent steps.
+Approves a step that is in Waiting status and resumes the run when a step can run. In a root run, the resume happens even while other manual steps keep waiting; see [Parallel Approvals](/writing-workflows/approval#parallel-approvals). If the step's `approval.input` defines input fields, the provided `inputs` are available as environment variables in subsequent steps.
 
 **Request Body** (optional):
 ```json
@@ -1814,13 +1814,42 @@ Approves a step that is in Waiting status. If the step's `approval.input` define
 |-------|------|-------------|
 | `dagRunId` | string | The DAG run ID |
 | `stepName` | string | The approved step name |
-| `resumed` | boolean | Whether the DAG run was re-enqueued for execution |
+| `resumed` | boolean | Whether resume execution was accepted, directly or through a queue. `true` does not mean execution has started. |
 
 **Error Responses**:
 - `400`: Step is not in Waiting status, or required inputs missing
 - `404`: DAG-run or step not found
+- `409`: The approval was saved, but the run changed before its resume could be accepted
+- `503`: The approval was saved, but the resume could not be accepted
+
+A `503` with error code `internal_error` includes `approvalStored: true` and `resumePending: true` in `details`. Do not approve again. Retry only the resume with [Resume After Approval](#resume-after-approval).
 
 **Sub DAG variant**: `POST /api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/steps/{stepName}/approve`
+
+The sub-DAG variant resumes the child only after every waiting step inside it is resolved. It returns `resumed: false` instead of `503` when that resume fails.
+
+### Resume After Approval
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/resume`
+
+Resumes a root run whose approval is saved but whose resume was not accepted. This endpoint has no request body; it never changes approvals or their inputs. It requires permission to run DAGs.
+
+**Response (200)**:
+
+```json
+{
+  "dagRunId": "20240211_140000_abc123",
+  "resumed": true
+}
+```
+
+The operation is safe to retry. A run that is already queued or running returns `resumed: true` without starting another execution.
+
+**Error Responses**:
+
+- `404`: The DAG run does not exist.
+- `409`: The run has no saved root approval, no approved work is ready to resume, or the run changed before the resume could be accepted.
+- `503`: The resume could not be accepted again and remains retryable.
 
 ### Reject Step
 

@@ -53,6 +53,35 @@ Push-back input names are not special-cased. `FEEDBACK` is common, but any key c
    - **Push back**: step resets to `Not Started` and re-executes (see [Push-back](#push-back))
    - **Reject**: step enters `Rejected` status, DAG becomes `Rejected`, dependents are aborted
 
+### Parallel Approvals
+
+In a root run, approving a step resumes the run as soon as a step can run, even while other approval steps keep waiting. The resumed attempt runs the ready branch and returns to `Waiting` until the remaining approvals are resolved.
+
+```yaml
+type: graph
+steps:
+  - id: build_web
+    run: ./build-web.sh
+    approval:
+      prompt: "Release the web build?"
+  - id: deploy_web
+    run: ./deploy-web.sh
+    depends: build_web
+  - id: build_api
+    run: ./build-api.sh
+    approval:
+      prompt: "Release the API build?"
+  - id: deploy_api
+    run: ./deploy-api.sh
+    depends: build_api
+```
+
+Approving `build_web` runs `deploy_web` while `build_api` keeps waiting.
+
+While any step has failed, been aborted, or is waiting for a retry, or when the ready step declares build `inputs`, the run keeps waiting until no manual steps remain, so failed steps are retried once. A [sub-DAG](/writing-workflows/sub-dags) run resumes only after every waiting step inside it is resolved.
+
+The resume starts directly, or through the queue when the DAG belongs to an enabled [global queue](/server-admin/queues); queued resumes need a running scheduler.
+
 ## Examples
 
 ### Collecting Inputs
@@ -316,6 +345,8 @@ The run details show the actor name for approval, rejection, and push-back opera
 
 To reject all waiting steps at once, use the **Reject** button in the DAG run action bar (replaces the Stop button when the DAG is in `Waiting` status). An optional rejection reason can be provided.
 
+If an approval is saved but the run cannot be resumed, the run view shows **Approval saved; resume failed.** with a **Retry resume** button. Retrying resumes the run without approving again.
+
 ### REST API
 
 #### Approve a Step
@@ -329,6 +360,14 @@ curl -X POST "http://localhost:8080/api/v1/dag-runs/{name}/{dagRunId}/steps/{ste
     }
   }'
 ```
+
+The approval and its inputs are saved before the run resumes. If the resume cannot be accepted, the request returns `503` with `approvalStored: true` and `resumePending: true` in `details`. Do not approve again; retry only the resume:
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/dag-runs/{name}/{dagRunId}/resume"
+```
+
+Repeating the request while the run is queued or running does not start another execution. See [Resume After Approval](/web-ui/api#resume-after-approval).
 
 #### Reject a Step
 
@@ -366,6 +405,8 @@ wait_mail:
   prefix: "[APPROVAL REQUIRED]"
 ```
 
+The email is sent each time the run enters `Waiting`, including after an approval resumes one branch while other steps still wait.
+
 See [Email Notifications](/writing-workflows/email-notifications) for details.
 
 ## Wait Handler
@@ -387,7 +428,7 @@ steps:
       prompt: "Approve deployment"
 ```
 
-The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of waiting step names.
+The `DAG_WAITING_STEPS` environment variable contains a comma-separated list of waiting step names. The handler runs each time the run enters `Waiting`, including after an approval resumes one branch while other steps still wait.
 
 See [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) for details.
 
