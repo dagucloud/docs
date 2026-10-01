@@ -158,6 +158,25 @@ DAGU_AUTH_BASIC_USERNAME=admin
 DAGU_AUTH_BASIC_PASSWORD=secure-password
 ```
 
+### Graceful Shutdown
+
+`dagu start-all`, `dagu server`, and `dagu scheduler` shut down on `SIGTERM` or `SIGINT`. By default, shutdown does not forward the signal to the DAG runs they started or wait for those runs to clean up. To stop those runs cleanly together with the service, enable signal propagation:
+
+```yaml
+# config.yaml
+signal_handling:
+  enable_propagation: true
+```
+
+Or set `DAGU_SIGNAL_PROPAGATION=true`. On shutdown, Dagu then forwards the signal to each DAG run it started and waits until those runs exit. Each run stops its steps within its [cleanup time](/writing-workflows/execution-control#cleanup-timeout), runs its `abort` and `exit` handlers, and records its final status. Runs that start after the signal arrives are not included.
+
+While Dagu waits for runs to clean up:
+
+- A repeated `SIGTERM` is ignored. Container runtimes and service managers can deliver `SIGTERM` more than once, for example to a whole process group and again through `sudo`, and they force a stop with `SIGKILL` when their own timeout expires.
+- A second `SIGINT`, such as pressing Ctrl+C again, exits immediately without waiting.
+
+Give the service manager enough time for the slowest run to clean up: raise `TimeoutStopSec` in the systemd unit, or set `stop_grace_period` in Docker Compose. `docker stop` waits 10 seconds by default.
+
 ### Resource Monitoring
 
 Dagu provides built-in resource monitoring that tracks CPU, memory, disk, and load average. The data is displayed in the System Status page of the web UI.

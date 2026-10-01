@@ -252,6 +252,10 @@ proc:
   heartbeat_sync_interval: "10s"   # How often heartbeat files are fsynced to disk
   stale_threshold: "90s"           # Time after which a heartbeat is considered stale
 
+# Shutdown signal handling (server, scheduler, start-all)
+signal_handling:
+  enable_propagation: false  # Forward SIGINT/SIGTERM to running DAG runs and wait for their cleanup
+
 # Resource Monitoring
 monitoring:
   retention: "24h"        # How long to keep resource history (default: 24h)
@@ -488,6 +492,9 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_SCHEDULER_ZOMBIE_DETECTION_INTERVAL` - Interval for detecting zombie DAG runs (default: `45s`, `0` to disable)
 - `DAGU_SCHEDULER_RETRY_FAILURE_WINDOW` - Lookback window for DAG-level retry scanning (default: `24h`, `0` to disable)
 - `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)
+
+### Signal Handling
+- `DAGU_SIGNAL_PROPAGATION` - Forward shutdown signals (`SIGINT`/`SIGTERM`) received by `dagu server`, `dagu scheduler`, or `dagu start-all` to the DAG runs it started, and wait for their cleanup before exiting (default: `false`). See [Graceful Shutdown](/server-admin/operations#graceful-shutdown).
 
 ### Proc Liveness
 These settings apply to all locally owned DAG runs, not just `dagu scheduler`.
