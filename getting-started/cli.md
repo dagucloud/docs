@@ -969,7 +969,7 @@ dagu cleanup [options] DAG_NAME
 - `--dry-run` - Preview what would be deleted without actually deleting
 - `--yes, -y` - Skip confirmation prompt
 
-Active runs (running, queued) are never deleted for safety. With the default `--retention-days 0`, it also clears the DAG's browser and computer replay caches on this host, like `dagu rm --history`.
+Active runs (running, queued) are never deleted for safety. Unlike `dagu rm --history`, it does not clear the DAG's browser and computer replay caches; use `dagu browser cache clear` or `dagu computer cache clear`.
 
 ```bash
 # Deprecated: delete all history

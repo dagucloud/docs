@@ -10,7 +10,7 @@ Every model request goes through Dagu's own [LLM providers](/step-types/llm/prov
 
 ## Requirements
 
-- A Dagu version newer than v2.17.2.
+- Dagu v2.18.0 or later.
 - macOS or Windows. On other systems the step fails with `desktop automation is supported on macOS and Windows only`.
 - Dagu running in a logged-in user session with the screen unlocked. On Windows it must not run as a service. On macOS, Screen Recording and Accessibility must be granted to the application that starts Dagu, or to the `dagu` binary. See [Setting Up a Desktop Host](#setting-up-a-desktop-host).
 - A model configured with a DAG-level `llm` block or `with.llm`. A computer step without one fails validation.
@@ -143,11 +143,11 @@ A desktop that runs computer steps is often one a person also works at. Before a
 
 When a person uses the desktop while the model is choosing its next actions, those actions are not run, because they were chosen for a screen that may have changed. The step waits for the idle period again and sends the model the new screen with a note saying why. Skipped actions do not count toward `max_actions`.
 
-The waiting counts toward the operation's `timeout`. An operation whose timeout passes while someone keeps working fails with `a person kept using the desktop until the operation timed out`. On a dedicated host, `idle: 0` turns the waiting off:
+The waiting counts toward the operation's `timeout`. An operation whose timeout passes while someone keeps working fails with `a person kept using the desktop until the operation timed out`. On a dedicated host, `idle: 0s` turns the waiting off, and actions are no longer skipped when someone uses the desktop:
 
 ```yaml
 with:
-  idle: 0
+  idle: 0s
   do:
     - act: Post the invoice
 ```
@@ -182,7 +182,7 @@ Computer steps use the DAG-level `llm` block. `with.llm` replaces it entirely fo
 | `native` | The native tool only. A provider without one fails validation, and a model without one fails the step. |
 | `generic` | Plain function tools, which work with any tool-calling model that accepts images, such as models through OpenRouter or a local server. |
 
-Native tools are available on Claude Opus 4.8, Sonnet 5, and later; GPT-5.4 and later, except nano models; and Gemini 3.5 and later.
+Native tools are available on Claude Opus 4.8, Claude 5 models, and later; GPT-5.4 and later, except nano models; and Gemini 3.5 and later. A model ID Dagu does not recognize, such as a custom deployment name, is treated as having the native tool; set `mode: generic` for such a model when it has none.
 
 When several models are listed, an `act` moves to the next model only when a model fails before any action ran, so a half-finished task is never handed to another model. `extract` and conditions try the models in order for every request.
 
@@ -211,7 +211,7 @@ steps:
 ```
 
 - Do not write `${ERP_PASSWORD}` inside an instruction. The step fails before operating the desktop when an `act`, `extract`, `ask`, `expect`, or `when` text contains the value of a declared secret of four or more characters.
-- A `%name%` must be a `with.variables` key or the `as` of an earlier `ask`; anything else fails validation.
+- A `%name%` in an `act` must be a `with.variables` key or the `as` of an earlier `ask`; anything else fails validation. Other operations send `%name%` to the model as written.
 - Declared secrets and `ask` answers of four or more characters are masked in the step log, the timeline, and errors.
 - A value typed into a field that shows it, rather than a password field, appears in later screenshots, which are sent to the model and saved as artifacts.
 
@@ -282,7 +282,7 @@ do:
 
 The step enters **Waiting** with the question in the step's **Agent** tab. The desktop stays as it is, and other computer steps can use it while the step waits. Answering resumes the step on the same host at the next operation, with the answer available as `%otp%` and the outputs extracted before the pause. Like a variable, the answer reaches the model only as the placeholder, so the model cannot act on what it says; it can only type it. While other steps of the run are still running, answering is rejected; try again after they finish.
 
-Rejecting the question fails the step, so an `ask` before an act that is hard to undo works as an approval gate. An answer after `timeout` (default `1h`) fails the step, and **Start clean session** runs the step again from the first operation.
+Rejecting the question fails the step, so an `ask` before an act that is hard to undo works as an approval gate. After `timeout` (default `1h`), the step can no longer resume: an answer is refused, or fails the step on a distributed worker. **Start clean session** runs the step again from the first operation.
 
 Answers are stored in the run's history, like other human input. Use `ask` for approvals and short-lived codes, not long-term secrets.
 
@@ -340,7 +340,7 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `mode` | `auto`, `native`, or `generic`. See [Model](#model). |
 | `max_actions` | Actions an `act` may perform. Defaults to `50`. |
 | `on_confirmation` | `fail` (default) or `allow`, for model provider confirmation requests. |
-| `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `15s`; `0` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
+| `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `15s`; `0s` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
 | `screenshots` | `on_failure`, `final`, `each`, or `never`. |
 | `cache` | Record and replay acts. Defaults to `true`. |
 | `llm` | Model configuration that replaces the DAG-level `llm` block. |
@@ -363,10 +363,11 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `the input desktop is not accessible; the screen may be locked` | The Windows screen is locked or a secure prompt is shown. | Unlock the screen and turn off the screen lock. |
 | `the screen is locked; unlock it and keep it unlocked while computer steps run` | The Mac screen locked before or during the step. | Unlock it and turn off the automatic screen lock. |
 | `another user's session has the display; switch back to this user` | Fast user switching moved the Mac's display to another user. | Switch back to the user that runs Dagu. |
-| `a person kept using the desktop until the operation timed out` | Someone used the mouse or keyboard for the whole operation timeout. | Run the step when the desktop is free, raise `timeout`, or set `idle: 0` on a dedicated host. |
+| `a person kept using the desktop until the operation timed out` | Someone used the mouse or keyboard for the whole operation timeout. | Run the step when the desktop is free, raise `timeout`, or set `idle: 0s` on a dedicated host. |
 | `Screen Recording permission is missing` or `Accessibility permission is missing` | macOS has not granted the permission to the process that runs Dagu. | Grant it in System Settings > Privacy & Security, then restart Dagu. |
 | `SendInput delivered ... events; the target may run elevated or the desktop is locked` | The target window runs as administrator, or the screen locked. | Run Dagu elevated, or keep the screen unlocked. |
 | `the task needed more than max_actions (...) actions` | The act is too large, or the model is going in circles. | Split the task into smaller acts, or raise `max_actions`. |
+| `expectation not met: ...` | An `expect` statement did not hold. The message gives the model's reason. | Look at the failure screenshot; fix the act before it, or add `within` when the screen needs time to change. |
 | `the model could not complete the task: ...` | The model reported the task impossible from what it saw. | Look at the failure screenshot; fix the instruction or the starting screen. |
 | `the model stopped without reporting the task done` | The model answered twice without acting. | Make the instruction concrete, or try another model. |
 | `the model provider asks a person to confirm the next actions (...)` | The provider's safety check wants a person to approve. | Add an `ask` before the act and set `on_confirmation: allow`. |
@@ -374,6 +375,7 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `the model does not support the provider's native computer use` | `mode: native` with an older model. | Use a newer model, or `mode: auto`. |
 | `contains the value of secret ...` | A declared secret is written in an instruction. | Pass it in `with.variables` and reference it as `%name%`. |
 | `act references %name%, which is not in with.variables or an earlier ask` | A misspelled or missing variable. | Add it to `with.variables` or fix the name. |
+| `the instruction uses %name%, but the ask that sets it did not run` | The `ask` was skipped because its `when` did not hold. | Give the act the same `when` as the `ask`. |
 | `computer actions need a model` | No `llm` block applies to the step. | Add a DAG-level `llm` block or `with.llm`. |
 | `act did not finish within ...` | The act ran past its `timeout`. | Raise the operation's `timeout`, or split the task. |
 

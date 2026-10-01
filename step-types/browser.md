@@ -1,3 +1,7 @@
+---
+description: Automate websites in a local Chrome with browser.run and browser.extract, driven by natural-language instructions and a model.
+---
+
 # Browser
 
 Automate websites that have no API. A browser step drives a local Chrome with natural-language instructions, extracts structured data into step outputs, checks page state, and can pause for a person, for example to enter a one-time code, then continue in the same browser.
@@ -6,7 +10,7 @@ Browser steps are powered by the [Stagehand](https://github.com/browserbase/stag
 
 ## Requirements
 
-- A Dagu version newer than v2.17.0.
+- Dagu v2.18.0 or later.
 - Google Chrome or Chromium installed on the host that runs the step. Dagu uses `browser.executable`, then `CHROME_PATH`, then a standard install location. Of the container images, only [`dev`](/server-admin/deployment/docker-images) includes Chromium, on amd64 and arm64.
 - In a container, Chrome's sandbox needs a seccomp profile that allows user namespaces. Run the `dev` image with its [Compose setup](/server-admin/deployment/docker-images), which applies the bundled profile. Where the sandbox cannot start at all, `browser.sandbox: false` in the [Dagu config](/server-admin/reference) or `DAGU_BROWSER_SANDBOX=false` turns it off for every browser on the host. Without the sandbox, a page that exploits the browser runs with the permissions of the Dagu process, which in the Dagu images has `sudo`, so use it only for sites you trust. A DAG cannot change this setting. With the sandbox on, a browser step fails when `CI` is set or Dagu runs as root on Linux, because the browser would run without the sandbox there; set `DAGU_BROWSER_SANDBOX=false` to allow it.
 - A model configured with a DAG-level `llm` block or `with.llm`. Use a model that follows tool-call schemas reliably.
@@ -227,7 +231,7 @@ When the step succeeds with outputs, stdout is one JSON object of them, so `outp
 
 ## Screenshots and Downloads
 
-Browser steps store files as [run artifacts](/writing-workflows/artifacts) under `browser/<step id>/`. A DAG with a browser step enables artifact storage automatically. These files are not masked and can show signed-in pages with personal data; use `screenshots: never` or `artifacts.enabled: false` to keep them out of run history.
+Browser steps store files as [run artifacts](/writing-workflows/artifacts) under `browser/<step id>/`. A DAG with a browser step enables artifact storage automatically. These files are not masked and can show signed-in pages with personal data; use `browser.screenshots: never` or `artifacts.enabled: false` to keep them out of run history.
 
 | `browser.screenshots` | Automatic screenshots |
 |-----------------------|-----------------------|
@@ -305,7 +309,7 @@ do:
     when: {text: Verification code}
 ```
 
-The step enters **Waiting** with the question in the step's **Agent** tab. The browser stays open. Answering resumes the step in the same browser at the next operation, with the answer available as `%otp%`. If an act needs an answer whose `ask` was skipped, the step fails instead of typing `%otp%`. While other steps of the run are still running, answering is rejected; try again after they finish. Rejecting the question fails the step. The browser stays open for `timeout` (default `1h`); after that, the answer fails the step and **Start clean session** runs the step again from the beginning.
+The step enters **Waiting** with the question in the step's **Agent** tab. The browser stays open. Answering resumes the step in the same browser at the next operation, with the answer available as `%otp%`. If an act needs an answer whose `ask` was skipped, the step fails instead of typing `%otp%`. While other steps of the run are still running, answering is rejected; try again after they finish. Rejecting the question fails the step. The browser stays open for `timeout` (default `1h`). After that, the step can no longer resume: an answer is refused, or fails the step on a distributed worker. **Start clean session** runs the step again from the beginning.
 
 Answers are stored in the run's history, like other human input. Use `ask` for short-lived codes, not long-term secrets.
 
@@ -314,7 +318,8 @@ Answers are stored in the run's history, like other human input. Use `ask` for s
 ## Safety
 
 - Page content is untrusted and is sent to the model. A hostile page, or content other users posted on an allowed site, can try to steer an `act`, for example into typing `%password%` into the wrong field. Use variables only on pages you trust, keep instructions specific, and follow sensitive acts with an `expect`.
-- The browser runtime applies `browser.allowed_domains` to the page's HTTP(S) requests, including scripts, images, and API calls, so list the CDN and sign-in hosts a site loads from. WebSocket connections are not covered, and the runtime's check has a known bypass. `example.com` matches only that host; `*.example.com` matches its subdomains but not `example.com`.
+- The browser runtime applies `browser.allowed_domains` to the page's HTTP(S) requests, including scripts, images, and API calls, so list the CDN and sign-in hosts a site loads from. WebSocket connections are not covered, and the runtime's check has a known bypass. `example.com` matches only that host; `*.example.com` matches its subdomains but not `example.com`. An entry is a host name with at least two labels, without a scheme, port, or path, and `*` may appear only as a leading `*.`.
+- Blocked requests are logged after the operation that made them, such as `allowed_domains blocked 3 requests: cdn.example.net (3)`, and a failed step's error lists them. A page that breaks for no clear reason often needs a host added.
 - Dagu itself checks only the page URL: it rejects a `goto` or `url` outside the list, and after every operation fails the step if a redirect or a click left the allowed domains.
 - Dialogs are accepted automatically, so an act that clicks the wrong button also confirms it. Keep instructions for destructive actions specific and check the result with an `expect`.
 - The browser runs with the permissions of the Dagu process.
@@ -327,7 +332,22 @@ Browser steps run on the worker that picks them up, which needs Chrome. Profiles
 
 The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, downloads, and accepted dialogs, and holds pending questions.
 
-## Browser Options
+## Options
+
+`browser.run` takes:
+
+| Field | Description |
+|-------|-------------|
+| `do` | Operations to run in order. Required. |
+| `url` | Page opened before the first operation. |
+| `variables` | Values referenced as `%name%` in `act` instructions. |
+| `cache` | Record and replay acts. Defaults to `true`. See [Replay Cache](#replay-cache). |
+| `browser` | [Browser options](#browser-options). |
+| `llm` | Model configuration that replaces the DAG-level `llm` block. |
+
+`browser.extract` takes `url`, `instruction`, and `schema`, with optional `timeout`, `browser`, `variables`, and `llm`, and behaves as `browser.run` with one `extract` operation.
+
+### Browser Options
 
 | Field | Description |
 |-------|-------------|
@@ -344,12 +364,17 @@ The step's **Agent** tab shows each operation with its status, token use, screen
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `the model (...) answered that no element on the page matches the instruction` | The element is not on the page, or the model answers "no match" for every request. | Look at the failure screenshot. If the element is there, [try another model](#model); otherwise reword the instruction or open the right page first. |
+| `act did not complete: ...` | The browser runtime could not perform the action. The message gives its reason. | Look at the failure screenshot; make the instruction more specific, or add a `wait` for the page to settle. |
+| `expectation not met: ...` | An `expect` condition did not hold. | Look at the failure screenshot; fix the act before it, or add `within` when the page needs time to change. |
+| `selector "..." did not appear within ...` | A `wait` selector did not become visible. | Check the selector, or raise the operation's `timeout`. |
+| `browser actions need a model` | No `llm` block applies to the step. | Add a DAG-level `llm` block or `with.llm`. |
 | `Chrome installation not found; set CHROME_PATH` | No Chrome or Chromium on the host that runs the step. | Install Chrome, set `CHROME_PATH` or `browser.executable`, or use the `dev` image. |
 | `the browser sandbox is on, but the browser runtime turns it off because CI is set` (or `when running as root`) | The browser would run without its sandbox. | Run Dagu as a non-root user without `CI`, or set `DAGU_BROWSER_SANDBOX=false`. |
 | `Chrome exited before its debugging port was ready` | On Linux, usually a sandbox that cannot start, as under Docker's default seccomp profile. | Run the `dev` image with its [Compose setup](/server-admin/deployment/docker-images), or set `DAGU_BROWSER_SANDBOX=false`. |
 | `... is outside browser.allowed_domains` or `the page navigated away` | A `goto`, redirect, or click left the allowed hosts. | Add the host, including sign-in and CDN hosts, or fix the instruction. |
 | `contains the value of secret ...` | A declared secret is written in an instruction. | Pass it in `with.variables` and reference it as `%name%`. |
 | `act references %name%, which is not in with.variables or an earlier ask` | A misspelled or missing variable. | Add it to `with.variables` or fix the name. |
+| `the instruction uses %name%, but the ask that sets it did not run` | The `ask` was skipped because its `when` did not hold. | Give the act the same `when` as the `ask`. |
 | `download of ... did not finish within ...` | The download ran longer than the longest `act` or `goto` timeout. | Raise the `timeout` of the act that starts it. |
 | `the browser did not respond within ...` | The page stopped responding. | Check the page; raise `timeout` for slow pages. |
 | `browser profile "..." is held by DAG run ..., which is waiting for input` | Another run holds the profile while it waits for an answer. | Answer or cancel that run. |
