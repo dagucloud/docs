@@ -3353,7 +3353,8 @@ Notes:
 
 - `tokenPrefix` is the stored identification prefix from the full token, currently the first 12 characters when available.
 - `profileSelection.allowedProfiles` lists the runtime profiles callers may select with `X-Dagu-Profile`. An empty list disables caller selection.
-- `profileTokens` lists the webhook's [profile tokens](/server-admin/authentication/webhooks#profile-tokens) without their secrets. `lastUsedAt` is set once a token has authorized a request.
+- `profileTokens` lists the webhook's [profile tokens](/server-admin/authentication/webhooks#profile-tokens) without their secrets. `lastUsedAt` is set once a token has authorized a request. Remote nodes running versions without profile tokens omit the field.
+- `lastUsedAt` on the webhook and on each profile token is updated at most once per minute, so it can lag the latest request by up to a minute.
 
 ### List All Webhooks
 
