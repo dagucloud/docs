@@ -18,7 +18,7 @@ Behavior when builtin auth is not available:
 - Management endpoints return `401 Unauthorized`
 - The trigger endpoint returns `404 Not Found`
 
-Most webhook management endpoints require developer, manager, or admin role. Configuring which runtime profiles webhook callers may select is admin-only.
+Most webhook management endpoints require developer, manager, or admin role. Configuring which runtime profiles webhook callers may select, and creating or revoking [profile tokens](#profile-tokens), is admin-only.
 
 ## Create a Webhook
 
@@ -50,6 +50,7 @@ Response:
     "profileSelection": {
       "allowedProfiles": []
     },
+    "profileTokens": [],
     "createdAt": "2026-04-29T10:00:00Z",
     "updatedAt": "2026-04-29T10:00:00Z",
     "createdBy": "user-id"
@@ -196,6 +197,61 @@ steps:
       echo "$WEBHOOK_PAYLOAD" | jq -r '.branch'
 ```
 
+## Profile Tokens
+
+A profile token is an extra webhook token bound to one runtime profile. Use profile tokens when several callers share one DAG but each caller may run only its own profile, for example one token per customer. Each caller gets its own token, and each token can be revoked on its own.
+
+- A request with a profile token always runs with the token's profile. The webhook allowlist does not apply.
+- An `X-Dagu-Profile` header naming a different profile returns `403 Forbidden`. Omitting the header, or naming the token's own profile, is accepted.
+- The default webhook token keeps its normal behavior, including allowlisted profile selection.
+- Profile tokens work in the `token_only` and `token_and_hmac` auth modes. In `token_and_hmac` mode, callers also sign requests with the webhook's HMAC secret as described in [Sign Requests That Select a Profile](#sign-requests-that-select-a-profile).
+- Profile tokens cannot be created while the auth mode is `hmac_only`, and existing profile tokens are ignored in that mode.
+- A webhook can have up to 100 profile tokens.
+
+A profile token grants access to its profile's variables and secrets, so only admins can create or revoke one. Both actions are written to the audit log.
+
+In the Web UI, open the DAG's **Webhook** tab, find **Profile tokens**, enter a token name, pick an active profile, and click **Create token**. The full token is shown once. The list shows each token's profile, prefix, creation time, and last use.
+
+The same operation through the API:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/profile-tokens \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"customer-a","profile":"customer-a"}'
+```
+
+`name` labels the caller and must be 1 to 100 characters. `profile` must exist and be active. The response has the same shape as webhook creation: the updated webhook, whose `profileTokens` list now includes the new token, and the full `token`, which is returned only once.
+
+```json
+{
+  "id": "8f14e45f-ceea-467f-a8f4-1c2b3d4e5f60",
+  "name": "customer-a",
+  "tokenPrefix": "dagu_wh_Pq3R",
+  "profile": "customer-a",
+  "createdAt": "2026-04-29T10:30:00Z",
+  "createdBy": "user-id"
+}
+```
+
+The caller triggers the DAG with its token. No profile header is needed:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
+  -H "Authorization: Bearer $CUSTOMER_A_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"payload":{"order":"1234"}}'
+```
+
+Revoke a token by ID:
+
+```bash
+curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook/profile-tokens/8f14e45f-ceea-467f-a8f4-1c2b3d4e5f60 \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+A revoked token is rejected with `401 Unauthorized` on the next request. Rotating the default token does not affect profile tokens. Deleting the webhook removes them.
+
 ## Other Management Operations
 
 List all webhooks:
@@ -237,6 +293,18 @@ curl -X PUT http://localhost:8080/api/v1/dags/my-dag/webhook/profile-selection \
   -d '{"allowedProfiles":["staging"]}'
 ```
 
+Create or revoke a profile token (admin only):
+
+```bash
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/profile-tokens \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"customer-a","profile":"customer-a"}'
+
+curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook/profile-tokens/$TOKEN_ID \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
 Delete the webhook:
 
 ```bash
@@ -249,7 +317,7 @@ curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook \
 - `200 OK`: DAG run was enqueued
 - `400 Bad Request`: invalid `X-Dagu-Profile` header, invalid request body, or the selected profile is disabled
 - `401 Unauthorized`: missing or invalid webhook token, or missing or invalid HMAC signature when strict HMAC enforcement is active
-- `403 Forbidden`: webhook is disabled, or the selected profile is not in the webhook allowlist
+- `403 Forbidden`: webhook is disabled, the selected profile is not in the webhook allowlist, or a profile token was sent with an `X-Dagu-Profile` header naming a different profile
 - `404 Not Found`: no webhook is configured for the DAG, the DAG or selected profile was not found, or webhook triggering is not configured on the server
 - `409 Conflict`: the supplied `dagRunId` already exists
 - `413 Payload Too Large`: request body exceeded `webhooks.max_payload_size`

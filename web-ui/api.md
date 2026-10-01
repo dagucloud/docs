@@ -3216,9 +3216,9 @@ The trigger endpoint uses the webhook's configured authentication mode instead o
 **Request Headers**:
 | Header | Description |
 |--------|-------------|
-| Authorization | `Bearer dagu_wh_<token>`. Required when the webhook auth mode includes token authentication. |
+| Authorization | `Bearer dagu_wh_<token>`. Accepts the webhook's default token or one of its profile tokens. Required when the webhook auth mode includes token authentication. |
 | X-Dagu-Signature | HMAC-SHA256 signature as `sha256=<hex>`. Required when strict HMAC enforcement is active. |
-| X-Dagu-Profile | Optional runtime profile for the run. The profile must be in the webhook's profile-selection allowlist. |
+| X-Dagu-Profile | Optional runtime profile for the run. With the default token, the profile must be in the webhook's profile-selection allowlist. With a profile token, the run always uses the token's profile, and the header may only name that profile. |
 
 **Request Body** (optional):
 ```json
@@ -3294,7 +3294,7 @@ Other `404` responses include `no webhook configured for this DAG` and `webhook 
 Profile-selection errors include:
 
 - `400 Bad Request` for an invalid or repeated `X-Dagu-Profile` header, or a disabled selected profile
-- `403 Forbidden` when the selected profile is not in the webhook allowlist
+- `403 Forbidden` when the selected profile is not in the webhook allowlist, or a profile token was sent with a header naming a different profile
 - `404 Not Found` when an allowlisted profile no longer exists
 
 **Error Response (409)**:
@@ -3331,6 +3331,17 @@ Webhook management endpoints return the same public webhook object:
   "profileSelection": {
     "allowedProfiles": ["staging", "prod"]
   },
+  "profileTokens": [
+    {
+      "id": "8f14e45f-ceea-467f-a8f4-1c2b3d4e5f60",
+      "name": "customer-a",
+      "tokenPrefix": "dagu_wh_Pq3R",
+      "profile": "customer-a",
+      "createdAt": "2026-04-29T10:30:00Z",
+      "createdBy": "user-id",
+      "lastUsedAt": "2026-04-29T10:45:00Z"
+    }
+  ],
   "createdAt": "2026-04-29T10:00:00Z",
   "updatedAt": "2026-04-29T10:15:00Z",
   "createdBy": "user-id",
@@ -3342,6 +3353,7 @@ Notes:
 
 - `tokenPrefix` is the stored identification prefix from the full token, currently the first 12 characters when available.
 - `profileSelection.allowedProfiles` lists the runtime profiles callers may select with `X-Dagu-Profile`. An empty list disables caller selection.
+- `profileTokens` lists the webhook's [profile tokens](/server-admin/authentication/webhooks#profile-tokens) without their secrets. `lastUsedAt` is set once a token has authorized a request.
 
 ### List All Webhooks
 
@@ -3429,6 +3441,45 @@ Policy changes apply to subsequent trigger requests immediately; the server does
 
 - `400 Bad Request`: invalid, disabled, or missing profile input
 - `404 Not Found`: webhook or requested runtime profile not found
+
+### Create Webhook Profile Token
+
+**Endpoint**: `POST /api/v1/dags/{fileName}/webhook/profile-tokens`
+
+Creates an additional webhook token bound to one runtime profile and returns the full token once. Requests authenticated with it always run with that profile. This endpoint is admin-only.
+
+**Request Body**:
+
+```json
+{
+  "name": "customer-a",
+  "profile": "customer-a"
+}
+```
+
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| name | string | Label for the caller that holds the token, 1 to 100 characters. | Yes |
+| profile | string | Runtime profile the token runs with. It must exist and be active. | Yes |
+
+**Response (201)**: The updated [webhook details](#webhook-details-shape) as `webhook` and the full token as `token`, in the same shape as [Create DAG Webhook](#create-dag-webhook).
+
+**Error Responses**:
+
+- `400 Bad Request`: invalid name, disabled profile, webhook auth mode is `hmac_only`, or the webhook already has 100 profile tokens
+- `404 Not Found`: webhook or runtime profile not found
+
+### Revoke Webhook Profile Token
+
+**Endpoint**: `DELETE /api/v1/dags/{fileName}/webhook/profile-tokens/{tokenId}`
+
+Revokes a profile token. The token is rejected from the next request on. This endpoint is admin-only.
+
+**Response (200)**: The updated [webhook details](#webhook-details-shape).
+
+**Error Responses**:
+
+- `404 Not Found`: webhook or profile token not found
 
 ### Regenerate Webhook Token
 

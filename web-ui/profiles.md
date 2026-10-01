@@ -79,6 +79,8 @@ Run history and run details show the selected profile name when a profile was us
 
 Admins can also let a webhook integration select specific profiles. Open the DAG's **Webhook** tab, choose the active profiles under **Runtime profile selection**, and save the allowlist. A webhook caller can then select one of those profiles with `X-Dagu-Profile`; omitting the header keeps the DAG's default-profile behavior. See [Webhook profile selection](/server-admin/authentication/webhooks#select-a-runtime-profile) for request and HMAC-signing examples.
 
+To give each caller its own profile instead, create a token for each caller under **Profile tokens** on the same tab. Requests with a profile token always run with that token's profile. See [Profile tokens](/server-admin/authentication/webhooks#profile-tokens).
+
 ## Retries
 
 Retries always inherit the original run's profile. The retry dialog does not allow switching profiles. This keeps a failed run's retry tied to the same runtime environment identity while still resolving the latest profile values when the retry attempt starts.

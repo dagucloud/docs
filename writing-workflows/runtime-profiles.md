@@ -120,6 +120,8 @@ The profile must be in that webhook's allowlist and must still exist and be acti
 
 Webhook credentials can select every profile in their allowlist, including protected profiles, so admins should grant only the profiles the integration needs. See [Webhooks](/server-admin/authentication/webhooks#select-a-runtime-profile) for configuration, HMAC signing, and error behavior.
 
+When several callers share one DAG and each may use only its own profile, an admin can instead create a [profile token](/server-admin/authentication/webhooks#profile-tokens) for each caller. A request with a profile token always runs with that token's profile, and the allowlist does not apply.
+
 ## Scheduled Runs
 
 The scheduler uses the DAG's effective default runtime profile from server-side DAG settings when it evaluates profile-scoped schedule entries:
