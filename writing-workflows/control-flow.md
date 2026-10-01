@@ -750,6 +750,10 @@ steps:
 > **Note**: always set `limit` on an `until` repeat. Without it the step repeats
 > indefinitely while the condition stays unmet.
 
+### Stopping a Repeating Step
+
+When a run is stopped while a repeating step is between attempts, for example while it checks its repeat condition or waits for `interval_sec`, the pending repetition is canceled and the step ends as aborted, as does the run. An attempt that is already running when the stop arrives can finish within the DAG's [cleanup time](/writing-workflows/execution-control#cleanup-timeout), and the step then keeps that attempt's result instead of repeating.
+
 ### Conditional Repeat Patterns
 
 #### While Process is Running
