@@ -29,7 +29,7 @@ The chat step finishes in one of two ways:
 
 Both scenarios result in successful step completion. The step only fails if the LLM request itself encounters an error.
 
-A step with [`output_schema`](/step-types/llm/#structured-output) ends differently: the model is offered a `respond` tool next to the workflow tools, the loop ends when it calls `respond` with a valid answer, and reaching `max_tool_iterations` without one fails the step.
+A step with [`output_schema`](/step-types/llm/#structured-output) ends differently: the model is offered a `respond` tool next to the workflow tools, and the loop ends when it calls `respond` with a valid answer. Reaching `max_tool_iterations` without one fails that model; the next fallback model starts over, and the step fails when no model is left.
 
 ## Basic Example
 

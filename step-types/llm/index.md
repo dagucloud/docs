@@ -205,7 +205,7 @@ steps:
 - Properties the schema does not list are dropped, and the rest is validated against the schema. Stdout is one JSON object, and each listed property becomes `${steps.<id>.outputs.<name>}`. Referencing a name the schema does not list is reported as unknown when the DAG loads.
 - An answer that does not match gets one correction, sent with the reason. If it still does not match, the next entry of a [`model` list](/step-types/llm/reliability#model-fallback) is tried. When no model answers, the step fails with `the model gave no answer that matches output_schema`; the step's stderr shows each rejected answer and why.
 - The schema must declare `type: object`, list at least one property, and list every `required` name under `properties`. It cannot be combined with `web_search` or with a tool named `respond`.
-- With `tools`, the tool workflows are offered next to `respond`, and the loop ends when the model calls `respond`. Reaching `max_tool_iterations` without an answer fails the step.
+- With `tools`, the tool workflows are offered next to `respond`, and the loop ends when the model calls `respond`. Reaching `max_tool_iterations` without an answer counts as that model failing: the next entry of a `model` list starts over, running the tools again, and the step fails when no model is left.
 - The answer is never streamed.
 
 Validation checks the shape of the answer, not whether it is true. For extraction, leave a field out of `required` when the input may not contain it: a required field makes the model invent a value rather than leave it out.
