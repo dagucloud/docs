@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `computer check`, `computer cache clear`, `xlsx inspect`, `xlsx read`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `computer check`, `computer cache clear`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
 
 ## Global Options
 
@@ -830,6 +830,24 @@ dagu xlsx read orders.xlsx --columns "Invoice No,Amount" --format json
 ```
 
 The text format prints a tab-separated header line and one line per row. With `--format json`, the result is one object with `rows`, `count`, `headers`, `sheet`, `range`, `warnings`, and `truncated`.
+
+### `xlsx cache clear`
+
+Remove the cells an [`xlsx.extract`](/step-types/xlsx#extracting-fields-from-a-form) step cached by sheet layout on this host, so its next run asks the model again.
+
+```bash
+dagu xlsx cache clear [options] DAG
+```
+
+**Options:**
+- `--step` - Clear one step by its ID or name; by default every extract step of the DAG
+
+```bash
+dagu xlsx cache clear quotes
+dagu xlsx cache clear quotes --step fields
+```
+
+Prints `Removed xlsx replay cache for step "fields" of DAG "quotes"` for each step cleared, or `No xlsx replay cache for DAG "quotes"`. `dagu rm --history` removes the cache together with the run history.
 
 ### `enqueue`
 

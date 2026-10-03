@@ -18,6 +18,7 @@ Read and write Excel workbooks from workflow steps without Excel, a script, or a
 | `xlsx.write_cells` | Fill named cells of a template, in place or into a copy. |
 | `xlsx.sheet` | Add, copy, rename, or delete a sheet. |
 | `xlsx.convert` | Export a sheet to CSV, JSON, or JSON Lines. |
+| `xlsx.extract` | Read fields out of a form-like sheet: a model names the cells, the engine reads their values. |
 
 Only `.xlsx` and `.xlsm` workbooks are accepted; another extension fails with `only .xlsx and .xlsm workbooks are supported; save as .xlsx`. Paths resolve as in [file actions](/step-types/file): relative paths from the step working directory, absolute and `~` paths as written. A `password` opens a protected workbook. Charts, images, formatting, and formulas the actions do not touch are preserved on save.
 
@@ -369,6 +370,44 @@ steps:
 
 For CSV, `encoding` is `utf-8` (default, no byte order mark), `utf-8-bom` so that Excel opens the file as UTF-8 by double click, or `shift_jis` as Windows uses it (code page 932; `cp932`, `windows-31j`, `sjis`, and `ms932` are accepted spellings), and `delimiter` is one character, a comma by default. The file is written through a temporary file and renamed into place. The step publishes `path`, `format`, `count`, `sheet`, `range`, `warnings`, and with `artifact: true` the copy's path as `artifact`. The other direction, a file into a workbook, is [`xlsx.write` with `input`](#writing-rows).
 
+## Extracting Fields from a Form
+
+Not every workbook is a table. A supplier's quote, an order, or an application is often a form on a grid, with labels and values scattered and a different layout for every sender. `xlsx.extract` reads such a sheet: `instruction` says what to find, `schema` names the fields, a model is asked which cell holds each field, and the step reads the typed value from that cell.
+
+```yaml
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
+  api_key_name: ANTHROPIC_API_KEY
+
+steps:
+  - id: fields
+    action: xlsx.extract
+    with:
+      path: inbox/${params.FILE}
+      instruction: A supplier's quote. Find the quote number, the delivery date, and the total amount.
+      schema:
+        type: object
+        properties:
+          quote_no: {type: string, description: 見積番号}
+          delivery: {type: string, format: date, description: 納期}
+          total: {type: number, description: 合計金額}
+
+  - id: record
+    depends: fields
+    action: xlsx.append
+    with:
+      path: quotes.xlsx
+      sheet: Quotes
+      rows: '[{"quote_no": "${steps.fields.outputs.quote_no}", "delivery": "${steps.fields.outputs.delivery}", "total": ${steps.fields.outputs.total}}]'
+```
+
+- **The model returns addresses, never values.** It is shown the sheet's non-empty cells, one per line as `B3 [text,bold]: 見積番号` with the address, the kind (`text`, `number`, `date`, `datetime`, `time`, `bool`), `bold` and `fill` hints, and the text cut to 200 characters, and it answers with the address of each field's cell, or `null` for a field the sheet lacks. The engine reads the value from that cell with the usual typing, so no number is invented and every output has a cell behind it. A property's `type` pins the cell (`number`, `integer`, `boolean`, `string`, `string` with `format: date` or `date-time`); a `description` in the sheet's own language helps the model find the label.
+- **Outputs** are each property, `cells` (property to the `Sheet1!B7` it was read from, empty when absent), `sheet`, `warnings`, and `source`, `model` or `cache`. An empty cell or an absent field is null.
+- **What is sent.** The listed cells and the instruction, nothing else: no variables and no screenshots. `send_values: false` lists a non-text cell as its kind only, `B7 [number]`, so amounts and dates stay on the host. A sheet with more than 2000 cells is refused; set `range` to the part that holds the fields. An instruction holding the value of a declared secret fails the step before any request, and secret values are masked in the text sent.
+- **Repeated layouts need no model call.** The answered addresses are cached by the sheet's shape, which cells hold something, their kinds and emphasis, and the merged regions, with the label beside each cell kept and checked. A second quote from the same supplier in the same template is read from the cache; a layout not seen before, a renamed or moved label, a changed instruction, or a schema with a new field asks the model again. An entry is kept only when the step succeeds. `cache: false` asks every run, and `dagu xlsx cache clear <dag>` drops the entries.
+- The step uses the DAG-level `llm` block or `with.llm`, which replaces it, as [browser steps](/step-types/browser) do. `dagu dry` checks that the workbook and sheet exist, nothing about the model.
+
 ## Saving Safely
 
 Every writer (`write`, `append`, `update_rows`, `write_cells`, `sheet`) publishes `path`, `sheet`, `changes`, `dry_run`, and `warnings`:
@@ -459,6 +498,11 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `dry_run` | writers | Report the changes and save nothing. |
 | `wait_for_unlock` | writers | How long to retry a locked workbook. |
 | `artifact` | writers, `convert` | Keep a copy with the run. |
+| `instruction` | `extract` | What to find on the sheet. Required. |
+| `schema` | `extract` | A JSON Schema with `type: object` whose properties name the fields. Required. |
+| `send_values` | `extract` | Send cell values to the model. Defaults to `true`; `false` sends labels and kinds only. |
+| `cache` | `extract` | Keep the answered cells by sheet layout. Defaults to `true`. |
+| `llm` | `extract` | The model to ask, replacing the DAG-level `llm` block. |
 
 ## Troubleshooting
 
@@ -481,6 +525,9 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `report.xlsx: cannot delete the only sheet "Sheet1"` | A workbook needs one sheet. | Add the replacement sheet first. |
 | `xlsx actions have fixed outputs` | The step declares `output:` or `outputs:`. | Remove it; read the published names instead. |
 | `artifact requires artifact storage` | `artifact: true` in a DAG whose artifacts are disabled. | Enable `artifacts` or drop the field. |
+| `xlsx.extract needs a model: set llm at the DAG level or with.llm on the step` | No model is configured for the extract step. | Add an `llm` block to the DAG or `with.llm` to the step. |
+| `quote.xlsx Sheet1: 2415 cells in Sheet1!A1:H600 is more than 2000; set range to the part of the sheet that holds the fields` | The sheet has too many non-empty cells to list for the model. | Set `range` to the area of the form. |
+| `xlsx: model answered field "total" with "H40", which is outside Sheet1!A1:D20` | The model named a cell outside the listed sheet or range. | Widen `range`, or improve the instruction and descriptions. |
 
 ## Related
 
