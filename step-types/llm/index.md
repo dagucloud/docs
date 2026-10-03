@@ -225,7 +225,7 @@ When [approval push-back](/writing-workflows/approval#push-back-environment) or 
 
 ## Configuration
 
-All action-specific fields belong under `with`.
+All action-specific fields belong under `with`, except `output_schema`, which sits on the step; see [Structured output](#structured-output).
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -244,8 +244,6 @@ All action-specific fields belong under `with`.
 | `tools` | array | - | DAG names exposed to the model as callable tools. |
 | `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds. |
 | `web_search` | object | disabled | [Built-in web-search integration](/step-types/llm/reasoning-web-search#web-search) settings. |
-
-`output_schema` is a step field rather than a `with` field; see [Structured output](#structured-output).
 
 `messages[].content`, `system`, and `base_url` support scoped value references such as `${params.TOPIC}` and `${env.LLM_BASE_URL}`.
 
