@@ -678,4 +678,65 @@ flowchart LR
 
 </div>
 
+<div class="example-card">
+
+### Excel Round Trip
+
+```yaml
+steps:
+  - id: read
+    action: xlsx.read
+    with:
+      path: ~/Inbox/orders.xlsx
+      sheet: Orders
+      where: {Status: ""}
+
+  - id: each
+    depends: read
+    foreach:
+      items: ${steps.read.outputs.rows}
+      key: ${foreach.item.order_id}
+      steps:
+        - id: submit
+          action: http.request
+          with:
+            method: POST
+            url: https://erp.example.com/orders
+            body: ${foreach.item}
+            format: json
+      collect:
+        order_id: ${foreach.item.order_id}
+        status: ${steps.submit.outputs.status_code}
+    output: RESULTS
+    continue_on:
+      failure: true
+
+  - id: mark
+    depends: each
+    action: xlsx.update_rows
+    with:
+      path: ~/Inbox/orders.xlsx
+      sheet: Orders
+      key: order_id
+      rows: ${steps.each.outputs.RESULTS}
+      set:
+        Status: status
+      wait_for_unlock: 5m
+```
+
+The rows without a status are read, each one is submitted, and the status is written back to the row it came from, so a rerun skips the rows already done. No spreadsheet application is needed.
+
+```mermaid
+flowchart LR
+  R[Read rows to do] --> S[Submit each]
+  S --> M[Write status back]
+  style R stroke:lightblue,stroke-width:1.6px,color:#333
+  style S stroke:lightblue,stroke-width:1.6px,color:#333
+  style M stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/xlsx" class="learn-more">Learn more →</a>
+
+</div>
+
 </div>

@@ -1,3 +1,4 @@
+| `xlsx.read`, `xlsx.info`, `xlsx.list_sheets`, `xlsx.write`, `xlsx.append`, `xlsx.update_rows`, `xlsx.validate`, `xlsx.write_cells`, `xlsx.sheet`, `xlsx.convert` | Read, write, validate, and convert `.xlsx` workbooks. See [XLSX](/step-types/xlsx). |
 # YAML Specification
 
 This page documents the YAML fields accepted by the current Dagu workflow parser. It is a reference for the top-level DAG document and for individual step definitions.

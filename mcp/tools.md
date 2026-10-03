@@ -14,14 +14,14 @@ Use `dagu_read` for current Dagu state.
 
 | Input | Values |
 |-------|--------|
-| `target` | `references`, `reference`, `dags`, `dag`, `dag_spec`, `dag_search`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, or `step_log` |
+| `target` | `references`, `reference`, `dags`, `dag`, `dag_spec`, `dag_search`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, `step_log`, or `workbook` |
 | `name` | DAG name for DAG and run targets, or reference topic for `reference` |
 | `dagRunId` | DAG-run ID for run and log targets |
 | `subRunId` | Optional child DAG-run ID for `run` and `step_log`; `name` and `dagRunId` identify its root run |
 | `stepName` | Step name for the `step_log` target |
 | `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100` |
 | `workspace` | `all`, `default`, or a workspace name. Required for `wiki_page`; optional for `wiki`, `wiki_search`, and `dag_search`. |
-| `path` | Wiki page path without `.md`; required for `wiki_page` |
+| `path` | Wiki page path without `.md`, required for `wiki_page`; or a workbook file path on the server, required for `workbook` |
 | `search` | Search text; required for `wiki_search` and `dag_search` |
 | `prefix` | Wiki page path prefix without `.md`; optional for `wiki` and `wiki_search` |
 | `cursor` | Opaque cursor from the preceding `wiki_search` or `dag_search` result page |
@@ -81,6 +81,14 @@ Read or search Markdown Wiki pages:
 ```
 
 Search results include matching snippets and `modifiedAt`. If `hasMore` is true, pass `nextCursor` as `cursor` in the next call and keep `search`, `workspace`, and `prefix` unchanged.
+
+Inspect an `.xlsx` workbook on the server before writing [xlsx steps](/step-types/xlsx) for it:
+
+```json
+{ "target": "workbook", "path": "/srv/data/orders.xlsx" }
+```
+
+The result describes each sheet, its used range, detected data block, header row, headers, column types, row count, and tables, with five typed sample rows, plus the workbook's named ranges and date system. `path` is any file the server process can read, and is recorded in the audit log as `workbook_path`.
 
 The legacy `docs`, `doc`, and `doc_search` targets remain available as deprecated exact aliases. New clients should use the Wiki target names.
 

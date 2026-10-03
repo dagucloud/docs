@@ -15,7 +15,7 @@ Use these examples as copy-paste starting points for common Dagu workflow patter
 
 ## Integrations & Operations
 
-- [Actions & Integrations](/writing-workflows/examples/actions-integrations) - Custom actions, containers, Kubernetes, SSH, HTTP, jq, archive extraction, mail, and mailboxes.
+- [Actions & Integrations](/writing-workflows/examples/actions-integrations) - Custom actions, containers, Kubernetes, SSH, HTTP, jq, archive extraction, mail, mailboxes, and Excel workbooks.
 - [Scheduling & Queues](/writing-workflows/examples/scheduling-queues) - Schedules, time zones, queue assignment, global queues, and notifications.
 - [Operations](/writing-workflows/examples/operations) - Retention, logs, timeouts, monitoring, tracing, execution control, and production configuration.
 

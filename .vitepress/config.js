@@ -399,6 +399,7 @@ const fullSidebar = [
               { text: "Artifact", link: "/step-types/artifact" },
               { text: "File", link: "/step-types/file" },
               { text: "Archive", link: "/step-types/archive" },
+              { text: "XLSX", link: "/step-types/xlsx" },
               { text: "Template", link: "/step-types/template" },
             ],
           },

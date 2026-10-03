@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `computer check`, `computer cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `computer check`, `computer cache clear`, `xlsx inspect`, `xlsx read`
 
 ## Global Options
 
@@ -785,6 +785,51 @@ Without `--step`, every step of the DAG is cleared. The cache lives on the host 
 dagu computer cache clear invoices
 dagu computer cache clear invoices --step post
 ```
+
+### `xlsx inspect`
+
+Describe every sheet of a workbook before writing [xlsx steps](/step-types/xlsx) for it: its used range, the detected data block, the header row and column names, the type of each column, the number of data rows, its tables, and a few typed sample rows. Named ranges and the date system are listed for the workbook. This is what `xlsx.info` publishes, read straight from the file; nothing is written and no run is created.
+
+```bash
+dagu xlsx inspect <path> [options]
+```
+
+**Options:**
+- `--sheet` - Describe this sheet only
+- `--rows`, `-n` - Typed sample rows to show per sheet (default: 5)
+- `--format`, `-f` - Output format: `text` (default) or `json`
+
+```bash
+dagu xlsx inspect orders.xlsx
+dagu xlsx inspect orders.xlsx --sheet Orders --rows 10
+dagu xlsx inspect orders.xlsx --format json
+```
+
+With `--format json`, the result is one object with `path`, `date_system`, `sheets` (each with `name`, `used_range`, `range`, `header_row`, `headers`, `types`, `row_count`, `tables`, and `sample`), `named_ranges`, and `warnings`. The command exits nonzero with the error on stderr when the file cannot be read.
+
+### `xlsx read`
+
+Print the rows of a sheet the way `xlsx.read` publishes them: numbers stay numbers, dates become ISO 8601 text, text keeps its leading zeros, and each row carries `_row`, its sheet row number.
+
+```bash
+dagu xlsx read <path> [options]
+```
+
+**Options:**
+- `--sheet` - Sheet name; the first sheet by default
+- `--range` - Cell range, `Sheet!A2:F` reference, named range, or table name
+- `--header` - `true` (default), `false`, a row number, or rows such as `3,4`
+- `--columns` - Columns to keep, comma-separated, with optional `name:alias` renames
+- `--max-rows` - Most rows to print (default: 5000)
+- `--format`, `-f` - Output format: `text` (default) or `json`
+
+```bash
+dagu xlsx read orders.xlsx
+dagu xlsx read orders.xlsx --sheet Orders --range A2:F --header false
+dagu xlsx read orders.xlsx --columns "Invoice No,Amount" --format json
+```
+
+The text format prints a tab-separated header line and one line per row. With `--format json`, the result is one object with `rows`, `count`, `headers`, `sheet`, `range`, `warnings`, and `truncated`.
 
 ### `enqueue`
 
