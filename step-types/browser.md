@@ -254,7 +254,7 @@ The step accepts every JavaScript dialog a page opens, so a dialog never blocks 
 
 ## Replay Cache
 
-An `act` records the actions it performed, and the recordings are kept when the step succeeds. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the page URL (without query or fragment) match. When a replay fails because the page changed, the step asks the model again, records the new actions, and marks the operation `healed` in the log.
+An `act` records the actions it performed, and the recordings are kept when the step succeeds. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the page URL (without query or fragment) match. When a replay fails because the page changed, the step asks the model again, records the new actions, and marks the operation `healed` in the log. A recorded element that is gone, or still on the page but hidden, such as a field in a closed dialog, fails the replay.
 
 - Recordings are kept only when the whole step succeeds. When an operation fails on the page after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of the model, the browser, a download, or an `ask`, or a canceled run, leaves them.
 - The cache covers `act` only. `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
