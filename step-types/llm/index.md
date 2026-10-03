@@ -104,6 +104,22 @@ See [Sessions](#sessions).
 
 See [Tool Calling](/features/chat/tool-calling).
 
+**Typed answers.** A step-level `output_schema` makes the model answer in that shape, and each listed property becomes a step output:
+
+```yaml
+  - id: classify
+    action: chat.completion
+    with:
+      prompt: "Classify this note: ${params.note}"
+    output_schema:
+      type: object
+      properties:
+        category: {type: string, enum: [refund, complaint, question]}
+      required: [category]
+```
+
+See [Structured output](#structured-output).
+
 **Route on the answer.** Ask for a label, then branch with `router.route`:
 
 ```yaml
@@ -156,6 +172,46 @@ See [Reliability](/step-types/llm/reliability).
 
 See [Web Search](/step-types/llm/reasoning-web-search#web-search).
 
+## Structured output
+
+Set `output_schema` on the step, next to `with`, when later steps need values rather than prose:
+
+```yaml
+steps:
+  - id: classify
+    action: chat.completion
+    with:
+      prompt: |
+        Classify this customer note and extract the amount:
+        I was charged twice, please refund the extra 12.50 EUR.
+    output_schema:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [refund, complaint, question]
+        amount:
+          type: number
+        currency:
+          type: string
+      required: [category]
+
+  - id: record
+    depends: classify
+    run: echo "${steps.classify.outputs.category} ${steps.classify.outputs.amount}"
+```
+
+- The model answers by calling a `respond` tool whose parameters are the schema, and the request requires a tool call. A reply that is a JSON object in plain text is accepted too.
+- Properties the schema does not list are dropped, and the rest is validated against the schema. Stdout is one JSON object, and each listed property becomes `${steps.<id>.outputs.<name>}`. Referencing a name the schema does not list is reported as unknown when the DAG loads.
+- An answer that does not match gets one correction, sent with the reason. If it still does not match, the next entry of a [`model` list](/step-types/llm/reliability#model-fallback) is tried. When no model answers, the step fails with `the model gave no answer that matches output_schema`; the step's stderr shows each rejected answer and why.
+- The schema must declare `type: object`, list at least one property, and list every `required` name under `properties`. It cannot be combined with `web_search` or with a tool named `respond`.
+- With `tools`, the tool workflows are offered next to `respond`, and the loop ends when the model calls `respond`. Reaching `max_tool_iterations` without an answer fails the step.
+- The answer is never streamed.
+
+Validation checks the shape of the answer, not whether it is true. For extraction, leave a field out of `required` when the input may not contain it: a required field makes the model invent a value rather than leave it out.
+
+Some models refuse a forced tool call: Claude models while `thinking` is enabled, and Claude 5 models always. For those, Dagu asks for the tool without forcing it and relies on the instruction, the validation, and the correction.
+
 ## Sessions
 
 The completed session is saved with the DAG run, including the provider, model, and token usage reported for assistant messages. A chat step also inherits conversation history from the steps in its `depends` list, which is what makes the multi-turn pattern above work:
@@ -188,6 +244,8 @@ All action-specific fields belong under `with`.
 | `tools` | array | - | DAG names exposed to the model as callable tools. |
 | `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds. |
 | `web_search` | object | disabled | [Built-in web-search integration](/step-types/llm/reasoning-web-search#web-search) settings. |
+
+`output_schema` is a step field rather than a `with` field; see [Structured output](#structured-output).
 
 `messages[].content`, `system`, and `base_url` support scoped value references such as `${params.TOPIC}` and `${env.LLM_BASE_URL}`.
 

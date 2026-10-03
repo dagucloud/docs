@@ -1061,6 +1061,8 @@ steps:
 
 `output_schema` must be an inline JSON Schema object. It is not a path. When present, Dagu captures stdout, decodes it as JSON, validates it, and fails the step on invalid JSON or schema mismatch.
 
+On a `chat.completion` step, `output_schema` also tells the model the shape to answer in, and only the listed properties are published; see [Structured output](/step-types/llm/#structured-output).
+
 In a build workflow, an input declaration requires `name` and `path`. An output declaration can use `path` instead of `type`:
 
 ```yaml

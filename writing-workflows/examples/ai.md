@@ -1,6 +1,6 @@
 # AI Examples
 
-Chat completions with OpenRouter and a secret-managed key, DAG-level defaults with a custom endpoint, response reuse, sessions, extended thinking, workflows as tools, model fallback, and typed decisions that route on confidence. Every example runs as-is with an `OPENROUTER_API_KEY` exported. Cards that omit `secrets` and `llm` assume the setup block from the first card.
+Chat completions with OpenRouter and a secret-managed key, DAG-level defaults with a custom endpoint, response reuse, typed answers, sessions, extended thinking, workflows as tools, model fallback, and typed decisions that route on confidence. Every example runs as-is with an `OPENROUTER_API_KEY` exported. Cards that omit `secrets` and `llm` assume the setup block from the first card.
 
 <div class="examples-grid">
 
@@ -105,6 +105,47 @@ flowchart LR
 ```
 
 <a href="/writing-workflows/outputs" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Typed Answer as Step Outputs
+
+```yaml
+steps:
+  - id: classify
+    action: chat.completion
+    with:
+      prompt: |
+        Classify this customer note and extract the amount:
+        I was charged twice, please refund the extra 12.50 EUR.
+    output_schema:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [refund, complaint, question]
+        amount:
+          type: number
+      required: [category]
+
+  - id: record
+    run: echo "${steps.classify.outputs.category} ${steps.classify.outputs.amount}"
+    depends: classify
+```
+
+The model answers through a tool whose parameters are the schema. The answer is validated, and each listed property becomes a step output.
+
+```mermaid
+flowchart LR
+    C["classify · chat.completion"] --> R["record"]
+    C -. "outputs.category, outputs.amount" .-> R
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/llm/#structured-output" class="learn-more">Learn more →</a>
 
 </div>
 

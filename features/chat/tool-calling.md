@@ -29,6 +29,8 @@ The chat step finishes in one of two ways:
 
 Both scenarios result in successful step completion. The step only fails if the LLM request itself encounters an error.
 
+A step with [`output_schema`](/step-types/llm/#structured-output) ends differently: the model is offered a `respond` tool next to the workflow tools, the loop ends when it calls `respond` with a valid answer, and reaching `max_tool_iterations` without one fails the step.
+
 ## Basic Example
 
 ```yaml
@@ -242,6 +244,8 @@ All major providers support tool calling with automatic API mapping:
 | OpenRouter | Provider-specific mapping | Depends on underlying model |
 | Local | OpenAI-compatible format | If model supports function calling |
 
+With `thinking` enabled, and on models that always reason, such as Claude 5 and Gemini 3, each tool-calling turn is sent back exactly as the provider returned it, so its reasoning blocks and thought signatures stay valid for the next request.
+
 ## Error Handling
 
 **Tool Execution Failures:**
@@ -252,7 +256,7 @@ All major providers support tool calling with automatic API mapping:
 **Iteration Limits:**
 - When `max_tool_iterations` is reached, the last assistant message is written to stdout
 - If no assistant message exists, outputs: `"[Max tool iterations (N) reached. The LLM may not have provided a complete response.]"`
-- Warning logged but step completes successfully (not as error)
+- Warning logged but step completes successfully (not as error), unless the step has `output_schema`
 - Increase `max_tool_iterations` for complex multi-step tasks
 
 ## Best Practices
