@@ -107,6 +107,7 @@ Without `range`, the data block is detected: leading empty rows and columns are 
 | Number | A JSON number. Integral values within 2^53 are integers. |
 | Number with a date, time, or date-time format | ISO 8601 text: `2026-10-01`, `15:04:05`, or `2026-10-01T14:30:00`. Built-in and custom date formats count, including ones such as `yyyy"年"m"月"d"日"`; elapsed time such as `[h]:mm` stays a number. The 1900 and 1904 date systems are honored. |
 | Text, including text-formatted numbers | A string, so leading zeros survive. `trim: true` removes surrounding white space, including the full-width space. |
+| Text under a pinned `number`, `integer`, `date`, or `datetime` | Full-width digits and punctuation are read as their ASCII forms. A number may carry a thousands separator, `¥` or `￥` before it, or `円` after it: `￥123,000` and `123,000円` are 123000. A date may be `2026年10月3日`, `2026.10.3`, or an era date, long or short: `令和8年10月3日`, `令和元年5月1日`, `R8.10.3`, `H31/4/30` (明治 M, 大正 T, 昭和 S, 平成 H, 令和 R). A weekday in parentheses is not read. |
 | Boolean | `true` or `false`. |
 | Formula | Its cached value. `formulas: text` yields the formula with its `=`; `formulas: calculate` evaluates it. A formula without a cached value is evaluated with a warning. |
 | Error such as `#N/A` | `null`, with a warning naming the cell. |
@@ -309,6 +310,19 @@ steps:
             artifact: true
 ```
 
+To merge cells first, so a title can span the filled template, list the ranges in `merge`; an address inside a merged range then writes its top-left cell, and `changes.merged` counts the ranges newly merged. A range already merged is left as it is. A range that overlaps another merged region, or that covers a filled cell other than its top-left, fails the step, since Excel keeps only the top-left value of a merged cell; clear the cell in an earlier step.
+
+```yaml
+steps:
+  - action: xlsx.write_cells
+    with:
+      path: quote.xlsx
+      merge: [A1:D1]
+      cells:
+        A1: 御見積書
+        B3: Q-2026-001
+```
+
 ## Managing Sheets
 
 `xlsx.sheet` runs one `operation` on a workbook that must exist:
@@ -406,7 +420,7 @@ steps:
 - **The model returns addresses, never values.** It is shown the sheet's non-empty cells, one per line as `B3 [text,bold]: 見積番号` with the address, the kind (`text`, `number`, `date`, `datetime`, `time`, `bool`), `bold` and `fill` hints, and the text cut to 200 characters, and it answers with the address of each field's cell, or `null` for a field the sheet lacks. The engine reads the value from that cell with the usual typing, so no number is invented and every output has a cell behind it. A property's `type` pins the cell (`number`, `integer`, `boolean`, `string`, `string` with `format: date` or `date-time`); a `description` in the sheet's own language helps the model find the label.
 - **Outputs** are each property, `cells` (property to the `Sheet1!B7` it was read from, empty when absent), `sheet`, `warnings`, and `source`, `model` or `cache`. An empty cell or an absent field is null.
 - **What is sent.** The listed cells and the instruction, nothing else: no variables and no screenshots. `send_values: false` lists a non-text cell as its kind only, `B7 [number]`, so amounts and dates stay on the host. A sheet with more than 2000 cells, or whose listing is longer than 200 KB, is refused before any request; set `range` to the part that holds the fields. An instruction holding the value of a declared secret fails the step before any request, and secret values are masked in the text sent.
-- **Repeated layouts need no model call.** The answered addresses are cached by the sheet's shape, which cells hold something, their kinds and emphasis, and the merged regions, with the label beside each cell kept and checked. A second quote from the same supplier in the same template is read from the cache; a layout not seen before, a renamed or moved label, a changed instruction, or a schema with a new field asks the model again. An entry is kept only when the step succeeds. `cache: false` asks every run, and `dagu xlsx cache clear <dag>` drops the entries.
+- **Repeated layouts need no model call.** The model also names the cells that are labels, and the answered addresses are cached by the sheet's shape, which cells hold something, their kinds and emphasis, and the merged regions, with a digest of each label. A second quote from the same supplier in the same template is read from the cache, and so is one that leaves an optional box blank, since its labels still hold and it lists no cell the recording did not see. A layout no recording serves, a renamed or moved label, a changed instruction, or a schema with a new field asks the model again. An entry is kept only when the step succeeds. `cache: false` asks every run, and `dagu xlsx cache clear <dag>` drops the entries.
 - The step uses the DAG-level `llm` block or `with.llm`, which replaces it, as [browser steps](/step-types/browser) do. `dagu dry` checks that the workbook and sheet exist, nothing about the model.
 
 ## Saving Safely
@@ -490,6 +504,7 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `on_problem` | `validate` | `warn` (default) or `fail`. |
 | `max_problems` | `validate` | Problems to keep in `problems`. Defaults to `1000`. |
 | `cells` | `write_cells` | Addresses and what they receive. Required. |
+| `merge` | `write_cells` | Ranges to merge before the cells are written, such as `[A1:D1]`. |
 | `output` | `write_cells`, `convert` | The file to write; for `write_cells`, a copy of the template. Required for `convert`. |
 | `operation` | `sheet` | `add`, `copy`, `rename`, or `delete`. Required. |
 | `to` | `sheet` | The new name for `copy` and `rename`. |
@@ -528,6 +543,8 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `artifact requires artifact storage` | `artifact: true` in a DAG whose artifacts are disabled. | Enable `artifacts` or drop the field. |
 | `xlsx.extract needs a model: set llm at the DAG level or with.llm on the step` | No model is configured for the extract step. | Add an `llm` block to the DAG or `with.llm` to the step. |
 | `quote.xlsx Sheet1: 2415 cells in Sheet1!A1:H600 is more than 2000; set range to the part of the sheet that holds the fields` | The sheet has too many non-empty cells to list for the model. | Set `range` to the area of the form. |
+| `template.xlsx: merge A1:D1 overlaps merged cell Sheet1!B1:E1` | The range to merge crosses a merged region that is already there. | Merge a range that lies beside it, or unmerge the region in Excel first. |
+| `template.xlsx: merge B10:D10 would discard the value of Sheet1!C10; clear it first` | A cell under the range, other than its top-left, holds something that the merge would drop. | Clear the cell with `write_cells` (`C10: null`) in an earlier step, or move the value to the top-left cell. |
 | `xlsx: model answered field "total" with "H40", which is outside Sheet1!A1:D20` | The model named a cell outside the listed sheet or range. | Widen `range`, or improve the instruction and descriptions. |
 
 ## Related
