@@ -25,6 +25,8 @@ Support and accepted limits depend on the provider and model:
 | OpenRouter | Maps the common settings to its unified reasoning configuration. |
 | Local | Sends standard chat-completion fields; local-provider reasoning controls are not currently serialized. |
 
+Claude models do not accept a forced tool call while reasoning. When a step needs one, such as a step with [`output_schema`](/step-types/llm/#structured-output), Dagu offers the tool without forcing it for Anthropic and for Claude models through OpenRouter.
+
 ## Web Search
 
 Anthropic and Gemini can use provider-native search. OpenRouter uses its web-search plugin.
@@ -63,6 +65,8 @@ For Anthropic, domain filtering is also available:
 | `user_location` | object | Approximate `city`, `region`, `country`, and `timezone`. Anthropic only. |
 
 For Anthropic, set either `allowed_domains` or `blocked_domains`, not both.
+
+Web search cannot be combined with [`output_schema`](/step-types/llm/#structured-output), whose answer comes from a tool call; search in an earlier step and pass the result on.
 
 If a DAG whose tool name is `web_search` is also listed in `tools`, Dagu disables the built-in search integration for that request. The DAG tool remains available for the model to call; it is not called automatically.
 
