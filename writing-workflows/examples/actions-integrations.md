@@ -708,8 +708,6 @@ steps:
         order_id: ${foreach.item.order_id}
         status: ${steps.submit.outputs.status_code}
     output: RESULTS
-    continue_on:
-      failure: true
 
   - id: mark
     depends: each
@@ -718,13 +716,13 @@ steps:
       path: ~/Inbox/orders.xlsx
       sheet: Orders
       key: order_id
-      rows: ${steps.each.outputs.RESULTS}
+      rows: ${RESULTS}
       set:
         Status: status
       wait_for_unlock: 5m
 ```
 
-The rows without a status are read, each one is submitted, and the status is written back to the row it came from, so a rerun skips the rows already done. No spreadsheet application is needed.
+The rows without a status are read, each one is submitted, and the status is written back to the row it came from, so a rerun skips the rows already done. A loop with one failed submission is partially succeeded, so the write-back still marks the rows that succeeded and the failed rows wait for the next run. No spreadsheet application is needed.
 
 ```mermaid
 flowchart LR

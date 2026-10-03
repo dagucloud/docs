@@ -373,7 +373,7 @@ steps:
 
 To handle every incoming email exactly once, search with `unread: true` and mark each email read, or move it, once its work is done:
 
-- **Work per email**, such as a ticket or a reply: put `mail.organize` last inside the `foreach`, as in the [Quick Start](#quick-start). An email whose work fails stays unread, so the next run retries it alone, and the emails that succeeded are not handled again. Marking after the loop instead would leave every email unread when one fails, and the next run would repeat the work already done for the rest.
+- **Work per email**, such as a ticket or a reply: put `mail.organize` last inside the `foreach`, as in the [Quick Start](#quick-start). An email whose work fails stays unread, so the next run retries it alone, and the emails that succeeded are not handled again; the loop is partially succeeded rather than failed, so the steps after it still run and the run reports the partial success. Marking after the loop instead would leave every email unread when one fails, and the next run would repeat the work already done for the rest.
 - **Work on the whole batch**, such as a daily summary: one `mail.organize` step at the end with `emails: ${steps.<search-id>.outputs.messages}`.
 
 A step that succeeds just before its mark fails runs again next time. That window is one step wide.
