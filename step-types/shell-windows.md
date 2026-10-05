@@ -56,7 +56,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
       with:
         shell: powershell
   ```
-  Scripts are saved as `.ps1` files and executed with the selected shell.
+  Scripts are saved as UTF-8 `.ps1` files with a byte order mark, so Windows PowerShell reads them as UTF-8 whatever the system code page, and executed with the selected shell.
 - **Interpreter + inline script**:
   ```yaml
   steps:
@@ -71,13 +71,13 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
 
 - A `run:` block is prepared as temporary script input and removed after the step finishes. Do not depend on the prepared script path or directory.
 - Dagu resolves scoped references such as `${params.name}` and `${env.NAME}` before the script starts. Unqualified environment syntax and command syntax remain for the selected interpreter; use PowerShell, `cmd.exe`, or another selected interpreter's native variable syntax.
-- With PowerShell/pwsh, the script runs through PowerShell file execution. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup so cmdlet errors stop execution and text handling is stable. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
+- With PowerShell/pwsh, the script runs through PowerShell file execution. Dagu prefixes each script with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup so cmdlet errors stop execution and text handling is stable. The script file is written as UTF-8 with a byte order mark, so non-ASCII text on any line parses correctly even when the system code page is not UTF-8. With `cmd`, scripts follow cmd semantics; use PowerShell for richer scripting.
 - When both `shell` and a multi-line `run` block are set, the shell value is used as the interpreter.
 
 ## Shell Options
 
 - **PowerShell / pwsh**  
-  Use DAG-level `shell: powershell`/`shell: pwsh`, or step-level `with.shell: powershell`/`with.shell: pwsh`. Script blocks run through PowerShell file execution and are prefixed with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup. Use PowerShell syntax for variables/pipelines.
+  Use DAG-level `shell: powershell`/`shell: pwsh`, or step-level `with.shell: powershell`/`with.shell: pwsh`. Script blocks are written as UTF-8 with a byte order mark, run through PowerShell file execution, and are prefixed with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup. Use PowerShell syntax for variables/pipelines.
 
 - **cmd.exe**  
   Set DAG-level `shell: cmd`, or step-level `with.shell: cmd`, for command prompt semantics. Include `/c` in the shell string/array when you want to run a single command string. For multi-line cmd scripts, embed the batch pattern directly in YAML:
