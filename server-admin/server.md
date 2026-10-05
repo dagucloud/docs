@@ -118,7 +118,7 @@ tls:
 ui:
   navbar_color: "#1976d2"        # Header color (hex or name)
   navbar_title: "Dagu"           # Header title
-  log_encoding_charset: "utf-8"   # Log file encoding (see reference for supported encodings)
+  log_encoding_charset: "utf-8"   # Charset for log lines that are not UTF-8 (see reference)
   max_dashboard_page_limit: 100    # Max items on dashboard
   dags:
     sort_field: "name"           # Default DAG list request sort field (`name` or `nextRun`)
@@ -473,10 +473,16 @@ Color suggestions:
 
 ### Log Encoding
 
-The `log_encoding_charset` option specifies the character encoding used to read log files in the UI. This is useful when your DAG steps produce output in non-UTF-8 encodings.
+The `log_encoding_charset` option sets the charset the Web UI and the REST API use to read log lines that are not UTF-8, such as output from `cmd.exe` or native Windows programs written in the system code page.
+
+Each line of a log is read on its own. A line that is valid UTF-8 is shown as is, and only the other lines are decoded with `log_encoding_charset`. UTF-8 output therefore displays correctly under any setting, including PowerShell steps, which Dagu runs with UTF-8 output, and a log that mixes UTF-8 and code page lines reads correctly. `utf-16`, `iso-2022-jp`, and `hz-gb-2312` are the exception: their lines cannot be judged one at a time, so the whole log is decoded with the configured charset.
+
+Log downloads return the file's bytes unchanged.
+
+When the option is not set, Dagu takes the default from the system: the ANSI code page on Windows, for example `shift_jis` on Japanese Windows, and the charset of the `LC_ALL` or `LANG` locale on Linux and macOS, falling back to `utf-8`. Set it explicitly when step output uses a legacy charset.
 
 **Common encodings:**
-- `utf-8` (default) - Unicode
+- `utf-8` - Unicode
 - `shift_jis`, `euc-jp` - Japanese
 - `gb2312`, `gbk`, `gb18030` - Simplified Chinese
 - `big5` - Traditional Chinese

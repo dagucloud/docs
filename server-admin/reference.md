@@ -161,7 +161,7 @@ tls:
 ui:
   navbar_color: "#1976d2"     # Hex or CSS color
   navbar_title: "Dagu"
-  log_encoding_charset: "utf-8"  # Character encoding for log files (see supported encodings below)
+  log_encoding_charset: "utf-8"  # Charset for log lines that are not UTF-8 (see supported encodings below)
   max_dashboard_page_limit: 100
   dags:
     sort_field: "name"        # Default DAG list request sort field (`name` or `nextRun`)
@@ -443,7 +443,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 ### UI
 - `DAGU_UI_NAVBAR_COLOR` - Nav bar color
 - `DAGU_UI_NAVBAR_TITLE` - Nav bar title
-- `DAGU_UI_LOG_ENCODING_CHARSET` - Log file character encoding (see [Supported Log Encodings](#supported-log-encodings))
+- `DAGU_UI_LOG_ENCODING_CHARSET` - Charset for log lines that are not UTF-8 (see [Supported Log Encodings](#supported-log-encodings))
 - `DAGU_UI_MAX_DASHBOARD_PAGE_LIMIT` - Dashboard limit
 - `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page request sort field (`name` or `nextRun`)
 - `DAGU_UI_DAGS_SORT_ORDER` - Default DAGs page sort order
@@ -779,7 +779,7 @@ peer:
 - `permissions.write_dags`: `true`
 - `permissions.run_dags`: `true`
 - `ui.max_dashboard_page_limit`: `100`
-- `ui.log_encoding_charset`: `utf-8`
+- `ui.log_encoding_charset`: the system charset (the ANSI code page on Windows, the `LC_ALL` or `LANG` locale elsewhere), or `utf-8`
 - `ui.dags.sort_field`: `name`
 - `ui.dags.sort_order`: `asc`
 - `log_format`: `text`
@@ -831,13 +831,13 @@ For upgrades:
 
 ## Supported Log Encodings
 
-The `ui.log_encoding_charset` configuration option supports a wide range of character encodings for reading log files. This is useful when your DAG steps produce output in non-UTF-8 encodings.
+The `ui.log_encoding_charset` configuration option decodes log lines that are not valid UTF-8. Lines that are valid UTF-8 are always shown as is; `utf-16`, `iso-2022-jp`, and `hz-gb-2312` decode the whole log instead. See [Log Encoding](/server-admin/server#log-encoding) for how lines are read and how the default is chosen.
 
 ### Common Encodings
 
 | Encoding | Aliases | Description |
 |----------|---------|-------------|
-| `utf-8` | `utf8` | Unicode (default) |
+| `utf-8` | `utf8` | Unicode |
 | `shift_jis` | `shiftjis`, `sjis`, `s-jis` | Japanese (Windows) |
 | `euc-jp` | `eucjp` | Japanese (Unix) |
 | `iso-2022-jp` | `iso2022jp` | Japanese (Email) |
