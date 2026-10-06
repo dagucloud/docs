@@ -88,7 +88,7 @@ Inspect an `.xlsx` workbook on the server before writing [xlsx steps](/step-type
 { "target": "workbook", "path": "/srv/data/orders.xlsx" }
 ```
 
-The result describes each sheet, its used range, detected data block, header row, headers, column types, row count, and tables, with five typed sample rows, plus the workbook's named ranges and date system. `path` is any file the server process can read, and is recorded in the audit log as `workbook_path`.
+The result describes each sheet, its used range, detected data block, header row, headers, column types, row count, and tables, with five typed sample rows, plus the workbook's named ranges and date system. Each column carries a profile over up to 5000 data rows: filled and blank cells, distinct values, the values themselves when a few repeat, the lowest and highest number or date, and the odd cells that do not read as the column's type, such as `未定` in a number column. Use it to choose `where`, `types`, and `on_type_error` for `xlsx.read`. `path` is any file the server process can read, and is recorded in the audit log as `workbook_path`.
 
 The legacy `docs`, `doc`, and `doc_search` targets remain available as deprecated exact aliases. New clients should use the Wiki target names.
 

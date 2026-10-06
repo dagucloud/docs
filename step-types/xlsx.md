@@ -10,7 +10,7 @@ Read and write Excel workbooks from workflow steps without Excel, a script, or a
 | Action | Use it to |
 |--------|-----------|
 | `xlsx.read` | Read the rows of a sheet, range, named range, or table as typed objects. |
-| `xlsx.info` | Describe a workbook: sheets, headers, column types, row counts, tables, named ranges. |
+| `xlsx.info` | Describe a workbook: sheets, headers, column types, a profile of each column, row counts, tables, named ranges. |
 | `xlsx.list_sheets` | List the sheet names in order. |
 | `xlsx.write` | Create a workbook, or replace or extend a sheet, from rows or a file. |
 | `xlsx.append` | Add rows below the last used row. |
@@ -73,7 +73,7 @@ steps:
 
 ## Looking at a Workbook First
 
-Before writing a workflow for a workbook, learn its sheets, headers, and column types:
+Before writing a workflow for a workbook, learn its sheets, headers, column types, and what each column holds:
 
 ```bash
 dagu xlsx inspect orders.xlsx
@@ -82,7 +82,27 @@ dagu xlsx read orders.xlsx --sheet Orders --columns "Invoice No,Amount" --format
 
 `inspect` prints what `xlsx.info` publishes plus a few typed sample rows per sheet; `read` prints what `xlsx.read` publishes. Both read the file directly and create no run. See the [CLI reference](/getting-started/cli#xlsx-inspect). An MCP client can do the same through the `dagu_read` tool's [`workbook` target](/mcp/tools#dagu-read).
 
-`xlsx.info` publishes `path`, `date_system`, `sheets` (each with `name`, `used_range`, `range`, `header_row`, `headers`, `types`, `row_count`, and `tables`), `named_ranges`, and `warnings`. `xlsx.list_sheets` publishes `sheets` and `count`.
+`xlsx.info` publishes `path`, `date_system`, `sheets` (each with `name`, `used_range`, `range`, `header_row`, `headers`, `types`, `row_count`, `columns`, `profile_truncated`, and `tables`), `named_ranges`, and `warnings`. `xlsx.list_sheets` publishes `sheets` and `count`.
+
+`types` and `columns` come from every data row of the detected table, up to 5000; when the table holds more, `profile_truncated` is `true`. A column's type is the kind most of its cells hold: a column mixing integers and decimals is `number`, one mixing dates and datetimes `datetime`, and an empty column `string`. `columns` profiles each column in header order:
+
+| Field | Meaning |
+|-------|---------|
+| `name`, `type` | The header and its entry in `types`. |
+| `filled`, `blank` | Cells that hold a value, and cells that are empty or hold only white space. |
+| `distinct` | Distinct values, compared as trimmed text, counted up to 1000. |
+| `values` | The distinct values in order of first appearance, when there are 12 or fewer and one repeats, so a column of unique identifiers lists none. A value longer than 40 characters is cut to 40 ending in `…`. |
+| `min`, `max` | The lowest and highest number of an `integer` or `number` column, or date of a `date` or `datetime` column, over the cells that read as that type the way `types` reads them, so `１２` counts as 12. |
+| `odd` | Cells holding a value the column's type cannot read even when pinned with `types`, such as `未定` in a number column. `１２`, `三千`, and `令和8年10月3日` read under their type and are not odd; a `string` column has none. |
+| `odd_cells` | The first three odd cells as `{cell, text}`, such as `{"cell": "D300", "text": "未定"}`, the text cut like a value. |
+
+`values`, `min`, `max`, `odd`, and `odd_cells` are absent when there is nothing to report. `inspect` prints the profile after each column name:
+
+```text
+Columns: 状態 (string: 済, 未; 40 blank), 数量 (number; 1..250; 1 odd: D300 "未定")
+```
+
+The profile answers what a few sample rows cannot: `values` gives the exact text to filter on in `where`, such as `{状態: ""}` for the rows still to do, and `odd` names the cells that would fail a read pinning that column's type, to fix in the workbook first or to read with `on_type_error: warn`. A sheet reports its first 20 read warnings, such as `Sheet1: Sheet1!B3: error cell #N/A`, then `Sheet1: 380 more warnings`.
 
 ## Reading Rows
 
