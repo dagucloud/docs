@@ -252,7 +252,7 @@ steps:
     run: echo '${not.a.supported.reference}'
 ```
 
-Supported but unavailable references are also preserved, and inspection surfaces can report a passive notice. For example, a known step-output reference without a dependency is preserved with a `missing_dependency` notice.
+Supported but unavailable references are also preserved, and inspection surfaces can report a passive notice. For example, a reference to an output name the step does not declare is preserved with an `unknown_output_name` notice.
 
 `steps[].stdin` is the exception. A path that still carries a supported reference, or that resolves to an empty value, fails the step instead of being preserved, because an empty standard input is indistinguishable from an unset field. See [Standard Input](/writing-workflows/data-flow#standard-input).
 

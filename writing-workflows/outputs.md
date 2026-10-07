@@ -121,7 +121,7 @@ steps:
     run: ./deploy.sh "${steps.build.outputs.image}"
 ```
 
-If `deploy` omits `depends: build`, Dagu preserves `${steps.build.outputs.image}` and inspection surfaces can report a `missing_dependency` notice.
+If `deploy` omits `depends: build`, the reference itself makes `deploy` depend on `build`. `dagu validate` lists the inferred dependency, and the UI graph draws it with a dashed line.
 
 ## Running One Step
 

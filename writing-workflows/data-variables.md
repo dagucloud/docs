@@ -156,7 +156,7 @@ steps:
       kubectl scale --replicas="${steps.get_config.outputs.replicas}" deployment/app
 ```
 
-The dependency is required. If `deploy` does not depend on `get_config`, Dagu preserves the reference and can report a `missing_dependency` notice.
+The `depends` entry is optional here. If `deploy` does not declare it, the reference itself makes `deploy` depend on `get_config`.
 
 ## JSON Step Outputs
 
