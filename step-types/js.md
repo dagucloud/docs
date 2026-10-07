@@ -43,8 +43,8 @@ Output of `links`:
 | `script` | JavaScript function body. Required. `return` a value to publish it. |
 | `input` | Any YAML value bound to `input`. Mutually exclusive with `input_file`. |
 | `input_file` | Path of a file whose contents are bound to `input`. Mutually exclusive with `input`. |
-| `format` | How string input is interpreted: `text` (default) binds it as-is, `json` parses it first. Applies to `input_file` contents and to a string `input`. |
-| `timeout` | Maximum script run time, such as `30s` or `2m`. Default: `60s`. |
+| `format` | How string input is interpreted. `auto` (default) parses a JSON object or array and binds any other string as-is. `text` always binds the string as-is. `json` always parses and fails on invalid JSON. Applies to `input_file` contents and to a string `input`. |
+| `timeout` | Maximum script run time, as seconds (`30`) or a duration (`2m`). Defaults to the step `timeout`, or `60s` when the step has none. |
 
 ## How It Works
 
@@ -66,7 +66,7 @@ Objects and lists in `input` arrive as native JavaScript objects and arrays. Whe
 
 ## Input From Earlier Steps
 
-A captured `output:` is a string. Set `format: json` to parse it before it reaches the script:
+A captured `output:` is a string. When it holds a JSON object or array, the default `format: auto` parses it, so one step's returned object is the next step's `input`:
 
 ```yaml
 steps:
@@ -82,10 +82,11 @@ steps:
     action: js.run
     with:
       input: ${DATA}
-      format: json
       script: |
         return input.items.map((item) => item + input.count);
 ```
+
+Set `format: text` when the script should see the raw string, and `format: json` when invalid JSON should fail the step instead of arriving as a string. Only the top-level string is parsed: nested string fields inside an `input` object stay strings.
 
 Use `input_file` for larger payloads, such as the stdout log of an earlier step:
 
@@ -99,7 +100,6 @@ steps:
     action: js.run
     with:
       input_file: ${dump.stdout}
-      format: json
       script: |
         return Object.keys(input).length;
 ```
@@ -125,19 +125,20 @@ Available:
 - ECMAScript builtins: `JSON`, `RegExp`, `Math`, `Date`, `Map`, `Set`, `Promise`, string and array methods, `encodeURIComponent`, and the rest of the standard library
 - `URL` and `URLSearchParams`
 - `console`
+- `await`, for promises that resolve without an event loop. The script body is an async function, so `await Promise.all([...])` and async helper functions work. A promise that is still pending when the body returns fails the step, because nothing can resolve it.
 
 Not available:
 
 - `require`, `import`, or npm packages
 - `fetch`, the filesystem, `process`, or environment variables
-- `setTimeout` and other timers, and `async` / `await`
+- `setTimeout` and other timers
 
 Scripts are compiled per run, so there is no shared state between steps.
 
 ## Limits and Errors
 
-- A script that runs longer than `timeout` fails the step with `js: timeout after 60s`. The step-level `timeout` and `dagu stop` also interrupt the script.
-- A thrown error fails the step. The error names the exception and the script line, such as `js: TypeError: Cannot read property 'x' of null (script line 3)`, and the full stack trace is written to stderr.
+- A script that runs longer than `timeout` fails the step with `js: timeout after 60s; raise with.timeout to allow longer scripts`. When the step has its own `timeout` and `with.timeout` is unset, the step timeout governs. `dagu stop` also interrupts the script.
+- A thrown error or rejected promise fails the step. The error names the exception and the script line, such as `js: TypeError: Cannot read property 'x' of null (script line 3)`, and the full stack trace is written to stderr. Lines and columns match the script text.
 - A script that returns `undefined`, usually because `return` is missing, succeeds with empty stdout and a notice on stderr.
 - Memory is not capped. A script that allocates without bound can exhaust the process.
 - The interrupt takes effect between JavaScript instructions, so a single long-running builtin call such as a catastrophic regular expression cannot be stopped early.
@@ -161,7 +162,6 @@ steps:
     action: js.run
     with:
       input: ${USERS}
-      format: json
       script: |
         return input
           .filter((user) => user.active)
