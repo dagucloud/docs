@@ -120,16 +120,29 @@ JSON output follows JavaScript rules: `toJSON` is honored, `Date` becomes an ISO
 
 ## Sandbox
 
-Available:
+### Language Level
 
-- ECMAScript builtins: `JSON`, `RegExp`, `Math`, `Date`, `Map`, `Set`, `Promise`, string and array methods, `encodeURIComponent`, and the rest of the standard library
+The engine implements ECMAScript 5.1 in full and the ES2015 through ES2022 language, so modern code runs as written:
+
+- Syntax: `let` and `const`, arrow functions, template literals, classes with `extends`, getters, private fields, and static blocks, destructuring, spread and rest, default parameters, generators, `async` and `await`, optional chaining `?.`, nullish coalescing `??`, logical assignment, `**`, tagged templates, computed keys
+- Builtins: `Map`, `Set`, `WeakMap`, `Symbol`, `Proxy`, `Reflect`, `BigInt`, typed arrays and `ArrayBuffer`, `Promise.all` and `Promise.any`, `Object.entries`, `Object.fromEntries`, `Object.hasOwn`, `Array.prototype.flat`, `flatMap`, `at`, `findLast`, `includes`, `toSorted`, `with`, `String.prototype.padStart`, `replaceAll`, `matchAll`, and the ES2025 `Set` methods such as `union`
+- Regular expressions: named groups, lookbehind, and the `s`, `u`, and `y` flags
+
+Not implemented:
+
+- ES modules: `import`, `export`, and dynamic `import()`
+- `Object.groupBy`, `Map.groupBy`, `Promise.withResolvers`, `Array.fromAsync`, the regular expression `v` flag, `WeakRef`, `FinalizationRegistry`
+- Host APIs that are not part of ECMAScript: `Intl`, `structuredClone`, `TextEncoder`, `TextDecoder`, `atob`, `btoa`
+
+### Available Globals
+
 - `URL` and `URLSearchParams`
 - `console`
 - `await`, for promises that resolve without an event loop. The script body is an async function, so `await Promise.all([...])` and async helper functions work. A promise that is still pending when the body returns fails the step, because nothing can resolve it.
 
-Not available:
+### Not Available
 
-- `require`, `import`, or npm packages
+- `require` or npm packages
 - `fetch`, the filesystem, `process`, or environment variables
 - `setTimeout` and other timers
 
