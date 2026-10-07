@@ -104,9 +104,9 @@ The separate `${<step_id>.output.<path>}` form reads into a step's captured JSON
 
 The matching `${<step_id>.outputs<path>}` form reads into the payload a step published on its outputs channel, which need not be an object. A [`parallel` step](/writing-workflows/sub-dags#reading-child-outputs-without-capturing-the-aggregate) publishes an array there, so `${fanout.outputs}` is the whole array and `${fanout.outputs[0].NAME}` is one entry's value. Array indexes are valid in both path forms.
 
-## Dependency Requirement
+## Dependencies
 
-Step output references do not create dependencies. The consuming step must depend directly or transitively on the producing step.
+A step output reference makes the consuming step depend on the producing step. An explicit `depends` entry is optional.
 
 ```yaml
 steps:
@@ -117,11 +117,18 @@ steps:
       - name: image
 
   - id: deploy
-    depends: build
     run: ./deploy.sh "${steps.build.outputs.image}"
 ```
 
-If `deploy` omits `depends: build`, the reference itself makes `deploy` depend on `build`. `dagu validate` lists the inferred dependency, and the UI graph draws it with a dashed line.
+`deploy` runs after `build` and the reference resolves. `dagu validate` reports the edge as `inferred: build -> deploy (steps[1].run)`, the API lists it in the step's `inferredDepends` field, and the UI graph draws it with a dashed line.
+
+Rules:
+
+- Inferred dependencies are unioned with `depends`. An empty `depends: []` does not suppress them.
+- A reference inside a `foreach` body makes the owning `foreach` step depend on the producer.
+- Lifecycle handlers under `handler_on` create no dependency. Neither do escaped references such as `\${steps.build.outputs.image}` or references in a `template.render` template body.
+- Two steps that reference each other's outputs, or a reference to a later step in a `type: chain` DAG, form a cycle and the DAG fails to load.
+- Inferred dependencies only order execution. Behavior that `depends` enables beyond ordering, such as chat history inheritance between LLM steps, still needs an explicit `depends` entry.
 
 ## Running One Step
 

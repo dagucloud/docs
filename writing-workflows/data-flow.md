@@ -85,7 +85,7 @@ steps:
     run: docker build -t "myapp:${steps.get_version.outputs.version}" .
 ```
 
-The consumer must depend on the producer. Step output references do not create dependencies.
+The reference makes `build_image` depend on `get_version`, so `depends: get_version` is optional. See [Dependencies](/writing-workflows/outputs#dependencies).
 
 ### Multiple Outputs
 
@@ -155,7 +155,7 @@ steps:
     run: ./deploy.sh '${steps.choose_region.outputs.region}'
 ```
 
-Only declared properties become outputs. The consumer must depend directly or transitively on the human-task step; the output reference does not create the dependency.
+Only declared properties become outputs. The reference makes `deploy` depend on the human-task step, so `depends: choose_region` is optional.
 
 ### Decision Outputs
 

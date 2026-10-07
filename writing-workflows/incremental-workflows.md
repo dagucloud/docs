@@ -110,9 +110,10 @@ Dagu canonicalizes paths before comparing them. This has several consequences:
 - Only one step may produce a given canonical output path.
 - A step cannot declare the same canonical path as both its input and output.
 - Matching producer outputs and consumer inputs add dependencies to the graph.
+- Step output references such as `${steps.build.outputs.image}` add dependencies the same way. See [Dependencies](/writing-workflows/outputs#dependencies).
 - Explicit and inferred dependencies must form an acyclic graph.
 
-An inferred file dependency controls ordering, while the declared input content controls reuse. An explicit `depends` entry also acts as a control dependency: if that upstream step executes during the current run, the dependent step executes too, even when its declared file inputs are unchanged. Use explicit dependencies for non-file prerequisites that should participate in the reuse decision. When a step needs only a producer's declared file, rely on the inferred dependency.
+An inferred dependency, from a matching path or a step output reference, controls ordering, while the declared input content and resolved values control reuse. An explicit `depends` entry also acts as a control dependency: if that upstream step executes during the current run, the dependent step executes too, even when its declared file inputs are unchanged. Use explicit dependencies for non-file prerequisites that should participate in the reuse decision. When a step needs only a producer's declared file, rely on the inferred dependency.
 
 Inputs must be regular, non-symlink files. Outputs may be absent before execution, but an existing output must also be a regular, non-symlink file. Missing inputs fail evaluation. The parent directory of an output must exist before the run starts.
 

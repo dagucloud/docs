@@ -141,8 +141,7 @@ Rules:
 - The producing step must have an `id`.
 - The output name must belong to the producing step's output contract, either through its `outputs` list or outputs supplied by its action.
 - The producing step must complete successfully before the consuming step starts.
-- The consuming step must depend directly or transitively on the producing step.
-- Step output references do not create dependencies.
+- The reference itself makes the consuming step depend on the producing step. An explicit `depends` entry is optional. See [Dependencies](/writing-workflows/outputs#dependencies).
 
 The looser `${step_id.outputs}` form reads the payload a step published on its outputs channel, including payloads that are not objects, and accepts a JSON path with array indexes. A [`parallel` step](/writing-workflows/sub-dags#reading-child-outputs-without-capturing-the-aggregate) publishes an array of per-child outputs there, read as `${fanout.outputs}` or `${fanout.outputs[0].NAME}`. See [Outputs](/writing-workflows/outputs#json-outputs) for how this form differs from the strict one.
 

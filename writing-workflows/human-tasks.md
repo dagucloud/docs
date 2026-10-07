@@ -111,7 +111,7 @@ ${steps.review.outputs.environment}
 
 Step IDs must follow the normal identifier rules: they are at most 40 characters, start with a letter, and contain only letters, numbers, and underscores.
 
-Output references do not create dependencies. A consumer must depend directly or transitively on the human task.
+An output reference makes the consumer depend on the human task. An explicit `depends` entry is optional.
 
 ## Prompt
 
