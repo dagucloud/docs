@@ -137,10 +137,11 @@ Scripts are compiled per run, so there is no shared state between steps.
 ## Limits and Errors
 
 - A script that runs longer than `timeout` fails the step with `js: timeout after 60s`. The step-level `timeout` and `dagu stop` also interrupt the script.
-- A thrown error fails the step. The error names the exception, and the stack trace, including the script line number, is written to stderr.
+- A thrown error fails the step. The error names the exception and the script line, such as `js: TypeError: Cannot read property 'x' of null (script line 3)`, and the full stack trace is written to stderr.
+- A script that returns `undefined`, usually because `return` is missing, succeeds with empty stdout and a notice on stderr.
 - Memory is not capped. A script that allocates without bound can exhaust the process.
 - The interrupt takes effect between JavaScript instructions, so a single long-running builtin call such as a catastrophic regular expression cannot be stopped early.
-- `dagu validate` rejects a missing `script` and the combination of `input` and `input_file`.
+- `dagu validate` rejects a missing `script`, the combination of `input` and `input_file`, and a script that does not compile, naming the line of the syntax error. The editor reports the same errors on save.
 
 ## Examples
 
