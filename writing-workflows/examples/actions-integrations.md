@@ -1,6 +1,6 @@
 # Actions & Integrations Examples
 
-Examples for custom actions, containers, Kubernetes, SSH, HTTP, jq, archive extraction, mail, and mailboxes.
+Examples for custom actions, containers, Kubernetes, SSH, HTTP, jq, sandboxed JavaScript, archive extraction, mail, and mailboxes.
 
 <div class="examples-grid">
 
@@ -421,6 +421,56 @@ flowchart LR
 ```
 
 <a href="/step-types/jq" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### JavaScript Transform
+
+```yaml
+steps:
+  # Fetch a page
+  - id: fetch
+    action: http.request
+    with:
+      method: GET
+      url: https://example.com
+    output: HTML
+
+  # Extract and normalize links in a sandboxed script, no Node.js needed
+  - id: links
+    action: js.run
+    with:
+      input: ${HTML}
+      script: |
+        const urls = new Set();
+        for (const m of input.matchAll(/href="([^"]+)"/g)) {
+          urls.add(new URL(m[1], "https://example.com").href);
+        }
+        return [...urls];
+    output: LINKS
+    depends: fetch
+
+  # A returned array arrives in the next script as an array
+  - id: report
+    action: js.run
+    with:
+      input: ${LINKS}
+      script: |
+        return `${input.length} links, first ${input[0] ?? "none"}`;
+    depends: links
+```
+
+```mermaid
+flowchart LR
+    F["fetch · output: HTML"] --> L["js.run · links"] --> R["js.run · report"]
+    style F stroke:lightblue,stroke-width:1.6px,color:#333
+    style L stroke:green,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/js" class="learn-more">Learn more →</a>
 
 </div>
 
