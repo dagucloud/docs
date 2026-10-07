@@ -395,6 +395,7 @@ const fullSidebar = [
             collapsed: true,
             items: [
               { text: "Data", link: "/step-types/data" },
+              { text: "JavaScript", link: "/step-types/js" },
               { text: "Outputs", link: "/step-types/outputs" },
               { text: "Artifact", link: "/step-types/artifact" },
               { text: "File", link: "/step-types/file" },

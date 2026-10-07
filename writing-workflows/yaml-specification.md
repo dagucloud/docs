@@ -900,6 +900,7 @@ Accepted built-in action names:
 | `human.task` | Wait for acknowledgement or typed operator input in a root DAG. |
 | `http.request` | HTTP requests. |
 | `jq.filter` | jq transforms. |
+| `js.run` | Sandboxed JavaScript transforms. |
 | `k8s.run`, `kubernetes.run` | Kubernetes job execution. |
 | `log.write` | Write a log message. |
 | `mail.organize`, `mail.search`, `mail.send` | Find, organize, and send email. See [Mailbox](/step-types/mailbox) and [Mail](/step-types/mail). |
