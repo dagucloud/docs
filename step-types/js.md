@@ -36,6 +36,19 @@ Output of `links`:
 ]
 ```
 
+## When to Use
+
+Use `js.run` to transform data between steps: parse, filter, reshape, extract with regular expressions, or compute values. It replaces inline `python -c`, Python or Node heredocs, and `awk`/`sed`/`jq` pipelines in `run:`:
+
+- No interpreter is needed on the host or on workers.
+- The script is passed as written, so `${...}` and `$` need no escaping.
+- Syntax errors fail `dagu validate`, the editor, and MCP preview before a run starts.
+- The returned value is clean stdout, ready for `output:`.
+
+Keep `run:` for invoking CLIs and for work that needs the network, files, environment variables, or a library. A single path such as `.items[].id` is fine in [`jq.filter`](/step-types/jq).
+
+The Dagu agent skill and MCP authoring rules give coding agents the same guidance.
+
 ## Configuration
 
 | Field | Description |
