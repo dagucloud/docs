@@ -802,10 +802,10 @@ The step holds the operations that succeeded and those skipped because their `wh
 Close the session's browser and remove the session with its history.
 
 ```bash
-dagu browser session close [--force] ID
+dagu browser session close [--force] [--keep] ID
 ```
 
-`--force` closes it even while another command holds it.
+`--force` closes it even while another command holds it. `--keep` ends the session instead: its browser closes and its profile is free for a step, and its history can still be exported for a day.
 
 #### `browser session list`
 
