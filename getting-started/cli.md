@@ -777,7 +777,7 @@ dagu browser session describe [options] ID
 - `--screenshot` - Also save a screenshot of the page under this name
 - `--format, -f` - `json` (default) or `text`
 
-The outline lists headings, fields with their labels, selects with their choice and options, buttons, checkboxes, links with their addresses, messages, and tables and lists by their columns and rows; a long run of alike rows shows the first three and counts the rest. Text typed into fields is never shown.
+The outline lists headings, fields with their labels, selects with their choice and options, buttons, checkboxes, links with their addresses, messages, and tables and lists by their columns and rows, the page's own content before the site's header, menus, and footer; a long run of alike rows shows the first three and counts the rest. Text typed into fields is never shown.
 
 #### `browser session export`
 
