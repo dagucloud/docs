@@ -760,6 +760,8 @@ The operation is written as an item of a browser step's `with.do`: `goto`, `act`
 
 A variable given as `{"env": NAME}` is read from the environment on this and every later command of the session, which then need it set, and is masked like a secret in everything the session reports. A plain string serves this command only. Values are never kept.
 
+An element the outline shows with its ID can be acted on by that ID, without the model: `{"click": "0-131"}`, `{"type": {"into": "0-229", "text": "%user%"}}`, or `{"select": {"in": "0-106", "option": "未出荷"}}`. The session keeps each as the act a step writes, such as `Click the "Sign in" button`, reported as `act`, with the action it took as the act's recording.
+
 The result reports the operation's `index` in the session's history, its `status` (`done`, `failed`, or `skipped` when its `when` does not hold), the `actions` an act performed and whether an exported step replays them (`recorded`), what an extract read (`outputs`), saved files, accepted dialogs, blocked requests, `tokens`, and the page the browser is on next with its `outline`. A failed operation exits 1, but the session stays open.
 
 #### `browser session describe`
@@ -777,7 +779,7 @@ dagu browser session describe [options] ID
 - `--screenshot` - Also save a screenshot of the page under this name
 - `--format, -f` - `json` (default) or `text`
 
-The outline lists headings, fields with their labels, selects with their choice and options, buttons, checkboxes, links with their addresses, messages, and tables and lists by their columns and rows, the page's own content before the site's header, menus, and footer; a long run of alike rows shows the first three and counts the rest. Text typed into fields is never shown.
+The outline lists headings, fields with their labels, selects with their choice and options, buttons, checkboxes, links with their addresses, messages, and tables and lists by their columns and rows, the page's own content before the site's header, menus, and footer. Each element `do` can act on shows its ID in brackets, and a link to the page's own site shows its path; a long run of alike rows shows the first three and counts the rest. Text typed into fields is never shown.
 
 #### `browser session export`
 
