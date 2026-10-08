@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `computer check`, `computer cache clear`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `computer check`, `computer cache clear`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
 
 ## Global Options
 
@@ -713,6 +713,108 @@ Without `--step`, every step of the DAG is cleared. The cache lives on the host 
 ```bash
 dagu browser cache clear billing
 dagu browser cache clear billing --step login
+```
+
+### `browser session`
+
+Work a site in a browser kept open between commands, one operation at a time, and turn what worked into a [browser step](/step-types/browser#building-a-step-in-a-browser-session). Every command prints one JSON object. A command that fails prints `{"error": {"code", "message"}}` and exits 1; the codes are `invalid_input`, `session_not_found`, `session_busy`, `session_ended`, `model_required`, `profile_in_use`, `launch_failed`, `operation_failed`, `export_invalid`, and `failed`. Sessions are kept on the host that runs the commands.
+
+#### `browser session open`
+
+Open a browser, go to the URL if given, and leave the browser waiting for the session's commands.
+
+```bash
+dagu browser session open [options] [URL]
+```
+
+**Options:**
+- `--provider`, `--model`, `--base-url`, `--api-key-name` - The model acts, extracts, and judged conditions ask. The API key is read from the environment variable named by `--api-key-name`, or the provider's usual one, on every command
+- `--llm` - The model as a step's `llm` field, in YAML or JSON, such as `'{provider: openai, model: gpt-5-mini}'`; use it or the flags above
+- `--profile` - Keep cookies and storage under this profile, shared with browser steps that name it
+- `--headed` - Show the browser window
+- `--viewport` - Size of the page area, as `WIDTHxHEIGHT`
+- `--executable`, `--proxy` - As in a step's `browser` options
+- `--allowed-domain` - Keep the browser on this host or `*.domain`; repeat for more
+- `--idle-timeout` - Close the browser when no command arrives for this long (default: `30m`, at most `24h`)
+- `--outline-chars` - Most characters of the page outline to report (default: `4000`; `0` leaves it out)
+
+The result carries the session `id` the other commands take, the page's `url`, `title`, and `outline`, and `cdp_url`, the browser's DevTools address, where an application can show the page and let a person act on it. Without a model, the session runs only operations that need none.
+
+#### `browser session do`
+
+Read one operation from stdin, in JSON or YAML, and run it in the session.
+
+```bash
+echo '{"act": "Click the Sign in button"}' | dagu browser session do [options] ID
+```
+
+**Options:**
+- `--outline-chars` - Most characters of the page outline to report (default: `4000`)
+
+The operation is written as an item of a browser step's `with.do`: `goto`, `act`, `extract`, `expect`, `wait`, or `screenshot`, with `when` and `timeout`. Give the values of the variables an act uses under `variables`:
+
+```json
+{"act": "Type %password% into the Password field",
+ "variables": {"password": {"env": "PORTAL_PASSWORD"}}}
+```
+
+A variable given as `{"env": NAME}` is read from the environment on this and every later command of the session, which then need it set, and is masked like a secret in everything the session reports. A plain string serves this command only. Values are never kept.
+
+An element the outline shows with its ID can be acted on by that ID, without the model: `{"click": "0-131"}`, `{"type": {"into": "0-229", "text": "%user%"}}`, or `{"select": {"in": "0-106", "option": "未出荷"}}`, each with `when` and `timeout` as an act takes them. The session keeps each as the act a step writes, such as `Click the "Sign in" button`, reported as `act`, with the action it took as the act's recording.
+
+The result reports the operation's `index` in the session's history, its `status` (`done`, `failed`, or `skipped` when its `when` does not hold), the `actions` an act performed and whether an exported step replays them (`recorded`), what an extract read (`outputs`), saved files, accepted dialogs, blocked requests, `tokens`, and the page the browser is on next with its `outline`. A failed operation exits 1, but the session stays open.
+
+#### `browser session describe`
+
+Report what the session's page shows, without asking a model.
+
+```bash
+dagu browser session describe [options] ID
+```
+
+**Options:**
+- `--find` - Show only the outline's entries containing this text, with the entries they sit in
+- `--max-chars` - Most characters of the outline (default: `8000`)
+- `--tree` - Report the page's accessibility tree as the model sees it, in place of the outline
+- `--screenshot` - Also save a screenshot of the page under this name
+- `--format, -f` - `json` (default) or `text`
+
+The outline lists headings, fields with their labels, selects with their choice and options, buttons, checkboxes, links with their addresses, messages, and tables and lists by their columns and rows, the page's own content before the site's header, menus, and footer. Each element `do` can act on shows its ID in brackets, and a link to the page's own site shows its path; a long run of alike rows shows the first three and counts the rest. Text typed into fields is never shown.
+
+#### `browser session export`
+
+Build a `browser.run` step from the operations the session ran.
+
+```bash
+dagu browser session export [options] ID
+```
+
+**Options:**
+- `--dag` - The DAG the step goes in, by name or YAML file path (required)
+- `--step` - The step's ID (required)
+- `--skip` - Leave out the operation with this index in the session's history; repeat for more
+- `--dry-run` - Build the step without writing its recordings
+- `--close` - Close the session afterwards
+- `--format, -f` - `json` (default), or `yaml` for the step alone
+
+The step holds the operations that succeeded and those skipped because their `when` did not hold, in order; failed operations and screenshots are left out. A variable read from the environment becomes `${NAME}`, which the DAG declares under its secrets; a literal one becomes a parameter of its own name. The acts' recordings are written to the step's replay cache on this host, so its first run replays them without a model request when it meets the pages the session met. A session whose browser has closed can still be exported for a day.
+
+#### `browser session close`
+
+Close the session's browser and remove the session with its history.
+
+```bash
+dagu browser session close [--force] [--keep] ID
+```
+
+`--force` closes it even while another command holds it. `--keep` ends the session instead: its browser closes and its profile is free for a step, and its history can still be exported for a day.
+
+#### `browser session list`
+
+List the host's sessions, oldest first, after closing those idle past their timeout. Each has a `state`: `idle` while it waits for a command, `busy` while one runs, or `ended` once its browser closed.
+
+```bash
+dagu browser session list
 ```
 
 ### `computer check`

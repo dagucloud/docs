@@ -260,7 +260,52 @@ An `act` records the actions it performed, and the recordings are kept when the 
 - The cache covers `act` only. `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
 - A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one; when the `expect` fails, the replay is dropped.
 - Disable the cache with `with.cache: false`, or for one operation with `act: {instruction: ..., cache: false}`.
+- `dagu browser session export` writes the recordings of the acts a session ran for a step before its first run; see [Building a Step in a Browser Session](#building-a-step-in-a-browser-session).
 - `dagu browser cache clear <dag>` removes the recordings of every step of a DAG, or of one step with `--step <id>`. The REST API does the same with `DELETE /api/v1/dags/{fileName}/browser-cache`, optionally with `?step=<id>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Each clears only the cache on the host that handles it.
+
+## Building a Step in a Browser Session
+
+Before writing a step for a page you have not seen, work the page in a browser session with the same operations the step will run, and look at the page after each instead of guessing its fields, buttons, or addresses. A session keeps the browser open between commands; each command runs one operation and reports what it did and what the page shows next.
+
+```bash
+dagu browser session open https://portal.example.com/login --provider openai --model gpt-5-mini
+# {"id": "ab2cd3ef4g", "outline": "form\n  textbox \"Username\"\n  textbox \"Password\"\n  button \"Sign in\"", ...}
+
+echo '{"act": "Type %user% into the Username field", "variables": {"user": "alice"}}' | dagu browser session do ab2cd3ef4g
+echo '{"act": "Type %password% into the Password field", "variables": {"password": {"env": "PORTAL_PASSWORD"}}}' | dagu browser session do ab2cd3ef4g
+echo '{"act": "Click the Sign in button"}' | dagu browser session do ab2cd3ef4g
+dagu browser session describe ab2cd3ef4g --find Orders --format text
+```
+
+When the operations do what the step should, export them:
+
+```bash
+dagu browser session export ab2cd3ef4g --dag orders --step fetch --format yaml
+```
+
+```yaml
+- id: fetch
+  action: browser.run
+  with:
+    url: https://portal.example.com/login
+    variables:
+      password: ${PORTAL_PASSWORD}
+      user: ${user}
+    do:
+    - act: Type %user% into the Username field
+    - act: Type %password% into the Password field
+    - act: Click the Sign in button
+```
+
+The step holds the operations that succeeded, in the order they ran. Export also writes their act recordings to the step's [replay cache](#replay-cache), so the step's first run on this host replays them without asking the model, and heals as usual when the page changed. Declare `PORTAL_PASSWORD` under the DAG's secrets and give it a parameter `user`.
+
+- `do` reads one operation from stdin, written as an item of `with.do`; `ask` is not available. Variable values go under `variables`, never on the command line: `{"env": NAME}` is read from the environment on every command and masked like a secret, and a plain string serves one command.
+- `describe` outlines the page without a model request: headings, fields with their labels, selects with their options, buttons, links with their addresses, and tables and lists, with long runs of alike rows collapsed. Text typed into fields is never shown.
+- A session closes its browser when no command arrives for `--idle-timeout` (default `30m`), even with no Dagu server running. Its history can still be exported for a day; `close` removes it at once.
+- A session opened with `--profile` holds the profile: a step naming it fails until the session ends. With `--headed`, the window is visible, and a person can sign in or solve a CAPTCHA in it between commands; the browser's DevTools address in the result lets an application show the page itself.
+- With a profile, the sign-in operations of the exported step run on every run; guard them with `when` as shown in [Profiles](#profiles).
+
+See [`browser session`](/getting-started/cli#browser-session) for every option.
 
 ## Trying One Step
 
@@ -289,7 +334,7 @@ with:
       when: {selector: "form#login"}
 ```
 
-The sign-in acts run only while the login form is showing. Profiles are stored on the host that runs the step. Runs that use the same profile run one at a time. A run fails immediately when another run is waiting for input with the same profile open.
+The sign-in acts run only while the login form is showing. Profiles are stored on the host that runs the step. Runs that use the same profile run one at a time. A run fails immediately when another run is waiting for input with the same profile open, or when a [browser session](#building-a-step-in-a-browser-session) holds it.
 
 ## Human Input
 
