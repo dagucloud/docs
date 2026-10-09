@@ -527,8 +527,9 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 - `DAGU_TUNNEL_RATE_LIMITING_BLOCK_DURATION_SECONDS` - Login rate-limit block duration in seconds
 
 ### License
-- `DAGU_LICENSE_KEY` - License key
-- `DAGU_LICENSE_CLOUD_URL` - License validation service URL
+- `DAGU_LICENSE_KEY` - Server key or license key from Dagu Console (`license.key`)
+- `DAGU_LICENSE_CLOUD_URL` - License validation service URL (`license.cloud_url`)
+- `DAGU_LICENSE_SERVER_NAME` - Name that identifies this server in Dagu Console (`license.server_name`; default: the hostname)
 
 ### External Secrets
 - `DAGU_SECRETS_VAULT_ADDRESS` - Default Vault server address for the `vault` secret provider
