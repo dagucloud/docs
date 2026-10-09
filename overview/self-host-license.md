@@ -38,7 +38,7 @@ A Team or Pro workspace in [Dagu Console](https://console.dagu.sh) has a number 
 2. Dagu Console opens in a new tab. Sign in, check that it shows the same code as Dagu, choose the workspace, and approve the server.
 3. Dagu loads the license within a few seconds. The **This server** panel shows the server's name, workspace, last check-in, and a link to the server in Dagu Console.
 
-`dagu license connect` does the same from a shell, which helps when the server's web UI is not reachable from your browser.
+`dagu license activate` without a key does the same from a shell, which helps when the server's web UI is not reachable from your browser.
 
 ### With a server key
 
