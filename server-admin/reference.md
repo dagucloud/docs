@@ -95,6 +95,17 @@ secrets:
     ca_cert: ""        # Path to a CA certificate file for verifying a custom/private Vault TLS endpoint
     client_cert: ""    # Path to a client certificate file for mTLS authentication to Vault
     client_key: ""     # Path to a client key file paired with `client_cert`
+  aws:
+    region: ""         # Default region for the `aws` provider
+  gcp:
+    project_id: ""     # Default project ID for the `gcp` provider
+    location: ""       # Optional regional location for the `gcp` provider
+  azure:
+    vault_url: ""      # Default Key Vault URL for the `azure` provider
+  alibaba:
+    region: ""         # Default region for the `alibaba` provider
+    endpoint: ""       # Dedicated KMS gateway hostname (no scheme or path)
+    ca_file: ""        # CA certificate file for the dedicated gateway
 
 # Permissions
 permissions:
@@ -221,6 +232,7 @@ coordinator:
   host: "127.0.0.1"       # Bind address
   port: 50055             # gRPC port
   health_port: 8091       # HTTP health check port (0 to disable)
+  worker_wait_timeout: "2m"  # Hold a run with no matching healthy worker this long before it fails (0 refuses at once)
 
 # Worker (for distributed execution)
 worker:
@@ -228,6 +240,7 @@ worker:
   coordinators: []         # Required by dagu worker (host:port)
   max_active_runs: 100      # Max parallel task executions
   health_port: 8092         # HTTP health check port (0 to disable)
+  shutdown_timeout: "60s"   # Drain bound on SIGINT/SIGTERM before running DAG runs are canceled (0 waits without a bound)
   labels:                 # Worker capabilities
     gpu: "false"
     memory: "16G"
@@ -324,6 +337,7 @@ All options support `DAGU_` prefix.
 - `DAGU_IP_ACCESS_ALLOWED_IPS` - Comma-separated IPv4/IPv6 addresses and CIDR ranges allowed to access the HTTP server. An empty value disables filtering.
 - `DAGU_IP_ACCESS_TRUSTED_PROXIES` - Comma-separated proxy addresses and CIDR ranges permitted to supply forwarded client IP headers.
 - `DAGU_CACHE` - Cache mode (default: `normal`)
+- `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated origins allowed for cross-origin browser access (`cors_allowed_origins`; default: empty, which disables it). See [Cross-Origin Browser Access](/server-admin/server#cross-origin-browser-access).
 
 ### Terminal
 - `DAGU_TERMINAL_ENABLED` - Enable web-based terminal (default: `false`)
@@ -468,10 +482,15 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
 - `DAGU_DEFAULT_SHELL` - Default shell for command steps. When unset, Dagu falls back to `$SHELL`, then `sh`.
 - `DAGU_BROWSER_SANDBOX` - Set to `false` to turn off Chromium's sandbox for every browser that [browser steps](/step-types/browser) start on this host (default: `true`). Use it only where the sandbox cannot start; see [Browser requirements](/step-types/browser#requirements). With the sandbox on, a browser step fails when `CI` is set or Dagu runs as root on Linux, because the browser would run without the sandbox there.
+- `DAGU_BROWSER_GUARD_CLIENT_CERTIFICATES` - Set to `false` to stop Dagu from guarding other HTTPS sites against Chrome client certificate prompts (`browser.guard_client_certificates`; default: `true` when client certificates are configured). See [Browser Certificate Trust](#browser-certificate-trust).
 - `DAGU_CONTAINER_RUNTIME` - Container runtime for root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`. Valid values: `docker` (default) or `podman`.
 - `DAGU_PODMAN_HOST` - Podman's Docker-compatible API socket when `DAGU_CONTAINER_RUNTIME=podman` (default: `unix:///run/podman/podman.sock`).
 
 `DAGU_CONTAINER_RUNTIME` and `DAGU_PODMAN_HOST` are read from the Dagu process environment. They are not DAG YAML fields and cannot be selected from DAG-level or step-level `env:`.
+
+### OpenCode
+- `DAGU_OPENCODE_EXECUTABLE` - OpenCode executable path or command name for the managed OpenCode service (`opencode.executable`; default: `opencode`)
+- `DAGU_OPENCODE_ENV_PASSTHROUGH` - Comma-separated exact environment variable names forwarded to the managed OpenCode service (`opencode.env_passthrough`). See [OpenCode service setup](/step-types/harness/opencode#service-setup).
 
 ### Coordinator
 - `DAGU_COORDINATOR_ENABLED` - Enable coordinator service (default: `true`)
@@ -479,11 +498,13 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_COORDINATOR_ADVERTISE` - Address to advertise in service registry (default: auto-detected hostname)
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
 - `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
+- `DAGU_COORDINATOR_WORKER_WAIT_TIMEOUT` - How long the coordinator holds a dispatched run as `Queued` when no healthy worker matches its selector. The first matching worker that registers in time takes the run; after the timeout the run fails with an error that names the selector (`coordinator.worker_wait_timeout`; default: `2m`, `0` refuses the dispatch at once).
 
 ### Worker
 - `DAGU_WORKER_ID` - Worker instance ID (default: `hostname@PID`)
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
 - `DAGU_WORKER_HEALTH_PORT` - Worker HTTP health check port (default: `8092`, `0` to disable)
+- `DAGU_WORKER_SHUTDOWN_TIMEOUT` - How long a worker that stops on `SIGINT` or `SIGTERM` waits for running DAG runs to finish before it cancels them (`worker.shutdown_timeout`; default: `60s`, `0` waits without a bound). Set the supervisor's stop timeout at least 15s above this value: systemd `TimeoutStopSec` defaults to 90s, `docker stop` to 10s, and Kubernetes `terminationGracePeriodSeconds` to 30s.
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
 - `DAGU_WORKER_COORDINATORS` - Coordinator addresses required by `dagu worker` (`host:port,...`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
@@ -556,6 +577,13 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 - `DAGU_SECRETS_KUBERNETES_NAMESPACE` - Default namespace for the `kubernetes` secret provider
 - `DAGU_SECRETS_KUBERNETES_KUBECONFIG` - Default kubeconfig path for the `kubernetes` secret provider
 - `DAGU_SECRETS_KUBERNETES_CONTEXT` - Default kubeconfig context for the `kubernetes` secret provider
+- `DAGU_SECRETS_AWS_REGION` - Default region for the `aws` secret provider. See [AWS Secrets Manager](/writing-workflows/secrets/aws-provider).
+- `DAGU_SECRETS_GCP_PROJECT_ID` - Default project ID for the `gcp` secret provider
+- `DAGU_SECRETS_GCP_LOCATION` - Optional regional location for the `gcp` secret provider. See [Google Secret Manager](/writing-workflows/secrets/gcp-provider).
+- `DAGU_SECRETS_AZURE_VAULT_URL` - Default Key Vault URL for the `azure` secret provider. See [Azure Key Vault](/writing-workflows/secrets/azure-provider).
+- `DAGU_SECRETS_ALIBABA_REGION` - Default region for the `alibaba` secret provider
+- `DAGU_SECRETS_ALIBABA_ENDPOINT` - Dedicated KMS gateway hostname for the `alibaba` secret provider, without `https://` or a path
+- `DAGU_SECRETS_ALIBABA_CA_FILE` - CA certificate file for the dedicated KMS gateway. See [Alibaba Cloud KMS](/writing-workflows/secrets/alibaba-provider).
 
 ### Git Sync
 See [Git Sync](/server-admin/git-sync) for repository layout, supporting-file behavior, and operational guidance.
@@ -579,12 +607,18 @@ See [Git Sync](/server-admin/git-sync) for repository layout, supporting-file be
 These variables are maintained for backward compatibility but should not be used in new deployments:
 - `DAGU__ADMIN_NAVBAR_COLOR` - Use `DAGU_UI_NAVBAR_COLOR`
 - `DAGU__ADMIN_NAVBAR_TITLE` - Use `DAGU_UI_NAVBAR_TITLE`
+- `DAGU_NAVBAR_COLOR` - Use `DAGU_UI_NAVBAR_COLOR`
+- `DAGU_NAVBAR_TITLE` - Use `DAGU_UI_NAVBAR_TITLE`
+- `DAGU_LOG_ENCODING_CHARSET` - Use `DAGU_UI_LOG_ENCODING_CHARSET`
+- `DAGU_MAX_DASHBOARD_PAGE_LIMIT` - Use `DAGU_UI_MAX_DASHBOARD_PAGE_LIMIT`
 - `DAGU__ADMIN_PORT` - Use `DAGU_PORT`
 - `DAGU__ADMIN_HOST` - Use `DAGU_HOST`
 - `DAGU__DATA` - Use `DAGU_DATA_DIR`
 - `DAGU__SUSPEND_FLAGS_DIR` - Use `DAGU_SUSPEND_FLAGS_DIR`
 - `DAGU__ADMIN_LOGS_DIR` - Use `DAGU_ADMIN_LOG_DIR`
 - `DAGU__EVENT_STORE_DIR` - Use `DAGU_EVENT_STORE_DIR`
+
+When a short UI variable such as `DAGU_NAVBAR_TITLE` and its `DAGU_UI_*` form are both set, the `DAGU_UI_*` value is used.
 
 ## Browser Certificate Trust
 
@@ -820,6 +854,8 @@ peer:
 - `ip_access.trusted_proxies`: empty (forwarded client IP headers are ignored)
 - `default_execution_mode`: `local`
 - `coordinator.enabled`: `true`
+- `coordinator.worker_wait_timeout`: `2m`
+- `worker.shutdown_timeout`: `60s`
 - `terminal.enabled`: `false`
 - `terminal.max_sessions`: `5`
 - `audit.enabled`: `true`
