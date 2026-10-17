@@ -50,7 +50,7 @@ The scheduler detects and cleans up "zombie" DAG runs: processes whose status fi
 
 #### How it works
 
-Each running DAG process writes an 8-byte binary timestamp to a proc file every `proc.heartbeat_interval` (default: 5s) and fsyncs every `proc.heartbeat_sync_interval` (default: 10s).
+Each running DAG process writes an 8-byte binary timestamp to a proc file every `proc.heartbeat_interval` (default: 5s). Each write goes to a temporary file that is fsynced and then renamed over the proc file, so a reader never sees a partial heartbeat.
 
 A local run is treated as dead when Dagu cannot find any non-stale proc heartbeat file for that run. This is a local heartbeat-based decision, not an OS-level PID lookup.
 
@@ -73,7 +73,6 @@ If a heartbeat file is deleted externally while the process is still alive, the 
 # config.yaml
 proc:
   heartbeat_interval: "5s"           # Process heartbeat write interval (default: 5s)
-  heartbeat_sync_interval: "10s"     # Heartbeat fsync interval (default: 10s)
   stale_threshold: "90s"             # Heartbeat age to be considered stale (default: 90s)
 
 scheduler:
@@ -81,9 +80,11 @@ scheduler:
   failure_threshold: 3               # Consecutive stale checks before kill (default: 3)
 ```
 
-The timing invariant: `proc.stale_threshold` should be significantly larger than `proc.heartbeat_sync_interval` to avoid false positives. With defaults, the margin is 80s (90s - 10s).
+The timing invariant: `proc.stale_threshold` should be significantly larger than `proc.heartbeat_interval` to avoid false positives. Dagu refuses to start when `proc.heartbeat_interval` is not less than `proc.stale_threshold`. With defaults, the margin is 85s (90s - 5s).
 
-Legacy compatibility: `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_interval`, and `scheduler.stale_threshold` are still accepted as deprecated aliases for `proc.*`. If both are set, `proc.*` wins.
+Legacy compatibility: `scheduler.heartbeat_interval` and `scheduler.stale_threshold` are still accepted as deprecated aliases for `proc.*`. If both are set, `proc.*` wins.
+
+`proc.heartbeat_sync_interval` and `scheduler.heartbeat_sync_interval` are deprecated and ignored. Dagu still accepts them so existing configuration files load, but the values have no effect. Remove them from your configuration.
 
 #### Example: tuning for faster detection
 
@@ -92,7 +93,6 @@ To detect dead processes in ~30 seconds at the cost of more frequent disk writes
 ```yaml
 proc:
   heartbeat_interval: "2s"
-  heartbeat_sync_interval: "4s"
   stale_threshold: "20s"
 
 scheduler:

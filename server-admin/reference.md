@@ -258,7 +258,6 @@ scheduler:
 # Local proc heartbeat/liveness (used by all local run owners: server, scheduler, CLI runs, and workers)
 proc:
   heartbeat_interval: "5s"         # How often local workflow processes write a heartbeat timestamp
-  heartbeat_sync_interval: "10s"   # How often heartbeat files are fsynced to disk
   stale_threshold: "90s"           # Time after which a heartbeat is considered stale
 
 # Shutdown signal handling (server, scheduler, start-all)
@@ -513,13 +512,13 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 These settings apply to all locally owned DAG runs, not just `dagu scheduler`.
 
 - `DAGU_PROC_HEARTBEAT_INTERVAL` - How often local workflow processes write a heartbeat timestamp (default: `5s`)
-- `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL` - How often heartbeat files are fsynced to disk (default: `10s`)
 - `DAGU_PROC_STALE_THRESHOLD` - Time after which a heartbeat is considered stale (default: `90s`)
 - `DAGU_SCHEDULER_HEARTBEAT_INTERVAL` - Deprecated alias for `DAGU_PROC_HEARTBEAT_INTERVAL`
-- `DAGU_SCHEDULER_HEARTBEAT_SYNC_INTERVAL` - Deprecated alias for `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL`
 - `DAGU_SCHEDULER_STALE_THRESHOLD` - Deprecated alias for `DAGU_PROC_STALE_THRESHOLD`
 
-Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_interval`, and `scheduler.stale_threshold` are also still accepted as deprecated aliases. Use `proc.*` for new configuration. If both are set, `proc.*` takes precedence.
+Legacy YAML keys `scheduler.heartbeat_interval` and `scheduler.stale_threshold` are also still accepted as deprecated aliases. Use `proc.*` for new configuration. If both are set, `proc.*` takes precedence.
+
+`proc.heartbeat_sync_interval` and `scheduler.heartbeat_sync_interval` are deprecated and ignored: they are accepted so existing configuration files still load, but they have no effect. `DAGU_PROC_HEARTBEAT_SYNC_INTERVAL` and `DAGU_SCHEDULER_HEARTBEAT_SYNC_INTERVAL` are no longer read.
 
 ### Resource Monitoring
 - `DAGU_MONITORING_RETENTION` - How long to keep resource history (default: `24h`)
