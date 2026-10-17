@@ -165,6 +165,55 @@ Without `silent` (or on a non-2xx response), stdout also includes status code an
 
 If the response body is not valid JSON, the step fails.
 
+### Poll an Asynchronous Job
+
+Many APIs accept a job, return a status URL, and finish the work later. Submit the job in one step, then let a second step poll the status URL with `repeat_policy` until the job reaches a final state. The status step repeats until its own JSON output matches `expected`:
+
+```yaml
+steps:
+  - id: submit
+    action: http.request
+    with:
+      method: POST
+      url: https://api.example.com/jobs
+      body: '{"report": "daily"}'
+      headers:
+        Content-Type: application/json
+      format: json
+      silent: true
+    output: SUBMIT
+
+  - id: wait_job
+    depends: submit
+    action: http.request
+    with:
+      method: GET
+      url: ${SUBMIT.body.status_url}
+      format: json
+      silent: true
+    output: JOB
+    retry_policy:
+      limit: 3          # Tolerate short outages of the status endpoint
+      interval_sec: 5
+    repeat_policy:
+      repeat: until
+      condition: "${JOB.body.state}"
+      expected: "re:^(done|failed)$"
+      interval_sec: 5
+      backoff: 1.5
+      max_interval_sec: 60
+      limit: 120        # Maximum number of polls
+
+  - id: check_result
+    depends: wait_job
+    run: test "${JOB.body.state}" = "done"
+```
+
+- `${SUBMIT.body.status_url}` reads a field of the JSON response of the first step.
+- `expected` accepts the same `re:` and `num:` prefixes as a precondition. The example stops on either final state, so a failed job does not keep the step polling.
+- A non-2xx status response fails the status step. `retry_policy` retries it, and polling then continues.
+- When `limit` is reached first, the status step stops polling with the last state it read. `check_result` then fails, as it does for a `failed` job.
+
 ### File Output Mode
 
 Set `output` to download the raw response body to a file:
