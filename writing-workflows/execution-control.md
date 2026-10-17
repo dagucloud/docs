@@ -236,13 +236,13 @@ Control retry and repeat intervals with exponential backoff to avoid overwhelmin
 ```yaml
 steps:
   # API call with exponential backoff
-  - run: curl https://api.example.com/data
+  - run: curl -fsS https://api.example.com/data
     retry_policy:
       limit: 6
       interval_sec: 1
       backoff: 2.0         # Double interval each time
       max_interval_sec: 60   # Cap at 60 seconds
-      exit_code: [429, 503] # Rate limit or service unavailable
+      exit_code: [7, 22, 28] # curl: connection failed, HTTP status >= 400, timeout
       # Intervals: 1s, 2s, 4s, 8s, 16s, 32s → 60s
 ```
 

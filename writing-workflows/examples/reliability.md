@@ -96,16 +96,16 @@ flowchart TD
 
 ```yaml
 steps:
-  - run: curl -f https://api.example.com/data
+  - run: curl -fsS https://api.example.com/data
     retry_policy:
       limit: 5
       interval_sec: 30
-      exit_code: [429, 503, 504]  # Rate limit, service unavailable
+      exit_code: [7, 22, 28]  # curl: connection failed, HTTP status >= 400, timeout
 ```
 
 ```mermaid
 flowchart TD
-    A["curl -f api.example.com/data"] --> B{"exit in 429/503/504?"}
+    A["curl -fsS api.example.com/data"] --> B{"curl exit in 7/22/28?"}
     B --> |yes| R["retry 5x · 30s"] --> A
     B --> |no| N[Next step]
     style A stroke:lightblue,stroke-width:1.6px,color:#333

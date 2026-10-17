@@ -246,12 +246,12 @@ steps:
 ```yaml
 steps:
   - id: flaky_service
-    run: echo "Calling service"
+    run: curl -fsS https://service.example.com/api
     retry_policy:
       limit: 3
       interval_sec: 5
     continue_on:
-      exit_code: [503]  # Continue if still 503 after retries
+      exit_code: [22]  # Continue if curl still gets an HTTP error after retries
 ```
 
 ### With Lifecycle Handlers

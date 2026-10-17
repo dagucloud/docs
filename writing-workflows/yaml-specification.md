@@ -1155,17 +1155,17 @@ Step-level `retry_policy` retries one step.
 | `interval_sec` | integer or string | Base interval between retries, in seconds. Required when `retry_policy` is present. |
 | `backoff` | boolean or number | `true` means `2.0`; a number greater than `1.0` is used as the multiplier. |
 | `max_interval_sec` | integer | Maximum interval between retries. |
-| `exit_code` | array | Exit codes that trigger retry. Default is all non-zero exits. |
+| `exit_code` | array | Exit codes that trigger retry. Default is all non-zero exits. These are process exit codes (0-255), not HTTP status codes. |
 
 ```yaml
 steps:
-  - run: curl https://api.example.com
+  - run: curl -fsS https://api.example.com
     retry_policy:
       limit: 5
       interval_sec: 2
       backoff: true
       max_interval_sec: 60
-      exit_code: [429, 503]
+      exit_code: [7, 22, 28] # curl: connection failed, HTTP status >= 400, timeout
 ```
 
 `repeat_policy` repeats one step.
