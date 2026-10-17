@@ -53,16 +53,16 @@ Starting a trial or a plan moves the free server onto it. Dagu picks up the new 
 
 ## Get Your First Alert
 
-1. [Connect the server](/overview/self-host-license#connect-a-server) to Dagu Console from **Plan & features** in Dagu. In a workspace without a plan, select **Connect for free monitoring** when you approve it.
-2. On the same page, select **Turn on** in the **Monitoring** section, choose **Health and run status (recommended)**, and select **Turn on**.
+1. In Dagu, open **Plan & features** as an administrator. On the **Monitor this server for free** card, keep **Health and run status (recommended)** and select **Connect for free**. A server that already has a license connects with **Connect to Dagu Console** instead; then select **Turn on** in the **Monitoring** section and choose the same level.
+2. Approve the server in Dagu Console. In a workspace without a plan, select **Connect for free monitoring**. Reporting starts as soon as the server connects.
 3. In Dagu Console, open **Settings**. Under **Alert emails**, owners and admins already get alert emails. With a trial or plan, add any other member or address there.
 4. Select **Send test** on a row to check that the email arrives.
 
-Within a minute, or five on free monitoring, the server shows **Reporting** on the console's **Servers** page. From then on, a failed workflow, or a server silent for 10 minutes (25 on free monitoring), emails the recipients. See [Alerts and Email](/overview/console-monitoring-alerts) for who gets what, and [Console Pages](/overview/console-monitoring-pages) for what each page shows.
+The server shows **Waiting for first report** on the console's **Servers** page until its first report arrives, a few seconds after the approval, and **Reporting** from then on. From then on, a failed workflow, or a server silent for 10 minutes (25 on free monitoring), emails the recipients. See [Alerts and Email](/overview/console-monitoring-alerts) for who gets what, and [Console Pages](/overview/console-monitoring-pages) for what each page shows.
 
 ## Turn It On
 
-Monitoring is off by default. Upgrading or connecting a server sends nothing beyond its license check-in until an administrator of the server chooses what to report.
+Monitoring is off by default. Upgrading or connecting a server sends nothing beyond its license check-in until an administrator of the server chooses what to report: on the **Monitor this server for free** card before connecting, or in the **Monitoring** section at any time.
 
 ### From the web UI
 
@@ -70,7 +70,7 @@ Monitoring is off by default. Upgrading or connecting a server sends nothing bey
 2. Choose **Health and run status (recommended)** or **Health only**. The dialog lists exactly what each choice sends and what is never sent.
 3. Select **Turn on**.
 
-Dagu also asks on its own. Right after a server connects from **Plan & features**, it opens **Monitor this server from Dagu Console**. On a server that was connected earlier, administrators see a **Monitor this server from Dagu Console** notice above other pages until they choose a level or dismiss it.
+Dagu also asks on its own. When a server connects from **Plan & features** without a level chosen, it opens **Monitor this server from Dagu Console**. On a server that was connected earlier, administrators see a **Monitor this server from Dagu Console** notice above other pages until they choose a level or dismiss it.
 
 The choice applies at once, without a restart, and is kept in the data directory (`cloud/report-settings.json` under `paths.data_dir`). Persist that directory in containers, as you do for the [license](/overview/self-host-license#keep-the-server-s-identity).
 

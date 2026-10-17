@@ -36,11 +36,11 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 
 A Team or Pro workspace in [Dagu Console](https://console.dagu.sh) has a number of server slots. A workspace without a plan has one, for [free monitoring](/overview/console-monitoring#free-and-paid) on Dagu v2.19.2 or later. Each Dagu server that uses the workspace's license takes one slot, and the console's **Servers** page lists every server with its name, last check-in, and Dagu version. Workers do not take slots.
 
-Connecting shares only the license check-in. To see each server's health and runs in the console and get an email when a workflow fails or the server stops reporting, turn on [Monitoring (Beta)](/overview/console-monitoring) on the server.
+Connecting shares only the license check-in, unless the server's [Monitoring (Beta)](/overview/console-monitoring) is on. It lets the console show each server's health and runs and email you when a workflow fails or the server stops reporting. On a Community server, the **Monitor this server for free** card turns it on as part of connecting.
 
 ### From the web UI
 
-1. Open **Plan & features** as an administrator and select **Connect to Dagu Console**. On a Community server, **Connect for free** on the **Monitor this server for free** card does the same.
+1. Open **Plan & features** as an administrator and select **Connect to Dagu Console**. On a Community server, **Connect for free** on the **Monitor this server for free** card does the same, and the server reports at the level chosen on the card once it connects.
 2. Dagu Console opens in a new tab. Sign in, check that it shows the same code as Dagu, choose the workspace, and approve the server.
 3. Dagu loads the license within a few seconds. The **This server** panel shows the server's name, workspace, last check-in, and a link to the server in Dagu Console.
 
