@@ -113,6 +113,14 @@ Use the step-level `timeout_sec` field to set an overall maximum wait time.
 
 ## Value References
 
-`path`, `method`, `headers`, and `body` accept [value references](/writing-workflows/template-variables), such as `${params.name}` or a previous step's output, and resolve when the step starts.
+All `wait` fields accept [value references](/writing-workflows/template-variables), such as `${params.name}` or a previous step's output, and resolve when the step starts. For example, an earlier step can compute the moment to wait for:
 
-`duration`, `until`, `url`, `state`, `status`, `poll_interval`, and `request_timeout` are validated as written when the DAG is built, before references resolve. A reference such as `until: ${params.deadline}` is rejected before the DAG runs.
+```yaml
+steps:
+  - id: compute
+    action: wait.until
+    with:
+      until: ${params.deadline}
+```
+
+A value that still holds a reference when the DAG is built skips strict validation until the reference resolves at run time. Literal values are still validated strictly at build time: an invalid literal duration, timestamp, URL, state, or status is rejected before the DAG runs, while a reference that resolves to an invalid value fails the step at execution.
