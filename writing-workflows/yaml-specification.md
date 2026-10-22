@@ -1304,7 +1304,7 @@ Common environment projections:
 | `DAG_RUN_ARTIFACTS_DIR` | Per-run artifact directory when artifacts are enabled. |
 | `DAGU_OUTPUT_FILE` | Current step output file path for declared outputs. |
 | `ITEM` | Current `parallel` item. |
-| `TRACEPARENT`, `TRACESTATE` | W3C trace context of the current step span, when [OpenTelemetry tracing](/server-admin/opentelemetry#step-process-trace-context) is enabled. |
+| `TRACEPARENT`, `TRACESTATE` | W3C trace context of the current step span, when [OpenTelemetry tracing](/server-admin/opentelemetry#step-processes) is enabled. |
 
 See [Runtime Context and Variables](/writing-workflows/runtime-variables) for the full list and compatibility notes.
 

@@ -8,6 +8,7 @@ When OpenTelemetry is enabled, Dagu creates:
 - A root span for each DAG execution
 - Child spans for each step execution
 - Proper trace context propagation for nested DAGs
+- Trace context for the processes that steps start (`TRACEPARENT`, `TRACESTATE`)
 - Key attributes for filtering and analysis
 
 ## Configuration
@@ -130,29 +131,44 @@ DAG: parent-workflow (trace_id: abc123)
         └── Step: child-step-2
 ```
 
-## Step Process Trace Context
+### Step Processes
 
-When tracing is enabled, Dagu puts the W3C trace context of each step span into that step's environment, so a traced tool that a `run` command starts can record its spans as children of the step:
-
-- `TRACEPARENT` names the trace of the DAG run and the span of the current step. `TRACESTATE` is set when the step span has a trace state.
-- These values replace a `TRACEPARENT` or `TRACESTATE` the step would otherwise inherit, such as one from the DAG-level `env`. An inherited `TRACESTATE` becomes empty when the step span has none, since it belongs to another span.
-- When the step's own `env` sets either variable, Dagu sets neither, and an inherited value of the other becomes empty. Set `TRACEPARENT` to an empty string to give the process no trace context.
-- Lifecycle handlers have no step span, and Dagu sets neither variable for them.
-- With tracing off, Dagu sets neither variable.
+Each step process receives the trace context of its step span in the
+`TRACEPARENT` and `TRACESTATE` environment variables (`TRACESTATE` only when
+the span has a trace state). A program that uses an OpenTelemetry SDK can read
+them to create child spans of the step span, and a script can forward the
+value to the services it calls:
 
 ```yaml
 otel:
   enabled: true
-  endpoint: "localhost:4317"
+  endpoint: "otel-collector:4317"
+
 steps:
-  - id: traced
-    run: ./export.sh        # receives the step span as TRACEPARENT
-  - id: untraced
-    depends: traced
-    env:
-      - TRACEPARENT: ""     # no trace context for this process
-    run: ./legacy.sh
+  - id: trigger
+    run: |
+      curl -fsS -X POST \
+        -H "traceparent: $TRACEPARENT" \
+        http://report-service:8080/jobs
 ```
+
+The spans of the called service then join the trace of the DAG run:
+
+```
+DAG: my-workflow
+└── Step: trigger
+    └── POST /jobs (report-service)
+```
+
+The variables are set only when OpenTelemetry is enabled for the DAG.
+A `TRACEPARENT` or `TRACESTATE` that the step sets in its own `env`, or in
+the `env` of its container, takes precedence, and Dagu then sets neither
+variable; an inherited value of the other one becomes empty. Set
+`TRACEPARENT` to an empty value in the step `env` to give the process no
+trace context. A `TRACEPARENT` from the DAG-level `env` is replaced by the
+step span, and an inherited `TRACESTATE` becomes empty when the step span has
+none, because it belongs to another span. Lifecycle handlers do not receive
+these variables.
 
 ## Using Base Configuration
 
