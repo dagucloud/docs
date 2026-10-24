@@ -1,10 +1,12 @@
 ---
-description: Automate desktop applications on macOS and Windows with computer.run and computer.extract, driven by a model that reads screenshots and clicks and types.
+description: Automate desktop applications on macOS and Windows with computer.run and computer.extract, driven by a model that reads screenshots and clicks and types, and replayed without one.
 ---
 
 # Computer
 
 Automate desktop applications that have no API, such as an ERP client or a legacy Windows program. A computer step operates the desktop of the host that runs it: a model looks at screenshots and clicks and types to complete tasks described in natural language. The step can start applications, read values from the screen into step outputs, check the screen, and pause for a person, then continue where it stopped.
+
+A task that succeeded is recorded and replayed on later runs without the model, by the buttons and fields it used where the application exposes them. Checks can read the window's elements exactly instead of asking the model, so a step that repeats can run with no model at all.
 
 Every model request goes through Dagu's own [LLM providers](/step-types/llm/providers), so the step uses the same `llm` configuration as `chat.completion`.
 
@@ -14,10 +16,10 @@ Every model request goes through Dagu's own [LLM providers](/step-types/llm/prov
 
 ## Requirements
 
-- Dagu v2.18.0 or later.
+- Dagu v2.18.0 or later. [Window maximizing](#window-size), and [exact checks](#exact-checks), [element replay](#replaying-by-element), and [pins](#pinned-steps) on macOS, need a Dagu release after v2.22.2.
 - macOS or Windows. On other systems the step fails with `desktop automation is supported on macOS and Windows only`.
 - Dagu running in a logged-in user session with the screen unlocked. On Windows it must not run as a service. On macOS, Screen Recording and Accessibility must be granted to the application that starts Dagu, or to the `dagu` binary. See [Setting Up a Desktop Host](#setting-up-a-desktop-host).
-- A model configured with a DAG-level `llm` block or `with.llm`. A computer step without one fails validation.
+- A model configured with a DAG-level `llm` block or `with.llm`, unless no operation of the step can call one. See [How Much AI Decides](#how-much-ai-decides).
 
 Run `dagu computer check` on the host to confirm it can be automated.
 
@@ -111,8 +113,8 @@ steps:
 | Operation | Value | Effect |
 |-----------|-------|--------|
 | `launch` | Program, or `{command, args}` | Start an application. |
-| `act` | Instruction, or `{instruction, cache, max_actions}` | Complete a task described in natural language. See [Acts](#acts). |
-| `extract` | `{instruction, schema}` | Read data from the screen. The schema must be a JSON Schema with `type: object`. |
+| `act` | Instruction, or `{instruction, ai, max_actions, find_within, input, maximize, recorded}` | Complete a task described in natural language. See [Acts](#acts). |
+| `extract` | `{instruction, schema, ai, max_rows, maximize, fields}` | Read data from the screen. The schema must be a JSON Schema with `type: object`. See [Outputs](#outputs). |
 | `expect` | [Condition](#conditions) | Fail the step unless the condition holds. |
 | `wait` | Duration | Pause, such as `2s`. |
 | `screenshot` | Name | Save a PNG of the screen as a run artifact. |
@@ -143,7 +145,7 @@ The act fails when:
 
 ## When a Person Uses the Desktop
 
-A desktop that runs computer steps is often one a person also works at. Before a step launches an application, replays a recorded turn, or starts an act, it waits until nobody has touched the mouse or keyboard for `with.idle` (default `15s`), and logs `Waiting until nobody has used the desktop for 15s`. On the step's timeline, this wait is a `waiting` event named `person`. Input the step sent itself does not count, and neither does input from the computer step that used the desktop before it.
+A desktop that runs computer steps is often one a person also works at. Before a step launches an application, maximizes a window, replays a recorded turn, or starts an act, it waits until nobody has touched the mouse or keyboard for `with.idle` (default `5s`), and logs `Waiting until nobody has used the desktop for 5s`. On the step's timeline, this wait is a `waiting` event named `person`. Input the step sent itself does not count, and neither does input from the computer step that used the desktop before it.
 
 When a person uses the desktop while the model is choosing its next actions, those actions are not run, because they were chosen for a screen that may have changed. The step waits for the idle period again and sends the model the new screen with a note saying why. Skipped actions do not count toward `max_actions`.
 
@@ -158,7 +160,7 @@ with:
 
 ## Conditions
 
-`expect` and `when` take a statement the model judges against a screenshot:
+`expect` and `when` take a statement the model judges against a screenshot, or an [exact check](#exact-checks):
 
 ```yaml
 - expect: The invoice list shows INV-0001
@@ -172,7 +174,51 @@ With `{statement, within}`, a false statement is checked again every few seconds
 - expect: {statement: A document number is shown, within: 30s}
 ```
 
-Each check is a model request, and results can vary between runs.
+Each statement check is a model request, and results can vary between runs.
+
+### Exact Checks
+
+An exact check reads the elements of the window in front, such as its buttons, fields, and labels, through Accessibility on macOS and UI Automation on Windows. It takes no screenshot and calls no model, so it gives the same answer on every run and works under `ai: never`.
+
+| Check | Holds when |
+|-------|------------|
+| `{text: ...}` | The name or value of a visible element contains the text. |
+| `{element: {role, name, id, near, in, nth}}` | The selector matches exactly one visible element. Several matches are a miss, never a guess. |
+
+A selector names an element by `role`, such as `button`, `text_field`, `text`, `checkbox`, `combo_box`, or `list_item`, and at least one of `name`, `id`, or `near: {label, side}`, the label the element sits next to and on which `side` (`right`, `below`, `left`, or `above`). `in` narrows the search to a container, itself a selector, and `nth` picks one of several equal matches in reading order, from 0. Names take `*` for any run of characters.
+| `{window: ...}` | The title of the window in front contains the text. `*` matches any run of characters. |
+
+```yaml
+- act: Post invoice ${params.INVOICE_ID}
+- expect: {text: Posted, within: 30s}
+- expect: {element: {role: button, name: Print}}
+- act: Close the warning
+  when: {window: "Warning*"}
+```
+
+An exact `expect` keeps looking until it holds, `within` passes, or, without `within`, the operation timeout passes. An exact `when` keeps looking for two seconds unless `within` is set. `%name%` placeholders are replaced from `with.variables` and earlier `ask` answers. A window that exposes no elements, such as one an application draws itself, is a miss while it is in front; check it with a statement instead.
+
+`dagu computer elements` lists the elements of the window in front, and `dagu computer elements --at-pointer` the one under the pointer, to find the role and name to write. See the [CLI reference](/getting-started/cli#computer-elements).
+
+Exact checks need macOS or 64-bit Windows. On other hosts the step fails at the first one with `exact checks need macOS or 64-bit Windows`.
+
+## Window Size
+
+Before an operation looks at the screen, a step maximizes the window in front, and during an act it maximizes each new window that comes to the front. The application is then operated at one size every run, so recordings replay and the model reads larger text.
+
+- On Windows the window is maximized as its maximize button would. On macOS it fills the main display between the menu bar and the Dock, without entering full screen, which would move it to a Space of its own. A window on another display moves to the main display, the only one captured.
+- A dialog, a sheet, a panel, a window of fixed size, and a window already maximized are left as they are.
+- Each window is maximized at most once per run, so a window a person or its application resizes afterwards keeps its size.
+- Maximizing waits for an idle desktop, as input does, and the step log names each window it maximized.
+
+`with.maximize: false` turns it off for the step, and `maximize` on an `act` or an `extract` sets it for that operation:
+
+```yaml
+with:
+  maximize: false
+  do:
+    - act: {instruction: Fill in the order form, maximize: true}
+```
 
 ## Model
 
@@ -229,11 +275,21 @@ Each model request carries:
 
 Screenshots show the whole display, including other open windows and notifications, and are not masked. Keep unrelated applications closed on a desktop host, and run it under an account that holds only what the workflows need.
 
+Replays, exact checks, and extracts read from bound elements send nothing to the model.
+
 ## Outputs
 
 The top-level properties each `extract` schema lists become step outputs, readable as `${steps.<id>.outputs.<name>}` and checked when the DAG loads. Fields a schema does not list are dropped. Two extracts in one step cannot list the same property.
 
 When the step succeeds with outputs, stdout is one JSON object of them, so `output:` also works. Operation progress is written to the step's stderr log.
+
+A successful `extract` binds each field to where its value was read, so later runs read it again exactly, with no model:
+
+- A scalar field (`string`, `number`, `integer`) binds to its element when exactly one element in the window gives that value and the model read it from an element. A later run reads that element and converts its value to the field's type: a string is trimmed, and a number loses grouping and currency, with full-width digits folded.
+- A `boolean` field binds to a checkbox's state.
+- A table field, an array of objects of scalars, binds to a grid, table, or list. The model names the container and each column's header, and a later run reads every row by header, up to `with.max_rows` (default `10000`; `max_rows` on the extract), so a moved column still reads and a missing header is a miss.
+
+Under `ai: on_miss` the model is asked only when a field's element is missing. Under `ai: never` the extract reads the bound elements alone, and fails when a field's element or a column header is missing. A schema that lists a plain object or a free array needs the model, so such an extract under `never` fails validation.
 
 ## Screenshots
 
@@ -248,15 +304,82 @@ Computer steps store screenshots as [run artifacts](/writing-workflows/artifacts
 
 With `artifacts.enabled: false`, no screenshots are saved and a `screenshot` operation fails.
 
+## How Much AI Decides
+
+`with.ai` chooses how much the model decides, and `ai` on an `act` or an `extract` sets it for that operation:
+
+| `ai` | Behavior |
+|------|----------|
+| `on_miss` (default) | Each task that succeeds is recorded and replayed on later runs without the model while each screen still matches, reported as `cache-hit`. When a screen differs, the model continues from there and repairs the recording, reported as `healed`. |
+| `every_run` | The model decides every run. A successful act is still recorded. |
+| `never` | Replay only. When the screen differs or the host has no recording, the step fails and says why, and the recording is kept for a run under `on_miss` to repair. |
+
+A step whose operations never call the model needs no `llm`. A statement `expect` or `when` needs the model, so a step-level `never` refuses it; [exact checks](#exact-checks) are allowed. `cache: false` is the older spelling of `every_run`; set `ai` or `cache`, not both.
+
+```yaml
+with:
+  ai: never
+  do:
+    - act: Open the invoice entry form and post invoice ${params.INVOICE_ID}
+    - expect: {text: Posted, within: 30s}
+```
+
+Run a step under `on_miss` until it succeeds once, then switch it to `never` for runs that must repeat at no cost and fail rather than improvise.
+
 ## Replay Cache
 
-With `with.cache` true (the default), an `act` records each screen the model saw and the actions it chose on it. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the display size match, and each screen, including the area around each click, still looks as recorded. The log marks a full replay `cache-hit`. When a screen differs or an action fails, the model continues from the current screen, the new actions are recorded, and the operation is marked `healed`.
+An `act` records each screen the model saw and the actions it chose on it. The next run of the same step on the same host replays them when the operation's position and its instruction match.
 
 - Recordings are kept only when the whole step succeeds. When an operation fails after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of a model request, the screen capture, a launch, or an `ask`, a person using the desktop, or a canceled run, leaves them.
 - A replay follows the step's current settings: it hands the task to the model before a recorded turn that would exceed `max_actions`, or that the model provider asked a person to confirm while `on_confirmation` is not `allow`.
 - Typed text is recorded with its `%name%` placeholders, never the values.
-- A replay repeats recorded input whenever the screens match. Disable the cache for acts that must not repeat blindly, such as a payment, with `act: {instruction: ..., cache: false}`, or for the whole step with `with.cache: false`.
-- `dagu computer cache clear <dag>` removes the recordings of every step of a DAG, or of one step with `--step <id>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Both work on the host they run on.
+- A replay repeats recorded input whenever the screens match. Use `ai: every_run` for acts that must not repeat blindly, such as a payment.
+- `dagu computer cache clear <dag>` removes the recordings of every step of a DAG, of one step with `--step <id>`, or of one task with `--op <position>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Both work on the host they run on.
+
+### Replaying by Element
+
+Where the application exposes its elements, a recording keeps the element each action landed on beside its pixels, and a replay finds that button or field where it is now. A moved window, another display, or a screen showing other data still replays, and the model is asked only when an element is missing. An element named by a variable's value is recorded as `%name%`, so one recording serves every row of a loop.
+
+- `with.find_within` (default `10s`; `find_within` on an act) is how long a replayed action waits for its element before it counts as a miss. `0` looks once.
+- Names and labels are compared after folding full-width characters and whitespace, and without a label's trailing colon.
+- `with.input: direct` (or `input` on an act) has a replayed element act itself instead of receiving the pointer and keys: a click invokes a button, toggles a checkbox, selects a list item, or opens a combo box, and typing sets the field's value at once when the recording showed the typed text became the value. An element without that ability replays on the screen. An application that reacts to each key or to the pointer alone sees nothing, so `screen` stays the default.
+
+### Replaying by Pixels
+
+A turn the model ran on the screen, rather than on an element, is recorded on the application window its first click landed on, or the window with the keyboard focus for a turn that only types. A replay compares only that window, including the area around each click, and clicks relative to its corner. A window that moved, or a change elsewhere on the screen such as another window, a notification, or the clock, still replays; a window of another size is a miss. Where the system names no window, the replay compares the whole display, which then needs the size it was recorded on. [Maximizing](#window-size) keeps the window at one size every run.
+
+## Pinned Steps
+
+A recording lives on the host that learned it. To run a task on every host of a system with no first-time learning, write it into the step: an `act` takes `recorded` and an `extract` takes `fields`, keyed by system (`windows` or `macos`). A host of the matching system runs them ahead of its own recording; a block for another system is ignored.
+
+```yaml
+- act:
+    instruction: Log in as clerk with password %password%
+    recorded:
+      windows:
+        - type: {into: {role: text_field, name: User}, text: clerk}
+        - type: {into: {role: text_field, name: Password}, text: "%password%"}
+        - click: {role: button, name: Log in}
+      macos:
+        - type: {into: {role: text_field, name: User}, text: clerk}
+        - type: {into: {role: text_field, name: Password}, text: "%password%"}
+        - key: return
+- extract:
+    instruction: The customer's phone number
+    schema:
+      type: object
+      properties:
+        phone: {type: string}
+    fields:
+      macos:
+        phone: {role: text_field, near: {label: Phone, side: right}}
+```
+
+`recorded` lists steps, each one of `click`, `double_click`, or `right_click` (a selector), `type` (`{into, text}`), `key` (a chord such as `ctrl+s`, with an optional `focus` selector to focus first), `scroll` (`{on, dy}`), or `wait` (a duration). Each pointer step acts on the centre of the element its selector names, waiting up to `find_within` for it. When every step runs, the act is a `cache-hit` with no model. When a step misses, `on_miss` lets the model finish, and `never` fails naming the step. A pinned act has no screen check of its own, so follow it with an exact `expect`.
+
+`fields` maps each output to a selector, or to `{container, columns}` for a table, where `columns` maps each item property to its column header. A host reads pinned fields with no model, and a field with no pin falls back to the host's own binding.
+
+Pins are kept per system because Accessibility and UI Automation expose an application differently. Pins travel with the step; the per-host cache does not. Rather than writing a pin by hand, run the step until it succeeds, then print the host's recordings in pinned form with `dagu computer cache show <dag> --step <id>` and copy them into the step. See the [CLI reference](/getting-started/cli#computer-cache-show).
 
 ## Trying One Step
 
@@ -307,6 +430,7 @@ It exits nonzero and prints a `Problem:` line for each missing condition. With `
 
 - Grant **Screen Recording** and **Accessibility** in System Settings > Privacy & Security to the application that starts Dagu, such as Terminal, or to the `dagu` binary when it runs on its own. `dagu computer check` also asks macOS to show the Screen Recording and Accessibility prompts for the permissions that are missing.
 - macOS ties the grants to the binary. After replacing an unsigned `dagu` binary, grant them again.
+- The Accessibility permission also lets steps read windows' elements for [exact checks](#exact-checks), [element replay](#replaying-by-element), and [extract binding](#outputs). An Electron or Chromium application builds its element tree when a step first asks for it.
 - Keep the user logged in and turn off the automatic screen lock. While a step uses the desktop, Dagu keeps the display and the Mac awake, but a screen that locks, or another user's session taking the display, fails the step.
 
 **Windows**
@@ -316,7 +440,11 @@ It exits nonzero and prints a `Problem:` line for each missing condition. With `
 - Over Remote Desktop, a minimized or disconnected session stops rendering. Use the console session, or keep the remote window open.
 - Input cannot reach windows that run as administrator, such as UAC prompts, unless Dagu runs elevated too.
 
+A step that starts on a locked screen, while nobody is logged in, or while another user's session has the display, such as a scheduled run that starts before anyone unlocks the screen, waits for the desktop to become usable instead of failing. The wait is recorded on its timeline as a `waiting` event named `screen` and is bounded by the step's timeout, or 24 hours without one. A screen that locks while a step runs still fails the step.
+
 One computer step at a time uses a user's desktop, across every Dagu process that user runs on the host, even ones with different data directories. A step that finds the desktop in use waits for it and logs `Waiting for another computer step to finish using the desktop`, recorded on its timeline as a `waiting` event named `desktop`.
+
+A step never operates or maximizes the windows of its own process, nor those of applications named in the `DAGU_DESKTOP_PROTECTED_APPS` environment variable of the Dagu process, a comma-separated list of executable names such as `Kitewell`. Name the application a person starts automation from, so a step never clicks into it.
 
 ## Distributed Mode
 
@@ -327,11 +455,11 @@ worker_selector:
   desktop: finance
 ```
 
-The replay cache and the state of a paused step are stored on that worker. An answered `ask` resumes on the same worker, and `dagu computer cache clear` must run there.
+The replay cache and the state of a paused step are stored on that worker. An answered `ask` resumes on the same worker, and `dagu computer cache clear` and `dagu computer cache show` must run there. [Pinned steps](#pinned-steps) travel with the DAG, so every worker of a system runs them.
 
 ## Web UI
 
-The step's **Agent** tab shows each operation with its status, token use, and screenshot thumbnails, and holds pending questions.
+The step's **Agent** tab shows each operation with its status, token use, duration, how it ran (`element`, `screen`, `model`, or `exact`), and screenshot thumbnails, and holds pending questions.
 
 ## Options
 
@@ -342,20 +470,25 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `do` | Operations to run in order. Required. |
 | `variables` | Values referenced as `%name%` in instructions. |
 | `mode` | `auto`, `native`, or `generic`. See [Model](#model). |
+| `ai` | `on_miss` (default), `every_run`, or `never`. See [How Much AI Decides](#how-much-ai-decides). |
 | `max_actions` | Actions an `act` may perform. Defaults to `50`. |
+| `find_within` | How long a replayed action waits for its element. Defaults to `10s`; `0` looks once. See [Replaying by Element](#replaying-by-element). |
+| `input` | `screen` (default) or `direct`, for how a replayed element is operated. |
+| `maximize` | Maximize the window in front. Defaults to `true`. See [Window Size](#window-size). |
+| `max_rows` | Rows a bound table field reads. Defaults to `10000`. |
 | `on_confirmation` | `fail` (default) or `allow`, for model provider confirmation requests. |
-| `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `15s`; `0s` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
+| `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `5s`; `0s` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
 | `screenshots` | `on_failure`, `final`, `each`, or `never`. |
-| `cache` | Record and replay acts. Defaults to `true`. |
+| `cache` | `false` means `ai: every_run`. Set `ai` or `cache`, not both. |
 | `llm` | Model configuration that replaces the DAG-level `llm` block. |
 
-`computer.extract` takes `instruction` and `schema`, with optional `timeout`, `mode`, `screenshots`, and `llm`, and behaves as `computer.run` with one `extract` operation.
+`computer.extract` takes `instruction` and `schema`, with optional `timeout`, `mode`, `ai`, `maximize`, `max_rows`, `screenshots`, and `llm`, and behaves as `computer.run` with one `extract` operation.
 
 ## Safety
 
 - Everything on the screen is sent to the model and is untrusted. A document, email, or web page that is visible can try to steer an `act`. Keep instructions specific and follow important acts with an `expect`.
 - The model acts with the permissions of the logged-in user on whatever is on screen. Use a dedicated account or virtual machine for desktop hosts.
-- Put an `ask` before acts that are hard to undo, and disable the replay cache for them.
+- Put an `ask` before acts that are hard to undo, and set `ai: every_run` on them so they never replay blindly.
 - Screenshots saved as artifacts can show personal data. Use `screenshots: never` when they must not be kept.
 
 ## Troubleshooting
@@ -382,11 +515,19 @@ The step's **Agent** tab shows each operation with its status, token use, and sc
 | `the instruction uses %name%, but the ask that sets it did not run` | The `ask` was skipped because its `when` did not hold. | Give the act the same `when` as the `ask`. |
 | `computer actions need a model` | No `llm` block applies to the step. | Add a DAG-level `llm` block or `with.llm`. |
 | `act did not finish within ...` | The act ran past its `timeout`. | Raise the operation's `timeout`, or split the task. |
+| `the act cannot run without AI: ...` or `the extract cannot run without AI: ...` | Under `ai: never`, the host has no recording or binding, or the screen or an element differs. The message says which. | Run the step once under `on_miss` to record or repair it, or [pin](#pinned-steps) the task. |
+| `... was not found within ...` | A recorded element did not appear within `find_within`. | Raise `find_within`, or let the model repair the recording once under `on_miss`. |
+| `... is not there; N elements match` | An exact check's selector matched several elements. | Add `in`, `near`, the window, or `nth` to the selector. |
+| `... is not there` | No element matched an exact check. | Check the role and name with `dagu computer elements`, or raise `within`. |
+| `... is in front, not ...` | A `window` check found another window in front. | Fix the title, or the operation before it. |
+| `the window in front exposes no elements` | The application draws its own controls, or runs as administrator on Windows. | Check it with a statement instead. |
+| `exact checks need macOS or 64-bit Windows` | An exact check ran on another system. | Route the DAG to a macOS or 64-bit Windows worker, or check with a statement. |
+| `... belongs to the application that runs this step, which it never operates` | The element or window is in the Dagu process's own application, or one named in `DAGU_DESKTOP_PROTECTED_APPS`. | Bring the target application to the front first, with `launch` or an act. |
 
 ## Not Supported Yet
 
 - Linux desktops.
-- Displays other than the primary one.
+- Displays other than the primary one. A window on another display moves to the main display when it is [maximized](#window-size).
 - Operating a desktop from a Dagu process that runs as a service, or from another machine.
 
 ## Related

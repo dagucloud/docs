@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `computer check`, `computer cache clear`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
 
 ## Global Options
 
@@ -888,6 +888,32 @@ With `--format json`, it prints one object for programs to read, and exits nonze
 | `screen_recording` | Screen Recording permission is missing (macOS). |
 | `accessibility` | Accessibility permission is missing (macOS). |
 | `no_display` | The display size is unavailable. |
+| `session_disconnected` | The Remote Desktop or child session's client has disconnected, so its display does not draw (Windows). |
+
+### `computer elements`
+
+List the accessible elements of the window in front, to find the role and name an [exact check](/step-types/computer#exact-checks) or a [pinned step](/step-types/computer#pinned-steps) selects. Elements are read on macOS, with the Accessibility permission, and on 64-bit Windows.
+
+```bash
+dagu computer elements [options]
+```
+
+**Options:**
+- `--format`, `-f` - Output format: `text` (default) or `json`
+- `--limit` - Most elements to list. Defaults to `400`
+- `--at-pointer` - Report the element under the pointer instead
+- `--after` - With `--at-pointer`, how long to wait first, such as `3s`, to move the pointer onto the element
+- `--watch` - Report the element under the pointer whenever it changes, one JSON object per line, until stdin closes or the command is interrupted
+- `--match` - Report the elements a selector matches, and succeed only when exactly one does. The selector is JSON, or `-` to read it from stdin
+
+Each element has its `role`, `name`, `id`, `value`, the `label` it is linked to, its `bounds` in display pixels, its `window`, and its `path` from the window down.
+
+```bash
+dagu computer elements --at-pointer --after 3s
+dagu computer elements --match '{"role": "button", "name": "Save", "in": {"role": "group", "name": "Payment"}}'
+```
+
+With `--format json`, the result is one object. A failing command prints `{"error": {"code", "message"}}` and exits 1, with one of the codes `invalid_input`, `unsupported`, `load_failed`, `no_elements`, `not_found`, `ambiguous`, `failed`, or a `computer check` problem code.
 
 ### `computer cache clear`
 
@@ -899,12 +925,35 @@ dagu computer cache clear [options] DAG
 
 **Options:**
 - `--step` - Clear only the step with this ID, or its name when the step has no ID
+- `--op` - With `--step`, forget only the task at this position in `with.do`, counted from 1
 
 Without `--step`, every step of the DAG is cleared. The cache lives on the host that ran the step; in distributed mode, run the command on the worker.
 
 ```bash
 dagu computer cache clear invoices
 dagu computer cache clear invoices --step post
+dagu computer cache clear invoices --step post --op 3
+```
+
+### `computer cache show`
+
+Show what a DAG's computer steps recorded on this host, written the way a step [pins](/step-types/computer#pinned-steps) it: an act's `recorded` steps and an extract's `fields`, keyed by the system the recording was made on. Written into the step, they run on every host of that system with no model and no recording of its own.
+
+```bash
+dagu computer cache show [options] DAG
+```
+
+**Options:**
+- `--step` - Show only the step with this ID, or its name when the step has no ID
+- `--op` - With `--step`, show only the task at this position in `with.do`, counted from 1
+- `--format`, `-f` - Output format: `text` (default) or `json`
+
+A task whose instruction changed, or that ran with other parameters, has a recording for each, and the newest comes first. An act with an action that has no pinned form, such as a drag, a click where no element could be read, or a click near an element's edge, cannot be pinned; each such action is listed with its turn and the reason instead.
+
+With `--format json`, the result is `{"operations": [...]}`, each with `step`, `op`, `kind`, `system`, `saved_at`, and either `recorded`, `fields`, or `unpinnable`, whose items carry `turn`, `action`, `code`, and `reason`.
+
+```bash
+dagu computer cache show invoices --step post --op 2
 ```
 
 ### `xlsx inspect`
