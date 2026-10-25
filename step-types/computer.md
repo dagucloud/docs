@@ -16,7 +16,7 @@ Every model request goes through Dagu's own [LLM providers](/step-types/llm/prov
 
 ## Requirements
 
-- Dagu v2.18.0 or later. [Window maximizing](#window-size), and [exact checks](#exact-checks), [element replay](#replaying-by-element), and [pins](#pinned-steps) on macOS, need a Dagu release after v2.22.2.
+- Dagu v2.18.0 or later. A Dagu release after v2.22.2 is needed for [window maximizing](#window-size), [checks on values](#checks-on-values), [handlers](#screens-that-come-up-sometimes), and `check` and `uncheck`, and on macOS for [exact checks](#exact-checks), [element replay](#replaying-by-element), and [pins](#pinned-steps).
 - macOS or Windows. On other systems the step fails with `desktop automation is supported on macOS and Windows only`.
 - Dagu running in a logged-in user session with the screen unlocked. On Windows it must not run as a service. On macOS, Screen Recording and Accessibility must be granted to the application that starts Dagu, or to the `dagu` binary. See [Setting Up a Desktop Host](#setting-up-a-desktop-host).
 - A model configured with a DAG-level `llm` block or `with.llm`, unless no operation of the step can call one. See [How Much AI Decides](#how-much-ai-decides).
@@ -124,7 +124,7 @@ Any operation can also set:
 
 | Field | Description |
 |-------|-------------|
-| `when` | A [condition](#conditions) checked before the operation. The operation is skipped unless it holds. |
+| `when` | A [condition](#conditions) checked before the operation. The operation is skipped unless it holds, and the timeline records it as skipped with the reason. |
 | `timeout` | Maximum time for the operation, such as `30s`. Defaults to `5m`. |
 
 `launch` starts the application in the step's working directory without a shell and does not wait for it; the application keeps running after the step ends. A string is the program itself, so a path with spaces needs no quoting. Pass arguments with `{command, args}`.
@@ -149,7 +149,9 @@ A desktop that runs computer steps is often one a person also works at. Before a
 
 When a person uses the desktop while the model is choosing its next actions, those actions are not run, because they were chosen for a screen that may have changed. The step waits for the idle period again and sends the model the new screen with a note saying why. Skipped actions do not count toward `max_actions`.
 
-The waiting counts toward the operation's `timeout`. An operation whose timeout passes while someone keeps working fails with `a person kept using the desktop until the operation timed out`. On a dedicated host, `idle: 0s` turns the waiting off, and actions are no longer skipped when someone uses the desktop:
+A replay, of a recording or a [pin](#pinned-steps), checks before each action, and while it waits for an element or an exact check, whether a person used the desktop since the step's own last input. If so, it waits for the idle period, brings back the application it last found an element or saw a check hold in, with that application's front window on top so an open dialog stays above its main window, and starts the wait for the element or check over. The application carries over to the next computer step of the same run, so a person who works between two steps is handled the same way. A switch to another application that the step's own action caused, such as a click that opens another application, is left as it is.
+
+Waiting for a person does not count toward the operation's `timeout`. A step that has waited an hour for someone to stop fails with `a person kept using the desktop for 1h 0m, so the step gave up waiting`. On a dedicated host, `idle: 0s` turns the waiting off, and actions are no longer skipped when someone uses the desktop:
 
 ```yaml
 with:
@@ -160,7 +162,7 @@ with:
 
 ## Conditions
 
-`expect` and `when` take a statement the model judges against a screenshot, or an [exact check](#exact-checks):
+`expect` and `when` take a statement the model judges against a screenshot, an [exact check](#exact-checks) of the window's elements, or a [check on a value](#checks-on-values) the step was given:
 
 ```yaml
 - expect: The invoice list shows INV-0001
@@ -184,9 +186,9 @@ An exact check reads the elements of the window in front, such as its buttons, f
 |-------|------------|
 | `{text: ...}` | The name or value of a visible element contains the text. |
 | `{element: {role, name, id, near, in, nth}}` | The selector matches exactly one visible element. Several matches are a miss, never a guess. |
+| `{window: ...}` | The title of the window in front contains the text. `*` matches any run of characters. |
 
 A selector names an element by `role`, such as `button`, `text_field`, `text`, `checkbox`, `combo_box`, or `list_item`, and at least one of `name`, `id`, or `near: {label, side}`, the label the element sits next to and on which `side` (`right`, `below`, `left`, or `above`). `in` narrows the search to a container, itself a selector, and `nth` picks one of several equal matches in reading order, from 0. Names take `*` for any run of characters.
-| `{window: ...}` | The title of the window in front contains the text. `*` matches any run of characters. |
 
 ```yaml
 - act: Post invoice ${params.INVOICE_ID}
@@ -201,6 +203,37 @@ An exact `expect` keeps looking until it holds, `within` passes, or, without `wi
 `dagu computer elements` lists the elements of the window in front, and `dagu computer elements --at-pointer` the one under the pointer, to find the role and name to write. See the [CLI reference](/getting-started/cli#computer-elements).
 
 Exact checks need macOS or 64-bit Windows. On other hosts the step fails at the first one with `exact checks need macOS or 64-bit Windows`.
+
+### Checks on Values
+
+`{value, equals}` holds when the value is the text, and `{value, not_equals}` when it is not. The value is data the step was given, such as a parameter, an earlier step's output, or a `%name%` placeholder from `with.variables` or an earlier `ask`. The check reads no screen and calls no model, so it is decided at once and takes no `within`, works under `ai: never`, and skips an operation without maximizing a window. An empty value is allowed, so `not_equals: ""` asks whether a value was given. Both sides are compared after folding full-width characters and whitespace, as names are, without `*` patterns.
+
+Use it for a part of a task that only some runs need, rather than an instruction that leaves the model to decide whether it applies. Pinned steps take no condition of their own, so such a part is an operation of its own:
+
+```yaml
+with:
+  variables:
+    contact: ${params.SECOND_CONTACT}
+    same: ${params.SAME_ADDRESS}
+  do:
+    - act: Enter the first contact
+    - act: Enter %contact% as the second contact
+      when: {value: "%contact%", not_equals: ""}
+    - act:
+        instruction: Tick Same as billing address
+        recorded:
+          macos:
+            - check: {role: checkbox, name: Same as billing address}
+      when: {value: "%same%", equals: "yes"}
+    - act:
+        instruction: Untick Same as billing address
+        recorded:
+          macos:
+            - uncheck: {role: checkbox, name: Same as billing address}
+      when: {value: "%same%", equals: "no"}
+```
+
+The timeline records a skipped operation with the reason, such as `"" is ""`. Passing the data as variables rather than writing `${params...}` into the instruction keeps the instruction the same on every run, so one [recording](#replay-cache) serves them all. An `expect` on a value fails the step when it does not hold.
 
 ## Window Size
 
@@ -375,11 +408,56 @@ A recording lives on the host that learned it. To run a task on every host of a 
         phone: {role: text_field, near: {label: Phone, side: right}}
 ```
 
-`recorded` lists steps, each one of `click`, `double_click`, or `right_click` (a selector), `type` (`{into, text}`), `key` (a chord such as `ctrl+s`, with an optional `focus` selector to focus first), `scroll` (`{on, dy}`), or `wait` (a duration). Each pointer step acts on the centre of the element its selector names, waiting up to `find_within` for it. When every step runs, the act is a `cache-hit` with no model. When a step misses, `on_miss` lets the model finish, and `never` fails naming the step. A pinned act has no screen check of its own, so follow it with an exact `expect`.
+`recorded` lists steps, each one of `click`, `double_click`, or `right_click` (a selector), `check` or `uncheck` (a `checkbox` selector), `type` (`{into, text}`), `key` (a chord such as `ctrl+s`, with an optional `focus` selector to focus first), `scroll` (`{on, dy}`), or `wait` (a duration). Each pointer step acts on the centre of the element its selector names, waiting up to `find_within` for it. When every step runs, the act is a `cache-hit` with no model. When a step misses, `on_miss` lets the model finish, and `never` fails naming the step. A pinned act has no screen check of its own, so follow it with an exact `expect`.
+
+`check` and `uncheck` leave a checkbox checked or unchecked: they click only when it is not already, then wait until the checkbox shows the state, so running the step again changes nothing. A click the model makes on a checkbox is recorded the same way, so a pin printed from a recording uses them. In Chrome and Electron applications on macOS, toggle buttons read as checkboxes too; `dagu computer elements` shows the role.
+
+To choose an option of a list box on macOS, click the box, then click the option inside it by name:
+
+```yaml
+- click: {role: combo_box, id: category}
+- click: {role: menu_item, name: "%category%", in: {role: combo_box, id: category}}
+```
+
+The option is chosen through Accessibility rather than at a position, so it works where the open menu is drawn apart from the window, as in Chrome and Electron applications.
 
 `fields` maps each output to a selector, or to `{container, columns}` for a table, where `columns` maps each item property to its column header. A host reads pinned fields with no model, and a field with no pin falls back to the host's own binding.
 
 Pins are kept per system because Accessibility and UI Automation expose an application differently. Pins travel with the step; the per-host cache does not. Rather than writing a pin by hand, run the step until it succeeds, then print the host's recordings in pinned form with `dagu computer cache show <dag> --step <id>` and copy them into the step. See the [CLI reference](/getting-started/cli#computer-cache-show).
+
+## Screens That Come Up Sometimes
+
+Some screens appear only on some runs, such as a confirmation that asks whether to discard what is already entered, or a notice after an update. `with.handle` lists such screens with the steps that clear them, so no operation has to say when they appear:
+
+```yaml
+with:
+  handle:
+    - name: Discard confirmation
+      when: {text: Discard the entered data?}
+      recorded:
+        macos:
+          - click: {role: button, name: Discard}
+        windows:
+          - click: {role: button, name: Discard}
+  do:
+    - act:
+        instruction: Press Reset
+        recorded:
+          macos:
+            - click: {role: button, name: Reset}
+          windows:
+            - click: {role: button, name: Reset}
+    - expect: {element: {role: text_field, name: Customer}, within: 10s}
+```
+
+A handler's `when` is an [exact check](#exact-checks) without `within`, and its `recorded` lists [pinned steps](#pinned-steps) by system. The step checks the handlers in the window in front before each replayed action, while it waits for something that is not there yet (an element, an exact check, or the screen a recording continues from), and before the model looks at the screen or its chosen actions run. The first handler whose check holds runs its steps for the host's system, and the step carries on where it was.
+
+- `name` names the handler in the timeline, which logs `handling <name>` each time it runs. Without one, the check names it.
+- A handler with no steps for the host's system is ignored, and a handler's steps look for no handler themselves.
+- `%name%` placeholders in a handler come from `with.variables`.
+- A handler that runs 20 times in one step fails it with `handle "...": the screen was still there after 20 times`, so a screen its steps do not clear cannot hold the step forever.
+
+Write the check so that it matches only the screen to clear, such as by its message, never by something the next screen also shows.
 
 ## Trying One Step
 
@@ -476,6 +554,7 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `input` | `screen` (default) or `direct`, for how a replayed element is operated. |
 | `maximize` | Maximize the window in front. Defaults to `true`. See [Window Size](#window-size). |
 | `max_rows` | Rows a bound table field reads. Defaults to `10000`. |
+| `handle` | Screens that may come up at any point, each `{name, when, recorded}`. See [Screens That Come Up Sometimes](#screens-that-come-up-sometimes). |
 | `on_confirmation` | `fail` (default) or `allow`, for model provider confirmation requests. |
 | `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `5s`; `0s` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
 | `screenshots` | `on_failure`, `final`, `each`, or `never`. |
@@ -500,7 +579,7 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `the input desktop is not accessible; the screen may be locked` | The Windows screen is locked or a secure prompt is shown. | Unlock the screen and turn off the screen lock. |
 | `the screen is locked; unlock it and keep it unlocked while computer steps run` | The Mac screen locked before or during the step. | Unlock it and turn off the automatic screen lock. |
 | `another user's session has the display; switch back to this user` | Fast user switching moved the Mac's display to another user. | Switch back to the user that runs Dagu. |
-| `a person kept using the desktop until the operation timed out` | Someone used the mouse or keyboard for the whole operation timeout. | Run the step when the desktop is free, raise `timeout`, or set `idle: 0s` on a dedicated host. |
+| `a person kept using the desktop for 1h 0m, so the step gave up waiting` | Someone kept using the mouse or keyboard for an hour. | Run the step when the desktop is free, or set `idle: 0s` on a dedicated host. |
 | `Screen Recording permission is missing` or `Accessibility permission is missing` | macOS has not granted the permission to the process that runs Dagu. | Grant it in System Settings > Privacy & Security, then restart Dagu. |
 | `SendInput delivered ... events; the target may run elevated or the desktop is locked` | The target window runs as administrator, or the screen locked. | Run Dagu elevated, or keep the screen unlocked. |
 | `the task needed more than max_actions (...) actions` | The act is too large, or the model is going in circles. | Split the task into smaller acts, or raise `max_actions`. |
@@ -520,6 +599,9 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `... is not there; N elements match` | An exact check's selector matched several elements. | Add `in`, `near`, the window, or `nth` to the selector. |
 | `... is not there` | No element matched an exact check. | Check the role and name with `dagu computer elements`, or raise `within`. |
 | `... is in front, not ...` | A `window` check found another window in front. | Fix the title, or the operation before it. |
+| `handle "...": the screen was still there after 20 times` | The handler's steps do not clear its screen, or its check also matches a screen the step goes on to. | Make the check match only the screen to clear, and check the steps' selectors with `dagu computer elements`. |
+| `... does not say whether it is checked` | A `check` or `uncheck` names an element that reports no checked state. | Use `click`, and follow it with an exact `expect`. |
+| `... it is not checked after the click` or `... unchecked after the click` | The click did not change the checkbox within `find_within`, or the application changed it back. | Look at the failure screenshot; check that the selector names the box itself, not its label. |
 | `the window in front exposes no elements` | The application draws its own controls, or runs as administrator on Windows. | Check it with a statement instead. |
 | `exact checks need macOS or 64-bit Windows` | An exact check ran on another system. | Route the DAG to a macOS or 64-bit Windows worker, or check with a statement. |
 | `... belongs to the application that runs this step, which it never operates` | The element or window is in the Dagu process's own application, or one named in `DAGU_DESKTOP_PROTECTED_APPS`. | Bring the target application to the front first, with `launch` or an act. |
