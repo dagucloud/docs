@@ -172,6 +172,32 @@ See [Reliability](/step-types/llm/reliability).
 
 See [Web Search](/step-types/llm/reasoning-web-search#web-search).
 
+## Files
+
+`with.files` gives the model files to read with the prompt: a path, a glob pattern, a list of them, or a list an earlier step published, such as the emails `mail.search` found with `save_attachments: true`.
+
+```yaml
+steps:
+  - id: read
+    action: chat.completion
+    with:
+      prompt: Read the invoice and give its number, date, and total.
+      files: ~/Downloads/invoice-*.pdf
+    output_schema:
+      type: object
+      properties:
+        number: {type: string}
+        date: {type: string}
+        total: {type: number}
+      required: [number]
+```
+
+- PDF, Word (`.docx`), Excel (`.xlsx`) and text files go to the model as text ahead of the prompt, each in a `<file name="…">` block, a PDF page by page. Text in Shift_JIS is decoded.
+- A PDF page without text of its own, such as a scan, goes as an image, and so does an image file (PNG, JPEG, GIF, WebP), scaled down to a long edge of 1568 pixels when larger. The text names each image by its place: `[Image 1 is receipt.jpg.]`, or `--- page 2: image 1 ---`.
+- A file may hold up to 50 MB; together the files may hold 1,000,000 characters of text and 50 images. A missing file, a pattern matching nothing, and a file of another kind fail the step before any request.
+- The session keeps the text, so a later step of the session still reads it; the images go with the one request. A push-back resends the feedback without the files.
+- `files` belongs on the step, under `with`; a DAG-level `llm` block refuses it.
+
 ## Structured output
 
 Set `output_schema` on the step, next to `with`, when later steps need values rather than prose:
