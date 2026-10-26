@@ -392,6 +392,29 @@ Live scheduled runs are also blocked while a catchup run is queued for the same 
 
 At most 1000 missed runs are buffered per DAG. If more than 1000 runs were missed, only the 1000 most recent are replayed.
 
+## Watched Folders
+
+A DAG that acts on files as they land in a folder watches the folder instead of polling it on a schedule:
+
+```yaml
+watch:
+  path: ~/Downloads/invoices
+  pattern: "*.pdf"
+  interval: 30s
+steps:
+  - id: read
+    action: chat.completion
+    with:
+      prompt: Read the invoice and give its number, date, and total.
+      files: ${WATCH_FILE}
+```
+
+- `path` is the folder; `pattern` is a glob the file's name must match (empty, or `*`, matches every file); `interval` is how often the folder is read, 10s by default and at least 1s. A DAG with `watch` needs no `schedule`; both may be set.
+- A file counts as arrived once its size and modification time are the same on two readings in a row, so a file still being copied waits. Each arrival starts one run, queued like a webhook's, with the file's absolute path as `WATCH_FILE` and its name as `WATCH_NAME`; the run's trigger type is `file`.
+- The scheduler remembers each file by its size and time, so a file runs once and runs again only when it is replaced. The files a folder holds when the watch starts, or when `path` or `pattern` change, are left alone; a file that arrives while the scheduler is off is new when it returns.
+- Hidden files, Office lock files (`~$`), folders, and files still being written (`.tmp`, `.part`, `.partial`, `.crdownload`, `.download`) never match. A folder that cannot be read is reported once and read again every interval. A suspended DAG's files wait and run once it resumes.
+- `WATCH_FILE` and `WATCH_NAME` are chosen by whoever put the file in the folder: a `run:` step reads them with `printenv` or through `template.render` rather than interpolating them into its command.
+
 ## Pausing the Scheduler
 
 Suspending a single DAG stops that DAG only. To freeze every scheduled run at once, for a maintenance window or an incident, pause the scheduler.
