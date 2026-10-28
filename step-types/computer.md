@@ -269,6 +269,8 @@ Native tools are available on Claude Opus 4.8, Claude 5 models, and later; GPT-5
 
 When several models are listed, an `act` moves to the next model only when a model fails before any action ran, so a half-finished task is never handed to another model. `extract` and conditions try the models in order for every request.
 
+`extract` and conditions ask the model for a `respond` tool call whose arguments are the answer. An answer with no valid JSON, in that call or as plain text, gets one correction: the same model is shown its answer and the reason and asked again, and the step log shows the rejected answer after `warning: <provider>/<model> answer rejected: <reason>`. When the corrected answer is still unusable, the next model is tried. Every call's tokens count, the rejected one's included.
+
 ## Secrets and Variables
 
 Declare secrets under `secrets:`, put them in `with.variables`, and reference them as `%name%` in `act` instructions. The model sees only the placeholder; when it types text containing `%name%`, the value is typed instead.
