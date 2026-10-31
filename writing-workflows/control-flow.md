@@ -1013,7 +1013,7 @@ steps:
   - id: simple_method
     run: echo "Processing with simple settings"
     preconditions:
-      - condition: "${env.TRY_ADVANCED_METHOD_EXIT_CODE}"
+      - condition: "${try_advanced_method.exit_code}"
         expected: "re:[1-9][0-9]*"
     depends: try_advanced_method
         
