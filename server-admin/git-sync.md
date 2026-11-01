@@ -1,6 +1,6 @@
 # Git Sync
 
-Git Sync keeps workflows and their supporting files synchronized with a Git repository. Pulling changes places DAG definitions, scripts, templates, binaries, Wiki pages, and Wiki attachments into their respective Dagu storage directories.
+Git Sync keeps workflows and their supporting files synchronized with a Git repository. Pulling changes places DAG definitions, scripts, templates, binaries, Wiki pages, Wiki attachments, and business calendars into their respective Dagu storage directories.
 
 ## Repository layout
 
@@ -10,6 +10,8 @@ Set `git_sync.path` when workflow files occupy a subdirectory within a larger re
 repository
 `-- workflows/                     # git_sync.path
     |-- daily-report.yaml          # DAG
+    |-- calendars/
+    |   `-- jp-banking.yaml        # business calendar
     |-- scripts/
     |   `-- generate.py            # supporting file
     |-- templates/
@@ -32,6 +34,9 @@ paths.dags_dir/
 paths.wiki_dir/
 `-- operations/
     `-- daily-report.md
+
+paths.calendars_dir/
+`-- jp-banking.yaml
 ```
 
 Paths under `git_sync.path` remain relative to their destination roots. Leave `path` empty when the repository itself is dedicated to Dagu files.
@@ -47,14 +52,24 @@ Git Sync assigns every managed file an `itemId` and `kind`. The Web UI, CLI, and
 | `skills/review/SKILL.md` | `paths.dags_dir/skills/review/SKILL.md` | `skills/review/SKILL.md` | `file` |
 | `wiki/operations/runbook.md` | `paths.wiki_dir/operations/runbook.md` | `wiki/operations/runbook` | `doc` |
 | `wiki/.attachments/operations/runbook/chart.png` | `paths.wiki_dir/.attachments/operations/runbook/chart.png` | `wiki/.attachments/operations/runbook/chart.png` | `doc-asset` |
+| `calendars/jp-banking.yaml` | `paths.calendars_dir/jp-banking.yaml` | `calendars/jp-banking` | `calendar` |
 
-Supporting-file IDs retain their complete relative path and file extension. DAG and Wiki page IDs omit `.yaml`, `.yml`, and `.md`.
+Supporting-file IDs retain their complete relative path and file extension. DAG, Wiki page, and calendar IDs omit `.yaml`, `.yml`, and `.md`.
 
 An existing repository that contains `docs/` but not `wiki/` continues using `docs/` for Wiki content. Git Sync rejects a repository containing both directories rather than merging them.
 
+### Calendars
+
+A file `calendars/<name>.yaml` directly under the synchronized scope, with a valid calendar name, is a [business calendar](/writing-workflows/business-calendars). It syncs with `paths.calendars_dir`. Deeper paths, `.yml` files, and other files under `calendars/` keep their DAG or supporting-file handling.
+
+- A calendar created on the Calendars page appears as `untracked` and can be published.
+- On a pull, a local calendar that Git Sync has not synced yet, but that the repository also has, becomes a conflict when the contents differ. It is never overwritten.
+- A calendar can only be moved to another calendar name.
+- A DAG kept at `calendars/<name>.yaml` before calendars were synced becomes a calendar on the next pull. An unchanged copy in `paths.dags_dir` is removed; an edited copy becomes a conflict.
+
 ### Supporting files
 
-Any Git-tracked regular file in scope that is not handled as a DAG, Wiki page, or Wiki attachment is a supporting file. Common examples include:
+Any Git-tracked regular file in scope that is not handled as a DAG, calendar, Wiki page, or Wiki attachment is a supporting file. Common examples include:
 
 - shell, Python, PowerShell, and JavaScript files
 - SQL, JSON, TOML, and dotenv configuration
@@ -63,7 +78,7 @@ Any Git-tracked regular file in scope that is not handled as a DAG, Wiki page, o
 
 Git Sync does not automatically discover new supporting files created directly in `paths.dags_dir`. Commit new files to the Git repository first, then pull them into Dagu. Once tracked, local edits and deletions appear in Git Sync status and can be published.
 
-Within the synchronized scope, reserve `.yaml` and `.yml` extensions for DAG definitions. Base configuration files and YAML files under the Wiki tree are excluded from supporting files.
+Within the synchronized scope, reserve `.yaml` and `.yml` extensions for DAG definitions and calendars. Base configuration files and YAML files under the Wiki tree are excluded from supporting files.
 
 Git symlinks and submodules are not synchronized. Additionally, a repository cannot contain items that resolve to the same `itemId`. For example, `workflow.yaml` and an extensionless supporting file named `workflow` collide, causing the pull operation to fail without writing either item.
 
@@ -120,7 +135,7 @@ git_sync:
     author_email: dagu@localhost
 ```
 
-`push_enabled: false` allows pulls but blocks publish, delete, and move operations. This is the recommended setting for deployments that receive reviewed changes from a promotion branch.
+`push_enabled: false` allows pulls but blocks publish, delete, and move operations. It also blocks DAG and calendar edits in the Web UI and API, so the server keeps matching the repository. This is the recommended setting for deployments that receive reviewed changes from a promotion branch.
 
 ## Authentication
 
@@ -171,13 +186,13 @@ A typical update follows this sequence:
 |---|---|
 | `synced` | Local content matches the last synchronized version. |
 | `modified` | A tracked local file changed. |
-| `untracked` | A local DAG, Wiki page, or Wiki attachment has not been published. New local supporting files are not discovered. |
+| `untracked` | A local DAG, Wiki page, Wiki attachment, or calendar has not been published. New local supporting files are not discovered. |
 | `conflict` | Local and remote content both changed, or a locally changed tracked item was deleted remotely. |
 | `missing` | A previously tracked local file is gone. |
 
 ### Pull and remote deletion
 
-Pulling preserves local edits. If the remote repository deletes a tracked DAG, Wiki page, Wiki attachment, or supporting file:
+Pulling preserves local edits. If the remote repository deletes a tracked DAG, Wiki page, Wiki attachment, calendar, or supporting file:
 
 - An unchanged local copy is removed, along with any directories the removal leaves empty.
 - A locally edited copy remains and becomes a conflict.
@@ -195,7 +210,7 @@ Git Sync preserves whether a supporting file is executable. On Unix systems, cha
 
 ## Web UI
 
-Open **Git Sync** from the server navigation. The page provides separate filters for workflows, Wiki pages, attachments, and supporting files.
+Open **Git Sync** from the server navigation. The page provides separate filters for workflows, calendars, Wiki pages, attachments, and supporting files.
 
 Use it to:
 

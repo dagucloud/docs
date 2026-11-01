@@ -396,6 +396,8 @@ The DAG object also exposes `histRetentionDays` for DAG history retention.
 
 When an inline rich param uses `eval`, `paramDefs.default` remains only the authored literal `default`, if one exists. Clients should not evaluate template defaults locally.
 
+The DAG object also carries `upcomingRuns`: the next ten fire times of its start schedules, earliest first. Each entry has `time`, the `scheduleIndex` of its schedule entry, and the `timezone` it runs in, plus `businessDay`, `extraBusinessDay`, and `skippedHolidays` when a [business calendar](/writing-workflows/business-calendars) placed it. The list comes from the definition alone; `upcomingRunsHold` is `suspended` or `schedulerPaused` when none of the runs will start. `GET /dags/{fileName}/spec` and `POST /dags/validate` return the same fields.
+
 ### Delete DAG
 
 **Endpoint**: `DELETE /api/v1/dags/{fileName}`
@@ -3832,6 +3834,39 @@ Rename and batch-delete requests use `newPath` and `paths` respectively:
 The old `/api/v1/docs` endpoints are not part of the current API. Upgrade direct clients to `/api/v1/wiki`; Dagu's remote-node proxy falls back to the legacy paths when it connects to an older Dagu node.
 
 See [Wiki](/web-ui/wiki) for Web UI behavior, workspace ownership, storage, and Git Sync.
+
+## Calendar Endpoints
+
+Calendar endpoints manage the [business calendar](/writing-workflows/business-calendars) files in `paths.calendars_dir` and accept an optional `remoteNode` query parameter. All authenticated users can list, read, and preview calendars. Creating, updating, and deleting require `permissions.write_dags` and, where roles apply, the developer role or above; they are refused while Git Sync runs with `push_enabled: false`.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/calendars` | List the built-in calendars and calendar files. `includeUsage=true` adds expiry warnings, includes, and how many DAGs use each calendar. |
+| `POST` | `/api/v1/calendars` | Create a calendar. Without `spec`, the file starts as Monday to Friday with no holidays, listed through the end of the year. |
+| `GET` | `/api/v1/calendars/{name}` | Read a calendar's content, its problems with positions, and the calendars and DAGs that depend on it. |
+| `PUT` | `/api/v1/calendars/{name}` | Replace a calendar's content. Content with problems is not saved; the problems are returned. |
+| `DELETE` | `/api/v1/calendars/{name}` | Delete a calendar. Returns `409` while a DAG's start schedule uses it, directly or through includes, or another calendar includes it. |
+| `POST` | `/api/v1/calendars/{name}/preview` | Apply unsaved content to the dates of a year, marking each date's status and the dates that differ from the saved calendar. |
+
+Create a calendar, then add a holiday:
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/calendars" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"jp-banking"}'
+
+curl -X PUT "http://localhost:8080/api/v1/calendars/jp-banking" \
+  -H "Content-Type: application/json" \
+  -d '{"spec":"holidays:\n  - date: 2027-01-11\n    name: Coming of Age Day\n"}'
+```
+
+Preview unsaved content for 2027:
+
+```json
+{"spec":"holidays: [2027-01-11]\n","year":2027}
+```
+
+The usage counts and dependents list only DAGs in workspaces the caller can see.
 
 ## Git Sync Endpoints
 

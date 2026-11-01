@@ -1155,7 +1155,7 @@ dagu config --dagu-home /custom/path
 
 ### `schema`
 
-Browse the JSON schema for DAG definitions or server configuration.
+Browse the JSON schema for DAG definitions, server configuration, or calendar files.
 
 ```bash
 dagu schema dag
@@ -1163,6 +1163,42 @@ dagu schema dag steps
 dagu schema dag steps.container
 dagu schema config
 dagu schema config server
+dagu schema calendar
+dagu schema calendar holidays
+```
+
+### `calendar`
+
+Check [business calendars](/writing-workflows/business-calendars) and preview the runs they allow. Calendar files live in `paths.calendars_dir`.
+
+#### `calendar check`
+
+```bash
+dagu calendar check [calendar files...]
+```
+
+Validates every `<name>.yaml` calendar file in `paths.calendars_dir`, or the files given. A file given as a path must be named `<name>.yaml`, and its includes are read from the files beside it. Each problem is printed on its own line with its position. The command exits non-zero when any calendar is invalid.
+
+```
+ok   jp-banking: 2 holidays, through 2027-12-31
+FAIL ops: [1:17] field 'weekdays[1]': unknown day FUN; use MON, TUE, WED, THU, FRI, SAT, or SUN
+FAIL ops: [3:5] field 'holidays[0]': invalid date "2027-13-01": use YYYY-MM-DD
+Error: 1 of 2 calendars are invalid
+```
+
+To check that the DAGs naming a calendar find it, run `dagu validate` on them.
+
+#### `calendar fires`
+
+```bash
+dagu calendar fires [--from <RFC 3339 time>] [--count <n>] <DAG>
+```
+
+Lists the next times a DAG's start schedules fire, ten by default, with the business day each fire matched and the holidays it skipped. `--from` sets only where the listing starts; schedules without a time zone prefix are still evaluated in `core.tz`.
+
+```bash
+dagu calendar fires payroll
+dagu calendar fires payroll.yaml --from 2027-01-01T00:00:00+09:00 --count 20
 ```
 
 ### `example`

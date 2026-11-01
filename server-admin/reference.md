@@ -371,6 +371,7 @@ All options support `DAGU_` prefix.
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
 - `DAGU_WIKI_DIR` - Markdown Wiki pages and runbooks (default: `{dags_dir}/wiki`)
 - `DAGU_DOCS_DIR` - Deprecated alias for `DAGU_WIKI_DIR`
+- `DAGU_CALENDARS_DIR` - Business calendar files (default: `~/.config/dagu/calendars`, or `$DAGU_HOME/calendars` when `DAGU_HOME` is set)
 - `DAGU_ALT_DAGS_DIR` - Additional read-only DAG directories
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data

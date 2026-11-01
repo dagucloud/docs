@@ -28,7 +28,8 @@ Dagu's UI is organized around a few everyday jobs:
 - **Notifications** for Microsoft Teams, Slack, email, Telegram, webhook, and local command routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
-- **Git Sync** for repository-managed workflows, Wiki content, and supporting files
+- **Calendars** for the holidays and business days that schedules follow
+- **Git Sync** for repository-managed workflows, calendars, Wiki content, and supporting files
 - **Search** for finding workflows and Wiki page content quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
@@ -81,9 +82,15 @@ Unsaved drafts are kept in browser storage, and the editor reports external chan
 
 ## Git Sync
 
-The Git Sync page displays workflows, Wiki content, and supporting files from the configured repository. Type and status filters make it easy to find scripts, templates, binaries, and other files.
+The Git Sync page displays workflows, calendars, Wiki content, and supporting files from the configured repository. Type and status filters make it easy to find scripts, templates, binaries, and other files.
 
 Use the page to pull remote changes, review text or binary differences, publish selected edits, and resolve conflicts. Supporting-file diffs also show executable permissions and remote deletions when applicable. See [Git Sync](/server-admin/git-sync) for repository layout, configuration, CLI commands, and production guidance.
+
+## Calendars
+
+Open **Configure > Calendars** to list the business calendars that start schedules name, with how many DAGs use each one and which need attention: a file that does not load, or holidays that run out within 30 days.
+
+A calendar's page opens its YAML in an editor with schema completion and problems marked on their lines, beside a year view that follows each edit. It lists the DAGs and calendars that depend on the calendar, and a calendar in use cannot be deleted. See [Business Calendars](/writing-workflows/business-calendars).
 
 ## Dashboard
 

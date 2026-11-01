@@ -182,6 +182,30 @@ schedule: "CRON_TZ=Asia/Tokyo 0 9 * * *"  # 9 AM Tokyo time
 
 See [tz database timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for valid values.
 
+## Business Days
+
+Name a [business calendar](/writing-workflows/business-calendars) to skip holidays, and add `business_days` to keep only chosen business days of each month:
+
+```yaml
+calendar: weekdays            # built in: Monday to Friday, no holidays
+schedule:
+  - "0 9 * * *"               # every business day at 09:00
+  - expression: "0 18 * * *"
+    business_days: [1, -1]    # first and last business day of the month
+steps:
+  - run: ./report.sh
+```
+
+A calendar file in `paths.calendars_dir` adds holidays, shared by every DAG that names it. A fire that falls on a holiday is dropped, not moved. See [Business Calendars](/writing-workflows/business-calendars) for calendar files, previews, and the Calendars page.
+
+## Preview Upcoming Runs
+
+The **Cron** launcher on the workflow canvas lists the next runs of the start schedules, five at first and up to ten, and updates as the YAML changes. Each run reads in the zone of its schedule. With several schedule entries, each run names its entry, and a run placed by a business calendar names the business day it matched or the holidays it skipped.
+
+The list comes from the definition alone. When the DAG is suspended or the scheduler is paused, the launcher says that none of the listed runs will start.
+
+The same list is available as `upcomingRuns` in DAG details, `GET /dags/{fileName}/spec`, and `POST /dags/validate`, and in the MCP `dagu_read` result for a DAG. On the command line, `dagu calendar fires <DAG>` lists the next fires, and `dagu ls -n` shows the scheduler's next run.
+
 ## One-Off Schedules
 
 Use `at` entries when a DAG should run exactly once at a specific timestamp. Dagu accepts them in top-level `schedule` arrays and under `schedule.start`:

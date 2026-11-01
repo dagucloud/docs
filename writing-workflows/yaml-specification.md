@@ -173,6 +173,7 @@ steps:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `schedule` | string, array, or object | Cron expression or [schedule alias](/writing-workflows/scheduling#schedule-aliases), multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
+| `calendar` | string | [Business calendar](/writing-workflows/business-calendars) of every start schedule entry that names none: a calendar file name, the built-in `weekdays`, or `none`. | - |
 | `skip_if_successful` | boolean | Skip the scheduled run if the DAG already succeeded for that day. | `false` |
 | `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. | `0` |
 | `catchup_window` | string | Duration for replaying missed cron runs after scheduler downtime. If omitted, missed runs are not replayed. | - |
@@ -218,11 +219,22 @@ schedule:
     profile: prod
   - expression: "30 */2 * * *"
     profile: dev
+
+# Business-day schedules
+calendar: jp-banking
+schedule:
+  - "0 9 * * *"
+  - expression: "0 18 * * *"
+    business_days: [3, -1]
+  - expression: "0 3 * * *"
+    calendar: none
 ```
 
 `at` is accepted only in a top-level `schedule` array and under `schedule.start`. `schedule.stop` and `schedule.restart` accept cron entries only. `at` timestamps must be RFC 3339 timestamps with an explicit offset or `Z`, and seconds must be `:00`.
 
 `profile` is an activation filter. A profile-scoped schedule participates in scheduling only when it matches the DAG's effective default runtime profile from the server-side DAG settings. Unscoped schedule entries are always active. If a DAG has no default runtime profile, profile-scoped entries are ignored. `profile` does not override the runtime profile used by the run.
+
+An object-form start entry also accepts `calendar`, which overrides the DAG-level `calendar` or opts out with `none`, and `business_days`, a list of business days of the month from 1 to 23 or -23 to -1 (`-1` is the last). A fire on a day that is not a business day is dropped. One-off entries and stop or restart schedules take neither key. See [Business Calendars](/writing-workflows/business-calendars).
 
 ### Execution Control
 
