@@ -212,7 +212,7 @@ steps:
   - id: fallback_method
     run: echo "Processing with fallback settings"
     preconditions:
-      - condition: "${env.TRY_OPTIMAL_METHOD_EXIT_CODE}"
+      - condition: "${try_optimal_method.exit_code}"
         expected: "re:[1-9][0-9]*"  # Only run if previous failed
     depends: try_optimal_method
 ```
@@ -345,7 +345,7 @@ steps:
   - id: check_secondary
     run: curl -f https://secondary.example.com/health
     preconditions:
-      - condition: "${env.CHECK_PRIMARY_EXIT_CODE}"
+      - condition: "${check_primary.exit_code}"
         expected: "re:[1-9][0-9]*"  # Only if primary failed
     depends: check_primary
 ```
