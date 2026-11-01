@@ -1,0 +1,151 @@
+{
+  "dag": "tutorial-09-approvals",
+  "status": "succeeded",
+  "durationMs": 5595,
+  "steps": [
+    {
+      "id": "build",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": true
+    },
+    {
+      "id": "choose_target",
+      "depends": [
+        "build"
+      ],
+      "routesTo": [],
+      "action": "human.task",
+      "approval": false
+    },
+    {
+      "id": "deploy",
+      "depends": [
+        "choose_target"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "build",
+      "status": "running"
+    },
+    {
+      "t": 18,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 18,
+      "target": "choose_target",
+      "status": "not_started"
+    },
+    {
+      "t": 18,
+      "target": "deploy",
+      "status": "not_started"
+    },
+    {
+      "t": 121,
+      "target": "$run",
+      "status": "waiting"
+    },
+    {
+      "t": 121,
+      "target": "build",
+      "status": "waiting"
+    },
+    {
+      "t": 1832,
+      "target": "$run",
+      "status": "queued"
+    },
+    {
+      "t": 1832,
+      "target": "build",
+      "status": "succeeded"
+    },
+    {
+      "t": 1901,
+      "target": "choose_target",
+      "status": "running"
+    },
+    {
+      "t": 1935,
+      "target": "$run",
+      "status": "waiting"
+    },
+    {
+      "t": 1935,
+      "target": "choose_target",
+      "status": "waiting"
+    },
+    {
+      "t": 3647,
+      "target": "$run",
+      "status": "queued"
+    },
+    {
+      "t": 3647,
+      "target": "choose_target",
+      "status": "succeeded"
+    },
+    {
+      "t": 5492,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 5527,
+      "target": "deploy",
+      "status": "running"
+    },
+    {
+      "t": 5553,
+      "target": "deploy",
+      "status": "succeeded"
+    },
+    {
+      "t": 5595,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "build": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Built release 1.4.0",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "choose_target": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "",
+      "stderr": "",
+      "outputs": {
+        "environment": "production"
+      },
+      "subRuns": []
+    },
+    "deploy": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Deploying 1.4.0 to production",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

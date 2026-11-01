@@ -1,0 +1,149 @@
+{
+  "dag": "tutorial-06-failures-and-retries",
+  "status": "partially_succeeded",
+  "durationMs": 2187,
+  "steps": [
+    {
+      "id": "call_api",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "warm_cache",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "publish",
+      "depends": [
+        "call_api",
+        "warm_cache"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [
+    "onFailure",
+    "onExit"
+  ],
+  "events": [
+    {
+      "t": 0,
+      "target": "call_api",
+      "status": "running"
+    },
+    {
+      "t": 0,
+      "target": "warm_cache",
+      "status": "running"
+    },
+    {
+      "t": 22,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 22,
+      "target": "publish",
+      "status": "not_started"
+    },
+    {
+      "t": 22,
+      "target": "onFailure",
+      "status": "not_started"
+    },
+    {
+      "t": 22,
+      "target": "onExit",
+      "status": "not_started"
+    },
+    {
+      "t": 56,
+      "target": "warm_cache",
+      "status": "failed"
+    },
+    {
+      "t": 2084,
+      "target": "call_api",
+      "status": "succeeded"
+    },
+    {
+      "t": 2091,
+      "target": "publish",
+      "status": "running"
+    },
+    {
+      "t": 2117,
+      "target": "publish",
+      "status": "succeeded"
+    },
+    {
+      "t": 2117,
+      "target": "onExit",
+      "status": "running"
+    },
+    {
+      "t": 2128,
+      "target": "onExit",
+      "status": "succeeded"
+    },
+    {
+      "t": 2187,
+      "target": "$run",
+      "status": "partially_succeeded"
+    }
+  ],
+  "results": {
+    "call_api": {
+      "status": "succeeded",
+      "retries": 1,
+      "executions": 1,
+      "stdout": "API responded",
+      "stderr": "API timed out",
+      "outputs": {},
+      "subRuns": []
+    },
+    "warm_cache": {
+      "status": "failed",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "",
+      "stderr": "Cache server unreachable",
+      "outputs": {},
+      "subRuns": []
+    },
+    "publish": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Published the report",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "onFailure": {
+      "status": "not_started",
+      "retries": 0,
+      "executions": 0,
+      "stdout": "",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "onExit": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 0,
+      "stdout": "Cleanup - runs after every run",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

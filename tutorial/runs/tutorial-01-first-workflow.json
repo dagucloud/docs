@@ -1,0 +1,148 @@
+{
+  "dag": "tutorial-01-first-workflow",
+  "status": "succeeded",
+  "durationMs": 2180,
+  "steps": [
+    {
+      "id": "checkout",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "lint",
+      "depends": [
+        "checkout"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "test",
+      "depends": [
+        "checkout"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "package",
+      "depends": [
+        "lint",
+        "test"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "checkout",
+      "status": "running"
+    },
+    {
+      "t": 20,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 20,
+      "target": "lint",
+      "status": "not_started"
+    },
+    {
+      "t": 20,
+      "target": "test",
+      "status": "not_started"
+    },
+    {
+      "t": 20,
+      "target": "package",
+      "status": "not_started"
+    },
+    {
+      "t": 46,
+      "target": "checkout",
+      "status": "succeeded"
+    },
+    {
+      "t": 46,
+      "target": "lint",
+      "status": "running"
+    },
+    {
+      "t": 46,
+      "target": "test",
+      "status": "running"
+    },
+    {
+      "t": 1114,
+      "target": "lint",
+      "status": "succeeded"
+    },
+    {
+      "t": 2077,
+      "target": "test",
+      "status": "succeeded"
+    },
+    {
+      "t": 2091,
+      "target": "package",
+      "status": "running"
+    },
+    {
+      "t": 2116,
+      "target": "package",
+      "status": "succeeded"
+    },
+    {
+      "t": 2180,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "checkout": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Fetched the source code",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "lint": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Lint passed",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "test": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "12 tests passed",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "package": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Packaged app.tar.gz",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

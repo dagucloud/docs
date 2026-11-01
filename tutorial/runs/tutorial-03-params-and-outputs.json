@@ -1,0 +1,78 @@
+{
+  "dag": "tutorial-03-params-and-outputs",
+  "status": "succeeded",
+  "durationMs": 154,
+  "steps": [
+    {
+      "id": "build",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "deploy",
+      "depends": [
+        "build"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "build",
+      "status": "running"
+    },
+    {
+      "t": 39,
+      "target": "build",
+      "status": "succeeded"
+    },
+    {
+      "t": 40,
+      "target": "deploy",
+      "status": "running"
+    },
+    {
+      "t": 51,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 68,
+      "target": "deploy",
+      "status": "succeeded"
+    },
+    {
+      "t": 154,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "build": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "app-1.0.0.tar.gz",
+      "stderr": "",
+      "outputs": {
+        "bundle": "app-1.0.0.tar.gz"
+      },
+      "subRuns": []
+    },
+    "deploy": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Deploying app-1.0.0.tar.gz to dev",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

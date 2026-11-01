@@ -1,0 +1,26 @@
+# Dagu tutorial, lesson 9: https://docs.dagu.sh/tutorial/approvals
+description: Pause for a review and ask a person for input
+type: graph
+
+steps:
+  - id: build
+    run: echo "Built release 1.4.0"
+    approval:
+      prompt: Check the build output, then approve the release
+
+  - id: choose_target
+    action: human.task
+    with:
+      prompt: Where should release 1.4.0 go?
+      form:
+        type: object
+        properties:
+          environment:
+            type: string
+            enum: [staging, production]
+        required: [environment]
+    depends: build
+
+  - id: deploy
+    run: echo "Deploying 1.4.0 to ${steps.choose_target.outputs.environment}"
+    depends: choose_target

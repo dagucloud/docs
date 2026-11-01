@@ -1,0 +1,62 @@
+# Dagu tutorial, lesson 7: https://docs.dagu.sh/tutorial/sub-dags
+description: Call a child workflow, then fan it out across regions
+type: graph
+
+steps:
+  - id: build
+    action: dag.run
+    with:
+      dag: build-app
+      params:
+        version: "1.4.0"
+
+  - id: smoke_test
+    action: dag.run
+    with:
+      dag: smoke-test
+      params:
+        region: ${ITEM}
+        bundle: ${steps.build.outputs.bundle}
+    parallel:
+      items: [us-east, eu-west, ap-south]
+      max_concurrent: 2
+    depends: build
+
+  - id: announce
+    run: echo "Released ${steps.build.outputs.bundle} to 3 regions"
+    depends: smoke_test
+
+---
+name: build-app
+type: graph
+params:
+  - name: version
+    type: string
+    required: true
+steps:
+  - id: compile
+    run: sleep 1 && echo "app-${params.version}.tar.gz"
+    output:
+      bundle:
+        from: stdout
+
+  - id: publish
+    action: outputs.write
+    with:
+      values:
+        bundle: ${steps.compile.outputs.bundle}
+    depends: compile
+
+---
+name: smoke-test
+type: graph
+params:
+  - name: region
+    type: string
+    required: true
+  - name: bundle
+    type: string
+    required: true
+steps:
+  - id: check
+    run: sleep 1 && echo "${params.bundle} is healthy in ${params.region}"

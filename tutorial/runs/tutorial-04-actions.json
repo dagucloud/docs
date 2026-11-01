@@ -1,0 +1,84 @@
+{
+  "dag": "tutorial-04-actions",
+  "status": "succeeded",
+  "durationMs": 623,
+  "steps": [
+    {
+      "id": "fetch_todo",
+      "depends": [],
+      "routesTo": [],
+      "action": "http.request",
+      "approval": false
+    },
+    {
+      "id": "write_report",
+      "depends": [
+        "fetch_todo"
+      ],
+      "routesTo": [],
+      "action": "template.render",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "fetch_todo",
+      "status": "running"
+    },
+    {
+      "t": 5,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 5,
+      "target": "write_report",
+      "status": "not_started"
+    },
+    {
+      "t": 516,
+      "target": "fetch_todo",
+      "status": "succeeded"
+    },
+    {
+      "t": 516,
+      "target": "write_report",
+      "status": "running"
+    },
+    {
+      "t": 544,
+      "target": "write_report",
+      "status": "succeeded"
+    },
+    {
+      "t": 623,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "fetch_todo": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"delectus aut autem\",\n  \"completed\": false\n}",
+      "stderr": "",
+      "outputs": {
+        "completed": "false",
+        "title": "delectus aut autem"
+      },
+      "subRuns": []
+    },
+    "write_report": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "# Todo report\n\n- Title: delectus aut autem\n- Done: false",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

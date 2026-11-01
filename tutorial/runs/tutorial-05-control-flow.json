@@ -1,0 +1,184 @@
+{
+  "dag": "tutorial-05-control-flow",
+  "status": "succeeded",
+  "durationMs": 2292,
+  "steps": [
+    {
+      "id": "choose_target",
+      "depends": [],
+      "routesTo": [
+        "deploy_prod",
+        "deploy_staging"
+      ],
+      "action": "router.route",
+      "approval": false
+    },
+    {
+      "id": "deploy_staging",
+      "depends": [
+        "choose_target"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "deploy_prod",
+      "depends": [
+        "choose_target"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "wait_until_healthy",
+      "depends": [
+        "deploy_staging",
+        "deploy_prod"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "publish_notes",
+      "depends": [
+        "wait_until_healthy"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "choose_target",
+      "status": "running"
+    },
+    {
+      "t": 22,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 22,
+      "target": "choose_target",
+      "status": "succeeded"
+    },
+    {
+      "t": 22,
+      "target": "deploy_staging",
+      "status": "not_started"
+    },
+    {
+      "t": 22,
+      "target": "deploy_prod",
+      "status": "not_started"
+    },
+    {
+      "t": 22,
+      "target": "wait_until_healthy",
+      "status": "not_started"
+    },
+    {
+      "t": 22,
+      "target": "publish_notes",
+      "status": "not_started"
+    },
+    {
+      "t": 40,
+      "target": "deploy_staging",
+      "status": "running"
+    },
+    {
+      "t": 40,
+      "target": "deploy_prod",
+      "status": "running"
+    },
+    {
+      "t": 100,
+      "target": "deploy_prod",
+      "status": "skipped"
+    },
+    {
+      "t": 114,
+      "target": "deploy_staging",
+      "status": "succeeded"
+    },
+    {
+      "t": 114,
+      "target": "wait_until_healthy",
+      "status": "running"
+    },
+    {
+      "t": 2242,
+      "target": "wait_until_healthy",
+      "status": "succeeded"
+    },
+    {
+      "t": 2242,
+      "target": "publish_notes",
+      "status": "running"
+    },
+    {
+      "t": 2260,
+      "target": "publish_notes",
+      "status": "skipped"
+    },
+    {
+      "t": 2292,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "choose_target": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Router evaluating: staging\n  prod -> [deploy_prod]\n  staging -> [deploy_staging]",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "deploy_staging": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Deployed to staging",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "deploy_prod": {
+      "status": "skipped",
+      "retries": 0,
+      "executions": 0,
+      "stdout": "",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "wait_until_healthy": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 3,
+      "stdout": "Health check 1: not ready yet\nHealth check 2: not ready yet\nHealth check 3: healthy",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "publish_notes": {
+      "status": "skipped",
+      "retries": 0,
+      "executions": 0,
+      "stdout": "",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

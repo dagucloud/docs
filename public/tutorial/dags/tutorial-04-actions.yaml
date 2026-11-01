@@ -1,0 +1,35 @@
+# Dagu tutorial, lesson 4: https://docs.dagu.sh/tutorial/actions
+description: Call an API and render a report with built-in actions
+type: graph
+
+steps:
+  - id: fetch_todo
+    action: http.request
+    with:
+      method: GET
+      url: https://jsonplaceholder.typicode.com/todos/1
+      silent: true
+    output:
+      title:
+        from: stdout
+        decode: json
+        select: .title
+      completed:
+        from: stdout
+        decode: json
+        select: .completed
+
+  - id: write_report
+    action: template.render
+    with:
+      data:
+        title: ${steps.fetch_todo.outputs.title}
+        completed: ${steps.fetch_todo.outputs.completed}
+      template: |
+        # Todo report
+
+        - Title: {{ .title }}
+        - Done: {{ .completed }}
+    stdout:
+      artifact: report.md
+    depends: fetch_todo

@@ -1,0 +1,48 @@
+{
+  "dag": "tutorial-08-scheduling",
+  "status": "succeeded",
+  "durationMs": 123,
+  "steps": [
+    {
+      "id": "snapshot",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "snapshot",
+      "status": "running"
+    },
+    {
+      "t": 21,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 28,
+      "target": "snapshot",
+      "status": "succeeded"
+    },
+    {
+      "t": 123,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "snapshot": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Snapshot taken at 00:41:33",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

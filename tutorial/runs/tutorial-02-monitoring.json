@@ -1,0 +1,114 @@
+{
+  "dag": "tutorial-02-monitoring",
+  "status": "succeeded",
+  "durationMs": 8252,
+  "steps": [
+    {
+      "id": "download",
+      "depends": [],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "transform",
+      "depends": [
+        "download"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    },
+    {
+      "id": "publish",
+      "depends": [
+        "transform"
+      ],
+      "routesTo": [],
+      "action": "run",
+      "approval": false
+    }
+  ],
+  "handlers": [],
+  "events": [
+    {
+      "t": 0,
+      "target": "download",
+      "status": "running"
+    },
+    {
+      "t": 20,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 20,
+      "target": "transform",
+      "status": "not_started"
+    },
+    {
+      "t": 20,
+      "target": "publish",
+      "status": "not_started"
+    },
+    {
+      "t": 5060,
+      "target": "download",
+      "status": "succeeded"
+    },
+    {
+      "t": 5077,
+      "target": "transform",
+      "status": "running"
+    },
+    {
+      "t": 8144,
+      "target": "transform",
+      "status": "succeeded"
+    },
+    {
+      "t": 8144,
+      "target": "publish",
+      "status": "running"
+    },
+    {
+      "t": 8172,
+      "target": "publish",
+      "status": "succeeded"
+    },
+    {
+      "t": 8252,
+      "target": "$run",
+      "status": "succeeded"
+    }
+  ],
+  "results": {
+    "download": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Downloaded part 1 of 5\nDownloaded part 2 of 5\nDownloaded part 3 of 5\nDownloaded part 4 of 5\nDownloaded part 5 of 5",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "transform": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Transformed batch 1 of 3\nTransformed batch 2 of 3\nTransformed batch 3 of 3",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    },
+    "publish": {
+      "status": "succeeded",
+      "retries": 0,
+      "executions": 1,
+      "stdout": "Published 3 batches",
+      "stderr": "",
+      "outputs": {},
+      "subRuns": []
+    }
+  }
+}

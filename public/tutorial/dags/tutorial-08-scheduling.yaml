@@ -1,0 +1,8 @@
+# Dagu tutorial, lesson 8: https://docs.dagu.sh/tutorial/scheduling
+description: Runs every minute while the scheduler is up
+type: graph
+schedule: "* * * * *"
+
+steps:
+  - id: snapshot
+    run: date "+Snapshot taken at %H:%M:%S"
