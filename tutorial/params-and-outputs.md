@@ -1,6 +1,6 @@
 # Parameters and Outputs
 
-<p class="tutorial-meta">Lesson 3 of 9 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 3 of 10 · 4 minutes</p>
 
 Parameters are a workflow's inputs, set each time it starts. Outputs carry a value from one step to the steps after it.
 

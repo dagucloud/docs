@@ -1,6 +1,6 @@
 # Failures and Retries
 
-<p class="tutorial-meta">Lesson 6 of 9 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 6 of 10 · 4 minutes</p>
 
 Commands fail: a network call times out, a server is down. This lesson retries a flaky step, lets an optional step fail without stopping the run, and runs cleanup at the end.
 

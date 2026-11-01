@@ -1,6 +1,6 @@
 # Your First Workflow
 
-<p class="tutorial-meta">Lesson 1 of 9 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 1 of 10 · 4 minutes</p>
 
 A workflow is a YAML file with a list of steps. Each step runs a command, and `depends` says which steps must finish before it starts.
 

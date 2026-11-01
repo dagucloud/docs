@@ -1,6 +1,6 @@
 # Next Steps
 
-You now know the core of Dagu: steps and dependencies, the Web UI, parameters and outputs, actions, control flow, retries, sub-DAGs, schedules, and approvals.
+You now know the core of Dagu: steps and dependencies, the Web UI, parameters and outputs, actions, control flow, retries, sub-DAGs, schedules, approvals, and alerts.
 
 Pick what fits your work next:
 

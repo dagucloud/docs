@@ -273,7 +273,7 @@ steps:
 
 ## Next steps
 
-- [Tutorial](/tutorial/): nine short hands-on lessons on monitoring, actions, control flow, sub-DAGs, and more
+- [Tutorial](/tutorial/): ten short hands-on lessons on monitoring, actions, control flow, sub-DAGs, alerts, and more
 - [Core Concepts](/getting-started/concepts): steps, dependencies, and execution model
 - [Deployment Models](/overview/deployment-models): single server, temporary workers, and distributed workers
 - [Writing Workflows](/writing-workflows/): full YAML surface

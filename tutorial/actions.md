@@ -1,6 +1,6 @@
 # Built-in Actions
 
-<p class="tutorial-meta">Lesson 4 of 9 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 4 of 10 · 4 minutes</p>
 
 `run` runs a shell command. For common jobs such as calling an API, rendering a file, querying a database, or starting a container, a step can use a built-in **action** instead, with no scripts or extra tools to install.
 

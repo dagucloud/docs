@@ -1,6 +1,6 @@
 # Branch, Skip, and Poll
 
-<p class="tutorial-meta">Lesson 5 of 9 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 5 of 10 · 4 minutes</p>
 
 A workflow does not have to run every step every time. This lesson picks one branch based on an input, skips a step when its condition is false, and repeats a check until it passes.
 

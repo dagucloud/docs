@@ -1,6 +1,6 @@
 # Approvals and Human Input
 
-<p class="tutorial-meta">Lesson 9 of 9 · 3 minutes</p>
+<p class="tutorial-meta">Lesson 9 of 10 · 3 minutes</p>
 
 Some steps should wait for a person: a review before a release, or a choice only a person can make. The run pauses as **Waiting** and continues when someone responds in the Web UI.
 

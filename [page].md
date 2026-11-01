@@ -128,7 +128,7 @@ Start the scheduler and Web UI in the same directory:
 dagu start-all --dags .
 ```
 
-Open <http://localhost:8080> and start `first-workflow` from the UI. `test` and `build` run in parallel after `checkout`; `package` waits for both. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals. To learn the basics in about 35 minutes, take the [tutorial](/tutorial/).
+Open <http://localhost:8080> and start `first-workflow` from the UI. `test` and `build` run in parallel after `checkout`; `package` waits for both. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals. To learn the basics in about 40 minutes, take the [tutorial](/tutorial/).
 
 ### A more realistic workflow
 

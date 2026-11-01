@@ -1,6 +1,6 @@
 # Sub-DAGs and Fan-out
 
-<p class="tutorial-meta">Lesson 7 of 9 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 7 of 10 · 4 minutes</p>
 
 A step can run another workflow as a sub-DAG. The child is a full run with its own steps, logs, and status. Use sub-DAGs to reuse a workflow, or to run one workflow once per item in a list.
 

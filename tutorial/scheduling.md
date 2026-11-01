@@ -1,6 +1,6 @@
 # Schedules
 
-<p class="tutorial-meta">Lesson 8 of 9 · 3 minutes</p>
+<p class="tutorial-meta">Lesson 8 of 10 · 3 minutes</p>
 
 `schedule` runs a workflow on a cron schedule. The scheduler that `dagu start-all` started in the setup checks every schedule and starts the runs.
 

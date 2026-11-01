@@ -1,6 +1,6 @@
 # Watch Runs in the Web UI
 
-<p class="tutorial-meta">Lesson 2 of 9 · 5 minutes</p>
+<p class="tutorial-meta">Lesson 2 of 10 · 5 minutes</p>
 
 Every run is recorded: each step's status, timing, and log. This lesson uses a slow workflow so you can follow it live, stop it, and look back at earlier runs.
 
@@ -71,5 +71,7 @@ To stop a run from a second terminal, run `dagu stop tutorial-02-monitoring.yaml
 2. `transform` and `publish`. They never started in that run, so their cells show a gray dot.
 
 :::
+
+To get an email when a run fails while you are away, connect the server to Dagu Console in [lesson 10](/tutorial/console-alerts).
 
 <a href="/overview/web-ui#workflow-page" class="learn-more">Go deeper: The workflow page →</a>

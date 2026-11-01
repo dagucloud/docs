@@ -214,6 +214,7 @@ const fullSidebar = [
       { text: "7. Sub-DAGs and Fan-out", link: "/tutorial/sub-dags" },
       { text: "8. Schedules", link: "/tutorial/scheduling" },
       { text: "9. Approvals and Human Input", link: "/tutorial/approvals" },
+      { text: "10. Alerts from Dagu Console", link: "/tutorial/console-alerts" },
       { text: "Next Steps", link: "/tutorial/next-steps" },
     ],
   },

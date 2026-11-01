@@ -1,10 +1,10 @@
 ---
-description: Learn Dagu in about 35 minutes. Nine short lessons, each one small workflow you can watch run in the browser, then run on your own machine.
+description: Learn Dagu in about 40 minutes. Ten short lessons. Watch each workflow run in the browser, then run it on your own machine and get alerts when it fails.
 ---
 
 # Dagu Tutorial
 
-Learn the basics of Dagu in about 35 minutes. Each lesson is one small workflow. Watch a recorded run of it on the page, then run it yourself and change it.
+Learn the basics of Dagu in about 40 minutes. Each lesson is one small workflow. Watch a recorded run of it on the page, then run it yourself and change it.
 
 You need a terminal and basic shell skills. No Dagu knowledge is assumed.
 
@@ -18,6 +18,7 @@ You need a terminal and basic shell skills. No Dagu knowledge is assumed.
   <a href="/tutorial/sub-dags"><b>07</b><span>Sub-DAGs and fan-out · 4 min</span></a>
   <a href="/tutorial/scheduling"><b>08</b><span>Schedules · 3 min</span></a>
   <a href="/tutorial/approvals"><b>09</b><span>Approvals and human input · 3 min</span></a>
+  <a href="/tutorial/console-alerts"><b>10</b><span>Alerts from Dagu Console · 4 min</span></a>
 </div>
 
 ## Set up (2 minutes)
