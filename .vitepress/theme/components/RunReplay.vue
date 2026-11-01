@@ -578,8 +578,10 @@ onBeforeUnmount(() => {
 }
 
 .rr-log pre {
+  max-height: 14rem;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
   background: none;
   font: 0.75rem/1.55 var(--vp-font-family-mono);
   white-space: pre-wrap;

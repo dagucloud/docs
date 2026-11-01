@@ -1,35 +1,47 @@
 # Dagu tutorial, lesson 4: https://docs.dagu.sh/tutorial/actions
-description: Call an API and render a report with built-in actions
+description: Call an API, transform the data in JavaScript, and render a report
 type: graph
 
 steps:
-  - id: fetch_todo
+  - id: fetch_todos
     action: http.request
     with:
       method: GET
-      url: https://jsonplaceholder.typicode.com/todos/1
+      url: https://jsonplaceholder.typicode.com/todos?userId=1
       silent: true
     output:
-      title:
+      todos:
+        from: stdout
+
+  - id: summarize
+    action: js.run
+    with:
+      input: ${steps.fetch_todos.outputs.todos}
+      script: |
+        const open = input.filter((todo) => !todo.completed);
+        return { open: open.length, next: open[0].title };
+    output:
+      open:
         from: stdout
         decode: json
-        select: .title
-      completed:
+        select: .open
+      next:
         from: stdout
         decode: json
-        select: .completed
+        select: .next
+    depends: fetch_todos
 
   - id: write_report
     action: template.render
     with:
       data:
-        title: ${steps.fetch_todo.outputs.title}
-        completed: ${steps.fetch_todo.outputs.completed}
+        open: ${steps.summarize.outputs.open}
+        next: ${steps.summarize.outputs.next}
       template: |
         # Todo report
 
-        - Title: {{ .title }}
-        - Done: {{ .completed }}
+        - Still open: {{ .open }}
+        - Next up: {{ .next }}
     stdout:
       artifact: report.md
-    depends: fetch_todo
+    depends: summarize

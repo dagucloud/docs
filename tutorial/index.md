@@ -12,7 +12,7 @@ You need a terminal and basic shell skills. No Dagu knowledge is assumed.
   <a href="/tutorial/first-workflow"><b>01</b><span>Your first workflow · 4 min</span></a>
   <a href="/tutorial/monitoring"><b>02</b><span>Watch runs in the Web UI · 5 min</span></a>
   <a href="/tutorial/params-and-outputs"><b>03</b><span>Parameters and outputs · 4 min</span></a>
-  <a href="/tutorial/actions"><b>04</b><span>Built-in actions · 4 min</span></a>
+  <a href="/tutorial/actions"><b>04</b><span>Built-in actions · 5 min</span></a>
   <a href="/tutorial/control-flow"><b>05</b><span>Branch, skip, and poll · 4 min</span></a>
   <a href="/tutorial/failures-and-retries"><b>06</b><span>Failures and retries · 4 min</span></a>
   <a href="/tutorial/sub-dags"><b>07</b><span>Sub-DAGs and fan-out · 4 min</span></a>
