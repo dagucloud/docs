@@ -168,7 +168,7 @@ Scripts are compiled per run, so there is no shared state between steps.
 - A script that returns `undefined`, usually because `return` is missing, succeeds with empty stdout and a notice on stderr.
 - Memory is not capped. A script that allocates without bound can exhaust the process.
 - The interrupt takes effect between JavaScript instructions, so a single long-running builtin call such as a catastrophic regular expression cannot be stopped early.
-- `dagu validate` rejects a missing `script`, the combination of `input` and `input_file`, and a script that does not compile, naming the line of the syntax error. The editor reports the same errors on save.
+- `dagu validate` rejects a missing `script`, the combination of `input` and `input_file`, a `with` field the table above does not list, and a script that does not compile, naming the line of the syntax error. An unknown field's error names it and suggests the field it likely misspells, such as `did you mean "input_file" instead of "input_files"?`. The editor reports the same errors on save.
 
 ## Examples
 

@@ -21,6 +21,8 @@ Dagu skips all value resolution (`${env.NAME}`, `${params.name}`, command substi
 | `template` | string | One of `template` or `template_ref` | Literal template text rendered by the template executor. |
 | `template_ref` | string | One of `template` or `template_ref` | One complete scoped Dagu reference that resolves to template text at runtime. |
 
+`dagu validate` rejects any other `with` field, naming it and suggesting the field it likely misspells, such as `did you mean "data" instead of "datas"?`.
+
 ## Basic Example
 
 ```yaml

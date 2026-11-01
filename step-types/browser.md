@@ -14,7 +14,7 @@ Browser steps are powered by the [Stagehand](https://github.com/browserbase/stag
 
 ## Requirements
 
-- Dagu v2.18.0 or later.
+- Dagu v2.18.0 or later, and v2.23.0 or later for the [write gate](#write-gate).
 - Google Chrome or Chromium installed on the host that runs the step. Dagu uses `browser.executable`, then `CHROME_PATH`, then a standard install location. Of the container images, only [`dev`](/server-admin/deployment/docker-images) includes Chromium, on amd64 and arm64.
 - In a container, Chrome's sandbox needs a seccomp profile that allows user namespaces. Run the `dev` image with its [Compose setup](/server-admin/deployment/docker-images), which applies the bundled profile. Where the sandbox cannot start at all, `browser.sandbox: false` in the [Dagu config](/server-admin/reference) or `DAGU_BROWSER_SANDBOX=false` turns it off for every browser on the host. Without the sandbox, a page that exploits the browser runs with the permissions of the Dagu process, which in the Dagu images has `sudo`, so use it only for sites you trust. A DAG cannot change this setting. With the sandbox on, a browser step fails when `CI` is set or Dagu runs as root on Linux, because the browser would run without the sandbox there; set `DAGU_BROWSER_SANDBOX=false` to allow it.
 - A model configured with a DAG-level `llm` block or `with.llm`, unless every operation replays without one (see [How Much AI Decides](#how-much-ai-decides)). Use a model that follows tool-call schemas reliably.
@@ -126,7 +126,11 @@ An `act` performs a single action. "Sign in with %user% and %password%" types in
 
 A browser that stops responding fails the step instead of hanging it: an operation is abandoned a few seconds after its `timeout`, and a screenshot or page check after 30 seconds.
 
+An operation can open a window while the page behind it loads, as a search does that shows a "searching" window until its answer arrives. Operations keep working on the page that opened such a window until the window closes, or until it stays open half a second past the load. A window still open then, such as one to fill in and close, is the page later operations work on. A step that fails on a window left open in front of its page, such as a "searching" window over an error, names that page in its error and, unless `browser.screenshots` is `never`, saves it as `NN-failure-opener.png`.
+
 `with.url` is opened before the first operation.
+
+Each run of the step drives a browser of its own. In a `foreach` body, every item gets its own browser. A retry of the step closes the browser its earlier attempt left open.
 
 ## Conditions
 
@@ -140,6 +144,8 @@ A browser that stops responding fails the step instead of hanging it: an operati
 | `url` | `expect: {url: /billing}` | The current URL contains it. |
 
 Fixed checks (`text`, `selector`, `url`) make no model call and give the same answer on every run, so prefer them for monitoring. A `selector` check holds when any matching element is visible.
+
+`text` and `selector` checks, and `wait: {selector}`, read the page and the frames it shows from its own origin, nested ones too, so they work on sites built of frames. A selector also matches inside open shadow roots. A hidden frame, or one from another origin, is not read. `wait` passes a selector that hops into frames with `>>`, or an XPath, to the browser runtime as written.
 
 A fixed `when` reads the page once, right after the previous operation. When the page may still be loading, add `within` so the check keeps reading until the condition holds or the window ends:
 
@@ -170,7 +176,7 @@ steps:
           products: { type: array }
 ```
 
-A list of models under `model` is tried in order for each request. Every request asks the model for a tool call whose parameters are the expected JSON. A provider or model without tool calling works only if it replies with plain JSON text, so choose a model that follows tool-call schemas reliably. Small local models often pick the wrong element.
+A list of models under `model` is tried in order for each request. Every request asks the model for a tool call whose parameters are the expected JSON. A reply without a tool call is accepted when its text is valid JSON. Any other reply gets one correction: the same model is asked again with its reply and the reason it was rejected, and the step log shows the rejected reply after `warning: <provider>/<model> answer rejected: ...`. When the second reply is also unusable, the next listed model is tried. Choose a model that follows tool-call schemas reliably. Small local models often pick the wrong element.
 
 If an `act` fails with "the model (...) answered that no element on the page matches the instruction" while the element is plainly on the page, the model is answering "no element" for every request. The schema allows `null` for "no match", and some models always choose it; `google/gemini-2.5-flash` through OpenRouter does, while newer Gemini Flash models, `gpt-4.1-mini`, and `claude-haiku-4.5` pick the element. Try another model. See [Troubleshooting](#troubleshooting).
 
@@ -253,7 +259,7 @@ When the step succeeds with outputs, stdout is one JSON object of them, so `outp
 
 ## Screenshots and Downloads
 
-Browser steps store files as [run artifacts](/writing-workflows/artifacts) under `browser/<step id>/`. A DAG with a browser step enables artifact storage automatically. These files are not masked and can show signed-in pages with personal data; use `browser.screenshots: never` or `artifacts.enabled: false` to keep them out of run history.
+Browser steps store files as [run artifacts](/writing-workflows/artifacts) under `browser/<step id>/`. A DAG with a browser step enables artifact storage automatically. These files are not masked and can show signed-in pages with personal data; use `browser.screenshots: never` or `artifacts.enabled: false` to keep them out of run history. A step in a `foreach` body saves every item's files there, and each item's timeline names the files that item saved.
 
 | `browser.screenshots` | Automatic screenshots |
 |-----------------------|-----------------------|
@@ -316,7 +322,7 @@ Each file is uploaded once, in the order named, and can be up to 50 MB. A file t
 
 How the files reach the page:
 
-- Without `into`, the page's only file input gets them, and no model is asked. A page with no file input, or with several, fails the operation and says how many it has.
+- Without `into`, the page's only file input gets them, and no model is asked. File inputs in the frames the page shows from its own origin count too. A page with no file input, or with several, fails the operation and says how many it has.
 - With `into`, the model finds the element once. The step records it and later runs replay it without the model while the page shows the same element, as [acts are replayed](#replay-cache).
 - When the element is a file input, or holds exactly one, such as a drop area, it gets the files directly.
 - Otherwise Dagu clicks the element and gives the files to the file picker the click opens. Dagu intercepts the picker, so no window shows, even with `headless: false`.
@@ -347,6 +353,7 @@ An `act` records the actions it performed, and the recordings are kept when the 
 - Recordings are kept only when the whole step succeeds. When an operation fails on the page after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of the model, the browser, a download, or an `ask`, or a canceled run, leaves them.
 - The cache covers `act` and `upload`. `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
 - A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one; when the `expect` fails, the replay is dropped.
+- A recording whose actions never use a variable the instruction names, as when the page already showed the value, replays only while that variable holds the value it had when recorded. The recording keeps a salted digest of that value, never the value. With another value the model acts and its actions replace the recording, and the step log warns `not replayed: its recording does nothing with %name%, ...`; under `ai: never` the act fails. Name in an instruction only the variables its actions use.
 - To have the model act on every run, or never, set `ai`; see [How Much AI Decides](#how-much-ai-decides).
 - `dagu browser session export` writes the recordings of the acts and uploads a session ran for a step before its first run; see [Building a Step in a Browser Session](#building-a-step-in-a-browser-session).
 - `dagu browser cache clear <dag>` removes the recordings of every step of a DAG, or of one step with `--step <id>`. The REST API does the same with `DELETE /api/v1/dags/{fileName}/browser-cache`, optionally with `?step=<id>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Each clears only the cache on the host that handles it.
@@ -420,11 +427,12 @@ dagu browser session export ab2cd3ef4g --dag orders --step fetch --format yaml
 The step holds the operations that succeeded, in the order they ran. Export also writes their act and upload recordings to the step's [replay cache](#replay-cache), so the step's first run on this host replays them without asking the model, and heals as usual when the page changed. Declare `PORTAL_PASSWORD` under the DAG's secrets and give it a parameter `user`.
 
 - `do` reads one operation from stdin, written as an item of `with.do`; `ask` is not available. Variable values go under `variables`, never on the command line: `{"env": NAME}` is read from the environment on every command and masked like a secret, and a plain string serves one command.
-- `describe` outlines the page without a model request: headings, fields with their labels, selects with their options, file inputs, buttons, links with their addresses, and tables and lists, with long runs of alike rows collapsed. Text typed into fields is never shown.
+- `describe` outlines the page without a model request: headings, fields with their labels (a field labeled only by the cell before it in a table row takes that cell's text, else its `name` or `id` attribute), selects with their options, file inputs, buttons, links with their addresses, and tables and lists, with long runs of alike rows collapsed. Text typed into fields is never shown.
 - An element the outline shows with its ID can be used without a model: `{"click": ID}`, `{"type": {"into": ID, "text": TEXT}}`, `{"select": {"in": ID, "option": OPTION}}`, or `{"upload": {"into": ID, "files": PATHS}}`. The session keeps each as the act or upload the step writes, with the element as its recording. An upload's relative paths are under the command's working directory, and the exported step uploads the files the session was given until you point `files` at what each run uploads.
 - A session closes its browser when no command arrives for `--idle-timeout` (default `30m`), even with no Dagu server running. Its history can still be exported for a day; `close` removes it at once.
 - A session opened with `--profile` holds the profile: a step naming it fails until the session ends. With `--headed`, the window is visible, and a person can sign in or solve a CAPTCHA in it between commands; the browser's DevTools address in the result lets an application show the page itself.
 - With a profile, the sign-in operations of the exported step run on every run; guard them with `when` as shown in [Profiles](#profiles).
+- `open --write-gate rehearse` blocks the page's writes and reports each under `writes`, so you see what the step would send before anything is saved; see [Write Gate](#write-gate). Export keeps the writes the session's acts and uploads sent or tried to send as [commit points](#commit-points) to approve.
 
 See [`browser session`](/getting-started/cli#browser-session) for every option.
 
@@ -610,6 +618,126 @@ Answers are stored in the run's history, like other human input. Use `ask` for s
 
 `ask` is not supported on Windows, where the browser cannot outlive the step process; such a step fails at the start.
 
+## Write Gate
+
+The write gate keeps a step from saving anything on a site until a person has approved what it sends. It decides every request the browser sends, from pages, frames, popups, and workers. A write is any request whose method is not `GET`, `HEAD`, or `OPTIONS`, such as a form post or an API call that saves. `browser.write_gate` sets the mode:
+
+| `write_gate` | Behavior |
+|--------------|----------|
+| `off` (default) | No gate. |
+| `rehearse` | Block every write and report what it would have sent. The step stops at the first blocked write. |
+| `record` | Send only the writes of approved [commit points](#commit-points). Any other write is blocked and fails the step. |
+| `ask` | As `record`, and wait for a person before each operation that is a commit point. |
+
+`browser.write_gate` in the [Dagu config](/server-admin/reference), or `DAGU_BROWSER_WRITE_GATE`, is the least strict mode every browser on the host runs in, [browser sessions](#building-a-step-in-a-browser-session) included. A step can only ask for a stricter one, in the order `off`, `record`, `ask`, `rehearse`.
+
+The gate refuses the WebSockets and WebTransport sessions of pages, frames, and dedicated workers, since it cannot see what they send. A WebSocket that a service worker or shared worker opens is out of its sight: the step log reports it as `write_gate unseen`.
+
+### Rehearsal
+
+A rehearsal runs the operations until one sends a write, and blocks it:
+
+```yaml
+params:
+  - AMOUNT: "1000"
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
+
+steps:
+  - id: enter_deal
+    action: browser.run
+    with:
+      url: https://books.example.com/deals/new
+      browser:
+        profile: books
+        write_gate: rehearse
+      variables:
+        amount: ${params.AMOUNT}
+      do:
+        - act: Type %amount% into the Amount field
+        - act: Click the Save button
+        - expect: {text: Deal saved}
+```
+
+The site never receives the write. The operations after the one that sent it do not run, and the step ends **Partially Succeeded**, so the steps that depend on it still run. The step log shows each write the gate decided and where the rehearsal stopped:
+
+```text
+[2/3] write blocked POST https://books.example.com/api/deals (write; POST https://books.example.com/api/deals? {amount})
+would send POST https://books.example.com/api/deals; not sent; do[2] did not run
+```
+
+The step saves `write-gate.json` under `browser/<step id>/` in the run's artifacts. It holds the mode, where the rehearsal stopped (`stopped_at`, `would_send`, `not_run`), and every write the gate decided, with its method, URL, signature, body field names, and the start of its body. Secrets, and fields named like passwords, tokens, or one-time codes, are hidden. `rehearsable` is `false` once a WebSocket the gate cannot see opened. A screenshot of the page at the stop is saved too, unless `browser.screenshots` is `never`.
+
+Some writes do not stop a rehearsal:
+
+- Sign-ins the [write policy](#write-policy) lists are sent.
+- Beacons, CSP reports, writes to the policy's `noise_hosts`, and analytics and error-report endpoints, such as Google Analytics, Microsoft Clarity, New Relic, Sentry, and Cloudflare Web Analytics, are blocked without stopping the step.
+
+### Commit Points
+
+A commit point is an `act`, or an `upload` with `into`, together with the kind of write it sends. A rehearsal keeps the operation it stopped at as a commit point to approve, and so does a write the gate blocks under `record` or `ask`. A write sent by any other operation, such as a `goto`, gets no commit point, so `record` always blocks it. The operation is identified as the [replay cache](#replay-cache) identifies it: by its position, its instruction, and the page URL. The write is identified by its signature: the method, the URL with numbers and ids in its path replaced and only the names of its query parameters, and the names of the body's fields, such as `POST https://books.example.com/api/deals? {amount}`. A page that posts every button to one address is told apart by the field that names the button, such as ASP.NET's `__EVENTTARGET` or GraphQL's `operationName`. Other values never count, so one approval covers every amount.
+
+Commit points are kept on the host that ran the step, apart from the replay cache, so `dagu browser cache clear` leaves them. Manage them with `dagu browser writes`:
+
+```bash
+dagu browser writes list books
+dagu browser writes approve books --step enter_deal
+dagu browser writes approve books --from-dag books-trial
+dagu browser writes revoke books --step enter_deal
+```
+
+`approve` and `revoke` take `--signature` to change only some writes. `--from-dag` copies the commit points of another DAG's steps into the steps of the same name and approves them, for a copy of the DAG that rehearsed it.
+
+To put a step behind the gate:
+
+1. Run it with `write_gate: rehearse`, or run a copy of the DAG that sets it.
+2. Check what it would send in the step log or `write-gate.json`.
+3. Approve the commit point: `dagu browser writes approve books --step enter_deal`.
+4. Set `write_gate: record`, or `ask`.
+
+### Record
+
+Under `record`, an operation sends only the writes its approved commit points name. An approved commit act replays the actions it recorded when it was kept, without asking the model, whatever the values of its variables; when they no longer fit the page, the step fails. Any other write is blocked: nothing is saved, the step fails with `write_blocked`, and the operation is kept as a commit point. Approve it and run the step again, so a step with several saves is approved one write at a time.
+
+### Ask
+
+Under `ask`, writes are decided as under `record`. Before each operation that is a commit point, the step also enters **Waiting** with a question in the step's **Agent** tab, such as `do[1] "Click the Save button" is about to send POST https://books.example.com/api/deals`. A screenshot and an outline of the page with its fields filled in show what is about to be sent.
+
+| Answer | Effect |
+|--------|--------|
+| **Allow once** | The operation runs and sends its writes. |
+| **Allow for this Dagu session** | The same, and the commit point is approved, so the step sends it under `record` without asking. |
+| **Reject** | The step fails. |
+| `skip` | The operation and those after it do not run, and nothing is sent. The step ends **Skipped**, as do the steps that depend on it. Only the REST API offers it: `POST /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/agent-interactions/{interactionId}/respond` with `{"decision": "skip"}`. |
+
+The browser stays open for the answer for up to four hours. `write_gate: ask` is not supported on Windows.
+
+### Write Policy
+
+`browser.write_policy` in the Dagu config, or `DAGU_BROWSER_WRITE_POLICY`, names a YAML or JSON file that tells the gate which requests to treat apart:
+
+```yaml
+sign_in:
+  - host: login.example.com
+    path: /session
+    secret: PORTAL_PASSWORD
+writes:
+  - host: books.example.com
+    path: /deals/delete*
+noise_hosts:
+  - "*.hotjar.com"
+```
+
+| Key | Description |
+|-----|-------------|
+| `sign_in` | Sign-in endpoints whose writes are sent in every mode. With `secret`, a request is sent only when its body carries that secret's value: a secret the step declares, or an environment variable of the Dagu process. A rule whose secret has no value for the step is left out. |
+| `writes` | Requests that save although their method only reads, such as a delete link. They count as writes whatever their method. |
+| `noise_hosts` | Hosts whose writes are blocked without counting as the work's writes. |
+
+`host` is a host name, `*.example.com` for its subdomains, or `*`. `path` is an exact path, or one ending in `*` to match every path it starts; without `path`, a rule matches every path on the host. Only `sign_in` rules take `secret`. A browser session reads its policy from `dagu browser session open --write-policy` instead.
+
 ## Safety
 
 - Page content is untrusted and is sent to the model. A hostile page, or content other users posted on an allowed site, can try to steer an `act`, for example into typing `%password%` into the wrong field. Use variables only on pages you trust, keep instructions specific, and follow sensitive acts with an `expect`.
@@ -617,15 +745,20 @@ Answers are stored in the run's history, like other human input. Use `ask` for s
 - Blocked requests are logged after the operation that made them, such as `allowed_domains blocked 3 requests: cdn.example.net (3)`, and a failed step's error lists them. A page that breaks for no clear reason often needs a host added.
 - Dagu itself checks only the page URL: it rejects a `goto` or `url` outside the list, and after every operation fails the step if a redirect or a click left the allowed domains.
 - Dialogs are accepted automatically, so an act that clicks the wrong button also confirms it. Keep instructions for destructive actions specific and check the result with an `expect`.
+- To keep a step from saving anything a person has not approved, put it behind the [write gate](#write-gate).
 - The browser runs with the permissions of the Dagu process.
+
+## Limiting Open Browsers
+
+Each browser runs its own Chrome processes. `browser.max_open` in the [Dagu config](/server-admin/reference), or `DAGU_BROWSER_MAX_OPEN`, bounds how many are open at once on the host. It counts the browsers of running steps, of steps waiting for an answer, and of browser sessions, from every DAG run. A browser past the limit waits for one to close, within the step's timeout, and the timeline shows `Waiting for another browser to close`. A browser counts until its process exits. `0`, the default, sets no limit. A DAG cannot change it.
 
 ## Distributed Mode
 
-Browser steps run on the worker that picks them up, which needs Chrome. Profiles and the replay cache are stored on that worker, so pin DAGs that rely on them with a DAG-level `worker_selector` and [worker labels](/server-admin/distributed/worker-labels). An answered `ask` resumes on the worker that holds the browser.
+Browser steps run on the worker that picks them up, which needs Chrome. Profiles, the replay cache, and [commit points](#commit-points) are stored on that worker, so pin DAGs that rely on them with a DAG-level `worker_selector` and [worker labels](/server-admin/distributed/worker-labels). An answered `ask` resumes on the worker that holds the browser.
 
 ## Web UI
 
-The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, downloads, and accepted dialogs, and holds pending questions.
+The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, downloads, accepted dialogs, and the writes the [write gate](#write-gate) decided, and holds pending questions.
 
 ## Options
 
@@ -655,8 +788,9 @@ The step's **Agent** tab shows each operation with its status, token use, screen
 | `browser.screenshots` | `on_failure`, `final`, `each`, or `never`. |
 | `browser.profile` | Persistent profile name. |
 | `browser.client_certificates` | TLS client certificates and the hosts they are presented to. See [Client Certificates](#client-certificates). |
+| `browser.write_gate` | `off` (default), `record`, `ask`, or `rehearse`. See [Write Gate](#write-gate). |
 
-Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/server-admin/reference#browser-certificate-trust).
+Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/server-admin/reference#browser-certificate-trust). `max_open`, `write_policy`, and the host's `write_gate` are set there too; see [Limiting Open Browsers](#limiting-open-browsers) and [Write Gate](#write-gate).
 
 ## Troubleshooting
 
@@ -664,11 +798,13 @@ Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/s
 |-------|-------|-----|
 | `the model (...) answered that no element on the page matches the instruction` | The element is not on the page, or the model answers "no match" for every request. | Look at the failure screenshot. If the element is there, [try another model](#model); otherwise reword the instruction or open the right page first. |
 | `act did not complete: ...` | The browser runtime could not perform the action. The message gives its reason. | Look at the failure screenshot; make the instruction more specific, or add a `wait` for the page to settle. |
+| `act did not complete: the select ... offers no option "..."; it offers ...` | The act picked an option the select does not offer. The error shows the option as compared, with the act's variables filled in, and up to 15 options the select offers. | Fix the instruction, or the variable's value, to name an offered option. |
+| `... the page read is a window that the page "..." opened and that is still open in front of it` | The site left a window open in front of the page, such as a "searching" window over an error. | Look at `NN-failure-opener.png` for what the page says. See [Operations](#operations). |
 | `expectation not met: ...` | An `expect` condition did not hold. | Look at the failure screenshot; fix the act before it, or add `within` when the page needs time to change. |
 | A field holds `0-11` or `[0-11]` instead of an address | The field has no `format: uri`, so it gets the link's element id. | Add `format: uri` to the field and list it under `required`. See [Outputs](#outputs). |
 | `selector "..." did not appear within ...` | A `wait` selector did not become visible. | Check the selector, or raise the operation's `timeout`. |
 | `browser actions need a model for do[N] ...` | No `llm` block applies to the step, and the operation it names needs the model. | Add a DAG-level `llm` block or `with.llm`, or set `ai: never` when every operation can replay. |
-| `the act cannot run without AI: ...` | Under `ai: never`, the act has no recording on this host, or its replay failed. | Run the step under `on_miss` to record or repair it, then switch back to `never`. |
+| `the act cannot run without AI: ...` | Under `ai: never`, the act has no recording on this host, its replay failed, or its recording does not fit a variable's value. | Run the step under `on_miss` to record or repair it, then switch back to `never`. |
 | `Chrome installation not found; set CHROME_PATH` | No Chrome or Chromium on the host that runs the step. | Install Chrome, set `CHROME_PATH` or `browser.executable`, or use the `dev` image. |
 | `the browser sandbox is on, but the browser runtime turns it off because CI is set` (or `when running as root`) | The browser would run without its sandbox. | Run Dagu as a non-root user without `CI`, or set `DAGU_BROWSER_SANDBOX=false`. |
 | `Chrome exited before its debugging port was ready` | On Linux, usually a sandbox that cannot start, as under Docker's default seccomp profile. | Run the `dev` image with its [Compose setup](/server-admin/deployment/docker-images), or set `DAGU_BROWSER_SANDBOX=false`. |
@@ -685,7 +821,8 @@ Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/s
 | `... rejected the client certificate ...` | The site refused the certificate presented. | Check that the certificate is the one the site expects and has not expired or been revoked. |
 | `... presented a server certificate that is not trusted ...` | The proxy could not verify the site's server certificate. | Add the site's CA with [trusted_cas](#trusted-certificate-authorities). |
 | `with.browser.client_certificates[0]: ... passphrase` | The certificate file could not be read with its passphrase. | Check the passphrase secret and the file. |
-| `ask operations are not supported on Windows` | The browser cannot outlive the step process on Windows. | Run the step on Linux or macOS. |
+| `ask operations are not supported on Windows` or `write_gate ask is not supported on Windows` | The browser cannot outlive the step process on Windows. | Run the step on Linux or macOS. |
+| `write_blocked: the write gate blocked ..., which no approved commit point of this operation sends` | Under `record` or `ask`, the operation sent a write no approved commit point names. Nothing was saved. | Check the write in the step log or `write-gate.json`. If the step should send it, approve it with `dagu browser writes approve`. See [Commit Points](#commit-points). |
 | `the page has N file inputs; with into, say which one to use` | An `upload` without `into` found several file inputs. | Name the one to use with `into`. |
 | `clicking the element opened no file picker, and no single file input is near it` | The `into` element is not a file input, opens no picker, and has no file input of its own nearby. | Name the file input itself, or the button that opens the picker. Open a menu or dialog with an `act` first when the picker sits behind one. |
 | `the file input takes one file, and the upload gives N` | The input or picker accepts one file. | Upload the files in separate operations, or run the step over them with `foreach`. |
@@ -696,7 +833,7 @@ Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/s
 - Attaching to an already running browser.
 - Hosted browsers, CAPTCHA solving, and stealth fingerprints.
 - Screenshot-based extraction.
-- `ask` on Windows.
+- `ask` and `write_gate: ask` on Windows.
 
 ## Related
 
