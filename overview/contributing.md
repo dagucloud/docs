@@ -40,8 +40,18 @@ We welcome contributions of all kinds, including:
 Prerequisites depend on your track:
 
 - Go 1.27 or newer for Go and backend changes ([install Go](https://go.dev/doc/install)).
-- Node.js 18.18 or newer and [pnpm](https://pnpm.io/installation) for UI changes.
+- Node.js 20 or newer and [pnpm](https://pnpm.io/installation) for UI changes.
 - Docs-only changes do not require the Go toolchain.
+
+### Nix
+
+With [Nix](https://nixos.org/download/), the repository flake provides Go, Node.js, pnpm, `make`, and the host tools the Makefile calls:
+
+```bash
+nix develop
+```
+
+The flake supports x86-64 and Arm64 Linux and Apple silicon macOS. The Makefile installs its own Go tools and `protoc` into `.local`. Docker and Zig, used only by the image and keepalive targets, are not included.
 
 Building frontend assets:
 

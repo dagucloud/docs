@@ -170,6 +170,20 @@ git_sync:
     ssh_key_path: /home/user/.ssh/id_ed25519
 ```
 
+### Secrets from files
+
+To read the token or the SSH passphrase from a file, such as a mounted Docker or Kubernetes secret, set `token_file` or `ssh_passphrase_file` instead:
+
+```yaml
+git_sync:
+  repository: github.com/your-org/automation
+  auth:
+    type: token
+    token_file: /run/secrets/git-token
+```
+
+The environment equivalents are `DAGU_GITSYNC_AUTH_TOKEN_FILE` and `DAGU_GITSYNC_AUTH_SSH_PASSPHRASE_FILE`. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 ## Work with changes
 
 A typical update follows this sequence:

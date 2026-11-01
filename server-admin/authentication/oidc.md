@@ -56,6 +56,8 @@ dagu start-all
 
 If the builtin administrator already exists, omit the two `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_*` variables.
 
+To read the client secret from a file, such as a mounted Docker or Kubernetes secret, set `auth.oidc.client_secret_file` or `DAGU_AUTH_OIDC_CLIENT_SECRET_FILE` instead of the secret. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 ## Callback URL
 
 Register this redirect URI with the provider:

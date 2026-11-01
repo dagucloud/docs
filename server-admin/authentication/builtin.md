@@ -53,6 +53,8 @@ export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
 dagu start-all
 ```
 
+To read the token secret or the initial admin password from a file, such as a mounted Docker or Kubernetes secret, set `token.secret_file` (`DAGU_AUTH_TOKEN_SECRET_FILE`) or `initial_admin.password_file` (`DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD_FILE`) instead. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 ## Create the first administrator
 
 On a new installation, create the first builtin administrator before anyone signs in.

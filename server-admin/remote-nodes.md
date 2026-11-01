@@ -25,6 +25,8 @@ remote_nodes:
     auth_token: "${PROD_TOKEN}"
 ```
 
+To read a password or token from a file, such as a mounted Docker or Kubernetes secret, set `basic_auth_password_file` or `auth_token_file` instead of the value. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 ## Using API Keys for Remote Access
 
 When remote nodes use [Builtin Authentication](/server-admin/authentication/builtin), you can use [API Keys](/server-admin/authentication/api-keys) for secure, role-based access:

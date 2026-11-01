@@ -126,7 +126,7 @@ Retrieves DAG definitions with optional filtering by name and labels.
 | perPage | integer | Items per page (max 1000) | 50 |
 | name | string | Filter DAGs by name | - |
 | labels | string | Filter by labels. Comma-separated. Syntax: `key`, `key=value`, `!key`, `key*`, `key=value*`. Supports `*` and `?` wildcards. AND logic. | - |
-| sort | string | Sort field: `name` or `nextRun` | `ui.dags.sort_field` (fallback `name`) |
+| sort | string | Sort field: `name`, `nextRun`, `status`, or `lastRun` | `ui.dags.sort_field` (fallback `name`) |
 | order | string | Sort order: `asc` or `desc` | `ui.dags.sort_order` (fallback `asc`) |
 | remoteNode | string | Remote node name | "local" |
 
@@ -173,6 +173,8 @@ Retrieves DAG definitions with optional filtering by name and labels.
 `schedule` entries are recurring cron objects such as `{"expression":"0 * * * *"}` or typed one-off start entries such as `{"kind":"at","at":"2026-03-29T09:30:00+09:00"}`. `nextRun` is the scheduler-aware next planned run time for that DAG. For a pending one-off start entry, `nextRun` can remain visible even after that timestamp has passed, until the scheduler consumes it.
 
 Schedule aliases in authored YAML are returned as canonical cron expressions. For example, `"@daily"` becomes `"0 0 * * *"` in schedule metadata.
+
+`sort=status` orders DAGs by the status of their latest run: running, waiting, queued, failed, rejected, aborted, partially succeeded, then succeeded. `sort=lastRun` orders them by the start time of their latest run. Both sorts read every matching DAG, so the order holds across pages. DAGs without a run come last in either order, sorted by name. Above 300 matching DAGs, the list is sorted by `name` instead and `errors` says why. Pinned DAGs are listed first; the sort applies within the pinned and unpinned parts.
 
 ### Create DAG
 
@@ -435,9 +437,12 @@ Fetches the YAML specification of a DAG.
     "name": "example_dag"
   },
   "spec": "name: example_dag\nsteps:\n  - name: hello\n    run: echo Hello",
+  "sha256": "4f2c0e7b9d1a...",
   "errors": []
 }
 ```
+
+`sha256` is the lowercase hex SHA-256 of the file bytes in `spec`.
 
 ### Update DAG Specification
 
@@ -448,16 +453,22 @@ Updates the YAML specification of a DAG.
 **Request Body**:
 ```json
 {
-  "spec": "name: example_dag\nsteps:\n  - name: hello\n    run: echo Hello World"
+  "spec": "name: example_dag\nsteps:\n  - name: hello\n    run: echo Hello World",
+  "expectedSha256": "4f2c0e7b9d1a..."
 }
 ```
+
+`expectedSha256` is optional. Set it to the `sha256` of the spec that was edited. When the file has changed since, the server writes nothing and returns `409`.
 
 **Response (200)**:
 ```json
 {
-  "errors": []
+  "errors": [],
+  "sha256": "9b8e61d0c3f4..."
 }
 ```
+
+`sha256` is the SHA-256 of the bytes written.
 
 **Response with Validation Errors (200)**:
 ```json
@@ -474,6 +485,14 @@ Updates the YAML specification of a DAG.
 {
   "code": "forbidden",
   "message": "Permission denied to edit DAGs"
+}
+```
+
+**Error Response (409)** - The current file does not match `expectedSha256`:
+```json
+{
+  "code": "conflict",
+  "message": "DAG example_dag changed since it was read: expected sha256 4f2c0e7b9d1a..., current sha256 7a1d93e05b2c..."
 }
 ```
 
@@ -528,6 +547,10 @@ Validates a DAG YAML specification without persisting any changes. Returns a lis
 - `errors` array contains human-readable validation messages
 - `dag` field may contain partial DAG details even when validation fails
 - Use this endpoint to validate DAG specs before creating or updating DAGs
+- `warnings` lists non-fatal spec warnings; they do not affect `valid`
+- `issues` lists the same errors, warnings, and notices as objects with `severity` (`error`, `warning`, or `notice`), `source` (`load`, `build`, `warning`, or `valueReference`), and `message`. An issue also has `stepName`, `stepPath` (such as `steps[3]` or `handler_on.failure`), `fieldPath` (such as `steps[3].with.url`), `line`, and `column` when known
+- `valueReferenceNotices` lists value-reference notices produced while loading the spec. They are not persisted
+- `referenceScope` lists what a step can reference: `params`, `consts`, `env` and `secrets` names (without their values), and `steps` with the outputs other steps can use. Each entry has its canonical `reference` token, such as `${params.region}` or `${steps.fetch.outputs.body}`. A step's `outputsKnown` is `static` when the spec gives its outputs and `runtime` when only a run does
 
 ### Rename DAG
 
@@ -588,10 +611,17 @@ Creates and starts a DAG run with optional parameters.
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
 | steps | string[] | Run only these steps, by step name or ID. Every other step is recorded as skipped and does not run. Not supported for agent DAGs | No |
-| outputsFromRunId | string | Finished DAG-run of the same DAG whose step outputs and work directory are carried into the skipped steps. Only steps that succeeded there contribute outputs. Requires `steps` | No |
-| outputs | object | Outputs of skipped steps, keyed by step name or ID and then by output name, with string values. Wins over `outputsFromRunId`. Requires `steps` | No |
+| outputsFromRunId | string | Finished DAG-run of the same DAG whose work directory, and the outputs of the skipped steps that the selected steps depend on, are carried into the run. Only steps that succeeded there contribute outputs. Requires `steps` | No |
+| outputsFromRuns | object | The run each skipped step takes its outputs from, keyed by step name or ID. Wins over `outputsFromRunId` for that step; the work directory still comes only from `outputsFromRunId`. Requires `steps` | No |
+| outputs | object | Outputs of skipped steps, keyed by step name or ID and then by output name, with string values. Wins over `outputsFromRunId` and `outputsFromRuns`. Requires `steps` | No |
+| outputsSources | object | The run each step of `outputs` was captured from, keyed by step name or ID, as `{"runId": "...", "capturedAt": "<RFC 3339>"}`; `capturedAt` is optional. Requires `steps` | No |
+| ephemeral | boolean | If true, the run leaves no trace. See [Ephemeral runs](#ephemeral-runs). Requires `steps` | No |
 
-> **Tip:** Set `steps` to try one step against the current definition without re-running the steps before it. The run is recorded like any other under the DAG's name. A skipped step's outputs come from `outputsFromRunId` or `outputs`; without them, references to those outputs stay unresolved. Retrying a failed selected-steps run follows normal retry rules, so steps downstream of the failed one run too.
+> **Tip:** Set `steps` to try one step against the current definition without re-running the steps before it. The run is recorded like any other under the DAG's name. Only a skipped step that a selected step depends on, directly or through other steps, carries outputs. They come from `outputsFromRunId`, `outputsFromRuns`, or `outputs`; without them, references to those outputs stay unresolved. Retrying a failed selected-steps run follows normal retry rules, so steps downstream of the failed one run too.
+
+The `success`, `failure`, `abort`, `wait`, and `exit` handlers of a selected-steps run run only when a selected step is a graph end step, one that no other step depends on. `handler_on.init` runs as usual. Retries of the run keep the same rule.
+
+An `outputsFromRuns` entry must name a skipped step and a finished run of the same DAG in which that step succeeded. Otherwise the request returns `400` with the message `step X cannot be reused from run Y: <reason>`. The run details of the new run list the source of each carried step in [`reusedInputs`](#reused-inputs).
 
 For example, to run `fetch` with a token its upstream `login` step would normally publish:
 
@@ -603,6 +633,8 @@ For example, to run `fetch` with a token its upstream `login` step would normall
 ```
 
 An `outputs` entry must name a skipped step. The name must be declared by the step's `outputs`, unless the step declares none, and a `type: json` output needs valid JSON. Naming the step's `output: VAR` sets that variable instead. Invalid entries return `400`. The audit log records output names but not values.
+
+`outputsSources` names the run each step's `outputs` came from, and the new run records it in `reusedInputs`. A step of `outputs` without an entry has no entry there. An entry for a step that is not in `outputs` returns `400`. The named run does not need to exist.
 
 > **Tip:** Overriding the DAG name changes the identifier used for queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
 
@@ -621,6 +653,20 @@ An `outputs` entry must name a skipped step. The name must be declared by the st
   "message": "DAG example_dag is already running, cannot start in singleton mode"
 }
 ```
+
+#### Ephemeral runs
+
+With `ephemeral: true`, the selected steps run in a run that leaves no trace. `ephemeral: true` without `steps` returns `400`.
+
+- The run executes like any run, and its run details, step logs, step outputs, spec, and SSE stream are readable by its ID while it exists.
+- It is not listed in run lists, queues, the dashboard, artifacts, or the events feed. [Get DAG Run History](#get-dag-run-history) includes it only with `includeEphemeral=true`. It does not count toward history retention.
+- It produces no events, so notification rules and incident policies do not see it.
+- Retry, reschedule, and edit-retry requests for it return `409`.
+- The server removes it 10 minutes after it ends, and removes every ended ephemeral run when the server starts. A run that has not ended is never removed.
+- The audit log records the start request, marked `ephemeral`.
+- Its run details and run summaries carry `ephemeral: true`.
+
+An ephemeral run can be the `outputsFromRunId` or `outputsFromRuns` source of another request while it exists.
 
 ### Start DAG (Synchronous)
 
@@ -767,6 +813,12 @@ Controls whether the scheduler creates runs from this DAG.
 **Endpoint**: `GET /api/v1/dags/{fileName}/dag-runs`
 
 Fetches execution history of a DAG.
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| includeEphemeral | boolean | Also return the [ephemeral runs](#ephemeral-runs) of this DAG, merged by start time under the same limit. Each carries `ephemeral: true`. No other list returns them | `false` |
+| remoteNode | string | Remote node name | "local" |
 
 **Response (200)**:
 ```json
@@ -1084,7 +1136,10 @@ Inline specifications have no source directory, so they cannot supply [file depe
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
 | steps | string[] | Run only these steps, by step name or ID; every other step is recorded as skipped. See [Start DAG](#start-dag) | No |
 | outputsFromRunId | string | Finished DAG-run of the same DAG whose step outputs feed the skipped steps. Requires `steps` | No |
+| outputsFromRuns | object | The run each skipped step takes its outputs from, keyed by step. Requires `steps` | No |
 | outputs | object | Outputs of skipped steps, keyed by step and then output name. Requires `steps` | No |
+| outputsSources | object | The run each step of `outputs` was captured from. Requires `steps` | No |
+| ephemeral | boolean | Run the selected steps in a run that leaves no trace. See [Ephemeral runs](#ephemeral-runs). Requires `steps` | No |
 
 **Response (200)**:
 ```json
@@ -1260,6 +1315,10 @@ When the returned DAG run is still `queued`, `dagRun.conditions` can contain que
 }
 ```
 
+`startedAt` and `finishedAt` of runs, steps, and sub DAG-runs are RFC 3339 timestamps with millisecond precision, such as `2024-02-11T12:00:00.158Z`. A run that an older version stored has second precision.
+
+A node whose step repeats with a `repeat` mode and no `limit` carries `continuous: true`. Its executions are recorded as samples; see [Continuous Step Endpoints](#continuous-step-endpoints).
+
 #### Build Execution Data
 
 For `type: build` workflows, the DAG-run object includes `noReuse`, and each node includes a `build` decision:
@@ -1293,6 +1352,52 @@ For `type: build` workflows, the DAG-run object includes `noReuse`, and each nod
 `decision` is one of `none`, `always`, `execute`, `reuse`, or `deferred`. `phase` is one of `precondition`, `evaluate`, `execute`, `verify`, `commit`, or `complete`. `reason` is stable for programmatic handling, while `detail` is the user-facing explanation. Producer fields are present for reused materializations.
 
 See [Build Workflows](/writing-workflows/incremental-workflows) for the decision rules.
+
+#### Reused Inputs
+
+A [selected-steps run](#start-dag) lists where the carried outputs of its skipped steps came from in `dagRun.reusedInputs`, one entry per skipped step, in DAG step order. The field is absent when the run carried no outputs.
+
+```json
+{
+  "dagRun": {
+    "reusedInputs": [
+      {
+        "step": "test",
+        "runId": "20241101_080000",
+        "capturedAt": "2024-11-01T08:00:12.480Z",
+        "startedAt": "2024-11-01T08:00:10.105Z",
+        "finishedAt": "2024-11-01T08:00:12.480Z",
+        "via": "run"
+      }
+    ]
+  }
+}
+```
+
+`via` is `run` when the outputs came from `outputsFromRunId` or `outputsFromRuns`. `startedAt` and `finishedAt` are then the step's times in that run, and `capturedAt` is its finish time. `via` is `cache` when the outputs came from `outputs` with an `outputsSources` entry. `runId` and `capturedAt` then come from that entry, and the step times are absent. The record stays on the run for all its attempts.
+
+#### Model Usage
+
+A node whose step called models carries `modelUsage.models`: one entry per provider and model, over every attempt of the step, including what a coding agent the step ran reported. `modelUsage.notReported` names a tool whose usage could not be read. `dagRun.modelUsage.models` totals every step of the run, handlers included.
+
+```json
+{
+  "provider": "openai",
+  "model": "gpt-5",
+  "calls": 3,
+  "inputTokens": 5210,
+  "cachedInputTokens": 4096,
+  "cacheWriteTokens": 0,
+  "outputTokens": 812,
+  "reasoningTokens": 256,
+  "cost": 0.0123,
+  "costReportedCalls": 3
+}
+```
+
+`inputTokens` includes cached and cache-write tokens, and `outputTokens` includes reasoning tokens. `cost` is in US dollars, as the provider reported it for `costReportedCalls` of the calls. It covers every call only when `costReportedCalls` equals `calls`.
+
+The body steps of a `foreach` item, as returned by `GET /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/foreach/{item}`, carry `modelUsage` and, when they kept one, such as the operations of a browser step, `agentSession`. Both have the shape that the run's own nodes have, with the run's secrets masked.
 
 ### Stop or Cancel DAG Run
 
@@ -1370,6 +1475,8 @@ Creates a new DAG run based on a previous execution.
 }
 ```
 
+**Error Response (409)** - The DAG run is [ephemeral](#ephemeral-runs).
+
 ### Reschedule DAG Run
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/reschedule`
@@ -1400,7 +1507,7 @@ Rescheduled runs always respect singleton mode. When the target DAG already has 
 }
 ```
 
-**Error Response (409)** - When the DAG already has active or queued runs:
+**Error Response (409)** - When the DAG already has active or queued runs, or the historic run is [ephemeral](#ephemeral-runs):
 ```json
 {
   "code": "max_run_reached",
@@ -1585,6 +1692,113 @@ curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/20240211_14
 curl "http://localhost:8080/api/v1/dag-runs/data-processing-pipeline/latest/outputs" \
      -H "Authorization: Bearer your-token"
 ```
+
+### Get Step Outputs
+
+**Endpoint**: `GET /api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/outputs`
+
+Returns the persisted outputs of one step. `stepName` is a step name or ID, a handler step's name or ID, or a handler key such as `handler_on.exit`.
+
+**Response (200)**:
+```json
+{
+  "stepName": "fetch_data",
+  "stepId": "fetch",
+  "status": 4,
+  "statusLabel": "succeeded",
+  "outputs": [
+    {"name": "body", "value": "{\"count\":42}", "truncated": false, "size": 12}
+  ],
+  "outputVariable": {"name": "RESULT", "value": "ok", "truncated": false, "size": 2}
+}
+```
+
+- `outputs` holds the step's declared outputs, sorted by name, as `${steps.<id>.outputs.<name>}` resolves them. For a step that declares none, it holds the published values.
+- `outputVariable` is the value of the step's string-form `output: NAME`, when it has one.
+- Each value is cut at 65536 bytes. `truncated` is `true` when it was cut, and `size` is its length in bytes before the cut.
+- Secret values are masked before they are persisted.
+- Returns `404` when the DAG run or the step does not exist.
+
+## Continuous Step Endpoints
+
+A continuous step is a step whose `repeat_policy` has a `repeat` mode and no `limit`. Its node in the run details carries `continuous: true`. Instead of keeping every execution in the run status, Dagu records one sample per execution with its start time, duration, and exit code. A sample with a non-zero exit code is a failed sample. These endpoints read the samples of one step. They accept the optional `remoteNode` query parameter.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/samples` | Samples summarized in time buckets |
+| `GET` | `/api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/events` | Starts, stops, failures, and recoveries, newest first |
+| `GET` | `/api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/availability` | Share of samples that succeeded over the last 24 hours, 7 days, 30 days, and 365 days |
+
+A request for a run or step that does not exist, or for a step that is not continuous, returns `404`. A query parameter out of its range, `from` after `to`, or a `before` cursor that the server did not give returns `400`.
+
+### Get Step Samples
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| from | string | Start of the window (RFC 3339) | 24 hours before `to` |
+| to | string | End of the window (RFC 3339) | now |
+| points | integer | Most buckets to return (10-2000) | 600 |
+
+The server keeps samples in four tiers: 1-second buckets for 24 hours, 1-minute buckets for 7 days, 1-hour buckets for 30 days, and 24-hour buckets with no limit. It answers from the finest tier whose retention covers `from` and whose bucket count in the window is at most `points`.
+
+**Response (200)**:
+```json
+{
+  "resolutionSeconds": 60,
+  "from": "2026-10-31T00:00:00Z",
+  "to": "2026-11-01T00:00:00Z",
+  "buckets": [
+    {"time": "2026-10-31T00:00:00Z", "count": 60, "failures": 1, "minMs": 12, "maxMs": 380, "p50Ms": 18, "p95Ms": 44}
+  ]
+}
+```
+
+`resolutionSeconds` is `1`, `60`, `3600`, or `86400`. Buckets are in time order and start in UTC. A bucket with no sample is not listed.
+
+### Get Step Events
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| from | string | Start of the window (RFC 3339), inclusive | no bound |
+| to | string | End of the window (RFC 3339), exclusive | no bound |
+| limit | integer | Most events to return (1-500) | 100 |
+| before | string | `nextCursor` from a previous response | - |
+
+**Response (200)**:
+```json
+{
+  "events": [
+    {"time": "2026-11-01T09:12:05.120Z", "kind": "recovered", "exitCode": 0, "failedCount": 42, "outageSeconds": 42},
+    {"time": "2026-11-01T09:11:23.004Z", "kind": "failed", "exitCode": 7, "message": "connection refused"}
+  ],
+  "nextCursor": "..."
+}
+```
+
+`kind` is `started`, `stopped`, `failed`, or `recovered`. `message` is the last line of a failed execution's standard error, 256 bytes at most. `failedCount` counts the failed samples of the outage, and `outageSeconds` is its length. A `failed` event is also recorded after each hour of an outage. `nextCursor` is absent when there are no more events.
+
+### Get Step Availability
+
+**Response (200)**:
+```json
+{
+  "windows": [
+    {"window": "24h", "count": 86400, "failures": 42, "availability": 0.99951},
+    {"window": "7d", "count": 604800, "failures": 42, "availability": 0.99993},
+    {"window": "30d", "count": 2592000, "failures": 310, "availability": 0.99988},
+    {"window": "365d", "count": 2592000, "failures": 310, "availability": 0.99988}
+  ],
+  "streak": 3175,
+  "lastFailureAt": "2026-11-01T09:12:04.950Z",
+  "totalCount": 2592000
+}
+```
+
+`availability` is the share of samples that succeeded, from 0 to 1, and is absent when `count` is 0. `streak` counts the samples since the last failed sample, and `lastFailureAt` is that sample's time; it is absent when no sample failed. Once the 1-second tier no longer holds that sample, `lastFailureAt` is the start of the bucket that holds it, and `streak` is a lower bound. `totalCount` counts every execution.
+
+See [Repeat Without a Limit](/writing-workflows/control-flow#repeat-without-a-limit) for continuous steps.
 
 ## Step Management Endpoints
 
@@ -3870,7 +4084,7 @@ The usage counts and dependents list only DAGs in workspaces the caller can see.
 
 ## Git Sync Endpoints
 
-Git Sync manages workflow definitions, Wiki content, and Git-tracked supporting files. The `kind` field is one of `dag`, `doc`, `doc-asset`, or `file`.
+Git Sync manages workflow definitions, Wiki content, calendars, and Git-tracked supporting files. The `kind` field is one of `dag`, `doc`, `doc-asset`, `file`, or `calendar`.
 
 DAG and Wiki page IDs omit their file extension. Supporting-file and attachment IDs retain their complete relative path and file extension. URL-encode IDs in endpoint paths: `scripts/report.py` becomes `scripts%2Freport.py`, while `assets/100%.txt` becomes `assets%2F100%25.txt`.
 
@@ -4399,11 +4613,11 @@ All endpoints returning workspace data use this shape:
 | `createdAt` | string (date-time) | UTC creation timestamp |
 | `updatedAt` | string (date-time) | UTC last-update timestamp |
 
-### List Workspace Settings Removed in v3.0
+### List Workspace Settings That v3.0 Moves into Projects
 
 **Endpoint**: `GET /api/v1/workspaces/deprecation`
 
-Lists the workspace settings in use that stop applying when workspaces are removed in v3.0. Requires admin role.
+Lists the workspace settings in use that v3.0 moves into projects. Requires admin role.
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |
@@ -4424,7 +4638,7 @@ Lists the workspace settings in use that stop applying when workspaces are remov
 
 Items are ordered by kind, then name. `kind` is one of `baseConfig`, `secret`, `profileEntry`, `notificationRoute`, `incidentPolicy`, `configKey`, `user`, `apiKey`, or `wikiDirectory`. `name` identifies the setting, such as a workspace, a secret and its workspace, or a username. Returns an empty array when no workspace settings are in use.
 
-See [Workspaces](/web-ui/workspaces#removal-in-v3-0) for when each kind is reported.
+See [Workspaces](/web-ui/workspaces#projects-in-v3-0) for when each kind is reported.
 
 ## Remote Node Support
 

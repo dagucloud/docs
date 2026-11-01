@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `browser writes`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
 
 ## Global Options
 
@@ -113,14 +113,16 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--profile` - Runtime profile to apply to this run
 - `--no-reuse` - Recompute eligible build steps instead of reusing prior materializations
 - `--only` - Run only this step (name or ID); repeatable. Every other step is recorded as skipped
-- `--outputs-from` - Finished run of the same DAG whose step outputs and work directory feed the steps selected by `--only`
-- `--output` - Output of a step skipped by `--only`, as `<step>.<name>=<value>`; repeatable, and wins over `--outputs-from`
+- `--outputs-from` - Finished run of the same DAG whose work directory, and the outputs of the skipped steps that the `--only` steps depend on, feed the run
+- `--output-from` - Run that gives the outputs of one skipped step, as `<step>=<run-id>`; repeatable, and wins over `--outputs-from` for that step
+- `--output` - Deprecated; use `--output-from`. Output of a step skipped by `--only`, as `<step>.<name>=<value>`; repeatable, and wins over `--outputs-from` and `--output-from`
 
 > **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
 
-> **Note:** `--only` starts a new run of the current definition, with its env, secrets, and params, under the DAG's own name. Only the selected steps run. Lifecycle handlers and preconditions apply as usual.
-> - A skipped step's outputs come from `--outputs-from`, `--output`, or neither. Without them, a `${steps.<id>.outputs.<name>}` reference to a skipped step stays unresolved.
-> - With `--outputs-from`, only steps that succeeded in that run contribute outputs, and their work-directory files are copied into the new run.
+> **Note:** `--only` starts a new run of the current definition, with its env, secrets, and params, under the DAG's own name. Only the selected steps run. Preconditions and `handler_on.init` apply as usual. The `success`, `failure`, `abort`, `wait`, and `exit` handlers run only when a selected step is a graph end step, one that no other step depends on.
+> - Only a skipped step that a selected step depends on, directly or through other steps, carries outputs. They come from `--outputs-from`, `--output-from`, `--output`, or none of them. Without them, a `${steps.<id>.outputs.<name>}` reference to a skipped step stays unresolved.
+> - With `--outputs-from`, only steps that succeeded in that run contribute outputs, and the run's work-directory files are copied into the new run.
+> - `--output-from` takes one step's outputs from its own run. That run must be a finished run of the same DAG in which the step succeeded, and the step cannot also be named by `--only`. The work directory still comes only from `--outputs-from`. The new run records the run each reused step came from.
 > - `--output` sets a declared output, or any name when the step declares none. Naming the step's `output: VAR` sets that variable instead. See [Running One Step](/writing-workflows/outputs#running-one-step).
 > - `--only` cannot be combined with `--from-run-id`, `--parent`, or `--root`, and is not supported for agent DAGs.
 > - Retrying a failed `--only` run follows normal retry rules, so steps downstream of the failed step run too; use `dagu retry --step` to re-run one step.
@@ -153,8 +155,8 @@ dagu start --only scrape example-dag.yaml
 # Run two steps with the outputs of an earlier run
 dagu start --only test --only report --outputs-from 20241031_235959 example-dag.yaml
 
-# Run one step with an upstream output supplied by hand
-dagu start --only fetch --output login.token=abc123 example-dag.yaml
+# Take one upstream step's outputs from a different run
+dagu start --only report --outputs-from 20241031_235959 --output-from test=20241101_080000 example-dag.yaml
 ```
 
 ### `stop`
@@ -715,9 +717,31 @@ dagu browser cache clear billing
 dagu browser cache clear billing --step login
 ```
 
+### `browser writes`
+
+List, approve, and revoke the [commit points](/step-types/browser#commit-points) of a DAG's browser steps, the writes a step behind the [write gate](/step-types/browser#write-gate) may send. Identify the DAG by name or YAML file path. Each command prints JSON. Commit points are kept on the host that ran the step; in distributed mode, run the command on the worker.
+
+```bash
+dagu browser writes list [--step ID] DAG
+dagu browser writes approve [options] DAG
+dagu browser writes revoke [options] DAG
+```
+
+**Options:**
+- `--step` - Only this step (ID, or name when the step has no ID)
+- `--signature` - With `approve` or `revoke`, only the commit points of this write signature; repeatable
+- `--from-dag` - With `approve`, copy the commit points of this DAG's steps, such as a copy of the DAG that ran the rehearsal, into the steps of the same name and approve them
+
+```bash
+dagu browser writes list books
+dagu browser writes approve books --step enter_deal
+dagu browser writes approve books --from-dag books-trial
+dagu browser writes revoke books --step enter_deal
+```
+
 ### `browser session`
 
-Work a site in a browser kept open between commands, one operation at a time, and turn what worked into a [browser step](/step-types/browser#building-a-step-in-a-browser-session). Every command prints one JSON object. A command that fails prints `{"error": {"code", "message"}}` and exits 1; the codes are `invalid_input`, `session_not_found`, `session_busy`, `session_ended`, `model_required`, `profile_in_use`, `launch_failed`, `operation_failed`, `export_invalid`, and `failed`. Sessions are kept on the host that runs the commands.
+Work a site in a browser kept open between commands, one operation at a time, and turn what worked into a [browser step](/step-types/browser#building-a-step-in-a-browser-session). Every command prints one JSON object. A command that fails prints `{"error": {"code", "message"}}` and exits 1; the codes are `invalid_input`, `session_not_found`, `session_busy`, `session_ended`, `model_required`, `profile_in_use`, `launch_failed`, `operation_failed`, `write_blocked`, `write_gate_lost` (the write gate stopped, closing the browser), `export_invalid`, and `failed`. Sessions are kept on the host that runs the commands.
 
 #### `browser session open`
 
@@ -737,8 +761,12 @@ dagu browser session open [options] [URL]
 - `--allowed-domain` - Keep the browser on this host or `*.domain`; repeat for more
 - `--idle-timeout` - Close the browser when no command arrives for this long (default: `30m`, at most `24h`)
 - `--outline-chars` - Most characters of the page outline to report (default: `4000`; `0` leaves it out)
+- `--write-gate` - [Write gate](/step-types/browser#write-gate) mode (default: the host's `browser.write_gate`, which the flag can only tighten)
+- `--write-policy` - [Write policy](/step-types/browser#write-policy) file naming the sign-in endpoints whose writes are sent
 
 The result carries the session `id` the other commands take, the page's `url`, `title`, and `outline`, and `cdp_url`, the browser's DevTools address, where an application can show the page and let a person act on it. Without a model, the session runs only operations that need none.
+
+With `--write-gate rehearse`, every write the page sends is blocked and reported under `writes`, by the command that sent it or, for a write sent while the session waited, by the next command. With `--write-gate record`, writes are blocked the same way unless the `do` command that sends one allows its signature with `--allow-write`; a blocked write fails the operation with `write_blocked`.
 
 Sessions use the host's `browser.client_certificates` and [`browser.trusted_cas`](/step-types/browser#trusted-certificate-authorities) settings. Open a new session after changing certificates.
 
@@ -761,6 +789,7 @@ echo '{"act": "Click the Sign in button"}' | dagu browser session do [options] I
 
 **Options:**
 - `--outline-chars` - Most characters of the page outline to report (default: `4000`)
+- `--allow-write` - In a session whose write gate records, let the operation send the write of this signature; repeatable
 
 The operation is written as an item of a browser step's `with.do`: `goto`, `act`, `upload`, `extract`, `expect`, `wait`, or `screenshot`, with `when` and `timeout`. An upload's relative paths are under the command's working directory. Give the values of the variables an act uses under `variables`:
 
@@ -773,7 +802,9 @@ A variable given as `{"env": NAME}` is read from the environment on this and eve
 
 An element the outline shows with its ID can be acted on by that ID, without the model: `{"click": "0-131"}`, `{"type": {"into": "0-229", "text": "%user%"}}`, `{"select": {"in": "0-106", "option": "未出荷"}}`, or `{"upload": {"into": "0-57", "files": "/path/to/invoice.pdf"}}`, each with `when` and `timeout` as an act takes them. The session keeps a click, typing, or pick as the act a step writes, such as `Click the "Sign in" button`, reported as `act`, and an upload as the upload into the element in words, such as `the "Receipt" file input`, reported as `into`, with the action it took as its recording.
 
-The result reports the operation's `index` in the session's history, its `status` (`done`, `failed`, or `skipped` when its `when` does not hold), the `actions` an act or upload performed and whether an exported step replays them (`recorded`), what an extract read (`outputs`), saved files, accepted dialogs, blocked requests, `tokens`, and the page the browser is on next with its `outline`. A failed operation exits 1, but the session stays open.
+The result reports the operation's `index` in the session's history, its `status` (`done`, `failed`, or `skipped` when its `when` does not hold), the `actions` an act or upload performed and whether an exported step replays them (`recorded`), what an extract read (`outputs`), saved files, accepted dialogs, blocked requests, the `writes` the write gate decided, `tokens`, and the page the browser is on next with its `outline`. A failed operation exits 1, but the session stays open.
+
+`--allow-write` sends only the write of the signature a blocked write reported. A form whose write was blocked stays on the page as it was filled in; allowing its write sends the values the form holds then, so check them first.
 
 #### `browser session describe`
 
@@ -820,6 +851,16 @@ dagu browser session close [--force] [--keep] ID
 
 `--force` closes it even while another command holds it. `--keep` ends the session instead: its browser closes and its profile is free for a step, and its history can still be exported for a day.
 
+#### `browser session gate`
+
+Tell the session's write gate that a person holds the browser, or hands it back.
+
+```bash
+dagu browser session gate (--person | --guard) ID
+```
+
+With `--person`, the gate sends the writes the page makes while a person works in the browser, in a `--headed` window or through `cdp_url`, and still reports each with the next command. `--guard` returns the browser to the session's write gate mode.
+
 #### `browser session list`
 
 List the host's sessions, oldest first, after closing those idle past their timeout. Each has a `state`: `idle` while it waits for a command, `busy` while one runs, or `ended` once its browser closed.
@@ -831,10 +872,10 @@ dagu browser session list
 The response lists sessions and supported features:
 
 ```json
-{"sessions": [], "capabilities": ["trusted_cas"]}
+{"sessions": [], "capabilities": ["trusted_cas", "write_gate"]}
 ```
 
-`trusted_cas` means this build supports [private CAs](/step-types/browser#trusted-certificate-authorities) and the `tls_verified` result. Update Dagu if it is missing. It reports feature support, regardless of whether any CA is configured.
+`trusted_cas` means this build supports [private CAs](/step-types/browser#trusted-certificate-authorities) and the `tls_verified` result. Update Dagu if it is missing. It reports feature support, regardless of whether any CA is configured. `write_gate` means the build supports the [write gate](/step-types/browser#write-gate) flags and `writes` results.
 
 ### `computer check`
 
@@ -906,7 +947,7 @@ dagu computer elements [options]
 - `--watch` - Report the element under the pointer whenever it changes, one JSON object per line, until stdin closes or the command is interrupted
 - `--match` - Report the elements a selector matches, and succeed only when exactly one does. The selector is JSON, or `-` to read it from stdin
 
-Each element has its `role`, `name`, `id`, `value`, the `label` it is linked to, its `bounds` in display pixels, its `window`, and its `path` from the window down.
+Each element has its `role`, `name`, `id`, `value`, the `label` it is linked to, its `bounds` in display pixels, its `window`, and its `path` from the window down. In JSON, an element that takes no input, such as a grayed-out button, also has `"disabled": true`, and on macOS an empty field has the hint it shows as `placeholder`.
 
 ```bash
 dagu computer elements --at-pointer --after 3s
@@ -948,9 +989,9 @@ dagu computer cache show [options] DAG
 - `--op` - With `--step`, show only the task at this position in `with.do`, counted from 1
 - `--format`, `-f` - Output format: `text` (default) or `json`
 
-A task whose instruction changed, or that ran with other parameters, has a recording for each, and the newest comes first. An act with an action that has no pinned form, such as a drag, a click where no element could be read, or a click near an element's edge, cannot be pinned; each such action is listed with its turn and the reason instead.
+A task whose instruction changed, or that ran with other parameters, has a recording for each, and the newest comes first. An act with an action that has no pinned form, such as a drag, a click where no element could be read, or a click near an element's edge, cannot be pinned; each such action is listed with its turn and the reason instead. An act whose actions never used a variable its task names, as one recorded where a field already showed the value, says so in a comment above its steps: pinned, they leave that field as each run finds it. An act recorded by an older release, which did not note such variables, says to check its steps instead.
 
-With `--format json`, the result is `{"operations": [...]}`, each with `step`, `op`, `kind`, `system`, `saved_at`, and either `recorded`, `fields`, or `unpinnable`, whose items carry `turn`, `action`, `code`, and `reason`.
+With `--format json`, the result is `{"operations": [...]}`, each with `step`, `op`, `kind`, `system`, `saved_at`, `assumes` (the variables the steps never use), `assumes_unknown` (set for an act recorded by an older release), and either `recorded`, `fields`, or `unpinnable`, whose items carry `turn`, `action`, `code`, and `reason`.
 
 ```bash
 dagu computer cache show invoices --step post --op 2
@@ -1151,7 +1192,15 @@ Show the resolved filesystem paths used by Dagu.
 ```bash
 dagu config
 dagu config --dagu-home /custom/path
+dagu config --values
+dagu config --values --format json
 ```
+
+**Options:**
+- `--values` - Print each setting that has an environment variable, with its value and source: `default`, `file`, or `env:<NAME>`. Secret values are masked
+- `--format, -f` - Output format for `--values`: `table` (default) or `json`. Requires `--values`
+
+Values are shown as read from the file, the environment, or the defaults, before Dagu derives its own values, so a derived setting can show as empty. `auth.mode` shows the mode Dagu runs in. See [Check Effective Settings](/server-admin/configuration#check-effective-settings).
 
 ### `schema`
 
@@ -1304,7 +1353,7 @@ Successfully removed 5 run(s) for DAG "my-workflow"
 
 ### `sync`
 
-Manage Git synchronization for workflows, Wiki content, and supporting files.
+Manage Git synchronization for workflows, Wiki content, calendars, and supporting files.
 
 ```bash
 dagu sync <subcommand>

@@ -122,7 +122,7 @@ ui:
   log_encoding_charset: "utf-8"   # Charset for log lines that are not UTF-8 (see reference)
   max_dashboard_page_limit: 100    # Max items on dashboard
   dags:
-    sort_field: "name"           # Default DAG list request sort field (`name` or `nextRun`)
+    sort_field: "name"           # Default DAG list request sort field (`name`, `nextRun`, `status`, or `lastRun`)
     sort_order: "asc"            # Default sort order (asc/desc)
 
 # Latest Status Configuration
@@ -238,8 +238,10 @@ For directory traversal, file-symlink behavior, duplicate handling, and Web UI b
 - `DAGU_AUTH_OIDC_ALLOWED_DOMAINS` - Allowed email domains (comma-separated)
 - `DAGU_AUTH_OIDC_BUTTON_LABEL` - SSO login button text
 
+The token secret, basic auth password, and OIDC client secret can also come from a file named by the variable with a `_FILE` suffix, such as `DAGU_AUTH_BASIC_PASSWORD_FILE`. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 **UI:**
-- `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page request sort field (`name` or `nextRun`)
+- `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page request sort field (`name`, `nextRun`, `status`, or `lastRun`)
 - `DAGU_UI_DAGS_SORT_ORDER` - Default DAGs page sort order
 
 **Terminal:**

@@ -73,6 +73,7 @@ paths:
   admin_logs_dir: "~/.local/share/dagu/logs/admin"
   event_store_dir: ""        # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"
+  calendars_dir: "~/.config/dagu/calendars" # Business calendar files
   dag_runs_dir: ""            # Auto: {data_dir}/dag-runs
   dag_run_work_dir: ""        # Auto: {data_dir}/dag-run-work
   queue_dir: ""              # Auto: {data_dir}/queue
@@ -93,6 +94,7 @@ secrets:
   vault:
     address: "https://vault.example.com"
     token: "hvs.DummyToken"
+    # token_file: /run/secrets/vault-token  # Instead of token
     ca_cert: ""        # Path to a CA certificate file for verifying a custom/private Vault TLS endpoint
     client_cert: ""    # Path to a client certificate file for mTLS authentication to Vault
     client_key: ""     # Path to a client key file paired with `client_cert`
@@ -121,17 +123,24 @@ auth:
   builtin:
     token:
       secret: "your-secret-key"  # Auto-generated if not set
+      # secret_file: /run/secrets/token-secret  # Instead of secret
       ttl: "24h"
+    initial_admin:            # Admin created on first start when no user exists
+      username: ""            # Set together with password
+      password: ""            # At least 8 characters
+      # password_file: /run/secrets/admin-password  # Instead of password
 
   # Basic auth (simple username/password)
   basic:
     username: "admin"
     password: "secret"
+    # password_file: /run/secrets/basic-password  # Instead of password
 
   # OIDC auth (auto-enabled under builtin mode when all required fields are set)
   oidc:
     client_id: "your-client-id"
     client_secret: "your-client-secret"
+    # client_secret_file: /run/secrets/oidc-client-secret  # Instead of client_secret
     client_url: "https://dagu.example.com"
     issuer: "https://accounts.google.com"
     scopes: ["openid", "profile", "email"]
@@ -176,7 +185,7 @@ ui:
   log_encoding_charset: "utf-8"  # Charset for log lines that are not UTF-8 (see supported encodings below)
   max_dashboard_page_limit: 100
   dags:
-    sort_field: "name"        # Default DAG list request sort field (`name` or `nextRun`)
+    sort_field: "name"        # Default DAG list request sort field (`name`, `nextRun`, `status`, or `lastRun`)
     sort_order: "asc"         # Default sort order (asc/desc)
 
 latest_status_today: true      # Show only today's status
@@ -193,6 +202,9 @@ env_passthrough_prefixes:
 # Browser steps
 browser:
   sandbox: true             # Set false only where Chromium's sandbox cannot start
+  max_open: 0               # Most browsers open at once on this host (default: 0, no limit)
+  write_gate: off           # Least strict write gate mode: off (default), record, ask, or rehearse
+  write_policy: /etc/dagu/browser-write-policy.yaml  # Sign-ins, declared writes, and noise hosts for the write gate
   client_certificates:      # TLS client certificates every browser presents
     - hosts: ["*.corp.example.com"]    # Host, *.domain, or * for every host
       pfx_file: /etc/dagu/certs/device.p12
@@ -221,10 +233,12 @@ remote_nodes:
     auth_type: "basic"
     basic_auth_username: "admin"
     basic_auth_password: "password"
+    # basic_auth_password_file: /run/secrets/staging-password  # Instead of basic_auth_password
   - name: "production"
     api_base_url: "https://prod.example.com/api/v1"
     auth_type: "token"
     auth_token: "prod-token"
+    # auth_token_file: /run/secrets/prod-token  # Instead of auth_token
     skip_tls_verify: false
 
 # Coordinator (for distributed execution)
@@ -301,8 +315,10 @@ git_sync:
   auth:
     type: "token"          # "token" or "ssh"
     token: "${GITHUB_TOKEN}"
+    # token_file: /run/secrets/git-token  # Instead of token
     ssh_key_path: ""
     ssh_passphrase: ""
+    # ssh_passphrase_file: /run/secrets/ssh-passphrase  # Instead of ssh_passphrase
 
   auto_sync:
     enabled: false
@@ -318,6 +334,10 @@ git_sync:
 
 All options support `DAGU_` prefix.
 
+Run `dagu config --values` to see the value of each setting and whether it came from a default, the configuration file, or an environment variable. See [Check Effective Settings](/server-admin/configuration#check-effective-settings).
+
+Variables ending in `_FILE` name a file that holds a secret. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 **Note:** Dagu filters which system environment variables are passed to step processes and sub-DAG executions. Built-in forwarding includes the platform allowlist plus the prefixes `DAGU_`, `DAG_`, `LC_`, and `KUBERNETES_`. You can extend that set with top-level `env_passthrough` and `env_passthrough_prefixes`. Dagu's own credentials, such as `DAGU_AUTH_BASIC_PASSWORD` and `DAGU_ENCRYPTION_KEY`, are never forwarded either way. See [Operations - Security](/server-admin/operations#security) for exact behavior.
 
 ### Server
@@ -325,6 +345,7 @@ All options support `DAGU_` prefix.
 - `DAGU_PORT` - Server port (default: `8080`)
 - `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification and incident DAG-run links
 - `DAGU_BASE_PATH` - Base path for reverse proxy
+- `DAGU_API_BASE_PATH` - API endpoint base path (default: `/api/v1`)
 - `DAGU_API_BASE_URL` - **DEPRECATED** - Use `api_base_path` config instead
 - `DAGU_TZ` - Server timezone
 - `DAGU_ENV_PASSTHROUGH` - Comma-separated exact env var names to forward to step execution
@@ -412,14 +433,17 @@ for traversal, symlink, and Web UI behavior.
 
 #### Builtin Auth (RBAC)
 - `DAGU_AUTH_TOKEN_SECRET` - JWT signing secret (auto-generated if not set)
+- `DAGU_AUTH_TOKEN_SECRET_FILE` - File holding the JWT signing secret (`auth.builtin.token.secret_file`)
 - `DAGU_AUTH_TOKEN_TTL` - JWT token expiry (default: `24h`, maximum: `8760h` / 365 days)
 - `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME` - Auto-provision admin username on first startup (requires password)
 - `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD` - Auto-provision admin password on first startup (requires username, minimum 8 characters)
+- `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD_FILE` - File holding the initial admin password (`auth.builtin.initial_admin.password_file`)
 - `DAGU_USERS_DIR` - User data directory (default: `{data_dir}/users`)
 
 #### Basic Auth
 - `DAGU_AUTH_BASIC_USERNAME` - Basic auth username
 - `DAGU_AUTH_BASIC_PASSWORD` - Basic auth password
+- `DAGU_AUTH_BASIC_PASSWORD_FILE` - File holding the basic auth password (`auth.basic.password_file`)
 
 #### OIDC Auth
 OIDC settings (used under builtin auth mode, auto-enabled when all required fields are set):
@@ -428,6 +452,7 @@ See [OIDC Workspace Access](/server-admin/authentication/oidc-workspace-access) 
 
 - `DAGU_AUTH_OIDC_CLIENT_ID` - OAuth2 client ID from your OIDC provider
 - `DAGU_AUTH_OIDC_CLIENT_SECRET` - OAuth2 client secret
+- `DAGU_AUTH_OIDC_CLIENT_SECRET_FILE` - File holding the OAuth2 client secret (`auth.oidc.client_secret_file`)
 - `DAGU_AUTH_OIDC_CLIENT_URL` - Base URL of your Dagu instance (for callback)
 - `DAGU_AUTH_OIDC_ISSUER` - OIDC provider URL
 - `DAGU_AUTH_OIDC_SCOPES` - OAuth2 scopes (comma-separated, default: `openid,profile,email`)
@@ -477,7 +502,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_UI_NAVBAR_TITLE` - Nav bar title
 - `DAGU_UI_LOG_ENCODING_CHARSET` - Charset for log lines that are not UTF-8 (see [Supported Log Encodings](#supported-log-encodings))
 - `DAGU_UI_MAX_DASHBOARD_PAGE_LIMIT` - Dashboard limit
-- `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page request sort field (`name` or `nextRun`)
+- `DAGU_UI_DAGS_SORT_FIELD` - Default DAGs page request sort field (`name`, `nextRun`, `status`, or `lastRun`)
 - `DAGU_UI_DAGS_SORT_ORDER` - Default DAGs page sort order
 
 ### Queue
@@ -487,6 +512,9 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_DEFAULT_EXECUTION_MODE` - Default execution mode: `local` (default) or `distributed`. When `distributed`, all DAGs are dispatched to workers through the coordinator, even without an explicit `worker_selector`. Use `worker_selector: local` in a DAG to override.
 - `DAGU_DEFAULT_SHELL` - Default shell for command steps. When unset, Dagu falls back to `$SHELL`, then `sh`.
 - `DAGU_BROWSER_SANDBOX` - Set to `false` to turn off Chromium's sandbox for every browser that [browser steps](/step-types/browser) start on this host (default: `true`). Use it only where the sandbox cannot start; see [Browser requirements](/step-types/browser#requirements). With the sandbox on, a browser step fails when `CI` is set or Dagu runs as root on Linux, because the browser would run without the sandbox there.
+- `DAGU_BROWSER_MAX_OPEN` - Most browsers open at once on this host, counting browser steps, steps waiting for an answer, and browser sessions (`browser.max_open`; default: `0`, no limit). A browser past it waits for one to close. A negative value is a configuration error. See [Limiting Open Browsers](/step-types/browser#limiting-open-browsers).
+- `DAGU_BROWSER_WRITE_GATE` - Least strict [write gate](/step-types/browser#write-gate) mode every browser on this host runs in: `off`, `record`, `ask`, or `rehearse` (`browser.write_gate`; default: `off`). A step or a browser session can only choose a stricter one. Any other value is a configuration error.
+- `DAGU_BROWSER_WRITE_POLICY` - YAML or JSON file of the [write policy](/step-types/browser#write-policy) browser steps follow: the sign-ins whose writes are sent, requests declared as writes, and noise hosts (`browser.write_policy`; default: empty).
 - `DAGU_BROWSER_GUARD_CLIENT_CERTIFICATES` - Set to `false` to stop Dagu from guarding other HTTPS sites against Chrome client certificate prompts (`browser.guard_client_certificates`; default: `true` when client certificates are configured). See [Browser Certificate Trust](#browser-certificate-trust).
 - `DAGU_CONTAINER_RUNTIME` - Container runtime for root-level `container:`, step-level `container:`, `docker.run`, and containerized `harness.run`. Valid values: `docker` (default) or `podman`.
 - `DAGU_PODMAN_HOST` - Podman's Docker-compatible API socket when `DAGU_CONTAINER_RUNTIME=podman` (default: `unix:///run/podman/podman.sock`).
@@ -579,6 +607,7 @@ Legacy YAML keys `scheduler.heartbeat_interval` and `scheduler.stale_threshold` 
 ### External Secrets
 - `DAGU_SECRETS_VAULT_ADDRESS` - Default Vault server address for the `vault` secret provider
 - `DAGU_SECRETS_VAULT_TOKEN` - Default Vault token for the `vault` secret provider
+- `DAGU_SECRETS_VAULT_TOKEN_FILE` - File holding the default Vault token (`secrets.vault.token_file`)
 - `DAGU_SECRETS_VAULT_CA_CERT` - Path to a CA certificate file for verifying a custom/private Vault TLS endpoint
 - `DAGU_SECRETS_VAULT_CLIENT_CERT` - Path to a client certificate file for mTLS authentication to Vault
 - `DAGU_SECRETS_VAULT_CLIENT_KEY` - Path to a client key file paired with `DAGU_SECRETS_VAULT_CLIENT_CERT`
@@ -603,8 +632,10 @@ See [Git Sync](/server-admin/git-sync) for repository layout, supporting-file be
 - `DAGU_GITSYNC_PUSH_ENABLED` - Enable push operations (default: `true`)
 - `DAGU_GITSYNC_AUTH_TYPE` - Auth type: `token` or `ssh` (default: `token`)
 - `DAGU_GITSYNC_AUTH_TOKEN` - Personal access token for HTTPS auth
+- `DAGU_GITSYNC_AUTH_TOKEN_FILE` - File holding the access token (`git_sync.auth.token_file`)
 - `DAGU_GITSYNC_AUTH_SSH_KEY_PATH` - Path to SSH private key
 - `DAGU_GITSYNC_AUTH_SSH_PASSPHRASE` - SSH key passphrase
+- `DAGU_GITSYNC_AUTH_SSH_PASSPHRASE_FILE` - File holding the SSH key passphrase (`git_sync.auth.ssh_passphrase_file`)
 - `DAGU_GITSYNC_AUTOSYNC_ENABLED` - Enable auto-sync background worker (default: `false`)
 - `DAGU_GITSYNC_AUTOSYNC_ON_STARTUP` - Pull on startup (default: `true`)
 - `DAGU_GITSYNC_AUTOSYNC_INTERVAL` - Sync interval in seconds (default: `300`, `0` = no periodic sync)
@@ -869,7 +900,7 @@ peer:
 - `terminal.max_sessions`: `5`
 - `audit.enabled`: `true`
 - `event_store.enabled`: `true`
-- `event_store.retention_days`: `3`
+- `event_store.retention_days`: `1`
 - `webhooks.max_payload_size`: `1048576`
 
 ### Auto-generated Paths

@@ -484,6 +484,7 @@ Dagu's own credentials are never forwarded, even though their names start with `
 - `DAGU_AUTH_BASIC_PASSWORD`, `DAGU_AUTH_OIDC_CLIENT_SECRET`, `DAGU_AUTH_TOKEN_SECRET`, `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD`
 - `DAGU_SECRETS_VAULT_TOKEN`, `DAGU_TUNNEL_TAILSCALE_AUTH_KEY`, `DAGU_GITSYNC_AUTH_TOKEN`, `DAGU_GITSYNC_AUTH_SSH_PASSPHRASE`
 - `DAGU_LICENSE`, `DAGU_LICENSE_KEY`, `DAGU_XLSX_PASSWORD`, `DAGU_ENCRYPTION_KEY`
+- The `_FILE` forms that name a file holding one of these, such as `DAGU_AUTH_BASIC_PASSWORD_FILE`. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
 
 Dagu's own processes, such as the `dagu start` process that runs a DAG, still receive them. A step never does, and `${VAR}` or `${env.VAR}` references to them stay unexpanded. `env_passthrough` does not change this. To give a step one of these values, declare it as a secret, which also masks it in logs:
 

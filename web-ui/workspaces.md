@@ -1,7 +1,7 @@
 # Workspaces
 
-::: warning Workspaces Are Removed in v3.0
-Workspace settings stop applying in v3.0, and users and API keys limited to selected workspaces become viewers. See [Removal in v3.0](#removal-in-v3-0) for the settings Dagu reports. Leave feedback on [issue #3288](https://github.com/dagucloud/dagu/issues/3288).
+::: warning Workspaces Become Projects in v3.0
+v3.0 replaces workspaces with projects, and a migration command moves workspace settings into them. No action is needed now. See [Projects in v3.0](#projects-in-v3-0) for the settings Dagu reports. Leave feedback on [issue #3288](https://github.com/dagucloud/dagu/issues/3288).
 :::
 
 Workspaces organize workflows and runs inside one Dagu installation. Use them to separate workflows by team, business function, product, or operational responsibility, such as `finance`, `data-platform`, `customer-support`, or `platform-ops`.
@@ -182,9 +182,9 @@ Dagu rejects the deletion while Wiki pages remain in the workspace. This keeps t
 
 After deletion, update affected DAG labels and access grants so future work stays easy to find.
 
-## Removal in v3.0
+## Projects in v3.0
 
-When the web server starts, it logs one warning, `Workspaces are removed in v3.0, and these workspace settings will stop applying`, with a `settings` attribute that lists every workspace setting still in use:
+When the web server starts, it logs one warning, `Workspaces become projects in v3.0, and a migration command moves these settings, so no action is needed now`, with a `settings` attribute that lists every workspace setting in use that v3.0 moves into projects:
 
 | Setting | Reported When |
 | --- | --- |
@@ -209,7 +209,7 @@ Most users manage workspaces from the Web UI. Automation can use the REST API wh
 | Create a workspace | `POST /api/v1/workspaces` |
 | Rename or update a workspace | `PATCH /api/v1/workspaces/{workspaceId}` |
 | Delete a workspace | `DELETE /api/v1/workspaces/{workspaceId}` |
-| List workspace settings removed in v3.0 (admin) | `GET /api/v1/workspaces/deprecation` |
+| List workspace settings that v3.0 moves into projects (admin) | `GET /api/v1/workspaces/deprecation` |
 
 For request and response details, see [REST API](/web-ui/api).
 

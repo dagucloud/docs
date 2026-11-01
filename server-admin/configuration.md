@@ -30,6 +30,30 @@ export DAGU_PORT=8080
 
 With this command, Dagu listens on port `9000` because the flag wins over the environment variable.
 
+### Check Effective Settings
+
+`dagu config --values` prints each setting that has an environment variable, with its value and the source that supplied it: `default`, `file`, or `env:<NAME>`.
+
+```bash
+DAGU_PORT=9000 dagu config --values
+```
+
+```text
+KEY              VALUE      SOURCE
+host             0.0.0.0    file
+port             9000       env:DAGU_PORT
+auth.mode        builtin    default
+paths.wiki_dir              default
+...
+```
+
+- Values are shown as read from the file, the environment, or the defaults, before Dagu derives its own values. A derived setting, such as `paths.wiki_dir`, can show as empty.
+- `auth.mode` shows the mode Dagu runs in.
+- Secret values and the paths of their `_file` settings are masked as `********`.
+- `--format json` prints the same list as JSON objects with `key`, `value`, and `source`.
+
+`dagu config` without `--values` prints the resolved paths. See [CLI Reference](/getting-started/cli#config).
+
 ## Configuration File
 
 The default configuration file is:
@@ -103,6 +127,49 @@ Common examples:
 | `DAGU_PROC_DIR` | `paths.proc_dir` | Process heartbeat storage directory |
 
 For all environment variables, see [Configuration Reference - Environment Variables](/server-admin/reference#environment-variables).
+
+### Secrets From Files
+
+Server credentials can be read from files, such as mounted Docker or Kubernetes secrets. Each of these keys names the file that holds the secret, in place of the secret itself:
+
+| Config field | Environment variable | Holds |
+| --- | --- | --- |
+| `auth.basic.password_file` | `DAGU_AUTH_BASIC_PASSWORD_FILE` | `auth.basic.password` |
+| `auth.builtin.token.secret_file` | `DAGU_AUTH_TOKEN_SECRET_FILE` | `auth.builtin.token.secret` |
+| `auth.builtin.initial_admin.password_file` | `DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD_FILE` | `auth.builtin.initial_admin.password` |
+| `auth.oidc.client_secret_file` | `DAGU_AUTH_OIDC_CLIENT_SECRET_FILE` | `auth.oidc.client_secret` |
+| `remote_nodes[].basic_auth_password_file` | - | `remote_nodes[].basic_auth_password` |
+| `remote_nodes[].auth_token_file` | - | `remote_nodes[].auth_token` |
+| `git_sync.auth.token_file` | `DAGU_GITSYNC_AUTH_TOKEN_FILE` | `git_sync.auth.token` |
+| `git_sync.auth.ssh_passphrase_file` | `DAGU_GITSYNC_AUTH_SSH_PASSPHRASE_FILE` | `git_sync.auth.ssh_passphrase` |
+| `secrets.vault.token_file` | `DAGU_SECRETS_VAULT_TOKEN_FILE` | `secrets.vault.token` |
+
+- Dagu reads the file when it starts, not each time it uses the secret. Restart Dagu after the file changes.
+- Trailing line breaks (`\n` and `\r`) are removed from the content.
+- A relative path is read from the directory Dagu starts in. Use an absolute path.
+- Setting a non-empty secret and its `_file` form together stops startup. An empty secret counts as unset.
+- A file that cannot be read, or that is empty or holds only whitespace, stops startup.
+- `tunnel.tailscale.auth_key` and `license.key` have no `_file` form.
+
+Steps never receive the `_FILE` variables, as with the secrets themselves. See [Operations - Security](/server-admin/operations#security).
+
+For example, with Docker Compose secrets:
+
+```yaml
+services:
+  dagu:
+    image: ghcr.io/dagucloud/dagu:latest
+    command: ["dagu", "start-all"]
+    environment:
+      - DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
+      - DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD_FILE=/run/secrets/dagu_admin_password
+    secrets:
+      - dagu_admin_password
+
+secrets:
+  dagu_admin_password:
+    file: ./admin-password.txt
+```
 
 ### Container Runtime Environment
 
@@ -236,7 +303,7 @@ included in the recursive catalog.
 File names without their `.yaml` or `.yml` extension must be unique across the
 discovered tree. Effective DAG `name` values must also be unique. Comparison is
 case-sensitive. If either value is duplicated, Dagu excludes every DAG in that
-conflict from the Definitions page and scheduler. The Definitions page shows an
+conflict from the Workflows page and scheduler. The Workflows page shows an
 error with the conflicting paths. After the files are renamed or removed, the
 remaining DAG is discovered again automatically.
 

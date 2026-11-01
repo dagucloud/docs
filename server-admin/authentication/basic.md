@@ -25,6 +25,8 @@ export DAGU_AUTH_BASIC_PASSWORD=secure-password
 dagu start-all
 ```
 
+To read the password from a file, such as a mounted Docker or Kubernetes secret, set `auth.basic.password_file` or `DAGU_AUTH_BASIC_PASSWORD_FILE` instead of the password. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 ## Usage
 
 ### CLI Access

@@ -4,9 +4,11 @@ For contributors or users who want to run a specific commit.
 
 ## Prerequisites
 
-- [Go 1.26+](https://go.dev/doc/install)
-- [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/installation)
+- [Go 1.27+](https://go.dev/doc/install)
+- [Node.js 20+](https://nodejs.org/) and [pnpm](https://pnpm.io/installation)
 - `make`
+
+With [Nix](https://nixos.org/download/), run `nix develop` in the repository to get these tools from its flake.
 
 ## Build
 
