@@ -77,9 +77,9 @@ To create a Teams channel:
 1. Open **Workflows** in Microsoft Teams and choose an incoming-webhook template for a chat or channel.
 2. Select the destination and authentication options, then save the Workflow.
 3. Copy the generated webhook URL. See [Microsoft's incoming-webhook setup guide](https://support.microsoft.com/en-US/Workflows/send-messages-in-teams-using-incoming-webhooks) for the complete Teams steps.
-4. In Dagu, open **Notifications > Channels**, select **Add**, and choose **Microsoft Teams**.
+4. In Dagu, open **Notifications > Channels**, select **Add channel**, and choose **Microsoft Teams**.
 5. Paste the HTTPS webhook URL and optionally customize the message template.
-6. Save the channel and use **Send test** before adding it to notification rules.
+6. Save the channel and use **Test channel** before adding it to notification rules.
 
 Teams webhook URLs must use HTTPS. Dagu encrypts the URL at rest and shows only a redacted preview after it is saved. Editing a channel without entering another URL preserves the saved value.
 
@@ -91,7 +91,7 @@ To send notifications to a specific topic in a Telegram forum group, set the opt
 
 The topic ID must be a positive integer. Leave it blank for regular chats or to keep the existing Telegram delivery behavior. To find the ID, inspect a Bot API update for a message posted in the topic and use the message's [`message_thread_id`](https://core.telegram.org/bots/api#message).
 
-After saving the channel, use the **Test** action to confirm that the bot can post to the selected chat and topic.
+After saving the channel, use **Test channel** to confirm that the bot can post to the selected chat and topic.
 
 ### Email Delivery
 
@@ -223,14 +223,14 @@ Select a named workspace in the Web UI, then open **Notifications > Rules**.
 
 Workspace rules can either:
 
-- **Inherit Global**: use the Global rules as-is.
-- **Configure Workspace**: replace Global rules for DAGs in that workspace.
+- Inherit Global rules as-is. This is the default, and **Use Global rules** returns to it.
+- **Configure workspace**: replace Global rules for DAGs in that workspace.
 
 Use workspace overrides when teams have separate channels, such as `data`, `ops`, or `production`.
 
 ### DAG Overrides
 
-Open a DAG, then use the **Notifications** tab for per-DAG exceptions.
+Open a workflow, select **Workflow** on the canvas toolbar, then use the **Notifications** tab of the Workflow panel for per-DAG exceptions.
 
 Keep DAG notifications inherited for most workflows. Configure a DAG override only when one workflow needs a different destination or event set from its workspace.
 
@@ -353,7 +353,7 @@ Use HMAC signing when the receiving service needs to verify that Dagu sent the w
 
 Notifications are sent by the Dagu server-side event monitor, not by a workflow step. This means notification delivery works for local runs and distributed workers as long as the server receives DAG-run events.
 
-The monitor remembers delivered events so a server restart does not replay old notifications. Use the channel **Test** action when validating credentials and destination access.
+The monitor remembers delivered events so a server restart does not replay old notifications. Use **Test channel** when validating credentials and destination access.
 
 ## Permissions
 

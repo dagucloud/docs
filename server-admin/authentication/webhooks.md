@@ -94,7 +94,7 @@ Response:
 
 Webhook callers can select a [runtime profile](/writing-workflows/runtime-profiles) only when an admin has added that profile to the webhook's allowlist. Without an allowlist, the `X-Dagu-Profile` header is rejected.
 
-In the Web UI, open the DAG's **Webhook** tab, find **Runtime profile selection**, select the active profiles callers may use, and save the policy. Non-admin users can view the policy, but only admins can change it.
+In the Web UI, open the **Webhook** launcher on the workflow's canvas, find **Runtime profile selection**, select the active profiles callers may use, and save the policy. Non-admin users can view the policy, but only admins can change it.
 
 The same policy can be replaced through the API:
 
@@ -223,7 +223,7 @@ A profile token is an extra webhook token bound to one runtime profile. Use prof
 
 A profile token grants access to its profile's variables and secrets, so only admins can create or revoke one. Both actions are written to the audit log.
 
-In the Web UI, open the DAG's **Webhook** tab, find **Profile tokens**, enter a token name, pick an active profile, and click **Create token**. The full token is shown once. The list shows each token's profile, prefix, creation time, and last use.
+In the Web UI, open the **Webhook** launcher on the workflow's canvas, find **Profile tokens**, enter a token name, pick an active profile, and click **Create token**. The full token is shown once. The list shows each token's profile, prefix, creation time, and last use.
 
 The same operation through the API:
 

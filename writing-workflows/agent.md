@@ -54,8 +54,8 @@ dagu start hello-agent
 ```
 
 The model is offered both steps as tools, runs each once, in whichever order
-it prefers, and settles the task. The run page shows the decisions as a
-timeline:
+it prefers, and settles the task. The run's **Agent** tab shows the decisions
+as a timeline:
 
 ```text
 1  ▶ report_time   succeeded
@@ -613,8 +613,8 @@ that declare a command are unaffected and still run it.
 ## Watching a run
 
 An agent has no dependency edges, so a graph of it carries no information.
-The **Status** tab shows a decision timeline in that slot instead: one row per
-turn, in the order things happened.
+The **Agent** tab of the workflow page's Activity panel shows a decision
+timeline instead: one row per turn, in the order things happened.
 
 ![Decision timeline of an agent run: a failed test run, the fix, the passing re-run, two completed tasks, and a sign-off waiting on a person](/agent-decision-timeline-light.png)
 

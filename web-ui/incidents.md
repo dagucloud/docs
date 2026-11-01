@@ -45,7 +45,7 @@ Do not add chat tools as incident connections unless they manage an incident lif
 5. Open **Incidents > Routing**.
 6. Configure the **Global** default route for all DAGs.
 7. Select a named workspace in the sidebar when a team or environment needs a workspace override.
-8. Use the DAG details **Incidents** tab only for per-DAG exceptions.
+8. Use the **Incidents** tab of a workflow's **Workflow** panel only for per-DAG exceptions.
 
 Keep most DAGs inherited. Global and workspace routes are easier to audit than one-off DAG settings.
 
@@ -68,7 +68,7 @@ Open **Incidents > Routing** to configure Global and workspace routing.
 | --- | --- |
 | **Global** | Default route for every DAG. Global can be set to send incidents or off. |
 | **Workspace** | Optional override for one named workspace. Workspace routing can inherit Global, send incidents to its own connections, or turn incidents off. |
-| **DAG** | Optional override for one DAG from the DAG detail **Incidents** tab. DAG routing can inherit, send incidents to its own connections, or turn incidents off. |
+| **DAG** | Optional override for one DAG from the **Incidents** tab of its workflow page's **Workflow** panel. DAG routing can inherit, send incidents to its own connections, or turn incidents off. |
 
 A workflow with `labels: [workspace=ops]` uses the `ops` workspace route when it is configured. If `ops` inherits, the workflow uses Global. If the DAG has its own override, the DAG override wins.
 

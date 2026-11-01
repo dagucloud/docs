@@ -27,7 +27,7 @@ Profiles can also define default entries that apply before a run-specific profil
 
 | Layer | Applies to | Managed from |
 | --- | --- | --- |
-| Global defaults | Every DAG run | **Profiles** tab, Global defaults row |
+| Global defaults | Every DAG run | **Profiles** tab, **Global environment** row |
 | Workspace defaults | DAGs with `labels: [workspace=<name>]` | **Profiles** tab while that workspace is selected |
 | Selected profile | Runs that choose a named profile | The named profile row |
 
@@ -46,7 +46,7 @@ Admins manage Global defaults. Workspace defaults require permission to write co
 ## Create A Profile
 
 1. Open **Profiles & Secrets** and select the **Profiles** tab.
-2. Click **Add Profile**.
+2. Click **Add profile**.
 3. Enter a lowercase profile name such as `prod`.
 4. Add an optional description.
 5. Enable **Protected** only when the profile should be admin-only.
@@ -73,13 +73,15 @@ The same selection applies to distributed runs. Profiles remain coordinator-mana
 
 ![Start DAG dialog showing the runtime profile selector](/runtime-profile-start-dialog.png)
 
-Run history and run details show the selected profile name when a profile was used.
+The **Executions** list and the run facts on the workflow page show the selected profile name when a profile was used.
 
 ![DAG run details showing the selected runtime profile](/runtime-profile-run-details.png)
 
-Admins can also let a webhook integration select specific profiles. Open the DAG's **Webhook** tab, choose the active profiles under **Runtime profile selection**, and save the allowlist. A webhook caller can then select one of those profiles with `X-Dagu-Profile`; omitting the header keeps the DAG's default-profile behavior. See [Webhook profile selection](/server-admin/authentication/webhooks#select-a-runtime-profile) for request and HMAC-signing examples.
+On a workflow's page, the **Overview** tab of the **Workflow** panel shows the runtime profile that applies to the workflow and the variables each layer sets, with secret values masked.
 
-To give each caller its own profile instead, create a token for each caller under **Profile tokens** on the same tab. Requests with a profile token always run with that token's profile. See [Profile tokens](/server-admin/authentication/webhooks#profile-tokens).
+Admins can also let a webhook integration select specific profiles. Open the workflow, select the **Webhook** launcher on the canvas, choose the active profiles under **Runtime profile selection**, and save the allowlist. A webhook caller can then select one of those profiles with `X-Dagu-Profile`; omitting the header keeps the DAG's default-profile behavior. See [Webhook profile selection](/server-admin/authentication/webhooks#select-a-runtime-profile) for request and HMAC-signing examples.
+
+To give each caller its own profile instead, create a token for each caller under **Profile tokens** in the same panel. Requests with a profile token always run with that token's profile. See [Profile tokens](/server-admin/authentication/webhooks#profile-tokens).
 
 ## Retries
 
@@ -87,11 +89,11 @@ Retries always inherit the original run's profile. The retry dialog does not all
 
 ## Relationship To Secrets
 
-The **DAG Secret Refs** tab manages registry secrets referenced directly from DAG YAML with `secrets[].ref`.
+The **Secret refs** tab manages registry secrets referenced directly from DAG YAML with `secrets[].ref`.
 
 Runtime profile secrets are different: they belong to a runtime profile and should be created or rotated from the **Profiles** tab. Dagu stores their values in the managed secret store internally, but the profile remains the user-facing owner of those values.
 
-This also applies to profile default layers. Default-layer secret entries should be created, rotated, and deleted from the **Profiles** tab, not from **DAG Secret Refs**.
+This also applies to profile default layers. Default-layer secret entries should be created, rotated, and deleted from the **Profiles** tab, not from **Secret refs**.
 
 ## Related
 

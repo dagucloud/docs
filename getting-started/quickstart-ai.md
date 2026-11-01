@@ -73,7 +73,7 @@ Start the Web UI from the same directory:
 dagu start-all --dags .
 ```
 
-Open <http://localhost:8080>, select the `review` run, and open the **Artifacts** tab to preview or download the result.
+Open <http://localhost:8080>, open the `review` workflow from **Workflows**, then open **Activity** at the bottom of the page and select the **Artifacts** tab to preview or download the result.
 
 Already have Codex, Claude Code, Copilot, or another agent installed and authenticated? Remove the `tools` block and choose that provider instead. The [Harness Run examples](/writing-workflows/examples/harness-run) cover those setups, structured results, custom harnesses, and more artifact patterns.
 
@@ -134,7 +134,7 @@ dagu start triage.yaml
 
 On a healthy machine the agent checks disk and load, skips the process listing, runs `summarize` last, and settles the task with a reason in its own words. Under load it can inspect processes first. Run it twice and the order can differ; the goal is what stays fixed.
 
-The run page shows each decision in a timeline. Its **Chat** tab holds the full transcript: what the agent saw after each step and why it settled the task.
+In the Web UI, open the `triage` workflow. The **Agent** tab of **Activity** shows each decision in a timeline. The **Chat** tab holds the full transcript: what the agent saw after each step and why it settled the task.
 
 ## 5. Connect an MCP client
 

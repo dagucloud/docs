@@ -22,9 +22,10 @@ Dagu's UI is organized around a few everyday jobs:
 
 - **Cockpit** for a live board of recent runs
 - **Wiki** for Markdown runbooks, Mermaid diagrams, and operational notes
-- **Dashboard** for recent activity and trends
-- **Definitions** for the list of workflows
-- **Run details** for human tasks, approvals, outputs, artifacts, logs, and retries
+- **Activity** for what needs attention, what is running, and what runs next
+- **Workflows** for the list of workflows
+- **Workflow page** for editing a workflow and following its runs, logs, outputs, artifacts, approvals, and human tasks
+- **Executions** for runs across every workflow
 - **Notifications** for Microsoft Teams, Slack, email, Telegram, webhook, and local command routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
@@ -35,7 +36,7 @@ Dagu's UI is organized around a few everyday jobs:
 
 ## Workspace Selector
 
-The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Wiki, Dashboard, Definitions, Runs, Search, and Design.
+The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Overview, Wiki, Workflows, Executions, and Search.
 
 ![Workspace selector](/web-ui-workspace-selector-demo.png)
 
@@ -49,7 +50,7 @@ See [Workspaces](/web-ui/workspaces) for the full behavior and admin setup.
 
 ## Cockpit
 
-Cockpit is the quickest way to watch what is happening right now.
+Cockpit is the quickest way to watch what is happening right now. Open it from the **Cockpit** tab of **Overview**.
 
 ![Cockpit](/cockpit.png)
 
@@ -57,8 +58,8 @@ Use it when you want to:
 
 - scan today's runs by status
 - spot failures or stuck work quickly
-- open run details without leaving the board
-- start or enqueue workflows from the template picker
+- peek at a run without leaving the board
+- open a workflow from the template picker to start or enqueue it
 
 See [Cockpit](/web-ui/cockpit) for the dedicated guide.
 
@@ -92,53 +93,127 @@ Open **Configure > Calendars** to list the business calendars that start schedul
 
 A calendar's page opens its YAML in an editor with schema completion and problems marked on their lines, beside a year view that follows each edit. It lists the DAGs and calendars that depend on the calendar, and a calendar in use cannot be deleted. See [Business Calendars](/writing-workflows/business-calendars).
 
-## Dashboard
+## Activity
 
-The Dashboard gives you a broader operations view than Cockpit.
+The **Activity** tab of **Overview** gives you a broader operations view than Cockpit.
 
 ![Dashboard](/dashboard.png)
 
 Use it to review:
 
-- recent workflow activity
-- success and failure patterns
-- filtered run lists by status, date, and name
+- failing workflows and runs waiting for input
+- runs in progress and the scheduled runs up next
+- runs by workflow over the last 24 hours or a chosen time range
 
-## Definitions
+For a run list filtered by status, date, and name, open **Executions**.
 
-The Definitions page lists every workflow you can access and shows its current state.
+## Workflows
+
+The **Workflows** page lists every workflow you can access and shows its current state.
 
 ![Definitions](/dag-definitions.png)
 
 This is the best place to:
 
 - browse workflows by workspace
-- open a DAG for details or editing
-- start or enqueue a workflow from its detail view
+- filter by name or label, and sort by name, status, or last run
+- peek at a workflow or open its workflow page
 - see whether a workflow is scheduled, suspended, or recently failed
 
+Click a row to peek at the workflow in a side sheet: its description, schedule, labels, latest run, a read-only graph of the run's step states, and recent runs. Select **Open workflow**, or press `Enter` or `F`, to open the workflow page. `Ctrl`/`Cmd`+click a row, or press `Ctrl`/`Cmd`+`Enter` in the peek, to open the page in a new tab. `Esc` or the browser's Back button closes the peek. Runs listed on **Executions**, **Activity**, and **Cockpit** open the same peek, with **Open run**. On screens narrower than 768 pixels, a click opens the page directly.
+
+Sorting by status or last run is available while 300 or fewer workflows match.
+
 When [recursive DAG discovery](/server-admin/configuration#recursive-dag-discovery)
-finds duplicate file names or effective DAG names, the Definitions page shows
+finds duplicate file names or effective DAG names, the Workflows page shows
 an error with the conflicting paths. All DAGs in the conflict are hidden from
 the list and excluded from scheduling until the files are renamed or removed.
 
-## Workflow Details
+## Workflow Page
 
-Open any workflow from **Definitions** to inspect its latest run, schedule, webhook settings, history, and YAML.
+Open a workflow from **Workflows** to edit it and follow its runs on one page.
 
-![DAG Details](/dag-status.png)
+The page has three parts:
 
-From this page you can usually:
+- the workflow bar at the top, with the name, labels, the selected run, its actions, and **Start**
+- the canvas, which draws the steps as a graph and marks each step with its state in the selected run
+- **Activity** at the bottom, with the run timeline, the steps of the selected run, and its logs and results
 
-- start, stop, or retry runs
-- review the latest graph or timeline
-- inspect step-level status
-- inspect queued runtime conditions when the latest run is still waiting in a queue
-- move between **Latest Run**, **Spec**, **Webhook**, **Notifications**, and **History**
+The page shows the latest run until another run is selected. Select a run on the run timeline or the **History** tab, or use the arrows on the run chip in the bar. The URL records the selected run and step, so a copied link opens the same view. Run links of the form `/dag-runs/<name>/<run-id>`, such as those in notifications, open the run on its workflow page.
 
-For a [build workflow](/writing-workflows/incremental-workflows), the start dialog also provides **Disable reuse for this run** when every eligible step should be recomputed.
+### Start And Control Runs
 
-Queued runtime conditions are shown only for queued DAG runs and explain the latest observed reason the run has not started yet. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact condition fields and reason names.
+**Start** opens the start dialog. Set parameters, a runtime profile, and an optional run ID, then start or enqueue the run. For a [build workflow](/writing-workflows/incremental-workflows), the dialog also provides **Disable reuse for this run** when every eligible step should be recomputed. With unsaved edits, the menu next to **Start** offers **Run unsaved draft**.
+
+The icons next to the run chip act on the selected run: stop, cancel auto-retry, reject, retry, reschedule, or dequeue, as its state allows. **Run details** shows the run's status, progress, timing, parameters, and reused outputs.
+
+For a queued run, **Run details** also shows its queued runtime conditions: the latest observed reason the run has not started yet. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact condition fields and reason names.
+
+When the selected run used a different definition from the saved file, a warning dot appears next to the run chip. Select it to show that run's definition, read-only, on the canvas. **Copy to editor** replaces the editor text with that definition.
+
+### Edit The Workflow
+
+Users with write access edit the workflow on the canvas.
+
+- Press `N`, or select the **+** after a step, to add a step from the step palette.
+- Drag from one step to another to add a dependency. Right-click a step or the canvas for more actions.
+- **YAML** opens the whole file beside the canvas, with validation, schema-aware completion, formatting, and quick fixes.
+- **Workflow** opens the Workflow panel. Its **Overview** tab shows the description, schedule, parameters, handlers, and the runtime profile that applies. The **Wiki**, **Incidents**, and **Notifications** tabs hold the workflow's Wiki pages and its incident and notification overrides.
+- The **Manual**, **Cron**, and **Webhook** launchers on the canvas show how the workflow starts. **Cron** edits the schedule and previews upcoming runs. **Webhook** holds the webhook settings.
+- **Save** shows the changes against the saved version before it writes the file. **Undo**, **Redo**, and **Revert to the last save** act on unsaved edits.
+
+### Steps
+
+Click a step to open its panel over the right side of the canvas. The panel shows the step in the selected run: its status, **Retry step** and **Change status** when they apply, a **Details** tab with its run facts and definition, and tabs such as **Log**, **Output**, and **History**. `Esc`, the close button, or a click on empty canvas closes it.
+
+Double-click a step, or press `Enter` on it, to open the node view. It shows the data from upstream steps, the step's form or YAML, and its result in the selected run.
+
+A build step shows its reuse decision, reason, and explanation. A reused materialization also links to the run that produced it.
+
+**Run step**, on a step's toolbar or in the node view, runs that step now. When the step has upstream steps, the confirmation offers **Step only** to reuse their outputs from an earlier run, **Changed steps** to also rerun the upstream steps that changed since that run, and **Run** to run every upstream step first. A step run from the saved file is recorded like any other run. A step run from unsaved edits is a test run: it is not kept and disappears 10 minutes after it ends.
+
+### Activity Panel
+
+Select **Activity** at the bottom of the page to open the run panel. It shows a timeline of recent runs, the steps of the selected run, and tabs for the run, or for one step when a step is selected.
+
+| Tab | Shows |
+| --- | --- |
+| **Log** | The log of the selected step, or the run's scheduler log when no step is selected |
+| **Agent** | Agent sessions, and the decision timeline of an [agent DAG](/writing-workflows/agent) run |
+| **Actions** | Approvals and [human tasks](/writing-workflows/human-tasks) that wait for input |
+| **Timeline** | When each step ran and for how long |
+| **History** | Each step's status across the runs on the timeline |
+| **Outputs** | Output values collected from the steps |
+| **Artifacts** | Files the run produced, with downloads and inline previews of Markdown, text, and images. See [Artifacts](/writing-workflows/artifacts). |
+| **Tasks** | The tasks of an agent DAG run and how each was settled |
+| **Chat** | Transcripts of chat and agent steps |
+| **Continuous** | Samples, availability, and events of a step that repeats without a `limit` |
+
+A tab appears only when the run has something to show in it. The run timeline can show a number of recent runs or a time range, and can filter runs by trigger.
+
+On the **History** tab, select a cell to show that run and step, or select a step name for that step's history: its success rate, usual duration, and recent results with links to their logs.
+
+When a run waits for an approval or a human task, the canvas shows a notice with **Open actions**, and the **Actions** tab shows how many items wait. Complete each generated form there, or select **Request changes** to push the work back when the task declares `with.push_back`. While the run is queued or running, open tasks stay visible but read-only, and typed input is kept. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
+
+### Logs
+
+The **Log** tab opens a failed step on its stderr. The run's scheduler log offers a download of the full log or of every step log as a ZIP file. `Cmd`/`Ctrl`+click **View stdout** or **View stderr** in a step's run facts to open that log on a page of its own in a new tab.
+
+### Keyboard Shortcuts
+
+| Key | Action |
+| --- | --- |
+| `[` / `]` | Select the older or newer run |
+| `Shift+L` | Follow the latest run |
+| `l` | Open the log of the selected step |
+| `r` | Refresh the workflow and its runs |
+| `N` | Add a step |
+| `Enter` | Open the selected step in the node view |
+| `F` or `0` | Fit the graph in view |
+| `Esc` | Close the open panel or clear the selection |
+| `Ctrl/Cmd+S` | Save |
+| `Ctrl/Cmd+K` | Open the command palette, including **Go to step** |
+| `Shift+?` | Show every canvas shortcut |
 
 ## Notifications
 
@@ -151,7 +226,7 @@ Use it to:
 - create reusable Microsoft Teams, Slack, email, Telegram, webhook, and local command channels
 - set Global notification defaults for all DAGs
 - override Global rules for one workspace
-- configure per-DAG exceptions from the DAG detail page
+- configure per-DAG exceptions from the **Notifications** tab of the workflow page's **Workflow** panel
 - test channels before relying on them in production
 
 See [Notifications](/web-ui/notifications) for the full routing model.
@@ -167,63 +242,12 @@ Use it to:
 - create reusable PagerDuty and SolarWinds Incident Response connections
 - set a Global incident route for every DAG
 - override the Global route for one workspace
-- configure per-DAG exceptions from the DAG detail page
+- configure per-DAG exceptions from the **Incidents** tab of the workflow page's **Workflow** panel
 - test provider credentials before relying on them in production
 
 Incident routing opens incidents only after automatic retries are exhausted, deduplicates repeated failures for the same provider, workspace, and DAG, and resolves the same incident when a later run succeeds.
 
 Incident connections and routing require an active Dagu license or trial on self-hosted deployments. See [Incident Routing](/web-ui/incidents) for the full model.
-
-## Run Details
-
-When you open a specific run, Dagu shows the full execution view.
-
-![Execution Details](/status-details.png)
-
-This is where you troubleshoot and verify results:
-
-- **Status** for the graph and step table
-- **Human tasks** for completing acknowledgement prompts and typed forms when operator input is required
-- **Timeline** for execution ordering and duration
-- **Outputs** for collected output values
-- **Artifacts** for generated files
-- **Logs** for the run and each step
-
-Build step status shows the reuse decision, reason, and explanation. A reused materialization also links to the run that produced it.
-
-When a run is waiting on [`action: human.task`](/writing-workflows/human-tasks), Dagu opens the **Human tasks** tab automatically. Complete each generated form there, or select **Request changes** to push the work back when the task declares `with.push_back`. While the run is queued or running, open tasks stay visible but read-only, and typed input is kept. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
-
-The dedicated outputs view is also available inside the run screen:
-
-![Outputs Tab](/outputs-tab.png)
-
-The same run details screen also includes an Artifacts tab for generated files. Markdown, text, and image artifacts can be previewed inline without leaving the page, and files can be downloaded from the tab:
-
-![Artifacts Tab](/artifacts-tab-light.png)
-
-See [Artifacts](/writing-workflows/artifacts) for configuration, storage, and API details.
-
-## Run History And Logs
-
-Use workflow history when you want to compare multiple attempts of the same DAG:
-
-![Execution History](/dag-history.png)
-
-Use the log view when you want the detailed text output for a run or a single step:
-
-![Execution Log](/dag-logs.png)
-
-## DAG Editor
-
-You can edit workflow YAML directly in the browser when your role allows writes.
-
-![DAG Editor](/dag-editor.png)
-
-The editor includes:
-
-- YAML editing with validation
-- schema-aware help and completion
-- save actions tied to normal DAG permissions
 
 ## Search
 
@@ -233,7 +257,7 @@ Search helps when you know roughly what you need but not exactly where it lives.
 
 You can search:
 
-- **DAGs** for workflow definitions
+- **Workflows** for workflow definitions
 - **Wiki** for Markdown files and matching lines
 
 ## Profiles & Secrets
@@ -246,13 +270,13 @@ The **Profiles** tab manages named runtime profiles for DAG runs. A profile grou
 
 Use profiles when the same DAG should run against different environments, such as `dev`, `staging`, or `prod`, without changing the DAG YAML.
 
-Run history and run details show the selected profile name when a profile was used. Retries inherit the original run's profile.
+The **Executions** list and the run facts on the workflow page show the selected profile name when a profile was used. Retries inherit the original run's profile.
 
 See [Profiles](/web-ui/profiles) for the Web UI workflow and [Runtime Profiles](/writing-workflows/runtime-profiles) for CLI, API, permission, and retry behavior.
 
-### DAG Secret Refs
+### Secret Refs
 
-The **DAG Secret Refs** tab manages encrypted Dagu-managed secret values for a selected scope. These secrets are referenced directly from DAG YAML with `secrets[].ref`.
+The **Secret refs** tab manages encrypted Dagu-managed secret values for a selected scope. These secrets are referenced directly from DAG YAML with `secrets[].ref`.
 
 Use it to:
 
@@ -282,7 +306,7 @@ System Status shows the health of the scheduler, coordinator, and the current ma
 This page helps you verify:
 
 - scheduler and coordinator availability
-- connected workers
+- connected workers and all of their labels
 - current CPU, memory, disk, and load trends
 
 If you use distributed execution, this is the first place to look when workers appear missing or overloaded.

@@ -139,7 +139,7 @@ Use this when the command output is the artifact. Use string-form `output: NAME`
 
 ## Web UI
 
-The DAG run details page shows an **Artifacts** tab when the DAG enables artifact storage or the run already has an `archiveDir`. The tab uses a file tree on the left and a preview pane on the right.
+The Activity panel of the [workflow page](/overview/web-ui#activity-panel) shows an **Artifacts** tab when the DAG enables artifact storage or the run already has an `archiveDir`. The tab uses a file tree on the left and a preview pane on the right.
 
 Example with a Markdown report selected while an image artifact is available in the same run:
 

@@ -149,7 +149,7 @@ docker run --rm \
 
 :::
 
-Visit <http://localhost:8080>. On first launch, create the admin account unless the installer wizard already created one. The UI shows live run status, logs per step, execution history, and a YAML editor.
+Visit <http://localhost:8080>. On first launch, create the admin account unless the installer wizard already created one. Open a workflow from **Workflows** to see its graph with live step status, its run history, and logs per step, and to edit it visually or as YAML.
 The `--dags .` flag loads every YAML file in the current folder as a workflow, which is why `hello.yaml` lives in an empty folder.
 
 If the script installer set up the background service, Dagu is already running at <http://localhost:8080>. Add workflows from the UI, or copy `hello.yaml` into the DAGs directory the installer printed, instead of starting a second server.

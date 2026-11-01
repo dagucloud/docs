@@ -48,7 +48,7 @@ Items within a queue are processed FIFO with two priority levels: high and low. 
 
 When a DAG run remains in `queued`, the scheduler may write one runtime condition to the DAG-run status explaining the latest observed reason it is still waiting. This condition is diagnostic state, not a separate DAG-run lifecycle status.
 
-Runtime conditions are exposed as the `conditions` field on queued DAG-run summaries and details. The Web UI shows them on the DAG run details page and in queue item rows. Conditions are cleared when the persisted DAG-run status changes from `queued` to another status.
+Runtime conditions are exposed as the `conditions` field on queued DAG-run summaries and details. The Web UI shows them in the run's **Run details** on the [workflow page](/overview/web-ui#start-and-control-runs) and in queue item rows. Conditions are cleared when the persisted DAG-run status changes from `queued` to another status.
 
 Each queued condition has this shape:
 

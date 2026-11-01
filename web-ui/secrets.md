@@ -1,6 +1,6 @@
 # DAG Secret Refs
 
-The **DAG Secret Refs** tab on the **Profiles & Secrets** page lets admins and managers create and rotate Dagu-managed secrets that are referenced directly from DAG YAML.
+The **Secret refs** tab on the **Profiles & Secrets** page lets admins and managers create and rotate Dagu-managed secrets that are referenced directly from DAG YAML.
 
 For named runtime environments selected when a run starts, or for Global/workspace runtime profile defaults, use the [Profiles](/web-ui/profiles) tab on the same page. Profile secret entries are created and rotated from the Profiles tab, even though Dagu stores their values in the managed secret store internally.
 
@@ -18,7 +18,7 @@ The DAG receives `DB_PASSWORD` as an environment variable when the run starts. T
 
 Secrets can be global or workspace-scoped. The same ref can exist globally and in multiple workspace scopes with different values.
 
-| Secret scope | DAG Secret Refs behavior |
+| Secret scope | Secret refs behavior |
 | --- | --- |
 | **Global** | Manage workspace-less secrets available to all DAGs as a fallback |
 | **Named workspace** | Manage secrets for DAGs with `labels: [workspace=<name>]` |
@@ -33,9 +33,9 @@ Do not include the scope or workspace name in the ref. A DAG in `workspace=payme
 
 ## Create A Secret
 
-1. Open **Profiles & Secrets** and select the **DAG Secret Refs** tab.
+1. Open **Profiles & Secrets** and select the **Secret refs** tab.
 2. Select **Global** or a named workspace.
-3. Click **Add Secret**.
+3. Click **Add secret ref**.
 4. Keep provider set to **Dagu Managed**.
 5. Enter a ref such as `prod/db-password`. Refs use lowercase slug segments separated by `/`.
 6. Enter the value and save.

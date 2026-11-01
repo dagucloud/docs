@@ -56,7 +56,7 @@ graph LR
 
 Each turn the model may pick one action or several distinct, independent actions. A batch runs concurrently, a bounded tail of each action's stdout and stderr comes back in call order, and the model decides again. Set `max_active_steps` on the DAG to cap concurrent actions; `0` is unlimited and `1` is serial. `set_task_status` and `ask_user` must each be called alone.
 
-Steps declare no `depends`, and may not: ordering belongs to the agent. The run page records the order that was actually chosen as a decision timeline, and the **Chat** tab holds the full transcript.
+Steps declare no `depends`, and may not: ordering belongs to the agent. The run's **Agent** tab records the order that was actually chosen as a decision timeline, and the **Chat** tab holds the full transcript.
 
 Actions in the same batch cannot consume one another's outputs. Each member sees outputs completed before the turn began. If one action fails, its siblings continue; if one waits for a person, the batch's observations are delivered together only after every waiting action is resolved.
 

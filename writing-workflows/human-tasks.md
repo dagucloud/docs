@@ -27,7 +27,7 @@ steps:
     run: ./deploy.sh '${steps.review.outputs.environment}'
 ```
 
-When the run reaches `review`, the step and the run enter `Waiting`. Open the run from **Cockpit**, fill in the form on the **Human tasks** tab, and select **Complete task**. The run is queued, resumes, and `deploy` runs with the selected environment.
+When the run reaches `review`, the step and the run enter `Waiting`. Open the run from **Cockpit**, select **Open actions**, fill in the form on the **Actions** tab, and select **Complete task**. The run is queued, resumes, and `deploy` runs with the selected environment.
 
 `deploy` needs no `depends` entry: referencing an output of `review` makes it depend on `review`.
 
@@ -216,7 +216,7 @@ Input is validated against the form stored with the run. A valid completion mark
 ### Web UI
 
 1. Open the waiting run from **Cockpit** or the workflow's run history.
-2. The **Human tasks** tab opens automatically.
+2. Select **Open actions** on the canvas notice, or the **Actions** tab of the Activity panel.
 3. Fill in the form and select **Complete task**.
 
 While the run is queued or running, open tasks are visible but read-only. Input already typed into the form is kept until the run waits again.

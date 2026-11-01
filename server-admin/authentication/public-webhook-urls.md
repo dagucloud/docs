@@ -36,7 +36,7 @@ GitHub, Stripe, Slack, ...
 
 ## Turn It On
 
-1. Open the DAG, then the **Webhook** tab. Create the webhook if the DAG has none.
+1. Open the workflow, then the **Webhook** launcher on its canvas. Create the webhook if the DAG has none.
 2. In **Public URL**, turn the switch on. Only admins can.
 3. Copy the URL once it appears. It looks like `https://hooks.dagu.sh/<server>/<token>`.
 4. Give the URL to the sender, and [choose the sender](#choose-the-sender) so Dagu checks its signature.

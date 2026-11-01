@@ -18,7 +18,7 @@ steps:
     run: ./deploy.sh production
 ```
 
-`deploy_staging` runs `./deploy.sh staging`. When the command succeeds, the step and the run enter `Waiting`, and `deploy_prod` stays `Not Started`. Open the run's **Approval** tab, review the output, and select **Approve**. The run resumes and `deploy_prod` runs.
+`deploy_staging` runs `./deploy.sh staging`. When the command succeeds, the step and the run enter `Waiting`, and `deploy_prod` stays `Not Started`. Open the run's **Actions** tab, review the output, and select **Approve**. The run resumes and `deploy_prod` runs.
 
 A step that fails does not wait for approval. It fails like any other step.
 
@@ -35,7 +35,7 @@ All fields are optional. `approval: {}` pauses with no prompt and no inputs.
 
 ## Reviewing a Step
 
-When a step waits, the run shows an **Approval** tab with each waiting step's prompt and stdout, **Approve** and **Retry** buttons, and, after a push-back, the iteration and push-back history. The reviewer has three choices:
+When a step waits, the run's **Actions** tab shows each waiting step's prompt and stdout, **Approve** and **Retry** buttons, and, after a push-back, the iteration and push-back history. The reviewer has three choices:
 
 | Action | Web UI | Result |
 |--------|--------|--------|

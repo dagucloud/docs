@@ -1,6 +1,6 @@
 # Cockpit
 
-Cockpit is a kanban-style view for monitoring workflow runs across days. It is the default Web UI landing page and provides a quick overview of what is queued, running, waiting for review, done, or failed.
+Cockpit is a kanban-style view for monitoring workflow runs across days. It provides a quick overview of what is queued, running, waiting for review, done, or failed.
 
 ![Cockpit](/web-ui-cockpit-demo.png)
 
@@ -8,7 +8,7 @@ Cockpit is a kanban-style view for monitoring workflow runs across days. It is t
 
 ## Opening Cockpit
 
-Open **Cockpit** from the left navigation or visit `/cockpit`.
+Open **Overview** from the left navigation and select the **Cockpit** tab, or visit `/cockpit`. Overview reopens the tab you used last.
 
 The page follows the global workspace selector:
 
@@ -28,15 +28,27 @@ Cockpit groups runs by date and status:
 | --- | --- |
 | **Queued** | Runs waiting to start. |
 | **Running** | Runs currently executing. |
-| **Review** | Local or distributed root runs paused for approval or human-task input. Open the run to complete the generated human-task form. |
+| **Review** | Local or distributed root runs paused for approval or human-task input. Open the run and complete the generated form in its **Actions** tab. |
 | **Done** | Successful or partially successful runs. |
 | **Failed** | Failed, aborted, or rejected runs. |
 
-Each card shows the workflow name, status, elapsed time, and a short parameter preview. Click a card to open the run details page.
+Each card shows the workflow name, status, elapsed time, and a short parameter preview. Click a card to peek at the run without leaving the board.
 
 ## Browsing Older Runs
 
 Cockpit starts with recent days. Scroll down and click **Load older day** to inspect earlier activity. Today's runs update live while the page is open.
+
+## Peeking at a Run
+
+The peek is a side sheet over the board. It shows:
+
+- the workflow description, schedule, and labels
+- the run's status, progress, and error, if any
+- a read-only graph of the workflow with the run's step states
+- recent runs of the workflow; select one to show it in place
+- start, stop, and retry controls for users who can run the workflow
+
+Select **Open run** to open the run on its [workflow page](/overview/web-ui#workflow-page), on the **Artifacts** tab when the run has artifacts. On screens narrower than 768 pixels, a click on a card opens the workflow page directly.
 
 ## Starting a Workflow from Cockpit
 
@@ -44,30 +56,21 @@ Use the template selector at the top of the page to find a workflow:
 
 1. Click **Select template**.
 2. Search by workflow name or browse grouped workflows.
-3. Select a workflow to open the preview panel.
-4. Review parameters and choose **Start** or **Enqueue**.
+3. Select a workflow to open its workflow page.
+4. Click **Start**, review parameters, and choose **Start** or **Enqueue**.
 
-When a named workspace is selected, Cockpit starts the run in that workspace. When **All workspaces** or **Default** is selected, Cockpit does not add a named workspace to the run.
+The template list follows the workspace selector, and the workflow page opens in the selected workspace.
 
-## Preview Panel
-
-The preview panel shows the same workflow information you see on the workflow details page:
-
-- workflow description and labels
-- schedule information
-- parameter inputs
-- start and enqueue controls
-- validation errors, if the workflow cannot be loaded
-
-Typed parameters render as friendly controls such as text inputs, selects, number fields, and toggles. Workflows without typed parameter metadata use the raw parameter editor.
+Typed parameters in the start dialog render as friendly controls such as text inputs, selects, number fields, and toggles. Workflows without typed parameter metadata use the raw parameter editor.
 
 ## Keyboard Shortcuts
 
 | Key | Action |
 | --- | --- |
-| `Escape` | Close the preview panel. |
-| `f` | Open the workflow in the full details page. |
-| `Cmd/Ctrl + Click` on fullscreen | Open the workflow in a new tab. |
+| `Escape` | Close the peek. |
+| `Enter` or `f` | Open the run on its workflow page. |
+| `Cmd/Ctrl + Enter` | Open the run on its workflow page in a new tab. |
+| `Cmd/Ctrl + Click` on a card | Open the run on its workflow page in a new tab. |
 
 Shortcuts are ignored while you are typing in an input or textarea.
 
@@ -75,10 +78,10 @@ Shortcuts are ignored while you are typing in an input or textarea.
 
 - Use workspaces to keep the board from mixing unrelated teams or environments.
 - Use labels on workflows to make the template selector easier to scan.
-- Click a run card when you need logs, step status, outputs, artifacts, or retry controls.
+- Open a run when you need logs, step status, outputs, artifacts, or retry controls.
 
 ## Related
 
 - [Web UI Overview](/overview/web-ui)
 - [Workspaces](/web-ui/workspaces)
-- [DAG Run Details](/overview/web-ui#run-details)
+- [Workflow Page](/overview/web-ui#workflow-page)

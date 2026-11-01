@@ -257,7 +257,7 @@ flowchart LR
     style T stroke:green,stroke-width:1.6px,color:#333
 ```
 
-No step declares `depends`, as execution ordering is determined dynamically by the agent. The run page records the order actually chosen as a decision timeline, and the **Chat** tab holds the transcript. [Agent DAGs](/writing-workflows/agent) covers the semantics; [Agent DAG Internals](/writing-workflows/agent-internals) covers cost, limits, and what survives a crash.
+No step declares `depends`, as execution ordering is determined dynamically by the agent. The run's **Agent** tab records the order actually chosen as a decision timeline, and the **Chat** tab holds the transcript. [Agent DAGs](/writing-workflows/agent) covers the semantics; [Agent DAG Internals](/writing-workflows/agent-internals) covers cost, limits, and what survives a crash.
 
 ## Operate Dagu from an AI client
 

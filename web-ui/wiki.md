@@ -116,6 +116,8 @@ steps:
 
 For a default-workspace DAG named `operations`, the path resolves to `<paths.wiki_dir>/operations`. For the same DAG in the `platform` workspace, it resolves to `<paths.wiki_dir>/platform/operations`.
 
+On a workflow's page, the **Wiki** tab of the **Workflow** panel lists the pages in that folder and the pages that link to the DAG with `[[dag:<name>]]`. **New runbook** creates a page in the folder.
+
 `DAGU_WIKI_DIR` configures the server-wide page root. `DAG_WIKI_DIR` is the per-DAG path projected into a running step.
 
 The deprecated `${context.paths.docs_dir}`, `${paths.docs_dir}`, and `DAG_DOCS_DIR` aliases resolve to the same directory for existing workflows.

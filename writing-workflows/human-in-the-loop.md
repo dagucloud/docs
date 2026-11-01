@@ -115,7 +115,7 @@ See [Push-back Context](/writing-workflows/runtime-variables#push-back-context-d
 
 | | Human task | Approval gate |
 |---|---|---|
-| Web UI | **Human tasks** tab: **Complete task**, **Request changes** | **Approval** tab: **Approve**, **Retry**; **Reject** in the run's action bar |
+| Web UI | **Actions** tab: **Complete task**, **Request changes** | **Actions** tab: **Approve**, **Retry**; **Reject** in the run's action bar |
 | REST API | [Human Task Endpoints](/web-ui/api#human-task-endpoints) | [Approval Endpoints](/web-ui/api#approval-endpoints) |
 | CLI | [`dagu human-task complete`](/getting-started/cli#human-task-complete), [`dagu human-task push-back`](/getting-started/cli#human-task-push-back) | Not available |
 | MCP | [`dagu_execute`](/mcp/tools#deciding-waiting-steps) `approve`, `push_back` | [`dagu_execute`](/mcp/tools#deciding-waiting-steps) `approve`, `push_back`, `reject` |
