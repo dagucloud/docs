@@ -402,9 +402,11 @@ flowchart TD
         T["tests · dag.run: test-suite"] --> P[publish]
     end
     subgraph Child["test-suite"]
-        U[unit] --> R[race]
+        U[unit]
+        R[race]
     end
     T -. "PACKAGE" .-> U
+    T -. "PACKAGE" .-> R
 
     style T stroke:lightblue,stroke-width:1.6px,color:#333
     style P stroke:green,stroke-width:1.6px,color:#333

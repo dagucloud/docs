@@ -123,23 +123,17 @@ steps:
   - run: uv run --python 3.13.9 python script.py
 ```
 
-This is equivalent to:
+These steps have no `depends`, so they start in parallel. Set `type: chain` to run them in the order listed:
 
 ```yaml
+type: chain
 tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - id: step_1
-    run: echo "Hello World"
-
-  - id: step_2
-    run: ls -la
-    depends: step_1
-
-  - id: step_3
-    run: uv run --python 3.13.9 python script.py
-    depends: step_2
+  - run: echo "Hello World"
+  - run: ls -la
+  - run: uv run --python 3.13.9 python script.py
 ```
 
 ### Multiple Commands

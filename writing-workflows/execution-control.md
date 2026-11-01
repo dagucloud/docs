@@ -220,7 +220,9 @@ steps:
     run: echo "Running task B"
     depends: setup
 
-  - run: echo "Finalizing"
+  - id: finalize
+    run: echo "Finalizing"
+    depends: [task_a, task_b]
 ```
 
 ## Retry and Repeat Control
