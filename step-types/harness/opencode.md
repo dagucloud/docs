@@ -10,7 +10,7 @@ For containerized Dagu runs, see [Run OpenCode in a Container](./sandbox/opencod
 
 ## Managed Sessions
 
-Built-in OpenCode harness steps use a host-owned OpenCode server session by default when launched by a standalone Dagu server, by `dagu start-all`, or on a distributed worker. The run page gets an **Agent** tab with the live timeline, tool activity, changed files, token usage, and native controls for permission requests and questions. Each managed step has its own conversation by default; when a run has multiple managed steps, choose the conversation by step name in the Agent tab. When OpenCode needs an answer, the step enters `waiting`, and the DAG-run enters `waiting` once no other step is running. Answering resumes the same session. While other steps of the run are still running, answering and starting a clean session are rejected; try again after they finish. In a root run, answering resumes the run even while other manual steps keep waiting. If the DAG belongs to an enabled [global queue](/server-admin/queues), the resume goes through the scheduler; use `dagu start-all` so the scheduler shares the server's OpenCode host.
+Built-in OpenCode harness steps use a host-owned OpenCode server session by default when launched by a standalone Dagu server, by `dagu start-all`, or on a distributed worker. The run gets an **Agent** tab with the live timeline, tool activity, changed files, token usage, and native controls for permission requests and questions. Each managed step has its own conversation by default; when a run has multiple managed steps, choose the conversation by step name in the Agent tab. When OpenCode needs an answer, the step enters `waiting`, and the DAG-run enters `waiting` once no other step is running. Answering resumes the same session. While other steps of the run are still running, answering and starting a clean session are rejected; try again after they finish. In a root run, answering resumes the run even while other manual steps keep waiting. If the DAG belongs to an enabled [global queue](/server-admin/queues), the resume goes through the scheduler; use `dagu start-all` so the scheduler shares the server's OpenCode host.
 
 ```yaml
 steps:
@@ -38,7 +38,7 @@ opencode:
     - OPENAI_API_KEY
 ```
 
-The environment equivalents are `DAGU_OPENCODE_EXECUTABLE` and comma-separated `DAGU_OPENCODE_ENV_PASSTHROUGH`.
+The environment equivalents are `DAGU_OPENCODE_EXECUTABLE` and comma-separated `DAGU_OPENCODE_ENV_PASSTHROUGH`. Dagu sets the managed server's sign-in itself, so `env_passthrough` rejects `OPENCODE_PASSWORD`, `OPENCODE_SERVER_USERNAME`, `OPENCODE_SERVER_PASSWORD`, and names that start with `_DAGU_INTERNAL_`; the configuration fails to load with such a name.
 
 Dagu does not add a Dagu MCP entry, install an OpenCode plugin, or modify configuration files. Existing OpenCode configuration, including user-configured MCP servers, is honored. Any environment variables referenced by those MCP servers must be included in `opencode.env_passthrough`. Add the [Dagu MCP configuration](/mcp/clients/opencode) yourself only when the agent needs to operate Dagu.
 
@@ -60,7 +60,21 @@ Dagu-created and forked OpenCode sessions belong to the DAG run, not to one atte
 
 **Start clean session** creates a new conversation generation and retries the step with its original prompt. Previous generations remain registered until the DAG run is deleted. This does not revert file changes already made in the workspace.
 
-The managed server shares one service identity among trusted workflows in the same Dagu process. Use separate workers or containerized CLI execution for untrusted workloads that need isolation. Dagu checks required API capabilities at host startup rather than relying on a version range; OpenCode v1.18.11 is the currently tested release.
+Stopping, cancelling, or timing out a managed step interrupts its turn once the turn has started, and waits, within a bound, for OpenCode to report the session idle. A stop never starts a fallback provider or the CLI path. A retry, restart, or DAG retry settles the discarded session before it creates a new one, and a prompt OpenCode has not started yet is delivered to the same session again. In a session supplied with `session:`, only Dagu's own turn is interrupted.
+
+The session's token usage and cost count toward the step's [model usage](/step-types/llm/#model-usage).
+
+The managed server shares one service identity among trusted workflows in the same Dagu process. Use separate workers or containerized CLI execution for untrusted workloads that need isolation. Dagu checks required API capabilities at host startup rather than relying on a version range; OpenCode v1.18.11 and v2.1.4 are tested releases.
+
+### OpenCode v2
+
+Install OpenCode v2 with `npm install -g @opencode/cli@2.1.4`; the v1 package is `opencode-ai`. Dagu selects the managed protocol from the server version.
+
+- With v2, `variant` requires `model`. Set both, or write the variant into the model as `model: provider/model#variant`.
+- The v2 CLI does not accept the v1 `--variant` and `--command` flags. Use managed mode for the `variant` and `command` options.
+- A managed v2 `command` must submit a prompt to the current session, as configured template commands do. A command that only changes settings or starts a separate subagent produces no harness result.
+- A missing command, model, or location fails the step with OpenCode's error name. Only a missing session marks the session unavailable.
+- Snapshot files that the assistant records appear as patch events in the session timeline.
 
 ## CLI Installation via Tools
 
@@ -102,7 +116,7 @@ opencode run "<prompt>"
 | Flag | Type | Description |
 |------|------|-------------|
 | `--model` | string | Model in `provider/model` format |
-| `--variant` | string | Provider-specific reasoning effort, such as `high` |
+| `--variant` | string | Provider-specific reasoning effort, such as `high`. OpenCode v1 only |
 | `--pure` | boolean | Run without external plugins |
 
 ## Example

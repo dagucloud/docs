@@ -22,7 +22,7 @@ steps:
         Summarize the incident report.
 ```
 
-Each model entry requires `provider` and `name`. It can override `temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. Streaming is disabled while fallback is configured so a partial response from a failed model is not mixed with the next response.
+Each model entry requires `provider` and `name`. It can override `temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`, and an `openrouter` entry can set its own [`provider_order`](/step-types/llm/providers#openrouter-provider-order). Streaming is disabled while fallback is configured so a partial response from a failed model is not mixed with the next response.
 
 Fallback applies to both `chat.completion` actions and `type: agent`
 decision calls. An agent starts with the first entry and advances in order
@@ -45,7 +45,7 @@ model. The run fails only after no configured model remains.
 
 ## Retries and Availability
 
-Dagu's LLM clients automatically retry transient network failures, rate-limit responses (`429`), and common server failures (`500` through `504`). When model fallback is configured, Dagu tries the next model after retries for the current model are exhausted.
+Dagu's LLM clients automatically retry transient network failures, rate-limit responses (`429`), and common server failures (`500` through `504`). OpenRouter can report an upstream failure inside a `200` response; Dagu retries such an error when its code is a rate limit or a server error, and retries an answer that carries no choices and no error. When model fallback is configured, Dagu tries the next model after retries for the current model are exhausted.
 
 Add a step-level `retry_policy` when the complete action should be attempted again after the provider retries and all fallback models fail:
 

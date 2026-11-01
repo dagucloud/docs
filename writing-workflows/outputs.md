@@ -132,21 +132,23 @@ Rules:
 
 ## Running One Step
 
-`dagu start --only deploy` runs `deploy` without the steps before it; they are recorded as skipped. The outputs `deploy` reads then come from one of two places:
+`dagu start --only deploy` runs `deploy` without the steps before it; they are recorded as skipped. The outputs `deploy` reads then come from finished runs of the same DAG:
 
 ```bash
 # Reuse the outputs a finished run recorded
 dagu start --only deploy --outputs-from 20260925_101500 pipeline.yaml
 
-# Supply the value yourself
-dagu start --only deploy --output build.image=registry.example.com/app:dev pipeline.yaml
+# Take one step's outputs from its own run
+dagu start --only deploy --outputs-from 20260925_101500 --output-from build=20260926_080000 pipeline.yaml
 ```
 
 - `--outputs-from` carries the outputs of steps that succeeded in that run, and copies its work directory.
-- `--output <step>.<name>=<value>` sets one output of a skipped step, and wins over `--outputs-from`. The name must be declared by the step's `outputs` unless the step declares none, and a `type: json` output needs valid JSON. The step needs an `id`, since references address steps by ID.
-- With neither, `${steps.build.outputs.image}` stays unresolved, as for any output that was never published.
+- `--output-from <step>=<run-id>` takes one skipped step's outputs from its own finished run, and wins over `--outputs-from` for that step. The step must have succeeded in that run and cannot also be named by `--only`. Repeat the flag for more steps. The run records the run each reused step came from.
+- Only a skipped step that a selected step depends on, directly or through other steps, carries outputs. Without a source, `${steps.build.outputs.image}` stays unresolved, as for any output that was never published.
+- The `success`, `failure`, `abort`, `wait`, and `exit` handlers run only when a selected step is a graph end step, one that no other step depends on. `handler_on.init` runs as usual.
+- `--output <step>.<name>=<value>` is deprecated; use `--output-from`.
 
-The REST API takes the same selection as `steps`, `outputsFromRunId`, and `outputs`; see [Start DAG](/web-ui/api#start-dag).
+The REST API takes the same selection as `steps`, `outputsFromRunId`, and `outputsFromRuns`; see [Start DAG](/web-ui/api#start-dag) and the [`start` command](/getting-started/cli#start).
 
 ## Output Names
 

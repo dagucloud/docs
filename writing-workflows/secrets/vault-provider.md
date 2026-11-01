@@ -36,6 +36,8 @@ export DAGU_SECRETS_VAULT_CLIENT_CERT=/etc/dagu/certs/vault-client.crt
 export DAGU_SECRETS_VAULT_CLIENT_KEY=/etc/dagu/certs/vault-client.key
 ```
 
+To keep the token out of the configuration, set `secrets.vault.token_file` or `DAGU_SECRETS_VAULT_TOKEN_FILE` to a file that holds it, such as a mounted Docker or Kubernetes secret. Dagu reads the file at startup. See [Secrets From Files](/server-admin/configuration#secrets-from-files).
+
 Per-secret options override the global defaults for that secret:
 
 ```yaml

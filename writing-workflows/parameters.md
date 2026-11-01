@@ -6,6 +6,8 @@ By default, parameter defaults are treated as literal values. If you want a para
 
 Use `${params.name}` when Dagu should resolve and validate a named parameter reference.
 
+Declare `params` in each DAG that uses them. A `params` block in the [base config](/server-admin/base-config) draws a build warning; share fixed values through `consts` in the base config instead.
+
 ## Supported Formats
 
 Dagu supports these DAG-level parameter formats:
@@ -348,6 +350,8 @@ The schema can be:
 - **Boolean schema**: `true` to accept any object, `false` to reject all input
 
 `values:` provides defaults that are validated against the schema.
+
+A value whose property declares no scalar `type`, such as an object, an array, or a name the schema does not list, reaches the run as the text supplied. The schema validates its decoded form, so `VERSION=1.10` stays `1.10` and a large integer keeps every digit. Defaults that the schema fills into an object value are added without rewriting the numbers already written.
 
 Inline object example:
 

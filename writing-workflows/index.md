@@ -250,6 +250,8 @@ Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-type
 | Send DAG-local scripts and configuration to distributed workers | [File Dependencies](/writing-workflows/file-dependencies) |
 | Reuse unchanged file-producing steps across runs | [Build Workflows](/writing-workflows/incremental-workflows) |
 | Add conditions, loops, parallel iteration, or sub-DAGs | [Control Flow](/writing-workflows/control-flow) |
+| Skip holidays or run on business days | [Business Calendars](/writing-workflows/business-calendars) |
+| Start a run for each file that arrives in a folder | [Watched Folders](/writing-workflows/watched-folders) |
 | Configure retries, timeouts, handlers, and failure behavior | [Durable Execution](/writing-workflows/durable-execution) and [Error Handling](/writing-workflows/error-handling) |
 | Run HTTP, SQL, SSH, Docker, Kubernetes, or other actions | [Built-in Actions](/step-types/shell) |
 | Start from copyable workflows | [Examples](/writing-workflows/examples) |

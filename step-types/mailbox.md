@@ -65,7 +65,7 @@ steps:
 ```
 
 - `mail.search` publishes the unread emails as `messages`, oldest first.
-- `foreach` runs its `steps` once for each email. `${foreach.email}` is the current email, and `${foreach.email.subject}` one of its fields.
+- `foreach` runs its `steps` once for each email. `${foreach.email}` is the current email, and `${foreach.email.subject}` one of its fields. Keep the `foreach.` prefix: `${email.subject}` is not an item reference, and the item fails with `${email.subject} does not reference the foreach item; use ${foreach.email.subject}` unless another value named `email` supplies it.
 - The email's text reaches the script through `env`, never inside the command itself; see [Safety](#safety).
 - Marking the email read is the last step for that email, so an email whose ticket fails stays unread and the next run tries it again; see [Process Each Email Once](#process-each-email-once).
 
@@ -250,6 +250,8 @@ steps:
     env:
       - INVOICES: ${steps.invoices.outputs.messages}
 ```
+
+To have a model read the saved attachments, pass the same `messages` output to the [`files`](/step-types/llm/#files) of a `chat.completion` step; it reads each email's saved attachments.
 
 ## Organize Email
 

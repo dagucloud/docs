@@ -185,6 +185,8 @@ steps:
 
 Dagu removes its escape marker and passes `${steps.build.outputs.image}` to the script as literal text.
 
+Path fields, such as `working_dir`, `stdout`, and `file.*` paths, are the exception: there a backslash is path text, so `C:\out\${params.name}.log` resolves the reference. See [Backslashes in Path Fields](/writing-workflows/quoting-and-escaping#backslashes-in-path-fields).
+
 Single quotes alone do not escape Dagu-owned references. They protect
 unqualified `$NAME` and `${NAME}` only when the quote characters remain after
 YAML parsing. See

@@ -178,7 +178,23 @@ tools:
     - example/tool@v1.2.3
 ```
 
-For custom registries, `registry.ref` is required. Prefer a commit SHA for immutability.
+For `github_content` registries, `registry.ref` is required. Prefer a commit SHA for immutability.
+
+For a registry file on the worker's own filesystem, use `local`:
+
+```yaml
+tools:
+  registry:
+    type: local
+    path: /opt/aqua/registry.yaml
+  packages:
+    - example/tool@v1.2.3
+```
+
+- `path` is required and must be absolute for the worker's operating system: a POSIX path, a Windows drive path such as `C:\aqua\registry.yaml`, or a UNC path. It is read on the worker that runs the DAG, not where the DAG is validated.
+- The file must be a regular file of at most 16 MiB. The worker reads it once before installing and installs from that snapshot.
+- The file's content is part of the toolset hash, so editing the registry installs a new toolset. Each distinct content keeps its own package set and aqua-proxy on every worker, and Dagu does not prune them.
+- Pin packages with a [digest](#digest-pinning) to fix the downloaded bytes even when the registry or an asset URL changes.
 
 ## Runtime Behavior
 

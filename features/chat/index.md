@@ -19,7 +19,7 @@ Dagu can call language models from workflows, let models invoke DAGs as tools, o
 
 ## LLM Completions
 
-Use `action: chat.completion` for provider API calls, multi-turn sessions, model fallback, reasoning, web search, and response routing.
+Use `action: chat.completion` for provider API calls, multi-turn sessions, reading files, model fallback, reasoning, web search, and response routing.
 
 - [LLM Completion](/step-types/llm/): quick start and complete field reference
 - [Providers & Endpoints](/step-types/llm/providers): credentials, shared defaults, and compatible endpoints

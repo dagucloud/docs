@@ -380,6 +380,10 @@ steps:
 
 Interpolated scalar strings are normalized before flags are generated, so values such as `"true"`, `"10"`, and `"5.5"` become booleans or numbers.
 
+## Model Usage
+
+A managed [OpenCode](./opencode) step adds what its session's models used to the step's [model usage](/step-types/llm/#model-usage). CLI providers and [ACP](./acp) agents do not report usage, so the step records the provider in `notReported` instead.
+
 ## Exit Codes
 
 | Exit code | Meaning |

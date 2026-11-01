@@ -23,7 +23,7 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.attempt.started_at}` | After the run attempt starts | None |
 | `${context.step.id}` | Current executable step when it has an `id` | None |
 | `${context.step.name}` | Current step or handler | `DAG_RUN_STEP_NAME` |
-| `${context.trigger.type}` | When the trigger type is known | None |
+| `${context.trigger.type}` | When the trigger type is known: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`, or `file` | None |
 | `${context.trigger.actor}` | Runs started by an attributable actor | None |
 | `${context.paths.log_file}` | All steps and handlers | `DAG_RUN_LOG_FILE` |
 | `${context.paths.work_dir}` | When a per-run work directory is available | `DAG_RUN_WORK_DIR` |
@@ -78,6 +78,8 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `WEBHOOK_PAYLOAD` | Webhook-triggered runs only | JSON string containing the payload from the webhook request body. Only available when the DAG was triggered via a webhook. Left out when the payload does not fit in one environment variable; read `WEBHOOK_PAYLOAD_FILE` instead. | `{"branch":"main","commit":"abc123"}` |
 | `WEBHOOK_PAYLOAD_FILE` | Webhook-triggered runs only (v2.20 or later) | Absolute path to a private file holding the payload. Always set for webhook-triggered runs; the file is removed when the run ends. | `/tmp/dagu-webhook-1234/payload` |
 | `WEBHOOK_HEADERS` | Webhook-triggered runs only | JSON object containing the allow-listed request headers configured by `webhook.forward_headers`. Header names are lowercase and values are arrays of strings. | `{"x-github-event":["push"]}` |
+| `WATCH_FILE` | Runs started by a [watched folder](/writing-workflows/watched-folders) only | Absolute path of the file that arrived. Also a run parameter, readable as `${WATCH_FILE}`. The name comes from whoever put the file there; quote it in shell commands. | `/home/user/Downloads/invoices/march.pdf` |
+| `WATCH_NAME` | Runs started by a watched folder only | Name of the file that arrived. | `march.pdf` |
 
 ## Per-Run Work Directory (`DAG_RUN_WORK_DIR`)
 

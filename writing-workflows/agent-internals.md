@@ -161,7 +161,8 @@ Failed model requests neither advance the turn counter nor append an assistant
 message. Each candidate sees the same provider-agnostic transcript, and the
 assistant message produced by a successful candidate records its actual
 provider and model. Entry-level `temperature`, `max_tokens`, `top_p`,
-`base_url`, and `api_key_name` override the shared values for that candidate.
+`base_url`, `api_key_name`, and `provider_order` override the shared values for
+that candidate.
 
 Transient failures are retried in two layers before a decision fails:
 
@@ -215,8 +216,11 @@ Every decision records the provider, the model, and the prompt, completion,
 and total token counts on the assistant message. The **Chat** tab shows them
 per message, so the growth of the conversation is visible turn by turn.
 
-There is no aggregate budget: Dagu does not sum tokens per run or stop a run at
-a spend threshold. The working controls are `llm.max_tool_iterations`, which
+The decisions also add up as [model usage](/step-types/llm/#model-usage) on the
+run's `__agent__` node, and the run details sum the usage of every step, cost
+included when the provider reports it. There is no budget:
+Dagu does not stop a run at a spend threshold. The working controls are
+`llm.max_tool_iterations`, which
 bounds how many completions a run can make; `llm.observation_max_bytes`, which
 bounds each new observation; and `llm.max_context_tokens`, which starts aging
 the older part of the transcript.

@@ -120,6 +120,16 @@ See [Tool Calling](/features/chat/tool-calling).
 
 See [Structured output](#structured-output).
 
+**Read files.** `files` hands the model PDFs, Word and Excel documents, text files, and images with the prompt:
+
+```yaml
+    with:
+      prompt: Read the invoice and give its number, date, and total.
+      files: ~/Downloads/invoice-*.pdf
+```
+
+See [Files](#files).
+
 **Route on the answer.** Ask for a label, then branch with `router.route`:
 
 ```yaml
@@ -212,6 +222,38 @@ Validation checks the shape of the answer, not whether it is true. For extractio
 
 Some models refuse a forced tool call: Claude models while `thinking` is enabled, and Claude 5 models always. For those, Dagu asks for the tool without forcing it and relies on the instruction, the validation, and the correction.
 
+## Files
+
+`files` names the files the model reads with the prompt: one path or glob pattern, several of them as a list or one per line, or a list an earlier step published, such as the `messages` of a [`mail.search`](/step-types/mailbox#attachments) step that saved attachments.
+
+```yaml
+steps:
+  - id: read
+    action: chat.completion
+    with:
+      provider: anthropic
+      model: claude-sonnet-5
+      prompt: Read the invoice and give its number, date, and total.
+      files: ~/Downloads/invoice-*.pdf
+    output_schema:
+      type: object
+      properties:
+        number: {type: string}
+        date: {type: string}
+        total: {type: number}
+      required: [number]
+```
+
+- A leading `~` is the home directory, and a relative path resolves from the step's working directory. Each file is read once, in the order named, before any request.
+- Text files (`.txt`, `.md`, `.csv`, `.tsv`, `.json`, `.jsonl`, `.yaml`, `.yml`, `.xml`, `.html`, `.htm`, `.log`), Word documents (`.docx`), and Excel workbooks (`.xlsx`, `.xlsm`) are given as text, a paragraph or row a line. A text file in Shift_JIS is decoded.
+- A PDF is given page by page as text. A page without text of its own, such as a scan, is rendered to an image.
+- PNG, JPEG, GIF, and WebP files are given as images, scaled down to a long edge of 1568 pixels when larger. Choose a model that accepts images when a file is an image or a scan.
+- The text goes ahead of the last user message, each file in a `<file name="…">` block. The images go with that message, and the text names each by its place, such as `[Image 1 is receipt.png.]`.
+- Together the files may hold up to 1,000,000 characters of text and 50 images. A file over 50 MB, a file of another kind, a missing file, and a pattern that matches nothing fail the step before any request.
+- The [session](#sessions) keeps the text, so a later chat step that inherits the session still reads it. The images go with the one request and are not kept. A push-back resends the feedback without the files.
+
+`files` is an LLM configuration field: a step that sets it replaces the DAG-level `llm` block, so it needs its own `provider` and `model`. A DAG-level `llm` block rejects `files`, since files belong with the prompt that asks about them.
+
 ## Sessions
 
 The completed session is saved with the DAG run, including the provider, model, and token usage reported for assistant messages. A chat step also inherits conversation history from the steps in its `depends` list, which is what makes the multi-turn pattern above work:
@@ -222,6 +264,15 @@ The completed session is saved with the DAG run, including the provider, model, 
 - Retries continue with the session already attached to the DAG run.
 
 When [approval push-back](/writing-workflows/human-in-the-loop#push-back-context) or [human-task push-back](/writing-workflows/human-tasks#requesting-changes) re-executes a chat step, Dagu restores the previous conversation and appends the reviewer feedback as the next user message; the workflow does not need to wire `${FEEDBACK}` itself.
+
+## Model usage
+
+Each step that calls a model keeps what it used, over every attempt, for each provider and model: the number of calls, input tokens with the cached and cache-write tokens among them, output tokens with the reasoning tokens among them, and the cost the provider reported. The run details from the [REST API](/web-ui/api) give it as `modelUsage` on each step, and summed over every step and handler as `modelUsage` on the run.
+
+- Chat completions, [Agent DAG](/writing-workflows/agent) decisions, [decision steps](/step-types/decision), and the model calls of browser, computer, and xlsx steps count toward their own step.
+- A sub-DAG step counts what its child run used, and a `foreach` step counts what its item bodies used.
+- A managed [OpenCode](/step-types/harness/opencode#managed-sessions) step counts what its session reports. Other coding-agent CLIs and [ACP](/step-types/harness/acp) agents do not report usage; the step names such a tool in `notReported`.
+- Cost appears only when the provider reports it, as OpenRouter does. `costReportedCalls` counts the calls that reported a cost, so the cost is complete only when it equals `calls`.
 
 ## Configuration
 
@@ -239,17 +290,19 @@ All action-specific fields belong under `with`, except `output_schema`, which si
 | `top_p` | number | provider default | Nucleus sampling value from `0.0` to `1.0`. |
 | `base_url` | string | provider default | Base URL for a [custom or OpenAI-compatible endpoint](/step-types/llm/providers#openai-compatible-endpoints). |
 | `api_key_name` | string | provider default | Environment variable that contains the API key. |
+| `provider_order` | array | - | OpenRouter only: the [upstream providers to try first](/step-types/llm/providers#openrouter-provider-order), in order. |
 | `stream` | boolean | `true` | Stream response tokens to stdout as they arrive. |
 | `thinking` | object | disabled | Provider-specific [extended reasoning](/step-types/llm/reasoning-web-search#reasoning). |
 | `tools` | array | - | DAG names exposed to the model as callable tools. |
 | `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds. |
 | `web_search` | object | disabled | [Built-in web-search integration](/step-types/llm/reasoning-web-search#web-search) settings. |
+| `files` | string or array | - | [Files](#files) the model reads with the prompt: paths, glob patterns, or a list an earlier step published. Not valid in the DAG-level `llm` block. |
 
-`messages[].content`, `system`, and `base_url` support scoped value references such as `${params.TOPIC}` and `${env.LLM_BASE_URL}`.
+`messages[].content`, `system`, `base_url`, and `files` support scoped value references such as `${params.TOPIC}` and `${env.LLM_BASE_URL}`.
 
 ## Security
 
-Values registered as Dagu secrets are masked before messages are sent to the provider. The run's saved session retains the resolved message content, so avoid placing unnecessary secrets in prompts and restrict access to run history.
+Values registered as Dagu secrets are masked before messages are sent to the provider. The run's saved session retains the resolved message content, including the text read from `files`, so avoid placing unnecessary secrets in prompts and restrict access to run history.
 
 ## Next Steps
 

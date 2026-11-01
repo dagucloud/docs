@@ -1,6 +1,6 @@
 # Scheduling
 
-Automate workflow execution with cron schedules and one-off start times.
+Automate workflow execution with cron schedules, one-off start times, and watched folders.
 
 ## Prerequisites
 
@@ -58,7 +58,7 @@ The zombie detector runs every `scheduler.zombie_detection_interval` (default: 4
 
 1. Read the proc file timestamp. If `now - timestamp < proc.stale_threshold`, the run is alive, so skip it.
 2. If stale, increment a per-run counter. If the counter is below `scheduler.failure_threshold` (default: 3), wait for the next cycle.
-3. After `scheduler.failure_threshold` consecutive stale checks, re-read the run's status. If it is still active (running/queued/waiting), write status "failed". If the run already completed (succeeded/cancelled/failed), do nothing.
+3. After `scheduler.failure_threshold` consecutive stale checks, re-read the run's status. If it is still running, write status "failed". If the run is queued or waiting, which needs no process, or has completed (succeeded/cancelled/failed), do nothing.
 4. Independent of the background detector, status reads also repair verified stale local runs immediately once no fresh local proc heartbeat remains, so `dagu server` and direct CLI execution do not leave runs stuck in `running`.
 
 With defaults, a truly dead process is detected by the background scheduler in at most `scheduler.failure_threshold × scheduler.zombie_detection_interval` = 3 × 45s = **135 seconds**. A transiently stale process (GC pause, I/O lag) survives as long as it recovers within that window.
@@ -205,6 +205,22 @@ The **Cron** launcher on the workflow canvas lists the next runs of the start sc
 The list comes from the definition alone. When the DAG is suspended or the scheduler is paused, the launcher says that none of the listed runs will start.
 
 The same list is available as `upcomingRuns` in DAG details, `GET /dags/{fileName}/spec`, and `POST /dags/validate`, and in the MCP `dagu_read` result for a DAG. On the command line, `dagu calendar fires <DAG>` lists the next fires, and `dagu ls -n` shows the scheduler's next run.
+
+## Watched Folders
+
+Start a run for each file that arrives in a folder instead of polling it on a schedule:
+
+```yaml
+watch:
+  path: ~/Downloads/invoices
+  pattern: "*.pdf"     # optional; every file by default
+  interval: 30s        # optional; 10s by default
+steps:
+  - id: count_pages
+    run: pdfinfo "$WATCH_FILE"
+```
+
+A file counts as arrived once its size and modification time hold still between two readings. Each file runs once, with its path in `WATCH_FILE` and its name in `WATCH_NAME`, and the files already in the folder when the watch starts are left alone. See [Watched Folders](/writing-workflows/watched-folders).
 
 ## One-Off Schedules
 
@@ -449,6 +465,7 @@ A pause has the same effect as suspending every DAG by hand:
 | Schedule | No runs are created |
 | Catchup | No runs are replayed |
 | Auto-retry | No retries are enqueued |
+| [Watched folder](/writing-workflows/watched-folders) | No runs start; arrived files wait and run after the resume |
 | Manual, webhook, sub-DAG | Unaffected |
 
 The scheduler process keeps running. Queue processing, zombie detection, and notification delivery continue, which is why pausing is preferable to stopping the process.

@@ -764,8 +764,9 @@ steps:
       limit: 120
 ```
 
-> **Note**: always set `limit` on an `until` repeat. Without it the step repeats
-> indefinitely while the condition stays unmet.
+> **Note**: set `limit` on an `until` repeat that should give up. Without it the
+> step repeats indefinitely while the condition stays unmet, as a
+> [continuous step](#repeat-without-a-limit).
 
 To poll the status URL of an HTTP job until the job finishes, see
 [Poll an Asynchronous Job](/step-types/http#poll-an-asynchronous-job).
@@ -789,6 +790,56 @@ steps:
 A failed attempt stops a `while` repeat and fails the step, and an `until`
 step whose last allowed attempt fails also fails. A `retry_policy` retries a
 failed attempt before the repeat decision.
+
+### Repeat Without a Limit
+
+A step whose `repeat_policy` has a `repeat` mode and no `limit` is a continuous
+step. It repeats until its condition ends it or the run stops, and Dagu keeps
+its disk use, memory, and pages small so it can run a check every second for
+years:
+
+```yaml
+steps:
+  - id: heartbeat
+    run: curl -fsS --max-time 5 https://example.com/health
+    repeat_policy:
+      repeat: until
+      condition: test -f /tmp/stop-heartbeat   # stop by creating this file
+      interval_sec: 1
+```
+
+With a `condition`, a failed check does not end the repeat; the next one runs
+on schedule. A continuous step differs from a step with a `limit` in what it
+keeps:
+
+- **Samples.** Each execution records its start time, duration, exit code, and,
+  for a failed one, the last line of its stderr. Samples are kept per second
+  for 24 hours, then as per-minute summaries for 7 days, per-hour summaries for
+  30 days, and per-day summaries with no limit.
+- **Events.** The step records when it starts and stops, the first failed
+  check of each outage, and the check that ends it, with the count of failed
+  checks and the length of the outage. A long outage records another failure
+  event every hour. Events never expire.
+- **Log.** Stdout and stderr go to a log of at most four 2 MiB segments; the
+  oldest segment is dropped when the last fills. The output of the last
+  execution and of each failed execution is kept while its segment is; the
+  output of an execution that succeeded is dropped once the next one starts.
+- **Status.** While the step repeats, the run status is written at most once a
+  minute, and at once when a check fails or recovers, the step stops or
+  retries, or the run ends. The execution count shown is the count at the last
+  write, in a compact form such as `1.2k` or `31M`.
+
+The **Continuous** tab of the workflow page's Activity panel shows a continuous step with its availability over the last 24
+hours, 7, 30, and 365 days, the checks since the last failure, a chart of the
+executions that zooms from one hour to years, and the list of events. The
+[REST API](/web-ui/api) serves the same data at
+`/api/v1/dag-runs/{name}/{dagRunId}/steps/{stepName}/samples`, `/events`, and
+`/availability`, and the run details mark the step with `continuous: true`.
+
+A run that stops or crashes loses at most the last minute of samples, and an
+outage open at the stop continues when the step starts again. Samples are kept
+in the run's local record, so a run whose status a distributed worker sends
+through the coordinator has none.
 
 ### Stopping a Repeating Step
 

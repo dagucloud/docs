@@ -69,6 +69,29 @@ steps:
 
 This configuration uses `https://openrouter.ai/api/v1` and reads the API key from `OPENROUTER_API_KEY`; neither `base_url` nor `api_key_name` is required. The same key reaches model ids from any vendor on the gateway.
 
+### OpenRouter Provider Order
+
+OpenRouter routes each request to one of the upstream providers that serve the model. `provider_order` lists the upstream providers to try first, in order:
+
+```yaml
+steps:
+  - id: summarize
+    action: chat.completion
+    with:
+      provider: openrouter
+      model: openai/gpt-5
+      provider_order: [azure/eu]
+      prompt: |
+        Summarize the incident report.
+```
+
+OpenRouter can pass over an endpoint, such as one with a regional surcharge, unless the request names it. An account limited to zero-data-retention endpoints may need `provider_order` to reach some models.
+
+- Dagu sends the list as OpenRouter's `provider.order` on every request of the step, including Agent DAG decisions and the model calls of browser, computer, and xlsx steps. Every `llm` block accepts it, including the DAG-level one.
+- OpenRouter can still fall back to providers outside the list, within the account's data policy.
+- An entry of a [`model` fallback list](/step-types/llm/reliability#model-fallback) can set its own `provider_order`, which replaces the shared one for that entry.
+- Only the `openrouter` provider accepts it. Validation rejects `provider_order` for any other provider, including a fallback entry that inherits a shared list. A provider given by a value reference is checked once it resolves.
+
 For another gateway, proxy, or hosted service that implements OpenAI's Chat Completions API, use the `openai` provider with a custom endpoint:
 
 ```yaml

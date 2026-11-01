@@ -1,6 +1,6 @@
 # Scheduling & Queues Examples
 
-Examples for schedules, time zones, queue assignment, global queues, and notifications.
+Examples for schedules, time zones, watched folders, queue assignment, global queues, and notifications.
 
 <div class="examples-grid">
 
@@ -122,6 +122,53 @@ flowchart LR
 ```
 
 <a href="/writing-workflows/scheduling#timezone-support" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Watched Folder
+
+```yaml
+watch:
+  path: ~/Downloads/invoices
+  pattern: "*.pdf"
+  interval: 30s
+steps:
+  - id: read
+    action: chat.completion
+    with:
+      provider: anthropic
+      model: claude-sonnet-5
+      prompt: Read the invoice and give its number, date, and total.
+      files: ${WATCH_FILE}
+    output_schema:
+      type: object
+      properties:
+        number: {type: string}
+        date: {type: string}
+        total: {type: number}
+      required: [number]
+
+  - id: file
+    depends: read
+    action: file.move
+    with:
+      source: ${WATCH_FILE}
+      destination: ~/Documents/invoices/${steps.read.outputs.number}.pdf
+      create_dirs: true
+```
+
+```mermaid
+flowchart LR
+    W["watch · *.pdf arrives"] --> R["read · chat.completion"]
+    R --> F["file · file.move"]
+    style W stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:lime,stroke-width:1.6px,color:#333
+    style F stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/writing-workflows/watched-folders" class="learn-more">Learn more →</a>
 
 </div>
 

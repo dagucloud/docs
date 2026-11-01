@@ -178,6 +178,7 @@ steps:
 | `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. | `0` |
 | `catchup_window` | string | Duration for replaying missed cron runs after scheduler downtime. If omitted, missed runs are not replayed. | - |
 | `overlap_policy` | string | Catchup overlap behavior: `skip`, `all`, or `latest`. | `skip` |
+| `watch` | object | [Watched folder](/writing-workflows/watched-folders): `path` (required), `pattern`, and `interval`. Starts one run for each file that arrives, with `WATCH_FILE` and `WATCH_NAME`. | - |
 
 ```yaml
 # Single cron schedule
@@ -228,6 +229,12 @@ schedule:
     business_days: [3, -1]
   - expression: "0 3 * * *"
     calendar: none
+
+# Watched folder
+watch:
+  path: ~/Downloads/invoices
+  pattern: "*.pdf"
+  interval: 30s
 ```
 
 `at` is accepted only in a top-level `schedule` array and under `schedule.start`. `schedule.stop` and `schedule.restart` accept cron entries only. `at` timestamps must be RFC 3339 timestamps with an explicit offset or `Z`, and seconds must be `:00`.
@@ -235,6 +242,8 @@ schedule:
 `profile` is an activation filter. A profile-scoped schedule participates in scheduling only when it matches the DAG's effective default runtime profile from the server-side DAG settings. Unscoped schedule entries are always active. If a DAG has no default runtime profile, profile-scoped entries are ignored. `profile` does not override the runtime profile used by the run.
 
 An object-form start entry also accepts `calendar`, which overrides the DAG-level `calendar` or opts out with `none`, and `business_days`, a list of business days of the month from 1 to 23 or -23 to -1 (`-1` is the last). A fire on a day that is not a business day is dropped. One-off entries and stop or restart schedules take neither key. See [Business Calendars](/writing-workflows/business-calendars).
+
+`watch.path` is the folder read; a leading `~` is the home directory. `watch.pattern` is a glob the file name must match, such as `*.pdf`, and matches every file when omitted. `watch.interval` is a duration of at least `1s` and defaults to `10s`. A DAG with `watch` needs no `schedule`. See [Watched Folders](/writing-workflows/watched-folders).
 
 ### Execution Control
 
@@ -333,7 +342,7 @@ tools:
       commands: [jq]
 ```
 
-The default provider is `aqua`. `latest` is rejected; package versions must be pinned. Managed tools are scoped to the current DAG run and are not inherited by sub-DAGs.
+The default provider is `aqua`. `latest` is rejected; package versions must be pinned. `registry.type` is `standard`, `github_content`, or `local`, a registry file at an absolute path on the worker; see [Registry](/writing-workflows/tools#registry). Managed tools are scoped to the current DAG run and are not inherited by sub-DAGs.
 
 ### Parameters
 
@@ -597,7 +606,7 @@ steps:
 
 Supported provider values are `openai`, `openai-codex`, `anthropic`, `gemini`, `google`, `openrouter`, `zai`, `zhipu`, `zhipuai`, `glm`, `opencode`, `local`, `ollama`, `vllm`, and `llama`.
 
-LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`.
+LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `provider_order`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`. [`provider_order`](/step-types/llm/providers#openrouter-provider-order) lists the OpenRouter upstream providers to try first and is accepted only with the `openrouter` provider. A `chat.completion` step also accepts [`files`](/step-types/llm/#files) under `with`, the files the model reads with the prompt; the DAG-level `llm` block rejects it.
 
 `model` accepts either a model-name string paired with `provider`, or an
 ordered array used by `chat.completion` actions and Agent DAG decisions:
@@ -612,7 +621,8 @@ llm:
 ```
 
 Each array entry requires `provider` and `name` and can override
-`temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. The first
+`temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, and
+`provider_order`. The first
 entry is primary; failures advance through later entries in order. An Agent DAG
 keeps a successful fallback selected for later decisions in the same process.
 
@@ -1188,7 +1198,7 @@ steps:
 | `interval_sec` | integer or string | Delay between repetitions. |
 | `backoff` | boolean or number | Exponential backoff multiplier. |
 | `max_interval_sec` | integer or string | Maximum repetition interval. |
-| `limit` | integer or string | Maximum number of executions. |
+| `limit` | integer or string | Maximum number of executions. Without it the step is a [continuous step](/writing-workflows/control-flow#repeat-without-a-limit) with bounded logs and sampled history. |
 | `condition` | string | Condition to evaluate. |
 | `expected` | string | Exact value, regex pattern with `re:`, or numeric comparison with `num:`. |
 | `exit_code` | array | Exit codes that trigger repeat. |

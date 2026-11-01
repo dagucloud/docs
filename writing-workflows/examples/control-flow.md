@@ -191,7 +191,7 @@ flowchart TD
     style N stroke:green,stroke-width:1.6px,color:#333
 ```
 
-<a href="/writing-workflows/control-flow#repeat-basic" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/control-flow#repeat-without-a-limit" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -219,7 +219,7 @@ flowchart TD
     style N stroke:green,stroke-width:1.6px,color:#333
 ```
 
-<a href="/writing-workflows/control-flow#repeat-basic" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/control-flow#repeat-until-mode" class="learn-more">Learn more →</a>
 
 </div>
 

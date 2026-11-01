@@ -141,6 +141,64 @@ Escaping for Dagu and escaping for a later runtime are separate concerns:
   `\${params.name}`. Plain, YAML single-quoted, and block scalars preserve the
   backslash as written.
 
+## Backslashes in Path Fields
+
+In a field that holds a filesystem path, a backslash is part of the path and
+never a Dagu escape marker, so a Windows path keeps its separator before a
+reference:
+
+```yaml
+params:
+  - name: name
+    default: prod
+
+steps:
+  - id: write_log
+    action: file.write
+    with:
+      path: C:\out\${params.name}.log
+      content: done
+```
+
+Dagu writes to `C:\out\prod.log`. Every reference form after a backslash
+resolves, Dagu removes no backslash, and a path field has no escape for
+literal dollar text.
+
+Assuming `${params.name}` is `prod` and `NAME` is `order-1.txt`:
+
+| Text Dagu receives in a path field | The field receives |
+| --- | --- |
+| `C:\out\${params.name}.log` | `C:\out\prod.log` |
+| `C:\done\${NAME}` | `C:\done\order-1.txt` |
+| `C:\out\\${params.name}` | `C:\out\\prod` |
+
+The workflow path fields are `dotenv` entries, root and step `working_dir`,
+step `stdin`, `stdout`, and `stderr` with their `artifact` paths,
+`output.<name>.path`, and `human.task` `with.artifacts`. Action inputs that are
+paths are path fields too:
+
+| Actions | Path inputs |
+| --- | --- |
+| `file.*` | `with.path`, `with.source`, `with.destination` |
+| `archive.*`, `s3.*` | `with.source`, `with.destination` |
+| `wait.file` | `with.path` |
+| `template.render` | `with.output` |
+| `http.request` | `with.output`, every value under `with.files` |
+| `jq.filter`, `data.*` | `with.input` |
+| `js.run` | `with.input_file` |
+| `xlsx.*` | `with.path`, `with.input`, `with.output` |
+| `postgres.*` | `with.output_file`, `with.import.input_file` |
+| `sqlite.*` | `with.dsn`, `with.output_file`, `with.import.input_file` |
+| `clickhouse.query` | `with.file`, `with.tls_ca` |
+| `redis.*` | `with.script_file`, `with.tls_cert`, `with.tls_key`, `with.tls_ca` |
+| `git.*` | `with.path`, `with.ssh_key_path` |
+| `mail.*` | every entry of `with.attachments` |
+| `kubernetes.run`, `k8s.run` | `with.kubeconfig` |
+
+Every other field, including `run`, `env` values, and action inputs not listed
+here, keeps the backslash escape. A Windows path in such a field uses `/` or a
+doubled `\\` before a reference.
+
 ## Quoting Does Not Sanitize Inserted Values
 
 Dagu inserts resolved strings as written. It does not shell-escape, JSON-escape,
