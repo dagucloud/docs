@@ -16,7 +16,7 @@ Every model request goes through Dagu's own [LLM providers](/step-types/llm/prov
 
 ## Requirements
 
-- Dagu v2.18.0 or later. A Dagu release after v2.22.2 is needed for [window maximizing](#window-size), [checks on values](#checks-on-values), [handlers](#screens-that-come-up-sometimes), and `check` and `uncheck`, and on macOS for [exact checks](#exact-checks), [element replay](#replaying-by-element), and [pins](#pinned-steps).
+- Dagu v2.18.0 or later. Dagu v2.22.3 or later is needed for [window maximizing](#window-size), [checks on values](#checks-on-values), [handlers](#screens-that-come-up-sometimes), and `check` and `uncheck`, and on macOS for [exact checks](#exact-checks), [element replay](#replaying-by-element), and [pins](#pinned-steps). `with.visible` needs v2.24.0 or later, and [outlines](#outlines), [`with.refuse`](#buttons-a-step-never-presses), and `choose` need v2.25.0 or later.
 - macOS or Windows. On other systems the step fails with `desktop automation is supported on macOS and Windows only`.
 - Dagu running in a logged-in user session with the screen unlocked. On Windows it must not run as a service. On macOS, Screen Recording and Accessibility must be granted to the application that starts Dagu, or to the `dagu` binary. See [Setting Up a Desktop Host](#setting-up-a-desktop-host).
 - A model configured with a DAG-level `llm` block or `with.llm`, unless no operation of the step can call one. See [How Much AI Decides](#how-much-ai-decides).
@@ -118,6 +118,7 @@ steps:
 | `expect` | [Condition](#conditions) | Fail the step unless the condition holds. |
 | `wait` | Duration | Pause, such as `2s`. |
 | `screenshot` | Name | Save a PNG of the screen as a run artifact. |
+| `outline` | Name | Publish the elements of the window in front as text, with no model. See [Outlines](#outlines). |
 | `ask` | `{prompt, as, timeout}` | Wait for a person's answer. See [Human Input](#human-input). |
 
 Any operation can also set:
@@ -127,7 +128,9 @@ Any operation can also set:
 | `when` | A [condition](#conditions) checked before the operation. The operation is skipped unless it holds, and the timeline records it as skipped with the reason. |
 | `timeout` | Maximum time for the operation, such as `30s`. Defaults to `5m`. |
 
-`launch` starts the application in the step's working directory without a shell and does not wait for it; the application keeps running after the step ends. A string is the program itself, so a path with spaces needs no quoting. Pass arguments with `{command, args}`.
+`launch` starts the application in the step's working directory without a shell; the application keeps running after the step ends. A string is the program itself, so a path with spaces needs no quoting. Pass arguments with `{command, args}`.
+
+A launch then waits, up to 5 seconds or its `timeout` when shorter, until what it opened is in front: a window of the application it names, by `open -a` on macOS or a Windows `.exe`, or any new window. That application becomes one the step [works in](#the-application-a-step-works-in). When nothing comes to the front in time, the step goes on with the window in front; follow such a launch with an exact `expect: {window: ...}` when the next operation needs that application.
 
 ## Acts
 
@@ -138,7 +141,8 @@ An action that fails, such as a key the keyboard does not have, skips the rest o
 The act fails when:
 
 - the model reports that the task cannot be done, with its reason;
-- the model twice answers without an action or a report;
+- the model keeps answering without an action or a report, even when asked only for its report;
+- the model repeats actions it already took while the screen stays as it was. Such a round gets a note, and the third one ends the act;
 - the task needs more than `max_actions` actions (`with.max_actions`, default `50`, or `max_actions` on the act);
 - the model provider asks a person to confirm the next actions and `with.on_confirmation` is `fail` (the default). With `allow`, the actions run and the approval is sent with the next screenshot. To keep a person in the loop, put an [`ask`](#human-input) before such an act instead;
 - the operation timeout passes.
@@ -147,7 +151,7 @@ The act fails when:
 
 A desktop that runs computer steps is often one a person also works at. Before a step launches an application, maximizes a window, replays a recorded turn, or starts an act, it waits until nobody has touched the mouse or keyboard for `with.idle` (default `5s`), and logs `Waiting until nobody has used the desktop for 5s`. On the step's timeline, this wait is a `waiting` event named `person`. Input the step sent itself does not count, and neither does input from the computer step that used the desktop before it.
 
-When a person uses the desktop while the model is choosing its next actions, those actions are not run, because they were chosen for a screen that may have changed. The step waits for the idle period again and sends the model the new screen with a note saying why. Skipped actions do not count toward `max_actions`.
+When a person uses the desktop while the model is choosing its next actions, the step waits for the idle period again. The actions run only when the window they land on still looks as the model saw it and the keyboard focus has not moved. Otherwise they are not run, the act brings back the application it was working in, and the model gets the new screen with a note saying why. The window the person left in front is never maximized. Skipped actions do not count toward `max_actions`.
 
 A replay, of a recording or a [pin](#pinned-steps), checks before each action, and while it waits for an element or an exact check, whether a person used the desktop since the step's own last input. If so, it waits for the idle period, brings back the application it last found an element or saw a check hold in, with that application's front window on top so an open dialog stays above its main window, and starts the wait for the element or check over. The application carries over to the next computer step of the same run, so a person who works between two steps is handled the same way. A switch to another application that the step's own action caused, such as a click that opens another application, is left as it is.
 
@@ -159,6 +163,33 @@ with:
   do:
     - act: Post the invoice
 ```
+
+## The Application a Step Works In
+
+A step works in the applications it launches, the one the run's previous computer step worked in, and those an exact check or a replay finds in front. Once it works in one, it never operates the windows other applications had on the screen when the step began, which are the person's, including their menus, status items, and the Dock or taskbar.
+
+- A click or a key that would reach such a window fails with `that is a window of <app>, which was open before this step and is not an app it works in; work in <app>`. The model is told and can try another way; a replay counts it as a miss.
+- When such a window comes to the front while nobody is at the desktop, the step brings its own application back before the model looks.
+- A window that opens while the step runs, such as a save panel or a page a link opens, is the step's to work in.
+
+To work in an application that is already open, `launch` it by name, which brings it forward.
+
+## Buttons a Step Never Presses
+
+`with.refuse` lists words the step never presses an element named with, such as the buttons that save or send in a run that only checks a form:
+
+```yaml
+with:
+  refuse: [Save, Submit, 保存]
+  do:
+    - act: Fill in the order form without saving it
+```
+
+- A click on such an element, or on what it holds, such as its label, fails with `button "Save" is not pressed in this step, which refuses "Save"; leave it as it is`, whether the model or a replay aims it. So do a button press with the pointer on one, a drag that starts on one, and Return, however it is sent, while one is in the window in front, since Return may press it as the window's default button. An option named with such a word is never [chosen](#pinned-steps).
+- The model is told why and can try another way; a replay counts it as a miss.
+- A Latin word matches a whole word, ignoring case and character width, so `Save` does not match `Unsaved`. Any other word matches wherever a name holds it.
+
+It limits presses only. The step still types into fields and sends other keys, so it is not a read-only mode. A host that cannot read elements cannot tell what a click lands on, so the words hold only where elements are read.
 
 ## Conditions
 
@@ -185,20 +216,20 @@ An exact check reads the elements of the window in front, such as its buttons, f
 | Check | Holds when |
 |-------|------------|
 | `{text: ...}` | The name or value of a visible element contains the text. |
-| `{element: {role, name, id, near, in, nth}}` | The selector matches exactly one visible element. Several matches are a miss, never a guess. |
+| `{element: {role, name, id, near, in, enabled, nth}}` | The selector matches exactly one visible element. Several matches are a miss, never a guess. |
 | `{window: ...}` | The title of the window in front contains the text. `*` matches any run of characters. |
 
-A selector names an element by `role`, such as `button`, `text_field`, `text`, `checkbox`, `combo_box`, or `list_item`, and at least one of `name`, `id`, or `near: {label, side}`, the label the element sits next to and on which `side` (`right`, `below`, `left`, or `above`). `in` narrows the search to a container, itself a selector, and `nth` picks one of several equal matches in reading order, from 0. Names take `*` for any run of characters.
+A selector names an element by `role`, such as `button`, `text_field`, `text`, `checkbox`, `combo_box`, or `list_item`, and at least one of `name`, `id`, or `near: {label, side}`, the label the element sits next to and on which `side` (`right`, `below`, `left`, or `above`). `in` narrows the search to a container, itself a selector, `enabled: true` keeps only the elements that take input and `enabled: false` only those that do not, such as a grayed-out button, and `nth` picks one of several equal matches in reading order, from 0. Names take `*` for any run of characters.
 
 ```yaml
 - act: Post invoice ${params.INVOICE_ID}
 - expect: {text: Posted, within: 30s}
-- expect: {element: {role: button, name: Print}}
+- expect: {element: {role: button, name: Print, enabled: true}, within: 10s}
 - act: Close the warning
   when: {window: "Warning*"}
 ```
 
-An exact `expect` keeps looking until it holds, `within` passes, or, without `within`, the operation timeout passes. An exact `when` keeps looking for two seconds unless `within` is set. `%name%` placeholders are replaced from `with.variables` and earlier `ask` answers. A window that exposes no elements, such as one an application draws itself, is a miss while it is in front; check it with a statement instead.
+An exact `expect` keeps looking until it holds, `within` passes, or, without `within`, the operation timeout passes. An exact `when` keeps looking for two seconds unless `within` is set. `%name%` placeholders are replaced from `with.variables` and earlier `ask` answers. A window that exposes no elements, such as one an application draws itself, is a miss while it is in front; check it with a statement instead. A check that fails while a dialog is in front names the dialog and the text it shows.
 
 `dagu computer elements` lists the elements of the window in front, and `dagu computer elements --at-pointer` the one under the pointer, to find the role and name to write. See the [CLI reference](/getting-started/cli#computer-elements).
 
@@ -300,21 +331,46 @@ steps:
 - Declared secrets and `ask` answers of four or more characters are masked in the step log, the timeline, and errors.
 - A value typed into a field that shows it, rather than a password field, appears in later screenshots, which are sent to the model and saved as artifacts.
 
+`with.visible` lists variables whose values are not secret and the model may see, such as the item a row chooses from a list. The model is told what each one stands for, so it can find or choose it on the screen, and it still types the placeholder. An element it chose by such a value is recorded by the placeholder, so a replay on the next row chooses that row's value:
+
+```yaml
+params:
+  CATEGORY: Office supplies
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
+
+steps:
+  - id: categorize
+    action: computer.run
+    with:
+      variables:
+        category: ${params.CATEGORY}
+      visible: [category]
+      do:
+        - act: Choose %category% as the expense category
+```
+
+A name in `visible` must be a `with.variables` key. The step fails before operating the desktop when a visible value contains the value of a declared secret, however short.
+
 ## What Is Sent to the Model
 
 Each model request carries:
 
 - screenshots of the primary display, scaled to the size the model accepts;
 - the operation's instruction, or the statement a condition checks;
-- the `extract` schema, and for an `act`, the results of the previous actions.
+- the `extract` schema, and for an `act`, the results of the previous actions;
+- the values of the variables `with.visible` names;
+- where the host reads elements, the names and values of the window's elements: up to 400 for an `extract`, and for an `act` in `generic` mode, up to 80 controls the model can click by id, with declared secrets masked and typed variable values written as their placeholders.
 
 Screenshots show the whole display, including other open windows and notifications, and are not masked. Keep unrelated applications closed on a desktop host, and run it under an account that holds only what the workflows need.
 
-Replays, exact checks, and extracts read from bound elements send nothing to the model.
+Replays, exact checks, outlines, and extracts read from bound elements send nothing to the model.
 
 ## Outputs
 
-The top-level properties each `extract` schema lists become step outputs, readable as `${steps.<id>.outputs.<name>}` and checked when the DAG loads. Fields a schema does not list are dropped. Two extracts in one step cannot list the same property.
+The top-level properties each `extract` schema lists become step outputs, readable as `${steps.<id>.outputs.<name>}` and checked when the DAG loads. Fields a schema does not list are dropped. Two extracts, or an extract and an [outline](#outlines), in one step cannot publish the same output; the step fails validation with `output "<name>" is already published by do[<n>]`.
 
 When the step succeeds with outputs, stdout is one JSON object of them, so `output:` also works. Operation progress is written to the step's stderr log.
 
@@ -325,6 +381,43 @@ A successful `extract` binds each field to where its value was read, so later ru
 - A table field, an array of objects of scalars, binds to a grid, table, or list. The model names the container and each column's header, and a later run reads every row by header, up to `with.max_rows` (default `10000`; `max_rows` on the extract), so a moved column still reads and a missing header is a miss.
 
 Under `ai: on_miss` the model is asked only when a field's element is missing. Under `ai: never` the extract reads the bound elements alone, and fails when a field's element or a column header is missing. A schema that lists a plain object or a free array needs the model, so such an extract under `never` fails validation.
+
+## Outlines
+
+`outline` reads the elements of the window in front and publishes them as text under the output it names, with no model. Use it to learn an application's buttons, fields, and labels before writing acts, exact checks, and pinned selectors:
+
+```yaml
+steps:
+  - id: look
+    action: computer.run
+    with:
+      do:
+        - launch: {command: open, args: [-a, TextEdit]}
+        - outline: window
+
+  - id: show
+    depends: look
+    env:
+      - OUTLINE: ${steps.look.outputs.window}
+    run: printf '%s\n' "$OUTLINE"
+```
+
+The text has a line for the window, with its title and application, then one line per element, indented under the element that holds it. Each line gives the element's role and name, any `label`, `value`, and `id` that differ from the name, and `disabled` for an element that takes no input:
+
+```text
+window "Invoice entry" app="ERP"
+  text_field label="Customer" id="customer"
+  group "Payment" id="paymentGroup"
+    combo_box "Method" value="Card" id="methodBox"
+    button "Save" id="saveButton" disabled
+```
+
+- Elements that show nothing and that a person does not act on, such as an unnamed group, are left out. An unnamed field or button stays, for a `near` selector to name.
+- A window with more than 400 elements lists the first 400 and says so.
+- Declared secrets in the text are masked.
+- An outline takes no screenshot of its own; the step's [`screenshots`](#screenshots) setting still applies.
+- Once the step [works in](#the-application-a-step-works-in) an application, an outline reads only that application's windows. After a person brings another one forward, it waits until they stop and brings the step's application back, and it fails rather than read another application's window.
+- The name starts with a letter and holds letters, digits, and `_`. Outlines need macOS or 64-bit Windows.
 
 ## Screenshots
 
@@ -345,7 +438,7 @@ With `artifacts.enabled: false`, no screenshots are saved and a `screenshot` ope
 
 | `ai` | Behavior |
 |------|----------|
-| `on_miss` (default) | Each task that succeeds is recorded and replayed on later runs without the model while each screen still matches, reported as `cache-hit`. When a screen differs, the model continues from there and repairs the recording, reported as `healed`. |
+| `on_miss` (default) | Each task that succeeds is recorded and replayed on later runs without the model while each screen still matches, reported as `cache-hit`. When a screen differs, the model continues from there, told which recorded actions already ran, and repairs the recording, reported as `healed`. |
 | `every_run` | The model decides every run. A successful act is still recorded. |
 | `never` | Replay only. When the screen differs or the host has no recording, the step fails and says why, and the recording is kept for a run under `on_miss` to repair. |
 
@@ -368,6 +461,7 @@ An `act` records each screen the model saw and the actions it chose on it. The n
 - Recordings are kept only when the whole step succeeds. When an operation fails after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of a model request, the screen capture, a launch, or an `ask`, a person using the desktop, or a canceled run, leaves them.
 - A replay follows the step's current settings: it hands the task to the model before a recorded turn that would exceed `max_actions`, or that the model provider asked a person to confirm while `on_confirmation` is not `allow`.
 - Typed text is recorded with its `%name%` placeholders, never the values.
+- A recording replays only on runs whose values it fits. When no recorded action types, chooses, or finds an element by a variable the instruction names, as when the field already showed the value on the row the recording was made on, the recording keeps a salted digest of that value. A run where the variable holds another value is worked by the model, which records afresh, and under `ai: never` the act fails with `its recording does nothing with %item%, so it fits only the value %item% had when it was recorded`. A recording that keeps no digest, such as one an older Dagu release made, does not replay on such an instruction either. Name in an instruction only the variables its actions use, since each new value of another costs a model request.
 - A replay repeats recorded input whenever the screens match. Use `ai: every_run` for acts that must not repeat blindly, such as a payment.
 - `dagu computer cache clear <dag>` removes the recordings of every step of a DAG, of one step with `--step <id>`, or of one task with `--op <position>`. Removing all of a DAG's history with `dagu rm --history` also clears them. Both work on the host they run on.
 
@@ -377,6 +471,7 @@ Where the application exposes its elements, a recording keeps the element each a
 
 - `with.find_within` (default `10s`; `find_within` on an act) is how long a replayed action waits for its element before it counts as a miss. `0` looks once.
 - Names and labels are compared after folding full-width characters and whitespace, and without a label's trailing colon.
+- A dialog of the recorded application that holds the element's window, such as a macOS sheet or a Windows dialog that disables its window, stops the replay unless a [handler](#screens-that-come-up-sometimes) clears it. The step never raises the window over the dialog, and the miss names the dialog and the text it shows.
 - `with.input: direct` (or `input` on an act) has a replayed element act itself instead of receiving the pointer and keys: a click invokes a button, toggles a checkbox, selects a list item, or opens a combo box, and typing sets the field's value at once when the recording showed the typed text became the value. An element without that ability replays on the screen. An application that reacts to each key or to the pointer alone sees nothing, so `screen` stays the default.
 
 ### Replaying by Pixels
@@ -410,22 +505,21 @@ A recording lives on the host that learned it. To run a task on every host of a 
         phone: {role: text_field, near: {label: Phone, side: right}}
 ```
 
-`recorded` lists steps, each one of `click`, `double_click`, or `right_click` (a selector), `check` or `uncheck` (a `checkbox` selector), `type` (`{into, text}`), `key` (a chord such as `ctrl+s`, with an optional `focus` selector to focus first), `scroll` (`{on, dy}`), or `wait` (a duration). Each pointer step acts on the centre of the element its selector names, waiting up to `find_within` for it. When every step runs, the act is a `cache-hit` with no model. When a step misses, `on_miss` lets the model finish, and `never` fails naming the step. A pinned act has no screen check of its own, so follow it with an exact `expect`.
+`recorded` lists steps, each one of `click`, `double_click`, or `right_click` (a selector), `check` or `uncheck` (a `checkbox` selector), `type` (`{into, text}`), `key` (a chord such as `ctrl+s`, with an optional `focus` selector to focus first), `scroll` (`{on, dy}`), `choose` (`{from, option}`), or `wait` (a duration). Each pointer step acts on the centre of the element its selector names, waiting up to `find_within` for it. When every step runs, the act is a `cache-hit` with no model. When a step misses, `on_miss` lets the model finish, and `never` fails naming the step. A pinned act has no screen check of its own, so follow it with an exact `expect`.
 
 `check` and `uncheck` leave a checkbox checked or unchecked: they click only when it is not already, then wait until the checkbox shows the state, so running the step again changes nothing. A click the model makes on a checkbox is recorded the same way, so a pin printed from a recording uses them. In Chrome and Electron applications on macOS, toggle buttons read as checkboxes too; `dagu computer elements` shows the role.
 
-To choose an option of a list box on macOS, click the box, then click the option inside it by name:
+`choose` sets a combo box or pop-up to an option by its text, through the control itself. It does nothing when the control already shows the option; otherwise it opens the control and presses the option, types the option into it, or steps down its list, until the control shows it. It never presses Return.
 
 ```yaml
-- click: {role: combo_box, id: category}
-- click: {role: menu_item, name: "%category%", in: {role: combo_box, id: category}}
+- choose: {from: {role: combo_box, id: category}, option: "%category%"}
 ```
 
-The option is chosen through Accessibility rather than at a position, so it works where the open menu is drawn apart from the window, as in Chrome and Electron applications.
+The option is chosen through Accessibility or UI Automation rather than at a position, so it works where the open list is drawn apart from the window, as in Chrome and Electron applications. In `generic` mode the model chooses options the same way, and the recording keeps each choice as a `choose` step, with an option that is a variable's value written as its placeholder, so each row of a loop chooses its own.
 
 `fields` maps each output to a selector, or to `{container, columns}` for a table, where `columns` maps each item property to its column header. A host reads pinned fields with no model, and a field with no pin falls back to the host's own binding.
 
-Pins are kept per system because Accessibility and UI Automation expose an application differently. Pins travel with the step; the per-host cache does not. Rather than writing a pin by hand, run the step until it succeeds, then print the host's recordings in pinned form with `dagu computer cache show <dag> --step <id>` and copy them into the step. See the [CLI reference](/getting-started/cli#computer-cache-show).
+Pins are kept per system because Accessibility and UI Automation expose an application differently. Pins travel with the step; the per-host cache does not. Rather than writing a pin by hand, run the step until it succeeds, then print the host's recordings in pinned form with `dagu computer cache show <dag> --step <id>` and copy them into the step. When an act's recording never used a variable its instruction names, the output says so in a comment above its steps: pinned, they leave that field as each run finds it. See the [CLI reference](/getting-started/cli#computer-cache-show).
 
 ## Screens That Come Up Sometimes
 
@@ -524,7 +618,7 @@ A step that starts on a locked screen, while nobody is logged in, or while anoth
 
 One computer step at a time uses a user's desktop, across every Dagu process that user runs on the host, even ones with different data directories. A step that finds the desktop in use waits for it and logs `Waiting for another computer step to finish using the desktop`, recorded on its timeline as a `waiting` event named `desktop`.
 
-A step never operates or maximizes the windows of its own process, nor those of applications named in the `DAGU_DESKTOP_PROTECTED_APPS` environment variable of the Dagu process, a comma-separated list of executable names such as `Kitewell`. Name the application a person starts automation from, so a step never clicks into it.
+A step never operates or maximizes the windows of its own process, nor those of applications named in the `DAGU_DESKTOP_PROTECTED_APPS` environment variable of the Dagu process, a comma-separated list of executable names such as `Kitewell`. Name the application a person starts automation from, so a step never clicks into it. `DAGU_DESKTOP_PROTECTED_TITLES`, a comma-separated list of window titles matched as a [`window` check](#exact-checks) matches them, protects windows by title instead, such as that application's pages in a browser a person also uses.
 
 ## Distributed Mode
 
@@ -549,6 +643,7 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 |-------|-------------|
 | `do` | Operations to run in order. Required. |
 | `variables` | Values referenced as `%name%` in instructions. |
+| `visible` | Names of `variables` that are not secret, whose values the model may see. See [Secrets and Variables](#secrets-and-variables). |
 | `mode` | `auto`, `native`, or `generic`. See [Model](#model). |
 | `ai` | `on_miss` (default), `every_run`, or `never`. See [How Much AI Decides](#how-much-ai-decides). |
 | `max_actions` | Actions an `act` may perform. Defaults to `50`. |
@@ -557,6 +652,7 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `maximize` | Maximize the window in front. Defaults to `true`. See [Window Size](#window-size). |
 | `max_rows` | Rows a bound table field reads. Defaults to `10000`. |
 | `handle` | Screens that may come up at any point, each `{name, when, recorded}`. See [Screens That Come Up Sometimes](#screens-that-come-up-sometimes). |
+| `refuse` | Words the step never presses an element named with. See [Buttons a Step Never Presses](#buttons-a-step-never-presses). |
 | `on_confirmation` | `fail` (default) or `allow`, for model provider confirmation requests. |
 | `idle` | How long nobody may have used the desktop before the step sends input, such as `30s`. Defaults to `5s`; `0s` turns it off. See [When a Person Uses the Desktop](#when-a-person-uses-the-desktop). |
 | `screenshots` | `on_failure`, `final`, `each`, or `never`. |
@@ -570,6 +666,7 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 - Everything on the screen is sent to the model and is untrusted. A document, email, or web page that is visible can try to steer an `act`. Keep instructions specific and follow important acts with an `expect`.
 - The model acts with the permissions of the logged-in user on whatever is on screen. Use a dedicated account or virtual machine for desktop hosts.
 - Put an `ask` before acts that are hard to undo, and set `ai: every_run` on them so they never replay blindly.
+- In a run that must not save or send, list the buttons that do in [`with.refuse`](#buttons-a-step-never-presses).
 - Screenshots saved as artifacts can show personal data. Use `screenshots: never` when they must not be kept.
 
 ## Troubleshooting
@@ -587,7 +684,8 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `the task needed more than max_actions (...) actions` | The act is too large, or the model is going in circles. | Split the task into smaller acts, or raise `max_actions`. |
 | `expectation not met: ...` | An `expect` statement did not hold. The message gives the model's reason. | Look at the failure screenshot; fix the act before it, or add `within` when the screen needs time to change. |
 | `the model could not complete the task: ...` | The model reported the task impossible from what it saw. | Look at the failure screenshot; fix the instruction or the starting screen. |
-| `the model stopped without reporting the task done` | The model answered twice without acting. | Make the instruction concrete, or try another model. |
+| `the model stopped without reporting the task done` | The model kept answering without acting, and did not report when asked. | Make the instruction concrete, or try another model. |
+| `the model kept acting for N rounds without changing the screen` | The model repeated actions that did not change the screen. | Look at the failure screenshot; make the instruction concrete, or split the task. |
 | `the model provider asks a person to confirm the next actions (...)` | The provider's safety check wants a person to approve. | Add an `ask` before the act and set `on_confirmation: allow`. |
 | `provider "..." has no native computer use; set mode to "generic"` | `mode: native` with a provider that has no native tool. | Use `mode: auto` or `generic`. |
 | `the model does not support the provider's native computer use` | `mode: native` with an older model. | Use a newer model, or `mode: auto`. |
@@ -597,7 +695,10 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `computer actions need a model` | No `llm` block applies to the step. | Add a DAG-level `llm` block or `with.llm`. |
 | `act did not finish within ...` | The act ran past its `timeout`. | Raise the operation's `timeout`, or split the task. |
 | `the act cannot run without AI: ...` or `the extract cannot run without AI: ...` | Under `ai: never`, the host has no recording or binding, or the screen or an element differs. The message says which. | Run the step once under `on_miss` to record or repair it, or [pin](#pinned-steps) the task. |
+| `its recording does nothing with %name%, so it fits only the value %name% had when it was recorded` | Under `ai: never`, the recording never used a variable its instruction names, and this run's value differs. | Name in the instruction only the variables its actions use, or run the step under `on_miss` for such rows. |
 | `... was not found within ...` | A recorded element did not appear within `find_within`. | Raise `find_within`, or let the model repair the recording once under `on_miss`. |
+| `the dialog "..." is in front, showing "..."` | A dialog of the application holds the window a replayed element is in. | Add a [handler](#screens-that-come-up-sometimes) for the dialog, or fix the operation before it. |
+| `... shows "...", not "...", after every way to choose it` | A `choose` could not set the control to the option. | Check the option's text, and the control's role and name with `dagu computer elements`. |
 | `... is not there; N elements match` | An exact check's selector matched several elements. | Add `in`, `near`, the window, or `nth` to the selector. |
 | `... is not there` | No element matched an exact check. | Check the role and name with `dagu computer elements`, or raise `within`. |
 | `... is in front, not ...` | A `window` check found another window in front. | Fix the title, or the operation before it. |
@@ -606,7 +707,10 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 | `... it is not checked after the click` or `... unchecked after the click` | The click did not change the checkbox within `find_within`, or the application changed it back. | Look at the failure screenshot; check that the selector names the box itself, not its label. |
 | `the window in front exposes no elements` | The application draws its own controls, or runs as administrator on Windows. | Check it with a statement instead. |
 | `exact checks need macOS or 64-bit Windows` | An exact check ran on another system. | Route the DAG to a macOS or 64-bit Windows worker, or check with a statement. |
-| `... belongs to the application that runs this step, which it never operates` | The element or window is in the Dagu process's own application, or one named in `DAGU_DESKTOP_PROTECTED_APPS`. | Bring the target application to the front first, with `launch` or an act. |
+| `... belongs to the application that runs this step, which it never operates` or `... is a page of the application that runs this step, which it never operates` | The element or window is in the Dagu process's own application, one named in `DAGU_DESKTOP_PROTECTED_APPS`, or a window whose title `DAGU_DESKTOP_PROTECTED_TITLES` names. | Bring the target application to the front first, with `launch` or an act. |
+| `that is a window of ..., which was open before this step and is not an app it works in` | The action would reach another application's window that was open before the step. See [The Application a Step Works In](#the-application-a-step-works-in). | `launch` the target application by name, or fix the instruction. |
+| `... is not pressed in this step, which refuses ...` or `Return is not pressed: it may press the default button ...` | The element, or a button in the window in front, is named with a word in `with.refuse`. | Expected in a run that must not save. Reword the act so the task does not need that button, or remove the word. |
+| `a window of ... is in front, not of ..., the app this step works in, and an outline reads only that app's windows` | An `outline` found another application in front. | Bring the step's application to the front before the outline. |
 
 ## Not Supported Yet
 
