@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-05-control-flow",
   "status": "succeeded",
-  "durationMs": 2292,
+  "durationMs": 2283,
   "steps": [
     {
       "id": "choose_target",
@@ -55,83 +55,78 @@
   "events": [
     {
       "t": 0,
-      "target": "choose_target",
-      "status": "running"
-    },
-    {
-      "t": 22,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 22,
+      "t": 0,
+      "target": "choose_target",
+      "status": "not_started"
+    },
+    {
+      "t": 0,
+      "target": "deploy_staging",
+      "status": "not_started"
+    },
+    {
+      "t": 0,
+      "target": "deploy_prod",
+      "status": "not_started"
+    },
+    {
+      "t": 0,
+      "target": "wait_until_healthy",
+      "status": "not_started"
+    },
+    {
+      "t": 0,
+      "target": "publish_notes",
+      "status": "not_started"
+    },
+    {
+      "t": 23,
+      "target": "choose_target",
+      "status": "running"
+    },
+    {
+      "t": 53,
       "target": "choose_target",
       "status": "succeeded"
     },
     {
-      "t": 22,
+      "t": 53,
       "target": "deploy_staging",
-      "status": "not_started"
+      "status": "running"
     },
     {
-      "t": 22,
-      "target": "deploy_prod",
-      "status": "not_started"
-    },
-    {
-      "t": 22,
+      "t": 98,
       "target": "wait_until_healthy",
-      "status": "not_started"
-    },
-    {
-      "t": 22,
-      "target": "publish_notes",
-      "status": "not_started"
-    },
-    {
-      "t": 40,
-      "target": "deploy_staging",
       "status": "running"
     },
     {
-      "t": 40,
-      "target": "deploy_prod",
-      "status": "running"
-    },
-    {
-      "t": 100,
-      "target": "deploy_prod",
-      "status": "skipped"
-    },
-    {
-      "t": 114,
+      "t": 105,
       "target": "deploy_staging",
       "status": "succeeded"
     },
     {
-      "t": 114,
-      "target": "wait_until_healthy",
-      "status": "running"
+      "t": 105,
+      "target": "deploy_prod",
+      "status": "skipped"
     },
     {
-      "t": 2242,
+      "t": 2240,
       "target": "wait_until_healthy",
       "status": "succeeded"
     },
     {
-      "t": 2242,
-      "target": "publish_notes",
-      "status": "running"
-    },
-    {
-      "t": 2260,
-      "target": "publish_notes",
-      "status": "skipped"
-    },
-    {
-      "t": 2292,
+      "t": 2283,
       "target": "$run",
       "status": "succeeded"
+    },
+    {
+      "t": 2283,
+      "target": "publish_notes",
+      "status": "skipped"
     }
   ],
   "results": {

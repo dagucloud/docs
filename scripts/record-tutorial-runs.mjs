@@ -204,7 +204,8 @@ class Timeline {
         this.push(target, status, startedAt);
         return;
       }
-      if (settled || status === "waiting") {
+      // A skipped step has a start time but never ran.
+      if ((settled && status !== "skipped") || status === "waiting") {
         this.push(target, "running", startedAt);
       }
     }
