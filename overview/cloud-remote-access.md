@@ -58,6 +58,26 @@ or with `DAGU_CLOUD_REMOTE_ACCESS=operator` and `DAGU_CLOUD_REMOTE_APPROVALS=fal
 
 Each key, when set, wins over the choice in the web UI, `off` and `false` included. The section shows **Set in configuration** for it and offers no way to change it. To change it, change the configuration and restart Dagu. A key left unset is chosen in the web UI, where it starts off.
 
+## Connect an AI App
+
+Add Dagu Cloud's MCP server URL to the AI app as a custom connector:
+
+```text
+https://console.dagu.sh/mcp
+```
+
+1. Add the URL in Claude, ChatGPT, Cursor, or another app that connects to remote MCP servers. **AI apps** in [Dagu Console](https://console.dagu.sh/ai-apps) shows the URL and the steps for each app.
+2. Sign in to Dagu Cloud when the app asks. Choose the workspaces the app may reach, what it may do in each (read, operate, or edit), on all servers or chosen ones, and whether it may decide steps waiting for a person.
+
+A call gets the lowest of:
+
+- what the connection was granted in step 2;
+- the workspace's **Agent policy**, which its owners set on **AI apps**;
+- the member's entry under **Server roles**, also set by owners;
+- the server's remote access [level](#levels).
+
+Owners see every connection to their workspace on **AI apps** and can end any of them.
+
 ## Levels
 
 | Level | A call may |
