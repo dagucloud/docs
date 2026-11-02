@@ -1,6 +1,4 @@
 # Dagu tutorial, lesson 1: https://docs.dagu.sh/tutorial/first-workflow
-description: Four steps; lint and test run in parallel
-type: graph
 
 steps:
   - id: checkout

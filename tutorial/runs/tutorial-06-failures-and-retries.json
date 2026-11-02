@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-06-failures-and-retries",
   "status": "partially_succeeded",
-  "durationMs": 2187,
+  "durationMs": 2174,
   "steps": [
     {
       "id": "call_api",
@@ -44,57 +44,57 @@
       "status": "running"
     },
     {
-      "t": 22,
+      "t": 18,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 22,
+      "t": 18,
       "target": "publish",
       "status": "not_started"
     },
     {
-      "t": 22,
+      "t": 18,
       "target": "onFailure",
       "status": "not_started"
     },
     {
-      "t": 22,
+      "t": 18,
       "target": "onExit",
       "status": "not_started"
     },
     {
-      "t": 56,
+      "t": 54,
       "target": "warm_cache",
       "status": "failed"
     },
     {
-      "t": 2084,
+      "t": 2071,
       "target": "call_api",
       "status": "succeeded"
     },
     {
-      "t": 2091,
+      "t": 2095,
       "target": "publish",
       "status": "running"
     },
     {
-      "t": 2117,
+      "t": 2124,
       "target": "publish",
       "status": "succeeded"
     },
     {
-      "t": 2117,
+      "t": 2124,
       "target": "onExit",
       "status": "running"
     },
     {
-      "t": 2128,
+      "t": 2135,
       "target": "onExit",
       "status": "succeeded"
     },
     {
-      "t": 2187,
+      "t": 2174,
       "target": "$run",
       "status": "partially_succeeded"
     }

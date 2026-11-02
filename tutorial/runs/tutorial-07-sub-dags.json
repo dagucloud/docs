@@ -1,13 +1,13 @@
 {
   "dag": "tutorial-07-sub-dags",
   "status": "succeeded",
-  "durationMs": 3558,
+  "durationMs": 2433,
   "steps": [
     {
       "id": "build",
       "depends": [],
       "routesTo": [],
-      "action": "dag.run",
+      "action": "run",
       "approval": false
     },
     {
@@ -17,15 +17,6 @@
       ],
       "routesTo": [],
       "action": "dag.run",
-      "approval": false
-    },
-    {
-      "id": "announce",
-      "depends": [
-        "smoke_test"
-      ],
-      "routesTo": [],
-      "action": "run",
       "approval": false
     }
   ],
@@ -37,47 +28,27 @@
       "status": "running"
     },
     {
-      "t": 58,
-      "target": "$run",
-      "status": "running"
-    },
-    {
-      "t": 58,
-      "target": "smoke_test",
-      "status": "not_started"
-    },
-    {
-      "t": 58,
-      "target": "announce",
-      "status": "not_started"
-    },
-    {
-      "t": 1191,
+      "t": 42,
       "target": "build",
       "status": "succeeded"
     },
     {
-      "t": 1191,
+      "t": 43,
       "target": "smoke_test",
       "status": "running"
     },
     {
-      "t": 3485,
+      "t": 63,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 2359,
       "target": "smoke_test",
       "status": "succeeded"
     },
     {
-      "t": 3485,
-      "target": "announce",
-      "status": "running"
-    },
-    {
-      "t": 3511,
-      "target": "announce",
-      "status": "succeeded"
-    },
-    {
-      "t": 3558,
+      "t": 2433,
       "target": "$run",
       "status": "succeeded"
     }
@@ -87,23 +58,18 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "{\n  \"name\": \"build-app\",\n  \"dagRunId\": \"Ax4oXNgKjvYkaeeR991HrjYAtfTF7RMuqn3RfSHGeV4C\",\n  \"params\": \"version=1.4.0\",\n  \"outputs\": {},\n  \"outputValues\": {\n    \"bundle\": \"app-1.4.0.tar.gz\"\n  },\n  \"status\": \"succeeded\"\n}",
+      "stdout": "app-1.4.0.tar.gz",
       "stderr": "",
       "outputs": {
         "bundle": "app-1.4.0.tar.gz"
       },
-      "subRuns": [
-        {
-          "dag": "build-app",
-          "params": "version=\"1.4.0\""
-        }
-      ]
+      "subRuns": []
     },
     "smoke_test": {
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "{\n  \"summary\": {\n    \"total\": 3,\n    \"succeeded\": 3,\n    \"failed\": 0\n  },\n  \"results\": [\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"85w5uUS9Lif8wkaGBhjStjLjk9nnF6hFkDRU91fxrSA7\",\n      \"params\": \"region=us-east bundle=app-1.4.0.tar.gz\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"E4vq7vvd6JHQNot52PXn3DBhYn6HF1xym85ysz43gCMd\",\n      \"params\": \"region=eu-west bundle=app-1.4.0.tar.gz\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"DEhtgL7sm8xtzD8CQMv31VkTBFVCoc3VTFmxXk8d67Nz\",\n      \"params\": \"region=ap-south bundle=app-1.4.0.tar.gz\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    }\n  ],\n  \"outputs\": [\n    {},\n    {},\n    {}\n  ]\n}",
+      "stdout": "{\n  \"summary\": {\n    \"total\": 3,\n    \"succeeded\": 3,\n    \"failed\": 0\n  },\n  \"results\": [\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"JsvR78SicCdysETgU8aMUeazVoUzz9kqxjQUawoG4fJ\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=us-east\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"HwQG67jMGnConnKZhVjvdcHSYtbrQfcN5xZevsGCquAE\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=eu-west\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"EgKcqJcDc5fts6Jp8x1iQEPDFjzGxBbKLJZ9EKyjudo9\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=ap-south\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    }\n  ],\n  \"outputs\": [\n    {},\n    {},\n    {}\n  ]\n}",
       "stderr": "",
       "outputs": {},
       "subRuns": [
@@ -120,15 +86,6 @@
           "params": "bundle=\"app-1.4.0.tar.gz\" region=\"ap-south\""
         }
       ]
-    },
-    "announce": {
-      "status": "succeeded",
-      "retries": 0,
-      "executions": 1,
-      "stdout": "Released app-1.4.0.tar.gz to 3 regions",
-      "stderr": "",
-      "outputs": {},
-      "subRuns": []
     }
   }
 }

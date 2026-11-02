@@ -1,6 +1,4 @@
 # Dagu tutorial, lesson 2: https://docs.dagu.sh/tutorial/monitoring
-description: A slow run to watch live in the Web UI
-type: graph
 
 steps:
   - id: download

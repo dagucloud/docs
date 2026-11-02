@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-02-monitoring",
   "status": "succeeded",
-  "durationMs": 8252,
+  "durationMs": 8173,
   "steps": [
     {
       "id": "download",
@@ -33,51 +33,56 @@
   "events": [
     {
       "t": 0,
-      "target": "download",
-      "status": "running"
-    },
-    {
-      "t": 20,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 20,
+      "t": 0,
+      "target": "download",
+      "status": "not_started"
+    },
+    {
+      "t": 0,
       "target": "transform",
       "status": "not_started"
     },
     {
-      "t": 20,
+      "t": 0,
       "target": "publish",
       "status": "not_started"
     },
     {
-      "t": 5060,
+      "t": 2,
+      "target": "download",
+      "status": "running"
+    },
+    {
+      "t": 5075,
       "target": "download",
       "status": "succeeded"
     },
     {
-      "t": 5077,
+      "t": 5075,
       "target": "transform",
       "status": "running"
     },
     {
-      "t": 8144,
+      "t": 8129,
       "target": "transform",
       "status": "succeeded"
     },
     {
-      "t": 8144,
+      "t": 8129,
       "target": "publish",
       "status": "running"
     },
     {
-      "t": 8172,
+      "t": 8153,
       "target": "publish",
       "status": "succeeded"
     },
     {
-      "t": 8252,
+      "t": 8173,
       "target": "$run",
       "status": "succeeded"
     }

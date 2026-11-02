@@ -1,6 +1,4 @@
 # Dagu tutorial, lesson 3: https://docs.dagu.sh/tutorial/params-and-outputs
-description: Take inputs and pass a value from one step to the next
-type: graph
 
 params:
   - name: environment
@@ -8,7 +6,6 @@ params:
     enum: [dev, staging, prod]
     default: dev
   - name: version
-    type: string
     default: "1.0.0"
 
 steps:

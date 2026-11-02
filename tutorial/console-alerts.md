@@ -1,10 +1,10 @@
 # Alerts from Dagu Console
 
-<p class="tutorial-meta">Lesson 10 of 10 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 10 of 10 · 3 minutes</p>
 
-The Web UI shows a failed run when you look at it. [Dagu Console](https://console.dagu.sh) watches for you: it emails you when a workflow fails or a server stops reporting, and shows all your servers in one place. It is free for one server. Monitoring is in beta.
+The Web UI shows failures only when you check it. [Dagu Console](https://console.dagu.sh) watches in the background. It emails you when a workflow fails or a server stops reporting, and brings all your servers into one view. Free monitoring covers one server. Monitoring is in beta.
 
-Workflows still run only on your server. The server sends Dagu Console a short report about its runs over outbound HTTPS; full logs, outputs, and secrets never leave it.
+Workflows still run only on your server. The server sends Dagu Console a short report about its runs over outbound HTTPS. Full logs, outputs, and secrets never leave it.
 
 ## Connect your server
 
@@ -14,30 +14,29 @@ Workflows still run only on your server. The server sends Dagu Console a short r
    ![The Monitor this server for free card with the recommended level selected](/tutorial/console-connect-light.png)
 
 3. Dagu Console opens in a new tab. Sign in or sign up, check that the code matches the one Dagu shows, and select **Connect for free monitoring**.
-4. On the page that confirms the connection, select **Send a test alert**. The test email goes to the workspace's owners and admins.
+4. On the confirmation page, select **Send a test alert**. The test email goes to workspace owners and admins.
 
 ## Get a real alert
 
-Make a run fail with the workflow from [lesson 6](/tutorial/failures-and-retries):
+Trigger a failure using the workflow from [lesson 6](/tutorial/failures-and-retries):
 
 1. Change `limit: 2` to `limit: 0` in `call_api` and start `tutorial-06-failures-and-retries`. The run fails.
-2. Within a minute or so, an email arrives. It names the workflow, the server, and the failed steps, quotes the end of the error, and links to the run in Dagu Console.
-3. Change `limit` back to `2` and start the workflow again. The run partially succeeds, which resolves the alert, and a second email says the workflow recovered.
+2. Within a minute or so, an email arrives. It names the workflow, server, and failed steps, quotes the end of the error, and links to the run in Dagu Console.
+3. Change `limit` back to `2` and start the workflow again. The run partially succeeds, which resolves the alert. A second email confirms the workflow recovered.
 
 ## See every server in one place
 
 ![Dagu Console Overview with servers reporting, failures today, open alerts, and the 7-day success rate](/monitoring/overview-light.png)
 
-- **Overview** shows which servers report, what failed today, and the open alerts.
-- **Runs** lists finished runs from every server. A failed run's page shows why it failed.
-- **Insights** charts each workflow's runs, success rate, and duration over time.
+**Overview** shows active servers, today's failures, and open alerts. **Runs** lists finished runs from every server, with failure causes on each run page. **Insights** charts workflow run counts, success rates, and durations over time.
 
 ## What leaves your server
 
-- **Sent:** the server's health, and for each finished run its workflow name, status, timing, and failed step names. At the recommended level, also the end of each failed step's error message, with workflow secrets masked.
-- **Never sent:** full logs, outputs, parameters, environment, step commands, workflow YAML, and the values of secrets.
+Your server sends its health status, plus the workflow name, status, timing, and failed step names for each finished run. At the recommended level, it also sends the tail of each failed step's error message, with secrets masked.
 
-**View last report** on **Plan & features** shows the exact JSON the server last sent. **Turn off** in the same section stops reporting at once.
+It never sends full logs, outputs, parameters, environment variables, step commands, workflow YAML, or secret values.
+
+**View last report** on **Plan & features** shows the exact JSON your server sent. **Turn off** in that same section stops reporting at once.
 
 ## Try it
 

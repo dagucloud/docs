@@ -1,8 +1,8 @@
-# Branch, Skip, and Poll
+# Branch and Poll
 
-<p class="tutorial-meta">Lesson 5 of 10 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 5 of 10 · 3 minutes</p>
 
-A workflow does not have to run every step every time. This lesson picks one branch based on an input, skips a step when its condition is false, and repeats a check until it passes.
+A workflow does not have to run every step every time. This workflow picks one branch based on an input parameter and repeats a check until it passes.
 
 ## The workflow
 
@@ -12,17 +12,17 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-05-control-flow.yaml
 
 <<< @/public/tutorial/dags/tutorial-05-control-flow.yaml
 
-- **Branch.** `router.route` compares `value` with each route and runs the steps listed for the routes that match. The steps of the other routes are **Skipped**. `deploy_staging` and `deploy_prod` have no `depends`, because the router starts them.
-- **Poll.** `repeat_policy` with `repeat: until` runs `wait_until_healthy` again, once a second, until it exits with 0, at most 10 times. The script here passes on the third try.
-- **Skip.** `preconditions` runs `publish_notes` only when the `notes` parameter matches the regular expression `.+`, that is, when it is not empty. Otherwise the step is **Skipped** and the run still succeeds.
+`router.route` compares `value` with each route and starts the steps listed for matching routes. The steps of the other routes end as **Skipped**. `deploy_staging` and `deploy_prod` have no `depends` field because the router starts them directly.
 
-`wait_until_healthy` depends on both deploy steps. A step skipped by a router does not block its dependents.
+`repeat_policy` with `repeat: until` runs `wait_until_healthy` again every second until the command exits 0, up to 10 times. The script counts its attempts in a file and passes on the third one.
+
+`wait_until_healthy` depends on both deploy steps. A step skipped by a router does not block its dependents, so `wait_until_healthy` starts as soon as `deploy_staging` finishes.
 
 ## Watch it run
 
 <RunReplay run="tutorial-05-control-flow" />
 
-The router runs `deploy_staging`. `wait_until_healthy` runs three times, and `publish_notes` is skipped because `notes` is empty.
+The router runs `deploy_staging` and skips `deploy_prod`. Then `wait_until_healthy` polls three times before succeeding.
 
 ## Run it yourself
 
@@ -33,12 +33,12 @@ dagu start tutorial-05-control-flow.yaml
 ## Try it
 
 1. Run with `-- environment=prod`. Which deploy step runs?
-2. Run with `-- notes="Fixed the login bug"`. What does `publish_notes` print?
+2. Change `-ge 3` to `-ge 5`. How many times does `wait_until_healthy` run?
 
 ::: details Answers
 
 1. `deploy_prod` runs and `deploy_staging` is skipped.
-2. `Release notes - Fixed the login bug`. With a non-empty `notes`, the precondition is true and the step runs.
+2. Five times. It repeats once a second until the check passes.
 
 :::
 

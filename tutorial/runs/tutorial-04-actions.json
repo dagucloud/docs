@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-04-actions",
   "status": "succeeded",
-  "durationMs": 341,
+  "durationMs": 430,
   "steps": [
     {
       "id": "fetch_todos",
@@ -18,15 +18,6 @@
       "routesTo": [],
       "action": "js.run",
       "approval": false
-    },
-    {
-      "id": "write_report",
-      "depends": [
-        "summarize"
-      ],
-      "routesTo": [],
-      "action": "template.render",
-      "approval": false
     }
   ],
   "handlers": [],
@@ -37,47 +28,32 @@
       "status": "running"
     },
     {
-      "t": 30,
+      "t": 19,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 30,
+      "t": 19,
       "target": "summarize",
       "status": "not_started"
     },
     {
-      "t": 30,
-      "target": "write_report",
-      "status": "not_started"
-    },
-    {
-      "t": 208,
+      "t": 328,
       "target": "fetch_todos",
       "status": "succeeded"
     },
     {
-      "t": 208,
-      "target": "summarize",
-      "status": "running"
-    },
-    {
-      "t": 238,
-      "target": "summarize",
-      "status": "succeeded"
-    },
-    {
-      "t": 244,
-      "target": "write_report",
-      "status": "running"
-    },
-    {
-      "t": 267,
-      "target": "write_report",
-      "status": "succeeded"
-    },
-    {
       "t": 341,
+      "target": "summarize",
+      "status": "running"
+    },
+    {
+      "t": 374,
+      "target": "summarize",
+      "status": "succeeded"
+    },
+    {
+      "t": 430,
       "target": "$run",
       "status": "succeeded"
     }
@@ -98,19 +74,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "{\n  \"open\": 9,\n  \"next\": \"delectus aut autem\"\n}",
-      "stderr": "",
-      "outputs": {
-        "next": "delectus aut autem",
-        "open": "9"
-      },
-      "subRuns": []
-    },
-    "write_report": {
-      "status": "succeeded",
-      "retries": 0,
-      "executions": 1,
-      "stdout": "# Todo report\n\n- Still open: 9\n- Next up: delectus aut autem",
+      "stdout": "Still open: 9. Next up: delectus aut autem",
       "stderr": "",
       "outputs": {},
       "subRuns": []

@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-09-approvals",
   "status": "succeeded",
-  "durationMs": 5595,
+  "durationMs": 4874,
   "steps": [
     {
       "id": "build",
@@ -37,82 +37,72 @@
       "status": "running"
     },
     {
-      "t": 18,
+      "t": 19,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 18,
+      "t": 19,
       "target": "choose_target",
       "status": "not_started"
     },
     {
-      "t": 18,
+      "t": 19,
       "target": "deploy",
       "status": "not_started"
     },
     {
-      "t": 121,
+      "t": 122,
       "target": "$run",
       "status": "waiting"
     },
     {
-      "t": 121,
+      "t": 122,
       "target": "build",
       "status": "waiting"
     },
     {
-      "t": 1832,
-      "target": "$run",
-      "status": "queued"
+      "t": 1808,
+      "target": "choose_target",
+      "status": "running"
     },
     {
-      "t": 1832,
+      "t": 1827,
       "target": "build",
       "status": "succeeded"
     },
     {
-      "t": 1901,
-      "target": "choose_target",
-      "status": "running"
-    },
-    {
-      "t": 1935,
-      "target": "$run",
-      "status": "waiting"
-    },
-    {
-      "t": 1935,
+      "t": 1827,
       "target": "choose_target",
       "status": "waiting"
     },
     {
-      "t": 3647,
+      "t": 3538,
       "target": "$run",
       "status": "queued"
     },
     {
-      "t": 3647,
+      "t": 3538,
       "target": "choose_target",
       "status": "succeeded"
     },
     {
-      "t": 5492,
+      "t": 4771,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 5527,
+      "t": 4787,
       "target": "deploy",
       "status": "running"
     },
     {
-      "t": 5553,
+      "t": 4813,
       "target": "deploy",
       "status": "succeeded"
     },
     {
-      "t": 5595,
+      "t": 4874,
       "target": "$run",
       "status": "succeeded"
     }

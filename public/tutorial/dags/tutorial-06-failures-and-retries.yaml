@@ -1,6 +1,4 @@
 # Dagu tutorial, lesson 6: https://docs.dagu.sh/tutorial/failures-and-retries
-description: Retry a flaky step, tolerate an optional failure, and clean up
-type: graph
 
 handler_on:
   failure:
@@ -12,24 +10,16 @@ steps:
   - id: call_api
     working_dir: ${context.paths.artifacts_dir}
     run: |
-      if [ -f attempted ]; then
-        echo "API responded"
-      else
-        touch attempted
-        echo "API timed out" >&2
-        exit 1
-      fi
+      if [ -f attempted ]; then echo "API responded"; exit 0; fi
+      touch attempted; echo "API timed out" >&2; exit 1
     retry_policy:
       limit: 2
       interval_sec: 2
 
   - id: warm_cache
-    run: |
-      echo "Cache server unreachable" >&2
-      exit 1
+    run: echo "Cache server unreachable" >&2; exit 1
     continue_on: failed
 
   - id: publish
     run: echo "Published the report"
-    timeout_sec: 30
     depends: [call_api, warm_cache]

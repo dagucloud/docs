@@ -1,8 +1,8 @@
 # Sub-DAGs and Fan-out
 
-<p class="tutorial-meta">Lesson 7 of 10 · 4 minutes</p>
+<p class="tutorial-meta">Lesson 7 of 10 · 3 minutes</p>
 
-A step can run another workflow as a sub-DAG. The child is a full run with its own steps, logs, and status. Use sub-DAGs to reuse a workflow, or to run one workflow once per item in a list.
+A step can run another workflow as a sub-DAG. You can use sub-DAGs to reuse existing workflows or fan out one workflow across a list of items.
 
 ## The workflow
 
@@ -12,11 +12,11 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-07-sub-dags.yaml
 
 <<< @/public/tutorial/dags/tutorial-07-sub-dags.yaml
 
-The file holds three workflows separated by `---`. The first is the parent. `build-app` and `smoke-test` are children, named with `name`.
+Three dashes `---` separate workflows in one file. The top workflow is the parent, and `smoke-test` below it is the child workflow.
 
-- `action: dag.run` runs the child named in `dag`. `params` passes values into it. A child sees only what it receives this way, not the parent's environment.
-- `outputs.write` in `build-app` returns `bundle` to the parent, which reads it as `${steps.build.outputs.bundle}`.
-- `parallel` runs `smoke-test` once per item, at most 2 at a time. `${ITEM}` is the current item.
+The `build` step captures a filename from standard output into `bundle`. Next, `smoke_test` calls the child workflow with `action: dag.run`. Child workflows run in isolation, receiving only what you pass through `params`.
+
+The `parallel` block runs `smoke-test` once per region, replacing `${ITEM}` with the current item. Setting `max_concurrent: 2` limits the fan-out so at most two child runs execute at the same time.
 
 ## Watch it run
 
@@ -30,9 +30,9 @@ Select `smoke_test` to see the three child runs it started, one per region.
 dagu start tutorial-07-sub-dags.yaml
 ```
 
-In the Web UI, the **Activity** list marks `smoke_test` with **3 sub-runs**. Select it to see, on the **Log** tab, a JSON summary of each child run's status and outputs.
+In the Web UI, the **Activity** list marks `smoke_test` with **3 sub-runs**. Select it to view a JSON summary of each child run's status on the **Log** tab.
 
-A child can also live in its own file. Then `dag` names that file, for example `dag: smoke-test` for `smoke-test.yaml` in the same folder.
+A child workflow can also live in a separate file. When it does, `dag` references the filename without the `.yaml` extension, such as `dag: smoke-test` for `smoke-test.yaml`.
 
 ## Try it
 
@@ -41,8 +41,8 @@ A child can also live in its own file. Then `dag` names that file, for example `
 
 ::: details Answers
 
-1. Four, one per item.
-2. About 3 seconds instead of 2. The child runs no longer overlap: each starts after the previous one finishes.
+1. Four child runs, one for each item.
+2. About 3 seconds instead of 2. Child runs no longer overlap, so each run waits for the previous one to finish.
 
 :::
 

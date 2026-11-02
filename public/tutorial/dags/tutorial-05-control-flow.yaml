@@ -1,15 +1,7 @@
 # Dagu tutorial, lesson 5: https://docs.dagu.sh/tutorial/control-flow
-description: Branch on a parameter, skip a step, and poll until ready
-type: graph
 
 params:
-  - name: environment
-    type: string
-    enum: [staging, prod]
-    default: staging
-  - name: notes
-    type: string
-    default: ""
+  - environment: staging
 
 steps:
   - id: choose_target
@@ -29,22 +21,12 @@ steps:
   - id: wait_until_healthy
     working_dir: ${context.paths.artifacts_dir}
     run: |
-      echo "check" >> checks.txt
+      echo check >> checks.txt
       count=$(wc -l < checks.txt | tr -d ' ')
-      if [ "$count" -lt 3 ]; then
-        echo "Health check $count: not ready yet"
-        exit 1
-      fi
-      echo "Health check $count: healthy"
+      echo "Health check $count"
+      [ "$count" -ge 3 ] && echo "Healthy"
     repeat_policy:
       repeat: until
       interval_sec: 1
       limit: 10
     depends: [deploy_staging, deploy_prod]
-
-  - id: publish_notes
-    run: echo "Release notes - ${params.notes}"
-    preconditions:
-      - condition: "${params.notes}"
-        expected: "re:.+"
-    depends: wait_until_healthy

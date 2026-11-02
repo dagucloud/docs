@@ -1,8 +1,8 @@
 # Schedules
 
-<p class="tutorial-meta">Lesson 8 of 10 · 3 minutes</p>
+<p class="tutorial-meta">Lesson 8 of 10 · 2 minutes</p>
 
-`schedule` runs a workflow on a cron schedule. The scheduler that `dagu start-all` started in the setup checks every schedule and starts the runs.
+Add `schedule` to run a workflow on a cron schedule. The scheduler started by `dagu start-all` checks every schedule and starts the runs.
 
 ## The workflow
 
@@ -26,10 +26,13 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-08-scheduling.yaml
 
 <RunReplay run="tutorial-08-scheduling" />
 
-## See it run on schedule
+`snapshot` prints the time it ran. On the schedule, a new run like this starts every minute.
 
-1. Open `tutorial-08-scheduling` in the Web UI and select the **Cron** launcher on the canvas. It lists the next three runs.
-2. Wait for the next minute to start. A new run appears in **Activity**, started by the scheduler instead of by you.
+## Run it yourself
+
+1. Open `tutorial-08-scheduling` in the Web UI.
+2. Select the **Cron** launcher on the canvas to see the next three scheduled runs.
+3. Wait for the next minute to start. A new run appears in **Activity**, started by the scheduler.
 
 ::: warning Stop the schedule when you are done
 This workflow runs every minute while Dagu is up. Delete `tutorial-08-scheduling.yaml`, or remove its `schedule` line, when you finish the lesson.
@@ -46,7 +49,6 @@ This workflow runs every minute while Dagu is up. Delete `tutorial-08-scheduling
 2. `schedule: "0 9,17 * * MON-FRI"`. A list of expressions also works:
 
 ```yaml
-type: graph
 schedule:
   - "0 9 * * MON-FRI"
   - "0 17 * * MON-FRI"

@@ -40,76 +40,57 @@
       "routesTo": [],
       "action": "run",
       "approval": false
-    },
-    {
-      "id": "publish_notes",
-      "depends": [
-        "wait_until_healthy"
-      ],
-      "routesTo": [],
-      "action": "run",
-      "approval": false
     }
   ],
   "handlers": [],
   "events": [
     {
       "t": 0,
+      "target": "choose_target",
+      "status": "running"
+    },
+    {
+      "t": 9,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 0,
-      "target": "choose_target",
-      "status": "not_started"
-    },
-    {
-      "t": 0,
+      "t": 9,
       "target": "deploy_staging",
       "status": "not_started"
     },
     {
-      "t": 0,
+      "t": 9,
       "target": "deploy_prod",
       "status": "not_started"
     },
     {
-      "t": 0,
+      "t": 9,
       "target": "wait_until_healthy",
       "status": "not_started"
     },
     {
-      "t": 0,
-      "target": "publish_notes",
-      "status": "not_started"
-    },
-    {
-      "t": 23,
-      "target": "choose_target",
-      "status": "running"
-    },
-    {
-      "t": 53,
+      "t": 31,
       "target": "choose_target",
       "status": "succeeded"
     },
     {
-      "t": 53,
+      "t": 31,
       "target": "deploy_staging",
       "status": "running"
     },
     {
-      "t": 98,
+      "t": 104,
+      "target": "deploy_staging",
+      "status": "succeeded"
+    },
+    {
+      "t": 104,
       "target": "wait_until_healthy",
       "status": "running"
     },
     {
-      "t": 105,
-      "target": "deploy_staging",
-      "status": "succeeded"
-    },
-    {
-      "t": 105,
+      "t": 114,
       "target": "deploy_prod",
       "status": "skipped"
     },
@@ -122,11 +103,6 @@
       "t": 2283,
       "target": "$run",
       "status": "succeeded"
-    },
-    {
-      "t": 2283,
-      "target": "publish_notes",
-      "status": "skipped"
     }
   ],
   "results": {
@@ -161,16 +137,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 3,
-      "stdout": "Health check 1: not ready yet\nHealth check 2: not ready yet\nHealth check 3: healthy",
-      "stderr": "",
-      "outputs": {},
-      "subRuns": []
-    },
-    "publish_notes": {
-      "status": "skipped",
-      "retries": 0,
-      "executions": 0,
-      "stdout": "",
+      "stdout": "Health check 1\nHealth check 2\nHealth check 3\nHealthy",
       "stderr": "",
       "outputs": {},
       "subRuns": []

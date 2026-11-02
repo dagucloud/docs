@@ -1,6 +1,4 @@
 # Dagu tutorial, lesson 9: https://docs.dagu.sh/tutorial/approvals
-description: Pause for a review and ask a person for input
-type: graph
 
 steps:
   - id: build

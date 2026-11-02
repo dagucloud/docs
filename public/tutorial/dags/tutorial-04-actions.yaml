@@ -1,6 +1,4 @@
 # Dagu tutorial, lesson 4: https://docs.dagu.sh/tutorial/actions
-description: Call an API, transform the data in JavaScript, and render a report
-type: graph
 
 steps:
   - id: fetch_todos
@@ -19,29 +17,5 @@ steps:
       input: ${steps.fetch_todos.outputs.todos}
       script: |
         const open = input.filter((todo) => !todo.completed);
-        return { open: open.length, next: open[0].title };
-    output:
-      open:
-        from: stdout
-        decode: json
-        select: .open
-      next:
-        from: stdout
-        decode: json
-        select: .next
+        return `Still open: ${open.length}. Next up: ${open[0].title}`;
     depends: fetch_todos
-
-  - id: write_report
-    action: template.render
-    with:
-      data:
-        open: ${steps.summarize.outputs.open}
-        next: ${steps.summarize.outputs.next}
-      template: |
-        # Todo report
-
-        - Still open: {{ .open }}
-        - Next up: {{ .next }}
-    stdout:
-      artifact: report.md
-    depends: summarize

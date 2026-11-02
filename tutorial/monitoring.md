@@ -2,7 +2,7 @@
 
 <p class="tutorial-meta">Lesson 2 of 10 · 5 minutes</p>
 
-Every run is recorded: each step's status, timing, and log. This lesson uses a slow workflow so you can follow it live, stop it, and look back at earlier runs.
+Dagu records the status, timing, and log output of every run. This workflow is slow on purpose, so you can watch it live, stop it, and look back at earlier runs.
 
 ## The workflow
 
@@ -12,13 +12,13 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-02-monitoring.yaml
 
 <<< @/public/tutorial/dags/tutorial-02-monitoring.yaml
 
-Each step prints a line every second, so the run takes about eight seconds.
+Each step prints a line every second, so a run takes about eight seconds. That is long enough to follow it in the browser.
 
 ## Watch it run
 
 <RunReplay run="tutorial-02-monitoring" />
 
-Select a step while it runs. Its log fills in as lines arrive.
+Select a step while it runs to see its log stream line by line. Step boxes change color as each step finishes.
 
 ## Follow a run in the Web UI
 
@@ -29,26 +29,27 @@ The workflow page has three parts:
 
 ![Workflow page with a finished run of tutorial-02-monitoring](/tutorial/workflow-page-light.png)
 
-- **The workflow bar** at the top shows the selected run and its status. Its buttons stop or retry the run and switch to older or newer runs.
-- **The canvas** draws the steps as a graph. Each step shows its status in the selected run.
-- **Activity** at the bottom charts recent runs and lists the steps of the selected run.
+**The workflow bar** at the top shows the selected run and its status. Use it to stop or retry the run, or switch to an earlier one.
 
-Select a step, on the canvas or in the **Activity** list, to see what it printed on the **Log** tab. The log keeps updating while the step runs.
+**The canvas** draws the steps as a graph, colored by status.
+
+**Activity** at the bottom charts recent runs and lists the steps of the selected run.
+
+Select any step on the canvas or in the **Activity** list to read its output on the **Log** tab. The log updates while the step runs.
 
 ![Activity panel showing the log of the transform step](/tutorial/step-log-light.png)
 
 ## Look back at earlier runs
 
-Run the workflow two or three more times, then open **Activity**:
+Run the workflow two or three more times, then open **Activity**.
 
-- **Timeline** shows when each step ran and how long it took.
-- **History** shows each step's status across recent runs, one column per run. Select a cell to open that run and step.
+**Timeline** shows when each step ran and how long it took. **History** shows each step's status across recent runs, one column per run. Select any cell to open that run and step.
 
 ![History tab with one column per run](/tutorial/history-light.png)
 
 ## Stop a run
 
-Start the workflow again and select the stop button in the workflow bar while `download` is running. The run and `download` end as **Aborted**. The steps after it never start.
+Start the workflow again and select the stop button in the workflow bar while `download` is running. The step and the run end as **Aborted**. Downstream steps never start.
 
 ## The same from the terminal
 
@@ -62,7 +63,7 @@ To stop a run from a second terminal, run `dagu stop tutorial-02-monitoring.yaml
 
 ## Try it
 
-1. Start a run in the Web UI, then run `dagu status tutorial-02-monitoring.yaml` in the terminal while it is still going. Do both show the same step running?
+1. Start a run in the Web UI, then run `dagu status tutorial-02-monitoring.yaml` in the terminal while it is still running. Do both show the same step running?
 2. Find the run you stopped in **History**. Which steps have no color?
 
 ::: details Answers

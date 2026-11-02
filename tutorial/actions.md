@@ -1,10 +1,8 @@
 # Built-in Actions
 
-<p class="tutorial-meta">Lesson 4 of 10 · 5 minutes</p>
+<p class="tutorial-meta">Lesson 4 of 10 · 4 minutes</p>
 
-`run` runs a shell command. For common jobs such as calling an API, transforming data, rendering a file, querying a database, or starting a container, a step can use a built-in **action** instead, with no scripts or extra tools to install.
-
-This lesson chains three actions: fetch a list of todos, summarize it in JavaScript, and render a report.
+`run` runs a shell command. For common jobs like calling an API or transforming data, a step can use a built-in action instead, with no extra tools to install.
 
 ## The workflow
 
@@ -14,18 +12,15 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-04-actions.yaml
 
 <<< @/public/tutorial/dags/tutorial-04-actions.yaml
 
-- `action` picks the built-in action. `with` holds its settings.
-- `http.request` calls a URL and prints the response body. `output` publishes it as `todos`.
-- `js.run` runs JavaScript in a sandbox built into Dagu, so Node.js does not need to be installed. `input` becomes the script's `input` variable, with JSON already parsed, and the value the script returns is the step's output. With `decode: json`, each `select` picks one field of it.
-- `template.render` fills a template with `data`. `stdout: {artifact: report.md}` saves what the step prints as a file attached to the run.
+Instead of `run`, each step specifies an `action` and passes configuration to `with`. `fetch_todos` uses `http.request` to call the API and stores the response body in `todos`. `summarize` passes that text into `js.run`, which parses the JSON automatically so the script can filter the array. Returning a string writes it directly to standard output.
 
-This lesson calls `jsonplaceholder.typicode.com`, a free test API, so it needs internet access.
+This workflow calls `jsonplaceholder.typicode.com`, so your machine needs internet access.
 
 ## Watch it run
 
 <RunReplay run="tutorial-04-actions" />
 
-Select `summarize` to see the object the script returned and the two fields picked out of it.
+Select `summarize` to see the text returned by the JavaScript sandbox.
 
 ## Run it yourself
 
@@ -33,13 +28,13 @@ Select `summarize` to see the object the script returned and the two fields pick
 dagu start tutorial-04-actions.yaml
 ```
 
-In the Web UI, open the run, then **Activity** → **Artifacts** to read `report.md`.
+In the Web UI, open the run and select `summarize` to read what it printed.
 
 ## When to use `js.run`
 
-Use `js.run` to filter, reshape, or compute values between steps, instead of `python -c`, `jq`, or `awk` in a `run` step. Dagu checks the script for syntax errors when it validates the workflow, before anything runs.
+Use `js.run` to filter, reshape, or compute values between steps instead of calling `jq` or `awk` in a shell command. Dagu checks JavaScript syntax when validating the workflow, before any step runs.
 
-The sandbox has no network, files, environment variables, or npm packages. Keep that work in `run` steps or other actions, and pass the results in through `input`.
+The sandbox has no access to the network, files, environment variables, or npm packages. Handle network and disk operations in other steps, and pass data into JavaScript through `input`.
 
 ## Find more actions
 
@@ -60,15 +55,13 @@ Every action has a reference page under **Actions** in the sidebar. For ready-ma
 
 ## Try it
 
-1. Change `userId=1` to `userId=2` in the URL and run again. What does `report.md` say now?
-2. Delete the closing `}` from the `return` line in `summarize`, then run `dagu validate tutorial-04-actions.yaml`. What happens?
-3. Change the URL to `https://jsonplaceholder.typicode.com/todos/9999`, which does not exist. What happens?
+1. Change `userId=1` to `userId=2` in the URL and run the workflow again. What does `summarize` print?
+2. Delete the last `)` on the `filter` line in `summarize`, then run `dagu validate tutorial-04-actions.yaml`. What happens?
 
 ::: details Answers
 
-1. `Still open: 12` and `Next up: suscipit repellat esse quibusdam voluptatem incidunt`.
+1. `Still open: 12. Next up: suscipit repellat esse quibusdam voluptatem incidunt`.
 2. Validation fails with a JavaScript `SyntaxError` that names the line, and nothing runs.
-3. The API answers `404`, so `fetch_todos` fails and the steps after it never run. `http.request` fails on any status outside 200–299.
 
 :::
 
