@@ -4,6 +4,12 @@
 
 Some steps need human judgment before work continues. The run pauses in the **Waiting** state and resumes when someone responds in the Web UI.
 
+## Watch it run
+
+<RunReplay run="tutorial-09-approvals" />
+
+The run waits twice: first for approval on `build`, then for the form on `choose_target`. In this recording, the reviewer approves the build and picks `production`.
+
 ## The workflow
 
 ```bash
@@ -15,12 +21,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-09-approvals.yaml
 `approval` on `build` pauses the run after the command succeeds. The run stays paused until someone approves or rejects the step.
 
 `action: human.task` pauses for structured form input. The `form` section uses a JSON schema to define fields. Every submitted field becomes a step output, so `${steps.choose_target.outputs.environment}` reads the chosen value.
-
-## Watch it run
-
-<RunReplay run="tutorial-09-approvals" />
-
-The run waits twice: first for approval on `build`, then for the form on `choose_target`. In this recording, the reviewer approves the build and picks `production`.
 
 ## Run it yourself
 

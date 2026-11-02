@@ -4,6 +4,12 @@
 
 A workflow is a YAML file with a list of steps. Each step runs a shell command, and `depends` sets which steps wait for others.
 
+## Watch it run
+
+<RunReplay run="tutorial-01-first-workflow" />
+
+`lint` and `test` start at the same time once `checkout` succeeds. `package` starts only after the slower `test` finishes.
+
 ## The workflow
 
 ```bash
@@ -15,12 +21,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-01-first-workflow.yaml
 Each step has an `id`, which other steps use to refer to it, and a `run` command.
 
 Steps that do not depend on each other run at the same time. A step with `depends` waits until those steps succeed: `lint` and `test` both wait for `checkout`, then run side by side, and `package` waits for both.
-
-## Watch it run
-
-<RunReplay run="tutorial-01-first-workflow" />
-
-`lint` and `test` start at the same time once `checkout` succeeds. `package` starts only after the slower `test` finishes.
 
 ## Run it yourself
 

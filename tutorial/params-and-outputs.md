@@ -4,6 +4,12 @@
 
 Parameters pass values into a workflow when it starts. Outputs pass values from one step to the steps that follow.
 
+## Watch it run
+
+<RunReplay run="tutorial-03-params-and-outputs" />
+
+Select `build` to see the `bundle` output it published.
+
 ## The workflow
 
 ```bash
@@ -15,12 +21,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-03-params-and-outputs.ya
 `params` declares the inputs. `environment` accepts only `dev`, `staging`, or `prod`. Both have defaults, so the workflow runs without any arguments. `${params.version}` puts a parameter's value into a command.
 
 Outputs pass data forward. The `build` step captures its printed text as an output named `bundle`. The `deploy` step reads that value with `${steps.build.outputs.bundle}`. A step can only read outputs from steps it depends on.
-
-## Watch it run
-
-<RunReplay run="tutorial-03-params-and-outputs" />
-
-Select `build` to see the `bundle` output it published.
 
 ## Run it yourself
 

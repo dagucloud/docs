@@ -4,6 +4,12 @@
 
 Dagu records the status, timing, and log output of every run. This workflow is slow on purpose, so you can watch it live, stop it, and look back at earlier runs.
 
+## Watch it run
+
+<RunReplay run="tutorial-02-monitoring" />
+
+Select a step while it runs to see its log stream line by line. Step boxes change color as each step finishes.
+
 ## The workflow
 
 ```bash
@@ -13,12 +19,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-02-monitoring.yaml
 <<< @/public/tutorial/dags/tutorial-02-monitoring.yaml
 
 Each step prints a line every second, so a run takes about eight seconds. That is long enough to follow it in the browser.
-
-## Watch it run
-
-<RunReplay run="tutorial-02-monitoring" />
-
-Select a step while it runs to see its log stream line by line. Step boxes change color as each step finishes.
 
 ## Follow a run in the Web UI
 

@@ -4,6 +4,12 @@
 
 Add `schedule` to run a workflow on a cron schedule. The scheduler started by `dagu start-all` checks every schedule and starts the runs.
 
+## Watch it run
+
+<RunReplay run="tutorial-08-scheduling" />
+
+`snapshot` prints the time it ran. On the schedule, a new run like this starts every minute.
+
 ## The workflow
 
 ```bash
@@ -21,12 +27,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-08-scheduling.yaml
 | `"0 9 * * MON-FRI"` | Weekdays at 9:00 |
 | `"@hourly"` | At the start of every hour |
 | `"CRON_TZ=Asia/Tokyo 0 9 * * *"` | 9:00 in Tokyo, whatever the server's time zone |
-
-## Watch it run
-
-<RunReplay run="tutorial-08-scheduling" />
-
-`snapshot` prints the time it ran. On the schedule, a new run like this starts every minute.
 
 ## Run it yourself
 

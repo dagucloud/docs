@@ -4,6 +4,12 @@
 
 A workflow does not have to run every step every time. This workflow picks one branch based on an input parameter and repeats a check until it passes.
 
+## Watch it run
+
+<RunReplay run="tutorial-05-control-flow" />
+
+The router runs `deploy_staging` and skips `deploy_prod`. Then `wait_until_healthy` polls three times before succeeding.
+
 ## The workflow
 
 ```bash
@@ -17,12 +23,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-05-control-flow.yaml
 `repeat_policy` with `repeat: until` runs `wait_until_healthy` again every second until the command exits 0, up to 10 times. The script counts its attempts in a file and passes on the third one.
 
 `wait_until_healthy` depends on both deploy steps. A step skipped by a router does not block its dependents, so `wait_until_healthy` starts as soon as `deploy_staging` finishes.
-
-## Watch it run
-
-<RunReplay run="tutorial-05-control-flow" />
-
-The router runs `deploy_staging` and skips `deploy_prod`. Then `wait_until_healthy` polls three times before succeeding.
 
 ## Run it yourself
 

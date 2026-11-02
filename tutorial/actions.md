@@ -4,6 +4,12 @@
 
 `run` runs a shell command. For common jobs like calling an API or transforming data, a step can use a built-in action instead, with no extra tools to install.
 
+## Watch it run
+
+<RunReplay run="tutorial-04-actions" />
+
+Select `summarize` to see the text returned by the JavaScript sandbox.
+
 ## The workflow
 
 ```bash
@@ -15,12 +21,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-04-actions.yaml
 Instead of `run`, each step specifies an `action` and passes configuration to `with`. `fetch_todos` uses `http.request` to call the API and stores the response body in `todos`. `summarize` passes that text into `js.run`, which parses the JSON automatically so the script can filter the array. Returning a string writes it directly to standard output.
 
 This workflow calls `jsonplaceholder.typicode.com`, so your machine needs internet access.
-
-## Watch it run
-
-<RunReplay run="tutorial-04-actions" />
-
-Select `summarize` to see the text returned by the JavaScript sandbox.
 
 ## Run it yourself
 

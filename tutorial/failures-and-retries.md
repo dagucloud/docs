@@ -4,6 +4,12 @@
 
 Commands fail when networks drop or services go down. Dagu can retry a flaky step automatically, ignore an optional failure, and run cleanup commands when the run finishes.
 
+## Watch it run
+
+<RunReplay run="tutorial-06-failures-and-retries" />
+
+`call_api` shows **retried 1×** before it succeeds. The `failure` handler stays **Not started** because the run reached **Partially succeeded** instead of failing.
+
 ## The workflow
 
 ```bash
@@ -17,12 +23,6 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-06-failures-and-retries.
 Not every failure needs to halt the workflow. Setting `continue_on: failed` on `warm_cache` lets `publish` run even though the cache fails. The run finishes as **Partially succeeded** so you still know something went wrong.
 
 `handler_on` registers commands for the end of the run. The `exit` handler runs after every run, while `failure` runs only when the workflow fails.
-
-## Watch it run
-
-<RunReplay run="tutorial-06-failures-and-retries" />
-
-`call_api` shows **retried 1×** before it succeeds. The `failure` handler stays **Not started** because the run reached **Partially succeeded** instead of failing.
 
 ## Run it yourself
 

@@ -4,6 +4,12 @@
 
 A step can run another workflow as a sub-DAG. You can use sub-DAGs to reuse existing workflows or fan out one workflow across a list of items.
 
+## Watch it run
+
+<RunReplay run="tutorial-07-sub-dags" />
+
+Select `smoke_test` to see the three child runs it started, one per region.
+
 ## The workflow
 
 ```bash
@@ -17,12 +23,6 @@ Three dashes `---` separate workflows in one file. The top workflow is the paren
 The `build` step captures a filename from standard output into `bundle`. Next, `smoke_test` calls the child workflow with `action: dag.run`. Child workflows run in isolation, receiving only what you pass through `params`.
 
 The `parallel` block runs `smoke-test` once per region, replacing `${ITEM}` with the current item. Setting `max_concurrent: 2` limits the fan-out so at most two child runs execute at the same time.
-
-## Watch it run
-
-<RunReplay run="tutorial-07-sub-dags" />
-
-Select `smoke_test` to see the three child runs it started, one per region.
 
 ## Run it yourself
 
