@@ -17,7 +17,7 @@ Every lesson runs from the Web UI, so it works on any operating system. No Dagu 
   <a href="/tutorial/failures-and-retries"><b>06</b><span>Failures and retries · 3 min</span></a>
   <a href="/tutorial/sub-dags"><b>07</b><span>Sub-DAGs and fan-out · 3 min</span></a>
   <a href="/tutorial/scheduling"><b>08</b><span>Schedules · 2 min</span></a>
-  <a href="/tutorial/approvals"><b>09</b><span>Approvals and human input · 3 min</span></a>
+  <a href="/tutorial/human-input"><b>09</b><span>Human input · 3 min</span></a>
   <a href="/tutorial/console-alerts"><b>10</b><span>Alerts from Dagu Console · 3 min</span></a>
 </div>
 

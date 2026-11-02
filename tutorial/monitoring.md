@@ -26,7 +26,7 @@ The workflow page has three parts:
 
 ![Workflow page with a finished run of tutorial-02-monitoring](/tutorial/workflow-page-light.png)
 
-**The workflow bar** at the top shows the selected run and its status. Icons next to the run chip stop, retry, or reject the selected run.
+**The workflow bar** at the top shows the selected run and its status. Icons next to the run chip stop or retry the selected run.
 
 **The canvas** draws the steps as a graph with each step's status.
 

@@ -1,14 +1,14 @@
 {
-  "dag": "tutorial-09-approvals",
+  "dag": "tutorial-09-human-input",
   "status": "succeeded",
-  "durationMs": 4921,
+  "durationMs": 3913,
   "steps": [
     {
       "id": "build",
       "depends": [],
       "routesTo": [],
       "action": "run",
-      "approval": true
+      "approval": false
     },
     {
       "id": "choose_target",
@@ -33,71 +33,76 @@
   "events": [
     {
       "t": 0,
-      "target": "build",
-      "status": "running"
-    },
-    {
-      "t": 24,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 24,
+      "t": 0,
       "target": "build",
-      "status": "waiting"
+      "status": "not_started"
     },
     {
-      "t": 24,
+      "t": 0,
       "target": "choose_target",
       "status": "not_started"
     },
     {
-      "t": 24,
+      "t": 0,
       "target": "deploy",
       "status": "not_started"
     },
     {
-      "t": 128,
-      "target": "$run",
-      "status": "waiting"
-    },
-    {
-      "t": 1719,
-      "target": "choose_target",
+      "t": 9,
+      "target": "build",
       "status": "running"
     },
     {
-      "t": 1740,
+      "t": 58,
       "target": "build",
       "status": "succeeded"
     },
     {
-      "t": 1740,
+      "t": 58,
+      "target": "choose_target",
+      "status": "running"
+    },
+    {
+      "t": 103,
+      "target": "$run",
+      "status": "waiting"
+    },
+    {
+      "t": 103,
       "target": "choose_target",
       "status": "waiting"
     },
     {
-      "t": 3479,
+      "t": 1851,
       "target": "$run",
       "status": "queued"
     },
     {
-      "t": 3479,
+      "t": 1852,
       "target": "choose_target",
       "status": "succeeded"
     },
     {
-      "t": 4890,
+      "t": 3810,
+      "target": "$run",
+      "status": "running"
+    },
+    {
+      "t": 3842,
       "target": "deploy",
       "status": "running"
     },
     {
-      "t": 4915,
+      "t": 3877,
       "target": "deploy",
       "status": "succeeded"
     },
     {
-      "t": 4921,
+      "t": 3913,
       "target": "$run",
       "status": "succeeded"
     }

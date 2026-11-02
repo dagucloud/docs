@@ -42,9 +42,8 @@ const IDLE_STATUSES = new Set(["not_started", "waiting", "queued"]);
 // Lessons whose run does not simply succeed on its own.
 const lessonOverrides = {
   "tutorial-06-failures-and-retries": { expectedStatus: "partially_succeeded" },
-  "tutorial-09-approvals": {
+  "tutorial-09-human-input": {
     waitingResponses: {
-      build: { path: "steps/build/approve", body: {} },
       choose_target: {
         path: "human-tasks/choose_target/complete",
         body: { environment: "production" },
