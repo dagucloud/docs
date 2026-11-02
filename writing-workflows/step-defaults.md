@@ -18,6 +18,7 @@ The `defaults` block accepts the following fields:
 | `signal_on_stop` | string | Signal sent when a step is stopped |
 | `env` | array/object | Environment variables added to each step |
 | `preconditions` | string/array | Preconditions added to each step |
+| `max_concurrent` | integer | Concurrency limit for `parallel` and `foreach` steps that omit `max_concurrent` |
 | `agent` | object | Agent configuration merged per field into a step's `agent` block |
 
 See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults) for the field reference.
@@ -34,6 +35,7 @@ See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#s
 | `signal_on_stop` | Step value replaces default |
 | `env` | Default entries prepended before step entries |
 | `preconditions` | Default entries prepended before step entries |
+| `max_concurrent` | Step `parallel.max_concurrent` or `foreach.max_concurrent` replaces default |
 | `agent` | Step `agent.<field>` value replaces the matching default subfield |
 
 **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): The default is applied only when the step does not set its own value. When a step defines the field, the step's value is used entirely; there is no field-level merging within the object.
@@ -41,6 +43,8 @@ See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#s
 **Agent fields** (`agent`): Defaults are applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 
 **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both sets are present at runtime.
+
+**Fan-out limit** (`max_concurrent`): Applies only to steps that already have a `parallel` or `foreach` block, and never adds one. The value must be an integer from `1` to `1000`; fractions and `${...}` references are rejected. Without a default, a step that omits `max_concurrent` runs up to `10` items at a time.
 
 Unknown keys inside `defaults` cause a validation error.
 
@@ -153,6 +157,34 @@ steps:
     # Must satisfy both: ENVIRONMENT=production AND branch=main
 ```
 
+### Shared Fan-out Limit
+
+`max_concurrent` sets the limit for every `parallel` and `foreach` step that does not set its own:
+
+```yaml
+defaults:
+  max_concurrent: 3
+
+steps:
+  - id: process_files
+    action: dag.run
+    with:
+      dag: file_processor
+      params: "file=${ITEM}"
+    parallel:
+      items: [a.csv, b.csv, c.csv, d.csv, e.csv]
+    # Up to 3 child runs at a time (inherited)
+
+  - id: notify_users
+    foreach:
+      items: [alice, bob, carol, dave]
+      max_concurrent: 1
+      steps:
+        - id: send
+          run: ./notify.sh ${foreach.item}
+    # One item at a time (step value wins)
+```
+
 ### Handler Inheritance
 
 `handler_on` steps also inherit from `defaults`:
@@ -173,6 +205,33 @@ handler_on:
   exit:
     run: ./cleanup.sh
     # timeout_sec: 300 (inherited)
+```
+
+### Foreach Body Inheritance
+
+Steps inside `foreach.steps` inherit from `defaults` under the same merge rules as top-level steps:
+
+```yaml
+defaults:
+  timeout_sec: 300
+  max_concurrent: 4
+
+steps:
+  - id: per_region
+    foreach:
+      items: [us, eu, ap]
+      steps:
+        - id: deploy
+          run: ./deploy.sh ${foreach.item}
+          # timeout_sec: 300 (inherited)
+        - id: backfill
+          depends: deploy
+          foreach:
+            items: [orders, users]
+            steps:
+              - id: copy
+                run: ./backfill.sh ${foreach.item}
+          # Up to 4 tables at a time (inherited)
 ```
 
 ### Combined Example
@@ -213,7 +272,7 @@ steps:
 
 ## Interaction with Base Configuration
 
-The `defaults` field is a DAG-level field. When set in [base configuration](/server-admin/base-config), it is inherited by all DAGs. A DAG-level `defaults` overrides the base configuration's `defaults` (standard merge behavior, where the DAG value wins).
+The `defaults` field is a DAG-level field. When set in [base configuration](/server-admin/base-config), it is inherited by all DAGs. `defaults` merge field by field, in the order global `base.yaml`, workspace `base.yaml`, then the DAG. A field set at a later level replaces the earlier value, except `env` and `preconditions`, which add to it. A field a level omits keeps the earlier value, so a DAG that sets only `timeout_sec` still inherits `max_concurrent` from `base.yaml`.
 
 ## See Also
 

@@ -362,6 +362,10 @@ restart_wait_sec: 60
 # Max concurrent steps within a run
 max_active_steps: 4
 
+# Max concurrent items per parallel or foreach step (default 10)
+defaults:
+  max_concurrent: 4
+
 # History retention (days)
 hist_retention_days: 30
 
