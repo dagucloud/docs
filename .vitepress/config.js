@@ -202,7 +202,7 @@ const fullSidebar = [
   },
   {
     text: "Tutorial",
-    collapsed: true,
+    collapsed: false,
     items: [
       { text: "Overview", link: "/tutorial/" },
       { text: "1. Your First Workflow", link: "/tutorial/first-workflow" },
