@@ -3,7 +3,7 @@
 Common paths: **Homebrew** (binary only), **npm** (binary only), or the **guided script installer** (optional LaunchAgent service and admin bootstrap).
 
 ::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.app/) is a separate app for running workflows on your own Mac without the command line.
+[Kitewell](https://kitewell.com/) is a separate app for running workflows on your own Mac without the command line.
 :::
 
 ## Homebrew

@@ -3,7 +3,7 @@
 The Windows installer ships as both a PowerShell script and a CMD launcher. The wizard can install Dagu as a Windows service using a version-pinned [WinSW](https://github.com/winsw/winsw) wrapper downloaded during setup.
 
 ::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.app/) is a separate app for running workflows on your own Windows PC without the command line.
+[Kitewell](https://kitewell.com/) is a separate app for running workflows on your own Windows PC without the command line.
 :::
 
 ## PowerShell

@@ -11,7 +11,7 @@ A task that succeeded is recorded and replayed on later runs without the model, 
 Every model request goes through Dagu's own [LLM providers](/step-types/llm/providers), so the step uses the same `llm` configuration as `chat.completion`.
 
 ::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.app/) is a separate app for automating desktop applications on your own Mac or Windows PC without YAML.
+[Kitewell](https://kitewell.com/) is a separate app for automating desktop applications on your own Mac or Windows PC without YAML.
 :::
 
 ## Requirements

@@ -7,7 +7,7 @@ description: Run Dagu as a Windows service that starts with the computer, and kn
 The Windows installer can register Dagu as a Windows service that starts with the computer and restarts after a failure. The service is a version-pinned [WinSW](https://github.com/winsw/winsw) wrapper around `dagu start-all`.
 
 ::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.app/) is a separate app for running workflows on your own Windows PC without the command line.
+[Kitewell](https://kitewell.com/) is a separate app for running workflows on your own Windows PC without the command line.
 :::
 
 ## Install the Service

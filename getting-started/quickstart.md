@@ -9,7 +9,7 @@ From zero to a running workflow in under five minutes.
 ## 1. Install
 
 ::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.app/) is a separate app for running workflows on your own Mac or Windows PC without the command line.
+[Kitewell](https://kitewell.com/) is a separate app for running workflows on your own Mac or Windows PC without the command line.
 :::
 
 ::: code-group

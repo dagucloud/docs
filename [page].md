@@ -70,7 +70,7 @@ flowchart LR
 ## Run your first workflow
 
 ::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.app/) is a separate app for running workflows on your own Mac or Windows PC without the command line.
+[Kitewell](https://kitewell.com/) is a separate app for running workflows on your own Mac or Windows PC without the command line.
 :::
 
 Install Dagu on Windows, macOS, or Linux:

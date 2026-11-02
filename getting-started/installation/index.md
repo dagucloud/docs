@@ -10,7 +10,7 @@ Pick the guide for your platform.
 - [**Linux**](/getting-started/installation/linux): Guided script installer with systemd service, or a manual binary
 - [**npm**](/getting-started/installation/npm): Global package that downloads the Dagu binary during postinstall
 - [**Windows**](/getting-started/installation/windows): PowerShell script installer with optional Windows service
-- [**Desktop app**](https://kitewell.app/download/): Kitewell, a separate macOS and Windows app with the Dagu engine bundled, no server or command line
+- [**Desktop app**](https://kitewell.com/download/): Kitewell, a separate macOS and Windows app with the Dagu engine bundled, no server or command line
 - [**Docker**](/getting-started/installation/docker): `docker run`, Compose, and mounting the host Docker socket
 - [**Kubernetes**](/getting-started/installation/kubernetes): Official Helm chart
 - [**Build from source**](/getting-started/installation/source): Go + Node toolchain
@@ -20,7 +20,7 @@ Pick the guide for your platform.
 | Situation | Install method |
 |---|---|
 | Trying Dagu locally on a laptop | **Homebrew** (macOS) or **script installer** (Linux/Windows) |
-| Want a desktop app, not a server or command line | [**Kitewell**](https://kitewell.app/download/), a separate macOS and Windows app with the Dagu engine bundled |
+| Want a desktop app, not a server or command line | [**Kitewell**](https://kitewell.com/download/), a separate macOS and Windows app with the Dagu engine bundled |
 | Running a shared server | **Script installer** with `--service yes` |
 | Running in a container | **Docker** |
 | Running on a cluster | **Kubernetes (Helm)** |
