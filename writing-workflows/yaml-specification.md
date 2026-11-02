@@ -422,7 +422,6 @@ Accepted `defaults` fields:
 | `env` | array or object | Prepended before step `env`. |
 | `preconditions` | string or array | Prepended before step `preconditions`. |
 | `max_concurrent` | integer | Used by `parallel` and `foreach` steps that omit `max_concurrent`. Must be from `1` to `1000`. |
-| `agent` | object | Merged per supported agent subfield. |
 
 Unknown keys inside `defaults` cause a validation error.
 

@@ -19,9 +19,8 @@ The `defaults` block accepts the following fields:
 | `env` | array/object | Environment variables added to each step |
 | `preconditions` | string/array | Preconditions added to each step |
 | `max_concurrent` | integer | Concurrency limit for `parallel` and `foreach` steps that omit `max_concurrent` |
-| `agent` | object | Agent configuration merged per field into a step's `agent` block |
 
-See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults) for the field reference.
+See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#defaults) for the field reference.
 
 ## Merge Rules
 
@@ -36,11 +35,8 @@ See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#s
 | `env` | Default entries prepended before step entries |
 | `preconditions` | Default entries prepended before step entries |
 | `max_concurrent` | Step `parallel.max_concurrent` or `foreach.max_concurrent` replaces default |
-| `agent` | Step `agent.<field>` value replaces the matching default subfield |
 
 **Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): The default is applied only when the step does not set its own value. When a step defines the field, the step's value is used entirely; there is no field-level merging within the object.
-
-**Agent fields** (`agent`): Defaults are applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 
 **Additive fields** (`env`, `preconditions`): Default entries are prepended before the step's own entries. Both sets are present at runtime.
 
@@ -276,6 +272,6 @@ The `defaults` field is a DAG-level field. When set in [base configuration](/ser
 
 ## See Also
 
-- [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults): Field reference
+- [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#defaults): Field reference
 - [Error Handling](/writing-workflows/error-handling): `retry_policy`, `continue_on` usage
 - [Base Configuration](/server-admin/base-config): Shared defaults across all DAGs
