@@ -24,7 +24,7 @@ AI app ──MCP──▶ Dagu Cloud ── signed call ──┐
 - The server is connected to Dagu Console with a license that checks in. See [Connect a Server](/overview/self-host-license#connect-a-server). Servers with offline licenses cannot use remote access.
 - The workspace is on the Team or Pro plan, or in a trial. Dagu Cloud refuses the connection for a workspace without a plan, including one on free monitoring.
 - `dagu server` or `dagu start-all`. Each process that serves the web UI holds its own connection.
-- Outbound HTTPS to Dagu Cloud. No inbound port is opened.
+- Outbound HTTPS to `console.dagu.sh` and `relay.dagu.sh`. No inbound port is opened.
 
 ## Turn It On
 
@@ -117,9 +117,14 @@ Calls from Dagu Cloud use the same three tools as the server's own [`/mcp` endpo
 - Turning remote access off closes the connection and ends the calls in flight. Calls that still arrive are refused.
 - Audit logs record each call with credential type `cloud`, the user's email, the AI app, and the Dagu Cloud workspace. See [Calls From Dagu Cloud](/mcp/auditability#calls-from-dagu-cloud).
 - When [monitoring](/overview/console-monitoring#health) is on, health reports include the remote access level and whether approvals are on.
+- Dagu Cloud passes each answer on without storing it. It keeps a log of each call for 90 days: tool, action, subject, outcome, user, and app, plus up to 300 characters of the error when a call fails.
+- An answer the AI app receives also reaches the app's provider, such as Anthropic or OpenAI. Every level, viewer included, can read logs.
+
+See [Dagu Cloud: Security and Data Flow](/overview/security) for every connection, what Dagu Cloud keeps, and what it is trusted with.
 
 ## Related Pages
 
+- [Dagu Cloud: Security and Data Flow](/overview/security)
 - [MCP Tools](/mcp/tools)
 - [MCP Authentication](/mcp/authentication)
 - [MCP Auditability](/mcp/auditability)

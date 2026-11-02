@@ -206,7 +206,7 @@ Running Dagu on more than one server? Connect them to [Dagu Console](https://con
 
 ![Dagu Console Overview: two of three servers reporting, failures today, open alerts including a server that stopped reporting, and the 7-day success rate](/monitoring/overview-light.png)
 
-Reporting is opt-in, outbound HTTPS only, and metadata only. Logs, outputs, parameters, and secrets never leave your servers, and workflows run the same whether or not the console can be reached. See [Monitoring](/overview/console-monitoring); it is free for one server, and Team and Pro cover every licensed server.
+Reporting is opt-in and outbound HTTPS only. It carries metadata, plus failed steps' error messages at the level that names them. Full logs, outputs, parameters, and secrets never leave your servers, and workflows run the same whether or not the console can be reached. See [Monitoring](/overview/console-monitoring); it is free for one server, and Team and Pro cover every licensed server.
 
 ## Why Dagu exists
 

@@ -38,7 +38,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 
 A Team or Pro workspace in [Dagu Console](https://console.dagu.sh) has a number of server slots. A workspace without a plan has one, for [free monitoring](/overview/console-monitoring#free-and-paid) on Dagu v2.19.2 or later. Each Dagu server that uses the workspace's license takes one slot, and the console's **Servers** page lists every server with its name, last check-in, and Dagu version. Workers do not take slots.
 
-Connecting shares only the license check-in, unless the server's [Monitoring (Beta)](/overview/console-monitoring) or [remote access](/overview/cloud-remote-access) is on. Monitoring lets the console show each server's health and runs and email you when a workflow fails or the server stops reporting. On a Community server, the **Monitor this server for free** card turns it on as part of connecting.
+Connecting shares only the license check-in, unless the server's [Monitoring (Beta)](/overview/console-monitoring), [public webhook URLs](/server-admin/authentication/public-webhook-urls), or [remote access](/overview/cloud-remote-access) is on. See [Dagu Cloud: Security and Data Flow](/overview/security). Monitoring lets the console show each server's health and runs and email you when a workflow fails or the server stops reporting. On a Community server, the **Monitor this server for free** card turns it on as part of connecting.
 
 ### From the web UI
 

@@ -112,6 +112,18 @@ Sub-DAG runs are not reported on their own; their top-level run is.
 
 Only the scheduler needs outbound HTTPS to `relay.dagu.sh` and `console.dagu.sh`. Workers need nothing extra.
 
+## Remote Access Across Topologies
+
+[Remote access](/overview/cloud-remote-access) works in every topology. Each process that serves the web UI, `dagu server` or `dagu start-all`, opens its own connection to Dagu Cloud while remote access is on. Calls go to the process heard from most recently, so a server with several replicas keeps taking calls while one restarts.
+
+| Topology | Where calls run |
+|----------|-----------------|
+| **Single server** | On the server. |
+| **Temporary workers** | On the server. A run that a call starts or retries is queued like any other and can run on a worker. |
+| **Distributed workers** | On the server, with runs routed as above. |
+
+The processes that serve the web UI need outbound HTTPS to `relay.dagu.sh` and `console.dagu.sh`. Workers need nothing extra. See [Dagu Cloud: Security and Data Flow](/overview/security) for every connection and what it carries.
+
 ## Pricing and Licensing Links
 
 - [Community self-host](https://dagu.sh/pricing#self-host): open-source Dagu for self-hosted use.

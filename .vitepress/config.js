@@ -129,6 +129,7 @@ const fullSidebar = [
       { text: "Core Concepts", link: "/getting-started/concepts" },
       { text: "Architecture", link: "/overview/architecture" },
       { text: "Deployment Models", link: "/overview/deployment-models" },
+      { text: "Security and Data Flow", link: "/overview/security" },
       {
         text: "Deployment",
         link: "/server-admin/deployment/",
@@ -793,7 +794,7 @@ export default withMermaid(
       },
 
       nav: [
-        { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|self-host-license|console-account|contributing|changelog)|getting-started/|migration/|ai/?$)" },
+        { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|security|self-host-license|console-account|contributing|changelog)|getting-started/|migration/|ai/?$)" },
         { text: "Tutorial", link: "/tutorial/", activeMatch: "^/tutorial(?:/|$)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
         { text: "MCP", link: "/mcp/", activeMatch: "^/(mcp(?:/|$)|ai/skills(?:/|$))" },

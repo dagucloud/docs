@@ -1,5 +1,5 @@
 ---
-description: See every self-hosted Dagu server in one place, get an email when a workflow fails or a server stops reporting, and track trends. Free for one server. Opt-in; logs and secrets stay on the server.
+description: See every self-hosted Dagu server in one place, get an email when a workflow fails or a server stops reporting, and track trends. Free for one server. Opt-in; full logs stay on the server.
 ---
 
 # Monitoring (Beta)
@@ -13,7 +13,7 @@ Connect your Dagu servers to [Dagu Console](https://console.dagu.sh) and see all
 - **Every server at a glance**: which servers report, what failed today, open alerts, and what needs attention, such as a stopped scheduler or a server that went silent.
 - **Alerts by email, chat, PagerDuty, or webhook**: when a workflow fails and when it recovers, and when a server stops reporting, to the members and addresses you choose, and on a paid plan to Slack, Microsoft Teams, Google Chat, and Discord channels, PagerDuty services, and webhooks. Each alert links to its run.
 - **Trends**: runs, success rate, and p50 and p95 duration for each workflow over 7, 30, or 90 days.
-- **Nothing sensitive leaves the server**: reporting is opt-in, outbound HTTPS only, and carries metadata, plus failed steps' [error messages](#error-messages) only at the level that names them. Full logs, outputs, parameters, and secrets are [never sent](#never-sent), and each server shows the exact JSON it last sent.
+- **Full logs stay on the server**: reporting is opt-in, outbound HTTPS only, and carries metadata, plus failed steps' [error messages](#error-messages) only at the level that names them. Full logs, outputs, parameters, and secrets are [never sent](#never-sent), and each server shows the exact JSON it last sent.
 - **Free for one server**: a workspace without a plan monitors one server at no cost, with the limits in [Free and Paid](#free-and-paid).
 
 ![Dagu Console Overview: two of three servers reporting, failures today, open alerts including a server that stopped reporting, and the 7-day success rate](/monitoring/overview-light.png)

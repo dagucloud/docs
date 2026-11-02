@@ -150,6 +150,25 @@ Scheduler (holding the scheduler lock) ─┘ ──▶ checks signature and eve
 - Each request is checked against the webhook's sender signature and events, then queued as a `webhook` run whose ID is the request's delivery ID, so a request sent twice starts one run. Runs follow the DAG's queue and execution mode, so they can run on workers.
 - Workflows still run only on the server and its workers. Dagu Cloud stores only the SHA-256 of each URL's token and keeps a request only until the server takes it.
 
+## Remote Access from Dagu Cloud (Optional)
+
+With [remote access](/overview/cloud-remote-access) on, AI apps connected to Dagu Cloud can use the server's MCP tools. Dagu Cloud signs each call; the server takes it over a connection it opens itself and decides whether to run it.
+
+```text
+AI app ──MCP──▶ Dagu Cloud (checks the grant, signs the call)
+                    │
+                    ▼
+                  relay
+                    ▲
+                    │ WebSocket, outbound from the server
+dagu server or start-all ──▶ verifies the signature ──▶ MCP tools
+```
+
+- Each process that serves the web UI holds its own connection to `relay.dagu.sh`, which it opens with a ticket from Dagu Console while remote access is on.
+- A call carries a signature that lasts one minute, is accepted once, and covers that request alone. The server runs it as the Dagu Cloud user, with the lower of the user's role and the server's level, and never as `manager` or `admin`.
+- Calls reach only the MCP tools. The answer goes back the same way; Dagu Cloud passes it on without storing it and keeps a log of each call for 90 days.
+- See [Dagu Cloud: Security and Data Flow](/overview/security) for what Dagu Cloud keeps and what it is trusted with.
+
 ## Distributed Execution Architecture
 
 Dagu supports distributed execution through a coordinator-worker model. DAG definitions are transmitted to workers via gRPC. Workers return status, logs, artifacts, and persistent-state operations through the coordinator.
