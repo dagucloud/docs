@@ -8,13 +8,11 @@ A workflow is a YAML file with a list of steps. Each step runs a shell command, 
 
 <RunReplay run="tutorial-01-first-workflow" />
 
-`lint` and `test` start at the same time once `checkout` succeeds. `package` starts only after the slower `test` finishes.
+`lint` and `test` start together after `checkout`, and `package` starts after both.
 
 ## The workflow
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-01-first-workflow.yaml
-```
+Create a workflow named `tutorial-01-first-workflow` and paste this YAML into it ([how](/tutorial/#_3-add-each-lesson-s-workflow)).
 
 <<< @/public/tutorial/dags/tutorial-01-first-workflow.yaml
 
@@ -24,19 +22,13 @@ Steps that do not depend on each other run at the same time. A step with `depend
 
 ## Run it yourself
 
-```bash
-dagu start tutorial-01-first-workflow.yaml
-```
+Select **Start** at the top right, then **Start** in the dialog. The canvas marks each step as it finishes.
 
-The terminal prints each step with its status and output, then the result. In the Web UI, open **Workflows**, select `tutorial-01-first-workflow`, and select **Start**.
-
-To check a workflow before running it:
-
-```bash
-dagu validate tutorial-01-first-workflow.yaml
-```
+If the YAML has a mistake, the issues button takes the place of **Save** and lists it.
 
 ## Try it
+
+Edit in the **YAML** panel, select **Save**, then select **Start**.
 
 1. Make `test` fail by changing its command to `exit 1`, then run the workflow again. What happens to `package`?
 2. Remove `depends: checkout` from `lint`. When does `lint` start now?

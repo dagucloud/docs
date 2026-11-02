@@ -8,51 +8,41 @@ Commands fail when networks drop or services go down. Dagu can retry a flaky ste
 
 <RunReplay run="tutorial-06-failures-and-retries" />
 
-`call_api` shows **retried 1×** before it succeeds. The `failure` handler stays **Not started** because the run reached **Partially succeeded** instead of failing.
+`warm_cache` retries twice and fails each time. Because `continue_on: failed` is set, `publish` runs anyway, and the run ends as **Partially succeeded**. The `failure` handler stays **Not started** because the run did not fail.
 
 ## The workflow
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-06-failures-and-retries.yaml
-```
+Create a workflow named `tutorial-06-failures-and-retries` and paste this YAML into it ([how](/tutorial/#_3-add-each-lesson-s-workflow)).
 
 <<< @/public/tutorial/dags/tutorial-06-failures-and-retries.yaml
 
-`call_api` simulates a flaky network call. Its `retry_policy` tries again up to two times with a two-second pause between attempts. The step fails on the first try and succeeds on the retry.
+`warm_cache` uses `http.request` against `http://localhost:9`, where no cache server listens. Its `retry_policy` retries up to 2 more times, 1 second apart, and fails each time.
 
-Not every failure needs to halt the workflow. Setting `continue_on: failed` on `warm_cache` lets `publish` run even though the cache fails. The run finishes as **Partially succeeded** so you still know something went wrong.
+Setting `continue_on: failed` on `warm_cache` lets `publish` run even though the cache fails. The run ends as **Partially succeeded** so the failure is still recorded.
 
-`handler_on` registers commands for the end of the run. The `exit` handler runs after every run, while `failure` runs only when the workflow fails.
+`handler_on` registers steps for the end of the run. The `exit` handler runs after every run, while `failure` runs only when the run fails.
 
 ## Run it yourself
 
-```bash
-dagu start tutorial-06-failures-and-retries.yaml
-```
+Select **Start** at the top right of the workflow page, then select **Start** in the dialog.
 
-The command exits with an error because the run was only partially successful.
+`warm_cache` fails after two retries, `publish` succeeds, and the `exit` handler runs. The workflow finishes as **Partially succeeded**.
 
 ## Retry a failed run
 
 A retry runs a failed run again under the same run ID, with the definition and parameters it started with. Retry once the cause is gone, such as a server that is back up.
 
-1. Change `limit: 2` to `limit: 0` in `call_api` and start the workflow. With retries disabled, `call_api` fails, `publish` is **Aborted**, and the `failure` handler runs.
-2. Find the run ID with `dagu history`, then retry it:
-
-```bash
-dagu history tutorial-06-failures-and-retries.yaml
-dagu retry --run-id=<run-id> tutorial-06-failures-and-retries.yaml
-```
-
-In the Web UI, the retry button in the workflow bar does the same. This time `call_api` succeeds, and the run finishes as **Partially succeeded**.
+In the Web UI, select the retry icon next to the run chip in the workflow bar.
 
 ## Try it
 
-1. Remove `continue_on: failed` from `warm_cache` and start the workflow. What happens to `publish` and the handlers?
+1. Remove `continue_on: failed` from `warm_cache`, select **Save**, and start the workflow. What happens to `publish` and the handlers?
+2. Change `limit: 2` to `limit: 0` in `warm_cache`. How many times does `warm_cache` run?
 
 ::: details Answers
 
-`publish` is **Aborted** without running. The run fails, so the `failure` handler runs.
+1. `publish` ends as **Aborted** without running. The run fails, so the `failure` handler runs, and `exit` runs as always.
+2. Once. With no retries left, it fails on the first attempt.
 
 :::
 

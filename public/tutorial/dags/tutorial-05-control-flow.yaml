@@ -2,6 +2,7 @@
 
 params:
   - environment: staging
+  - notes: ""
 
 steps:
   - id: choose_target
@@ -18,15 +19,9 @@ steps:
   - id: deploy_prod
     run: echo "Deployed to prod"
 
-  - id: wait_until_healthy
-    working_dir: ${context.paths.artifacts_dir}
-    run: |
-      echo check >> checks.txt
-      count=$(wc -l < checks.txt | tr -d ' ')
-      echo "Health check $count"
-      [ "$count" -ge 3 ] && echo "Healthy"
-    repeat_policy:
-      repeat: until
-      interval_sec: 1
-      limit: 10
+  - id: publish_notes
+    run: echo "Release notes - ${params.notes}"
+    preconditions:
+      - condition: "${params.notes}"
+        expected: "re:.+"
     depends: [deploy_staging, deploy_prod]

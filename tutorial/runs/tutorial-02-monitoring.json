@@ -1,13 +1,13 @@
 {
   "dag": "tutorial-02-monitoring",
   "status": "succeeded",
-  "durationMs": 8173,
+  "durationMs": 8147,
   "steps": [
     {
       "id": "download",
       "depends": [],
       "routesTo": [],
-      "action": "run",
+      "action": "wait.duration",
       "approval": false
     },
     {
@@ -16,7 +16,7 @@
         "download"
       ],
       "routesTo": [],
-      "action": "run",
+      "action": "wait.duration",
       "approval": false
     },
     {
@@ -33,56 +33,51 @@
   "events": [
     {
       "t": 0,
+      "target": "download",
+      "status": "running"
+    },
+    {
+      "t": 22,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 0,
-      "target": "download",
-      "status": "not_started"
-    },
-    {
-      "t": 0,
+      "t": 22,
       "target": "transform",
       "status": "not_started"
     },
     {
-      "t": 0,
+      "t": 22,
       "target": "publish",
       "status": "not_started"
     },
     {
-      "t": 2,
-      "target": "download",
-      "status": "running"
-    },
-    {
-      "t": 5075,
+      "t": 5025,
       "target": "download",
       "status": "succeeded"
     },
     {
-      "t": 5075,
+      "t": 5038,
       "target": "transform",
       "status": "running"
     },
     {
-      "t": 8129,
+      "t": 8079,
       "target": "transform",
       "status": "succeeded"
     },
     {
-      "t": 8129,
+      "t": 8079,
       "target": "publish",
       "status": "running"
     },
     {
-      "t": 8153,
+      "t": 8105,
       "target": "publish",
       "status": "succeeded"
     },
     {
-      "t": 8173,
+      "t": 8147,
       "target": "$run",
       "status": "succeeded"
     }
@@ -92,7 +87,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "Downloaded part 1 of 5\nDownloaded part 2 of 5\nDownloaded part 3 of 5\nDownloaded part 4 of 5\nDownloaded part 5 of 5",
+      "stdout": "",
       "stderr": "",
       "outputs": {},
       "subRuns": []
@@ -101,7 +96,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "Transformed batch 1 of 3\nTransformed batch 2 of 3\nTransformed batch 3 of 3",
+      "stdout": "",
       "stderr": "",
       "outputs": {},
       "subRuns": []
@@ -110,7 +105,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "Published 3 batches",
+      "stdout": "Published the report",
       "stderr": "",
       "outputs": {},
       "subRuns": []

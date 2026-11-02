@@ -2,20 +2,16 @@
 
 steps:
   - id: download
-    run: |
-      for part in 1 2 3 4 5; do
-        echo "Downloaded part $part of 5"
-        sleep 1
-      done
+    action: wait.duration
+    with:
+      duration: 5s
 
   - id: transform
-    run: |
-      for batch in 1 2 3; do
-        echo "Transformed batch $batch of 3"
-        sleep 1
-      done
+    action: wait.duration
+    with:
+      duration: 3s
     depends: download
 
   - id: publish
-    run: echo "Published 3 batches"
+    run: echo "Published the report"
     depends: transform

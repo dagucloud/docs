@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-04-actions",
   "status": "succeeded",
-  "durationMs": 430,
+  "durationMs": 854,
   "steps": [
     {
       "id": "fetch_todos",
@@ -28,32 +28,32 @@
       "status": "running"
     },
     {
-      "t": 19,
+      "t": 22,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 19,
+      "t": 22,
       "target": "summarize",
       "status": "not_started"
     },
     {
-      "t": 328,
+      "t": 749,
       "target": "fetch_todos",
       "status": "succeeded"
     },
     {
-      "t": 341,
+      "t": 766,
       "target": "summarize",
       "status": "running"
     },
     {
-      "t": 374,
+      "t": 788,
       "target": "summarize",
       "status": "succeeded"
     },
     {
-      "t": 430,
+      "t": 854,
       "target": "$run",
       "status": "succeeded"
     }

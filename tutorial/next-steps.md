@@ -15,4 +15,4 @@ Pick what fits your work next:
   <a href="/mcp/"><b>MCP</b><span>Let AI tools read and run your workflows.</span></a>
 </div>
 
-Clean up the tutorial folder when you are done. Stop `dagu start-all` with `Ctrl+C`, and delete `tutorial-08-scheduling.yaml` first if Dagu keeps running as a service.
+When done, stop `dagu start-all` with `Ctrl+C`. If Dagu runs as a background service, remove the schedule from `tutorial-08-scheduling` (or delete it) so it stops running every minute.

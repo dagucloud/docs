@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-08-scheduling",
   "status": "succeeded",
-  "durationMs": 118,
+  "durationMs": 122,
   "steps": [
     {
       "id": "snapshot",
@@ -19,17 +19,17 @@
       "status": "running"
     },
     {
-      "t": 16,
+      "t": 18,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 26,
+      "t": 25,
       "target": "snapshot",
       "status": "succeeded"
     },
     {
-      "t": 118,
+      "t": 122,
       "target": "$run",
       "status": "succeeded"
     }
@@ -39,7 +39,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "Snapshot taken at 12:17:09",
+      "stdout": "Snapshot taken at 2026-11-02T04:05:33Z",
       "stderr": "",
       "outputs": {},
       "subRuns": []

@@ -4,4 +4,4 @@ schedule: "* * * * *"
 
 steps:
   - id: snapshot
-    run: date "+Snapshot taken at %H:%M:%S"
+    run: echo "Snapshot taken at ${context.attempt.started_at}"

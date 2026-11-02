@@ -6,14 +6,14 @@ description: Learn Dagu in ten short lessons. Run workflows locally, watch them 
 
 Learn the basics of Dagu in ten short lessons. Each lesson is one small workflow. Watch a recorded run on the page, run it on your machine, and change it.
 
-You need a terminal and basic shell skills. No Dagu knowledge is assumed.
+Every lesson runs from the Web UI, so it works on any operating system. No Dagu knowledge is assumed.
 
 <div class="basic-recipe-map">
   <a href="/tutorial/first-workflow"><b>01</b><span>Your first workflow · 3 min</span></a>
   <a href="/tutorial/monitoring"><b>02</b><span>Watch runs in the Web UI · 5 min</span></a>
   <a href="/tutorial/params-and-outputs"><b>03</b><span>Parameters and outputs · 4 min</span></a>
   <a href="/tutorial/actions"><b>04</b><span>Built-in actions · 4 min</span></a>
-  <a href="/tutorial/control-flow"><b>05</b><span>Branch and poll · 3 min</span></a>
+  <a href="/tutorial/control-flow"><b>05</b><span>Branch and skip · 3 min</span></a>
   <a href="/tutorial/failures-and-retries"><b>06</b><span>Failures and retries · 3 min</span></a>
   <a href="/tutorial/sub-dags"><b>07</b><span>Sub-DAGs and fan-out · 3 min</span></a>
   <a href="/tutorial/scheduling"><b>08</b><span>Schedules · 2 min</span></a>
@@ -47,31 +47,26 @@ npm install -g --ignore-scripts=false @dagucloud/dagu
 
 Other methods, including Docker: [Installation](/getting-started/installation/).
 
-### 2. Start Dagu in a tutorial folder
+### 2. Start Dagu
 
 ```bash
-mkdir dagu-tutorial && cd dagu-tutorial
-dagu start-all --dags .
+dagu start-all
 ```
 
-`start-all` runs the Web UI and the scheduler together. `--dags .` tells Dagu to load workflow files from the current folder. Leave this terminal running, and open a second terminal in the same folder for the lessons.
+`dagu start-all` runs the Web UI and the scheduler together. Leave this terminal running.
 
 Open <http://localhost:8080>. On first launch, create the admin account.
 
-In an empty folder, Dagu also adds six example workflows (`example-01` through `example-06`) and a `wiki` folder. You can keep or delete them.
+On first launch, Dagu also adds six example workflows (`example-01` to `example-06`) and a `wiki` folder. They are not part of the tutorial.
 
 ::: tip If Dagu runs as a background service
-If your installer set up a background service, Dagu is already running at <http://localhost:8080>. Skip `start-all` and run the lesson commands inside your DAGs directory (`~/.config/dagu/dags` by default).
+If your installer set up a background service, Dagu is already running at <http://localhost:8080>. Skip `start-all`.
 :::
 
-### 3. Get each lesson's workflow
+### 3. Add each lesson's workflow
 
-Every lesson starts with a command to download its workflow:
+Open **Workflows**, select **New**, enter the name each lesson gives, such as `tutorial-01-first-workflow`, and select **Create**. The workflow page opens.
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-01-first-workflow.yaml
-```
-
-The workflow appears under **Workflows** in the Web UI right away. You can also create a workflow in the Web UI and paste the YAML directly.
+Select **YAML** to open the file beside the canvas, replace its text with the lesson's YAML, then select **Save**.
 
 <a href="/tutorial/first-workflow" class="learn-more">Start with lesson 1: Your first workflow →</a>

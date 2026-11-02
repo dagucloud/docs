@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-05-control-flow",
   "status": "succeeded",
-  "durationMs": 2283,
+  "durationMs": 225,
   "steps": [
     {
       "id": "choose_target",
@@ -32,7 +32,7 @@
       "approval": false
     },
     {
-      "id": "wait_until_healthy",
+      "id": "publish_notes",
       "depends": [
         "deploy_staging",
         "deploy_prod"
@@ -50,57 +50,52 @@
       "status": "running"
     },
     {
-      "t": 9,
+      "t": 18,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 9,
-      "target": "deploy_staging",
-      "status": "not_started"
-    },
-    {
-      "t": 9,
-      "target": "deploy_prod",
-      "status": "not_started"
-    },
-    {
-      "t": 9,
-      "target": "wait_until_healthy",
-      "status": "not_started"
-    },
-    {
-      "t": 31,
+      "t": 18,
       "target": "choose_target",
       "status": "succeeded"
     },
     {
-      "t": 31,
+      "t": 18,
+      "target": "deploy_staging",
+      "status": "not_started"
+    },
+    {
+      "t": 18,
+      "target": "deploy_prod",
+      "status": "not_started"
+    },
+    {
+      "t": 18,
+      "target": "publish_notes",
+      "status": "not_started"
+    },
+    {
+      "t": 34,
       "target": "deploy_staging",
       "status": "running"
     },
     {
-      "t": 104,
+      "t": 98,
       "target": "deploy_staging",
       "status": "succeeded"
     },
     {
-      "t": 104,
-      "target": "wait_until_healthy",
-      "status": "running"
-    },
-    {
-      "t": 114,
+      "t": 123,
       "target": "deploy_prod",
       "status": "skipped"
     },
     {
-      "t": 2240,
-      "target": "wait_until_healthy",
-      "status": "succeeded"
+      "t": 123,
+      "target": "publish_notes",
+      "status": "skipped"
     },
     {
-      "t": 2283,
+      "t": 225,
       "target": "$run",
       "status": "succeeded"
     }
@@ -133,11 +128,11 @@
       "outputs": {},
       "subRuns": []
     },
-    "wait_until_healthy": {
-      "status": "succeeded",
+    "publish_notes": {
+      "status": "skipped",
       "retries": 0,
-      "executions": 3,
-      "stdout": "Health check 1\nHealth check 2\nHealth check 3\nHealthy",
+      "executions": 0,
+      "stdout": "",
       "stderr": "",
       "outputs": {},
       "subRuns": []

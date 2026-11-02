@@ -12,9 +12,7 @@ Select `summarize` to see the text returned by the JavaScript sandbox.
 
 ## The workflow
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-04-actions.yaml
-```
+Create a workflow named `tutorial-04-actions` and paste this YAML into it ([how](/tutorial/#_3-add-each-lesson-s-workflow)).
 
 <<< @/public/tutorial/dags/tutorial-04-actions.yaml
 
@@ -24,11 +22,7 @@ This workflow calls `jsonplaceholder.typicode.com`, so your machine needs intern
 
 ## Run it yourself
 
-```bash
-dagu start tutorial-04-actions.yaml
-```
-
-In the Web UI, open the run and select `summarize` to read what it printed.
+Select **Start** at the top right of the workflow page, then select **Start** in the dialog. Select `summarize` to read what it printed.
 
 ## When to use `js.run`
 
@@ -51,17 +45,17 @@ The sandbox has no access to the network, files, environment variables, or npm p
 | `mail.send` | Send an email |
 | `dag.run` | Run another workflow. See [lesson 7](/tutorial/sub-dags) |
 
-Every action has a reference page under **Actions** in the sidebar. For ready-made patterns in the terminal, run `dagu example`.
+Every action has a reference page under **Actions** in the sidebar.
 
 ## Try it
 
-1. Change `userId=1` to `userId=2` in the URL and run the workflow again. What does `summarize` print?
-2. Delete the last `)` on the `filter` line in `summarize`, then run `dagu validate tutorial-04-actions.yaml`. What happens?
+1. Edit the YAML to change `userId=1` to `userId=2` in the URL, select **Save**, and select **Start**. What does `summarize` print?
+2. Delete the last `)` on the `filter` line in `summarize`. What happens to **Save**?
 
 ::: details Answers
 
 1. `Still open: 12. Next up: suscipit repellat esse quibusdam voluptatem incidunt`.
-2. Validation fails with a JavaScript `SyntaxError` that names the line, and nothing runs.
+2. The issues button takes the place of **Save** and lists a JavaScript `SyntaxError`, so the broken workflow cannot be saved.
 
 :::
 

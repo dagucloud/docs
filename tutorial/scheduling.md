@@ -12,9 +12,7 @@ Add `schedule` to run a workflow on a cron schedule. The scheduler started by `d
 
 ## The workflow
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-08-scheduling.yaml
-```
+Create a workflow named `tutorial-08-scheduling` and paste this YAML into it ([how](/tutorial/#_3-add-each-lesson-s-workflow)).
 
 <<< @/public/tutorial/dags/tutorial-08-scheduling.yaml
 
@@ -30,12 +28,11 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-08-scheduling.yaml
 
 ## Run it yourself
 
-1. Open `tutorial-08-scheduling` in the Web UI.
-2. Select the **Cron** launcher on the canvas to see the next three scheduled runs.
-3. Wait for the next minute to start. A new run appears in **Activity**, started by the scheduler.
+1. Select the **Cron** launcher on the canvas to see the next three scheduled runs.
+2. Wait for the next minute to start. A new run appears in **Activity**, started by the scheduler.
 
 ::: warning Stop the schedule when you are done
-This workflow runs every minute while Dagu is up. Delete `tutorial-08-scheduling.yaml`, or remove its `schedule` line, when you finish the lesson.
+This workflow runs every minute while Dagu is up. Remove its `schedule` line and select **Save**, or delete the workflow when you finish the lesson.
 :::
 
 ## Try it
@@ -55,7 +52,7 @@ schedule:
 
 steps:
   - id: snapshot
-    run: date "+Snapshot taken at %H:%M:%S"
+    run: echo "Snapshot taken at ${context.attempt.started_at}"
 ```
 
 :::

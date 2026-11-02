@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-03-params-and-outputs",
   "status": "succeeded",
-  "durationMs": 122,
+  "durationMs": 149,
   "steps": [
     {
       "id": "build",
@@ -28,23 +28,18 @@
       "status": "running"
     },
     {
-      "t": 19,
-      "target": "$run",
-      "status": "running"
-    },
-    {
-      "t": 19,
-      "target": "deploy",
-      "status": "not_started"
-    },
-    {
-      "t": 41,
+      "t": 39,
       "target": "build",
       "status": "succeeded"
     },
     {
-      "t": 41,
+      "t": 39,
       "target": "deploy",
+      "status": "running"
+    },
+    {
+      "t": 46,
+      "target": "$run",
       "status": "running"
     },
     {
@@ -53,7 +48,7 @@
       "status": "succeeded"
     },
     {
-      "t": 122,
+      "t": 149,
       "target": "$run",
       "status": "succeeded"
     }

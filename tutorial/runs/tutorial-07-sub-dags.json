@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-07-sub-dags",
   "status": "succeeded",
-  "durationMs": 2433,
+  "durationMs": 334,
   "steps": [
     {
       "id": "build",
@@ -28,27 +28,32 @@
       "status": "running"
     },
     {
-      "t": 42,
-      "target": "build",
-      "status": "succeeded"
-    },
-    {
-      "t": 43,
-      "target": "smoke_test",
-      "status": "running"
-    },
-    {
-      "t": 63,
+      "t": 22,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 2359,
+      "t": 22,
+      "target": "build",
+      "status": "succeeded"
+    },
+    {
+      "t": 22,
+      "target": "smoke_test",
+      "status": "not_started"
+    },
+    {
+      "t": 38,
+      "target": "smoke_test",
+      "status": "running"
+    },
+    {
+      "t": 319,
       "target": "smoke_test",
       "status": "succeeded"
     },
     {
-      "t": 2433,
+      "t": 334,
       "target": "$run",
       "status": "succeeded"
     }
@@ -69,7 +74,7 @@
       "status": "succeeded",
       "retries": 0,
       "executions": 1,
-      "stdout": "{\n  \"summary\": {\n    \"total\": 3,\n    \"succeeded\": 3,\n    \"failed\": 0\n  },\n  \"results\": [\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"JsvR78SicCdysETgU8aMUeazVoUzz9kqxjQUawoG4fJ\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=us-east\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"HwQG67jMGnConnKZhVjvdcHSYtbrQfcN5xZevsGCquAE\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=eu-west\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"EgKcqJcDc5fts6Jp8x1iQEPDFjzGxBbKLJZ9EKyjudo9\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=ap-south\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    }\n  ],\n  \"outputs\": [\n    {},\n    {},\n    {}\n  ]\n}",
+      "stdout": "{\n  \"summary\": {\n    \"total\": 3,\n    \"succeeded\": 3,\n    \"failed\": 0\n  },\n  \"results\": [\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"FoMhNwBo4FpogVY2AdD3jDLjXgwftxeexcaG11mNovuQ\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=us-east\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"BetEWkhNoJnAypEDppq2SG2AKa3zVDuhJLWQhbUVHat3\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=eu-west\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    },\n    {\n      \"name\": \"smoke-test\",\n      \"dagRunId\": \"CraxuR1iByFDXQcsyTdRhcJyNUNCLBRYpRiv6J9JofAk\",\n      \"params\": \"bundle=app-1.4.0.tar.gz region=ap-south\",\n      \"outputs\": {},\n      \"status\": \"succeeded\"\n    }\n  ],\n  \"outputs\": [\n    {},\n    {},\n    {}\n  ]\n}",
       "stderr": "",
       "outputs": {},
       "subRuns": [

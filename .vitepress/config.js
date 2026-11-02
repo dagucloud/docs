@@ -209,7 +209,7 @@ const fullSidebar = [
       { text: "2. Watch Runs in the Web UI", link: "/tutorial/monitoring" },
       { text: "3. Parameters and Outputs", link: "/tutorial/params-and-outputs" },
       { text: "4. Built-in Actions", link: "/tutorial/actions" },
-      { text: "5. Branch and Poll", link: "/tutorial/control-flow" },
+      { text: "5. Branch and Skip", link: "/tutorial/control-flow" },
       { text: "6. Failures and Retries", link: "/tutorial/failures-and-retries" },
       { text: "7. Sub-DAGs and Fan-out", link: "/tutorial/sub-dags" },
       { text: "8. Schedules", link: "/tutorial/scheduling" },

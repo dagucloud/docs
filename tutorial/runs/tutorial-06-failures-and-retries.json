@@ -1,26 +1,18 @@
 {
   "dag": "tutorial-06-failures-and-retries",
   "status": "partially_succeeded",
-  "durationMs": 2174,
+  "durationMs": 2108,
   "steps": [
-    {
-      "id": "call_api",
-      "depends": [],
-      "routesTo": [],
-      "action": "run",
-      "approval": false
-    },
     {
       "id": "warm_cache",
       "depends": [],
       "routesTo": [],
-      "action": "run",
+      "action": "http.request",
       "approval": false
     },
     {
       "id": "publish",
       "depends": [
-        "call_api",
         "warm_cache"
       ],
       "routesTo": [],
@@ -35,86 +27,67 @@
   "events": [
     {
       "t": 0,
-      "target": "call_api",
-      "status": "running"
-    },
-    {
-      "t": 0,
       "target": "warm_cache",
       "status": "running"
     },
     {
-      "t": 18,
+      "t": 25,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 18,
+      "t": 25,
       "target": "publish",
       "status": "not_started"
     },
     {
-      "t": 18,
+      "t": 25,
       "target": "onFailure",
       "status": "not_started"
     },
     {
-      "t": 18,
+      "t": 25,
       "target": "onExit",
       "status": "not_started"
     },
     {
-      "t": 54,
+      "t": 2044,
       "target": "warm_cache",
       "status": "failed"
     },
     {
+      "t": 2045,
+      "target": "publish",
+      "status": "running"
+    },
+    {
       "t": 2071,
-      "target": "call_api",
-      "status": "succeeded"
-    },
-    {
-      "t": 2095,
-      "target": "publish",
-      "status": "running"
-    },
-    {
-      "t": 2124,
       "target": "publish",
       "status": "succeeded"
     },
     {
-      "t": 2124,
+      "t": 2072,
       "target": "onExit",
       "status": "running"
     },
     {
-      "t": 2135,
+      "t": 2084,
       "target": "onExit",
       "status": "succeeded"
     },
     {
-      "t": 2174,
+      "t": 2108,
       "target": "$run",
       "status": "partially_succeeded"
     }
   ],
   "results": {
-    "call_api": {
-      "status": "succeeded",
-      "retries": 1,
-      "executions": 1,
-      "stdout": "API responded",
-      "stderr": "API timed out",
-      "outputs": {},
-      "subRuns": []
-    },
     "warm_cache": {
       "status": "failed",
-      "retries": 0,
+      "retries": 2,
       "executions": 1,
       "stdout": "",
-      "stderr": "Cache server unreachable",
+      "stderr": "",
       "outputs": {},
       "subRuns": []
     },

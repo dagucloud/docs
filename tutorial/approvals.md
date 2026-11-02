@@ -12,9 +12,7 @@ The run waits twice: first for approval on `build`, then for the form on `choose
 
 ## The workflow
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-09-approvals.yaml
-```
+Create a workflow named `tutorial-09-approvals` and paste this YAML into it ([how](/tutorial/#_3-add-each-lesson-s-workflow)).
 
 <<< @/public/tutorial/dags/tutorial-09-approvals.yaml
 
@@ -24,7 +22,7 @@ curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-09-approvals.yaml
 
 ## Run it yourself
 
-1. In the Web UI, open `tutorial-09-approvals` and select **Start**. `build` finishes and the run status changes to **Waiting**.
+1. Select **Start** at the top right of the workflow page, then select **Start** in the dialog. `build` finishes and the run status changes to **Waiting**.
 2. Select **Open actions** on the canvas, or open **Activity** → **Actions**. Review the log from `build` and select **Approve**.
 3. The form for `choose_target` appears. Pick an environment and submit it.
 4. `deploy` runs and prints the environment you picked.
@@ -33,7 +31,7 @@ A waiting run holds no process or worker slot, so it can wait as long as the rev
 
 ## Try it
 
-1. Start another run and select the reject button while it waits. Check the final run status.
+1. Start another run and select the reject icon next to the run chip while it waits. Check the final run status.
 2. Add a boolean form field named `notify`, then print it in `deploy`.
 
 ::: details Answers

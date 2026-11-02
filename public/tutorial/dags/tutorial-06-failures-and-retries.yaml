@@ -7,19 +7,16 @@ handler_on:
     run: echo "Cleanup - runs after every run"
 
 steps:
-  - id: call_api
-    working_dir: ${context.paths.artifacts_dir}
-    run: |
-      if [ -f attempted ]; then echo "API responded"; exit 0; fi
-      touch attempted; echo "API timed out" >&2; exit 1
+  - id: warm_cache
+    action: http.request
+    with:
+      method: GET
+      url: http://localhost:9 # No cache server listens here
     retry_policy:
       limit: 2
-      interval_sec: 2
-
-  - id: warm_cache
-    run: echo "Cache server unreachable" >&2; exit 1
+      interval_sec: 1
     continue_on: failed
 
   - id: publish
     run: echo "Published the report"
-    depends: [call_api, warm_cache]
+    depends: warm_cache

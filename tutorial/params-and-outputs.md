@@ -12,9 +12,7 @@ Select `build` to see the `bundle` output it published.
 
 ## The workflow
 
-```bash
-curl -fsSLO https://docs.dagu.sh/tutorial/dags/tutorial-03-params-and-outputs.yaml
-```
+Create a workflow named `tutorial-03-params-and-outputs` and paste this YAML into it ([how](/tutorial/#_3-add-each-lesson-s-workflow)).
 
 <<< @/public/tutorial/dags/tutorial-03-params-and-outputs.yaml
 
@@ -24,25 +22,20 @@ Outputs pass data forward. The `build` step captures its printed text as an outp
 
 ## Run it yourself
 
-Run the workflow with defaults, then pass your own values after `--`:
+Select **Start** at the top right of the workflow page. The start dialog has one field per parameter. `environment` is a list with the three allowed values, so the dialog only offers allowed values.
 
-```bash
-dagu start tutorial-03-params-and-outputs.yaml
-dagu start tutorial-03-params-and-outputs.yaml -- environment=staging version=2.1.0
-```
+Select **Start** in the dialog to run with the defaults.
 
-`deploy` prints `Deploying app-2.1.0.tar.gz to staging`.
-
-In the Web UI, **Start** opens a dialog with one field per parameter. `environment` shows a list with the three allowed values.
+Select **Start** again. Choose `staging` for `environment` and enter `2.1.0` for `version`. Select **Start** in the dialog to run. The `deploy` step prints `Deploying app-2.1.0.tar.gz to staging`.
 
 ## Try it
 
-1. Run with `-- environment=qa`. What happens?
+1. Change the default of `version` to `2.0.0` in the YAML, select **Save**, and select **Start** without changing any values in the dialog. What does `deploy` print?
 2. Add a third step, `notify`, that prints `Shipped <bundle>` using the output of `build`.
 
 ::: details Answers
 
-1. Dagu rejects the input before any step runs, because `qa` is not one of the allowed values.
+1. `Deploying app-2.0.0.tar.gz to dev`
 2. Add a step to `steps` with `id: notify`, `depends: build`, and `run: echo "Shipped ${steps.build.outputs.bundle}"`.
 
 :::

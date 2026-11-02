@@ -5,11 +5,11 @@ steps:
     run: echo "Fetched the source code"
 
   - id: lint
-    run: sleep 1 && echo "Lint passed"
+    run: echo "Lint passed"
     depends: checkout
 
   - id: test
-    run: sleep 2 && echo "12 tests passed"
+    run: echo "12 tests passed"
     depends: checkout
 
   - id: package

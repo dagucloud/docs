@@ -1,7 +1,7 @@
 {
   "dag": "tutorial-01-first-workflow",
   "status": "succeeded",
-  "durationMs": 2188,
+  "durationMs": 234,
   "steps": [
     {
       "id": "checkout",
@@ -47,62 +47,62 @@
       "status": "running"
     },
     {
-      "t": 22,
+      "t": 24,
       "target": "$run",
       "status": "running"
     },
     {
-      "t": 22,
+      "t": 24,
       "target": "lint",
       "status": "not_started"
     },
     {
-      "t": 22,
+      "t": 24,
       "target": "test",
       "status": "not_started"
     },
     {
-      "t": 22,
+      "t": 24,
       "target": "package",
       "status": "not_started"
     },
     {
-      "t": 39,
+      "t": 40,
       "target": "checkout",
       "status": "succeeded"
     },
     {
-      "t": 39,
+      "t": 41,
       "target": "lint",
       "status": "running"
     },
     {
-      "t": 39,
+      "t": 41,
       "target": "test",
       "status": "running"
     },
     {
-      "t": 1103,
+      "t": 99,
+      "target": "test",
+      "status": "succeeded"
+    },
+    {
+      "t": 112,
       "target": "lint",
       "status": "succeeded"
     },
     {
-      "t": 2082,
-      "target": "test",
-      "status": "succeeded"
-    },
-    {
-      "t": 2091,
+      "t": 112,
       "target": "package",
       "status": "running"
     },
     {
-      "t": 2120,
+      "t": 142,
       "target": "package",
       "status": "succeeded"
     },
     {
-      "t": 2188,
+      "t": 234,
       "target": "$run",
       "status": "succeeded"
     }

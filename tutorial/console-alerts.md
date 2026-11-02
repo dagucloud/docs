@@ -20,9 +20,9 @@ Workflows still run only on your server. The server sends Dagu Console a short r
 
 Trigger a failure using the workflow from [lesson 6](/tutorial/failures-and-retries):
 
-1. Change `limit: 2` to `limit: 0` in `call_api` and start `tutorial-06-failures-and-retries`. The run fails.
+1. In `tutorial-06-failures-and-retries`, remove `continue_on: failed` from `warm_cache`, save, and start it. The run fails.
 2. Within a minute or so, an email arrives. It names the workflow, server, and failed steps, quotes the end of the error, and links to the run in Dagu Console.
-3. Change `limit` back to `2` and start the workflow again. The run partially succeeds, which resolves the alert. A second email confirms the workflow recovered.
+3. Put `continue_on: failed` back, save, and start again. The run partially succeeds, which resolves the alert, and a second email says the workflow recovered.
 
 ## See every server in one place
 
