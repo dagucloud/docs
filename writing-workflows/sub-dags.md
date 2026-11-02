@@ -299,7 +299,7 @@ steps:
 |-------|-------------|
 | `parallel.items` | Static list of items. |
 | `parallel.variable` | Variable or reference whose value expands at runtime. |
-| `parallel.max_concurrent` | Maximum concurrent child runs. Must be greater than `0`. |
+| `parallel.max_concurrent` | Maximum concurrent child runs, from `1` to `1000`. Defaults to `defaults.max_concurrent`, or `10`. |
 
 Object items expose their fields as `${ITEM.<field>}`:
 

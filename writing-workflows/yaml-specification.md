@@ -407,7 +407,7 @@ params:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `defaults` | object | Default values applied to every step and every `handler_on` step. | - |
+| `defaults` | object | Default values applied to every step, `handler_on` step, and `foreach` body step. | - |
 
 Accepted `defaults` fields:
 
@@ -421,7 +421,7 @@ Accepted `defaults` fields:
 | `signal_on_stop` | string | Step value replaces default. |
 | `env` | array or object | Prepended before step `env`. |
 | `preconditions` | string or array | Prepended before step `preconditions`. |
-| `agent` | object | Merged per supported agent subfield. |
+| `max_concurrent` | integer | Used by `parallel` and `foreach` steps that omit `max_concurrent`. Must be from `1` to `1000`. |
 
 Unknown keys inside `defaults` cause a validation error.
 
@@ -1035,7 +1035,7 @@ When a completion unblocks a step or no manual steps remain waiting, Dagu enqueu
 |-------|------|-------------|
 | `parallel.items` | array | Static items to fan out. |
 | `parallel.variable` | string | Variable name whose value is expanded at runtime. |
-| `parallel.max_concurrent` | integer | Maximum concurrent child runs. Must be greater than `0` if set. |
+| `parallel.max_concurrent` | integer | Maximum concurrent child runs, from `1` to `1000`. Defaults to `defaults.max_concurrent`, or `10`. |
 
 `parallel` is valid only with `action: dag.run` or `action: dag.enqueue`, and it requires `items` or `variable`.
 
