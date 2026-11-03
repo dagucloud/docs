@@ -4,13 +4,13 @@ description: When Dagu Console opens and resolves monitoring alerts, who gets th
 
 # Monitoring Alerts and Email
 
-Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring (Beta)](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
+Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring (Beta)](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
 
 ## Workflow Alerts
 
 Workflow alerts need the `runs` level. An alert belongs to one workflow on one server.
 
-- A run with status failed opens an alert. Further failures add to its count.
+- A run with status failed opens an alert, or, when the workflow's [alert rules](#alert-rules) ask for several failures in a row, the last of them does. The alert opens as of the first of them and counts them all. Further failures add to its count.
 - A later run that succeeds or partially succeeds resolves it.
 - Aborted and rejected runs count as failures in totals, but they neither open nor resolve an alert.
 
@@ -18,9 +18,9 @@ Workflow alerts need the `runs` level. An alert belongs to one workflow on one s
 
 Stopped-reporting alerts need `health` or `runs`.
 
-A server that sends no report for 10 minutes, or 25 minutes on [free monitoring](/overview/console-monitoring#free-and-paid), opens an alert, and its [recipients](#who-gets-alert-emails) are emailed. Its next report resolves the alert, and that email says how long the server was silent.
+A server that sends no report for 10 minutes, or 25 minutes on [free monitoring](/overview/console-monitoring#free-and-paid), opens an alert, and its [recipients](#who-gets-alert-emails) are emailed. A server's [alert rules](#alert-rules) can wait longer, up to 24 hours. Its next report resolves the alert, and that email says how long the server was silent.
 
-- Every server that has reported is watched. To stop watching one, a workspace owner opens its **Settings** tab, clears **Alert when this server stops reporting or its scheduler stops** under **Alerts**, and selects **Save changes**. Turning it off closes its open stopped-reporting and scheduler alerts without an email.
+- Every server that has reported is watched. To stop watching one, a workspace owner opens its **Settings** tab, clears **Alert when this server stops reporting** under **Alerts**, and selects **Save changes**. Turning it off closes an open alert without an email.
 - A server whose monitoring is turned off opens no alert. Turning monitoring off sends one last report that says so: the server shows **Monitoring off**, and an open stopped-reporting alert closes without an email.
 - When many servers stop reporting at the same moment, Dagu Console takes the problem to be on its own side and opens no alerts for them.
 
@@ -31,11 +31,21 @@ On a Team or Pro plan, a server whose scheduler is down for 5 minutes opens an a
 - The scheduler counts as down when the server's report counts no running scheduler, or when one runs but has not ticked for 5 minutes and nobody paused it. A paused scheduler opens no alert.
 - Only a server that has reported a running scheduler before is watched, so a server that never runs one, such as one whose runs start on [temporary workers](/overview/deployment-models#temporary-workers), opens none.
 - It resolves when a scheduler runs again. The email or post that says so names the workflows that did not run on schedule meanwhile.
-- It follows the same switch as stopped-reporting alerts, on the server's **Settings** tab.
+- To stop them for one server, a workspace owner clears **Alert when its scheduler stops** in the server's [alert rules](#alert-rules). Turning it off closes an open one without an email.
+
+## Deadline Alerts
+
+On a Team or Pro plan, a workspace owner gives a workflow a deadline in its [alert rules](#alert-rules): a time of day, on chosen days of the week, in the workspace's [time zone](#who-gets-alert-emails). When a deadline comes and no run of the workflow succeeded since the one before, an alert opens, as of the deadline.
+
+- A workflow has one such alert at a time. Each later deadline it misses adds to its count.
+- A run that succeeds resolves it, and the email or post says it succeeded after its deadline.
+- A new deadline counts the runs that succeeded since its last time, so setting one opens no alert for a workflow that already ran.
+- The alert opens even while the server is silent, since the work is late either way.
+- A deadline at a time the clocks skip, when daylight saving time starts, moves with the clocks.
 
 ## Missed-Schedule Alerts
 
-On a Team or Pro plan, a scheduled run that did not start opens an alert once it is 5 minutes late. These alerts need the `runs` level.
+On a Team or Pro plan, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `runs` level.
 
 - A workflow has one such alert at a time. Later slots that do not start add to its count. It says when the run was due, why it did not start, and when the next run is.
 - It resolves when a later slot's run starts, or when the workflow is no longer scheduled.
@@ -47,10 +57,29 @@ On a Team or Pro plan, a scheduled run that did not start opens an alert once it
 On a Team or Pro plan, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
 
 - A workflow's limit is twice how long 95% of its runs took over the last 14 UTC days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
+- A workflow's [alert rules](#alert-rules) can fix the limit instead, from 1 minute to 7 days, whatever its runs took.
 - Only a running run counts. A queued run, or one waiting for approval, does not.
-- A workflow has one such alert at a time. It names the oldest run past the limit, how long the workflow's runs usually take, and the limit.
+- A workflow has one such alert at a time. It names the oldest run past the limit, how long the workflow's runs usually take, and the limit, or the fixed limit it passed.
 - It resolves when the run finishes, or when the server no longer lists the run in progress. A run that finishes as failed also opens the workflow's failure alert.
 - A server whose monitoring is turned off, or set to `health`, closes these alerts without an email.
+
+## Alert Rules
+
+On a Team or Pro plan, workspace owners choose when Dagu server workflows alert. Rules apply to new alerts; alerts already open stay until they resolve.
+
+| Rule | Choices | Default |
+| --- | --- | --- |
+| **Failed runs** | On or off, and how many failures in a row, 1 to 20 | On, after 1 |
+| **Runs running too long** | The learned limit, a fixed limit of 1 minute to 7 days, or off | The learned limit |
+| **Scheduled runs that do not start** | On or off, and how many minutes late, 1 to 720 | On, after 5 minutes |
+
+Rules are set at three levels, each taking what it leaves empty from the one above:
+
+1. **The workspace**: **Alert rules** on the **Notifications** page sets every rule for all servers' workflows.
+2. **A server**: **Alert rules** on its **Settings** tab sets rules for its workflows. It also sets **Alert when its scheduler stops** and **Stopped reporting after, in minutes**, from 10 to 1440.
+3. **A workflow**: **Alert rules** on [its page](/overview/console-monitoring-pages#workflow-pages) sets its own, and its [deadline](#deadline-alerts): **Must succeed by** a time, **On** chosen days.
+
+A choice marked **Inherited** shows what the level above sets, and an empty number shows it as a placeholder. Kitewell projects' workflows keep the defaults.
 
 ## Who Gets Alert Emails
 
@@ -102,7 +131,16 @@ On a Team or Pro plan, a workspace owner adds up to 10 destinations on the **Not
 | **Webhook** | Any `https://` URL on the public internet. The page that adds it shows its signing secret once. | One signed JSON post per alert. |
 
 - A chat post names what failed and where, quotes the end of its error when the server [sends errors](/overview/console-monitoring#error-messages), and has **View run** and, when the server has a [Dagu URL](/overview/console-monitoring-pages#servers), **Open in Dagu**. A pass sends at most 20 alerts to a chat channel or webhook and sums up the rest in one more message.
-- A PagerDuty incident's summary names what failed and the last line of its error. Acknowledging the alert acknowledges the incident. Its details carry the host, the workflow, the run, the failed steps, and the error, with links to the run. A workflow's failure and a scheduled run that did not start have severity `error`, a run running too long `warning`, and a server that stopped reporting or whose scheduler stopped `critical`. Each alert is its own incident, keyed `dagu:<workspace>:<alert>`, so an event sent twice opens no second incident. Every alert of a pass is sent.
+- A PagerDuty incident's summary names what failed and the last line of its error. Acknowledging the alert acknowledges the incident. Its details carry the host, the workflow, the run, the failed steps, and the error, with links to the run. A workflow's failure, a missed deadline, and a scheduled run that did not start have severity `error`, a run running too long `warning`, and a server that stopped reporting or whose scheduler stopped `critical`. Each alert is its own incident, keyed `dagu:<workspace>:<alert>`, so an event sent twice opens no second incident. Every alert of a pass is sent.
+
+### Which Alerts a Destination Gets
+
+A destination gets every alert of its products until a workspace owner narrows it under **Which alerts** on its page:
+
+- **Kinds of alerts**: failed runs, missed deadlines, runs running too long, scheduled runs that do not start, servers that stopped reporting, and stopped schedulers. Choosing all of them also takes kinds added later.
+- **Dagu servers and workflows**: all of them, or only those chosen. A chosen server includes its workflows. Kitewell alerts are not narrowed by this choice.
+
+The **Notifications** page marks a narrowed destination **Some alerts**. A destination whose chosen servers and workflows are all gone gets no Dagu server alerts until it is changed. Email recipients are not affected.
 
 **Send test** sends the workspace's last workflow alert of a product the destination gets, as it looked while failing, or an example when there is none, under a line saying it is a test. It runs at most once a minute.
 
@@ -113,7 +151,7 @@ The destination's **Status** shows when it last took a post, its last refusal, o
 
 - A refused post is tried again after 30 seconds, then after waits that double up to an hour, or after the wait a `Retry-After` header asks for, for up to a day. Each destination is tried on its own, so one that is down holds back no email or other destination.
 - An answer of 401, 403, 404, or 410 gives up on the post at once. Three in a row stop the destination: the **Notifications** page says so, and **Turn back on** on its page lets it take alerts again once it is fixed.
-- A resolution is posted only after its opening. An alert that resolves before its opening was posted is posted to neither.
+- A resolution is posted only after its opening, and only to the destinations its opening went to. An alert that resolves before its opening was posted is posted to neither.
 
 Destination URLs, signing secrets, and integration keys are stored encrypted.
 
@@ -163,7 +201,7 @@ Any member of the workspace selects **Acknowledge** on an open alert to say they
 
 ### Reminders
 
-On the **Notifications** page, a workspace owner sets **Reminders** to **Every hour**, **Every 4 hours**, or **Every day**. An open alert no one acknowledged is then posted again to its chat destinations and webhooks at that interval, up to 6 times, saying it is still failing, still running long, still not running on schedule, still not reporting, or its scheduler is still stopped, with a link to its page. A webhook gets it as an `alert.reminder` event. PagerDuty is not reminded, since it escalates on its own. Reminders are part of paid plans.
+On the **Notifications** page, a workspace owner sets **Reminders** to **Every hour**, **Every 4 hours**, or **Every day**. An open alert no one acknowledged is then posted again to its chat destinations and webhooks at that interval, up to 6 times, saying it is still failing, still without a success, still running long, still not running on schedule, still not reporting, or its scheduler is still stopped, with a link to its page. A webhook gets it as an `alert.reminder` event. PagerDuty is not reminded, since it escalates on its own. Reminders are part of paid plans.
 
 Acknowledging an alert stops its reminders. To pause them without acknowledging, any member selects **Snooze reminders** on the alert's page for 1 hour, 4 hours, 1 day, or until 9:00 in the workspace's [time zone](#who-gets-alert-emails); **Resume reminders** ends the snooze early. Reminders and snoozes appear on the alert's **Timeline**. A muted workflow's alerts are not reminded of.
 
