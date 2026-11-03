@@ -11,7 +11,7 @@ Monitoring is in beta. The retention periods and limits on this page may change 
 Connect your Dagu servers to [Dagu Console](https://console.dagu.sh) and see all of them in one place:
 
 - **Every server at a glance**: which servers report, what failed today, open alerts, and what needs attention, such as a stopped scheduler or a server that went silent.
-- **Alerts by email, chat, PagerDuty, or webhook**: when a workflow fails and when it recovers, and when a server stops reporting, to the members and addresses you choose, and on a paid plan to Slack, Microsoft Teams, Google Chat, and Discord channels, PagerDuty services, and webhooks. Each alert links to its run.
+- **Alerts by email, chat, PagerDuty, or webhook**: when a workflow fails and when it recovers, and when a server stops reporting or its scheduler stops, to the members and addresses you choose, and on a paid plan to Slack, Microsoft Teams, Google Chat, and Discord channels, PagerDuty services, and webhooks. Each alert links to its run.
 - **Trends**: runs, success rate, and p50 and p95 duration for each workflow over 7, 30, or 90 days.
 - **Full logs stay on the server**: reporting is opt-in, outbound HTTPS only, and carries metadata, plus failed steps' [error messages](#error-messages) only at the level that names them. Full logs, outputs, parameters, and secrets are [never sent](#never-sent), and each server shows the exact JSON it last sent.
 - **Free for one server**: a workspace without a plan monitors one server at no cost, with the limits in [Free and Paid](#free-and-paid).
