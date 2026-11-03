@@ -244,7 +244,6 @@ Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-type
 
 | When you want to… | Read |
 |---|---|
-| Learn the basics step by step | [Tutorial](/tutorial/) |
 | Learn step fields, scripts, dependencies, and defaults | [Workflow Basics](/writing-workflows/basics) |
 | Pass parameters, outputs, and files between steps | [Data & Variables](/writing-workflows/data-variables) |
 | Feed a previous step's output file into a command's standard input | [Standard Input](/writing-workflows/data-flow#standard-input) |

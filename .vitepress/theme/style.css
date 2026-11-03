@@ -446,14 +446,6 @@ h1.title {
 
 }
 
-/* Tutorial lessons */
-.vp-doc .tutorial-meta {
-  margin: -0.5rem 0 1.25rem;
-  color: var(--vp-c-text-3);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
 /* Custom container for workflow visualization */
 .workflow-visualizer {
   border: 1px solid var(--vp-c-divider);

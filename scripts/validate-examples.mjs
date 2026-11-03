@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
 import {
+  accessSync,
+  constants,
   mkdtempSync,
   readFileSync,
   readdirSync,
@@ -8,11 +10,10 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { extname, join, relative } from "node:path";
-import { docsRoot, findDaguBin } from "./dagu-bin.mjs";
+import { extname, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-// Standalone workflow files that pages embed and readers download.
-const workflowFileDirectory = join(docsRoot, "public", "tutorial", "dags");
+const docsRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const excludedDirectories = new Set([
   ".dagu-source",
   ".git",
@@ -21,7 +22,22 @@ const excludedDirectories = new Set([
 ]);
 const markdownFiles = [];
 
-const daguBin = findDaguBin(process.argv[2]);
+function findDaguBin() {
+  const configuredBin = process.env.DAGU_BIN || process.argv[2];
+  if (configuredBin) {
+    return configuredBin;
+  }
+
+  const siblingBuild = resolve(docsRoot, "..", ".local", "bin", "dagu");
+  try {
+    accessSync(siblingBuild, constants.X_OK);
+    return siblingBuild;
+  } catch {
+    return "dagu";
+  }
+}
+
+const daguBin = findDaguBin();
 
 function commandOutput(result) {
   return [result.stdout, result.stderr]
@@ -130,18 +146,6 @@ const failures = [];
 let candidateCount = 0;
 let excludedCount = 0;
 
-function validateWorkflow(path, file, line) {
-  const result = spawnSync(daguBin, ["validate", path], {
-    encoding: "utf8",
-    env: validationEnvironment(join(fixtureDir, "home")),
-    timeout: 20_000,
-  });
-
-  if (result.status !== 0) {
-    failures.push({ file, line, output: formatCommandFailure(result) });
-  }
-}
-
 try {
   for (const file of markdownFiles.sort()) {
     const source = readFileSync(file, "utf8");
@@ -166,15 +170,20 @@ try {
         `${String(candidateCount).padStart(4, "0")}.yaml`,
       );
       writeFileSync(fixture, yaml);
-      validateWorkflow(fixture, relative(docsRoot, file), line);
-    }
-  }
 
-  for (const entry of readdirSync(workflowFileDirectory).sort()) {
-    if (extname(entry) === ".yaml") {
-      candidateCount++;
-      const file = join(workflowFileDirectory, entry);
-      validateWorkflow(file, relative(docsRoot, file), 1);
+      const result = spawnSync(daguBin, ["validate", fixture], {
+        encoding: "utf8",
+        env: validationEnvironment(join(fixtureDir, "home")),
+        timeout: 20_000,
+      });
+
+      if (result.status !== 0) {
+        failures.push({
+          file: relative(docsRoot, file),
+          line,
+          output: formatCommandFailure(result),
+        });
+      }
     }
   }
 } finally {

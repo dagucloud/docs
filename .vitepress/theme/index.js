@@ -1,7 +1,6 @@
 import DefaultTheme from 'vitepress/theme'
 import { nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vitepress'
-import RunReplay from './components/RunReplay.vue'
 import './style.css'
 
 // Detect user's OS and select appropriate tab in code groups
@@ -50,7 +49,7 @@ function selectedCodeGroupTab(group) {
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
-    app.component('RunReplay', RunReplay)
+    // Register custom components here if needed
   },
   setup() {
     const route = useRoute()

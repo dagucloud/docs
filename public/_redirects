@@ -230,6 +230,8 @@
 /tutorials/scheduled-automation/ /writing-workflows/scheduling 301
 /tutorials /writing-workflows/examples 301
 /tutorials/ /writing-workflows/examples 301
+/tutorial /getting-started/quickstart 301
+/tutorial/ /getting-started/quickstart 301
 /step-types/github-actions /dagu-actions/ 301
 /step-types/github-actions/ /dagu-actions/ 301
 
@@ -245,3 +247,4 @@
 /guides/execution/* /writing-workflows/:splat 301
 /guides/step-types/* /step-types/:splat 301
 /guides/workflows/* /writing-workflows/:splat 301
+/tutorial/* /getting-started/quickstart 301

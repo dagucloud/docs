@@ -1,7 +1,0 @@
-# Dagu tutorial, lesson 8: https://docs.dagu.sh/tutorial/scheduling
-
-schedule: "* * * * *"
-
-steps:
-  - id: snapshot
-    run: echo "Snapshot taken at ${context.attempt.started_at}"

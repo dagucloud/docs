@@ -7,7 +7,6 @@
     "dev": "vitepress dev",
     "build": "vitepress build && node scripts/validate-social-metadata.mjs",
     "preview": "vitepress preview",
-    "record:tutorial": "node scripts/record-tutorial-runs.mjs",
     "test:worker": "node --test tests/worker.test.mjs",
     "validate:examples": "node scripts/validate-examples.mjs",
     "validate:social": "node scripts/validate-social-metadata.mjs"

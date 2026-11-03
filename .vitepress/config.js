@@ -202,24 +202,6 @@ const fullSidebar = [
     ],
   },
   {
-    text: "Tutorial",
-    collapsed: true,
-    items: [
-      { text: "Overview", link: "/tutorial/" },
-      { text: "1. Your First Workflow", link: "/tutorial/first-workflow" },
-      { text: "2. Watch Runs in the Web UI", link: "/tutorial/monitoring" },
-      { text: "3. Parameters and Outputs", link: "/tutorial/params-and-outputs" },
-      { text: "4. Built-in Actions", link: "/tutorial/actions" },
-      { text: "5. Branch and Skip", link: "/tutorial/control-flow" },
-      { text: "6. Failures and Retries", link: "/tutorial/failures-and-retries" },
-      { text: "7. Sub-DAGs and Fan-out", link: "/tutorial/sub-dags" },
-      { text: "8. Schedules", link: "/tutorial/scheduling" },
-      { text: "9. Human Input", link: "/tutorial/human-input" },
-      { text: "10. Alerts from Dagu Console", link: "/tutorial/console-alerts" },
-      { text: "Next Steps", link: "/tutorial/next-steps" },
-    ],
-  },
-  {
     text: "Web UI",
     items: [
       { text: "Overview", link: "/overview/web-ui" },
@@ -795,7 +777,6 @@ export default withMermaid(
 
       nav: [
         { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|security|self-host-license|console-account|contributing|changelog)|getting-started/|migration/|ai/?$)" },
-        { text: "Tutorial", link: "/tutorial/", activeMatch: "^/tutorial(?:/|$)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
         { text: "MCP", link: "/mcp/", activeMatch: "^/(mcp(?:/|$)|ai/skills(?:/|$))" },
         { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/(writing-workflows/(?!examples(?:/|$))|features/)" },
@@ -819,7 +800,6 @@ export default withMermaid(
         "/web-ui/": fullSidebar,
         "/server-admin/": fullSidebar,
         "/migration/": fullSidebar,
-        "/tutorial/": fullSidebar,
       },
 
       socialLinks: [
