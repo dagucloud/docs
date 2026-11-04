@@ -130,6 +130,7 @@ Sent at `runs` and `errors`:
 
 - **Each top-level run that finishes**, once: the DAG name, run ID, attempt ID, status (succeeded, partially succeeded, failed, aborted, or rejected), how it was triggered (scheduler, manual, webhook, retry, or catchup), when it was queued, started, and finished, and the names of its failed steps, up to 50.
 - **The runs in progress**: the runs queued, running, or waiting, with the same fields up to the start time. A report lists up to 200 of them, the most recently started or queued first, and the total count.
+- **Each queue that holds queued or running runs**: its name, how many runs are queued and running, how many may run at once, when the next run in line was queued, and why that run cannot start when no worker can take it. A report lists up to 256 queues, those waiting for a worker first, and the total count.
 - **Each scheduled DAG**: its name, its next run, and its latest start-schedule slot that came due, with the outcome below. A report lists up to 500 of them, those whose slot failed, is planned, or was missed first, and the total count. When several processes share a data directory, the one that sends runs sends these.
 
 | Slot outcome | Meaning |
@@ -144,7 +145,7 @@ Sent at `runs` and `errors`:
 | `planned` | Chosen to run, with its dispatch not yet settled. |
 | `missed` | Came due while no scheduler ran, and was not caught up. |
 
-DAG names and step names are sent only at `runs` and `errors`. Choose `health` if you consider them sensitive.
+DAG names, queue names, and step names are sent only at `runs` and `errors`. Choose `health` if you consider them sensitive.
 
 ### Error messages
 

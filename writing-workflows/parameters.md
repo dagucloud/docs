@@ -97,6 +97,8 @@ Top-level inline JSON Schema is recognized only when the top-level `params:` obj
 
 Prefer the ordered list form for authored DAGs when a flat list of scalar parameters is enough. Use schema-backed params when you need nested objects, arrays, or JSON Schema rules outside the inline rich subset.
 
+A `key=value` parameter for a property the schema does not type reaches the run as written, so `version=1.10` stays `1.10` and a long ID keeps every digit. A typed property is normalized: with `type: number`, `ratio=1.10` becomes `1.1`. In `values`, YAML reads an unquoted `1.10` as a number, so quote it to keep the text.
+
 ## Inline Rich Definitions
 
 Inline rich definitions keep defaults, validation, and UI metadata next to the parameter declaration.

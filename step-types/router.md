@@ -27,6 +27,8 @@ steps:
 
 When `INPUT=exact_value`, only `route_a` runs. The `route_b` step is skipped.
 
+Each route lists the steps it runs, named by step `id` or `name`.
+
 ## Patterns
 
 Routes are matched against `with.value`.
