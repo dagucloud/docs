@@ -50,29 +50,36 @@ When a DAG run remains in `queued`, the scheduler may write one runtime conditio
 
 Runtime conditions are exposed as the `conditions` field on queued DAG-run summaries and details. The Web UI shows them in the run's **Run details** on the [workflow page](/overview/web-ui#start-and-control-runs) and in queue item rows. Conditions are cleared when the persisted DAG-run status changes from `queued` to another status.
 
-Each queued condition has this shape:
+A queued run carries one condition per `type`. `Runnable` says whether the run can start, and a second condition names the part that holds it back.
 
 | Field | Meaning |
 |-------|---------|
-| `type` | Condition type. The current queued condition type is `Queued`. |
-| `status` | Condition status. The scheduler currently writes `True` for queued conditions. |
-| `reason` | Machine-readable reason. |
+| `type` | `Runnable`, or the blocking part: `ConcurrencyReady`, `WorkerAssignmentReady`, `RunRecordReady`, `WorkerReady`, `StartObserved`, or `QueueReady`. |
+| `status` | `False` when the run cannot start yet, or `Unknown` when the scheduler could not check. |
+| `reason` | Machine-readable reason, shared by the `Runnable` condition and the blocking condition. |
 | `message` | Human-readable explanation. |
 | `checkedAt` | RFC 3339 timestamp when the scheduler observed the condition. |
 
-The current queued condition reasons are:
+The current reasons are:
 
-| Reason | Message | When it is written |
-|--------|---------|--------------------|
-| `QueueConcurrencyLimitReached` | `DAG-run is waiting because the queue's active-run concurrency limit has been reached.` | No queue slot is available because active runs, in-flight dispatches, dispatch admission reservations, or applicable outstanding dispatch reservations consume the configured `max_concurrency`. |
-| `DispatchAdmissionPending` | `A distributed dispatch reservation is already pending; DAG-run is waiting in the queue.` | A distributed dispatch reservation already exists for the run, so the scheduler waits instead of creating a duplicate dispatch. |
-| `WorkerSelectorNotMatched` | `No healthy worker matches the required worker selector; DAG-run is waiting in the queue.` | Distributed dispatch reported that no healthy worker matches the run's required `worker_selector`. |
-| `NoAvailableWorker` | `No healthy distributed worker is available; DAG-run is waiting in the queue.` | Distributed dispatch reported that no healthy worker is available. |
-| `DispatchUnavailable` | `Distributed dispatch is temporarily unavailable; DAG-run is waiting in the queue.` | Distributed dispatch could not complete, and the error was not classified as a worker selector mismatch or no available worker. The detailed error is logged server-side; it is not persisted in the user-facing condition message. |
+| Reason | Blocking condition | When it is written |
+|--------|--------------------|--------------------|
+| `MaxConcurrencyReached` | `ConcurrencyReady`, `False` | Active runs and in-flight dispatches use every slot of the queue's `max_concurrency`. |
+| `AssignmentPending` | `WorkerAssignmentReady`, `Unknown` | Dagu is already assigning the run to a worker. |
+| `AssignmentUnavailable` | `WorkerAssignmentReady`, `Unknown` | Dagu cannot tell whether worker assignment can proceed. |
+| `WorkerDispatchUnavailable` | `WorkerAssignmentReady`, `Unknown` | Dagu attempted worker assignment, but dispatch is temporarily unavailable. The detailed error is logged on the server. |
+| `NoMatchingWorker` | `WorkerReady`, `False` | No healthy worker matches the run's `worker_selector`. |
+| `NoAvailableWorker` | `WorkerReady`, `False` | No healthy distributed worker is available. |
+| `AttemptIdentityMissing` | `RunRecordReady`, `False` | The queued attempt lacks the identity that worker assignment needs. |
+| `DAGSnapshotUnavailable` | `RunRecordReady`, `False` | The run's stored DAG snapshot cannot be read. |
+| `LaunchFailed` | `StartObserved`, `False` | A local launch failed before the run reported that it started. |
+| `StartupNotObserved` | `StartObserved`, `False` | Dagu started the run but saw no heartbeat, lease, or status change within the startup wait window. |
+| `RunLivenessUnavailable` | `StartObserved`, `Unknown` | Dagu could not check run liveness while waiting for startup. This reason writes no `Runnable` condition. |
+| `QueueStateUnavailable` | `QueueReady`, `Unknown` | The scheduler could not read the queue state. |
 
-There is no `QueueAccepted` condition. A run's `queued` status and queue entry already mean it was accepted into the queue. There is also no "queue full" condition: `QueueConcurrencyLimitReached` means the queue's active-run concurrency limit currently has no free slot; it does not mean the queue cannot accept more queued items.
+There is no `QueueAccepted` condition. A run's `queued` status and queue entry already mean it was accepted into the queue. There is also no "queue full" condition: `MaxConcurrencyReached` means the queue's active-run concurrency limit currently has no free slot; it does not mean the queue cannot accept more queued items.
 
-The scheduler stores only the latest queued condition. If the same reason and message are already present, the scheduler refreshes `checkedAt` only when the new observation is at least one minute newer than the stored observation. Older observations do not replace newer ones.
+A new observation replaces the stored condition of the same type unless the stored one is newer. An unchanged observation refreshes `checkedAt` at most once a minute.
 
 ## Scheduled Runs and Queues
 

@@ -1069,25 +1069,34 @@ The response includes `nextCursor` when older results are available. Repeat the 
 
 `DAGRunSummary` and `DAGRunDetails` may include a `conditions` array when the DAG run status is `queued`. The current implementation emits queued runtime conditions only while the run remains queued. Conditions are omitted for non-queued statuses, and invalid `checkedAt` values are skipped when the API response is built.
 
-Each condition object has:
+A queued run carries one condition per `type`: `Runnable`, which says whether the run can start, and a condition for the part that holds it back. Each condition object has:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| type | string | Condition type. The current queued condition type is `Queued`. |
-| status | string | `True`, `False`, or `Unknown` by schema. The scheduler currently writes `True` for queued conditions. |
-| reason | string | Machine-readable reason. |
+| type | string | `Runnable`, `ConcurrencyReady`, `WorkerAssignmentReady`, `RunRecordReady`, `WorkerReady`, `StartObserved`, or `QueueReady`. |
+| status | string | `False` when the run cannot start yet, or `Unknown` when the scheduler could not check. The schema also allows `True`. |
+| reason | string | Machine-readable reason, shared by the `Runnable` condition and the blocking condition. |
 | message | string | Human-readable explanation. |
 | checkedAt | string | RFC 3339 timestamp when the scheduler observed the condition. |
 
-Current queued condition reasons:
+Current reasons:
 
 | Reason | Meaning |
 |--------|---------|
-| `QueueConcurrencyLimitReached` | The queue's active-run concurrency limit currently has no free slot. |
-| `DispatchAdmissionPending` | A distributed dispatch reservation already exists for the run. |
-| `WorkerSelectorNotMatched` | No healthy worker matches the run's required `worker_selector`. |
+| `MaxConcurrencyReached` | The queue's active-run concurrency limit has no free slot. |
+| `AssignmentPending` | Dagu is already assigning the run to a worker. |
+| `AssignmentUnavailable` | Dagu cannot tell whether worker assignment can proceed. |
+| `WorkerDispatchUnavailable` | Worker dispatch is temporarily unavailable. |
+| `NoMatchingWorker` | No healthy worker matches the run's `worker_selector`. |
 | `NoAvailableWorker` | No healthy distributed worker is available. |
-| `DispatchUnavailable` | Distributed dispatch is temporarily unavailable and the error was not classified as a worker selector mismatch or no available worker. |
+| `AttemptIdentityMissing` | The queued attempt lacks the identity that worker assignment needs. |
+| `DAGSnapshotUnavailable` | The run's stored DAG snapshot cannot be read. |
+| `LaunchFailed` | A local launch failed before the run reported that it started. |
+| `StartupNotObserved` | No heartbeat, lease, or status change was seen within the startup wait window. |
+| `RunLivenessUnavailable` | Run liveness could not be checked while waiting for startup. |
+| `QueueStateUnavailable` | The queue state could not be read. |
+
+See [Queues](/server-admin/queues) for the blocking condition each reason writes.
 
 **Response (200)**:
 ```json
@@ -1128,10 +1137,17 @@ Current queued condition reasons:
       "triggerType": "scheduler",
       "conditions": [
         {
-          "type": "Queued",
-          "status": "True",
-          "reason": "WorkerSelectorNotMatched",
-          "message": "No healthy worker matches the required worker selector; DAG-run is waiting in the queue.",
+          "type": "Runnable",
+          "status": "False",
+          "reason": "NoMatchingWorker",
+          "message": "The DAG-run cannot start because no healthy worker matches the required selector.",
+          "checkedAt": "2024-02-11T14:31:00Z"
+        },
+        {
+          "type": "WorkerReady",
+          "status": "False",
+          "reason": "NoMatchingWorker",
+          "message": "No healthy worker matches the required worker selector.",
           "checkedAt": "2024-02-11T14:31:00Z"
         }
       ],
@@ -2966,10 +2982,17 @@ Returns one page of the queued DAG-runs of a queue, from the head of the queue t
       "triggerType": "scheduler",
       "conditions": [
         {
-          "type": "Queued",
-          "status": "True",
-          "reason": "QueueConcurrencyLimitReached",
-          "message": "DAG-run is waiting because the queue's active-run concurrency limit has been reached.",
+          "type": "Runnable",
+          "status": "False",
+          "reason": "MaxConcurrencyReached",
+          "message": "The DAG-run cannot start because the queue active-run concurrency limit has been reached.",
+          "checkedAt": "2024-02-11T14:31:00Z"
+        },
+        {
+          "type": "ConcurrencyReady",
+          "status": "False",
+          "reason": "MaxConcurrencyReached",
+          "message": "The queue active-run concurrency limit has been reached.",
           "checkedAt": "2024-02-11T14:31:00Z"
         }
       ]
