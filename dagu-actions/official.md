@@ -18,7 +18,6 @@ Contributions are welcome. Each action repository is public, so submit improveme
 |--------|------------|----------|
 | [`node-script@v1`](/dagu-actions/official/node-script) | [`dagucloud/node-script`](https://github.com/dagucloud/node-script) | Run JavaScript that needs Node.js modules, network access, the filesystem, or environment variables, with action-owned Node.js. |
 | [`python-script@v1`](/dagu-actions/official/python-script) | [`dagucloud/python-script`](https://github.com/dagucloud/python-script) | Run Python that needs packages, network access, the filesystem, or environment variables, with action-owned Python and optional requirements. |
-
 | [`dbt@v1`](/dagu-actions/official/dbt) | [`dagucloud/dbt`](https://github.com/dagucloud/dbt) | Run dbt Core commands with project-local adapter requirements. |
 | [`duckdb@v1`](/dagu-actions/official/duckdb) | [`dagucloud/duckdb`](https://github.com/dagucloud/duckdb) | Run analytical SQL or file-backed DuckDB workflows without adding DuckDB bindings to the Dagu core binary. |
 | [`ffmpeg@v1`](/dagu-actions/official/ffmpeg) | [`dagucloud/ffmpeg`](https://github.com/dagucloud/ffmpeg) | Run media conversion, transcoding, probing, or stream processing without baking FFmpeg into worker images. |
