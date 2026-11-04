@@ -70,7 +70,7 @@ The current built-in direct provider registry contains:
 
 | Provider | Source |
 | --- | --- |
-| `env` | A variable from the context environment scope, an internal Dagu transport variable, or the Dagu process environment |
+| `env` | A variable from the context environment scope or the Dagu process environment |
 | `file` | The complete contents of one local file |
 | `kubernetes` | One data key from a Kubernetes Secret resource |
 | `vault` | One field from a HashiCorp Vault secret response |
@@ -118,7 +118,7 @@ secrets:
 | --- | --- | --- |
 | `name` | Yes | Target environment variable injected into the run |
 | `ref` | Required for registry refs | Registry ref, for example `prod/db-password` |
-| `provider` | Required for direct provider refs | Resolver name. Built-in values are `env`, `file`, `kubernetes`, `vault`, `aws`, and `gcp` |
+| `provider` | Required for direct provider refs | Resolver name. Built-in values are `env`, `file`, `kubernetes`, `vault`, `aws`, `gcp`, `azure`, and `alibaba` |
 | `key` | Required for direct provider refs | Provider-specific lookup key |
 | `options` | Direct provider refs only | Provider-specific string map |
 
@@ -127,6 +127,7 @@ Validation rules:
 - `name` must be a valid environment variable name.
 - `name` must be unique inside the DAG.
 - `name` must not start with `DAGU_`.
+- `name` must not match a Dagu-managed run variable such as `DAG_NAME`, `DAG_RUN_ID`, or `DAG_PARAMS_JSON`.
 - `ref` must be lowercase slug segments separated by `/`, for example `prod/db-password`.
 - `ref` cannot be combined with `provider`, `key`, or `options`.
 - Direct provider refs require both `provider` and `key`.
@@ -176,7 +177,7 @@ When a DAG run starts, Dagu:
 3. Adds resolved secret values to the run environment with source `secret`.
 4. Starts steps only if secret resolution succeeds.
 
-If any secret fails to resolve, run initialization fails and steps do not execute. `dagu dry` also resolves secrets. `dagu validate` checks YAML shape and DAG structure, but it does not contact providers and does not verify that a secret exists.
+If any secret fails to resolve, run initialization fails and steps do not execute. `dagu dry` attempts resolution but ignores failures, so a dry run still succeeds when a secret is missing. `dagu validate` checks YAML shape and DAG structure, but it does not contact providers and does not verify that a secret exists.
 
 ## Distributed Runs
 
@@ -238,11 +239,14 @@ The masker is applied to:
 - Step stdout and stderr log writers.
 - Step stdout and stderr redirect writers.
 - Final `outputs.json` values collected from string-form `output: NAME`, `stdout.outputs`, and `outputs.write`.
+- Stored run status: error messages, output variables, published step outputs, including values written to `DAGU_OUTPUT_FILE`, and step configuration. A secret that appears in escaped form inside JSON text is masked too.
 - Chat step messages immediately before they are sent to the LLM provider.
 
 The matcher replaces exact secret values. It does not mask empty values. It also does not mask values loaded through `env:` or `dotenv:` unless those values are resolved through `secrets:`.
 
 Masking is not a process sandbox. The step process receives the raw secret in its environment and can write it to files, databases, APIs, child processes, or output variables used by later steps.
+
+Within one run, a later step reads a published output with the secret intact. A run that reuses a stored step result instead of executing the step again reads the masked value, so each secret in a reused output reads as `*******`. This covers retry, resume after an approval or a human task, and runs that reuse another run's outputs.
 
 ## Provider Pages
 

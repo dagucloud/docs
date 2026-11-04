@@ -65,6 +65,6 @@ steps:
       queue: background
 ```
 
-`with.queue` overrides the child DAG's queue for that enqueued run. If it is omitted, Dagu uses the child DAG's top-level `queue`, the base-config default, or the child's local queue. The parent step succeeds after the child run is persisted and added to the queue.
+`with.queue` overrides the child DAG's queue for that enqueued run. If it is omitted, Dagu uses the child DAG's top-level `queue`, the base-config default, or the child's local queue. The parent step succeeds after the child run is persisted and added to the queue. When `queues.enabled` is `false` in `config.yaml`, the step fails with `queues are disabled in configuration`. Queues are enabled by default.
 
 Use `action: dag.run` instead when the parent workflow must wait for the child DAG result before continuing. A `dag.run` child starts directly rather than through its queue, so the queue's `max_concurrency` does not limit it.

@@ -57,7 +57,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | Variable | Provided In | Description | Example |
 |----------|-------------|-------------|---------|
 | `DAG_NAME` | All steps & handlers | Name of the DAG definition being executed. | `daily-backup` |
-| `DAG_RUN_ID` | All steps & handlers | Unique identifier for the current run. Combines timestamp and a short suffix. | `20241012_040000_c1f4b2` |
+| `DAG_RUN_ID` | All steps & handlers | Unique identifier for the current run. Generated IDs are 22-character base62 encodings of a time-ordered UUIDv7. | `034rZkt36lnWMsDqnxAuLV` |
 | `DAG_RUN_LOG_FILE` | All steps & handlers | Absolute path to the aggregated DAG run log. Useful for attaching to alerts. | `/var/log/dagu/daily-backup/20241012_040000.log` |
 | `DAG_RUN_STEP_NAME` | Current step or handler only | Name field of the step that is currently executing. | `upload-artifacts` |
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step or handler only | File path backing the step's captured stdout stream. | `/var/log/dagu/daily-backup/upload-artifacts.stdout.log` |

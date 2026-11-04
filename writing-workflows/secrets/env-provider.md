@@ -16,8 +16,7 @@ secrets:
 The resolver checks `key` in this order:
 
 1. The context environment scope. During normal DAG execution, this scope starts with the Dagu process environment and then overlays DAG `env:` entries and values loaded through `dotenv:`.
-2. The internal transport variable `_DAGU_PRESOLVED_SECRET_<KEY>`, used by Dagu when a parent process pre-resolves env-provider secrets for a subprocess.
-3. A direct lookup in the process environment visible to the Dagu process.
+2. A direct lookup in the process environment visible to the Dagu process.
 
 If the variable is not set, resolution fails. If the variable exists and its value is an empty string, resolution succeeds with an empty value. Empty secret values are not masked.
 
@@ -42,7 +41,7 @@ steps:
   - run: ./notify.sh
 ```
 
-The step process receives `SLACK_TOKEN`, not only `PROD_SLACK_TOKEN`.
+The step process receives `SLACK_TOKEN`. It usually does not receive `PROD_SLACK_TOKEN`: Dagu passes host variables to steps only when their names match the base environment allowlist, such as the `DAGU_`, `DAG_`, `LC_`, and `KUBERNETES_` prefixes.
 
 ## From Dotenv
 

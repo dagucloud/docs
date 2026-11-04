@@ -132,15 +132,19 @@ steps:
 |-------|-----------------|---------|
 | `@hourly` | `0 * * * *` | The start of each hour |
 | `@daily` | `0 0 * * *` | Midnight each day |
+| `@midnight` | `0 0 * * *` | Midnight each day |
 | `@weekly` | `0 0 * * 0` | Midnight on Sunday |
 | `@monthly` | `0 0 1 * *` | Midnight on the first day of each month |
 | `@yearly` | `0 0 1 1 *` | Midnight on January 1 |
+| `@annually` | `0 0 1 1 *` | Midnight on January 1 |
 
 Aliases are case-sensitive and must be quoted in YAML. They work in schedule arrays, `expression` entries, and `start`, `stop`, and `restart` schedules.
 
 Dagu normalizes aliases to the cron expressions above. The API and UI schedule badges show that expression; the YAML editor retains the authored alias. Next-run and catch-up behavior match the equivalent cron schedule.
 
-For an explicit `CRON_TZ` timezone, use the equivalent five-field expression, such as `"CRON_TZ=Asia/Tokyo 0 0 * * *"` for midnight in Tokyo.
+A `CRON_TZ=` or `TZ=` prefix works with aliases, so `"CRON_TZ=Asia/Tokyo @daily"` runs at midnight in Tokyo.
+
+`@every <duration>`, such as `"@every 90m"`, runs once per interval on a fixed grid aligned to the Unix epoch. The duration must be a positive whole number of minutes, and `@every` does not accept a timezone prefix.
 
 ## Multiple Schedules
 
@@ -308,11 +312,11 @@ restart_wait_sec: 60  # Wait 60s before restart
 
 ## Skip Redundant Runs
 
-Prevent overlapping executions:
+Skip a scheduled run when the DAG already succeeded since the previous scheduled time, for example after a manual run:
 
 ```yaml
 schedule: "*/5 * * * *"  # Every 5 minutes
-skip_if_successful: true   # Skip if last run succeeded
+skip_if_successful: true   # Skip if a run succeeded since the previous slot
 
 steps:
   - run: echo "Checking status"
@@ -323,13 +327,7 @@ steps:
 When the scheduler restarts after downtime, it can replay missed cron runs. Catchup requires two things:
 
 1. `catchup_window` set on the DAG
-2. `queues.enabled: true` in `config.yaml`
-
-```yaml
-# ~/.config/dagu/config.yaml
-queues:
-  enabled: true
-```
+2. Queues enabled in `config.yaml`. `queues.enabled` defaults to `true`.
 
 ```yaml
 # DAG file
@@ -364,20 +362,19 @@ If enqueueing fails after the run record is created, the record is rolled back (
 Catchup run IDs follow the format:
 
 ```
-catchup-{name}-{hash}-{timestamp}
+catchup-{hash}-{timestamp}
 ```
 
-- `{name}`: DAG name with dots replaced by underscores, truncated to 31 characters if needed
-- `{hash}`: first 8 hex characters of the SHA-256 hash of the original DAG name
+- `{hash}`: first 12 hex characters of the SHA-256 hash of the DAG name
 - `{timestamp}`: scheduled time in UTC as `20060102T150405`
 
 Example: a DAG named `etl-pipeline` with a missed run at 2026-03-12 14:00 UTC produces:
 
 ```
-catchup-etl-pipeline-b763ab2e-20260312T140000
+catchup-b763ab2e276d-20260312T140000
 ```
 
-The hash ensures that DAGs with names that differ only in dots vs underscores (e.g., `my.dag` and `my_dag`) produce different run IDs. The deterministic format means the same missed interval always produces the same ID, which is what makes catchup idempotent across restarts.
+The deterministic format means the same missed interval always produces the same ID, which is what makes catchup idempotent across restarts. Before enqueueing, the scheduler also checks for an ID in the older `catchup-{name}-{8-hex hash}-{timestamp}` format, so an interval enqueued by an earlier version is not replayed twice.
 
 ### Idempotency on restart
 
@@ -530,12 +527,6 @@ steps:
 
 When no `queue` is specified, DAGs use a local queue with FIFO processing (concurrency of 1).
 
-Disable queue processing:
-
-```yaml
-disable_queue: true  # Skip queue, run immediately
-```
-
 ## Common Patterns
 
 ### Business Hours Only
@@ -547,8 +538,10 @@ schedule: "*/30 8-17 * * MON-FRI"  # Every 30 min, 8AM-5PM weekdays
 ```yaml
 schedule: "0 23 28-31 * *"  # 11 PM on last days of month
 preconditions:
-  - condition: '[ $(date +%d -d tomorrow) -eq 1 ]'
+  - condition: '[ "$(date -d tomorrow +%d 2>/dev/null || date -v+1d +%d)" = 01 ]'
 ```
+
+The check uses GNU `date -d` and falls back to BSD `date -v`, as on macOS.
 
 ### Maintenance Windows
 ```yaml

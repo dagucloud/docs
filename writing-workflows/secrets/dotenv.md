@@ -49,8 +49,9 @@ dotenv:
   - ${PROJECT_DIR}/.env.local
 ```
 
-`HOME` and `PROJECT_DIR` are read from the Dagu process environment. A backtick
-or `$()` expression in a dotenv path remains literal path text.
+`HOME` and `PROJECT_DIR` are read from DAG `env:` entries, params, or the Dagu
+process environment. A backtick or `$()` expression in a dotenv path remains
+literal path text.
 
 Missing dotenv files in a DAG are ignored. Parse errors are logged as warnings and the run continues.
 

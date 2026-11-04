@@ -297,8 +297,7 @@ steps:
 
 | Field | Description |
 |-------|-------------|
-| `parallel.items` | Static list of items. |
-| `parallel.variable` | Variable or reference whose value expands at runtime. |
+| `parallel.items` | List of items, or a reference such as `${steps.discover.outputs.files}` whose value expands to a list at runtime. |
 | `parallel.max_concurrent` | Maximum concurrent child runs, from `1` to `1000`. Defaults to `defaults.max_concurrent`, or `10`. |
 
 Object items expose their fields as `${ITEM.<field>}`:
@@ -370,12 +369,13 @@ Rules:
 
 The channel stays empty when no child run succeeds, and when the collected array exceeds [`max_output_size`](/writing-workflows/data-flow#output-size). Dagu logs a warning and the step still succeeds. An empty channel leaves `${fanout.outputs}` in the command as literal text, which most shells reject as a bad substitution, so guard the reference or capture the aggregate instead when children are expected to fail.
 
-Discovering work at runtime uses the same shape:
+Discovering work at runtime uses the same shape. Here `list-files.sh` prints a one-line JSON array, and the step publishes it through `DAGU_OUTPUT_FILE`:
 
 ```yaml
 steps:
   - id: discover
-    run: ./list-files.sh
+    run: |
+      printf 'files=%s\n' "$(./list-files.sh)" >> "$DAGU_OUTPUT_FILE"
     outputs:
       - name: files
         type: json
@@ -412,7 +412,7 @@ steps:
     run: echo "Queued ${QUEUED.dagRunId}"
 ```
 
-`with.queue` overrides the queue for that run. Without it, Dagu uses the child DAG's own `queue`, the base-config default, or the child's local queue. A single enqueue returns `{name, dagRunId, params, queue, status}`; a `parallel` enqueue returns `{summary: {total, queued}, runs: [...]}`.
+`with.queue` overrides the queue for that run. Without it, Dagu uses the child DAG's own `queue`, the base-config default, or the child's local queue. A single enqueue returns `{name, dagRunId, params, queue, status}`; a `parallel` enqueue returns `{summary: {total, queued}, runs: [...]}`. The step fails with `queues are disabled in configuration` when `queues.enabled` is `false`. Queues are enabled by default.
 
 See [Queue Assignment](/writing-workflows/queues).
 
@@ -454,6 +454,11 @@ The runtime profile selected for the parent run is passed to the child run, and 
 ## Failure Handling
 
 A failed or aborted child run fails the parent step. A partially succeeded child produces a partially succeeded parent step.
+
+Two child outcomes do not fail the parent step:
+
+- A child whose DAG-level `preconditions` are not met is aborted before any step runs. The parent step is marked skipped, so its dependents are skipped unless they set `continue_on: skipped`.
+- A child that is waiting for an approval or a human task puts the parent step in waiting.
 
 Use `continue_on` when the parent should proceed anyway:
 

@@ -1,4 +1,3 @@
-| `xlsx.read`, `xlsx.info`, `xlsx.list_sheets`, `xlsx.write`, `xlsx.append`, `xlsx.update_rows`, `xlsx.validate`, `xlsx.write_cells`, `xlsx.sheet`, `xlsx.convert`, `xlsx.extract` | Read, write, validate, convert, and extract fields from `.xlsx` workbooks. See [XLSX](/step-types/xlsx). |
 # YAML Specification
 
 This page documents the YAML fields accepted by the current Dagu workflow parser. It is a reference for the top-level DAG document and for individual step definitions.
@@ -61,7 +60,7 @@ steps:
 
   - id: render
     depends: summarize
-    run: ./bin/render-report --summary '${SUMMARY}'
+    run: ./bin/render-report --summary "$SUMMARY"
     stdout:
       artifact: ${REPORT_DIR}/daily.md
 
@@ -174,7 +173,7 @@ steps:
 |-------|------|-------------|---------|
 | `schedule` | string, array, or object | Cron expression or [schedule alias](/writing-workflows/scheduling#schedule-aliases), multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
 | `calendar` | string | [Business calendar](/writing-workflows/business-calendars) of every start schedule entry that names none: a calendar file name, the built-in `weekdays`, or `none`. | - |
-| `skip_if_successful` | boolean | Skip the scheduled run if the DAG already succeeded for that day. | `false` |
+| `skip_if_successful` | boolean | Skip a scheduled run if the DAG already succeeded since the previous scheduled time. | `false` |
 | `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. | `0` |
 | `catchup_window` | string | Duration for replaying missed cron runs after scheduler downtime. If omitted, missed runs are not replayed. | - |
 | `overlap_policy` | string | Catchup overlap behavior: `skip`, `all`, or `latest`. | `skip` |
@@ -259,8 +258,9 @@ An object-form start entry also accepts `calendar`, which overrides the DAG-leve
 | `retry_policy` | object | Scheduler-driven retry policy for the whole DAG run. | - |
 | `run_config` | object | UI/API controls for starting DAG runs. | - |
 | `worker_selector` | object or `local` | Distributed worker label selector, or `local` to force local execution. | - |
+| `resources` | object | CPU and memory limits for the whole DAG run under `resources.limits`. See [DAG Run Resource Limits](/writing-workflows/dag-run-resource-limits). | - |
 
-There is no accepted top-level `resources` field in the current YAML parser. For DAG-level concurrency use `max_active_steps` or `queue`. For Kubernetes resource defaults, use top-level `kubernetes.resources`, which applies only to explicit `k8s.run` or `kubernetes.run` steps.
+Top-level `resources` limits CPU and memory only. For DAG-level concurrency use `max_active_steps` or `queue`. For Kubernetes resource defaults, use top-level `kubernetes.resources`, which applies only to explicit `k8s.run` or `kubernetes.run` steps.
 
 ### DAG Retry Policy
 
@@ -285,7 +285,7 @@ retry_policy:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `hist_retention_days` | integer | Days of DAG-run history to retain. `0` uses the default when `hist_retention_runs` is not set. Negative values disable automatic cleanup. | `30` |
+| `hist_retention_days` | integer | Days of DAG-run history to retain. Must be `0` or greater. `0` uses the default when `hist_retention_runs` is not set. | `30` |
 | `hist_retention_runs` | integer | Number of DAG runs to retain. Must be greater than `0` if set. Cannot be set with `hist_retention_days`. | - |
 | `max_output_size` | integer | Maximum captured output size per step, in bytes. | `1048576` |
 
@@ -293,6 +293,7 @@ retry_policy:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
+| `consts` | array | Ordered immutable values read through `${consts.name}`. Each entry has exactly one key with a string, number, or boolean value, and can reference only earlier consts. | - |
 | `params` | string, array, or object | DAG parameters. Supports legacy string/map forms, inline rich definitions, and JSON Schema mode. | `[]` |
 | `env` | array or object | DAG environment variables. | `[]` |
 | `secrets` | array | Secret references resolved at runtime and exposed as environment variables. | `[]` |
@@ -824,7 +825,7 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `run` | string or array | Shell command or multi-line shell script. Array form is legacy compatibility. |
 | `action` | string | Built-in, custom, or remote action name. |
 | `with` | object | Inputs for `action`, or shell config for `run`. |
-| `dependencies` | string or array | DAG-relative files, directories, or glob patterns to transfer for distributed execution. |
+| `dependencies` | string or array | Files, directories, or glob patterns snapshotted into the run work directory for local and distributed execution. |
 | `working_dir` | string | Step working directory. |
 | `env` | array or object | Step-specific environment variables. |
 | `stdin` | string | File path piped to the step command's standard input. Only `run` steps accept it. |
@@ -839,12 +840,15 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `container` | string or object | Step-level container override. |
 | `worker_selector` | object | Step-level distributed worker selector. |
 | `pass_env` | boolean or array | Parent environment values handed to a child run. Not supported with `action: dag.enqueue`. |
+| `foreach` | object | Inline per-item iteration over body steps. See [Foreach](#foreach). |
+| `signal_on_stop` | string | Signal sent to the step process when the run is stopped, such as `SIGINT`. Defaults to the signal Dagu received. |
+| `mail_on_error` | boolean | Send an error email when this step fails. |
 
 `run` and `action` are mutually exclusive.
 
 `stdin` names a file, not inline content. A leading `~` expands, and a relative path resolves against the step working directory. The path is value-resolved before the command starts, and unlike `run`, a path that resolves to nothing or still carries a reference fails the step. See [Standard Input](/writing-workflows/data-flow#standard-input).
 
-`dependencies` accepts literal paths relative to the authored DAG file. Each declaration must match at dispatch time. Exact files, directories, and glob patterns are supported. See [File Dependencies](/writing-workflows/file-dependencies) for transfer behavior, examples, validation rules, and bundle limits.
+`dependencies` accepts literal paths relative to the DAG `working_dir`, or to the authored DAG file's directory when `working_dir` is omitted. Each declaration must match at dispatch time. The snapshot becomes the DAG's process working directory, also for local runs; an explicit step `working_dir` still takes precedence. Exact files, directories, and glob patterns are supported. See [File Dependencies](/writing-workflows/file-dependencies) for transfer behavior, examples, validation rules, and bundle limits.
 
 Array-form `run` is accepted for legacy compatibility, but new workflows should use string `run`. Use `action: exec` when a command must run as direct argv without shell parsing.
 
@@ -939,6 +943,7 @@ Accepted built-in action names:
 | `state.get`, `state.set`, `state.delete`, `state.list`, `state.diff` | Persistent JSON state across DAG runs. See [Persistent State](/writing-workflows/persistent-state). |
 | `template.render` | Template rendering. |
 | `wait.duration`, `wait.file`, `wait.http`, `wait.until` | Wait and polling actions. |
+| `xlsx.read`, `xlsx.info`, `xlsx.list_sheets`, `xlsx.write`, `xlsx.append`, `xlsx.update_rows`, `xlsx.validate`, `xlsx.write_cells`, `xlsx.sheet`, `xlsx.convert`, `xlsx.extract` | Read, write, validate, convert, and extract fields from `.xlsx` workbooks. See [XLSX](/step-types/xlsx). |
 
 DuckDB is provided as the official [`duckdb@v1` action](/step-types/sql/duckdb), not as a built-in SQL action.
 
@@ -1033,11 +1038,10 @@ When a completion unblocks a step or no manual steps remain waiting, Dagu enqueu
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `parallel.items` | array | Static items to fan out. |
-| `parallel.variable` | string | Variable name whose value is expanded at runtime. |
+| `parallel.items` | array or string | Items to fan out: a static list, or a reference such as `${env.ITEMS}` whose value expands to a list at runtime. |
 | `parallel.max_concurrent` | integer | Maximum concurrent child runs, from `1` to `1000`. Defaults to `defaults.max_concurrent`, or `10`. |
 
-`parallel` is valid only with `action: dag.run` or `action: dag.enqueue`, and it requires `items` or `variable`.
+`parallel` is valid only with `action: dag.run` or `action: dag.enqueue`, and it requires `items`.
 
 ```yaml
 steps:
@@ -1051,6 +1055,39 @@ steps:
 ```
 
 Inside each parallel child run, `ITEM` is set to the current item.
+
+### Foreach
+
+`foreach` runs an inline list of body steps once per item, without a child DAG. A step with `foreach` cannot also set `run`, `action`, or `parallel`.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `foreach.items` | array or string | Required. A static list, or a reference that resolves to a JSON array. |
+| `foreach.steps` | array | Required. Body steps run for each item. |
+| `foreach.as` | string | Name of the current item in the `foreach` namespace. Defaults to `item`; cannot be `index` or `key`. |
+| `foreach.key` | string | Expression that produces a stable key for each item. Defaults to the item index. |
+| `foreach.max_concurrent` | integer | Maximum item bodies running at once, from `1` to `1000`. Defaults to `defaults.max_concurrent`, or `10`. |
+| `foreach.collect` | object | Output names mapped to expressions copied from each successful item body into the aggregate. |
+
+Body steps read `${foreach.item}` (or `${foreach.<as>}`), `${foreach.index}`, and `${foreach.key}`.
+
+```yaml
+steps:
+  - id: per_region
+    foreach:
+      items: [us, eu, ap]
+      max_concurrent: 2
+      steps:
+        - id: check
+          run: printf 'status=ok-%s\n' "${foreach.item}" >> "$DAGU_OUTPUT_FILE"
+          outputs:
+            - name: status
+      collect:
+        status: ${steps.check.outputs.status}
+    output: REGION_STATUS
+```
+
+`REGION_STATUS` holds a JSON aggregate with `summary`, per-item `items`, and the collected `outputs` of successful items.
 
 ### Output
 
@@ -1371,10 +1408,6 @@ preconditions:
   - eval: "$(date +%u)"
     expected: "re:[1-5]"
 
-
-tools:
-  - astral-sh/uv@0.11.14
-
 steps:
   - id: validate_environment
     run: ./scripts/validate.sh
@@ -1382,7 +1415,7 @@ steps:
   - id: extract_data
     run:
       - mkdir -p /data/raw
-      - uv run --python 3.13.9 python extract.py --date="${params.DATE}" --output "/data/raw/${params.DATE}.json"
+      - python extract.py --date="${params.DATE}" --output "/data/raw/${params.DATE}.json"
       - printf 'raw_data_path=%s\n' "/data/raw/${params.DATE}.json" >> "$DAGU_OUTPUT_FILE"
     outputs:
       - name: raw_data_path
@@ -1410,7 +1443,7 @@ steps:
     depends: transform_data
 
   - id: validate_results
-    run: uv run --python 3.13.9 python validate_results.py --date="${params.DATE}"
+    run: python validate_results.py --date="${params.DATE}"
     mail_on_error: true
     depends: load_data
 
@@ -1447,16 +1480,14 @@ container:
   image: python:3.11-slim
   volumes:
     - ./scripts:/scripts:ro
-tools:
-  - astral-sh/uv@0.11.14
 steps:
   - id: transform
-    run: uv run --python 3.13.9 python /scripts/transform.py --type="${params.type}" --input="${params.input}"
+    run: python /scripts/transform.py --type="${params.type}" --input="${params.input}"
 ```
 
 ## Common Accuracy Gotchas
 
-- Top-level `resources` is not accepted by the current YAML parser.
+- Top-level `resources` sets run-wide CPU and memory limits. Kubernetes pod resources belong under `kubernetes.resources`.
 - Step IDs cannot contain hyphens. Use underscores.
 - `max_active_steps` defaults to `0`, which means unlimited step concurrency inside one DAG run.
 - `mail.send` uses `message`, not `body`. With `mailbox`, it sends through that account in `mail_accounts` instead of `smtp`.

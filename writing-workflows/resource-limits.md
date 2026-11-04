@@ -47,15 +47,15 @@ tools:
 steps:
   - id: quick_check
     run: curl -sf https://example.com/health
-    timeout_sec: 30      # Kills this step after 30s (overrides DAG-level 600s)
+    timeout_sec: 30      # Kills this step after 30s
   - id: long_task
-    run: uv run --python 3.13.9 python long_task.py   # Inherits DAG-level 600s since no step timeout
+    run: uv run --python 3.13.9 python long_task.py   # Bounded only by the DAG-level 600s
 ```
 
 Behavior:
-- A step with `timeout_sec` > 0 gets its own context deadline; it overrides the DAG-level timeout for that step.
+- A step with `timeout_sec` > 0 gets its own context deadline. It can only shorten the time the step may run; the DAG-level timeout still applies.
 - If the timeout is reached, the step is terminated and marked failed with exit code `124` (standard timeout code).
-- DAG-level `timeout_sec` enforces a ceiling on total runtime; steps without their own `timeout_sec` respect this.
+- DAG-level `timeout_sec` enforces a ceiling on total runtime for every step, including steps with a longer `timeout_sec`.
 - Use step timeouts for unreliable external calls or long-running operations to fail fast while letting other steps continue.
 
 Validation rules:

@@ -25,7 +25,7 @@ Runtime profiles support inherited default layers. These layers are resolved aut
 | --- | --- | --- |
 | Global defaults | Every DAG run | Installation-wide fallback variables and secrets |
 | Workspace defaults | DAGs with `labels: [workspace=<name>]` | Team- or environment-specific fallback values |
-| Selected profile | Runs started with `--profile`, `profileName`, the Web UI selector, or an allowlisted webhook header | Explicit runtime environment chosen for that run |
+| Selected profile | Runs started with `--profile`, the REST API `profile` field, the Web UI selector, or an allowlisted webhook header | Explicit runtime environment chosen for that run |
 
 Resolution order is:
 
@@ -34,6 +34,8 @@ Global defaults < Workspace defaults < Selected profile
 ```
 
 If more than one layer defines the same key, the later layer overrides the earlier one. Defaults are best for shared baseline values such as `REGION`, `HTTP_PROXY`, or common credentials. Selected profiles are best when the operator needs to choose between environments such as `dev`, `staging`, and `prod`.
+
+When a run does not select a profile, Dagu uses the DAG's default profile from its server-side DAG settings (`/dags/{fileName}/settings`). If the DAG has none, Dagu uses the default profile of the DAG's workspace. Without either, the run has no selected profile.
 
 A workspace default applies only when the DAG has a workspace label:
 
@@ -91,7 +93,7 @@ dagu enqueue etl.yaml --profile prod -- DATE=2026-06-01
 dagu dry etl.yaml --profile prod
 ```
 
-Remote CLI `start` and `enqueue` reject `--profile`. To start a remote run with a profile, use the Web UI profile selector or send `profileName` through the REST API:
+Remote CLI `start` and `enqueue` reject `--profile`. To start a remote run with a profile, use the Web UI profile selector or send `profile` through the REST API:
 
 ![Start DAG dialog showing the runtime profile selector](/runtime-profile-start-dialog.png)
 
@@ -100,11 +102,11 @@ curl -X POST "http://localhost:8080/api/v1/dags/etl.yaml/start" \
   -H "Content-Type: application/json" \
   -d '{
         "params": "{\"DATE\":\"2026-06-01\"}",
-        "profileName": "prod"
+        "profile": "prod"
       }'
 ```
 
-The same `profileName` field is accepted by start, synchronous start, enqueue, and inline DAG-run execution endpoints.
+The same `profile` field is accepted by start, synchronous start, enqueue, and inline DAG-run execution endpoints. Omit it to use the DAG's default profile, or send an empty string to run without a profile.
 
 ### Webhook Runs
 
@@ -154,7 +156,13 @@ When a run starts, Dagu:
 
 Secret entry plaintext is write-only. API and UI responses show secret entry metadata, not the secret value.
 
-Default profile entries are fallback values. A selected profile overrides default layers for matching keys. Step-level `env:` can still override variables for a single step. Profile secrets are treated as secrets, so they participate in secret masking. Avoid reusing the same key across DAG `env:`, DAG `secrets:`, default layers, and selected profiles unless the override behavior is intentional.
+Default profile entries are fallback values. A selected profile overrides default layers for matching keys. It also overrides a same-named DAG `env:` value, while a DAG `secrets:` entry overrides every profile layer:
+
+```text
+Global defaults < Workspace defaults < DAG env: < Selected profile < DAG secrets:
+```
+
+Step-level `env:` can still override variables for a single step. Profile secrets are treated as secrets, so they participate in secret masking. Avoid reusing the same key across DAG `env:`, DAG `secrets:`, default layers, and selected profiles unless the override behavior is intentional.
 
 ### Distributed Runs
 

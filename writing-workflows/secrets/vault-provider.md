@@ -53,7 +53,7 @@ secrets:
       vault_client_key: /etc/dagu/certs/alt-vault-client.key
 ```
 
-If no Dagu Vault address is configured, the resolver uses the HashiCorp Vault API client's default address, `https://127.0.0.1:8200`. If no Dagu Vault token is configured, Dagu creates the client without a token.
+If no Dagu Vault address is configured, the resolver uses the HashiCorp Vault API client's default address, `https://127.0.0.1:8200`. If no Dagu Vault token is configured, Dagu creates the client without a token. The standard `VAULT_ADDR` and `VAULT_TOKEN` environment variables are not read; use the Dagu settings above or per-secret options instead.
 
 `vault_address`, `vault_token`, `vault_ca_cert`, `vault_client_cert`, `vault_client_key`, and `field` option values are literal strings. They are not expanded through DAG variables or dotenv values.
 
