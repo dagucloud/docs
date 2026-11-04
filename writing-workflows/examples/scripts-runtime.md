@@ -1,6 +1,6 @@
 # Scripts & Runtime Examples
 
-Examples for shell scripts, Python scripts, working directories, shell selection, and reproducible runtimes.
+Examples for shell scripts, sandboxed JavaScript, Python scripts, working directories, shell selection, and reproducible runtimes.
 
 <div class="examples-grid">
 
@@ -27,6 +27,131 @@ flowchart LR
 ```
 
 <a href="/writing-workflows/basics#scripts" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### JavaScript Scripts
+
+```yaml
+params:
+  - name: TOTAL
+    default: "1000"
+
+steps:
+  - id: batches
+    action: js.run
+    with:
+      input:
+        total: ${params.TOTAL}
+        size: 300
+      script: |
+        const total = Number(input.total);
+        const batches = [];
+        for (let start = 0; start < total; start += input.size) {
+          batches.push({ start, end: Math.min(start + input.size, total) });
+        }
+        return batches;
+    output: BATCHES
+
+  - id: export
+    depends: [batches]
+    foreach:
+      items: ${BATCHES}
+      max_concurrent: 2
+      steps:
+        - id: copy
+          run: ./export.sh --from ${foreach.item.start} --to ${foreach.item.end}
+```
+
+Runs in Dagu's embedded JavaScript sandbox, so the DAG works on any host or worker without Node.js, Python, or a `tools:` entry. Syntax errors fail `dagu validate` before a run starts.
+
+```mermaid
+flowchart LR
+    B["js.run · batches"] --> E["foreach · ./export.sh"]
+    style B stroke:lightblue,stroke-width:1.6px,color:#333
+    style E stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/js" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Reshape Command Output
+
+```yaml
+steps:
+  - id: pods
+    run: kubectl get pods -o json
+
+  - id: unhealthy
+    depends: [pods]
+    action: js.run
+    with:
+      input_file: ${pods.stdout}
+      script: |
+        return input.items
+          .filter((pod) => !pod.status.containerStatuses?.every((c) => c.ready))
+          .map((pod) => ({
+            name: pod.metadata.name,
+            phase: pod.status.phase,
+            restarts: (pod.status.containerStatuses ?? [])
+              .reduce((sum, c) => sum + c.restartCount, 0),
+          }));
+    output: UNHEALTHY
+```
+
+The CLI emits JSON and `js.run` filters and reshapes it. `input_file` reads the full stdout log, so large output does not pass through a variable.
+
+```mermaid
+flowchart LR
+    P["pods · kubectl get pods -o json"] --> U["js.run · unhealthy"]
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style U stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/js#input-from-earlier-steps" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Parse Text Logs
+
+```yaml
+steps:
+  - id: error_counts
+    action: js.run
+    with:
+      input_file: /var/log/app.log
+      format: text
+      script: |
+        const codes = [...input.matchAll(/level=error .*code=(\w+)/g)].map((m) => m[1]);
+        const by_code = {};
+        for (const code of codes) by_code[code] = (by_code[code] ?? 0) + 1;
+        return { total: codes.length, by_code };
+    output: ERRORS
+
+  - id: report
+    depends: [error_counts]
+    run: echo "${error_counts.output.total} errors, ${error_counts.output.by_code.E_TIMEOUT} timeouts"
+```
+
+`format: text` binds the file as a string. One script replaces a `grep | awk | sort | uniq -c` pipeline, and later steps address the returned fields by path.
+
+```mermaid
+flowchart LR
+    L["app.log"] --> C["js.run · error_counts"]
+    C --> R["report"]
+    style L stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/js#configuration" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -77,7 +202,7 @@ steps:
       shell: uv run --python 3.13.9 python
 ```
 
-Execute script with specific interpreter.
+Execute script with specific interpreter. Use Python when the script needs its libraries. For data transforms, `js.run` needs no interpreter.
 
 ```mermaid
 flowchart LR
