@@ -33,10 +33,22 @@ Times show in your browser's time zone; day totals are by UTC day. On a Team or 
 
 Each server's page has these tabs:
 
-- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services from the last report; open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
+- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services and queues from the last report; open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
 - **Runs**: the server's runs.
 - **Workflows**: each workflow's finished runs per UTC day over the last 14 days as bars, with runs, failures, success rate, and average and longest duration. **Failing** marks a workflow with an open alert, and **Muted** a [muted](/overview/console-monitoring-alerts#mute-a-workflow) one.
 - **Settings**, for owners: **Name**, [Dagu URL](#dagu-url), [Alert rules](/overview/console-monitoring-alerts#alert-rules), **Delete reports**, and **Disconnect server**.
+
+### Machine and Queues
+
+Each **Machine** chart draws a dashed line, named **Alerts at** a percent, where its figure alerts: the [alert rules](/overview/console-monitoring-alerts#alert-rules) of the server over the workspace's. A figure whose alerts are off has no line, so CPU has none by default. **Disk almost full** shows when the data directory's disk is at its alert's percent or over. When the server runs in a container with limits, the CPU card names the CPUs the container may use, and memory reads as part of the container's limit.
+
+**Queues** lists each queue with runs: how many are queued, how many are running, of how many it may run at once, and its status:
+
+| Status | Meaning |
+| --- | --- |
+| **Waiting for a worker** | Its next run waits for a worker. Hovering it says why. |
+| **Stalled** | Its next run has waited as long as the server's [queue alerts](/overview/console-monitoring-alerts#queue-stalled-alerts) allow, though the queue has room. |
+| No status | The queue moves, or its runs fill it and wait their turn. |
 
 ### Dagu URL
 
@@ -59,7 +71,7 @@ With the server's [remote access](/overview/cloud-remote-access#act-on-runs-from
 
 ![Open alerts: a server that stopped reporting, a muted workflow's failure, and a failing workflow with when each was emailed](/monitoring/alerts-light.png)
 
-**Open** and **Resolved** alerts, filtered by server. Selecting one opens its page, with why it failed, its timeline, and **Acknowledge**; see [Acknowledge an Alert](/overview/console-monitoring-alerts#acknowledge-an-alert). A workflow's alert shows the workflow, the server, when it opened, the last failure, the number of failures, the last run, and the failed steps. A [run running too long](/overview/console-monitoring-alerts#running-too-long-alerts) shows the limit it passed, the workflow's usual time, and the run. A server's [stopped-reporting alert](/overview/console-monitoring-alerts#stopped-reporting-alerts) shows how long the server has been silent, or was, and its [scheduler alert](/overview/console-monitoring-alerts#scheduler-alerts) since when its scheduler is down and why. Once either resolves, it names the workflows that did not run on schedule meanwhile.
+**Open** and **Resolved** alerts, filtered by server. Selecting one opens its page, with why it failed, its timeline, and **Acknowledge**; see [Acknowledge an Alert](/overview/console-monitoring-alerts#acknowledge-an-alert). A workflow's alert shows the workflow, the server, when it opened, the last failure, the number of failures, the last run, and the failed steps. A [run running too long](/overview/console-monitoring-alerts#running-too-long-alerts) shows the limit it passed, the workflow's usual time, and the run. A server's [stopped-reporting alert](/overview/console-monitoring-alerts#stopped-reporting-alerts) shows how long the server has been silent, or was, and its [scheduler alert](/overview/console-monitoring-alerts#scheduler-alerts) since when its scheduler is down and why. Once either resolves, it names the workflows that did not run on schedule meanwhile. A [disk alert](/overview/console-monitoring-alerts#disk-almost-full-alerts) shows which disk filled up, how full, and the percent it crossed; a [memory](/overview/console-monitoring-alerts#memory-high-alerts) or [CPU](/overview/console-monitoring-alerts#cpu-high-alerts) alert the use, the percent it crossed, and since when; and a [queue alert](/overview/console-monitoring-alerts#queue-stalled-alerts) the queue, since when its next run waits, its runs, and why.
 
 **Notified** shows when the alert was told of, or [why it was not](/overview/console-monitoring-alerts#notified-column), and how its posts to each destination went.
 
@@ -67,7 +79,7 @@ Owners see **Alert emails**, which opens the [recipients](/overview/console-moni
 
 ## Notifications
 
-For owners. Lists where the workspace's alerts go: the alert emails, and each [chat channel, PagerDuty service, and webhook](/overview/console-monitoring-alerts#chat-pagerduty-and-webhooks) with the products it gets, its status, and **Send test**. Selecting one opens its delivery log. **Add a destination** opens each kind's setup. Destinations are part of paid plans.
+For owners. Lists where the workspace's alerts go: the alert emails, and each [chat channel, PagerDuty service, and webhook](/overview/console-monitoring-alerts#chat-pagerduty-and-webhooks) with the products it gets, its status, and **Send test**. Selecting one opens its delivery log. **Add a destination** opens each kind's setup. Destinations are part of paid plans. **Alert rules** sets the workspace's [alert rules](/overview/console-monitoring-alerts#alert-rules), those of its servers' machines and queues included.
 
 ## Insights
 

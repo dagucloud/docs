@@ -4,7 +4,7 @@ description: When Dagu Console opens and resolves monitoring alerts, who gets th
 
 # Monitoring Alerts and Email
 
-Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a server's [disk is almost full](#disk-almost-full-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
+Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a server's [disk is almost full](#disk-almost-full-alerts), its [memory](#memory-high-alerts) or [CPU](#cpu-high-alerts) use stays high, one of its [queues stalls](#queue-stalled-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
 
 ## Workflow Alerts
 
@@ -35,12 +35,40 @@ On a Team or Pro plan, a server whose scheduler is down for 5 minutes opens an a
 
 ## Disk Almost Full Alerts
 
-On a Team or Pro plan, a server whose data directory's disk is 90% full or more opens an alert, since runs, logs, and queues stop when it fills up. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
+On a Team or Pro plan, a server whose disk is 90% full or more, or the percent its [alert rules](#alert-rules) set, from 50 to 99, opens an alert. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
 
-- The disk is the one that holds the server's data directory, as the server measures it.
-- It resolves once the disk is below 85%, so a disk near 90% alerts once rather than again and again. The email or post says how much of the disk is in use.
-- To stop them for one server, a workspace owner sets **Disk almost full** to **Off** in the server's [alert rules](#alert-rules). Turning it off closes an open one without an email.
+- The disk is the one that holds the server's data directory, where runs, logs, and queues stop when it fills up. A Dagu release after v2.25.4 also sends the disk that holds the log directory, when that is another disk, and how many of each disk's inodes are in use. The fullest of these counts: a disk whose inodes run out can make no new file even with bytes to spare.
+- The email or post says which disk filled up, and how full it is, by bytes or by inodes.
+- It resolves once that disk is 5 points under the percent, 85% by default, so a disk near the line alerts once rather than again and again.
+- Turning **Disk almost full** off in the [alert rules](#alert-rules) closes an open one without an email.
 - A report without the disk's figures, as from an earlier Dagu or after the workspace stops paying, closes an open one without an email.
+
+## Memory High Alerts
+
+On a Team or Pro plan, a server whose memory use stays at or over 90% for 10 minutes, or the percent and minutes its [alert rules](#alert-rules) set, opens an alert. These alerts need Dagu v2.25.4 or later, at `health` or `runs`.
+
+- The alert opens as of when the use went over the percent. A single report over it opens nothing.
+- Use that drops under the percent starts the wait over.
+- It resolves once use is 5 points under the percent, and the email or post says how much is in use then.
+- In a container with a memory limit, a Dagu release after v2.25.4 measures the container's memory against that limit rather than the host's.
+- Turning **Memory high** off, or a report without memory use, closes an open one without an email.
+
+## CPU High Alerts
+
+On a Team or Pro plan, workspace owners can turn on alerts of a server whose CPU use stays high. They are off by default. Once on, a server whose CPU use stays at or over 90% for 15 minutes, or the percent and minutes the [alert rules](#alert-rules) set, opens an alert, as for [memory](#memory-high-alerts).
+
+- CPU use is the average over the samples since the server's last report, from a Dagu release after v2.25.4, and the latest sample from earlier releases. In a container with a CPU limit, it is measured against that limit.
+- It resolves once use is 5 points under the percent.
+
+## Queue Stalled Alerts
+
+On a Team or Pro plan, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `runs`.
+
+- A queue whose runs fill it is not stalled: its next run waits its turn.
+- A run that waits for a [worker](/server-admin/distributed/) says why: no worker matches its selector, every worker that matches is busy or unhealthy, or runs cannot be sent to workers.
+- A server has one such alert per queue, as of when the queue's next run was queued. The email or post says how many runs the queue held and why its next run waits.
+- It resolves once the queue no longer stalls: its next run starts, its runs fill it, or it holds no more runs.
+- A server whose monitoring is turned off, or set to `health`, or a report that cannot list the queues, closes these alerts without an email. So does turning **Queue stalled** off.
 
 ## Deadline Alerts
 
@@ -74,19 +102,23 @@ On a Team or Pro plan, a run still running well past its workflow's usual time o
 
 ## Alert Rules
 
-On a Team or Pro plan, workspace owners choose when Dagu server workflows alert. Rules apply to new alerts; alerts already open stay until they resolve.
+On a Team or Pro plan, workspace owners choose when Dagu server workflows, and servers' machines and queues, alert. Rules apply to new alerts; alerts already open stay until they resolve. Turning a machine or queue rule off closes its open alerts without an email.
 
 | Rule | Choices | Default |
 | --- | --- | --- |
+| **Memory high** | On or off, the percent, 50 to 99, and for how many minutes, 1 to 1440 | On, at 90% for 10 minutes |
+| **CPU high** | On or off, the percent, 50 to 99, and for how many minutes, 1 to 1440 | Off; at 90% for 15 minutes once on |
+| **Disk almost full** | On or off, and the percent, 50 to 99 | On, at 90% |
+| **Queue stalled** | On or off, and after how many minutes, 1 to 1440 | On, after 10 minutes |
 | **Failed runs** | On or off, and how many failures in a row, 1 to 20 | On, after 1 |
 | **Runs running too long** | The learned limit, a fixed limit of 1 minute to 7 days, or off | The learned limit |
 | **Scheduled runs that do not start** | On or off, and how many minutes late, 1 to 720 | On, after 5 minutes |
 
 Rules are set at three levels, each taking what it leaves empty from the one above:
 
-1. **The workspace**: **Alert rules** on the **Notifications** page sets every rule for all servers' workflows.
-2. **A server**: **Alert rules** on its **Settings** tab sets rules for its workflows. It also sets **Stopped reporting**, on or off on any plan, and after how many minutes, from 10 to 1440, **Scheduler stopped**, and **Disk almost full**.
-3. **A workflow**: **Alert rules** on [its page](/overview/console-monitoring-pages#workflow-pages) sets its own, and its [deadline](#deadline-alerts): **Must succeed by** a time, **On** chosen days.
+1. **The workspace**: **Alert rules** on the **Notifications** page sets every rule for all servers and their workflows.
+2. **A server**: **Alert rules** on its **Settings** tab sets the machine and queue rules for itself and the rules for its workflows. It also sets **Stopped reporting**, on or off on any plan, and after how many minutes, from 10 to 1440, and **Scheduler stopped**.
+3. **A workflow**: **Alert rules** on [its page](/overview/console-monitoring-pages#workflow-pages) sets its own workflow rules, and its [deadline](#deadline-alerts): **Must succeed by** a time, **On** chosen days.
 
 A choice marked **Inherited** shows what the level above sets, and an empty number shows it as a placeholder. Kitewell projects' workflows keep the defaults.
 
@@ -140,13 +172,13 @@ On a Team or Pro plan, a workspace owner adds up to 10 destinations on the **Not
 | **Webhook** | Any `https://` URL on the public internet. The page that adds it shows its signing secret once. | One signed JSON post per alert. |
 
 - A chat post names what failed and where, quotes the end of its error when the server [sends errors](/overview/console-monitoring#error-messages), and has **View run** and, when the server has a [Dagu URL](/overview/console-monitoring-pages#dagu-url), **Open in Dagu**. A pass sends at most 20 alerts to a chat channel or webhook and sums up the rest in one more message.
-- A PagerDuty incident's summary names what failed and the last line of its error. Acknowledging the alert acknowledges the incident. Its details carry the host, the workflow, the run, the failed steps, and the error, with links to the run. A workflow's failure, a missed deadline, and a scheduled run that did not start have severity `error`, a run running too long or a disk almost full `warning`, and a server that stopped reporting or whose scheduler stopped `critical`. Each alert is its own incident, keyed `dagu:<workspace>:<alert>`, so an event sent twice opens no second incident. Every alert of a pass is sent.
+- A PagerDuty incident's summary names what failed and the last line of its error. Acknowledging the alert acknowledges the incident. Its details carry the host, the workflow, the run, the failed steps, and the error, with links to the run. A workflow's failure, a missed deadline, a scheduled run that did not start, and a stalled queue have severity `error`, a run running too long, a disk almost full, and memory or CPU use that stays high `warning`, and a server that stopped reporting or whose scheduler stopped `critical`. Each alert is its own incident, keyed `dagu:<workspace>:<alert>`, so an event sent twice opens no second incident. Every alert of a pass is sent.
 
 ### Which Alerts a Destination Gets
 
 A destination gets every alert of its products until a workspace owner narrows it under **Which alerts** on its page:
 
-- **Kinds of alerts**: failed runs, missed deadlines, runs running too long, scheduled runs that do not start, servers that stopped reporting, stopped schedulers, and disks almost full. Choosing all of them also takes kinds added later.
+- **Kinds of alerts**: failed runs, missed deadlines, runs running too long, scheduled runs that do not start, servers that stopped reporting, stopped schedulers, disks almost full, memory high, CPU high, and stalled queues. Choosing all of them also takes kinds added later.
 - **Dagu servers and workflows**: all of them, or only those chosen. A chosen server includes its workflows. Kitewell alerts are not narrowed by this choice.
 
 The **Notifications** page marks a narrowed destination **Some alerts**. A destination whose chosen servers and workflows are all gone gets no Dagu server alerts until it is changed. Email recipients are not affected.
@@ -202,7 +234,16 @@ A stopped-reporting alert has `rule` `runner_offline` and no run. `errors` is pr
 
 A [running-too-long alert](#running-too-long-alerts) has `rule` `run_too_long` and a `detail` object: `attempt_id`, `started_at`, `limit_ms`, `typical_ms` (the usual time), and `samples` (the timed runs it was measured over). Once resolved, `detail.resolution` is `finished`, `gone` (no longer listed in progress), or `unreported` (the server stopped telling of runs).
 
-A [disk almost full alert](#disk-almost-full-alerts) has `rule` `disk_almost_full` and `detail.disk`: `used_percent`, `used_bytes`, and `total_bytes`, as the disk was when the alert opened, and once resolved, as it was then.
+A [disk almost full alert](#disk-almost-full-alerts) has `rule` `disk_almost_full` and a `detail` object, as the fullest disk was when the alert opened, and once resolved, as it was then:
+
+- `disk`: `used_percent`, `used_bytes`, and `total_bytes`, and `inodes_used_percent` when the disk's filesystem says.
+- `disk_kind`: `data` for the disk that holds the data directory, or `logs` for the one that holds the log directory.
+- `inodes`: `true` when the disk's inodes, rather than its bytes, were the fuller.
+- `threshold`: the percent the disk crossed.
+
+A [memory high](#memory-high-alerts) or [CPU high](#cpu-high-alerts) alert has `rule` `memory_high` or `cpu_high` and a `detail` object: `percent`, the use when it opened, and once resolved, when it resolved; `threshold`, the percent it crossed; and `since`, when the use went over it. `host` names the machine when it is not the server's own, and is left out for the server's own.
+
+A [stalled queue alert](#queue-stalled-alerts) has `rule` `queue_stalled` and a `detail` object, as the queue was when the alert opened: `queue`, its name; `queued` and `running`, its runs; `max_active`, how many may run at once; `waiting_since`, when its next run was queued; and `blocked_reason`, `NoMatchingWorker`, `NoAvailableWorker`, or `WorkerDispatchUnavailable`, when that run waits for a worker.
 
 An alert [resolved by hand](#resolve-an-alert-by-hand) has `detail.resolution` `manual` and `detail.resolved_by`, the email of whoever resolved it.
 
@@ -218,11 +259,11 @@ An alert about a workflow stays open until the workflow does what resolves it, s
 
 - The alert is told of as resolved, by email, in chat, and to webhooks, naming who resolved it, and a [PagerDuty](#chat-pagerduty-and-webhooks) incident of the alert is resolved.
 - The workflow's next failure, missed deadline, or missed schedule opens a new alert. A run running too long is not alerted of again after its alert is resolved by hand; another run of the workflow is.
-- An alert that a server or computer stopped reporting, or that a server's scheduler stopped, has no **Resolve**: it resolves when the server or computer reports again, or when its scheduler runs.
+- An alert that a server or computer stopped reporting, that a server's scheduler stopped, or about a server's disk, memory, CPU, or queue, has no **Resolve**: it resolves when the server or computer reports again, its scheduler runs, or its figures or queue are back to normal.
 
 ### Reminders
 
-On the **Notifications** page, a workspace owner sets **Reminders** to **Every hour**, **Every 4 hours**, or **Every day**. An open alert no one acknowledged is then posted again to its chat destinations and webhooks at that interval, up to 6 times, saying it is still failing, still without a success, still running long, still not running on schedule, still not reporting, or its scheduler is still stopped, with a link to its page. A webhook gets it as an `alert.reminder` event. PagerDuty is not reminded, since it escalates on its own. Reminders are part of paid plans.
+On the **Notifications** page, a workspace owner sets **Reminders** to **Every hour**, **Every 4 hours**, or **Every day**. An open alert no one acknowledged is then posted again to its chat destinations and webhooks at that interval, up to 6 times, saying it is still failing, still without a success, still running long, still not running on schedule, still not reporting, its scheduler is still stopped, its disk is still almost full, its memory or CPU use is still high, or its queue is still stalled, with a link to its page. A webhook gets it as an `alert.reminder` event. PagerDuty is not reminded, since it escalates on its own. Reminders are part of paid plans.
 
 Acknowledging an alert stops its reminders. To pause them without acknowledging, any member selects **Snooze reminders** on the alert's page for 1 hour, 4 hours, 1 day, or until 9:00 in the workspace's [time zone](#who-gets-alert-emails); **Resume reminders** ends the snooze early. Reminders and snoozes appear on the alert's **Timeline**. A muted workflow's alerts are not reminded of.
 
