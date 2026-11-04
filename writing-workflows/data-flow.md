@@ -185,6 +185,35 @@ steps:
 
 Those three names are readable as strict references such as `${steps.classify.outputs.answers}`. Reaching a field inside an answer needs the `${classify.output....}` path form shown above.
 
+### Transforming Outputs
+
+Pass a JSON output to [`js.run`](/step-types/js) to filter, reshape, or compute from it. The script runs in an embedded sandbox, so no interpreter or `tools:` entry is needed, and the returned value becomes the step's stdout.
+
+```yaml
+steps:
+  - id: services
+    run: |
+      cat >> "$DAGU_OUTPUT_FILE" <<'EOF'
+      services<<JSON
+      [{"name":"api","replicas":3},{"name":"worker","replicas":0}]
+      JSON
+      EOF
+    outputs:
+      - name: services
+        type: json
+
+  - id: scaled_down
+    depends: services
+    action: js.run
+    with:
+      input: ${steps.services.outputs.services}
+      script: |
+        return input.filter((service) => service.replicas === 0).map((service) => service.name);
+    output: SCALED_DOWN
+```
+
+`SCALED_DOWN` holds `["worker"]` as JSON.
+
 ## Files
 
 Use files when the data is large or when another process expects a file path.
@@ -343,4 +372,5 @@ steps:
 - [Parameters](/writing-workflows/parameters)
 - [Artifacts](/writing-workflows/artifacts)
 - [Shell](/step-types/shell)
+- [JavaScript](/step-types/js)
 - [Template Variables](/writing-workflows/template-variables)

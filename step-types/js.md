@@ -249,4 +249,4 @@ steps:
 
 ## Need Real Node.js?
 
-Use the `node-script@v1` action when a script needs npm packages, network access, or the Node.js standard library. It runs on the host's Node.js installation.
+Use the [`node-script@v1`](/dagu-actions/official/node-script) action when a script needs Node.js modules, network access, the filesystem, or environment variables. It runs on a Node.js runtime that the action installs.

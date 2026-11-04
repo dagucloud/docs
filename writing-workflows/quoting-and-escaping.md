@@ -141,6 +141,31 @@ Escaping for Dagu and escaping for a later runtime are separate concerns:
   `\${params.name}`. Plain, YAML single-quoted, and block scalars preserve the
   backslash as written.
 
+## Scripts That Need No Escaping
+
+[`js.run`](/step-types/js) passes `with.script` to its sandbox as written.
+Dagu does not resolve references there and no shell parses it, so JavaScript
+template literals and `$` need no escaping. Workflow values enter through
+`with.input`, which Dagu resolves as usual.
+
+```yaml
+params:
+  - name: name
+    default: world
+
+steps:
+  - id: greet
+    action: js.run
+    with:
+      input:
+        name: ${params.name}
+      script: |
+        const price = "$5";
+        return `Hello, ${input.name}. Tickets cost ${price}.`;
+```
+
+The step prints `Hello, world. Tickets cost $5.`
+
 ## Backslashes in Path Fields
 
 In a field that holds a filesystem path, a backslash is part of the path and
@@ -231,6 +256,7 @@ Assuming `FOO=bar`:
 | `run: printf '%s\n' '${FOO}'` | Nobody; shell single quotes preserve it | `${FOO}` |
 | `run: printf '%s\n' '${env.FOO}'` | Dagu, before the shell runs | `bar` |
 | `run: printf '%s\n' '\${env.FOO}'` | Nobody; the backslash escapes Dagu and the quotes protect it from the shell | `${env.FOO}` |
+| `js.run` with `script: 'return "${env.FOO}";'` | Nobody; Dagu does not resolve `js.run` scripts | `${env.FOO}` |
 
 ## Related Pages
 

@@ -1,6 +1,8 @@
 # Python (`python-script@v1`)
 
-Run a small Python transform or glue step with action-owned Python and optional requirements.
+Run Python that needs packages, network access, the filesystem, or environment variables, with action-owned Python and optional requirements.
+
+For data transforms that need none of these, use the built-in [`js.run`](/step-types/js) step. It runs in an embedded sandbox and needs no Python download.
 
 - Repository: [`dagucloud/python-script`](https://github.com/dagucloud/python-script)
 - Runtime owned by the action: `astral-sh/uv@0.11.14` through action `tools`; default Python `3.13.9`

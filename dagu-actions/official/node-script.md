@@ -1,6 +1,8 @@
 # JavaScript (`node-script@v1`)
 
-Run a small JavaScript transform or glue step with action-owned Node.js.
+Run JavaScript that needs Node.js modules, network access, the filesystem, or environment variables, with action-owned Node.js.
+
+For data transforms that need none of these, use the built-in [`js.run`](/step-types/js) step. It runs in an embedded sandbox and needs no Node.js download.
 
 - Repository: [`dagucloud/node-script`](https://github.com/dagucloud/node-script)
 - Runtime owned by the action: `nodejs/node@v22.21.1` through action `tools`
