@@ -123,6 +123,7 @@ Sent at `health`, `runs`, and `errors`:
 - Which services run: the number of schedulers holding the scheduler lock, and the number of registered coordinators
 - The scheduler's last tick, and whether it is paused
 - The [remote access](/overview/cloud-remote-access) level, and whether remote approvals are on
+- On a paid plan or trial, with Dagu v2.25.4 or later, how busy the server's machine is, from the latest sample Dagu takes every `monitoring.interval` (5 seconds by default): CPU use and the number of CPUs, the 1, 5, and 15 minute load averages, memory use, and the use of the disk that holds the data directory, in percent and bytes. A server on free monitoring sends none of it.
 
 ### Run status
 

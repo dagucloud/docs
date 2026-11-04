@@ -4,7 +4,7 @@ description: When Dagu Console opens and resolves monitoring alerts, who gets th
 
 # Monitoring Alerts and Email
 
-Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
+Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a server's [disk is almost full](#disk-almost-full-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
 
 ## Workflow Alerts
 
@@ -32,6 +32,15 @@ On a Team or Pro plan, a server whose scheduler is down for 5 minutes opens an a
 - Only a server that has reported a running scheduler before is watched, so a server that never runs one, such as one whose runs start on [temporary workers](/overview/deployment-models#temporary-workers), opens none.
 - It resolves when a scheduler runs again. The email or post that says so names the workflows that did not run on schedule meanwhile.
 - To stop them for one server, a workspace owner clears **Alert when its scheduler stops** in the server's [alert rules](#alert-rules). Turning it off closes an open one without an email.
+
+## Disk Almost Full Alerts
+
+On a Team or Pro plan, a server whose data directory's disk is 90% full or more opens an alert, since runs, logs, and queues stop when it fills up. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
+
+- The disk is the one that holds the server's data directory, as the server measures it.
+- It resolves once the disk is below 85%, so a disk near 90% alerts once rather than again and again. The email or post says how much of the disk is in use.
+- To stop them for one server, a workspace owner sets **Disk almost full** to **Off** in the server's [alert rules](#alert-rules). Turning it off closes an open one without an email.
+- A report without the disk's figures, as from an earlier Dagu or after the workspace stops paying, closes an open one without an email.
 
 ## Deadline Alerts
 
@@ -76,7 +85,7 @@ On a Team or Pro plan, workspace owners choose when Dagu server workflows alert.
 Rules are set at three levels, each taking what it leaves empty from the one above:
 
 1. **The workspace**: **Alert rules** on the **Notifications** page sets every rule for all servers' workflows.
-2. **A server**: **Alert rules** on its **Settings** tab sets rules for its workflows. It also sets **Stopped reporting**, on or off on any plan, and after how many minutes, from 10 to 1440, and **Scheduler stopped**.
+2. **A server**: **Alert rules** on its **Settings** tab sets rules for its workflows. It also sets **Stopped reporting**, on or off on any plan, and after how many minutes, from 10 to 1440, **Scheduler stopped**, and **Disk almost full**.
 3. **A workflow**: **Alert rules** on [its page](/overview/console-monitoring-pages#workflow-pages) sets its own, and its [deadline](#deadline-alerts): **Must succeed by** a time, **On** chosen days.
 
 A choice marked **Inherited** shows what the level above sets, and an empty number shows it as a placeholder. Kitewell projects' workflows keep the defaults.
@@ -131,13 +140,13 @@ On a Team or Pro plan, a workspace owner adds up to 10 destinations on the **Not
 | **Webhook** | Any `https://` URL on the public internet. The page that adds it shows its signing secret once. | One signed JSON post per alert. |
 
 - A chat post names what failed and where, quotes the end of its error when the server [sends errors](/overview/console-monitoring#error-messages), and has **View run** and, when the server has a [Dagu URL](/overview/console-monitoring-pages#dagu-url), **Open in Dagu**. A pass sends at most 20 alerts to a chat channel or webhook and sums up the rest in one more message.
-- A PagerDuty incident's summary names what failed and the last line of its error. Acknowledging the alert acknowledges the incident. Its details carry the host, the workflow, the run, the failed steps, and the error, with links to the run. A workflow's failure, a missed deadline, and a scheduled run that did not start have severity `error`, a run running too long `warning`, and a server that stopped reporting or whose scheduler stopped `critical`. Each alert is its own incident, keyed `dagu:<workspace>:<alert>`, so an event sent twice opens no second incident. Every alert of a pass is sent.
+- A PagerDuty incident's summary names what failed and the last line of its error. Acknowledging the alert acknowledges the incident. Its details carry the host, the workflow, the run, the failed steps, and the error, with links to the run. A workflow's failure, a missed deadline, and a scheduled run that did not start have severity `error`, a run running too long or a disk almost full `warning`, and a server that stopped reporting or whose scheduler stopped `critical`. Each alert is its own incident, keyed `dagu:<workspace>:<alert>`, so an event sent twice opens no second incident. Every alert of a pass is sent.
 
 ### Which Alerts a Destination Gets
 
 A destination gets every alert of its products until a workspace owner narrows it under **Which alerts** on its page:
 
-- **Kinds of alerts**: failed runs, missed deadlines, runs running too long, scheduled runs that do not start, servers that stopped reporting, and stopped schedulers. Choosing all of them also takes kinds added later.
+- **Kinds of alerts**: failed runs, missed deadlines, runs running too long, scheduled runs that do not start, servers that stopped reporting, stopped schedulers, and disks almost full. Choosing all of them also takes kinds added later.
 - **Dagu servers and workflows**: all of them, or only those chosen. A chosen server includes its workflows. Kitewell alerts are not narrowed by this choice.
 
 The **Notifications** page marks a narrowed destination **Some alerts**. A destination whose chosen servers and workflows are all gone gets no Dagu server alerts until it is changed. Email recipients are not affected.
@@ -192,6 +201,8 @@ A webhook post carries these headers:
 A stopped-reporting alert has `rule` `runner_offline` and no run. `errors` is present only when the server sends errors.
 
 A [running-too-long alert](#running-too-long-alerts) has `rule` `run_too_long` and a `detail` object: `attempt_id`, `started_at`, `limit_ms`, `typical_ms` (the usual time), and `samples` (the timed runs it was measured over). Once resolved, `detail.resolution` is `finished`, `gone` (no longer listed in progress), or `unreported` (the server stopped telling of runs).
+
+A [disk almost full alert](#disk-almost-full-alerts) has `rule` `disk_almost_full` and `detail.disk`: `used_percent`, `used_bytes`, and `total_bytes`, as the disk was when the alert opened, and once resolved, as it was then.
 
 An alert [resolved by hand](#resolve-an-alert-by-hand) has `detail.resolution` `manual` and `detail.resolved_by`, the email of whoever resolved it.
 

@@ -9,7 +9,7 @@ The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar ho
 ## Overview
 
 - **Failed today (UTC)**, **Open alerts**, **In progress**, and **Success (7 UTC days)** with each day's runs.
-- **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Failing workflows, Events lost, Monitoring off, and, for owners, Over capacity. Then the open alerts, the runs of Dagu servers waiting for a person, and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
+- **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Disk almost full, Failing workflows, Events lost, Monitoring off, and, for owners, Over capacity. Then the open alerts, the runs of Dagu servers waiting for a person, and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
 - **In progress**: the runs queued, running, or waiting, latest first; a run waiting for someone stands out.
 - **Instances**: Dagu servers, then Kitewell computers, each by name, those with a problem first.
 
@@ -19,7 +19,7 @@ Times show in your browser's time zone; day totals are by UTC day. On a Team or 
 
 ## Instances
 
-**Dagu servers** lists each server with its status, Dagu version, last report, failures today (UTC), success rate over 7 UTC days, and open alerts. When Kitewell computers reported in the last 14 days, **Kitewell computers** lists them after the servers.
+**Dagu servers** lists each server with its status, Dagu version, last report, failures today (UTC), success rate over 7 UTC days, and open alerts. On a paid plan or trial, **Machine** shows each reporting server's CPU, memory, and disk use from its last report, and **Disk almost full** when its data directory's disk is 90% full or more. When Kitewell computers reported in the last 14 days, **Kitewell computers** lists them after the servers.
 
 | Status | Meaning |
 | --- | --- |
@@ -33,7 +33,7 @@ Times show in your browser's time zone; day totals are by UTC day. On a Team or 
 
 Each server's page has these tabs:
 
-- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; the services from the last report; open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
+- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services from the last report; open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
 - **Runs**: the server's runs.
 - **Workflows**: each workflow's finished runs per UTC day over the last 14 days as bars, with runs, failures, success rate, and average and longest duration. **Failing** marks a workflow with an open alert, and **Muted** a [muted](/overview/console-monitoring-alerts#mute-a-workflow) one.
 - **Settings**, for owners: **Name**, [Dagu URL](#dagu-url), [Alert rules](/overview/console-monitoring-alerts#alert-rules), **Delete reports**, and **Disconnect server**.
