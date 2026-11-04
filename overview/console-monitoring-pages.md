@@ -36,7 +36,7 @@ Each server's page has these tabs:
 - **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; the services from the last report; open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
 - **Runs**: the server's runs.
 - **Workflows**: each workflow's finished runs per UTC day over the last 14 days as bars, with runs, failures, success rate, and average and longest duration. **Failing** marks a workflow with an open alert, and **Muted** a [muted](/overview/console-monitoring-alerts#mute-a-workflow) one.
-- **Settings**, for owners: **Name**, [Dagu URL](#dagu-url), **Alerts**, **Delete reports**, and **Disconnect server**.
+- **Settings**, for owners: **Name**, [Dagu URL](#dagu-url), [Alert rules](/overview/console-monitoring-alerts#alert-rules), **Delete reports**, and **Disconnect server**.
 
 ### Dagu URL
 

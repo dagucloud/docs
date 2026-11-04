@@ -20,7 +20,7 @@ Stopped-reporting alerts need `health` or `runs`.
 
 A server that sends no report for 10 minutes, or 25 minutes on [free monitoring](/overview/console-monitoring#free-and-paid), opens an alert, and its [recipients](#who-gets-alert-emails) are emailed. A server's [alert rules](#alert-rules) can wait longer, up to 24 hours. Its next report resolves the alert, and that email says how long the server was silent.
 
-- Every server that has reported is watched. To stop watching one, a workspace owner opens its **Settings** tab, clears **Alert when this server stops reporting** under **Alerts**, and selects **Save changes**. Turning it off closes an open alert without an email.
+- Every server that has reported is watched. To stop watching one, a workspace owner opens its **Settings** tab, sets **Stopped reporting** to **Off** under **Alert rules**, and selects **Save changes**. This choice is on every plan, free monitoring included. Turning it off closes an open alert without an email.
 - A server whose monitoring is turned off opens no alert. Turning monitoring off sends one last report that says so: the server shows **Monitoring off**, and an open stopped-reporting alert closes without an email.
 - When many servers stop reporting at the same moment, Dagu Console takes the problem to be on its own side and opens no alerts for them.
 
@@ -76,7 +76,7 @@ On a Team or Pro plan, workspace owners choose when Dagu server workflows alert.
 Rules are set at three levels, each taking what it leaves empty from the one above:
 
 1. **The workspace**: **Alert rules** on the **Notifications** page sets every rule for all servers' workflows.
-2. **A server**: **Alert rules** on its **Settings** tab sets rules for its workflows. It also sets **Alert when its scheduler stops** and **Stopped reporting after, in minutes**, from 10 to 1440.
+2. **A server**: **Alert rules** on its **Settings** tab sets rules for its workflows. It also sets **Stopped reporting**, on or off on any plan, and after how many minutes, from 10 to 1440, and **Scheduler stopped**.
 3. **A workflow**: **Alert rules** on [its page](/overview/console-monitoring-pages#workflow-pages) sets its own, and its [deadline](#deadline-alerts): **Must succeed by** a time, **On** chosen days.
 
 A choice marked **Inherited** shows what the level above sets, and an empty number shows it as a placeholder. Kitewell projects' workflows keep the defaults.
