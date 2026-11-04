@@ -32,23 +32,15 @@ Cockpit groups runs by date and status:
 | **Done** | Successful or partially successful runs. |
 | **Failed** | Failed, aborted, or rejected runs. |
 
-Each card shows the workflow name, status, elapsed time, and a short parameter preview. Click a card to peek at the run without leaving the board.
+Each card shows the workflow name, status, elapsed time, and a short parameter preview. Click a card to open the run over the board without leaving it.
 
 ## Browsing Older Runs
 
 Cockpit starts with recent days. Scroll down and click **Load older day** to inspect earlier activity. Today's runs update live while the page is open.
 
-## Peeking at a Run
+## Opening a Run
 
-The peek is a side sheet over the board. It shows:
-
-- the workflow description, schedule, and labels
-- the run's status, progress, and error, if any
-- a read-only graph of the workflow with the run's step states
-- recent runs of the workflow; select one to show it in place
-- start, stop, and retry controls for users who can run the workflow
-
-Select **Open run** to open the run on its [workflow page](/overview/web-ui#workflow-page), on the **Artifacts** tab when the run has artifacts. On screens narrower than 768 pixels, a click on a card opens the workflow page directly.
+A click on a card opens the run on its [workflow page](/overview/web-ui#workflow-page) over the board, on the **Artifacts** tab when the run has artifacts. The page has the run's steps, logs, outputs, and run controls. The board stays below, and the browser's Back button or the close button returns to it. **Open workflow** keeps the workflow page as the page. On screens narrower than 768 pixels, a click on a card opens the workflow page directly.
 
 ## Starting a Workflow from Cockpit
 
@@ -67,9 +59,7 @@ Typed parameters in the start dialog render as friendly controls such as text in
 
 | Key | Action |
 | --- | --- |
-| `Escape` | Close the peek. |
-| `Enter` or `f` | Open the run on its workflow page. |
-| `Cmd/Ctrl + Enter` | Open the run on its workflow page in a new tab. |
+| `Escape` | Return to the board, once the workflow page has nothing left to close. |
 | `Cmd/Ctrl + Click` on a card | Open the run on its workflow page in a new tab. |
 
 Shortcuts are ignored while you are typing in an input or textarea.

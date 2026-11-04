@@ -26,6 +26,8 @@ Dagu's UI is organized around a few everyday jobs:
 - **Workflows** for the list of workflows
 - **Workflow page** for editing a workflow and following its runs, logs, outputs, artifacts, approvals, and human tasks
 - **Executions** for runs across every workflow
+- **Queues** for each queue's capacity and the runs waiting or running in it
+- **Artifacts** for files that runs produced, filtered by workflow and date
 - **Notifications** for Microsoft Teams, Slack, email, Telegram, webhook, and local command routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
@@ -58,8 +60,10 @@ Use it when you want to:
 
 - scan today's runs by status
 - spot failures or stuck work quickly
-- peek at a run without leaving the board
+- open a run over the board without leaving it
 - open a workflow from the template picker to start or enqueue it
+
+Users with write access can add boards of their own with **New view** on **Overview**. A view sets a name, a workspace, labels, a DAG name filter, the days in each row, and the visible columns. Each view opens as its own tab, and **Pin to sidebar** adds it to the navigation.
 
 See [Cockpit](/web-ui/cockpit) for the dedicated guide.
 
@@ -117,10 +121,10 @@ This is the best place to:
 
 - browse workflows by workspace
 - filter by name or label, and sort by name, status, or last run
-- peek at a workflow or open its workflow page
+- open a workflow over the list or as a page of its own
 - see whether a workflow is scheduled, suspended, or recently failed
 
-Click a row to peek at the workflow in a side sheet: its description, schedule, labels, latest run, a read-only graph of the run's step states, and recent runs. Select **Open workflow**, or press `Enter` or `F`, to open the workflow page. `Ctrl`/`Cmd`+click a row, or press `Ctrl`/`Cmd`+`Enter` in the peek, to open the page in a new tab. `Esc` or the browser's Back button closes the peek. Runs listed on **Executions**, **Activity**, and **Cockpit** open the same peek, with **Open run**. On screens narrower than 768 pixels, a click opens the page directly.
+Click a row to open its [workflow page](#workflow-page) over the list, at the page's own URL. The list stays below with its location and filters. `Up` and `Down`, or the arrow buttons at the top, step through the rows of the list. Drag the left edge to change the width; double-click it to reset. **Open workflow** keeps the workflow page as the page. The browser's Back button, the close button, a click outside, or `Esc` when the workflow page has nothing left to close returns to the list. `Ctrl`/`Cmd`+click a row or **Open workflow** to open the page in a new tab. Runs listed on **Executions**, **Activity**, and **Cockpit** open the same way, on the selected run. On screens narrower than 768 pixels, a click opens the page directly.
 
 Sorting by status or last run is available while 300 or fewer workflows match.
 
@@ -188,8 +192,9 @@ Select **Activity** at the bottom of the page to open the run panel. It shows a 
 | **Tasks** | The tasks of an agent DAG run and how each was settled |
 | **Chat** | Transcripts of chat and agent steps |
 | **Continuous** | Samples, availability, and events of a step that repeats without a `limit` |
+| **Definition** | The YAML that the run used, and its changes against the saved version |
 
-A tab appears only when the run has something to show in it. The run timeline can show a number of recent runs or a time range, and can filter runs by trigger.
+**Log**, **History**, **Outputs**, and **Definition** are always present once the workflow has run. The other tabs appear only when the run has something to show in them. The run timeline can show a number of recent runs or a time range, and can filter runs by trigger.
 
 On the **History** tab, select a cell to show that run and step, or select a step name for that step's history: its success rate, usual duration, and recent results with links to their logs.
 
@@ -320,13 +325,16 @@ Depending on your role and license, the navigation can also include pages such a
 - **Users**
 - **API Keys**
 - **Remote Nodes**
+- **Terminal**
 - **Base Config**
-- **Profiles**
+- **Profiles & Secrets**
+- **Webhooks**
 - **Notifications**
 - **Incidents**
+- **External Monitoring**
 - **Events**
 - **Audit Logs**
-- **License**
+- **Plan & features**
 
 These pages are intended for administrators and operators rather than day-to-day workflow users.
 

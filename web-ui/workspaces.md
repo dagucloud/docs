@@ -44,7 +44,7 @@ The scheduler loads and evaluates workflows across the deployment regardless of 
 
 ## Selecting a Workspace
 
-The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Wiki, Dashboard, Definitions, Runs, Search, Design, Notifications, and Incident Routing.
+The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Overview, Wiki, Workflows, Executions, Artifacts, Search, Notifications, and Incidents.
 
 | Selection | What You See |
 | --- | --- |
@@ -52,7 +52,7 @@ The workspace selector is in the left navigation above the remote node selector.
 | **Default** | Workflows without a workspace label and Wiki pages outside named-workspace directories. |
 | **Named workspace** | Only workflows, runs, and Wiki pages for that workspace. |
 
-The selector stays on your last choice in the browser, so switching from `finance` to Runs keeps the same focus.
+The selector stays on your last choice in the browser, so switching from `finance` to Executions keeps the same focus.
 
 ## Creating a Workspace
 
@@ -99,7 +99,7 @@ Wiki pages cannot be dragged across workspace boundaries. Renaming a workspace m
 
 ## Secrets in Workspaces
 
-The **DAG Secret Refs** tab on the **Profiles & Secrets** page supports global and workspace scopes. A Dagu-managed secret with ref `database/password` in `finance` is different from a secret with the same ref in `data-platform`.
+The **Secret refs** tab on the **Profiles & Secrets** page supports global and workspace scopes. A Dagu-managed secret with ref `database/password` in `finance` is different from a secret with the same ref in `data-platform`.
 
 DAGs resolve registry refs from their own workspace:
 
@@ -112,7 +112,7 @@ secrets:
     ref: database/password
 ```
 
-Do not include the workspace name in the ref. Select the workspace in the Web UI, open **Profiles & Secrets**, create `database/password` from **DAG Secret Refs**, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Global** secret scope.
+Do not include the workspace name in the ref. Select the workspace in the Web UI, open **Profiles & Secrets**, create `database/password` from **Secret refs**, and use the same ref in DAGs for that workspace. Workflows without a workspace label use the **Global** secret scope.
 
 Global secrets are workspace-less values. A workflow in `finance` checks `finance` first, then **Global**. It never reads another named workspace.
 
@@ -150,7 +150,7 @@ Incident routing can be Global or workspace-scoped.
 
 - **Global** routing is the default for every DAG.
 - A named workspace can inherit Global routing, configure its own incident routes, or turn incidents off.
-- A DAG can still override the workspace from the DAG detail **Incidents** tab when it needs a one-off route.
+- A DAG can still override the workspace from the **Incidents** tab of its workflow page's **Workflow** panel when it needs a one-off route.
 
 Use workspace incident routing when each business function or team has its own PagerDuty service or SolarWinds Incident Response endpoint. A workflow with `labels: [workspace=finance]` uses the `finance` workspace incident route when it is configured; otherwise it falls back to Global.
 

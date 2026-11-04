@@ -1,6 +1,6 @@
 # MCP Resources
 
-Dagu exposes MCP resources for DAG specs, Markdown Wiki pages, DAG-run details, scheduler and step logs, and built-in references.
+Dagu exposes MCP resources for DAG specs, Markdown Wiki pages, DAG-run details, scheduler and step logs, foreach items, and built-in references.
 
 ## Resource URIs
 
@@ -15,16 +15,22 @@ Dagu exposes MCP resources for DAG specs, Markdown Wiki pages, DAG-run details, 
 | `dagu://reference/apps` | `text/markdown` | Interactive run inspector behavior for MCP Apps hosts. |
 | `dagu://reference/notifications` | `text/markdown` | How run-completion notifications work over MCP resources. |
 | `dagu://dags` | `application/json` | DAG summaries visible to the caller. |
+| `dagu://dags?{+query}` | `application/json` | DAG summaries filtered by a query string accepted by `target=dags`. |
 | `dagu://dags/{name}/spec` | `application/yaml` | Current YAML spec for a DAG. |
 | `dagu://wiki` | `application/json` | Wiki page tree across accessible workspaces. |
 | `dagu://wiki/{workspace}` | `application/json` | Wiki page tree for `default` or one named workspace. |
 | `dagu://wiki/{workspace}/{path}` | `text/markdown` | Current Markdown content for one Wiki page. |
 | `dagu://runs` | `application/json` | DAG-run summaries visible to the caller. |
+| `dagu://runs?{+query}` | `application/json` | DAG-run summaries filtered by a query string accepted by `target=runs`. `status` may repeat. |
 | `dagu://runs/{name}/{dagRunId}` | `application/json` | Current DAG-run details. |
 | `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | Scheduler log and step log metadata. |
 | `dagu://runs/{name}/{dagRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one step. |
 | `dagu://runs/{name}/{dagRunId}/sub/{subRunId}` | `application/json` | Current details for a child DAG run addressed under its root run. |
 | `dagu://runs/{name}/{dagRunId}/sub/{subRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one child-run step. |
+| `dagu://runs/{name}/{dagRunId}/steps/{stepName}/foreach` | `application/json` | Items of a foreach step, with the status each body run reached. Supports `parent`, `status`, `page`, and `perPage`. |
+| `dagu://runs/{name}/{dagRunId}/steps/{stepName}/foreach/{item}` | `application/json` | One item of a foreach step, with the status of each body step. |
+| `dagu://runs/{name}/{dagRunId}/steps/{stepName}/foreach/{item}/steps/{bodyStepName}/logs` | `application/json` | Standard output and standard error for one body step of a foreach item. |
+| `ui://dagu/run-inspector/v10` | `text/html;profile=mcp-app` | Run inspector app for [MCP Apps hosts](#mcp-app-run-inspector). |
 
 Use `dagu_read` with a `uri` to read any resource directly:
 
@@ -44,7 +50,7 @@ dagu://wiki/operations/runbooks%2Frestart
 
 The `dagu_read` list and search targets return these canonical URIs. `dagu://wiki` and workspace collection resources accept the same `page`, `perPage`, `flat`, `sort`, `order`, and `prefix` query parameters as `target=wiki`. Wiki page lists accept up to 200 entries per page.
 
-The `dagu://docs` collection and page URIs remain available as deprecated exact aliases for existing MCP clients.
+The deprecated `dagu://docs` collection and page URIs still resolve through `dagu_read` with `uri`. They are not registered MCP resources, so `resources/read` does not accept them.
 
 In tree mode, pagination selects direct children of the workspace or `prefix`; a returned directory still contains its descendants. In flat mode, pagination selects individual Wiki pages.
 
@@ -71,6 +77,8 @@ Child runs are addressed beneath the root run that created them:
 ```text
 dagu://runs/nightly-report/20260522T010000/sub/child-run-id
 ```
+
+The foreach resources also exist under a child run, after `sub/{subRunId}`. A top-level foreach item is its index. A nested item is the body step's `foreachParent`, a dot, and the index.
 
 ## Run Subscriptions
 
@@ -110,5 +118,3 @@ Dagu also exposes MCP prompts for common workflows:
 | `dagu_create_wiki_page` | `workspace`, `path`, `goal` | Draft, preview, and create a Markdown Wiki page. |
 | `dagu_edit_wiki_page` | `workspace`, `path`, `change` | Read a Markdown Wiki page, make a scoped edit, preview, then apply. |
 | `dagu_debug_failed_run` | `name`, `dagRunId` | Read a run and logs, explain the likely failure, then offer retry or stop when appropriate. |
-
-The deprecated `dagu_create_doc` and `dagu_edit_doc` prompts forward to their Wiki equivalents.

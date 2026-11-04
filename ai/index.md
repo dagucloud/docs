@@ -175,7 +175,7 @@ Because the request never leaves the machine, this is the path for prompts carry
 
 ## Run a coding agent as a step
 
-`action: harness.run` launches an external agent CLI as an ordinary step, so it composes with dependencies, retries, approvals, and artifacts. Fifteen providers are built in, including Claude Code, Codex, Copilot, Gemini CLI, Cursor, OpenCode, Aider, and Goose.
+`action: harness.run` launches an external agent CLI as an ordinary step, so it composes with dependencies, retries, approvals, and artifacts. Built-in providers include Claude Code, Codex, Copilot, Gemini CLI, Cursor, OpenCode, Aider, and Goose.
 
 ```yaml
 steps:
@@ -281,7 +281,7 @@ flowchart LR
     style AU stroke:green,stroke-width:1.6px,color:#333
 ```
 
-Every request, tool call, and downstream DAG action is audit-attributed to the accepted credential. Thirteen client guides cover the common setups: [Clients](/mcp/clients/). Start with the [MCP Quickstart](/mcp/quickstart).
+Every request, tool call, and downstream DAG action is audit-attributed to the accepted credential. Client guides cover the common setups: [Clients](/mcp/clients/). Start with the [MCP Quickstart](/mcp/quickstart).
 
 ## Keeping agents safe
 
@@ -347,7 +347,7 @@ For a step that should wait for a person without running anything first, use a [
   </div>
   <div class="overview-card">
     <h3><a href="/step-types/harness/">Harness Steps</a></h3>
-    <p>Fifteen agent CLIs, custom harness definitions, structured results, and containerized execution.</p>
+    <p>Built-in agent CLIs, custom harness definitions, structured results, and containerized execution.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/agent">Agent DAGs</a></h3>

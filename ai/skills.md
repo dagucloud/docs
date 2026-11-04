@@ -58,10 +58,10 @@ Neither a skill nor a reference file guarantees correct YAML. Two commands close
 
 ```bash
 dagu validate workflow.yaml
-dagu schema dag steps
+dagu schema dag handler_on
 ```
 
-`validate` builds the DAG and reports the same errors the server would, without running anything. `schema` prints the accepted fields for any dot-separated path (`dagu schema dag steps.container`), so an agent can look up a shape instead of guessing it. Telling a coding tool to run `dagu validate` after every edit turns a plausible-looking file into a verified one, and the same command is what checks every YAML example in this documentation.
+`validate` builds the DAG and reports the same errors the server would, without running anything. `schema` prints the JSON Schema at a dot-separated path (`dagu schema dag defaults.continue_on`), so an agent can look up a shape instead of guessing it. Telling a coding tool to run `dagu validate` after every edit turns a plausible-looking file into a verified one, and the same command is what checks every YAML example in this documentation.
 
 ## When to use MCP instead
 

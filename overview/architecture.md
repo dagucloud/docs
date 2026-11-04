@@ -87,14 +87,12 @@ Dagu follows the XDG Base Directory specification for file organization:
 │   │               └── 03/         # Month
 │   │                   └── 15/     # Day
 │   │                       └── dag-run_20240315_120000Z_abc123/
-│   │                           ├── attempt_20240315_120001_123Z_def456/
+│   │                           ├── a_20240315_120001_123Z_def456/   # Attempt
 │   │                           │   ├── status.jsonl     # Status updates (JSON Lines)
-│   │                           │   ├── step1.stdout.log # Step stdout
-│   │                           │   ├── step1.stderr.log # Step stderr
-│   │                           │   └── step2.stdout.log
-│   │                           └── subdags/           # Sub DAG runs (nested workflows)
-│   │                               └── sub_xyz789/
-│   │                                   └── attempt_20240315_120002_456Z_ghi012/
+│   │                           │   └── dag.json         # Definition the attempt ran
+│   │                           └── sub/                 # Sub DAG runs (nested workflows)
+│   │                               └── xyz789/
+│   │                                   └── a_20240315_120002_456Z_ghi012/
 │   │                                       └── status.jsonl
 │   ├── queue/         # File-based execution queue
 │   │   └── my-workflow/
@@ -102,23 +100,22 @@ Dagu follows the XDG Base Directory specification for file organization:
 │   │       └── item_low_20240315_120030_456Z_batch1.json      # Low priority
 │   ├── suspend/       # Workflow suspend flags
 │   │   └── my-workflow.suspend
-│   └── proc/          # Process heartbeat files for liveness detection
-│       └── {proc_group}/
-│           └── {dag_name}/
-│               └── proc_YYYYMMDD_HHMMSSZ_{run_id}.proc  # 8-byte binary timestamp
-├── logs/              # Human-readable execution logs
-│   ├── admin/         # Admin/scheduler logs
-│   │   ├── scheduler.log
-│   │   └── server.log
-│   └── dags/          # DAG-specific logs (for web UI)
-│       └── my-workflow/
-│           └── 20240315_120000_abc123/
-│               ├── step1.stdout.log
-│               ├── step1.stderr.log
-│               └── status.yaml
-└── scheduler/         # Scheduler coordination
-    └── locks/         # Directory-based locks for HA
-        └── .dagu_lock.<hostname@pid>.<timestamp>/
+│   ├── proc/          # Process heartbeat files for liveness detection
+│   │   └── {proc_group}/
+│   │       └── {dag_name}/
+│   │           └── proc_YYYYMMDD_HHMMSSZ_{run_id}.proc  # 8-byte binary timestamp
+│   └── scheduler/     # Scheduler coordination
+│       └── locks/     # Directory-based lock for HA
+│           └── .dagu_lock/
+└── logs/              # Execution logs
+    ├── admin/         # Server-wide records
+    │   └── events/    # Event store (paths.event_store_dir)
+    └── my-workflow/   # DAG-specific logs
+        └── dag-run_20240315_120000Z_abc123/
+            ├── dag-run_20240315.120000.000.abc123.log      # Run log
+            └── run_20240315_120001Z_def456/                # Attempt
+                ├── step1.20240315.120001.100.abc123.out    # Step stdout
+                └── step1.20240315.120001.100.abc123.err    # Step stderr
 ```
 
 ## Monitoring in Dagu Console (Optional)
@@ -204,7 +201,7 @@ Dagu supports distributed execution through a coordinator-worker model. DAG defi
 - Long Polling: Workers poll for tasks using efficient long-polling mechanism
 - Health Monitoring: Tracks worker heartbeats and health status
 - Failure Detection: Marks tasks failed when workers become unresponsive
-- Authentication: Supports signing keys and mutual TLS
+- Authentication: Supports mutual TLS
 
 #### 2. Worker Service
 - Coordinator Discovery: Workers connect to configured coordinator addresses
@@ -261,10 +258,7 @@ Worker health is determined by heartbeat recency:
    - Client certificates for mutual TLS authentication
    - CA certificate validation
 
-2. Authentication
-   - Signing key for request validation
-
-3. Network Security
+2. Network Security
    - Configurable bind addresses
    - Firewall-friendly single port
 

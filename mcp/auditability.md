@@ -12,7 +12,7 @@ MCP audit entries use the `mcp` category and include MCP-specific fields when av
 | `surface` | Accepted credential surface. MCP API-key requests use `mcp`. |
 | `result` | Outcome such as `received`, `started`, `succeeded`, `failed`, or `denied`. |
 | `correlation_id` | Shared ID that connects MCP attempt events with downstream domain events. |
-| `resource_type` | Affected resource class such as `dag`, `doc`, `run`, `run_logs`, `dag_run_step_log`, or `mcp_request`. |
+| `resource_type` | Affected resource class such as `dag`, `doc`, `run`, `run_logs`, `dag_run_step_log`, or `mcp_request`. Resource reads use `dag_spec`, `dag_run`, `dag_run_logs`, `reference`, or `mcp_app`, and `document` or `documents` for Wiki pages. |
 | `resource_id` | Affected resource identifier, such as a DAG name, Wiki page path, `dagName/dagRunId`, or `dagName/dagRunId/stepName`. |
 | `workspace` | Canonical workspace used for audit filtering. |
 | `credential_id` | Accepted credential identifier, independent of the user or service-account subject. |
@@ -49,11 +49,15 @@ On a server with audit logs, the **Remote access** section of **Plan & features*
 
 ## Request And Subscription Events
 
-Authentication and subscription behavior is also auditable:
+Authentication, resource reads, and subscriptions are also auditable:
 
 | Action | Meaning |
 |--------|---------|
 | `mcp.request.denied` | The request reached the MCP route but authentication or surface authorization denied it. |
+| `mcp.resource.read.received` | Dagu accepted an MCP `resources/read` request. |
+| `mcp.resource.read.succeeded` | The resource was read. Details include `duration_ms` and `mime_type`. |
+| `mcp.resource.read.failed` | Reading the resource failed. |
+| `mcp.resource.read.denied` | Authorization denied the resource read. |
 | `mcp.resource.subscribe.succeeded` | A client subscribed to a supported run resource. |
 | `mcp.resource.unsubscribe.succeeded` | A client unsubscribed from a resource, or the subscription was already absent. |
 
@@ -63,7 +67,7 @@ MCP tools call the same internal API service used by the Web UI and REST API. Wh
 
 Filter audit logs by:
 
-- `category=mcp` to see MCP tool and subscription events
+- `category=mcp` to see MCP tool, resource read, and subscription events
 - `source=mcp` to see all activity originating from MCP, including downstream DAG events
 - `surface=mcp` to see activity accepted through the MCP credential surface
 - `mcp_tool=dagu_execute` or another tool name for tool-specific investigation

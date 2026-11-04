@@ -21,6 +21,35 @@ The API supports multiple authentication methods:
 
 API keys are recommended for general programmatic access as they support role-based permissions. See [API Keys](/server-admin/authentication/api-keys) for details. For triggering specific DAGs from external systems, see [Webhooks](/server-admin/authentication/webhooks).
 
+### Log In
+
+**Endpoint**: `POST /api/v1/auth/login`
+
+Exchanges a Builtin Auth username and password for a JWT token.
+
+**Request Body**:
+```json
+{
+  "username": "admin",
+  "password": "admin-password"
+}
+```
+
+**Response (200)**:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresAt": "2024-02-12T12:00:00Z",
+  "user": {
+    "id": "38d01e00-ebf7-4991-b7b4-e07d98cf3f8d",
+    "username": "admin",
+    "role": "admin"
+  }
+}
+```
+
+Send the token as `Authorization: Bearer <token>`. Invalid credentials return `401`, and too many attempts return `429`.
+
 ## System Endpoints
 
 ### Health Check
@@ -39,19 +68,10 @@ Checks the health status of the Dagu server.
 }
 ```
 
-**Response when unhealthy (503)**:
-```json
-{
-  "status": "unhealthy",
-  "version": "1.14.5",
-  "uptime": 300,
-  "timestamp": "2024-02-11T16:30:45.123456789Z",
-  "error": "Scheduler not responding"
-}
-```
+The endpoint answers while the web server runs. It does not check the scheduler or the coordinator.
 
 **Response Fields**:
-- `status`: Server health status ("healthy" or "unhealthy")
+- `status`: Server health status (`healthy` while the server responds)
 - `version`: Current server version
 - `uptime`: Server uptime in seconds
 - `timestamp`: Current server time
@@ -153,9 +173,11 @@ Retrieves DAG definitions with optional filtering by name and labels.
         "statusLabel": "running",
         "startedAt": "2024-01-01T12:00:00Z",
         "finishedAt": "",
-        "log": "/logs/example_dag.log"
+        "triggerType": "scheduler",
+        "workerId": "local"
       },
       "suspended": false,
+      "pinned": false,
       "errors": []
     }
   ],
@@ -165,7 +187,8 @@ Retrieves DAG definitions with optional filtering by name and labels.
     "currentPage": 1,
     "totalPages": 5,
     "nextPage": 2,
-    "prevPage": null
+    "prevPage": 1,
+    "hasNextPage": true
   }
 }
 ```
@@ -244,19 +267,19 @@ Fetches detailed information about a specific DAG.
       "DATA_SOURCE=postgres://prod-db:5432/analytics",
       "WAREHOUSE_URL=${env.WAREHOUSE_URL}"
     ],
-    "log_dir": "/var/log/dagu/pipelines",
-    "handler_on": {
+    "logDir": "/var/log/dagu/pipelines",
+    "handlerOn": {
       "success": {
         "name": "notify_success",
-        "command": "notify.sh 'Pipeline completed successfully'"
+        "commands": [{"command": "notify.sh", "args": ["Pipeline completed successfully"]}]
       },
       "failure": {
         "name": "alert_on_failure",
-        "command": "alert.sh 'Pipeline failed' high"
+        "commands": [{"command": "alert.sh", "args": ["Pipeline failed", "high"]}]
       },
       "exit": {
         "name": "cleanup",
-        "command": "cleanup_temp_files.sh"
+        "commands": [{"command": "cleanup_temp_files.sh", "args": []}]
       }
     },
     "steps": [
@@ -265,8 +288,9 @@ Fetches detailed information about a specific DAG.
         "id": "extract",
         "description": "Extract data from source database",
         "dir": "/app/etl",
-        "command": "python",
-        "args": ["extract.py", "--date", "${params.date}"],
+        "commands": [
+          {"command": "python", "args": ["extract.py", "--date", "${params.date}"]}
+        ],
         "stdout": "/logs/extract.out",
         "stderr": "/logs/extract.err",
         "output": "EXTRACTED_FILE",
@@ -280,33 +304,37 @@ Fetches detailed information about a specific DAG.
         "name": "transform_data",
         "id": "transform",
         "description": "Apply transformations to extracted data",
-        "command": "python transform.py --input=${env.EXTRACTED_FILE}",
+        "commands": [
+          {"command": "python", "args": ["transform.py", "--input=${env.EXTRACTED_FILE}"]}
+        ],
         "depends": ["extract_data"],
         "output": "TRANSFORMED_FILE",
-        "repeat_policy": {
-          "repeat": false,
-          "interval": 0
+        "repeatPolicy": {
+          "repeat": "until",
+          "interval": 60,
+          "limit": 3
         },
-        "mail_on_error": true
+        "mailOnError": true
       },
       {
         "name": "load_to_warehouse",
         "id": "load",
-        "run": "warehouse-loader",
+        "call": "warehouse-loader",
+        "commands": [],
         "params": "{\"file\": \"${env.TRANSFORMED_FILE}\", \"table\": \"fact_sales\"}",
         "depends": ["transform_data"]
       }
     ],
     "delay": 30,
-    "hist_retention_days": 30,
+    "histRetentionDays": 30,
     "preconditions": [
       {
         "eval": "$(date +%u)",
         "expected": "re:[1-5]"
       }
     ],
-    "max_active_runs": 1,
-    "max_active_steps": 5,
+    "maxActiveRuns": 1,
+    "maxActiveSteps": 5,
     "params": ["date", "env", "batch_size"],
     "paramDefs": [
       {
@@ -356,11 +384,11 @@ Fetches detailed information about a specific DAG.
         "steps": [
           {
             "name": "validate_schema",
-            "command": "validate_schema.py"
+            "commands": [{"command": "validate_schema.py", "args": []}]
           },
           {
             "name": "load_data",
-            "command": "load_to_warehouse.py",
+            "commands": [{"command": "load_to_warehouse.py", "args": []}],
             "depends": ["validate_schema"]
           }
         ]
@@ -608,6 +636,9 @@ Creates and starts a DAG run with optional parameters.
 | params | string | JSON string of parameters. Values are validated and coerced against DAG param definitions or external parameter schema before execution. For named params, prefer a JSON object payload. JSON arrays are mainly for positional or mixed raw input. | No |
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
+| profile | string | Runtime profile for this run. Omit to use the DAG default profile; an empty string runs without a profile | No |
+| labels | string[] | Labels added to this run (`key=value` or `key`), merged with the DAG labels | No |
+| workerSelector | object | Worker labels this run requires. Replaces the DAG `worker_selector` for this run and its retries | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
 | steps | string[] | Run only these steps, by step name or ID. Every other step is recorded as skipped and does not run. Not supported for agent DAGs | No |
@@ -649,8 +680,8 @@ An `outputs` entry must name a skipped step. The name must be declared by the st
 **Response (409)** - When `singleton: true` and DAG is already running:
 ```json
 {
-  "code": "already_running",
-  "message": "DAG example_dag is already running, cannot start in singleton mode"
+  "code": "already_exists",
+  "message": "DAG example_dag is already running (singleton mode)"
 }
 ```
 
@@ -697,6 +728,9 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 | params | string | JSON string of parameters. Values are validated and coerced against DAG param definitions or external parameter schema before execution. | No |
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run | No |
+| profile | string | Runtime profile for this run. Omit to use the DAG default profile; an empty string runs without a profile | No |
+| labels | string[] | Labels added to this run, merged with the DAG labels | No |
+| workerSelector | object | Worker labels this run requires | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
 
@@ -716,7 +750,7 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
     "params": "{}",
     "nodes": [
       {
-        "step": {"name": "step1", "command": "echo hello"},
+        "step": {"name": "step1", "commands": [{"command": "echo", "args": ["hello"]}]},
         "status": 4,
         "statusLabel": "succeeded",
         "startedAt": "2024-01-01T12:00:01Z",
@@ -771,7 +805,11 @@ Adds a DAG run to the queue for later execution.
 | params | string | JSON string of parameters. Values are validated and coerced against DAG param definitions or external parameter schema before the run is queued. | No |
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for the queued run (must satisfy DAG name validation) | No |
+| profile | string | Runtime profile for this run. Omit to use the DAG default profile; an empty string runs without a profile | No |
 | queue | string | Queue name override | No |
+| labels | string[] | Labels added to this run, merged with the DAG labels | No |
+| workerSelector | object | Worker labels this run requires | No |
+| singleton | boolean | If true, prevent enqueuing if the DAG is already running or queued (returns 409) | No |
 | noReuse | boolean | If true, recompute eligible build steps when the queued run starts | No |
 
 > **Tip:** When you override the DAG name, the queued run is tracked under the new identifier for both queue management and history records.
@@ -805,6 +843,16 @@ Controls whether the scheduler creates runs from this DAG.
   "message": "DAG not found"
 }
 ```
+
+### Pin or Unpin DAG
+
+**Endpoints**: `PUT /api/v1/dags/{fileName}/pin` and `DELETE /api/v1/dags/{fileName}/pin`
+
+`PUT` pins the DAG to the top of the DAG list for all users, and `DELETE` removes the pin. Both need write access to the DAG's workspace and work while Git Sync is read-only. Repeating either request succeeds. The DAG list and DAG details report the state as `pinned`.
+
+**Response (204)**: No content
+
+**Error Response (404)**: The DAG does not exist.
 
 ## DAG Run History Endpoints
 
@@ -915,8 +963,9 @@ Gets detailed status of a specific DAG run.
         "step": {
           "name": "extract_data",
           "id": "extract",
-          "command": "python",
-          "args": ["extract.py", "--date", "2024-02-11"]
+          "commands": [
+            {"command": "python", "args": ["extract.py", "--date", "2024-02-11"]}
+          ]
         },
         "stdout": "/logs/data_processing_pipeline/20240211_140000_abc123/extract_data.stdout",
         "stderr": "/logs/data_processing_pipeline/20240211_140000_abc123/extract_data.stderr",
@@ -934,7 +983,9 @@ Gets detailed status of a specific DAG run.
         "step": {
           "name": "transform_data",
           "id": "transform",
-          "command": "python transform.py --input=/tmp/extracted_20240211.csv",
+          "commands": [
+            {"command": "python", "args": ["transform.py", "--input=/tmp/extracted_20240211.csv"]}
+          ],
           "depends": ["extract_data"]
         },
         "stdout": "/logs/data_processing_pipeline/20240211_140000_abc123/transform_data.stdout",
@@ -953,7 +1004,8 @@ Gets detailed status of a specific DAG run.
         "step": {
           "name": "load_to_warehouse",
           "id": "load",
-          "run": "warehouse-loader",
+          "call": "warehouse-loader",
+          "commands": [],
           "params": "{\"file\": \"/tmp/transformed_20240211.csv\", \"table\": \"fact_sales\"}",
           "depends": ["transform_data"]
         },
@@ -1042,10 +1094,6 @@ Current queued condition reasons:
 {
   "dagRuns": [
     {
-      "rootDAGRunName": "data_processing_pipeline",
-      "rootDAGRunId": "20240211_160000_current",
-      "parentDAGRunName": "",
-      "parentDAGRunId": "",
       "dagRunId": "20240211_160000_current",
       "name": "data_processing_pipeline",
       "status": 1,
@@ -1053,14 +1101,11 @@ Current queued condition reasons:
       "queuedAt": "",
       "startedAt": "2024-02-11T16:00:00Z",
       "finishedAt": "",
-      "log": "/logs/data_processing_pipeline/20240211_160000_current.log",
+      "triggerType": "scheduler",
+      "workerId": "local",
       "params": "{\"date\": \"2024-02-11\", \"env\": \"production\", \"batch_size\": 5000}"
     },
     {
-      "rootDAGRunName": "database_backup",
-      "rootDAGRunId": "20240211_150000_backup",
-      "parentDAGRunName": "",
-      "parentDAGRunId": "",
       "dagRunId": "20240211_150000_backup",
       "name": "database_backup",
       "status": 4,
@@ -1068,14 +1113,11 @@ Current queued condition reasons:
       "queuedAt": "",
       "startedAt": "2024-02-11T15:00:00Z",
       "finishedAt": "2024-02-11T15:45:30Z",
-      "log": "/logs/database_backup/20240211_150000_backup.log",
+      "triggerType": "scheduler",
+      "workerId": "local",
       "params": "{\"target_db\": \"production\", \"retention_days\": 30}"
     },
     {
-      "rootDAGRunName": "ml_training_pipeline",
-      "rootDAGRunId": "20240211_143000_ml",
-      "parentDAGRunName": "",
-      "parentDAGRunId": "",
       "dagRunId": "20240211_143000_ml",
       "name": "ml_training_pipeline",
       "status": 5,
@@ -1083,7 +1125,7 @@ Current queued condition reasons:
       "queuedAt": "2024-02-11T14:30:00Z",
       "startedAt": "",
       "finishedAt": "",
-      "log": "/logs/ml_training_pipeline/20240211_143000_ml.log",
+      "triggerType": "scheduler",
       "conditions": [
         {
           "type": "Queued",
@@ -1132,6 +1174,9 @@ Inline specifications have no source directory, so they cannot supply [file depe
 | name | string | Override DAG name used for validation and execution | No |
 | params | string | JSON string persisted with the DAG-run and exposed to steps | No |
 | dagRunId | string | Explicit run identifier. If omitted, one is generated | No |
+| profile | string | Runtime profile for this run. Omit it or send an empty string to run without a profile | No |
+| labels | string[] | Labels added to this run | No |
+| workerSelector | object | Worker labels this run requires | No |
 | singleton | boolean | When true, aborts with `409` if the DAG already has active or queued runs | No |
 | noReuse | boolean | If true, recompute eligible build steps instead of reusing prior materializations | No |
 | steps | string[] | Run only these steps, by step name or ID; every other step is recorded as skipped. See [Start DAG](#start-dag) | No |
@@ -1207,7 +1252,10 @@ Inline specifications have no source directory, so they cannot supply [file depe
 | name | string | Override DAG name if the spec omits one | No |
 | params | string | JSON string saved with the queued run | No |
 | dagRunId | string | Explicit run ID. When omitted, one is generated | No |
+| profile | string | Runtime profile for this run. Omit it or send an empty string to run without a profile | No |
 | queue | string | Queue name override for this run only | No |
+| labels | string[] | Labels added to this run | No |
+| workerSelector | object | Worker labels this run requires | No |
 | noReuse | boolean | If true, recompute eligible build steps when the queued run starts | No |
 
 **Response (200)**:
@@ -1252,12 +1300,12 @@ Fetches detailed status of a specific DAG run. You can use the special value "la
 | name | string | DAG name |
 | dagRunId | string | DAG run ID or "latest" |
 
-When the returned DAG run is still `queued`, `dagRun.conditions` can contain queued runtime conditions using the shape described in [DAG-run Runtime Conditions](#dag-run-runtime-conditions). Non-queued DAG runs omit `conditions`.
+When the returned DAG run is still `queued`, `dagRunDetails.conditions` can contain queued runtime conditions using the shape described in [DAG-run Runtime Conditions](#dag-run-runtime-conditions). Non-queued DAG runs omit `conditions`.
 
 **Response (200)**:
 ```json
 {
-  "dagRun": {
+  "dagRunDetails": {
     "dagRunId": "20240211_120000",
     "name": "data-pipeline",
     "status": 4,
@@ -1269,7 +1317,7 @@ When the returned DAG run is still `queued`, `dagRun.conditions` can contain que
       {
         "step": {
           "name": "extract",
-          "command": "python extract.py"
+          "commands": [{"command": "python", "args": ["extract.py"]}]
         },
         "status": 4,
         "statusLabel": "succeeded",
@@ -1282,7 +1330,7 @@ When the returned DAG run is still `queued`, `dagRun.conditions` can contain que
       {
         "step": {
           "name": "transform",
-          "command": "python transform.py",
+          "commands": [{"command": "python", "args": ["transform.py"]}],
           "depends": ["extract"]
         },
         "status": 4,
@@ -1294,7 +1342,8 @@ When the returned DAG run is still `queued`, `dagRun.conditions` can contain que
       {
         "step": {
           "name": "load",
-          "run": "sub-workflow",
+          "call": "sub-workflow",
+          "commands": [],
           "params": "TARGET=warehouse"
         },
         "status": 4,
@@ -1304,9 +1353,8 @@ When the returned DAG run is still `queued`, `dagRun.conditions` can contain que
         "subRuns": [
           {
             "dagRunId": "sub_20240211_121000",
-            "name": "sub-workflow",
-            "status": 4,
-            "statusLabel": "succeeded"
+            "dagName": "sub-workflow",
+            "params": "TARGET=warehouse"
           }
         ]
       }
@@ -1321,11 +1369,11 @@ A node whose step repeats with a `repeat` mode and no `limit` carries `continuou
 
 #### Build Execution Data
 
-For `type: build` workflows, the DAG-run object includes `noReuse`, and each node includes a `build` decision:
+For `type: build` workflows, the `dagRunDetails` object includes `noReuse`, and each node includes a `build` decision:
 
 ```json
 {
-  "dagRun": {
+  "dagRunDetails": {
     "noReuse": false,
     "nodes": [
       {
@@ -1355,11 +1403,11 @@ See [Build Workflows](/writing-workflows/incremental-workflows) for the decision
 
 #### Reused Inputs
 
-A [selected-steps run](#start-dag) lists where the carried outputs of its skipped steps came from in `dagRun.reusedInputs`, one entry per skipped step, in DAG step order. The field is absent when the run carried no outputs.
+A [selected-steps run](#start-dag) lists where the carried outputs of its skipped steps came from in `dagRunDetails.reusedInputs`, one entry per skipped step, in DAG step order. The field is absent when the run carried no outputs.
 
 ```json
 {
-  "dagRun": {
+  "dagRunDetails": {
     "reusedInputs": [
       {
         "step": "test",
@@ -1378,7 +1426,7 @@ A [selected-steps run](#start-dag) lists where the carried outputs of its skippe
 
 #### Model Usage
 
-A node whose step called models carries `modelUsage.models`: one entry per provider and model, over every attempt of the step, including what a coding agent the step ran reported. `modelUsage.notReported` names a tool whose usage could not be read. `dagRun.modelUsage.models` totals every step of the run, handlers included.
+A node whose step called models carries `modelUsage.models`: one entry per provider and model, over every attempt of the step, including what a coding agent the step ran reported. `modelUsage.notReported` names a tool whose usage could not be read. `dagRunDetails.modelUsage.models` totals every step of the run, handlers included.
 
 ```json
 {
@@ -1448,14 +1496,25 @@ Forcefully stops all currently running instances of a DAG. This is useful when m
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/retry`
 
-Creates a new DAG run based on a previous execution.
+Retries an existing DAG run under the same DAG run ID. It does not create a new DAG run. With `stepName`, only that step is reset.
 
 **Request Body**:
 ```json
 {
-  "dagRunId": "new-run-id"
+  "dagRunId": "20240211_120000",
+  "stepName": "transform",
+  "includeDownstream": true
 }
 ```
+
+**Request Fields**:
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| dagRunId | string | ID of the DAG run to retry. Must equal `{dagRunId}` in the path, or the request returns 400 | **Yes** |
+| stepName | string | Retry only this step | No |
+| includeDownstream | boolean | Also reset every step reachable from `stepName`. Requires `stepName` | No |
+| bypassPreconditions | boolean | Skip step preconditions for the reset steps. Requires `stepName` | No |
+| subDAGRunId | string | Persisted child DAG run that contains `stepName`. The path and `dagRunId` stay the root run. Requires `stepName` | No |
 
 **Response (200)**: Success
 
@@ -1463,19 +1522,17 @@ Creates a new DAG run based on a previous execution.
 ```json
 {
   "code": "not_found",
-  "message": "Original DAG run not found"
+  "message": "dag-run ID 20240211_120000 not found for DAG data-pipeline"
 }
 ```
 
-**Error Response (400)**:
+**Error Response (409)** - The DAG run is still active or waiting, or it is [ephemeral](#ephemeral-runs):
 ```json
 {
-  "code": "already_running",
-  "message": "Another instance of this DAG is already running"
+  "code": "conflict",
+  "message": "DAG-run data-pipeline:20240211_120000 is active and cannot be retried"
 }
 ```
-
-**Error Response (409)** - The DAG run is [ephemeral](#ephemeral-runs).
 
 ### Reschedule DAG Run
 
@@ -1496,6 +1553,7 @@ Launches a fresh DAG run by reusing the captured parameters from a historic exec
 |-------|------|-------------|----------|
 | dagRunId | string | Custom ID for the new run. If omitted a unique ID is generated. | No |
 | dagName | string | Override the DAG name used for the rescheduled run. Must pass DAG name validation. | No |
+| useCurrentDagFile | boolean | If true, use the current contents of the original DAG file instead of the YAML stored with the historic run. | No |
 
 Rescheduled runs always respect singleton mode. When the target DAG already has active or queued runs, the request is rejected.
 
@@ -1538,6 +1596,97 @@ Removes a queued DAG run from the queue.
   "message": "DAG run not found in queue"
 }
 ```
+
+### Delete DAG Run
+
+**Endpoint**: `DELETE /api/v1/dag-runs/{name}/{dagRunId}`
+
+Permanently removes a DAG run record and its run data. Developer, manager, or admin only. `latest` is not accepted as `dagRunId`.
+
+**Response (204)**: No content
+
+**Error Response (400)** - The run is still active, or `latest` was used:
+```json
+{
+  "code": "bad_request",
+  "message": "DAG run 20240211_120000 is active; stop or dequeue it before deleting"
+}
+```
+
+**Error Response (404)**:
+```json
+{
+  "code": "not_found",
+  "message": "DAG run 20240211_120000 not found"
+}
+```
+
+### Preview Edited Retry
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/edit-retry/preview`
+
+Validates an edited DAG definition against a previous DAG run and returns the steps that an edited retry would skip and run.
+
+**Request Body**:
+```json
+{
+  "spec": "steps:\n  - id: extract\n    run: ./extract.sh\n  - id: load\n    run: ./load.sh\n    depends: extract",
+  "dagName": "data-pipeline"
+}
+```
+
+- `spec` (required): Edited DAG specification in YAML
+- `dagName` (optional): DAG name for the edited run. Send it when `spec` has no `name`
+
+**Response (200)**:
+```json
+{
+  "dagName": "data-pipeline",
+  "skippedSteps": ["extract"],
+  "runnableSteps": ["load"],
+  "steps": [],
+  "ineligibleSteps": [],
+  "errors": [],
+  "warnings": []
+}
+```
+
+`steps` holds the resolved steps of the edited spec. `ineligibleSteps` lists completed steps that cannot be skipped, each with `stepName` and `reason`. Fix every entry of `errors` before running the edited retry.
+
+**Error Response (409)** - The DAG run is [ephemeral](#ephemeral-runs).
+
+### Run Edited Retry
+
+**Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/edit-retry`
+
+Creates a new DAG run from an edited DAG definition. Skipped steps keep the output variables of the previous run.
+
+**Request Body**:
+```json
+{
+  "spec": "steps:\n  - id: extract\n    run: ./extract.sh\n  - id: load\n    run: ./load.sh\n    depends: extract",
+  "dagName": "data-pipeline",
+  "skipSteps": ["extract"],
+  "dagRunId": "optional-new-id"
+}
+```
+
+- `spec` (required): Edited DAG specification in YAML
+- `dagName` (optional): DAG name for the edited run. Send it when `spec` has no `name`
+- `skipSteps` (optional): Steps to mark skipped while keeping their previous outputs
+- `dagRunId` (optional): ID for the new run. One is generated when omitted
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "20240211_130000",
+  "queued": false,
+  "skippedSteps": ["extract"],
+  "startedSteps": ["load"]
+}
+```
+
+**Error Response (409)** - The DAG run is [ephemeral](#ephemeral-runs).
 
 ## Log Endpoints
 
@@ -1718,6 +1867,52 @@ Returns the persisted outputs of one step. `stepName` is a step name or ID, a ha
 - Each value is cut at 65536 bytes. `truncated` is `true` when it was cut, and `size` is its length in bytes before the cut.
 - Secret values are masked before they are persisted.
 - Returns `404` when the DAG run or the step does not exist.
+
+## Artifact Endpoints
+
+These endpoints read the files that runs stored in their [artifact directory](/writing-workflows/artifacts). `path` is relative to the run's artifact directory and must not start with `/` or contain `..`. They accept the optional `remoteNode` query parameter.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/artifacts` | Root DAG runs that produced artifacts, newest first, each with its files. Query: `name`, `fileName` (substring or glob), `fromDate`, `toDate`, `limit` (default 100, max 500), `cursor`. |
+| `GET` | `/api/v1/dag-runs/{name}/{dagRunId}/artifacts` | File tree of one run. Add `recursive=true` to expand nested directories. |
+| `GET` | `/api/v1/dag-runs/{name}/{dagRunId}/artifacts/preview?path=...` | Preview of one file: `kind` (`markdown`, `html`, `text`, `image`, or `binary`), `mimeType`, `size`, `tooLarge`, `truncated`, and text `content`. |
+| `GET` | `/api/v1/dag-runs/{name}/{dagRunId}/artifacts/download?path=...` | Raw file as `application/octet-stream`, with a `Content-Disposition` file name. |
+
+Sub DAG runs have the same three endpoints under `/api/v1/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}/artifacts`.
+
+**Response of `GET /api/v1/dag-runs/{name}/{dagRunId}/artifacts?recursive=true` (200)**:
+```json
+{
+  "items": [
+    {
+      "name": "reports",
+      "path": "reports",
+      "type": "directory",
+      "children": [
+        {"name": "summary.md", "path": "reports/summary.md", "type": "file", "size": 15}
+      ]
+    }
+  ]
+}
+```
+
+**Response of `GET /api/v1/artifacts` (200)**:
+```json
+{
+  "items": [
+    {
+      "name": "daily-report",
+      "dagRunId": "20240211_120000",
+      "startedAt": "2024-02-11T12:00:00.141Z",
+      "createdAt": "2024-02-11T12:00:08.000Z",
+      "files": [{"path": "reports/summary.md", "size": 15}],
+      "filesTruncated": false
+    }
+  ],
+  "nextCursor": "eyJ..."
+}
+```
 
 ## Continuous Step Endpoints
 
@@ -2449,9 +2644,17 @@ All endpoints return structured error responses:
 | unauthorized | Authentication failed |
 | bad_gateway | Upstream service error |
 | remote_node_error | Remote node connection failed |
-| already_running | DAG is already running |
+| max_run_reached | The DAG or its queue cannot take another run now |
 | not_running | DAG is not running |
-| already_exists | Resource already exists |
+| already_exists | Resource already exists, or a singleton DAG is already running |
+| conflict | The resource is in a state that does not allow the request |
+| timeout | The request timed out |
+| rate_limited | Too many requests |
+| payload_too_large | The request body is too large |
+| human_task_resume_failed | The human-task input was saved, but the run could not be queued for resume |
+| auth.unauthorized | Authentication required |
+| auth.token_invalid | Invalid or expired token |
+| auth.forbidden | Insufficient permissions for the authenticated user |
 
 ## Sub DAG Run Endpoints
 
@@ -2562,8 +2765,7 @@ Fetches detailed status of a sub DAG run.
       {
         "step": {
           "name": "validate_schema",
-          "command": "validate_schema.py",
-          "args": [],
+          "commands": [{"command": "validate_schema.py", "args": []}],
           "depends": []
         },
         "stdout": "/logs/warehouse_loader_subdag/sub_20240211_143020_xyz456/validate_schema.stdout",
@@ -2581,7 +2783,7 @@ Fetches detailed status of a sub DAG run.
       {
         "step": {
           "name": "load_data",
-          "command": "load_to_warehouse.py",
+          "commands": [{"command": "load_to_warehouse.py", "args": []}],
           "depends": ["validate_schema"]
         },
         "stdout": "/logs/warehouse_loader_subdag/sub_20240211_143020_xyz456/load_data.stdout",
@@ -2669,7 +2871,7 @@ Updates the status of a step in a sub DAG run.
 
 **Endpoint**: `GET /api/v1/queues`
 
-Retrieves queue summaries. Use `GET /api/v1/queues/{name}/items` to fetch paginated running or queued items for a specific queue.
+Retrieves queue summaries. Use `GET /api/v1/queues/{name}` for one queue and `GET /api/v1/queues/{name}/items` to page through its queued items.
 
 **Response (200)**:
 ```json
@@ -2689,7 +2891,7 @@ Retrieves queue summaries. Use `GET /api/v1/queues/{name}/items` to fetch pagina
           "statusLabel": "running",
           "startedAt": "2024-02-11T14:00:00Z",
           "finishedAt": "",
-          "log": "/logs/data_processing_pipeline/20240211_140000_abc123.log"
+          "triggerType": "scheduler"
         }
       ]
     },
@@ -2706,7 +2908,7 @@ Retrieves queue summaries. Use `GET /api/v1/queues/{name}/items` to fetch pagina
           "statusLabel": "running",
           "startedAt": "2024-02-11T15:00:00Z",
           "finishedAt": "",
-          "log": "/logs/backup_job/20240211_150000_backup.log"
+          "triggerType": "scheduler"
         }
       ],
       "maxConcurrency": 1
@@ -2728,18 +2930,25 @@ Retrieves queue summaries. Use `GET /api/v1/queues/{name}/items` to fetch pagina
 - `running`: Only currently running DAG-runs are embedded here
 - `summary`: Capacity and utilization totals across all queues
 
+### Get Queue
+
+**Endpoint**: `GET /api/v1/queues/{name}`
+
+Returns one queue with the same fields as an entry of `queues` above: `name`, `type`, `maxConcurrency`, `runningCount`, `queuedCount`, and `running`. `queuedCountCapped` is `true` when counting stopped at the server scan cap, so `queuedCount` is a lower bound.
+
+**Error Response (404)**: The queue does not exist.
+
 ### List Queue Items
 
 **Endpoint**: `GET /api/v1/queues/{name}/items`
 
-Returns paginated items for one queue.
+Returns one page of the queued DAG-runs of a queue, from the head of the queue toward the tail. Running DAG-runs are listed in `running` of [Get Queue](#get-queue).
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
-| type | string | `queued` or `running` | `queued` |
-| page | integer | Page number | 1 |
-| perPage | integer | Items per page | 50 |
+| limit | integer | Items per page (max 500) | 100 |
+| cursor | string | Opaque cursor returned by the previous page | - |
 | remoteNode | string | Remote node name | "local" |
 
 **Response (200)**:
@@ -2754,7 +2963,7 @@ Returns paginated items for one queue.
       "queuedAt": "2024-02-11T14:30:00Z",
       "startedAt": "",
       "finishedAt": "",
-      "log": "/logs/ml_training_pipeline/20240211_143000_def456.log",
+      "triggerType": "scheduler",
       "conditions": [
         {
           "type": "Queued",
@@ -2766,25 +2975,15 @@ Returns paginated items for one queue.
       ]
     }
   ],
-  "pagination": {
-    "totalRecords": 2,
-    "currentPage": 1,
-    "totalPages": 2,
-    "nextPage": 2,
-    "prevPage": null
-  }
+  "nextCursor": "eyJ2ZXJzaW9uIjoxLCJxdWV1ZSI6ImNyaXRpY2FsIiwib2Zmc2V0IjoxfQ"
 }
 ```
 
-**Error Response (500)**:
-```json
-{
-  "code": "internal_error",
-  "message": "Failed to retrieve queue information"
-}
-```
+`nextCursor` is present when more queued items follow. Repeat the request with `cursor=<nextCursor>` to continue.
 
-Queued items use the same `conditions` field as other DAG-run summaries. Running queue items do not include queued runtime conditions.
+**Error Response (400)**: The cursor is invalid.
+
+Queued items use the same `conditions` field as other DAG-run summaries.
 
 ## Additional Endpoints
 
@@ -2817,10 +3016,6 @@ Use `nextCursor` from the previous response to continue loading older runs.
 {
   "dagRuns": [
     {
-      "rootDAGRunName": "data_processing_pipeline",
-      "rootDAGRunId": "20240211_140000_abc123",
-      "parentDAGRunName": "",
-      "parentDAGRunId": "",
       "dagRunId": "20240211_140000_abc123",
       "name": "data_processing_pipeline",
       "status": 4,
@@ -2828,14 +3023,11 @@ Use `nextCursor` from the previous response to continue loading older runs.
       "queuedAt": "",
       "startedAt": "2024-02-11T14:00:00Z",
       "finishedAt": "2024-02-11T14:45:30Z",
-      "log": "/logs/data_processing_pipeline/20240211_140000_abc123.log",
+      "triggerType": "scheduler",
+      "workerId": "local",
       "params": "{\"date\": \"2024-02-11\", \"env\": \"production\", \"batch_size\": 5000}"
     },
     {
-      "rootDAGRunName": "data_processing_pipeline",
-      "rootDAGRunId": "20240211_020000_def456",
-      "parentDAGRunName": "",
-      "parentDAGRunId": "",
       "dagRunId": "20240211_020000_def456",
       "name": "data_processing_pipeline",
       "status": 2,
@@ -2843,7 +3035,8 @@ Use `nextCursor` from the previous response to continue loading older runs.
       "queuedAt": "",
       "startedAt": "2024-02-11T02:00:00Z",
       "finishedAt": "2024-02-11T02:15:45Z",
-      "log": "/logs/data_processing_pipeline/20240211_020000_def456.log",
+      "triggerType": "scheduler",
+      "workerId": "local",
       "params": "{\"date\": \"2024-02-11\", \"env\": \"production\", \"batch_size\": 5000}"
     }
   ],
@@ -2892,8 +3085,8 @@ curl -X POST "http://localhost:8080/api/v1/dags/critical-job/start" \
 **Response if DAG is already running (409)**:
 ```json
 {
-  "code": "already_running",
-  "message": "DAG critical-job is already running, cannot start in singleton mode"
+  "code": "already_exists",
+  "message": "DAG critical-job is already running (singleton mode)"
 }
 ```
 
@@ -3158,7 +3351,7 @@ curl "http://localhost:8080/api/v1/queues" \
      -H "Authorization: Bearer your-token"
 
 # Load queued items from one queue
-curl "http://localhost:8080/api/v1/queues/default/items?type=queued&page=1&perPage=20" \
+curl "http://localhost:8080/api/v1/queues/default/items?limit=20" \
      -H "Authorization: Bearer your-token"
 ```
 
@@ -3233,6 +3426,8 @@ Retrieves all API keys. Requires admin role.
       "name": "ci-pipeline",
       "description": "API key for CI/CD pipeline",
       "role": "operator",
+      "allowedSurfaces": ["rest_api"],
+      "attributionClass": "service_account",
       "keyPrefix": "dagu_7Kq",
       "createdAt": "2024-02-11T12:00:00Z",
       "updatedAt": "2024-02-11T12:00:00Z",
@@ -3254,7 +3449,9 @@ Creates a new API key. Requires admin role.
 {
   "name": "ci-pipeline",
   "description": "API key for CI/CD pipeline",
-  "role": "operator"
+  "role": "operator",
+  "allowedSurfaces": ["rest_api"],
+  "attributionClass": "service_account"
 }
 ```
 
@@ -3263,7 +3460,12 @@ Creates a new API key. Requires admin role.
 |-------|------|-------------|----------|
 | name | string | Human-readable name (1-100 chars) | Yes |
 | description | string | Optional description (max 500 chars) | No |
-| role | string | Role: "admin", "manager", "operator", "viewer" | Yes |
+| role | string | Role: "admin", "manager", "developer", "operator", "viewer" | Yes |
+| allowedSurfaces | string[] | Interfaces that accept the key: `rest_api`, `mcp`, or both. A request without it returns 400 | Yes |
+| attributionClass | string | `service_account` for a key that acts as its own identity, or `user_owned` for a key owned by a user | Yes |
+| ownerUserId | string | Owner user ID. Required when `attributionClass` is `user_owned` | No |
+| serviceAccountName | string | Display name of the service account. Defaults to `name` | No |
+| workspaceAccess | object | Workspaces the key can reach, as `{"all": true}` or `{"all": false, "grants": [...]}`. Defaults to all workspaces | No |
 
 **Response (201)**:
 ```json
@@ -3273,6 +3475,8 @@ Creates a new API key. Requires admin role.
     "name": "ci-pipeline",
     "description": "API key for CI/CD pipeline",
     "role": "operator",
+    "allowedSurfaces": ["rest_api"],
+    "attributionClass": "service_account",
     "keyPrefix": "dagu_7Kq",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
@@ -3308,6 +3512,8 @@ Retrieves a specific API key by ID. Requires admin role.
     "name": "ci-pipeline",
     "description": "API key for CI/CD pipeline",
     "role": "operator",
+    "allowedSurfaces": ["rest_api"],
+    "attributionClass": "service_account",
     "keyPrefix": "dagu_7Kq",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T12:00:00Z",
@@ -3350,6 +3556,8 @@ All fields are optional. Only provided fields are updated.
     "name": "production-ci",
     "description": "Updated description",
     "role": "manager",
+    "allowedSurfaces": ["rest_api"],
+    "attributionClass": "service_account",
     "keyPrefix": "dagu_7Kq",
     "createdAt": "2024-02-11T12:00:00Z",
     "updatedAt": "2024-02-11T16:00:00Z",
@@ -3395,7 +3603,7 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
 API_KEY=$(curl -s -X POST http://localhost:8080/api/v1/api-keys \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name": "automation", "role": "operator"}' | jq -r '.key')
+  -d '{"name": "automation", "role": "operator", "allowedSurfaces": ["rest_api"], "attributionClass": "service_account"}' | jq -r '.key')
 
 echo "Created API key: $API_KEY"
 
@@ -3754,6 +3962,26 @@ Enables or disables the webhook without rotating credentials. Requires developer
 }
 ```
 
+### Webhook HMAC
+
+These endpoints set how the trigger endpoint checks the `X-Dagu-Signature` header. Each requires developer, manager, or admin role and returns `404` when the DAG has no webhook.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/api/v1/dags/{fileName}/webhook/hmac/enable` | Turn on HMAC. Body: `authMode` (`token_and_hmac` or `hmac_only`) and optional `enforcementMode` (`strict`, the default, or `observe`). Returns `webhook` and the new `hmacSecret`. |
+| `POST` | `/api/v1/dags/{fileName}/webhook/hmac/configure` | Change `authMode` or `enforcementMode` without rotating the secret. Returns the [webhook details](#webhook-details-shape). |
+| `POST` | `/api/v1/dags/{fileName}/webhook/hmac/regenerate` | Replace the secret. The old secret stops working at once. Returns `webhook` and the new `hmacSecret`. |
+| `POST` | `/api/v1/dags/{fileName}/webhook/hmac/disable` | Return the webhook to `token_only`. Returns the [webhook details](#webhook-details-shape). |
+
+`hmacSecret` is returned only by `enable` and `regenerate`. `hmac_only` always uses `strict`; omit `enforcementMode` with it.
+
+```bash
+curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/hmac/enable \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"authMode": "token_and_hmac", "enforcementMode": "strict"}'
+```
+
 ### Delete DAG Webhook
 
 **Endpoint**: `DELETE /api/v1/dags/{fileName}/webhook`
@@ -3926,9 +4154,11 @@ Retrieves information about connected workers in the distributed execution syste
         "memory": "64G",
         "region": "us-east-1"
       },
-      "health_status": "WORKER_HEALTH_STATUS_HEALTHY",
-      "last_heartbeat": "2024-02-11T12:00:00Z",
-      "running_tasks": [
+      "healthStatus": "healthy",
+      "lastHeartbeatAt": "2024-02-11T12:00:00Z",
+      "totalPollers": 4,
+      "busyPollers": 1,
+      "runningTasks": [
         {
           "dagName": "ml-training-pipeline",
           "dagRunId": "20240211_120000_abc123",
@@ -3947,9 +4177,11 @@ Retrieves information about connected workers in the distributed execution syste
         "cpu-cores": "32",
         "region": "us-east-1"
       },
-      "health_status": "WORKER_HEALTH_STATUS_WARNING",
-      "last_heartbeat": "2024-02-11T11:59:50Z",
-      "running_tasks": []
+      "healthStatus": "warning",
+      "lastHeartbeatAt": "2024-02-11T11:59:50Z",
+      "totalPollers": 4,
+      "busyPollers": 0,
+      "runningTasks": []
     },
     {
       "id": "worker-eu-01",
@@ -3957,9 +4189,11 @@ Retrieves information about connected workers in the distributed execution syste
         "region": "eu-west-1",
         "compliance": "gdpr"
       },
-      "health_status": "WORKER_HEALTH_STATUS_UNHEALTHY",
-      "last_heartbeat": "2024-02-11T11:59:30Z",
-      "running_tasks": [
+      "healthStatus": "unhealthy",
+      "lastHeartbeatAt": "2024-02-11T11:59:30Z",
+      "totalPollers": 2,
+      "busyPollers": 1,
+      "runningTasks": [
         {
           "dagName": "data-processor",
           "dagRunId": "20240211_113000_def456",
@@ -3971,14 +4205,19 @@ Retrieves information about connected workers in the distributed execution syste
         }
       ]
     }
-  ]
+  ],
+  "errors": []
 }
 ```
 
+When no coordinator is configured, the response is `200` with an empty `workers` list and `"errors": ["Coordinator service not configured"]`.
+
 **Worker Health Status Values**:
-- `WORKER_HEALTH_STATUS_HEALTHY`: Last heartbeat < 5 seconds ago
-- `WORKER_HEALTH_STATUS_WARNING`: Last heartbeat 5-15 seconds ago
-- `WORKER_HEALTH_STATUS_UNHEALTHY`: Last heartbeat > 15 seconds ago
+- `healthy`: Last heartbeat < 5 seconds ago
+- `warning`: Last heartbeat 5-15 seconds ago
+- `unhealthy`: Last heartbeat > 15 seconds ago
+
+`totalPollers` is the number of task pollers of the worker, and `busyPollers` is how many of them are running a task.
 
 **Running Task Fields**:
 - `dagName`: Name of the DAG being executed
@@ -3989,11 +4228,10 @@ Retrieves information about connected workers in the distributed execution syste
 - `parentDagRunId`: ID of the immediate parent DAG run
 - `startedAt`: When the task execution started
 
-**Error Response (503)** (when coordinator is not running):
+**Error Response (503)** (when the coordinator cannot be reached):
 ```json
 {
-  "code": "service_unavailable",
-  "message": "Coordinator service is not available"
+  "message": "Coordinator service unavailable"
 }
 ```
 
@@ -4013,8 +4251,8 @@ Wiki endpoints accept optional `workspace` and `remoteNode` query parameters. Pa
 | `POST` | `/api/v1/wiki/page/rename?path=...` | Rename or move a page or directory. |
 | `GET` | `/api/v1/wiki/page/revisions?path=...` | List saved revisions for one page. |
 | `GET` | `/api/v1/wiki/page/revision?path=...` | Read one saved revision. |
-| `POST` | `/api/v1/wiki/page/attachment?path=...` | Upload an attachment for a page. |
-| `GET` | `/api/v1/wiki/page/attachment?path=...` | Download a page attachment. |
+| `PUT` | `/api/v1/wiki/page/attachment?path=...&name=...` | Upload an attachment for a page. The body is the raw file as `application/octet-stream`. An attachment with the same `name` is replaced. |
+| `GET` | `/api/v1/wiki/page/attachment?path=...&name=...` | Download a page attachment. |
 | `POST` | `/api/v1/wiki/delete-batch` | Delete several pages or directories. |
 
 Create a page in the `operations` directory of the default workspace:
@@ -4457,8 +4695,7 @@ curl -X POST "http://localhost:8080/api/v1/sync/cleanup"
 
 ## API Versioning
 
-- Current version: v2
-- Legacy v1 endpoints are deprecated but still available
+- Current version: v1. It is the only REST API version.
 - Version is included in the URL path: `/api/v1/`
 - Breaking changes will result in a new API version
 

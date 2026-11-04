@@ -70,7 +70,8 @@ dagu://reference/authoring
 
 | Symptom | Cause |
 |---------|-------|
-| `401 Unauthorized` | Missing or wrong API key, key not accepted on the `mcp` surface, or a role without the needed permission. See [Authentication](/mcp/authentication). |
+| `401 Unauthorized` | Missing or wrong API key, or a role without the needed permission. See [Authentication](/mcp/authentication). |
+| `403 Forbidden` with `API key is not allowed for this surface` | The API key does not allow the `mcp` surface. Add it to the key's allowed surfaces. |
 | `404 Not Found` | Server base path missing from the URL. A server mounted at `/dagu` exposes MCP at `/dagu/mcp`. |
 | Client reports a missing command or a stdio server | The entry has a URL but no transport type. Add the client's HTTP type field. |
 | Client connects but no tools appear | The key's role is too narrow, or the client cached an earlier failed session. Reconnect the server. |

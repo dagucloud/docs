@@ -5,7 +5,7 @@ Dagu intentionally exposes three MCP tools.
 | Tool | Purpose |
 |------|---------|
 | `dagu_read` | Read DAGs, Markdown Wiki pages, DAG runs, logs, list views, and Dagu MCP reference resources. |
-| `dagu_change` | Preview or apply DAG YAML and workspace-aware Wiki page changes. |
+| `dagu_change` | Preview or apply DAG YAML, DAG default runtime profile, and workspace-aware Wiki page changes. |
 | `dagu_execute` | Start, enqueue, retry, or stop DAG runs, and approve, reject, or push back steps waiting for a person. |
 
 ## `dagu_read`
@@ -14,14 +14,17 @@ Use `dagu_read` for current Dagu state.
 
 | Input | Values |
 |-------|--------|
-| `target` | `references`, `reference`, `dags`, `dag`, `dag_spec`, `dag_search`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, `step_log`, or `workbook` |
+| `target` | `references`, `reference`, `dags`, `dag`, `dag_spec`, `dag_profile`, `dag_search`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, `step_log`, `foreach_items`, `foreach_item`, or `workbook` |
 | `name` | DAG name for DAG and run targets, or reference topic for `reference` |
 | `dagRunId` | DAG-run ID for run and log targets |
-| `subRunId` | Optional child DAG-run ID for `run` and `step_log`; `name` and `dagRunId` identify its root run |
-| `stepName` | Step name for the `step_log` target |
-| `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100` |
+| `subRunId` | Optional child DAG-run ID for `run`, `step_log`, `foreach_items`, and `foreach_item`; `name` and `dagRunId` identify its root run |
+| `stepName` | Step name for the `step_log`, `foreach_items`, and `foreach_item` targets |
+| `item` | Foreach item path for `foreach_item`, or for `step_log` with `bodyStepName`. A top-level item is its index; a nested item is the body step's `foreachParent`, a dot, and the index. |
+| `bodyStepName` | Body step name inside a foreach item for `step_log`; requires `item` |
+| `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100`. `foreach_items` accepts `parent`, `status`, `page`, and `perPage`. |
 | `workspace` | `all`, `default`, or a workspace name. Required for `wiki_page`; optional for `wiki`, `wiki_search`, and `dag_search`. |
 | `path` | Wiki page path without `.md`, required for `wiki_page`; or a workbook file path on the server, required for `workbook` |
+| `password` | Password of a protected workbook; optional for `workbook` and not recorded in the audit log |
 | `search` | Search text; required for `wiki_search` and `dag_search` |
 | `prefix` | Wiki page path prefix without `.md`; optional for `wiki` and `wiki_search` |
 | `cursor` | Opaque cursor from the preceding `wiki_search` or `dag_search` result page |
@@ -121,6 +124,37 @@ Read a child DAG run or one of its step logs by adding the child ID returned in 
 }
 ```
 
+List the items of a foreach step, filtered by the status each body run reached (`not_started`, `running`, `succeeded`, `failed`, or `aborted`):
+
+```json
+{
+  "target": "foreach_items",
+  "name": "nightly-report",
+  "dagRunId": "20260522T010000",
+  "stepName": "process-files",
+  "query": "status=failed"
+}
+```
+
+Read one item with `foreach_item`, or the log of one body step of an item with `step_log`:
+
+```json
+{
+  "target": "step_log",
+  "name": "nightly-report",
+  "dagRunId": "20260522T010000",
+  "stepName": "process-files",
+  "item": "3",
+  "bodyStepName": "upload"
+}
+```
+
+Read the default runtime profile of a DAG. The result has `configuredProfile`, `effectiveProfile`, and `source` (`dag`, `workspace`, or `none`):
+
+```json
+{ "target": "dag_profile", "name": "nightly-report" }
+```
+
 Successful reads return a stable envelope with `target`, normalized `data`, built-in `references`, and `uri` when the result has a canonical resource URI. DAG and run lists include canonical URIs; run summaries include numeric and human-readable statuses; run details include the current `attemptId`, step statuses, errors, log URIs, and child-run references.
 
 ## `dagu_change`
@@ -130,10 +164,11 @@ Use `dagu_change` to create, update, rename, or delete DAG definitions and to ma
 | Input | Values |
 |-------|--------|
 | `mode` | `preview` or `apply`; defaults to `preview` |
-| `type` | `upsert_dag`, `rename_dag`, `delete_dag`, `upsert_wiki_page`, `rename_wiki_page`, or `delete_wiki_page`; defaults to `upsert_dag` |
+| `type` | `upsert_dag`, `rename_dag`, `delete_dag`, `set_dag_profile`, `clear_dag_profile`, `upsert_wiki_page`, `rename_wiki_page`, or `delete_wiki_page`; defaults to `upsert_dag` |
 | `name` | Target DAG name for DAG changes |
 | `spec` | Full DAG YAML specification for `upsert_dag` |
 | `newName` | Destination DAG name for `rename_dag` |
+| `profile` | Runtime profile name for `set_dag_profile` |
 | `workspace` | `default` or a named workspace for Wiki page changes; `all` is not allowed |
 | `path` | Wiki page or directory path without `.md` for Wiki page changes |
 | `content` | Full Markdown content for `upsert_wiki_page`; empty content is allowed |
@@ -187,6 +222,19 @@ Preview a DAG deletion:
 ```
 
 Repeat the call with `mode=apply` to delete the DAG definition. A successful deletion omits `dagUri` because the resource no longer exists.
+
+Set the default runtime profile of a DAG:
+
+```json
+{
+  "mode": "preview",
+  "type": "set_dag_profile",
+  "name": "nightly-report",
+  "profile": "prod"
+}
+```
+
+`set_dag_profile` and `clear_dag_profile` change the server-side DAG setting, not the YAML. Preview checks the profile without writing it. `clear_dag_profile` removes the setting, so the DAG falls back to its workspace default, if any. Read the current value with `target=dag_profile`. See [Runtime Profiles](/writing-workflows/runtime-profiles).
 
 Preview a Wiki page create or update:
 

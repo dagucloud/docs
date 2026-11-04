@@ -117,10 +117,15 @@ The run handle exposes the run reference and current state:
 ```go
 ref := run.Ref()
 status, err := run.Status(ctx)
+outputs, err := run.Outputs(ctx)
 err = run.Stop(ctx)
 ```
 
-`Engine.Status(ctx, ref)` and `Engine.Stop(ctx, ref)` operate on a run reference. `Engine.Status` reads the local file-backed run status. For distributed runs, use the `Run` returned by `RunFile` or `RunYAML`; its `Status` method reads status from the coordinator.
+`Run.ID` and `Run.Name` return the run ID and DAG name.
+
+`Engine.Status(ctx, ref)`, `Engine.Outputs(ctx, ref)`, and `Engine.Stop(ctx, ref)` operate on a run reference. `Engine.Status` reads the local file-backed run status. For distributed runs, use the `Run` returned by `RunFile` or `RunYAML`; its `Status` method reads status from the coordinator.
+
+`Outputs` returns the collected step outputs as a `map[string]string`, read from the local file-backed run store.
 
 `dagu.Status` contains the DAG name, run ID, attempt ID, status string, start and finish times, error string, log file path, archive directory, worker ID, and trigger type.
 
@@ -141,6 +146,8 @@ dagu.RegisterExecutor(
 ```
 
 The executor type name must start with a letter and may contain letters, digits, `_`, and `-`.
+
+`WithStepValidator` adds a `func(dagu.Step) error` that checks the step's configuration while the DAG loads.
 
 ```go
 type echoExecutor struct {
@@ -246,6 +253,10 @@ if err != nil {
 }
 status, err := run.Wait(ctx)
 ```
+
+`DistributedOptions.MaxStatusErrors` sets how many consecutive status read failures make `Run.Wait` fail.
+
+`Worker.Stop(ctx)` stops polling and drains the running DAG runs. A `ctx` deadline bounds the wait; without one, `Stop` waits for every run.
 
 `WorkerOptions.Coordinators` overrides `DistributedOptions.Coordinators` when non-empty. `WorkerOptions.TLS` overrides `DistributedOptions.TLS` when non-zero. `HealthPort` starts the worker health endpoint on that port; `0` disables it.
 

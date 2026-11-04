@@ -39,9 +39,10 @@ The Web UI lets you route these DAG-run events:
 | **Aborted** | Notify operators when a run is stopped. |
 | **Rejected** | Surface queue, concurrency, or policy rejections. |
 | **Waiting** | Ask for approval or manual intervention. |
+| **Partially succeeded** | Report a run that finished while some steps failed. |
 | **Succeeded** | Notify only when successful completion matters. |
 
-New rules default to the operational events: **Failed**, **Aborted**, **Rejected**, and **Waiting**. **Succeeded** is opt-in to avoid noisy channels.
+New rules default to the operational events: **Failed**, **Aborted**, **Rejected**, and **Waiting**. **Partially succeeded** and **Succeeded** are opt-in to avoid noisy channels.
 
 When a DAG has DAG-level auto retry remaining, Dagu does not send the **Failed** notification for the intermediate failed attempt. The failure notification is sent only after the retry budget is exhausted and the DAG run is finally failed.
 
@@ -56,7 +57,7 @@ Open **Notifications > Channels** to create destinations before adding rules.
 | **Email** | Send to one or more recipients through the configured SMTP transport. |
 | **Generic Webhook** | POST a structured payload to an incident system, chat relay, or internal service. |
 | **Telegram** | Send messages through a Telegram bot token and chat ID, optionally targeting a forum topic. |
-| **Custom** | Run a shell command on the Dagu server. See [Local Commands](#local-commands). |
+| **Local command** | Run a shell command on the Dagu server. See [Local Commands](#local-commands). |
 
 For Google Chat or another service without a dedicated channel type, use a generic webhook and customize its JSON body to match the receiver's payload format.
 
@@ -150,7 +151,7 @@ for Microsoft and Google setup instructions.
 
 ### Local Commands
 
-A **Custom** channel runs a shell command on the Dagu server each time it delivers a notification. Use it for a destination without a channel type, such as a desktop notifier, a command-line client, or a local script. After saving, the channel list shows it as **Local command**.
+A **Local command** channel runs a shell command on the Dagu server each time it delivers a notification. Use it for a destination without a channel type, such as a desktop notifier, a command-line client, or a local script.
 
 Local command channels need both of these:
 
