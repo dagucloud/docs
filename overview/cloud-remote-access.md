@@ -1,13 +1,13 @@
 ---
-description: Let AI apps connected to Dagu Cloud, and members in Dagu Console, read logs and act on runs of a self-hosted server over a connection the server opens. Off by default; the server caps the role.
+description: Let MCP clients connected to Dagu Cloud, and members in Dagu Console, read logs and act on runs of a self-hosted server over a connection the server opens. Off by default; the server caps the role.
 ---
 
 # Remote Access from Dagu Cloud
 
-AI apps connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on, and members can [act on runs from Dagu Console](#act-on-runs-from-dagu-console). Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key.
+MCP clients connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on, and members can [act on runs from Dagu Console](#act-on-runs-from-dagu-console). Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key.
 
 ```text
-AI app ──MCP──▶ Dagu Cloud ── signed call ──┐
+Client ──MCP──▶ Dagu Cloud ── signed call ──┐
                                             │  WebSocket, opened by the server
                                             ▼
                      Dagu server ──▶ dagu_read, dagu_change, dagu_execute
@@ -58,21 +58,21 @@ or with `DAGU_CLOUD_REMOTE_ACCESS=operator` and `DAGU_CLOUD_REMOTE_APPROVALS=fal
 
 Each key, when set, wins over the choice in the web UI, `off` and `false` included. The section shows **Set in configuration** for it and offers no way to change it. To change it, change the configuration and restart Dagu. A key left unset is chosen in the web UI, where it starts off.
 
-## Connect an AI App
+## Connect an MCP Client
 
-Add Dagu Cloud's MCP server URL to the AI app as a custom connector:
+Add Dagu Cloud's MCP server URL to the MCP client as a custom connector:
 
 ```text
 https://console.dagu.sh/mcp
 ```
 
-1. Add the URL in Claude, ChatGPT, Cursor, or another app that connects to remote MCP servers. **MCP** in [Dagu Console](https://console.dagu.sh/ai-apps) shows the URL and the steps for each app.
-2. Sign in to Dagu Cloud when the app asks. Choose the workspaces the app may reach, what it may do in each (read, operate, or edit), on all servers or chosen ones, and whether it may decide steps waiting for a person.
+1. Add the URL in Claude, ChatGPT, Cursor, or another client that connects to remote MCP servers. **MCP** in [Dagu Console](https://console.dagu.sh/mcp-access) shows the URL and the steps for each client.
+2. Sign in to Dagu Cloud when the client asks. Choose the workspaces the client may reach, what it may do in each (read, operate, or edit), on all servers or chosen ones, and whether it may decide steps waiting for a person.
 
 A call gets the lowest of:
 
 - what the connection was granted in step 2;
-- the workspace's **Agent policy**, which its owners set on **MCP**;
+- the workspace's **MCP policy**, which its owners set on **MCP**;
 - the member's entry under **Server roles**, also set by owners;
 - the server's remote access [level](#levels).
 
@@ -123,13 +123,13 @@ Calls from Dagu Cloud use the same three tools as the server's own [`/mcp` endpo
 
 ## Security
 
-- Each call carries an assertion that Dagu Cloud signs for that one request. It names the user, their role, and the AI app, is good for at most a minute, and is accepted once. The server refuses a call whose assertion is invalid, expired, reused, or made for another server or request, and nothing runs.
+- Each call carries an assertion that Dagu Cloud signs for that one request. It names the user, their role, and the MCP client, is good for at most a minute, and is accepted once. The server refuses a call whose assertion is invalid, expired, reused, or made for another server or request, and nothing runs.
 - Calls reach only the MCP endpoint and never get `manager` or `admin`, so they cannot open the terminal or manage users, API keys, the license, or these settings.
 - Turning remote access off closes the connection and ends the calls in flight. Calls that still arrive are refused.
-- Audit logs record each call with credential type `cloud`, the user's email, the AI app, and the Dagu Cloud workspace. See [Calls From Dagu Cloud](/mcp/auditability#calls-from-dagu-cloud).
+- Audit logs record each call with credential type `cloud`, the user's email, the MCP client, and the Dagu Cloud workspace. See [Calls From Dagu Cloud](/mcp/auditability#calls-from-dagu-cloud).
 - When [monitoring](/overview/console-monitoring#health) is on, health reports include the remote access level and whether approvals are on.
 - Dagu Cloud passes each answer on without storing it. It keeps a log of each call for 90 days: tool, action, subject, outcome, user, and app (**Dagu Console** for a member's own action), plus up to 300 characters of the error when a call fails.
-- An answer the AI app receives also reaches the app's provider, such as Anthropic or OpenAI. Every level, viewer included, can read logs.
+- An answer the MCP client receives also reaches the client's provider, such as Anthropic or OpenAI. Every level, viewer included, can read logs.
 
 See [Dagu Cloud: Security and Data Flow](/overview/security) for every connection, what Dagu Cloud keeps, and what it is trusted with.
 

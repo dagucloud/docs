@@ -31,7 +31,7 @@ If the Dagu server uses a base path, place `/mcp` under that base path. For exam
 | Configure Claude Code, Codex, Cursor, VS Code, or another client | [Clients](/mcp/clients/) |
 | Understand the request path and audit flow | [Architecture](/mcp/architecture) |
 | Choose API key, role, surface, and attribution settings | [Authentication](/mcp/authentication) |
-| Let AI apps connected to Dagu Cloud use a server with no public address | [Remote Access from Dagu Cloud](/overview/cloud-remote-access) |
+| Let MCP clients connected to Dagu Cloud use a server with no public address | [Remote Access from Dagu Cloud](/overview/cloud-remote-access) |
 | Read or mutate Dagu through MCP tools | [Tools](/mcp/tools) |
 | Use `dagu://` resources or run-completion subscriptions | [Resources](/mcp/resources) |
 | Review what appears in audit logs | [Auditability](/mcp/auditability) |

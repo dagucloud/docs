@@ -39,8 +39,8 @@ Calls that Dagu Cloud carries under [remote access](/overview/cloud-remote-acces
 
 | Field | Meaning |
 |-------|---------|
-| `credential_id` | The connection the user made from an AI app |
-| `credential_name` | The AI app's name |
+| `credential_id` | The connection the user made from an MCP client |
+| `credential_name` | The MCP client's name |
 | `subject_id` | `cloud:` followed by the Dagu Cloud user ID |
 | `subject_name` | The user's email |
 | `cloud_workspace` | The Dagu Cloud workspace the call came from |

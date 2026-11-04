@@ -33,7 +33,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 - **Incident routing:** open and resolve provider incidents for failed workflows.
 - **Monitoring in Dagu Console:** see connected servers' health, runs, and trends in one place, and get an email when a workflow fails or a server stops reporting. A Community server can be monitored for free, one per workspace and with lower limits; it stays on Community. See [Free and Paid](/overview/console-monitoring#free-and-paid).
 - **Public webhook URLs through Dagu Cloud:** give a DAG's webhook an address on the internet, so GitHub, Stripe, or Slack can start it on a server with no public address. A connected server has up to 1,000; a server on free monitoring has one. See [Public Webhook URLs](/server-admin/authentication/public-webhook-urls).
-- **Remote access from Dagu Cloud (MCP):** let AI apps connected to Dagu Cloud use the server's MCP tools over a connection the server opens, up to a role the server's administrator chooses. It needs a Team or Pro plan, or a trial. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
+- **Remote access from Dagu Cloud (MCP):** let MCP clients connected to Dagu Cloud use the server's MCP tools over a connection the server opens, up to a role the server's administrator chooses. It needs a Team or Pro plan, or a trial. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
 
 ## Connect a Server
 

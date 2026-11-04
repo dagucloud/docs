@@ -40,7 +40,7 @@ Off until you give a webhook a public URL. The scheduler holding the scheduler l
 
 Off until an administrator turns it on. Each `dagu server` or `dagu start-all` process keeps a WebSocket to `relay.dagu.sh`. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
 
-- **Sent**: answers to the calls AI apps make, within the server's level. Dagu Cloud passes them on without storing them.
+- **Sent**: answers to the calls MCP clients make, within the server's level. Dagu Cloud passes them on without storing them.
 - **Kept**: a log of each call for 90 days: tool, action, subject, outcome, user, and app, plus up to 300 characters of the error when a call fails.
 
 ### Upgrade check and tracing
@@ -63,7 +63,7 @@ Allow outbound HTTPS (port 443) for the features you use. Workers need nothing.
 ## How a Remote Call Is Checked
 
 ```text
-AI app
+MCP client
   │ MCP
   ▼
 console.dagu.sh   checks the grant, signs the call
@@ -76,7 +76,7 @@ relay.dagu.sh     passes it on
 Dagu server       verifies the signature, runs, audits
 ```
 
-- **Dagu Cloud signs each call.** It first checks what the connection may do (below), then signs the call with its Ed25519 key. The signature names the user, their role, and the AI app, lasts one minute, is accepted once, and covers the exact request.
+- **Dagu Cloud signs each call.** It first checks what the connection may do (below), then signs the call with its Ed25519 key. The signature names the user, their role, and the MCP client, lasts one minute, is accepted once, and covers the exact request.
 - **The relay passes it on.** It holds no signing key, so it cannot make a call your server accepts, and a call changed on the way fails the server's check.
 - **Your server decides.** It verifies the signature with Dagu Cloud's public key and refuses a call that is expired, reused, or made for another server or request. It runs the call as `cloud:` and the user's ID, with the lower of the signed role and the server's own level, and never as `manager` or `admin`.
 - **Calls reach only the MCP tools**: never the terminal, users, API keys, the license, or the remote access settings. Each call is in the server's [audit log](/mcp/auditability#calls-from-dagu-cloud).
@@ -86,11 +86,11 @@ Dagu server       verifies the signature, runs, audits
 A call gets the lowest of four limits:
 
 - **The connection**: the workspaces, servers, and access (read, operate, or edit) chosen when the app was connected.
-- **The workspace's Agent policy**, set by its owners in Dagu Console.
+- **The workspace's MCP policy**, set by its owners in Dagu Console.
 - **The member's role on the workspace's servers**, set by its owners.
 - **The server's remote access [level](/overview/cloud-remote-access#levels)**, set by the server's administrator.
 
-Deciding a step that waits for a person also needs approvals allowed by the connection, the Agent policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it.
+Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it.
 
 ## What You Trust Dagu Cloud With
 
@@ -100,7 +100,7 @@ Deciding a step that waits for a person also needs approvals allowed by the conn
 
 ## AI Providers
 
-When an AI app reads a run or its logs through Dagu Cloud, the answer goes to the app and to its provider, such as Anthropic or OpenAI, under that provider's terms. Every level, viewer included, can read logs. Choose each server's level and the workspace's Agent policy with that in mind.
+When an MCP client reads a run or its logs through Dagu Cloud, the answer goes to the client and to its provider, such as Anthropic or OpenAI, under that provider's terms. Every level, viewer included, can read logs. Choose each server's level and the workspace's Agent policy with that in mind.
 
 ## Where Dagu Cloud Runs
 

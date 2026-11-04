@@ -149,10 +149,10 @@ Scheduler (holding the scheduler lock) ─┘ ──▶ checks signature and eve
 
 ## Remote Access from Dagu Cloud (Optional)
 
-With [remote access](/overview/cloud-remote-access) on, AI apps connected to Dagu Cloud can use the server's MCP tools. Dagu Cloud signs each call; the server takes it over a connection it opens itself and decides whether to run it.
+With [remote access](/overview/cloud-remote-access) on, MCP clients connected to Dagu Cloud can use the server's MCP tools. Dagu Cloud signs each call; the server takes it over a connection it opens itself and decides whether to run it.
 
 ```text
-AI app ──MCP──▶ Dagu Cloud (checks the grant, signs the call)
+Client ──MCP──▶ Dagu Cloud (checks the grant, signs the call)
                     │
                     ▼
                   relay
