@@ -704,7 +704,9 @@ For complete documentation on all available fields, inheritance behavior, and co
 
 ## Command-Line Flags
 
-### Global Flags (All Commands)
+### Common Flags (Most Commands)
+`version`, `schema`, `example`, `completion`, `xlsx inspect`, and `xlsx read` do not accept these flags.
+
 - `--config, -c` - Config file (default: `~/.config/dagu/config.yaml`)
 - `--dagu-home` - Override DAGU_HOME for this command invocation
 - `--quiet, -q` - Suppress output

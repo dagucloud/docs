@@ -35,6 +35,7 @@ dagu upgrade -y
 | `--backup` | | Create backup before upgrading | `false` |
 | `--yes` | `-y` | Skip confirmation prompt | `false` |
 | `--pre-release` | | Include pre-release versions | `false` |
+| `--force` | `-f` | Allow downgrading to an older version | `false` |
 
 ## Installation Methods
 

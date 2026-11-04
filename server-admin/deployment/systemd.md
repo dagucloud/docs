@@ -3,9 +3,9 @@
 ## Install Dagu
 
 ```bash
-# Install to /usr/local/bin (system-wide)
+# Install to /usr/local/bin (system-wide) without the installer's own service
 curl -L https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
-  bash -s -- --install-dir /usr/local/bin
+  bash -s -- --install-dir /usr/local/bin --service no
 
 # Create user and directories
 sudo useradd -r -s /bin/false dagu

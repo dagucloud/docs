@@ -8,11 +8,13 @@ The guided script installer is the recommended path. It can register Dagu as a s
 curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | bash
 ```
 
-By default the wizard installs to `~/.local/bin` (no sudo required). It can also:
+The wizard can:
 
 - add `dagu` to your `PATH`
 - register a `systemd --user` unit (per-user) or a system unit (root)
 - create and verify the first admin account
+
+A system service is the default when `sudo` is available. It installs to `/usr/local/bin` and keeps data in `/var/lib/dagu`. A user service installs to `~/.local/bin` and keeps data in `~/.dagu`. An install without a service uses `~/.local/bin`. Neither needs sudo.
 
 ### Non-interactive with user service
 
@@ -20,6 +22,7 @@ By default the wizard installs to `~/.local/bin` (no sudo required). It can also
 curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | \
   bash -s -- \
     --service yes \
+    --service-scope user \
     --admin-username admin \
     --admin-password 'change-me-now'
 ```

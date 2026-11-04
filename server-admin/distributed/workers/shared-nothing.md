@@ -225,15 +225,22 @@ metadata:
   name: dagu-coordinator
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: dagu-coordinator
   template:
+    metadata:
+      labels:
+        app: dagu-coordinator
     spec:
       containers:
         - name: dagu
-          image: dagu:latest
+          image: ghcr.io/dagucloud/dagu:latest
           args:
             - "dagu"
             - "start-all"
             - "--host=0.0.0.0"
+            - "--dags=/etc/dagu/dags"
             - "--coordinator.host=0.0.0.0"
             - "--coordinator.advertise=dagu-coordinator.default.svc.cluster.local"
           ports:
@@ -272,11 +279,17 @@ metadata:
   name: dagu-worker
 spec:
   replicas: 5
+  selector:
+    matchLabels:
+      app: dagu-worker
   template:
+    metadata:
+      labels:
+        app: dagu-worker
     spec:
       containers:
         - name: worker
-          image: dagu:latest
+          image: ghcr.io/dagucloud/dagu:latest
           args:
             - "dagu"
             - "worker"

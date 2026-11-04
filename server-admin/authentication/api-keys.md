@@ -53,11 +53,13 @@ curl -H "Authorization: Bearer $DAGU_API_KEY" \
   http://localhost:8080/api/v1/dags
 ```
 
-For CLI usage:
+For CLI usage, store the key in a [CLI context](/getting-started/cli#context):
 
 ```bash
-export DAGU_API_TOKEN=$DAGU_API_KEY
-dagu status
+dagu context add prod \
+  --server http://localhost:8080/api/v1 \
+  --api-key "$DAGU_API_KEY"
+dagu --context prod status my-dag
 ```
 
 ## Accepted Surfaces

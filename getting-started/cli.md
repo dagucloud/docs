@@ -2,8 +2,7 @@
 
 Commands accept either DAG names (from YAML `name` field) or file paths.
 
-- Both formats: `start`, `stop`, `status`, `retry`
-- File path only: `dry`, `enqueue`
+- Both formats: `start`, `stop`, `status`, `retry`, `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
 - Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `browser writes`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
@@ -11,16 +10,20 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 ## Global Options
 
 ```bash
-dagu [global options] command [command options] [arguments...]
+dagu [--context NAME] command [command options] [arguments...]
 ```
 
-- `--config, -c` - Config file (default: `~/.config/dagu/config.yaml`)
 - `--context` - CLI context name for context-aware commands (default: current context or `local`)
+- `--help, -h` - Show help
+
+Most commands also accept these options. `version`, `schema`, `example`, `completion`, `xlsx inspect`, and `xlsx read` do not.
+
+- `--config, -c` - Config file (default: `~/.config/dagu/config.yaml`)
 - `--dagu-home` - Override DAGU_HOME for this command invocation
 - `--quiet, -q` - Suppress output
 - `--cpu-profile` - Enable CPU profiling
-- `--help, -h` - Show help
-- `--version, -v` - Print version
+
+Use [`dagu version`](#version) to print the version.
 
 ## Remote Contexts
 
@@ -28,7 +31,6 @@ CLI contexts let context-aware commands target a remote Dagu server instead of t
 
 Context-aware commands are:
 
-- `agent`
 - `start`
 - `enqueue`
 - `status`
@@ -58,12 +60,11 @@ dagu --context staging status nightly-backup
 
 Remote command rules:
 
-- `agent` operates on the agent sessions of the selected server and does not take a DAG path.
 - DAG-oriented remote commands only operate on DAGs that already exist on the remote server.
 - For `start`, `enqueue`, `status`, `stop`, `retry`, and `restart`, pass the remote DAG `fileName` or a unique deployed DAG name. Local YAML paths such as `./job.yaml` are rejected.
 - For `history`, pass a deployed DAG name. Local YAML paths are rejected.
 - Commands that are not context-aware always run against the local instance and reject non-local contexts.
-- `--profile` is local-only for `start`, `enqueue`, and `dry`. To select a profile on a remote server, use the Web UI or the REST API `profileName` field.
+- `--profile` is local-only for `start`, `enqueue`, and `dry`. To select a profile on a remote server, use the Web UI or the REST API `profile` field.
 
 ## Commands
 
@@ -106,12 +107,16 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 `dagu start` requires exactly one DAG name or file path.
 
 **Options:**
-- `--params, -p` - Parameters as JSON
+- `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--run-id, -r` - Custom run ID
 - `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
+- `--params-stdin` - Read parameters from piped or redirected stdin, up to 1 MiB; `--` and `--params` take precedence
 - `--profile` - Runtime profile to apply to this run
 - `--no-reuse` - Recompute eligible build steps instead of reusing prior materializations
+- `--labels` - Additional labels, comma-separated `key=value` or `key` (`--tags` is a deprecated alias)
+- `--worker-label` - Worker label (`key=value`) the run requires, replacing the DAG's `worker_selector`; repeatable
+- `--default-working-dir` - Working directory for DAGs without an explicit working directory
 - `--only` - Run only this step (name or ID); repeatable. Every other step is recorded as skipped
 - `--outputs-from` - Finished run of the same DAG whose work directory, and the outputs of the skipped steps that the `--only` steps depend on, feed the run
 - `--output-from` - Run that gives the outputs of one skipped step, as `<step>=<run-id>`; repeatable, and wins over `--outputs-from` for that step
@@ -305,6 +310,7 @@ dagu status [options] DAG_NAME_OR_FILE
 
 **Options:**
 - `--run-id, -r` - Check specific run (optional)
+- `--sub-run-id, -s` - Check a sub DAG-run of `--run-id` (optional)
 
 ```bash
 dagu status my-workflow  # Latest run status
@@ -312,13 +318,27 @@ dagu status my-workflow  # Latest run status
 
 **Output:**
 ```
-Status: running
-Started: 2024-01-01 12:00:00
-Steps:
-  ✓ download     [completed]
-  ⟳ process      [running]
-  ○ upload       [pending]
+Succeeded - 2026-11-04T14:48:38.856+09:00
+
+dag: my-workflow (110ms)
+├─log: .../logs/my-workflow/dag-run_.../dag-run_....log
+│
+├─download (39ms) [succeeded]
+│ ├─echo downloaded
+│ │
+│ └─stdout: .../download....out
+│     downloaded
+│
+└─process (25ms) [succeeded]
+  ├─echo processed
+  │
+  └─stdout: .../process....out
+      processed
+
+Result: Succeeded
 ```
+
+Log paths are shortened here.
 
 ### `ps`
 
@@ -332,6 +352,7 @@ dagu ps [options]
 
 - `--dag, -d` - Filter by exact DAG name
 - `--run-id, -r` - Filter by run ID; partial matches are accepted
+- `--format, -f` - Output format: `table` (default) or `json`
 
 ```bash
 # List all running processes
@@ -546,6 +567,26 @@ The command prompts before making changes unless `--force` is set. `--quiet` sup
 dagu --context local rm -H my-workflow
 ```
 
+### `prune-artifacts`
+
+Remove artifact directories and index records that no surviving DAG run points to, such as those left after a run record was deleted another way or the artifact root moved.
+
+```bash
+dagu prune-artifacts [options]
+```
+
+**Options:**
+- `--older-than, -t` - Only remove entries older than a duration such as `10d`, `24h`, or `1w` (default: `24h`; at least `1h` is always enforced)
+- `--root` - Artifact root to prune (default: `paths.artifact_dir`), such as a previous `<data_dir>/artifacts` or a DAG's `artifacts.dir`. Roots holding run history or logs are refused
+- `--dry-run` - Preview what would be removed without removing it
+- `--yes, -y` - Skip confirmation prompt
+
+```bash
+dagu prune-artifacts --dry-run
+dagu prune-artifacts -t 7d -y
+dagu prune-artifacts --root /old/data/artifacts
+```
+
 ### `context`
 
 Manage CLI contexts for local and remote Dagu servers.
@@ -600,6 +641,10 @@ dagu server [options]
 - `--host, -s` - Host (default: localhost)
 - `--port, -p` - Port (default: 8080)
 - `--dags, -d` - DAGs directory
+- `--tunnel, -t` - Enable [tunnel mode](/server-admin/tunnel) for remote access
+- `--tunnel-funnel` - Enable Tailscale Funnel for public internet access
+- `--tunnel-https` - Use HTTPS for Tailscale (requires HTTPS enabled in the Tailscale admin panel)
+- `--tunnel-token` - Tailscale auth key for headless authentication
 
 ```bash
 dagu server                               # Default settings
@@ -637,19 +682,23 @@ dagu start-all [options]
 - `--coordinator.host` - Coordinator bind address (default: 127.0.0.1)
 - `--coordinator.advertise` - Address to advertise in service registry
 - `--coordinator.port` - Coordinator gRPC port (default: 50055)
+- `--peer.cert-file`, `--peer.key-file`, `--peer.client-ca-file`, `--peer.insecure`, `--peer.skip-tls-verify` - Peer TLS settings, as for [`coordinator`](#coordinator)
 
 ```bash
-# Single instance mode (coordinator disabled)
+# Default: coordinator listens on 127.0.0.1:50055
 dagu start-all
 
-# Distributed mode with coordinator enabled
+# Without the coordinator
+DAGU_COORDINATOR_ENABLED=false dagu start-all
+
+# Coordinator reachable from remote workers
 dagu start-all --coordinator.host=0.0.0.0 --coordinator.port=50055
 
 # Production mode
 dagu start-all --host=0.0.0.0 --port=9000 --coordinator.host=0.0.0.0
 ```
 
-**Note:** The coordinator service starts only when `--coordinator.host` is set to a non-localhost address (not `127.0.0.1` or `localhost`). By default, `start-all` runs in single instance mode without the coordinator.
+**Note:** The coordinator is enabled by default and binds to `127.0.0.1`. Set `coordinator.enabled: false` or `DAGU_COORDINATOR_ENABLED=false` to run without it.
 
 ### `validate`
 
@@ -661,20 +710,19 @@ dagu validate [options] DAG_FILE
 
 Checks structural correctness and references (e.g., step dependencies) without evaluating variables or executing the DAG. Returns validation errors in a human-readable format.
 
+**Options:**
+- `--show-unresolved` - Also report references whose value only exists during a run
+
 ```bash
 dagu validate my-workflow.yaml
 ```
 
-**Output when valid:**
-```
-DAG spec is valid: my-workflow.yaml (name: my-workflow)
-```
+A valid DAG prints nothing and exits `0`.
 
 **Output when invalid:**
 ```
-Validation failed for my-workflow.yaml
-- Step 'process' depends on non-existent step 'missing_step'
-- Invalid cron expression in schedule: '* * * *'
+Error: Validation failed for my-workflow.yaml
+- field 'depends': step process depends on non-existent step missing_step (value: missing_step)
 ```
 
 ### `dry`
@@ -682,14 +730,15 @@ Validation failed for my-workflow.yaml
 Validate a DAG without executing it.
 
 ```bash
-dagu dry [options] DAG_FILE [-- PARAMS...]
+dagu dry [options] DAG_NAME_OR_FILE [-- PARAMS...]
 ```
 
 **Options:**
-- `--params, -p` - Parameters as JSON
+- `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--profile` - Runtime profile to use during the dry run
 - `--no-reuse` - Preview a build run with reuse disabled
+- `--format, -f` - Output format for dry-run checks: `text` (default) or `json`
 
 ```bash
 dagu dry my-workflow.yaml
@@ -1085,16 +1134,20 @@ Prints `Removed xlsx replay cache for step "fields" of DAG "quotes"` for each st
 Add a DAG to the execution queue.
 
 ```bash
-dagu enqueue [options] DAG_FILE [-- PARAMS...]
+dagu enqueue [options] DAG_NAME_OR_FILE [-- PARAMS...]
 ```
 
 **Options:**
 - `--run-id, -r` - Custom run ID
-- `--params, -p` - Parameters as JSON
+- `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--queue, -u` - Override DAG-level queue name for this enqueue
+- `--params-stdin` - Read parameters from piped or redirected stdin, up to 1 MiB; `--` and `--params` take precedence
 - `--profile` - Runtime profile to apply when the queued run starts
 - `--no-reuse` - Recompute eligible build steps when the queued run starts
+- `--labels` - Additional labels, comma-separated `key=value` or `key` (`--tags` is a deprecated alias)
+- `--worker-label` - Worker label (`key=value`) the run requires, replacing the DAG's `worker_selector`; repeatable
+- `--default-working-dir` - Working directory for DAGs without an explicit working directory
 
 ```bash
 dagu enqueue my-workflow.yaml
@@ -1282,7 +1335,7 @@ dagu upgrade --version vX.Y.Z
 dagu upgrade --dry-run
 ```
 
-Use `--yes` to skip prompts in automation. Self-upgrade is unavailable for package-manager or container installs such as Homebrew, Snap, `go install`, Docker, Podman, and Kubernetes. After a successful upgrade, the command prints how to restart running Dagu processes; see [Restarting After an Upgrade](/server-admin/self-upgrade#restarting-after-an-upgrade).
+Use `--yes` to skip prompts in automation. `--backup` keeps a copy of the current binary, `--pre-release` includes pre-release versions, and `--force, -f` allows a downgrade. Self-upgrade is unavailable for package-manager or container installs such as Homebrew, Snap, `go install`, Docker, Podman, and Kubernetes. After a successful upgrade, the command prints how to restart running Dagu processes; see [Restarting After an Upgrade](/server-admin/self-upgrade#restarting-after-an-upgrade).
 
 ### `license`
 
@@ -1594,6 +1647,7 @@ dagu worker [options]
 - `--worker.max-active-runs` - Maximum number of active runs (default: `100`)
 - `--worker.health-port` - HTTP health check port (default: `8092`, `0` disables)
 - `--worker.labels, -l` - Worker labels for capability matching (format: `key1=value1,key2=value2`)
+- `--worker.shutdown-timeout` - How long a stopping worker drains running DAG runs before it cancels them (default: `60s`, `0` waits without a bound)
 - `--peer.insecure` - Use insecure connection (h2c) instead of TLS (default: `true`)
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections

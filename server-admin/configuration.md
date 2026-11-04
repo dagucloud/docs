@@ -91,7 +91,7 @@ paths:
 
 ## Environment Variables
 
-Configuration fields can be overridden with `DAGU_` environment variables. Nested fields are flattened with underscores.
+Configuration fields can be overridden with `DAGU_` environment variables. Each field has a fixed variable name, which does not always follow the field path. For example, `paths.dags_dir` is `DAGU_DAGS_DIR` and `auth.builtin.token.ttl` is `DAGU_AUTH_TOKEN_TTL`. Names not listed in the reference, such as `DAGU_PATHS_DAGS_DIR`, are ignored.
 
 ```bash
 export DAGU_HOST=0.0.0.0

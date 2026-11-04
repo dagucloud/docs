@@ -268,10 +268,6 @@ docker compose up -d
 ### 1. Enable Debug Logging
 
 ```bash
-# Run with debug flag
-dagu start --debug test-otel.yaml
-
-# Or set environment variable
 export DAGU_DEBUG=true
 dagu start test-otel.yaml
 ```

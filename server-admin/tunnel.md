@@ -83,7 +83,7 @@ tunnel:
     # Use HTTPS for tailnet-only access
     https: false
 
-    # State directory (default: ~/.dagu_data/tailscale)
+    # State directory (default: {paths.data_dir}/tailscale)
     state_dir: ""
 
   # Allow terminal access via tunnel (default: false)
@@ -202,7 +202,7 @@ server:
 
 3. Click URL → Authorize in browser
 
-4. State saved to ~/.dagu_data/tailscale/tailscaled.state
+4. State saved to {paths.data_dir}/tailscale/tailscaled.state
 
 5. Subsequent runs auto-connect (no login needed)
 ```
@@ -224,8 +224,10 @@ dagu server --tunnel
 
 ## File Locations
 
+Both files live under `paths.data_dir`. `tunnel.tailscale.state_dir` moves the `tailscale/` directory.
+
 ```
-~/.dagu_data/
+{paths.data_dir}/
 ├── tailscale/
 │   └── tailscaled.state   # Persistent auth credentials
 └── tunnel_url             # Last known tunnel URL

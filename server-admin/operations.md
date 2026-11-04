@@ -115,6 +115,7 @@ services:
       - DAGU_LOG_FORMAT=json
       
       # Authentication (optional)
+      # - DAGU_AUTH_MODE=basic
       # - DAGU_AUTH_BASIC_USERNAME=admin
       # - DAGU_AUTH_BASIC_PASSWORD=your-secure-password
       
@@ -154,6 +155,7 @@ docker compose down
 
 With authentication (`.env` file):
 ```bash
+DAGU_AUTH_MODE=basic
 DAGU_AUTH_BASIC_USERNAME=admin
 DAGU_AUTH_BASIC_PASSWORD=secure-password
 ```

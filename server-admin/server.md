@@ -145,7 +145,7 @@ audit:
 # Centralized Event Store
 event_store:
   enabled: true               # Enable centralized event logging (default: true)
-  retention_days: 3            # Days to keep event log files (default: 3, 0 = keep forever)
+  retention_days: 1            # Days to keep event log files (default: 1, 0 = keep forever)
 
 # Webhook Trigger Limits
 webhooks:
@@ -254,7 +254,7 @@ The token secret, basic auth password, and OIDC client secret can also come from
 
 **Event Store:**
 - `DAGU_EVENT_STORE_ENABLED` - Enable centralized event logging (default: `true`)
-- `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `3`, `0` = keep forever)
+- `DAGU_EVENT_STORE_RETENTION_DAYS` - Days to keep event log files (default: `1`, `0` = keep forever)
 
 ## Cross-Origin Browser Access
 

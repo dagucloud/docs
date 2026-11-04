@@ -50,6 +50,7 @@ paths:
 ```bash
 docker run -d \
   -e DAGU_HOST=0.0.0.0 \
+  -e DAGU_AUTH_MODE=basic \
   -e DAGU_AUTH_BASIC_USERNAME=admin \
   -e DAGU_AUTH_BASIC_PASSWORD=secret \
   -p 8080:8080 \
@@ -166,6 +167,7 @@ export DAGU_WIKI_DIR=/opt/workflows/wiki
 export DAGU_LOG_DIR=/var/log/dagu
 
 # Auth
+export DAGU_AUTH_MODE=basic
 export DAGU_AUTH_BASIC_USERNAME=admin
 export DAGU_AUTH_BASIC_PASSWORD=secret
 

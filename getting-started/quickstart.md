@@ -154,7 +154,7 @@ The `--dags .` flag loads every YAML file in the current folder as a workflow, w
 
 If the script installer set up the background service, Dagu is already running at <http://localhost:8080>. Add workflows from the UI, or copy `hello.yaml` into the DAGs directory the installer printed, instead of starting a second server.
 
-On first launch against an empty DAGs directory, Dagu creates six example workflows (`example-01-basic-sequential.yaml` through `example-06-retry-on-failure.yaml`). The first attempt of `example-06-retry-on-failure` fails and a retry succeeds, which shows how a step recovers from a flaky dependency. The default binary directory is `~/.config/dagu/dags/`; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
+On first launch against an empty DAGs directory, Dagu creates six example workflows (`example-01-basic-sequential.yaml` through `example-06-retry-on-failure.yaml`). The first attempt of `example-06-retry-on-failure` fails and a retry succeeds, which shows how a step recovers from a flaky dependency. The default binary directory is `~/.config/dagu/dags/`, or `~/.dagu/dags/` once `~/.dagu` exists, as after a script installer service setup; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
 
 ## Core pieces
 

@@ -55,6 +55,8 @@ After installation, Dagu uses these paths by default. These are the main locatio
     └── suspend/   # Suspend flags
 ```
 
+A background service set up by a script installer keeps everything in one directory instead: `~/.dagu`, `/var/lib/dagu` for a Linux system service, or `C:\ProgramData\Dagu` for a Windows service. It has the [`DAGU_HOME` layout](/server-admin/configuration#dagu-home), with workflows in `dags/`. Once `~/.dagu` exists, the `dagu` command uses it too.
+
 Override any path with environment variables:
 
 ```bash
