@@ -35,6 +35,7 @@ The `installer.sh` / `installer.ps1` / `installer.cmd` scripts open a guided wiz
 - Add it to your `PATH`
 - Set it up as a background service (systemd on Linux, LaunchAgent on macOS, Windows service on Windows)
 - Create and verify the first admin account
+- Install the [Dagu AI skill](/ai/skills) for the AI coding tools it detects
 
 Homebrew, npm, Docker, Helm, and manual downloads install without the guided wizard, service setup, or admin bootstrap.
 

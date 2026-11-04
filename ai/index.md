@@ -77,7 +77,7 @@ See the [MCP Quickstart](/mcp/quickstart) for auth and remote URLs, and [Clients
 When the tool works on files with no server to talk to, give it the reference directly:
 
 ```bash
-gh skill install dagucloud/dagu dagu
+gh skill install dagucloud/dagu dagu --agent claude-code --scope user
 ```
 
 Tools that read a URL instead of installing a skill can point at the same material as one file:

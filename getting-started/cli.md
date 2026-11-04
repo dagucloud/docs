@@ -1516,7 +1516,7 @@ dagu sync mv old-dag new-dag --dry-run
 Install the Dagu skill for external AI coding tools with GitHub CLI:
 
 ```bash
-gh skill install dagucloud/dagu dagu
+gh skill install dagucloud/dagu dagu --agent claude-code --scope user
 ```
 
 The skill helps AI coding tools write correct Dagu workflow YAML. To let MCP-capable clients operate a running Dagu server, start Dagu and configure the client to use:
@@ -1525,7 +1525,7 @@ The skill helps AI coding tools write correct Dagu workflow YAML. To let MCP-cap
 http://localhost:8080/mcp
 ```
 
-For details, run `gh skill install --help` and see [MCP Server](/mcp/).
+Replace `claude-code` with your tool, such as `codex` or `cursor`. For details, see [Skills](/ai/skills) and [MCP Server](/mcp/).
 
 ### `coordinator`
 

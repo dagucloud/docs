@@ -30,15 +30,17 @@ flowchart LR
 
 ## Install the skill
 
-Install it with the GitHub CLI:
+The [script installers](/getting-started/installation/#what-the-script-installers-do) offer to install the skill for the AI coding tools they detect. To install it yourself with the GitHub CLI, name the tool and install at user scope:
 
 ```bash
-gh skill install dagucloud/dagu dagu
+gh skill install dagucloud/dagu dagu --agent claude-code --scope user
 ```
+
+Without `--scope user`, gh installs into the project in the current directory. Without `--agent`, it asks for a tool, or installs for GitHub Copilot when it cannot ask. Use another `--agent` value such as `codex`, `cursor`, `gemini-cli`, or `opencode` for other tools, and add `--force` to update an existing install.
 
 It carries the authoring rules that are easy to get wrong from general knowledge: when to reach for `type: graph` over `type: agent`, why `id` belongs on every step, when `action: template.render` beats a shell heredoc, and which `file.*` action replaces shelling out to `cp` or `mkdir`. It loads task-specific references on demand rather than all at once, covering step types, the CLI, Dagu Actions, harnesses, and build DAGs.
 
-Run `gh skill install --help` for tool-specific installation targets.
+Run `gh skill install --help` for the full list of `--agent` values.
 
 ## Point a tool at llms.txt
 
@@ -67,7 +69,7 @@ A skill stops at the file. [MCP](/mcp/) covers the same authoring job and more, 
 
 | | Skill or `llms.txt` | MCP |
 |---|---|---|
-| Configure | `gh skill install dagucloud/dagu dagu` | `http://localhost:8080/mcp` |
+| Configure | `gh skill install dagucloud/dagu dagu --scope user` | `http://localhost:8080/mcp` |
 | Needs a running server | No | Yes |
 | Authoring reference | Installed on the client | Supplied by the server |
 | Validation | You tell the tool to run `dagu validate` | The server checks every edit before it is saved |

@@ -42,7 +42,7 @@ The Dagu skill and the Dagu MCP server solve related but different problems.
 
 | Integration | Configure | Best for |
 |-------------|-----------|----------|
-| [Dagu skill](/ai/skills) | `gh skill install dagucloud/dagu dagu` | Teaching AI coding tools how to write valid Dagu workflow YAML. |
+| [Dagu skill](/ai/skills) | `gh skill install dagucloud/dagu dagu --scope user` | Teaching AI coding tools how to write valid Dagu workflow YAML. |
 | Dagu MCP server | `http://localhost:8080/mcp` | Letting MCP clients read Dagu state and Wiki pages, apply scoped DAG or Wiki page edits, and control runs. |
 
 Most AI-assisted workflow authoring setups benefit from both: install the skill for authoring guidance, then connect MCP when the tool should operate a running Dagu server.
