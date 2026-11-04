@@ -294,7 +294,7 @@ All action-specific fields belong under `with`, except `output_schema`, which si
 | `stream` | boolean | `true` | Stream response tokens to stdout as they arrive. |
 | `thinking` | object | disabled | Provider-specific [extended reasoning](/step-types/llm/reasoning-web-search#reasoning). |
 | `tools` | array | - | DAG names exposed to the model as callable tools. |
-| `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds. |
+| `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds, at least 1. |
 | `web_search` | object | disabled | [Built-in web-search integration](/step-types/llm/reasoning-web-search#web-search) settings. |
 | `files` | string or array | - | [Files](#files) the model reads with the prompt: paths, glob patterns, or a list an earlier step published. Not valid in the DAG-level `llm` block. |
 

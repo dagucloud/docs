@@ -141,6 +141,29 @@ Escaping for Dagu and escaping for a later runtime are separate concerns:
   `\${params.name}`. Plain, YAML single-quoted, and block scalars preserve the
   backslash as written.
 
+## Quoted References in Shell Commands
+
+On Dagu v2.25.3 or later, a local `run` command for a POSIX or Nix shell treats a bare `"${NAME}"` by where it sits:
+
+- Unquoted or inside double quotes, the shell expands it, reading `NAME` from the step environment. Dagu leaves it as written.
+- Inside a single-quoted span or a here-document body, where the shell never expands it, Dagu fills in the value, escaped so a JSON body stays valid.
+- A secret is never written into the command text. To put one in a single-quoted body, close the quotes around it so the shell expands it.
+
+```yaml
+env:
+  - NAME: widget
+secrets:
+  - name: TOKEN
+    provider: env
+    key: API_TOKEN
+steps:
+  - id: post
+    run: |
+      curl -d '{"name":"${NAME}","token":"'"${TOKEN}"'"}' https://api.example.com/items
+```
+
+Dagu fills in `NAME` inside the JSON body. The shell expands `TOKEN` from the environment, between the closed and reopened single quotes.
+
 ## Scripts That Need No Escaping
 
 [`js.run`](/step-types/js) passes `with.script` to its sandbox as written.

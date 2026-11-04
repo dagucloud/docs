@@ -23,7 +23,7 @@ Output: `"John Doe"`
 | `filter` | jq expression to evaluate. Required. |
 | `args` | Named jq variables. Values retain their YAML types. Supplying this map, including `{}`, makes `filter` literal jq source. |
 | `raw` | Output raw strings without JSON encoding (like `jq -r`). Default: `false`. |
-| `input` | File path to read JSON input from. Mutually exclusive with `data`. |
+| `input` | File path to read JSON input from. Mutually exclusive with `data`. A relative path resolves from the step working directory on Dagu v2.25.3 or later, as does a `file://` path in `data`. |
 | `data` | Inline JSON value or file URL string to provide as jq input. Mutually exclusive with `input`. |
 
 ### Input Sources

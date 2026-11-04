@@ -100,7 +100,7 @@ A server block overrides the provider default field by field:
 | `port` | Standard port | 993 for IMAP or 465 for SMTP with `tls`; 143 for IMAP or 587 for SMTP with `starttls`. Changing only `security` switches to that mode's standard port. |
 | `security` | `tls` | `tls` connects with TLS. `starttls` upgrades the connection and fails when the server does not offer STARTTLS. |
 | `skip_tls_verify` | `false` | Accept any server certificate, such as a self-signed one. Use it only for a server you run yourself. |
-| `tls_cert_sha256` | None | Accept only the server certificate with this SHA-256 fingerprint: 64 hex characters, any case, colons allowed. The chain is not verified. Takes precedence over `skip_tls_verify`. |
+| `tls_cert_sha256` | None | Accept only the server certificate with this SHA-256 fingerprint: 64 hex characters, any case, colons allowed. The chain is not verified. Takes precedence over `skip_tls_verify`. Dagu v2.25.3 or later. |
 
 Every connection uses TLS. An account with no SMTP server can find and organize email but not send it.
 
@@ -131,7 +131,7 @@ Gmail, iCloud, Yahoo, and Fastmail accept an app password made on the provider's
 
 ### Servers With Their Own Certificate
 
-A server with a self-signed or private-CA certificate fails the default certificate check. Pin its certificate with `tls_cert_sha256` instead of accepting any certificate with `skip_tls_verify`, which also accepts one presented by an attacker on the network path.
+A server with a self-signed or private-CA certificate fails the default certificate check. On Dagu v2.25.3 or later, pin its certificate with `tls_cert_sha256` instead of accepting any certificate with `skip_tls_verify`, which also accepts one presented by an attacker on the network path.
 
 ```yaml
 secrets:

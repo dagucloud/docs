@@ -89,6 +89,8 @@ steps:
 
 All fields support scoped value references such as `${env.NAME}`, `${params.name}`, and `${steps.step_id.outputs.name}`.
 
+On Dagu v2.25.3 or later, a relative `source` or `destination` resolves from the step working directory, and `extract` without a `destination` extracts there. Outputs keep the paths as written.
+
 ## Additional Examples
 
 ### Selective Extraction

@@ -87,7 +87,7 @@ For distributed workers running multiple concurrent DAGs, configure PostgreSQL c
 | `null_string` | string | null | NULL representation in CSV output. JSON and JSONL always write `null` |
 | `max_rows` | int | 0 | Limit rows (0 = unlimited) |
 | `streaming` | bool | false | Stream to file |
-| `output_file` | string | - | Explicit output path for streaming results |
+| `output_file` | string | - | Explicit output path for streaming results. Relative to the step working directory on Dagu v2.25.3 or later |
 
 ### Locking
 
@@ -123,7 +123,7 @@ steps:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `input_file` | string | required | Source file path |
+| `input_file` | string | required | Source file path. Relative to the step working directory on Dagu v2.25.3 or later |
 | `table` | string | required | Target table name |
 | `format` | string | auto-detect | `csv`, `tsv`, `jsonl` (detected from file extension) |
 | `has_header` | bool | true | First row is header |

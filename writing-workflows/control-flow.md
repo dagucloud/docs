@@ -258,7 +258,7 @@ For a numeric comparison you no longer need a shell. See
 [Numeric Comparison](#numeric-comparison), which compares the values directly and works
 the same way on Windows.
 
-The run log names each condition that is not met, for step and DAG preconditions alike: a
+On Dagu v2.25.3 or later, the run log names each condition that is not met, for step and DAG preconditions alike: a
 `Condition was not met` line carries the text of its `condition` or `eval` field and the
 error. A condition that cannot be evaluated, such as a numeric comparison against text,
 logs `Condition failed to evaluate` instead. The values of workflow secrets are masked in

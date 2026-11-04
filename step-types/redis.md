@@ -370,6 +370,8 @@ steps:
         - "${params.PARAM}"
 ```
 
+On Dagu v2.25.3 or later, a relative `script_file`, `tls_ca`, `tls_cert`, or `tls_key` resolves from the step working directory.
+
 ### Distributed Locking
 
 Acquire a lock before executing critical operations:
