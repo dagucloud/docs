@@ -59,7 +59,7 @@ Starting a trial or a plan moves the free server onto it. Dagu picks up the new 
 
 Dagu waits up to an hour for the approval, so there is time to sign up or choose a plan first. If the request expires or Dagu stops before you approve it, the approval page says that the server stopped waiting; connect again from Dagu.
 
-The server shows **Waiting for first report** on the console's **Servers** page until its first report arrives, a few seconds after the approval, and **Reporting** from then on. From then on, a failed workflow, or a server silent for 10 minutes (25 on free monitoring), emails the recipients. See [Alerts and Email](/overview/console-monitoring-alerts) for who gets what, and [Console Pages](/overview/console-monitoring-pages) for what each page shows.
+The server shows **Waiting for first report** on the console's **Instances** page until its first report arrives, a few seconds after the approval, and **Reporting** from then on. From then on, a failed workflow, or a server silent for 10 minutes (25 on free monitoring), emails the recipients. See [Alerts and Email](/overview/console-monitoring-alerts) for who gets what, and [Console Pages](/overview/console-monitoring-pages) for what each page shows.
 
 ## Turn It On
 

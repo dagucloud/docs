@@ -36,7 +36,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 
 ## Connect a Server
 
-A Team or Pro workspace in [Dagu Console](https://console.dagu.sh) has a number of server slots. A workspace without a plan has one, for [free monitoring](/overview/console-monitoring#free-and-paid) on Dagu v2.19.2 or later. Each Dagu server that uses the workspace's license takes one slot, and the console's **Servers** page lists every server with its name, last check-in, and Dagu version. Workers do not take slots.
+A Team or Pro workspace in [Dagu Console](https://console.dagu.sh) has a number of server slots. A workspace without a plan has one, for [free monitoring](/overview/console-monitoring#free-and-paid) on Dagu v2.19.2 or later. Each Dagu server that uses the workspace's license takes one slot, and the console's **Instances** page lists every server with its name, last check-in, and Dagu version. Workers do not take slots.
 
 Connecting shares only the license check-in, unless the server's [Monitoring](/overview/console-monitoring), [public webhook URLs](/server-admin/authentication/public-webhook-urls), or [remote access](/overview/cloud-remote-access) is on. See [Dagu Cloud: Security and Data Flow](/overview/security). Monitoring lets the console show each server's health and runs and email you when a workflow fails or the server stops reporting. On a Community server, the **Monitor this server for free** card turns it on as part of connecting.
 
@@ -52,7 +52,7 @@ A server on free monitoring starts the trial with **Start free trial** on **Plan
 
 ### With a server key
 
-For containers, fleets, and other automated setups, generate a **server key** on the console's **Servers** page and give it to each server:
+For containers, fleets, and other automated setups, generate a **server key** on the console's **Instances** page and give it to each server:
 
 ```bash
 export DAGU_LICENSE_KEY=DAGU-XXXX-XXXX-XXXX-XXXX
@@ -84,12 +84,12 @@ Dagu stores the server's ID and license in the `license` folder of the data dire
 Connected servers check in with Dagu Console every hour, and right away when Dagu Console moves them to another license, as when a trial starts, while monitoring is on. **Plan & features** also checks in when you come back to it from Dagu Console, and **Check now** checks in immediately.
 
 - **Disconnect** on **Plan & features**, or `dagu license deactivate`, frees the slot right away.
-- **Disconnect** on the console's **Servers** page frees the slot and the server stops using the license at its next check-in. A server whose configuration still has the server key connects again when it restarts; generate a new key to prevent that.
+- **Disconnect** on the console's **Instances** page frees the slot and the server stops using the license at its next check-in. A server whose configuration still has the server key connects again when it restarts; generate a new key to prevent that.
 - Slots are never freed automatically. A server that is gone for good keeps its slot until it is disconnected in the console.
 
 ### Air-gapped servers
 
-Servers that cannot reach Dagu Console use an offline license. Create one with **Add offline server** on the console's **Servers** page and install it with `DAGU_LICENSE` or `DAGU_LICENSE_FILE`. An offline server takes a slot until its license is revoked.
+Servers that cannot reach Dagu Console use an offline license. Create one with **Add offline server** on the console's **Instances** page and install it with `DAGU_LICENSE` or `DAGU_LICENSE_FILE`. An offline server takes a slot until its license is revoked.
 
 ## Related Pages
 

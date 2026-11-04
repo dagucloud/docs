@@ -11,15 +11,15 @@ The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar ho
 - **Failed today (UTC)**, **Open alerts**, **In progress**, and **Success (7 UTC days)** with each day's runs.
 - **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Failing workflows, Events lost, Monitoring off, and, for owners, Over capacity. Then the open alerts and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
 - **In progress**: the runs queued, running, or waiting, latest first; a run waiting for someone stands out.
-- **Servers** and **Kitewell computers**: each by name, those with a problem first.
+- **Instances**: Dagu servers, then Kitewell computers, each by name, those with a problem first.
 
 When failures listed here say nothing of why, owners see a note above them: some servers [send no errors](/overview/console-monitoring#error-messages), with a link to the first one's license page in Dagu, or the workspace keeps no errors of Kitewell computers, with a link to **Settings**.
 
 Times show in your browser's time zone; day totals are by UTC day. On a Team or Pro plan, the Overview, Runs, Alerts, and server pages update themselves every 30 seconds while they are open.
 
-## Servers
+## Instances
 
-**Connected servers** lists each server with its status, Dagu version, last report, failures today (UTC), success rate over 7 UTC days, and open alerts.
+**Dagu servers** lists each server with its status, Dagu version, last report, failures today (UTC), success rate over 7 UTC days, and open alerts. When Kitewell computers reported in the last 14 days, **Kitewell computers** lists them after the servers.
 
 | Status | Meaning |
 | --- | --- |
