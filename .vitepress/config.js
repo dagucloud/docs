@@ -581,6 +581,7 @@ const fullSidebar = [
     items: [
       { text: "Self-hosted Plan Comparison", link: "/overview/self-host-license" },
       { text: "Dagu Console Account", link: "/overview/console-account" },
+      { text: "Dagu Console Members", link: "/overview/console-members" },
     ],
   },
   {
@@ -776,7 +777,7 @@ export default withMermaid(
       },
 
       nav: [
-        { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|security|self-host-license|console-account|contributing|changelog)|getting-started/|migration/|ai/?$)" },
+        { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|security|self-host-license|console-account|console-members|contributing|changelog)|getting-started/|migration/|ai/?$)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
         { text: "MCP", link: "/mcp/", activeMatch: "^/(mcp(?:/|$)|ai/skills(?:/|$))" },
         { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/(writing-workflows/(?!examples(?:/|$))|features/)" },

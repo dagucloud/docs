@@ -17,6 +17,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 | Notification routing | ✓ | ✓ | ✓ |
 | Incident routing | - | ✓ | ✓ |
 | Monitoring in Dagu Console | △ 1 server, free | ✓ | ✓ |
+| [People in a Dagu Console workspace](/overview/console-members) | △ Owner only | Up to 10 | Up to 10 |
 | Public webhook URLs through Dagu Cloud | △ 1 per server, with free monitoring | ✓ | ✓ |
 | Remote access from Dagu Cloud (MCP) | - | ✓ | ✓ |
 
@@ -97,6 +98,7 @@ Servers that cannot reach Dagu Console use an offline license. Create one with *
 - [Public Webhook URLs](/server-admin/authentication/public-webhook-urls)
 - [Remote Access from Dagu Cloud](/overview/cloud-remote-access)
 - [Dagu Console Account](/overview/console-account)
+- [Dagu Console Members](/overview/console-members)
 - [Builtin Authentication](/server-admin/authentication/builtin)
 - [OIDC Authentication](/server-admin/authentication/oidc)
 - [Audit Logging](/server-admin/server#audit-logging)
