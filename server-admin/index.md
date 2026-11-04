@@ -58,7 +58,7 @@ docker run -d \
 
 ## Topics
 
-**[Monitoring in Dagu Console (Beta)](/overview/console-monitoring)**
+**[Monitoring in Dagu Console](/overview/console-monitoring)**
 - Every server's health, runs, and trends in one place
 - Email when a workflow fails or a server stops reporting
 - Opt-in, outbound HTTPS only, metadata only

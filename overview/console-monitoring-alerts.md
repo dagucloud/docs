@@ -4,7 +4,7 @@ description: When Dagu Console opens and resolves monitoring alerts, who gets th
 
 # Monitoring Alerts and Email
 
-Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring (Beta)](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
+Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
 
 ## Workflow Alerts
 
@@ -256,6 +256,6 @@ Unsubscribe: https://console.dagu.sh/alert-emails/unsubscribe?r=<token>&w=<works
 
 ## Related Pages
 
-- [Monitoring (Beta)](/overview/console-monitoring)
+- [Monitoring](/overview/console-monitoring)
 - [Console Pages](/overview/console-monitoring-pages)
 - [Notifications](/web-ui/notifications)

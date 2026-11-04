@@ -21,7 +21,7 @@ For servers you connect to Dagu Console. `dagu server` or `dagu start-all` check
 - **Sent**: the license and server IDs, the server's name, its Dagu version, and a heartbeat secret.
 - **Kept**: the server's record, with the secret only as a hash. A disconnected server is marked inactive.
 
-### Monitoring (Beta)
+### Monitoring
 
 Off until you choose a level. The process that holds the license reports to `console.dagu.sh`. See [Monitoring](/overview/console-monitoring).
 
@@ -116,7 +116,7 @@ Email `company@descarty.com` with a subject such as `Security report: Dagu`, or 
 
 ## Related Pages
 
-- [Monitoring (Beta)](/overview/console-monitoring)
+- [Monitoring](/overview/console-monitoring)
 - [Public Webhook URLs](/server-admin/authentication/public-webhook-urls)
 - [Remote Access from Dagu Cloud](/overview/cloud-remote-access)
 - [Architecture](/overview/architecture)

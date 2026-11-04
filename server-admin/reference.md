@@ -298,7 +298,7 @@ monitoring:
   retention: "24h"        # How long to keep resource history (default: 24h)
   interval: "5s"          # How often to collect metrics (default: 5s)
 
-# Dagu Console Monitoring (Beta)
+# Dagu Console Monitoring
 cloud:
   report: ""              # "off", "health", "runs", or "errors"; empty (default) = choose in the web UI
   remote_access: ""       # "off", "viewer", "operator", or "developer"; empty (default) = choose in the web UI
@@ -599,8 +599,8 @@ Legacy YAML keys `scheduler.heartbeat_interval` and `scheduler.stale_threshold` 
 - `DAGU_LICENSE_CLOUD_URL` - License validation service URL (`license.cloud_url`)
 - `DAGU_LICENSE_SERVER_NAME` - Name this server reports to Dagu Console (`license.server_name`; default: the hostname). A name set in Dagu Console or Dagu is shown in its place
 
-### Dagu Console Monitoring (Beta)
-- `DAGU_CLOUD_REPORT` - What the server reports to Dagu Console: `off`, `health`, `runs`, or, on v2.22 or later, `errors` (`cloud.report`; default: empty, which reports nothing until an administrator chooses in the web UI). A set value, `off` included, fixes the level and the web UI shows it read-only. See [Monitoring (Beta)](/overview/console-monitoring).
+### Dagu Console Monitoring
+- `DAGU_CLOUD_REPORT` - What the server reports to Dagu Console: `off`, `health`, `runs`, or, on v2.22 or later, `errors` (`cloud.report`; default: empty, which reports nothing until an administrator chooses in the web UI). A set value, `off` included, fixes the level and the web UI shows it read-only. See [Monitoring](/overview/console-monitoring).
 - `DAGU_CLOUD_REMOTE_ACCESS` - Highest role a Dagu Cloud user gets on calls Dagu Cloud carries to this server: `off`, `viewer`, `operator`, or `developer` (`cloud.remote_access`; default: empty, which leaves the choice to an administrator in the web UI, where it starts at `off`). A set value fixes it.
 - `DAGU_CLOUD_REMOTE_APPROVALS` - Whether those calls, at `operator` or above, may approve, reject, or push back steps waiting for a person (`cloud.remote_approvals`; default: unset, which leaves the choice to the web UI, where it starts off). A set value fixes it.
 

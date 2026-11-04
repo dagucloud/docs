@@ -2,11 +2,7 @@
 description: See every self-hosted Dagu server in one place, get an email when a workflow fails or a server stops reporting, and track trends. Free for one server. Opt-in; full logs stay on the server.
 ---
 
-# Monitoring (Beta)
-
-::: info Beta
-Monitoring is in beta. The retention periods and limits on this page may change during the beta.
-:::
+# Monitoring
 
 Connect your Dagu servers to [Dagu Console](https://console.dagu.sh) and see all of them in one place:
 
@@ -182,7 +178,7 @@ The event store keeps one day of events by default (`event_store.retention_days`
 
 ## Retention and Limits
 
-During the beta, Dagu Console keeps:
+Dagu Console keeps:
 
 | Data | Kept for |
 | --- | --- |

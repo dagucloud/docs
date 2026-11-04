@@ -66,17 +66,17 @@ Add Dagu Cloud's MCP server URL to the AI app as a custom connector:
 https://console.dagu.sh/mcp
 ```
 
-1. Add the URL in Claude, ChatGPT, Cursor, or another app that connects to remote MCP servers. **AI apps** in [Dagu Console](https://console.dagu.sh/ai-apps) shows the URL and the steps for each app.
+1. Add the URL in Claude, ChatGPT, Cursor, or another app that connects to remote MCP servers. **MCP** in [Dagu Console](https://console.dagu.sh/ai-apps) shows the URL and the steps for each app.
 2. Sign in to Dagu Cloud when the app asks. Choose the workspaces the app may reach, what it may do in each (read, operate, or edit), on all servers or chosen ones, and whether it may decide steps waiting for a person.
 
 A call gets the lowest of:
 
 - what the connection was granted in step 2;
-- the workspace's **Agent policy**, which its owners set on **AI apps**;
+- the workspace's **Agent policy**, which its owners set on **MCP**;
 - the member's entry under **Server roles**, also set by owners;
 - the server's remote access [level](#levels).
 
-Owners see every connection to their workspace on **AI apps** and can end any of them.
+Owners see every connection to their workspace on **MCP** and can end any of them.
 
 ## Levels
 
@@ -129,5 +129,5 @@ See [Dagu Cloud: Security and Data Flow](/overview/security) for every connectio
 - [MCP Authentication](/mcp/authentication)
 - [MCP Auditability](/mcp/auditability)
 - [Connect a Server](/overview/self-host-license#connect-a-server)
-- [Monitoring (Beta)](/overview/console-monitoring)
+- [Monitoring](/overview/console-monitoring)
 - [Configuration Reference](/server-admin/reference)

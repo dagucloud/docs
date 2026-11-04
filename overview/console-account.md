@@ -37,5 +37,5 @@ In **Settings**, select **Turn off** under **Two-factor authentication**. Sign-i
 
 ## Related Pages
 
-- [Monitoring (Beta)](/overview/console-monitoring)
+- [Monitoring](/overview/console-monitoring)
 - [Self-hosted Plan Comparison](/overview/self-host-license)

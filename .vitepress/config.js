@@ -478,7 +478,7 @@ const fullSidebar = [
     items: [
       { text: "Overview", link: "/server-admin/" },
       {
-        text: "Monitoring (Beta)",
+        text: "Monitoring",
         link: "/overview/console-monitoring",
         collapsed: true,
         items: [

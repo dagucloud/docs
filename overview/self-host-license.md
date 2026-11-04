@@ -16,7 +16,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 | Audit logs | - | ✓ | ✓ |
 | Notification routing | ✓ | ✓ | ✓ |
 | Incident routing | - | ✓ | ✓ |
-| Monitoring in Dagu Console (Beta) | △ 1 server, free | ✓ | ✓ |
+| Monitoring in Dagu Console | △ 1 server, free | ✓ | ✓ |
 | Public webhook URLs through Dagu Cloud | △ 1 per server, with free monitoring | ✓ | ✓ |
 | Remote access from Dagu Cloud (MCP) | - | ✓ | ✓ |
 
@@ -30,7 +30,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 - **Audit logs:** review administrative and security-relevant activity.
 - **Notification routing:** send workflow events to team channels.
 - **Incident routing:** open and resolve provider incidents for failed workflows.
-- **Monitoring in Dagu Console (Beta):** see connected servers' health, runs, and trends in one place, and get an email when a workflow fails or a server stops reporting. A Community server can be monitored for free, one per workspace and with lower limits; it stays on Community. See [Free and Paid](/overview/console-monitoring#free-and-paid).
+- **Monitoring in Dagu Console:** see connected servers' health, runs, and trends in one place, and get an email when a workflow fails or a server stops reporting. A Community server can be monitored for free, one per workspace and with lower limits; it stays on Community. See [Free and Paid](/overview/console-monitoring#free-and-paid).
 - **Public webhook URLs through Dagu Cloud:** give a DAG's webhook an address on the internet, so GitHub, Stripe, or Slack can start it on a server with no public address. A connected server has up to 1,000; a server on free monitoring has one. See [Public Webhook URLs](/server-admin/authentication/public-webhook-urls).
 - **Remote access from Dagu Cloud (MCP):** let AI apps connected to Dagu Cloud use the server's MCP tools over a connection the server opens, up to a role the server's administrator chooses. It needs a Team or Pro plan, or a trial. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
 
@@ -38,7 +38,7 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 
 A Team or Pro workspace in [Dagu Console](https://console.dagu.sh) has a number of server slots. A workspace without a plan has one, for [free monitoring](/overview/console-monitoring#free-and-paid) on Dagu v2.19.2 or later. Each Dagu server that uses the workspace's license takes one slot, and the console's **Servers** page lists every server with its name, last check-in, and Dagu version. Workers do not take slots.
 
-Connecting shares only the license check-in, unless the server's [Monitoring (Beta)](/overview/console-monitoring), [public webhook URLs](/server-admin/authentication/public-webhook-urls), or [remote access](/overview/cloud-remote-access) is on. See [Dagu Cloud: Security and Data Flow](/overview/security). Monitoring lets the console show each server's health and runs and email you when a workflow fails or the server stops reporting. On a Community server, the **Monitor this server for free** card turns it on as part of connecting.
+Connecting shares only the license check-in, unless the server's [Monitoring](/overview/console-monitoring), [public webhook URLs](/server-admin/authentication/public-webhook-urls), or [remote access](/overview/cloud-remote-access) is on. See [Dagu Cloud: Security and Data Flow](/overview/security). Monitoring lets the console show each server's health and runs and email you when a workflow fails or the server stops reporting. On a Community server, the **Monitor this server for free** card turns it on as part of connecting.
 
 ### From the web UI
 
@@ -93,7 +93,7 @@ Servers that cannot reach Dagu Console use an offline license. Create one with *
 
 ## Related Pages
 
-- [Monitoring (Beta)](/overview/console-monitoring)
+- [Monitoring](/overview/console-monitoring)
 - [Public Webhook URLs](/server-admin/authentication/public-webhook-urls)
 - [Remote Access from Dagu Cloud](/overview/cloud-remote-access)
 - [Dagu Console Account](/overview/console-account)

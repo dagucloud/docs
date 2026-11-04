@@ -4,7 +4,7 @@ description: What each Dagu Console monitoring page shows, from the fleet overvi
 
 # Monitoring Console Pages
 
-The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar holds these pages. Every member of the workspace can view them. Any member can acknowledge an alert. Only workspace owners can delete reports, disconnect servers, mute workflows, and change who gets alert emails and where alerts go. See [Monitoring (Beta)](/overview/console-monitoring) to connect a server.
+The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar holds these pages. Every member of the workspace can view them. Any member can acknowledge an alert. Only workspace owners can delete reports, disconnect servers, mute workflows, and change who gets alert emails and where alerts go. See [Monitoring](/overview/console-monitoring) to connect a server.
 
 ## Overview
 
@@ -95,5 +95,5 @@ Dagu Console counts each day's run durations in ranges, from under a second to 8
 
 ## Related Pages
 
-- [Monitoring (Beta)](/overview/console-monitoring)
+- [Monitoring](/overview/console-monitoring)
 - [Alerts and Email](/overview/console-monitoring-alerts)

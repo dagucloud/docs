@@ -129,7 +129,7 @@ The processes that serve the web UI need outbound HTTPS to `relay.dagu.sh` and `
 - [Community self-host](https://dagu.sh/pricing#self-host): open-source Dagu for self-hosted use.
 - [Team and Pro self-host licenses](https://dagu.sh/pricing#self-host): enterprise controls and more API keys for self-hosted Dagu servers.
 - [License Comparison](/overview/self-host-license): feature comparison for Community, Team, and Pro self-host.
-- [Monitoring (Beta)](/overview/console-monitoring): one view of all your Dagu servers in Dagu Console, free for one server; Team and Pro cover every licensed server.
+- [Monitoring](/overview/console-monitoring): one view of all your Dagu servers in Dagu Console, free for one server; Team and Pro cover every licensed server.
 - [Public Webhook URLs](/server-admin/authentication/public-webhook-urls): start DAGs from GitHub, Stripe, or Slack on servers with no public address.
 - [Contact](https://dagu.sh/contact): sizing, deployment, or security review questions.
 
