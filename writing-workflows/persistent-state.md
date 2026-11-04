@@ -317,7 +317,11 @@ steps:
       required: true
 
   - id: read_version
-    run: printf '%s\n' "$STATE" | jq -r .version
+    action: js.run
+    with:
+      input: ${STATE}
+      script: |
+        return input.version;
     output: VERSION
     depends: load
 

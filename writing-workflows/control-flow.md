@@ -208,7 +208,11 @@ steps:
     depends: split_chunks
 
   - id: reduce_results
-    run: printf '%s\n' "${map_chunks.outputs}" | jq '[.[].ROWS | tonumber] | add'
+    action: js.run
+    with:
+      input: ${map_chunks.outputs}
+      script: |
+        return input.reduce((total, child) => total + Number(child.ROWS), 0);
     depends: map_chunks
 ---
 name: worker

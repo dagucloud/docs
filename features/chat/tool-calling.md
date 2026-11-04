@@ -302,18 +302,25 @@ steps:
 # Transform data tool
 name: transform_data
 description: "Transform and clean data"
-params: "data format=json"
-
-tools:
-  - jqlang/jq@jq-1.7.1
+params: "data"
 
 steps:
   - id: transform
-    run: echo "$1" | jq '.' > /tmp/transformed.json
-  - id: read_result
-    run: cat /tmp/transformed.json
+    action: js.run
+    with:
+      input: ${params.data}
+      format: json
+      script: |
+        const rows = Array.isArray(input) ? input : [input];
+        return rows.map((row) =>
+          Object.fromEntries(
+            Object.entries(row).map(([key, value]) => [
+              key.trim().toLowerCase(),
+              typeof value === "string" ? value.trim() : value,
+            ]),
+          ),
+        );
     output: TRANSFORMED_DATA
-    depends: transform
 ---
 # Store data tool
 name: store_data

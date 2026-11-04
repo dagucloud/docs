@@ -159,14 +159,12 @@ actions:
           type: string
           enum: [low, medium, high]
     template:
-      run: |
-        uv run --python 3.13.9 python - <<'PY'
-        import json
-        print(json.dumps({"category": "bug", "priority": "high"}))
-        PY
-
-tools:
-  - astral-sh/uv@0.11.14
+      action: js.run
+      with:
+        input: {$input: text}
+        script: |
+          const crash = /crash|panic/i.test(input);
+          return { category: crash ? "bug" : "question", priority: crash ? "high" : "low" };
 
 steps:
   - id: classify

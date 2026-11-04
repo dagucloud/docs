@@ -110,9 +110,6 @@ steps:
 ### Capture Response
 
 ```yaml
-tools:
-  - jqlang/jq@jq-1.7.1
-
 steps:
   - id: get_user
     action: http.request
@@ -123,9 +120,11 @@ steps:
     output: USER
 
   - id: process
-    run: echo "$USER" | jq '.email'
+    run: echo "${get_user.output.email}"
     depends: get_user
 ```
+
+`${get_user.output.email}` reads a field from the captured JSON body. Use [`js.run`](/step-types/js) to filter or reshape the response.
 
 ### JSON Output Mode
 
