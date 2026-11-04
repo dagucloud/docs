@@ -88,14 +88,15 @@ steps:
 Parameter defaults are literal unless an inline rich parameter uses `eval`.
 
 ```yaml
-env:
-  - BASE_DIR: /srv/data
-
 params:
+  - name: base_dir
+    default: /srv/data
   - name: output_dir
-    eval: "${env.BASE_DIR}/out"
+    eval: "${params.base_dir}/out"
     default: /tmp/out
 ```
+
+`eval` can read earlier params and the host environment. It cannot read the DAG `env` block, which is evaluated after params.
 
 Runtime overrides from the CLI, API, and sub-DAG calls stay literal.
 

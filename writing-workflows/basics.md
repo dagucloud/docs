@@ -84,7 +84,7 @@ Step names are optional. When omitted, Dagu automatically generates names based 
 steps:
   - run: echo "First step"                  # Auto-named: cmd_1
 
-  - run: |                                  # Auto-named: cmd_2
+  - run: |                                  # Auto-named: script_2
       echo "Multi-line"
       echo "Script"
 

@@ -62,7 +62,7 @@ env:
 
 ### Inherited Fields
 
-The following fields are inherited from base configuration:
+Every DAG field set in the base configuration is inherited, and a DAG can override it. See [How Inheritance Works](/server-admin/base-config#how-inheritance-works) for the merge rules. These fields are common in environment setups:
 
 | Field | Description |
 |-------|-------------|
@@ -106,7 +106,7 @@ env:
   - KEY2: value2
   - KEY3: ${env.KEY1}_suffix  # Can reference earlier vars
 
-# Format 2: Simple Map (order not guaranteed)
+# Format 2: Simple Map (preserves order)
 env:
   KEY1: value1
   KEY2: value2
@@ -123,7 +123,7 @@ env:
   - KEY3: ${env.KEY1}
 ```
 
-**Note**: The array format (Format 1) preserves order, which matters when later variables reference earlier ones. The simple map format (Format 2) does not guarantee order.
+**Note**: Every format keeps the YAML source order, which matters when later variables reference earlier ones.
 
 ### Non-String Values
 
@@ -312,14 +312,14 @@ What happens when a variable is not defined depends on the execution context:
 | Dagu-expanded action and executor fields | Unknown unqualified references remain literal | `$HOME` → `$HOME` |
 | SSH or container command text | Preserved text may be expanded by the remote shell or container process | `$HOME` is resolved remotely |
 | HTTP, mail, and other fields with no later variable-aware runtime | Preserved text remains literal content | `$HOME` → `$HOME` |
-| `template` step `script` | Dagu skips variable expansion entirely | `${HOME}` → `${HOME}` |
+| `template.render` `with.template` | Dagu skips variable expansion entirely | `${HOME}` → `${HOME}` |
 
 General action and executor fields expand values from the current DAG or step
 environment scope. An unresolved unqualified reference is preserved, but only a
 later variable-aware runtime can expand it. Import host values through root
 `env` and use scoped `${env.NAME}` references when Dagu should resolve them.
 
-`template` steps are stricter: the `script` body is never expanded by Dagu, so `${VAR}` remains literal there. If you want expanded values in a template step, pass them through `with.data`.
+`template.render` steps are stricter: the `with.template` body is never expanded by Dagu, so `${VAR}` remains literal there. If you want expanded values in a template step, pass them through `with.data`.
 
 ### POSIX Shell Expansion Syntax
 
@@ -381,8 +381,8 @@ When the same variable is defined at multiple levels, the highest-precedence val
 | Output variables | ↑ | From previous steps (`output:` field) |
 | Secrets | ↑ | From `secrets:` block |
 | DAG `env:` + `dotenv` | ↑ | Workflow-level variables |
+| Base config `env:` | ↑ | Shared configuration, merged before DAG `env:` |
 | Parameters | ↑ | From `params:` and CLI overrides |
-| Base config `env:` | ↑ | Shared configuration |
 | System environment | Lowest | Filtered OS variables |
 
 For detailed precedence rules, see [Variables Reference - Precedence](/writing-workflows/template-variables#variable-precedence).
@@ -405,8 +405,8 @@ Dagu filters the process environment before it builds the step execution environ
 
 Built-in forwarded variables:
 
-- Unix and macOS exact names: `PATH`, `HOME`, `USER`, `SHELL`, `TMPDIR`, `TERM`, `EDITOR`, `VISUAL`, `LANG`, `LC_ALL`, `LC_CTYPE`, `TZ`, `LD_LIBRARY_PATH`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
-- Windows exact names: `USERPROFILE`, `SYSTEMROOT`, `WINDIR`, `SYSTEMDRIVE`, `COMSPEC`, `PATHEXT`, `TEMP`, `TMP`, `PATH`, `PSMODULEPATH`, `HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
+- Unix and macOS exact names: `PATH`, `HOME`, `USER`, `SHELL`, `TMPDIR`, `TERM`, `EDITOR`, `VISUAL`, `LANG`, `LC_ALL`, `LC_CTYPE`, `TZ`, `LD_LIBRARY_PATH`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
+- Windows exact names: `USERPROFILE`, `SYSTEMROOT`, `WINDIR`, `SYSTEMDRIVE`, `COMSPEC`, `PATHEXT`, `TEMP`, `TMP`, `PATH`, `PSMODULEPATH`, `HOME`, `TZ`, `APPDATA`, `LOCALAPPDATA`, `USERNAME`, `USERDOMAIN`, `PROGRAMFILES`, `PROGRAMFILES(X86)`, `PROGRAMDATA`, `SSH_AUTH_SOCK`, `SSH_AGENT_PID`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
 - Prefixes on all platforms: `DAGU_`, `DAG_`, `LC_`, `KUBERNETES_`
 
 Dagu's own credentials, such as `DAGU_AUTH_BASIC_PASSWORD` and `DAGU_ENCRYPTION_KEY`, are never forwarded and never expanded, even though they start with `DAGU_`. See [Environment Variable Filtering](/server-admin/operations#environment-variable-filtering) for the full list and how to pass one to a step as a secret.

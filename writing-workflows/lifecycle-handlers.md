@@ -8,7 +8,7 @@ Lifecycle handlers let you run extra steps after the main DAG completes. Use the
 |---------|---------|-------------------|
 | `init` | Runs before any workflow steps (after DAG-level preconditions pass) | Setup tasks, acquire locks, validate environment |
 | `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continue_on`) | Deliver success notifications, enqueue downstream jobs |
-| `failure` | The DAG ended with `failed` or `rejected` status, including a DAG timeout or DAG-level precondition evaluation error | Page on-call, collect diagnostics |
+| `failure` | The DAG ended with `failed` or `rejected` status, including a DAG timeout or DAG-level precondition evaluation error. With a root `retry_policy`, it is skipped while DAG retries remain and runs only on the last allowed attempt | Page on-call, collect diagnostics |
 | `abort` | The run was aborted by a stop request, queue eviction, or unmet DAG-level precondition | Roll back partial work, release locks |
 | `wait` | The DAG has paused waiting for approval or human-task completion | Notify operators, send Slack messages |
 | `exit` | Always runs after the status-specific handler finishes (including when it fails or is skipped) | File system clean-up, archival tasks |
@@ -41,7 +41,7 @@ steps:
   - run: ./load.sh
 ```
 
-Each handler is a normal step definition. You can use `run`, `script`, `action` (for built-in, official, or third-party actions), `executor`, containers, timeouts, or any other step field that makes sense for a single task.
+Each handler is a normal step definition. You can use `run`, `action` (for built-in, official, or third-party actions), containers, timeouts, or any other step field that makes sense for a single task.
 
 ## Execution Model
 
@@ -112,7 +112,7 @@ handler_on:
     action: dag.run
     with:
       dag: sync-reporting
-      params: |
+      params:
         parent_run_id: ${context.run.id}
 ```
 

@@ -62,16 +62,18 @@ If a DAG sets `artifacts.dir`, that DAG-specific base directory is used instead 
 
 ## Directory Layout
 
-Artifact directories use the same per-run layout as `log_dir`:
+Artifact directories are partitioned by the UTC date on which the run is created:
 
 ```text
-<base>/<safe dag name>/dag-run_<YYYYMMDD_HHMMSSZ>_<dag-run-id>/
+<base>/<YYYY>/<MM>/<DD>/<HHMMSS>_<safe dag name>_<suffix>/
 ```
+
+`<HHMMSS>` is the UTC creation time, and `<suffix>` is 16 hexadecimal characters derived from the DAG-run ID. The run ID itself is not part of the path. Dagu records the run each directory belongs to in a `.meta` sidecar file.
 
 Example:
 
 ```text
-/var/lib/dagu/artifacts/daily-report/dag-run_20260412_031500Z_run-123/
+/var/lib/dagu/artifacts/2026/04/12/031500_daily-report_3f9c2a7b1e4d5c6a/
 ```
 
 ## Runtime Variable

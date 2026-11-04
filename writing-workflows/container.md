@@ -72,6 +72,8 @@ Exec mode is ideal for:
 ## With Volume Mounts
 
 ```yaml
+working_dir: .  # Resolve ./src and ./data from the DAG file's directory
+
 container:
   image: node:24
   volumes:
@@ -95,6 +97,7 @@ steps:
 Volume specs use `source:target[:ro|rw]`.
 
 - `source` may be an absolute host path, `~`, `.`, `./...`, another relative path, or a Docker named volume.
+- Relative sources resolve from the DAG `working_dir`. Without `working_dir`, that is the per-run work directory, not the DAG file's directory, so set `working_dir: .` to mount files stored beside the DAG.
 - Dagu expands `$VAR` and `${VAR}` only on the source side, using the Dagu process environment after DAG expression interpolation.
 - `target` is the container path and is not expanded from host environment variables.
 - `ro` and `rw` are the only valid modes; the mode is not expanded.
@@ -424,6 +427,8 @@ container:
 Multiple commands share the same step configuration, including the container config:
 
 ```yaml
+working_dir: .
+
 steps:
   - id: build_and_test
     container:
@@ -545,6 +550,8 @@ steps:
 You can also use different containers for different steps:
 
 ```yaml
+working_dir: .
+
 steps:
   - id: build
     container:
@@ -601,7 +608,7 @@ steps:
 ```
 
 ::: warning
-When using step-level `container`, you cannot use `executor` or `script` fields on the same step.
+When using step-level `container`, you cannot use the deprecated `script` field on the same step. Use `run`.
 :::
 
 Note: A supported step-level `container:` overrides the DAG-level container for

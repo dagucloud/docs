@@ -21,6 +21,10 @@ Dagu connects to the provider's SMTP submission endpoint on port `587`, requires
 STARTTLS, and authenticates only when the server advertises XOAUTH2. OAuth does
 not fall back to password authentication.
 
+The `smtp` block opens a plain connection and upgrades it with STARTTLS when the
+server offers it. It does not support implicit TLS (SMTPS, usually port `465`).
+Use the provider's submission port, usually `587`.
+
 ### Base Configuration
 
 Set up SMTP defaults in the base configuration inherited by DAGs:
@@ -95,7 +99,7 @@ Override global settings per DAG:
 # my-dag.yaml
 smtp:
   host: smtp.company.com
-  port: "465"
+  port: "587"
   username: ${env.SMTP_USER}
   password: ${env.SMTP_PASS}
 

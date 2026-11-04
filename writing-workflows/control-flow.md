@@ -1133,7 +1133,7 @@ steps:
 
 ```yaml
 schedule: "0 * * * *"  # Every hour
-skip_if_successful: true  # Skip if already ran successfully today (e.g., run manually)
+skip_if_successful: true  # Skip when a run succeeded since the previous scheduled time (e.g., a manual run)
 
 steps:
   - run: echo "Syncing data"

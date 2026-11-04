@@ -4,7 +4,7 @@ The `continue_on` configuration allows workflows to continue execution even when
 
 ## Overview
 
-By default, Dagu stops workflow execution when a step fails (returns a non-zero exit code). The `continue_on` configuration overrides this behavior, allowing you to:
+By default, when a step fails (returns a non-zero exit code), the steps that depend on it do not run and are marked `aborted`. Independent branches keep running, and the DAG ends as `failed`. The `continue_on` configuration overrides this behavior, allowing you to:
 
 - Continue execution after failures
 - Handle specific exit codes differently
@@ -256,7 +256,7 @@ steps:
 
 ### With Lifecycle Handlers
 
-When a step with `continue_on` fails but the DAG continues, the final status is `partially_succeeded`, which triggers the `onSuccess` handler (not `onFailure`):
+When a step with `continue_on` fails and at least one other step succeeds, the final status is `partially_succeeded`, which triggers the `onSuccess` handler (not `onFailure`). If no step succeeds, the DAG ends as `failed` and `onFailure` runs.
 
 ```yaml
 handler_on:
@@ -266,7 +266,11 @@ handler_on:
 steps:
   - id: optional_step
     run: exit 1
-    continue_on: failed  # Continues, DAG ends as partially_succeeded
+    continue_on: failed  # Continues to the next step
+
+  - id: main_step
+    run: echo "Main work"
+    depends: optional_step  # Succeeds, so the DAG ends as partially_succeeded
 ```
 
 ### With Dependencies
@@ -329,7 +333,7 @@ steps:
 
   - id: verify_deployment
     run: echo "Verifying cloud deployment"
-    # No continue_on - at least one cloud must be working
+    # Runs after both deployments, even when both fail
     depends: [deploy_aws, deploy_gcp]
 ```
 

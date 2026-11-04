@@ -150,7 +150,7 @@ steps:
 Behavior:
 - If a step defines `timeout_sec > 0`, a dedicated context deadline is used; it overrides the DAG-level `timeout_sec` only for that step.
 - On step timeout the process tree is terminated and the step is marked `failed` with exit code `124` (standard timeout code).
-- Dependent steps are skipped unless `continue_on` allows the timed-out step to be treated as non-blocking.
+- Dependent steps do not run and are marked `aborted` unless `continue_on` allows the timed-out step to be treated as non-blocking.
 - Omit or set `timeout_sec: 0` on a step to rely solely on the DAG timeout.
 - Use step timeouts for external calls (network, APIs, third-party CLIs) to fail fast while letting other steps proceed.
 

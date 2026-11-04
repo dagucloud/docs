@@ -126,6 +126,8 @@ This retry path creates a new attempt under the same DAG-run ID.
 
 Only scheduler-issued DAG retries consume this retry budget. Manual retry does not increment the DAG auto-retry counter.
 
+While DAG retries remain, a failed top-level attempt skips `handler_on.failure`. The failure handler runs only on the last allowed attempt. The `exit` handler still runs on every attempt. If the scheduler never issues the retry, the failure handler does not run for that run.
+
 Requirements:
 
 - the scheduler must be running
