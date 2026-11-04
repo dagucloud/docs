@@ -1,10 +1,10 @@
 ---
-description: Let AI apps connected to Dagu Cloud use a self-hosted server's MCP tools over a connection the server opens. Off by default; the server caps the role.
+description: Let AI apps connected to Dagu Cloud, and members in Dagu Console, read logs and act on runs of a self-hosted server over a connection the server opens. Off by default; the server caps the role.
 ---
 
 # Remote Access from Dagu Cloud
 
-AI apps connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on. Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key for the app.
+AI apps connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on, and members can [act on runs from Dagu Console](#act-on-runs-from-dagu-console). Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key.
 
 ```text
 AI app ──MCP──▶ Dagu Cloud ── signed call ──┐
@@ -78,6 +78,17 @@ A call gets the lowest of:
 
 Owners see every connection to their workspace on **MCP** and can end any of them.
 
+## Act on Runs from Dagu Console
+
+With remote access on, a member acts on the server's runs from Dagu Console's pages, through the same connection and checks:
+
+- A run's page reads a failed step's log from the server on **View log**. The log is shown, not kept.
+- **Retry** retries a finished run, and **Stop** stops one in progress.
+- A run waiting for a person shows the step it waits at and what its approval gate asks for, with **Approve** and **Reject**. A task with a form, or a wait inside a sub-workflow, opens in Dagu. The Overview lists such runs under **Needs attention**.
+- A failure alert offers its run's log and **Retry**, and an alert of a run running too long, **Stop**. The alert's **Timeline** keeps who did it.
+
+What a member may do is the lower of their entry under **Server roles** on **MCP** and the server's remote access [level](#levels): reading needs `viewer`, and retrying, stopping, and deciding need `operator`. Deciding also needs [approvals](#approvals) on. A button the member may not use is shown disabled, saying why. These actions need the Team or Pro plan, or a trial. Each one is recorded on the server under the member's email, with **Dagu Console** as the app, and in the workspace's **Calls from Dagu Cloud** on **MCP**.
+
 ## Levels
 
 | Level | A call may |
@@ -117,7 +128,7 @@ Calls from Dagu Cloud use the same three tools as the server's own [`/mcp` endpo
 - Turning remote access off closes the connection and ends the calls in flight. Calls that still arrive are refused.
 - Audit logs record each call with credential type `cloud`, the user's email, the AI app, and the Dagu Cloud workspace. See [Calls From Dagu Cloud](/mcp/auditability#calls-from-dagu-cloud).
 - When [monitoring](/overview/console-monitoring#health) is on, health reports include the remote access level and whether approvals are on.
-- Dagu Cloud passes each answer on without storing it. It keeps a log of each call for 90 days: tool, action, subject, outcome, user, and app, plus up to 300 characters of the error when a call fails.
+- Dagu Cloud passes each answer on without storing it. It keeps a log of each call for 90 days: tool, action, subject, outcome, user, and app (**Dagu Console** for a member's own action), plus up to 300 characters of the error when a call fails.
 - An answer the AI app receives also reaches the app's provider, such as Anthropic or OpenAI. Every level, viewer included, can read logs.
 
 See [Dagu Cloud: Security and Data Flow](/overview/security) for every connection, what Dagu Cloud keeps, and what it is trusted with.

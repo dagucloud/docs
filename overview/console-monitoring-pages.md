@@ -9,7 +9,7 @@ The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar ho
 ## Overview
 
 - **Failed today (UTC)**, **Open alerts**, **In progress**, and **Success (7 UTC days)** with each day's runs.
-- **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Failing workflows, Events lost, Monitoring off, and, for owners, Over capacity. Then the open alerts and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
+- **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Failing workflows, Events lost, Monitoring off, and, for owners, Over capacity. Then the open alerts, the runs of Dagu servers waiting for a person, and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
 - **In progress**: the runs queued, running, or waiting, latest first; a run waiting for someone stands out.
 - **Instances**: Dagu servers, then Kitewell computers, each by name, those with a problem first.
 
@@ -52,6 +52,8 @@ Runs in progress come first, then finished runs, newest recorded first. Filter b
 - Range: **Last hour**, **Last 24 hours** (default), **Last 7 days**, **Last 14 days**, or, on Team or Pro, **Last 30 days**, by when Dagu Console recorded the run. Free monitoring shows up to **Last 7 days**.
 
 Each run has a permalink to a page with its status, start, duration, failed steps, and attempts. When the server [sends errors](/overview/console-monitoring#error-messages), the page shows **Why it failed**: each failed step's error in full, with **Copy**. Without them, it says how to have the server send them. A run in progress on a server that has not reported for 5 minutes shows **Unknown**. A workflow's name opens [its page](#workflow-pages).
+
+With the server's [remote access](/overview/cloud-remote-access#act-on-runs-from-dagu-console) on, the page also reads a failed step's log, retries or stops the run, and approves or rejects a step waiting for a person, as the member's server role allows.
 
 ## Alerts
 
