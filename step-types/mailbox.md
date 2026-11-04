@@ -76,7 +76,7 @@ steps:
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `provider` | string | No | `imap` | `google`, `microsoft`, or `imap`. Sets the default servers. |
-| `imap` | object | For an `imap` account | Provider default | IMAP server: `host`, `port`, `security`, and `skip_tls_verify`. |
+| `imap` | object | For an `imap` account | Provider default | IMAP server: `host`, `port`, `security`, `skip_tls_verify`, and `tls_cert_sha256`. |
 | `smtp` | object | To send through an `imap` account | Provider default | SMTP server, with the same fields as `imap`. |
 | `username` | string | No | The address | Login name for a password, and the user an OAuth token signs in as. |
 | `password` | string | One of `password` or `oauth` | - | Password or app password. |
@@ -100,6 +100,7 @@ A server block overrides the provider default field by field:
 | `port` | Standard port | 993 for IMAP or 465 for SMTP with `tls`; 143 for IMAP or 587 for SMTP with `starttls`. Changing only `security` switches to that mode's standard port. |
 | `security` | `tls` | `tls` connects with TLS. `starttls` upgrades the connection and fails when the server does not offer STARTTLS. |
 | `skip_tls_verify` | `false` | Accept any server certificate, such as a self-signed one. Use it only for a server you run yourself. |
+| `tls_cert_sha256` | None | Accept only the server certificate with this SHA-256 fingerprint: 64 hex characters, any case, colons allowed. The chain is not verified. Takes precedence over `skip_tls_verify`. |
 
 Every connection uses TLS. An account with no SMTP server can find and organize email but not send it.
 
@@ -127,6 +128,39 @@ steps:
 ```
 
 Gmail, iCloud, Yahoo, and Fastmail accept an app password made on the provider's site in place of the account password. Microsoft 365 and Outlook.com no longer accept passwords over IMAP; use [OAuth](#oauth).
+
+### Servers With Their Own Certificate
+
+A server with a self-signed or private-CA certificate fails the default certificate check. Pin its certificate with `tls_cert_sha256` instead of accepting any certificate with `skip_tls_verify`, which also accepts one presented by an attacker on the network path.
+
+```yaml
+secrets:
+  - name: OPS_MAIL_PASSWORD
+    ref: mail/ops
+
+mail_accounts:
+  ops@example.com:
+    imap:
+      host: mail.internal.example.com
+      tls_cert_sha256: 9f2c4e71a0b85d36c1e7f40a29b6d8e53c7a1f04b9e2d6c8a3f5170e4b9d2c6a
+    password: ${OPS_MAIL_PASSWORD}
+
+steps:
+  - id: find
+    action: mail.search
+    with:
+      mailbox: ops@example.com
+      within: 24h
+```
+
+Print the fingerprint with OpenSSL, adding `-starttls imap` or `-starttls smtp` for a STARTTLS port. Copy the value after `Fingerprint=`; the colons can stay.
+
+```bash
+openssl s_client -connect mail.internal.example.com:993 </dev/null 2>/dev/null \
+  | openssl x509 -noout -fingerprint -sha256
+```
+
+The pin names one certificate, so update it when the server's certificate is renewed. Until then, connections fail with `server certificate SHA-256 <hash> does not match tls_cert_sha256`.
 
 ### OAuth
 
