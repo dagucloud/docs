@@ -82,12 +82,12 @@ binary.
 ## Step-Level Container
 
 Use a step-level container when only the Codex step should receive the
-workspace mount and Codex credential.
+workspace mount and Codex credential. DAG `env:`, `secrets:`, params, and step
+outputs reach every harness container in the DAG, so load the credential with
+`container.env_file` instead. Here `codex.env` is a dotenv file on the host
+that runs the step, containing `CODEX_API_KEY=...`.
 
 ```yaml
-env:
-  - CODEX_API_KEY: ${CODEX_API_KEY}
-
 steps:
   - id: review
     action: harness.run
@@ -97,8 +97,7 @@ steps:
       working_dir: /workspace
       volumes:
         - .:/workspace:ro
-      env:
-        - CODEX_API_KEY=${env.CODEX_API_KEY}
+      env_file: codex.env
     with:
       provider: codex
       prompt: |

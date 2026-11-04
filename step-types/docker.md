@@ -194,7 +194,7 @@ container:
   ports:
     - "8080:8080"
   network: bridge
-  keep_container: true         # Keep container after workflow (DAG-level only)
+  keep_container: true         # Keep the container after it finishes
 ```
 
 #### Object Form - Exec Mode
@@ -210,6 +210,10 @@ container:
 ```
 
 `env_file` accepts one path or a list and uses dotenv syntax. A missing file fails the step. See [Environment Files](/writing-workflows/container#environment-files) for path lookup and precedence.
+
+`shell` is an array, such as `["/bin/bash", "-o", "errexit"]`, that wraps each step command. Dagu adds the command flag (`-c`) when it is missing.
+
+`healthcheck` sets a custom container healthcheck with `test`, `interval`, `timeout`, `start_period`, and `retries`. `test` starts with `NONE`, `CMD`, or `CMD-SHELL`.
 
 #### Field Availability
 
@@ -228,6 +232,8 @@ container:
 | `network` | Not allowed | Optional |
 | `platform` | Not allowed | Optional |
 | `keep_container` | Not allowed | Optional |
+| `shell` | Optional | Optional |
+| `healthcheck` | Not allowed | Optional |
 
 ### Image Pull Policy
 
@@ -352,7 +358,7 @@ steps:
 ### Image Mode
 
 - **Required fields**: `container.image` is required.
-- **Container name**: Must be unique. If a container with the same name already exists (running or stopped), the DAG fails.
+- **Container name**: For a DAG-level container, the name must be unique. If a container with the same name already exists (running or stopped), the DAG fails. For a step-level container, Dagu execs into a running container with that name, even if it uses a different image. A stopped one is removed and created again.
 - **Volume format**: `source:target[:ro|rw]`
   - Source-side `$VAR` and `${VAR}` values are expanded from the Dagu process environment.
   - Path-like sources may be absolute, relative to DAG working_dir (`.`, `./...`, or another relative path), or `~`-expanded; otherwise the source is treated as a named volume.
@@ -632,7 +638,7 @@ setup details.
 
 ## Container Lifecycle Management
 
-The `keep_container` option (DAG-level only) prevents the container from being removed after the workflow completes:
+The `keep_container` option prevents the container from being removed after the workflow completes. On a step-level container, it keeps that step's container:
 
 ```yaml
 container:

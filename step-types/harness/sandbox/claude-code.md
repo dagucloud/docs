@@ -85,12 +85,12 @@ binary.
 ## Step-Level Container
 
 Use a step-level container when only the Claude Code step should receive the
-workspace mount and credential.
+workspace mount and credential. DAG `env:`, `secrets:`, params, and step
+outputs reach every harness container in the DAG, so load the credential with
+`container.env_file` instead. Here `claude.env` is a dotenv file on the host
+that runs the step, containing `ANTHROPIC_API_KEY=...`.
 
 ```yaml
-env:
-  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-
 steps:
   - id: review
     action: harness.run
@@ -100,8 +100,7 @@ steps:
       working_dir: /workspace
       volumes:
         - .:/workspace:ro
-      env:
-        - ANTHROPIC_API_KEY=${env.ANTHROPIC_API_KEY}
+      env_file: claude.env
     with:
       provider: claude
       prompt: |

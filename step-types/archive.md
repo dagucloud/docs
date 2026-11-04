@@ -13,22 +13,16 @@ Work with archive files directly from a DAG step without relying on shell utilit
 | **RAR** | `.rar` | ✓ | ✗ | Yes (read) | Read-only; extraction with password |
 | **7-Zip** | `.7z` | ✓ | ✗ | Yes (read) | Read-only; extraction with password |
 
-### Compression Formats (Single File)
+### Compressed Single Files
 
-| Format | Extension | Compression Level | Notes |
-|--------|-----------|-------------------|-------|
-| **GZIP** | `.gz` | 0-9 (default: -1) | Configurable compression |
-| **Bzip2** | `.bz2` | 0-9 (default: -1) | Configurable compression |
-| **XZ** | `.xz` | Fixed | High compression ratio |
-| **Zstandard** | `.zst`, `.zstd` | Fixed | Fast with good compression |
-| **LZ4** | `.lz4` | Fixed | Very fast, lower ratio |
+Standalone compressed files (`.gz`, `.bz2`, `.xz`, `.zst`, `.lz4`) are not supported. `create` and `extract` fail, and `list` returns no entries. Use these compressions through the TAR formats below.
 
 ### Combined Formats (Archive + Compression)
 
 | Format | Extensions | Read | Write | Compression Level |
 |--------|------------|------|-------|-------------------|
-| **TAR+GZIP** | `.tar.gz`, `.tgz` | ✓ | ✓ | 0-9 (default: -1) |
-| **TAR+Bzip2** | `.tar.bz2`, `.tbz2`, `.tbz` | ✓ | ✓ | 0-9 (default: -1) |
+| **TAR+GZIP** | `.tar.gz`, `.tgz` | ✓ | ✓ | 1-9 (default: -1) |
+| **TAR+Bzip2** | `.tar.bz2`, `.tbz2`, `.tbz` | ✓ | ✓ | 1-9 (default: -1) |
 | **TAR+XZ** | `.tar.xz`, `.txz` | ✓ | ✓ | Fixed |
 | **TAR+Zstandard** | `.tar.zst`, `.tar.zstd` | ✓ | ✓ | Fixed |
 
@@ -72,7 +66,7 @@ steps:
     depends: package
 ```
 
-`extract` and `create` emit a JSON summary (files processed, bytes, duration, etc.) on `stdout`. `list` outputs a JSON array of entries so subsequent steps can filter or inspect the archive with tools like `jq`.
+`extract` and `create` emit a JSON summary (files processed, bytes, duration, etc.) on `stdout`. `list` outputs a JSON object whose `files` array lists the entries, so subsequent steps can filter or inspect the archive with tools like `jq`.
 
 ## Configuration
 
@@ -81,7 +75,7 @@ steps:
 | `source` | Input archive or directory | string | *required* | Path to archive file (extract/list) or source directory (create) |
 | `destination` | Output directory or archive path | string | `.` (extract) | Target directory (extract) or output archive path (create); optional for `list` |
 | `format` | Archive format override | string | auto-detect | Explicit format: `zip`, `tar`, `tar.gz`, `tar.bz2`, `tar.xz`, `tar.zst`, `7z`, `rar`, etc. |
-| `compression_level` | Compression level | int | `-1` | `-1` = default, `0` = none, `1-9` = level; applies to gzip and bzip2 only |
+| `compression_level` | Compression level | int | `-1` | `-1` or `0` = default, `1-9` = level; applies to gzip and bzip2 only |
 | `overwrite` | Replace existing files | bool | `false` | When `false`, extraction fails if destination file exists |
 | `strip_components` | Strip leading path segments | int | `0` | Remove N leading directories from paths (like `tar --strip-components=N`) |
 | `preserve_paths` | Preserve full paths | bool | `true` | When `false`, only extracts the basename of each file |
@@ -169,7 +163,8 @@ These protections defend against "zip slip" and similar archive-based attacks.
 | **RAR** | Read-only; cannot create RAR archives |
 | **7-Zip** | Read-only; cannot create 7z archives |
 | **Password Protection** | Extraction only; cannot create encrypted archives |
-| **Compression Levels** | Only GZIP and Bzip2 support configurable levels (0-9) |
+| **Compression Levels** | Only GZIP and Bzip2 support configurable levels (1-9) |
+| **Compressed single files** | Not supported; use a TAR-based format |
 
 ## Output Format
 
@@ -193,7 +188,7 @@ Both `extract` and `create` commands output JSON to `stdout` with operation metr
 
 ### List Operation
 
-The `list` command outputs a JSON array of archive entries:
+The `list` command outputs a JSON object with the archive entries in `files`:
 
 ```json
 {

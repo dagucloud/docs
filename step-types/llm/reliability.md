@@ -45,7 +45,7 @@ model. The run fails only after no configured model remains.
 
 ## Retries and Availability
 
-Dagu's LLM clients automatically retry transient network failures, rate-limit responses (`429`), and common server failures (`500` through `504`). OpenRouter can report an upstream failure inside a `200` response; Dagu retries such an error when its code is a rate limit or a server error, and retries an answer that carries no choices and no error. When model fallback is configured, Dagu tries the next model after retries for the current model are exhausted.
+Dagu's LLM clients automatically retry transient network failures, rate-limit responses (`429`), and server failures (`500`, `502`, `503`, `504`, and `529`). OpenRouter can report an upstream failure inside a `200` response; Dagu retries such an error when its code is a rate limit or a server error, and retries an answer that carries no choices and no error. When model fallback is configured, Dagu tries the next model after retries for the current model are exhausted.
 
 Add a step-level `retry_policy` when the complete action should be attempted again after the provider retries and all fallback models fail:
 

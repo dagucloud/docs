@@ -116,11 +116,7 @@ bob@example.com
 
 ## Named Arguments
 
-::: info Unreleased
-Named arguments require a Dagu build containing PR #2782. This feature is not yet available on Dagu main.
-
-https://github.com/dagucloud/dagu/pull/2782
-:::
+Named arguments require Dagu v2.17.0 or later.
 
 Use `with.args` to pass values into a filter as `$name` variables:
 

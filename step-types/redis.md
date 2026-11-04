@@ -58,9 +58,9 @@ Steps inherit connection settings from the DAG level. Step-level `with` values o
 | Field | Description | Default |
 |-------|-------------|---------|
 | `tls` | Enable TLS connection | `false` |
-| `tls_cert` | Client certificate path | - |
-| `tls_key` | Client key path | - |
-| `tls_ca` | CA certificate path | - |
+| `tls_cert` | Client certificate path (step `with` only) | - |
+| `tls_key` | Client key path (step `with` only) | - |
+| `tls_ca` | CA certificate path (step `with` only) | - |
 | `tls_skip_verify` | Skip certificate verification | `false` |
 
 ### High Availability
@@ -85,7 +85,7 @@ Steps inherit connection settings from the DAG level. Step-level `with` values o
 | `fields` | Multiple hash fields (map) | - |
 | `ttl` | Expiration in seconds (for SET, EXPIRE) | - |
 | `timeout` | Command timeout in seconds | `30` |
-| `max_retries` | Maximum retry attempts | `3` |
+| `max_retries` | Retry attempts for each command | `3` |
 
 ### Additional Options
 
@@ -99,6 +99,23 @@ Steps inherit connection settings from the DAG level. Step-level `with` values o
 | `with_scores` | Include scores in sorted set output |
 | `match` | Pattern for SCAN/KEYS |
 | `count` | Count for SCAN, LPOP, etc. |
+| `keep_ttl` | Keep the existing TTL on SET |
+| `position` | `BEFORE` or `AFTER` for LINSERT |
+| `pivot` | Pivot element for LINSERT |
+| `min` | Range min (for ZRANGEBYSCORE, ZCOUNT, XRANGE) |
+| `max` | Range max (for ZRANGEBYSCORE, ZCOUNT, XRANGE) |
+| `channel` | Pub/Sub channel for PUBLISH |
+| `message` | Message for PUBLISH |
+| `stream` | Stream key |
+| `stream_id` | Stream entry ID (`*` for auto) |
+| `group` | Consumer group |
+| `consumer` | Consumer name |
+| `stream_fields` | Stream entry fields (map) |
+| `max_len` | MAXLEN for XADD |
+| `block` | Block timeout in milliseconds (BLPOP, XREAD) |
+| `no_ack` | NOACK for XREADGROUP |
+| `script_sha` | SHA of a pre-loaded Lua script |
+| `watch` | Keys to WATCH before a transaction |
 
 ### Output
 
@@ -106,7 +123,6 @@ Steps inherit connection settings from the DAG level. Step-level `with` values o
 |-------|-------------|---------|
 | `output_format` | Output format: `json`, `jsonl`, `raw`, `csv` | `json` |
 | `null_value` | String representation for nil values | `null` |
-| `max_result_size` | Maximum result size in bytes | `10MB` |
 
 ## Examples
 
@@ -432,26 +448,12 @@ redis:
   password: ${env.REDIS_PASSWORD}
 ```
 
-## Connection Pooling
+## Connections
 
-### Non-Worker Mode
-
-When executing DAGs directly, each step creates its own connection with defaults:
-- Max retries: 3 (configurable via `max_retries`)
+Each step creates its own connection and closes it when the step finishes. Defaults:
+- Connection setup: up to 30 attempts, with a delay that grows from 0.5 seconds to 2 seconds. An unreachable server fails the step after about a minute. `max_retries` and `timeout` do not change this window.
+- Command retries: 3 (configurable via `max_retries`)
 - Command timeout: 30 seconds (configurable via `timeout`)
-
-### Worker Mode
-
-When running distributed workers, Redis connections use a **global connection pool** managed at the worker level. This prevents connection exhaustion when multiple DAGs run concurrently.
-
-The pool manager:
-- Reuses connections across DAG executions with the same connection parameters
-- Automatically manages connection lifecycle
-- Verifies connections with PING before reuse
-
-::: warning Connection Limits
-In worker mode, configure your Redis server's `maxclients` setting appropriately for the expected number of concurrent connections.
-:::
 
 ## Output Formats
 
@@ -506,14 +508,21 @@ steps:
 
 ## TLS Configuration
 
+The DAG-level `redis` block accepts `tls` and `tls_skip_verify`. Set `tls_cert`, `tls_key`, and `tls_ca` in the step `with` block:
+
 ```yaml
 redis:
   host: secure-redis.example.com
   port: 6380
   tls: true
-  tls_cert: /path/to/client.crt
-  tls_key: /path/to/client.key
-  tls_ca: /path/to/ca.crt
+
+steps:
+  - id: ping
+    action: redis.ping
+    with:
+      tls_cert: /path/to/client.crt
+      tls_key: /path/to/client.key
+      tls_ca: /path/to/ca.crt
 ```
 
 For self-signed certificates in development:

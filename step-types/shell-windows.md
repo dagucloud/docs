@@ -12,12 +12,15 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
   ```
 - **Step override** (evaluated at runtime so params/secrets/outputs are allowed):
   ```yaml
+  params:
+    - STEP_SHELL: pwsh
   steps:
     - run: Write-Host "Runs in the step shell"
       with:
-        shell: ${SHELL_OVERRIDE:-pwsh -NoProfile}
+        shell: ${params.STEP_SHELL} -NoProfile
   ```
-- **Fallback**: If no shell is set, Dagu prefers PowerShell, then `pwsh`, then `cmd.exe`.
+  A shell-style default such as `${SHELL_OVERRIDE:-pwsh}` does not apply when `SHELL_OVERRIDE` is undefined; the text stays literal and the step fails. A resolved value is used as one executable name, so keep flags outside the reference.
+- **Fallback**: If no shell is set, Dagu uses `DAGU_DEFAULT_SHELL`, then `pwsh`, then Windows PowerShell, then `cmd.exe`.
 - **String or array**: `shell` accepts either `"powershell -NoProfile"` or `["powershell", "-NoProfile"]`; arrays avoid quoting issues.
 
 ## Running Commands
@@ -80,7 +83,7 @@ Run commands and scripts on Windows using PowerShell, pwsh, or cmd.exe.
   Use DAG-level `shell: powershell`/`shell: pwsh`, or step-level `with.shell: powershell`/`with.shell: pwsh`. Script blocks are written as UTF-8 with a byte order mark, run through PowerShell file execution, and are prefixed with `$ErrorActionPreference = 'Stop'` plus UTF-8 console/output encoding setup. Use PowerShell syntax for variables/pipelines.
 
 - **cmd.exe**  
-  Set DAG-level `shell: cmd`, or step-level `with.shell: cmd`, for command prompt semantics. Include `/c` in the shell string/array when you want to run a single command string. For multi-line cmd scripts, embed the batch pattern directly in YAML:
+  Set DAG-level `shell: cmd`, or step-level `with.shell: cmd`, for command prompt semantics. Dagu adds `/c` when the shell string does not include it. For multi-line cmd scripts, embed the batch pattern directly in YAML:
   ```yaml
   steps:
     - run: |

@@ -16,7 +16,7 @@ claude -p "<prompt>"
 
 ## Common Flags
 
-Any `with` key other than `provider` and `fallback` is passed as a CLI flag. Snake-case keys are normalized to kebab-case.
+Any `with` key other than the reserved keys `prompt`, `stdin`, `provider`, `fallback`, `managed`, and `acp_permission` is passed as a CLI flag. Snake-case keys are normalized to kebab-case.
 
 | Flag | Type | Description |
 |------|------|-------------|

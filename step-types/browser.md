@@ -444,7 +444,7 @@ While you reword `act` instructions or adjust `expect` conditions, run the brows
 dagu start --only checkout workflow.yaml
 ```
 
-The other steps are recorded as skipped, and the run keeps the workflow's name, so the replay cache and `browser.profile` apply as in a full run. With a profile, a site stays signed in, so the step does not need the sign-in steps before it. When the step reads an earlier step's output, take it from a finished run with `--outputs-from <run-id>`, or set it with `--output <step>.<name>=<value>`. See [Running One Step](/writing-workflows/outputs#running-one-step).
+The other steps are recorded as skipped, and the run keeps the workflow's name, so the replay cache and `browser.profile` apply as in a full run. With a profile, a site stays signed in, so the step does not need the sign-in steps before it. When the step reads an earlier step's output, take it from a finished run with `--outputs-from <run-id>`, or take one step's outputs with `--output-from <step>=<run-id>`. See [Running One Step](/writing-workflows/outputs#running-one-step).
 
 ## Profiles
 
@@ -817,7 +817,7 @@ Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/s
 | `... answered with a Cloudflare bot check (HTTP 403) in place of the page` | The site showed a bot check that did not pass on its own within 10 seconds. | Pass it once in a browser session with a window and the step's profile. See [Refused Pages](#refused-pages). |
 | `... refused the page (HTTP 403 Forbidden)` or `(HTTP 429 Too Many Requests)` | The account may not open the page, the site blocks the host's network, or the site wants fewer requests. | Check the account's access, ask the site's owner to allow the host, or run less often. See [Refused Pages](#refused-pages). |
 | `browser profile "..." is held by DAG run ..., which is waiting for input` | Another run holds the profile while it waits for an answer. | Answer or cancel that run. |
-| `the site asks for a TLS client certificate (ERR_...)` | The site requires a client certificate and no entry names its host. | Add it to `browser.client_certificates`. See [Client Certificates](#client-certificates). |
+| `... asks for a TLS client certificate, and none is configured for it (ERR_...)` | The site requires a client certificate and no entry names its host. | Add it to `browser.client_certificates`. See [Client Certificates](#client-certificates). |
 | `... rejected the client certificate ...` | The site refused the certificate presented. | Check that the certificate is the one the site expects and has not expired or been revoked. |
 | `... presented a server certificate that is not trusted ...` | The proxy could not verify the site's server certificate. | Add the site's CA with [trusted_cas](#trusted-certificate-authorities). |
 | `with.browser.client_certificates[0]: ... passphrase` | The certificate file could not be read with its passphrase. | Check the passphrase secret and the file. |

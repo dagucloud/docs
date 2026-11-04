@@ -16,7 +16,6 @@ steps:
   - id: notify
     action: acme/dagu-action-notify@v1.2.0
     with:
-      channel: "#ops"
       text: "Deployment finished for ${params.ENVIRONMENT}"
 ```
 

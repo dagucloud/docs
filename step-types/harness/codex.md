@@ -18,13 +18,13 @@ codex exec "<prompt>"
 
 ## Default Config
 
-Codex is the only built-in provider that ships with a default config. When you use `provider: codex`, Dagu automatically applies:
+Codex ships with a default config. When you use `provider: codex`, Dagu automatically applies:
 
 ```yaml
 skip_git_repo_check: true
 ```
 
-This becomes `--skip-git-repo-check` on the CLI. You can override it by explicitly setting `skip_git_repo_check: false` in your step `with`.
+This becomes `--skip-git-repo-check` on the CLI. You can override it by explicitly setting `skip_git_repo_check: false` in your step `with`. Cursor, Goose, and Kilo Code also ship defaults; see [Harness](/step-types/harness/).
 
 ## Common Flags
 
@@ -73,7 +73,7 @@ steps:
 Generated invocation:
 
 ```text
-codex exec "Fix all lint errors" --yolo --sandbox workspace-write --skip-git-repo-check
+codex exec "Fix all lint errors" --sandbox workspace-write --skip-git-repo-check --yolo
 ```
 
 **Warning:** This disables all safety checks. Only use in isolated or trusted environments.

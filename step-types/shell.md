@@ -12,12 +12,15 @@ Run system commands and scripts with the default action.
   ```
 - **Step override** (evaluated at runtime, can reference params/secrets/outputs):
   ```yaml
+  params:
+    - STEP_SHELL: /bin/zsh
   steps:
     - run: echo "Runs in the step shell"
       with:
-        shell: ${CUSTOM_SHELL:-/bin/zsh}
+        shell: ${params.STEP_SHELL}
   ```
-- **Fallback**: if you set nothing, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh` on Unix; on Windows it prefers PowerShell, then `pwsh`, then `cmd.exe`.
+  A shell-style default such as `${CUSTOM_SHELL:-/bin/zsh}` does not apply when `CUSTOM_SHELL` is undefined; the text stays literal and the step fails. Declare the value as a param or in DAG `env`.
+- **Fallback**: if you set nothing, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh` on Unix; on Windows it uses `DAGU_DEFAULT_SHELL`, then `pwsh`, then Windows PowerShell, then `cmd.exe`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
 
 ## Running Commands

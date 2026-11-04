@@ -223,14 +223,14 @@ steps:
         name: test
 ```
 
-Use `default` to handle optional keys safely:
+`default` cannot rescue a missing key, because `{{ .name }}` fails before `default` runs. Read optional keys with `get`, then apply `default`:
 
 ```yaml
 with:
-  template: '{{ .name | default "Anonymous" }}'
+  template: '{{ get . "name" | default "Anonymous" }}'
 ```
 
-Or use `get` for safe map access:
+The same works for nested maps:
 
 ```yaml
 with:

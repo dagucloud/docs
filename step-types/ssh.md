@@ -64,12 +64,14 @@ steps:
 |-------|----------|---------|-------------|
 | `user` | Yes | - | SSH username |
 | `host` | Yes | - | Hostname or IP address |
+| `ip` | No | - | Alias for `host` |
 | `port` | No | `22` | SSH port |
 | `key` | No | Auto-detect | Private key path (see below) |
 | `password` | No | - | Password (not recommended) |
 | `strict_host_key` | No | `true` | Enable host key verification |
 | `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `shell` | No | - | Shell for remote command execution (string form only; e.g., `"/bin/bash -e"`) |
+| `shell_args` | No | - | Extra shell arguments, appended after those in `shell` |
 | `timeout` | No | `30s` | Connection timeout |
 | `bastion` | No | - | Bastion/jump host configuration |
 
@@ -79,28 +81,25 @@ The SSH `timeout` field limits connection establishment. DAG-level and step-leve
 
 ### Shell Configuration
 
-When `shell` is specified, commands are wrapped and executed through the shell on the remote server:
+Dagu sends the step's commands to the remote server as one script on standard input. Without `shell`, the remote `/bin/sh` runs that script. Set `shell` to choose a different interpreter or add arguments:
 
 ```yaml
 ssh:
   user: deploy
   host: app.example.com
-  shell: ["/bin/bash", "-e"]  # Commands wrapped as: /bin/bash -e -c 'command' (DAG-level example)
+  shell: ["/bin/bash", "-e"]  # Script runs as: /bin/bash -e, reading stdin (DAG-level example)
 
 steps:
   - run: echo $HOME && ls -la  # Shell features like pipes, variables work
 ```
 
-Without `shell`, commands are executed directly without shell interpretation. Use `shell` when you need:
-- Shell variable expansion (`$HOME`, `$PATH`)
-- Command chaining (`&&`, `||`, `;`)
-- Pipes (`|`) and redirections (`>`, `<`)
-- Glob patterns (`*.txt`)
+Shell features such as `$HOME`, `&&`, pipes, redirections, and globs work with the default `/bin/sh` too. Use `shell` when commands need a specific shell, such as Bash syntax.
 
 **Shell Priority:**
 1. Step-level SSH `with.shell` (string only)
 2. DAG-level SSH config `shell` (string or array)
 3. Step-level `shell` field on the step (string or array, acts as fallback for UX)
+4. `/bin/sh`
 
 **Specifying Shell Arguments**
 
@@ -244,10 +243,9 @@ steps:
 
 Instead of duplicating the SSH executor `with` block, `preconditions`, `retry_policy`, `env`, etc. across multiple steps, combine commands into one step.
 
-**Important:** Each command runs in a **new SSH session**, so:
-- Working directory resets to the user's home directory for each command
-- Environment variables set in one command don't persist to the next
-- Use absolute paths or combine commands with `&&` if you need shared context
+**Important:** All commands run in **one SSH session** as a single script, so:
+- A directory change or exported variable carries over to later commands
+- The script runs with `set -e`, so the first failing command stops the rest
 
 ## Security Best Practices
 

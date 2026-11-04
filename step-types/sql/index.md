@@ -84,7 +84,7 @@ For distributed workers running multiple concurrent DAGs, configure PostgreSQL c
 |-------|------|---------|-------------|
 | `output_format` | string | jsonl | `jsonl`, `json`, `csv` |
 | `headers` | bool | false | Include headers in CSV |
-| `null_string` | string | null | NULL representation |
+| `null_string` | string | null | NULL representation in CSV output. JSON and JSONL always write `null` |
 | `max_rows` | int | 0 | Limit rows (0 = unlimited) |
 | `streaming` | bool | false | Stream to file |
 | `output_file` | string | - | Explicit output path for streaming results |
@@ -127,7 +127,7 @@ steps:
 | `table` | string | required | Target table name |
 | `format` | string | auto-detect | `csv`, `tsv`, `jsonl` (detected from file extension) |
 | `has_header` | bool | true | First row is header |
-| `delimiter` | string | `,` | Field delimiter |
+| `delimiter` | string | `,` (tab for `tsv`) | Field delimiter |
 | `columns` | []string | - | Explicit column names |
 | `null_values` | []string | `["", "NULL", "null", "\\N"]` | Values treated as NULL |
 | `batch_size` | int | 1000 | Rows per INSERT |
@@ -282,6 +282,8 @@ steps:
     continue_on:
       failure: true
 ```
+
+Connection setup retries before the query runs. A step tries up to 30 times, with a delay that grows from 0.5 seconds to 2 seconds, so an unreachable database fails the step after about a minute. `timeout` applies to the query, not to this connection window.
 
 ## Fan-Out: Running Across Multiple Databases
 

@@ -83,6 +83,7 @@ The caller chooses the package with the step `action` field:
 |-----------|---------|---------|
 | `name@version` | Official Dagu Action from `dagucloud/name` | `python-script@v1` |
 | `owner/repo@version` | Third-party action package | `acme/dagu-action-notify@v1.2.0` |
+| `source:<location>@version` | Local directory, `file://` path, or Git URL. Local paths ignore the version. | `source:file:///path/to/duckdb@local` |
 
 Versions are required. Use a version tag or commit SHA for production workflows. A commit SHA is the strongest reproducibility boundary.
 

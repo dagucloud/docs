@@ -40,6 +40,17 @@ steps:
 
 The `requirements` field is optional. When present, each entry is passed to `uv run --with`, so pin dependencies for reproducible runs.
 
+## Inputs
+
+| Field | Description |
+|-------|-------------|
+| `script` | Required. Python async function body to run. |
+| `input` | JSON-compatible value exposed to the script as `input`. |
+| `requirements` | Requirement specifiers installed for the script. Defaults to `[]`. |
+| `env` | Extra environment variables for the script process, as a string map. |
+| `timeoutSeconds` | Timeout for the script process in seconds, from 1 to 300. Defaults to `30`. |
+| `pythonVersion` | Exact Python version used by uv, such as `3.13.9`. Defaults to `3.13.9`. |
+
 ## Outputs
 
 | Field | Description |

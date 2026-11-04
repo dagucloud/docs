@@ -34,6 +34,15 @@ steps:
 
 `script` is a JavaScript async function body. `return` publishes `result`. The action exposes `input`, `params`, `env`, and a captured `console` object.
 
+## Inputs
+
+| Field | Description |
+|-------|-------------|
+| `script` | Required. JavaScript async function body to run. |
+| `input` | JSON-compatible value exposed to the script as `input`. |
+| `env` | Extra environment variables for the script, as a string map. |
+| `timeoutSeconds` | Script timeout in seconds, from 1 to 300. Defaults to `30`. |
+
 ## Outputs
 
 | Field | Description |

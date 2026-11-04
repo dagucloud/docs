@@ -5,6 +5,11 @@ to its container. Dagu does not copy host login state into a container unless th
 DAG mounts the files or passes the environment variables required by the
 provider.
 
+Every harness container also receives the DAG's user environment: DAG `env:`,
+the step's own `env:`, params, step outputs, and `secrets:`. A credential declared at DAG
+level therefore reaches every harness step in the DAG. The Dagu process
+environment is not copied.
+
 ## Environment Variables
 
 Use `container.env` for API keys and provider tokens:
@@ -79,8 +84,9 @@ container path.
 
 ## Step-Level Visibility
 
-Use a step-level `container:` when one harness attempt should receive a
-credential:
+Use a step-level `container:` with `env_file` when one harness step should
+receive a credential. `provider.env` is a dotenv file on the host that runs the
+step, containing `PROVIDER_API_KEY=...`:
 
 ```yaml
 harnesses:
@@ -94,15 +100,16 @@ steps:
     container:
       image: dagu-provider-runner:local
       pull_policy: never
-      env:
-        - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
+      env_file: provider.env
     with:
       provider: your_provider
       prompt: |
         Review this repository.
 ```
 
-Only that step receives `PROVIDER_API_KEY` through this container definition.
+Only that step receives `PROVIDER_API_KEY`, because `env_file` loads it into
+this container alone. The same key declared in DAG `env:` or `secrets:` would
+reach every harness container in the DAG.
 
 ## Root-Level Visibility
 

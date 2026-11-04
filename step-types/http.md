@@ -17,6 +17,8 @@ steps:
 
 | Field | Description | Example |
 |-------|-------------|---------|
+| `method` | HTTP method. Required. | `GET` |
+| `url` | Request URL. Required. | `https://api.example.com/data` |
 | `headers` | Request headers | `Authorization: Bearer token` |
 | `query` | URL parameters | `page: "1"` |
 | `body` | Request body | `{"name": "value"}` |
@@ -150,13 +152,13 @@ The response body must be valid JSON. On a successful response with `silent: tru
 }
 ```
 
-Without `silent` (or on a non-2xx response), stdout also includes status code and headers:
+Without `silent` (or on a non-2xx response), stdout also includes status code and headers. Each header value is an array of strings:
 
 ```json
 {
   "status_code": 200,
   "headers": {
-    "Content-Type": "application/json"
+    "Content-Type": ["application/json"]
   },
   "body": {"key": "value"}
 }

@@ -12,11 +12,14 @@ Run commands and scripts on Unix-like systems (macOS, Linux, BSD).
   ```
 - **Step override** (evaluated at runtime so params/secrets/outputs are allowed):
   ```yaml
+  params:
+    - STEP_SHELL: /bin/zsh
   steps:
     - run: echo "Runs in the step shell"
       with:
-        shell: ${CUSTOM_SHELL:-/bin/zsh}
+        shell: ${params.STEP_SHELL}
   ```
+  A shell-style default such as `${CUSTOM_SHELL:-/bin/zsh}` does not apply when `CUSTOM_SHELL` is undefined; the text stays literal and the step fails.
 - **Fallback**: If no shell is set, Dagu uses `DAGU_DEFAULT_SHELL`, then `$SHELL`, then `sh`.
 - **String or array**: `shell` accepts either `"bash -e"` or `["bash", "-e"]`; arrays avoid quoting issues.
 

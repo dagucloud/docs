@@ -87,7 +87,7 @@ Consider these constraints:
 
 - Dagu expects the OpenAI-compatible route, not vendor-native endpoints.
 - Provider-specific options, such as Ollama native `think` settings, cannot be configured here.
-- Multimodal or image message content is not supported on this path.
+- Images from `files` are sent as OpenAI `image_url` content parts. They reach the model only if the local server and model accept images.
 
 If you need vendor-specific behavior, place the service behind a compatible proxy or invoke the tool directly outside this path.
 

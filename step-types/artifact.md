@@ -89,7 +89,7 @@ steps:
 | `path` | all | string | `.` for list | Artifact-relative path. Required for write and read. |
 | `content` | write | string | - | Text content to write. |
 | `overwrite` | write | boolean | `false` | Replace an existing artifact. |
-| `atomic` | write | boolean | `true` | Write by atomic replacement when overwriting. |
+| `atomic` | write | boolean | `true` | Write by atomic replacement when overwriting. `overwrite: true` requires `atomic: true`. |
 | `mode` | write | string | `0600` | File mode such as `0600` or `0644`. |
 | `format` | read | string | `raw` | `raw` or `json`. |
 | `max_bytes` | read | integer | `0` | Maximum bytes to read. Zero means no limit. |

@@ -93,9 +93,9 @@ target path and the optional `ro` or `rw` mode are not expanded.
 ## Credentials
 
 Do not bake credentials into an image. Pass provider credentials at run time
-with `container.env` or a mounted credentials directory.
+with `container.env`, `container.env_file`, or a mounted credentials directory.
 
-Step-level container:
+Step-level container, with `PROVIDER_API_KEY` in a host dotenv file:
 
 ```yaml
 harnesses:
@@ -112,8 +112,7 @@ steps:
       working_dir: /workspace
       volumes:
         - .:/workspace:ro
-      env:
-        - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
+      env_file: provider.env
     with:
       provider: your_provider
       prompt: |
@@ -137,8 +136,11 @@ container:
 ```
 
 With a root-level container, every inherited command step and CLI harness step
-inside that shared container can read `PROVIDER_API_KEY`. If only one harness
-step should receive a credential, put `container:` on that step instead.
+inside that shared container can read `PROVIDER_API_KEY`. DAG `env:` also
+reaches every harness container, including step-level ones. If only one harness
+step should receive a credential, put `container:` on that step and load the
+credential with `container.env_file`; see
+[Step-Level Visibility](./credentials#step-level-visibility).
 
 ## Provider Pages
 

@@ -90,7 +90,7 @@ cat orders.xlsx | dagu xlsx read - --sheet Orders --format json
 
 Standard input accepts up to 64 MiB; larger input fails before workbook parsing. `inspect --format json` reports `"path": "-"` for stdin. This size limit applies only to standard input.
 
-`xlsx.info` publishes `path`, `date_system`, `sheets` (each with `name`, `used_range`, `range`, `header_row`, `headers`, `types`, `row_count`, `columns`, `profile_truncated`, and `tables`), `named_ranges`, and `warnings`. `xlsx.list_sheets` publishes `sheets` and `count`.
+`xlsx.info` publishes `path`, `date_system`, `sheets` (each with `name`, `used_range`, `range`, `header_row`, `headers`, `types`, `row_count`, `columns`, `profile_truncated`, and `tables`, plus `hidden` for a hidden sheet and `hidden_rows`, the hidden data rows, when there are any), `named_ranges`, and `warnings`. `xlsx.list_sheets` publishes `sheets` and `count`.
 
 `types` and `columns` come from every data row of the detected table, up to 5000; when the table holds more, `profile_truncated` is `true`. A column's type is the kind most of its cells hold: a column mixing integers and decimals is `number`, one mixing dates and datetimes `datetime`, and an empty column `string`. `columns` profiles each column in header order:
 
@@ -156,6 +156,8 @@ with:
 ```
 
 `stop_at_blank: true` stops at the first row whose values are all empty. `max_rows` (default `5000`) caps the rows that hold a value; reaching it sets `truncated` with a warning only when more rows remain. Rows that do not fit the step output budget are left out from the end, also with `truncated`. For a sheet larger than that, use [`xlsx.convert`](#exporting-a-sheet), which writes every row to a file.
+
+`skip_hidden: true` leaves out rows hidden by a filter or by hand. By default, hidden rows are read.
 
 ## Writing Rows
 
@@ -244,7 +246,7 @@ with:
 
 ## Validating a Workbook
 
-`xlsx.validate` checks a sheet before a workflow acts on it. It reads the sheet the way `xlsx.read` does (`sheet`, `range`, `header`, `columns`, `merged`, `trim`, `formulas`) and applies rules to every non-empty row. At least one rule is required.
+`xlsx.validate` checks a sheet before a workflow acts on it. It reads the sheet the way `xlsx.read` does (`sheet`, `range`, `header`, `columns`, `merged`, `skip_hidden`, `trim`, `formulas`) and applies rules to every non-empty row. At least one rule is required.
 
 | Rule | Checks that |
 |------|-------------|
@@ -410,7 +412,7 @@ Three limits of the underlying library: a rename does not rewrite formulas on ot
 
 ## Exporting a Sheet
 
-`xlsx.convert` writes the rows of a sheet to the file named by `output`, as CSV, JSON, or JSON Lines by the file's extension (`.csv`, `.json`, `.jsonl` or `.ndjson`) or by `format`. It reads the way `xlsx.read` does (`sheet`, `range`, `header`, `columns`, `types`, `trim`, `merged`, `formulas`), but writes every row with no cap, and a cell that fails a pinned type fails the step. Columns follow the header order, or `columns`; `_row` is not written. CSV cells are text as a reader would show them, with dates in ISO form; JSON keeps the typed values.
+`xlsx.convert` writes the rows of a sheet to the file named by `output`, as CSV, JSON, or JSON Lines by the file's extension (`.csv`, `.json`, `.jsonl` or `.ndjson`) or by `format`. It reads the way `xlsx.read` does (`sheet`, `range`, `header`, `columns`, `types`, `trim`, `merged`, `skip_hidden`, `formulas`), but writes every row with no cap, and a cell that fails a pinned type fails the step. Columns follow the header order, or `columns`; `_row` is not written. CSV cells are text as a reader would show them, with dates in ISO form; JSON keeps the typed values.
 
 ```yaml
 steps:
@@ -522,17 +524,18 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `path` | all | The workbook. Required. |
 | `password` | all | Password of a protected workbook. |
 | `sheet` | all but `info`, `list_sheets` | The sheet; the first by default. For `sheet`, the sheet operated on. |
-| `range` | `read`, `validate`, `convert` | Cells to read. See [Where the Data Is](#where-the-data-is). |
+| `range` | `read`, `validate`, `convert`, `extract` | Cells to read. See [Where the Data Is](#where-the-data-is). |
 | `header` | `read`, `write`, `append`, `update_rows`, `validate`, `convert` | `true`, `false`, a row number, or a list of row numbers. On `append` and `mode: append`, `false` means the sheet has no header row and rows are written by position. |
 | `columns` | `read`, `write`, `append`, `validate`, `convert` | Columns to keep and their order, with optional `{name: alias}` renames. |
 | `merged` | `read`, `validate`, `convert` | `fill` or `first`. |
-| `trim` | `read`, `validate`, `convert` | Trim text cells. |
-| `formulas` | `read`, `validate`, `convert` | `cached`, `text`, or `calculate`. |
+| `trim` | `read`, `validate`, `convert`, `extract` | Trim text cells. |
+| `formulas` | `read`, `validate`, `convert`, `extract` | `cached`, `text`, or `calculate`. |
 | `types` | `read`, `write`, `append`, `validate`, `convert` | Column types: `string`, `number`, `integer`, `boolean`, `date`, `datetime`. |
 | `on_type_error` | `read` | `fail` (default), `warn` (also spelled `null`), or `keep`. |
 | `where` | `read` | Row filter. |
 | `max_rows` | `read` | Most rows to read. Defaults to `5000`. |
 | `stop_at_blank`, `keep_empty_rows` | `read` | Stop at the first empty row; keep trailing empty rows. |
+| `skip_hidden` | `read`, `validate`, `convert` | Leave out hidden rows. Defaults to `false`. |
 | `rows` | `write`, `append`, `update_rows` | Rows to write, or the aggregate output of a `foreach` step for `update_rows`. |
 | `input` | `write`, `append` | A `.json`, `.jsonl`, or `.csv` file to write instead of `rows`. |
 | `format` | `write`, `append`, `convert` | File format when the extension does not say. |

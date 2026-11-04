@@ -216,10 +216,10 @@ An exact check reads the elements of the window in front, such as its buttons, f
 | Check | Holds when |
 |-------|------------|
 | `{text: ...}` | The name or value of a visible element contains the text. |
-| `{element: {role, name, id, near, in, enabled, nth}}` | The selector matches exactly one visible element. Several matches are a miss, never a guess. |
+| `{element: {role, name, id, near, in, enabled, nth, app, window}}` | The selector matches exactly one visible element. Several matches are a miss, never a guess. |
 | `{window: ...}` | The title of the window in front contains the text. `*` matches any run of characters. |
 
-A selector names an element by `role`, such as `button`, `text_field`, `text`, `checkbox`, `combo_box`, or `list_item`, and at least one of `name`, `id`, or `near: {label, side}`, the label the element sits next to and on which `side` (`right`, `below`, `left`, or `above`). `in` narrows the search to a container, itself a selector, `enabled: true` keeps only the elements that take input and `enabled: false` only those that do not, such as a grayed-out button, and `nth` picks one of several equal matches in reading order, from 0. Names take `*` for any run of characters.
+A selector names an element by `role`, such as `button`, `text_field`, `text`, `checkbox`, `combo_box`, or `list_item`, and at least one of `name`, `id`, or `near: {label, side}`, the label the element sits next to and on which `side` (`right`, `below`, `left`, or `above`). `in` narrows the search to a container, itself a selector, `enabled: true` keeps only the elements that take input and `enabled: false` only those that do not, such as a grayed-out button, and `nth` picks one of several equal matches in reading order, from 0. `app`, a process name compared ignoring case, and `window`, text the window title contains, make the selector match only in that app or window. Names take `*` for any run of characters.
 
 ```yaml
 - act: Post invoice ${params.INVOICE_ID}

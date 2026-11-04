@@ -15,7 +15,8 @@ By default, Dagu reads credentials from the provider's standard environment vari
 | `zai` | `ZAI_API_KEY` |
 | `opencode` | `OPENCODE_API_KEY` |
 | `local` | None |
-| `typesafe` | `TYPESAFE_API_KEY` |
+
+`typesafe` (`TYPESAFE_API_KEY`) is a [`decision.evaluate`](/step-types/decision#providers) provider only. `chat.completion` rejects it.
 
 Provider aliases include `google` for `gemini`; `ollama`, `vllm`, and `llama` for `local`; and `zhipu`, `zhipuai`, and `glm` for `zai`.
 

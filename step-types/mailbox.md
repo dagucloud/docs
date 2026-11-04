@@ -12,7 +12,7 @@ Dagu can work in an existing mailbox: find email, mark or move it, and send or r
 | `mail.organize` | Mark email read, unread, flagged, or unflagged, and move it to a folder, the archive, or the trash. |
 | `mail.send` with `mailbox` | Send from the account, or reply to an email it received. |
 
-The mailbox is reached over IMAP, and mail is sent over SMTP. Gmail and Google Workspace, Microsoft 365 and Outlook.com, and any server that offers IMAP work.
+The mailbox is reached over IMAP, and mail is sent over SMTP. A `google` account that signs in with OAuth uses the [Gmail API](#gmail-api) instead. Gmail and Google Workspace, Microsoft 365 and Outlook.com, and any server that offers IMAP work.
 
 ::: tip Notifications
 To be told when a run fails or succeeds, use the DAG-level `smtp` block with `mail_on`, `error_mail`, and `info_mail`; see [Email Notifications](/writing-workflows/email-notifications). Those never use `mail_accounts`.
@@ -78,7 +78,7 @@ steps:
 | `provider` | string | No | `imap` | `google`, `microsoft`, or `imap`. Sets the default servers. |
 | `imap` | object | For an `imap` account | Provider default | IMAP server: `host`, `port`, `security`, `skip_tls_verify`, and `tls_cert_sha256`. |
 | `smtp` | object | To send through an `imap` account | Provider default | SMTP server, with the same fields as `imap`. |
-| `username` | string | No | The address | Login name for a password, and the user an OAuth token signs in as. |
+| `username` | string | No | The address | Login name for a password, and the user an OAuth token signs in as. Not used by a [Gmail API](#gmail-api) account. |
 | `password` | string | One of `password` or `oauth` | - | Password or app password. |
 | `oauth` | object | One of `password` or `oauth` | - | OAuth refresh-token credentials; see [OAuth](#oauth). |
 
@@ -164,7 +164,7 @@ The pin names one certificate, so update it when the server's certificate is ren
 
 ### OAuth
 
-`oauth` holds a refresh token. Before each IMAP or SMTP connection, the action exchanges it for an access token and signs in with `XOAUTH2`. Access tokens never appear in logs, outputs, or run status.
+`oauth` holds a refresh token. Before each IMAP or SMTP connection, the action exchanges it for an access token and signs in with `XOAUTH2`. A [Gmail API](#gmail-api) account sends the access token with each API request instead. Access tokens never appear in logs, outputs, or run status.
 
 | `oauth.provider` | Required fields | Optional fields |
 |------------------|-----------------|-----------------|
@@ -202,6 +202,39 @@ A Microsoft 365 shared mailbox signs in as its own address with the token of a m
 ::: warning Keeping a refresh token current
 Dagu uses the configured refresh token and does not store a new one that the provider returns. Getting the token in the first place, with the provider's consent screen, happens outside Dagu. Some providers end a refresh token after a while even when it is used; Microsoft does after 90 days. Replace the secret with a fresh token before then.
 :::
+
+### Gmail API
+
+A `google` account with `oauth` reaches its mailbox through the Gmail API instead of IMAP and SMTP. `mail.search`, `mail.organize`, and `mail.send` all use the API.
+
+- The account has no servers. Setting `imap`, `smtp`, or `username` fails with `imap is not used by a google account with oauth, which uses the Gmail API`, naming the field.
+- Folders are Gmail labels. The folder names Gmail shows over IMAP, such as `[Gmail]/Sent Mail` or `[Gmail]/Trash`, map to their labels.
+- The refresh token must grant `https://www.googleapis.com/auth/gmail.modify` or `https://mail.google.com/`, and the Google Cloud project of `client_id` must have the Gmail API enabled. Without the scope, steps fail with `the sign-in does not grant Gmail access`.
+
+```yaml
+secrets:
+  - name: OPS_MAIL_CLIENT_SECRET
+    ref: mail/ops-client-secret
+  - name: OPS_MAIL_TOKEN
+    ref: mail/ops-token
+
+mail_accounts:
+  ops@example.com:
+    provider: google
+    oauth:
+      provider: google_refresh
+      client_id: 1234567890-abc.apps.googleusercontent.com
+      client_secret: ${OPS_MAIL_CLIENT_SECRET}
+      refresh_token: ${OPS_MAIL_TOKEN}
+
+steps:
+  - id: find
+    action: mail.search
+    with:
+      mailbox: ops@example.com
+      folder: "[Gmail]/Sent Mail"
+      within: 24h
+```
 
 ### Base Configuration
 
@@ -354,7 +387,7 @@ steps:
 
 ## Send and Reply
 
-`action: mail.send` with `with.mailbox` sends through that account's SMTP server and sign-in instead of the DAG-level `smtp` block. `from` defaults to the mailbox address. The other fields, such as `to`, `subject`, `message`, and `attachments`, work as they do in [Mail](/step-types/mail).
+`action: mail.send` with `with.mailbox` sends through that account's SMTP server and sign-in, or through the [Gmail API](#gmail-api), instead of the DAG-level `smtp` block. `from` defaults to the mailbox address. The other fields, such as `to`, `subject`, `message`, and `attachments`, work as they do in [Mail](/step-types/mail).
 
 `with.in_reply_to` makes the message a reply to one email of the mailbox. It takes an email ID, or an email object with an `id`, and requires `mailbox`. Before sending, the action reads that email without changing it:
 

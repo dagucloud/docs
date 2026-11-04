@@ -49,7 +49,7 @@ with:
 ```
 
 ::: tip In-Memory Database Sharing
-By default, `:memory:` databases are ephemeral and not shared between steps. To share an in-memory database across steps within the same DAG run, use `shared_memory: true`:
+By default, each connection to `:memory:` gets its own ephemeral database. With `shared_memory: true`, connections in the same Dagu process share one in-memory database while at least one of them is open:
 
 ```yaml
 with:
@@ -57,7 +57,7 @@ with:
   shared_memory: true  # Enables shared cache mode
 ```
 
-This converts the DSN to `file::memory:?cache=shared` internally. For persistent storage, use file databases.
+This converts the DSN to `file::memory:?cache=shared` internally. The database is discarded when its last connection closes, and each step closes its connection when it finishes. A later step does not see tables created by an earlier step. To share data across steps, or for persistent storage, use a file database.
 :::
 
 ## Configuration
@@ -70,7 +70,7 @@ steps:
       dsn: "file:./app.db"
       query: SELECT 1
       timeout: 30           # Query timeout in seconds
-      shared_memory: false   # Set true for :memory: databases to share across steps
+      shared_memory: false   # Set true to use shared cache for :memory: databases
 ```
 
 ::: tip Connection Pooling
@@ -228,7 +228,7 @@ steps:
 | `replace` | `INSERT OR REPLACE` - update existing rows |
 
 ::: tip
-Unlike PostgreSQL where `replace` uses `ON CONFLICT DO NOTHING`, SQLite's `replace` truly replaces existing rows using `INSERT OR REPLACE`.
+Unlike PostgreSQL, where `replace` without `conflict_target` uses `ON CONFLICT DO NOTHING`, SQLite's `replace` truly replaces existing rows using `INSERT OR REPLACE`.
 :::
 
 ## Output Formats

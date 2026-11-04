@@ -33,7 +33,7 @@ Dagu has built-in support for the following providers. Each adapter is pre-confi
 | Droid | `droid` | `droid exec "<prompt>" [flags]` | Folded into the prompt |
 | Amp | `amp` | `amp -x "<prompt>" [flags]` | Piped to stdin |
 | DeepSeek Harness | `deepseek` | `dsh --profile headless [flags] "<prompt>"` | Folded into the prompt |
-| Kilo Code | `kilo` | `kilo run "<prompt>" --auto [flags]` | Piped to stdin |
+| Kilo Code | `kilo` | `kilo run "<prompt>" [flags incl. --auto]` | Piped to stdin |
 
 Codex enables `skip_git_repo_check` by default, Cursor defaults to `output_format: text`, Goose defaults to `quiet: true`, and Kilo Code defaults to `auto: true` so the agent runs unattended. Explicit values under `with` override these defaults. The `deepseek` adapter targets the official DeepSeek Harness `dsh` CLI in its headless profile; it does not select DeepSeek as another harness's model backend.
 
@@ -326,14 +326,14 @@ steps:
     with:
       prompt: |
         Fix the flaky integration tests
-      provider: codex
-      full-auto: true
+      model: opus
 ```
 
 Merge rules:
 
 - DAG-level `harness:` is the base config for every harness step
 - step-level `with:` overrides primary keys from DAG-level `harness:`
+- DAG-level options pass to whichever provider the step selects; a step that sets another `provider` still receives keys such as `model` and `bare`, so keep provider-specific flags on the steps or `fallback` entries that need them
 - step-level `with.fallback` replaces the DAG-level fallback list; it is not merged
 - remote [ACP](./acp#dag-level-defaults) steps inherit only `provider` and `acp_permission`, because a remote agent takes no CLI flags
 
@@ -394,4 +394,4 @@ A managed [OpenCode](./opencode) step adds what its session's models used to the
 
 An explicit stop of an [ACP](./acp#stopping-and-timeouts) step reports the signal exit code, normally `143`, or `137` when forced.
 
-On failure, Dagu includes the last 1024 bytes of stderr in the returned error message.
+On failure, Dagu includes the last 1024 bytes of stderr and the last 1024 bytes of stdout in the returned error message. The stdout tail is also written to the step's stderr log.
