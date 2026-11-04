@@ -56,9 +56,9 @@ params: "operation a b"
 steps:
   - id: calculate
     run: |
-      case "$1" in
-        add) echo $(($2 + $3)) ;;
-        multiply) echo $(($2 * $3)) ;;
+      case "${params.operation}" in
+        add) echo $((${params.a} + ${params.b})) ;;
+        multiply) echo $((${params.a} * ${params.b})) ;;
         *) echo "Unknown operation" ;;
       esac
     output: RESULT
@@ -134,7 +134,7 @@ description: "A tool defined locally"
 params: "input"
 
 steps:
-  - run: 'echo "Processing: $1"'
+  - run: 'echo "Processing: ${params.input}"'
     output: RESULT
 ```
 
@@ -186,7 +186,7 @@ description: "Search the web for current information"
 params: "query"
 
 steps:
-  - run: curl "https://api.example.com/search?q=$1"
+  - run: curl -G --data-urlencode "q=${params.query}" https://api.example.com/search
     output: SEARCH_RESULTS
 
 ---
@@ -199,7 +199,9 @@ tools:
   - astral-sh/uv@0.11.14
 
 steps:
-  - run: echo "$1" | uv run --python 3.13.9 python analyze.py
+  - env:
+      - DATA: ${params.data}
+    run: printf '%s' "$DATA" | uv run --python 3.13.9 python analyze.py
     output: INSIGHTS
 ```
 
@@ -295,7 +297,7 @@ description: "Fetch data from external API"
 params: "endpoint"
 
 steps:
-  - run: curl "https://api.example.com/$1"
+  - run: curl "https://api.example.com/${params.endpoint}"
     output: RAW_DATA
 
 ---
@@ -325,13 +327,15 @@ steps:
 # Store data tool
 name: store_data
 description: "Store data in database"
-params: "data table"
+params: "data"
 
 steps:
   - action: postgres.query
     with:
       dsn: ${env.DATABASE_URL}
-      query: "INSERT INTO $2 (data) VALUES ('$1'::jsonb)"
+      params:
+        data: ${params.data}
+      query: "INSERT INTO records (data) VALUES (CAST(:data AS jsonb))"
 ```
 
 The LLM orchestrates the multi-step data pipeline by calling tools in sequence.
