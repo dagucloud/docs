@@ -11,7 +11,7 @@ Dagu Console opens an alert when a workflow fails or a server stops reporting, a
 Workflow alerts need the `runs` level. An alert belongs to one workflow on one server.
 
 - A run with status failed opens an alert, or, when the workflow's [alert rules](#alert-rules) ask for several failures in a row, the last of them does. The alert opens as of the first of them and counts them all. Further failures add to its count.
-- A later run that succeeds or partially succeeds resolves it.
+- A later run that succeeds or partially succeeds resolves it, or any member [resolves it by hand](#resolve-an-alert-by-hand).
 - Aborted and rejected runs count as failures in totals, but they neither open nor resolve an alert.
 
 ## Stopped-Reporting Alerts
@@ -193,11 +193,21 @@ A stopped-reporting alert has `rule` `runner_offline` and no run. `errors` is pr
 
 A [running-too-long alert](#running-too-long-alerts) has `rule` `run_too_long` and a `detail` object: `attempt_id`, `started_at`, `limit_ms`, `typical_ms` (the usual time), and `samples` (the timed runs it was measured over). Once resolved, `detail.resolution` is `finished`, `gone` (no longer listed in progress), or `unreported` (the server stopped telling of runs).
 
+An alert [resolved by hand](#resolve-an-alert-by-hand) has `detail.resolution` `manual` and `detail.resolved_by`, the email of whoever resolved it.
+
 ## Acknowledge an Alert
 
 Each alert has a page: select it on the **Alerts** page, or follow **View alert** in a chat post or **Alert:** in an email. It shows what the alert is about, why its workflow failed, and a **Timeline** of when it opened, was emailed, was posted to each destination and how that went, was acknowledged, and resolved.
 
 Any member of the workspace selects **Acknowledge** on an open alert to say they are on it. An alert email's **Acknowledge:** link does the same without signing in, as the address the email went to, for 7 days after the alert opened: opening it shows the alert, and **Acknowledge** on that page acknowledges it. The **Alerts** page then marks it **Acknowledged**, naming who on hover, and a [PagerDuty](#chat-pagerduty-and-webhooks) incident of the alert is acknowledged too. **Take back** undoes it. A resolved alert needs no acknowledgement.
+
+### Resolve an Alert by Hand
+
+An alert about a workflow stays open until the workflow does what resolves it, such as a run that succeeds. When that will not happen, for example because the workflow no longer runs, any member selects **Resolve** on the alert's page.
+
+- The alert is told of as resolved, by email, in chat, and to webhooks, naming who resolved it, and a [PagerDuty](#chat-pagerduty-and-webhooks) incident of the alert is resolved.
+- The workflow's next failure, missed deadline, or missed schedule opens a new alert. A run running too long is not alerted of again after its alert is resolved by hand; another run of the workflow is.
+- An alert that a server or computer stopped reporting, or that a server's scheduler stopped, has no **Resolve**: it resolves when the server or computer reports again, or when its scheduler runs.
 
 ### Reminders
 
