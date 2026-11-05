@@ -6,12 +6,10 @@ description: Let MCP clients connected to Dagu Cloud, and members in Dagu Consol
 
 MCP clients connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on, and members can [act on runs from Dagu Console](#act-on-runs-from-dagu-console). Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key. Without remote access, MCP clients still read what the server reports to Dagu Cloud. See [MCP](/mcp/).
 
-```text
-Client ──MCP──▶ Dagu Cloud ── signed call ──┐
-                                            │  WebSocket, opened by the server
-                                            ▼
-                     Dagu server ──▶ dagu_read, dagu_change, dagu_execute
-```
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-architecture-portrait.svg" width="480" height="790">
+  <img src="/mcp/mcp-architecture.svg" width="720" height="500" alt="An MCP client connects to Dagu Console at console.dagu.sh with OAuth. Dagu Console sends signed calls through the relay at relay.dagu.sh to Dagu servers over a WebSocket each server opens, and servers report to Dagu Console. Servers accept no inbound connections." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
 - Remote access is off until an administrator of the server turns it on. Dagu Cloud cannot turn it on or raise it.
 - The server sets the highest role a call gets. Each user gets the lower of that role and the one Dagu Cloud grants them.

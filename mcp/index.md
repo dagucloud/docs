@@ -12,17 +12,10 @@ https://console.dagu.sh/mcp
 
 A person adds the URL to an MCP client such as Claude, ChatGPT, Claude Code, or Cursor, signs in to Dagu Cloud, and chooses what the client may reach. The client can then read runs, alerts, and logs across the workspace's servers, start, retry, or stop runs, decide steps that wait for a person, and edit DAGs, as far as the [limits below](#what-a-call-may-do) allow.
 
-```text
-MCP client ──MCP, OAuth──▶ console.dagu.sh ──▶ what servers reported: runs, alerts, health
-                                │
-                                │ signed call
-                                ▼
-                           relay.dagu.sh
-                                ▲
-                                │ WebSocket, opened by the server
-                                │
-                           Dagu server ──▶ dagu_read, dagu_change, dagu_execute
-```
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-architecture-portrait.svg" width="480" height="790">
+  <img src="/mcp/mcp-architecture.svg" width="720" height="500" alt="An MCP client connects to Dagu Console at console.dagu.sh with OAuth. Dagu Console sends signed calls through the relay at relay.dagu.sh to Dagu servers over a WebSocket each server opens, and servers report to Dagu Console. Servers accept no inbound connections." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
 Workflows run only on your servers. Each server opens its own outbound connections, so it needs no public address, open port, or API key.
 
@@ -38,6 +31,11 @@ Dagu Cloud's MCP server answers from two places.
 The tools keep the names a Dagu server uses: `dagu_read`, `dagu_execute`, and `dagu_change`. A live call names its server. See [Through Dagu Cloud](/mcp/tools#through-dagu-cloud).
 
 ## What a Call May Do
+
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-access-portrait.svg" width="480" height="586">
+  <img src="/mcp/mcp-access.svg" width="720" height="470" alt="A call gets the lowest of four limits: the connection, the MCP policy, the member's server role, and the server's remote access level. With edit, operate, developer, and viewer, the call may only read." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
 Each call gets the lowest of four limits, read again on every call:
 

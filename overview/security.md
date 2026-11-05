@@ -62,19 +62,10 @@ Allow outbound HTTPS (port 443) for the features you use. Workers need nothing.
 
 ## How a Remote Call Is Checked
 
-```text
-MCP client
-  │ MCP
-  ▼
-console.dagu.sh   checks the grant, signs the call
-  │ signed call
-  ▼
-relay.dagu.sh     passes it on
-  ▲
-  │ WebSocket, opened by the server
-  │
-Dagu server       verifies the signature, runs, audits
-```
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-call-portrait.svg" width="480" height="690">
+  <img src="/mcp/mcp-call.svg" width="720" height="520" alt="1: the MCP client sends a tool call with its token. 2: Dagu Console checks the four limits. 3: it signs the call for one request and one server, valid for at most a minute. 4: the relay forwards it over the server's WebSocket. 5 to 7: the server verifies the signature, applies its level and runs the tool, and writes its audit log. 8: the answer returns, and Dagu Cloud does not store it." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
 - **Dagu Cloud signs each call.** It first checks what the connection may do (below), then signs the call with its Ed25519 key. The signature names the user, their role, and the MCP client, lasts one minute, is accepted once, and covers the exact request.
 - **The relay passes it on.** It holds no signing key, so it cannot make a call your server accepts, and a call changed on the way fails the server's check.

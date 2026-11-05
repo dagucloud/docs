@@ -37,22 +37,21 @@ A call gets the lowest of four limits: the connection's grant, the workspace's M
 
 ## Call Verification
 
-```text
-MCP client ──▶ console.dagu.sh   evaluates the four limits, signs the call
-                    │
-                    ▼
-               relay.dagu.sh     forwards the call; holds no signing key
-                    ▲
-                    │ WebSocket, opened by the server
-                    │
-               Dagu server       verifies the signature, applies its level, runs, audits
-```
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-call-portrait.svg" width="480" height="690">
+  <img src="/mcp/mcp-call.svg" width="720" height="520" alt="1: the MCP client sends a tool call with its token. 2: Dagu Console checks the four limits. 3: it signs the call for one request and one server, valid for at most a minute. 4: the relay forwards it over the server's WebSocket. 5 to 7: the server verifies the signature, applies its level and runs the tool, and writes its audit log. 8: the answer returns, and Dagu Cloud does not store it." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
 - Dagu Console signs each call to a server with an Ed25519 key. The signed assertion names the person, their role, the MCP client, the Dagu Cloud workspace, and the target server. It contains a SHA-256 digest of the call's method, path, and body, and expires at most one minute after it is issued.
 - The server verifies the assertion with a public key built into the Dagu binary, and accepts each assertion once. It refuses an expired, reused, altered, or misdirected call before running anything.
 - The relay cannot produce an assertion that a server accepts.
 
 ## Data Exposure
+
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-data-portrait.svg" width="480" height="860">
+  <img src="/mcp/mcp-data.svg" width="720" height="470" alt="A Dagu server's reports go to Dagu Console, which stores them. Answers to calls pass through the relay and Dagu Console without being stored. The MCP client passes what it reads to its model provider." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
 ### Readable by a Client
 
