@@ -62,9 +62,9 @@ Edit lets a client change DAGs, and DAG steps run commands on the host. Allow it
 | **Server sets the ceiling** | Calls run at or below the server's level, reach only the MCP tools, and never get `manager` or `admin`. |
 | **Signed per call** | Each call is signed for one request and one server, valid for at most one minute, and accepted once. The relay cannot create or alter a call. |
 | **Runs as a person** | Each call runs as the member who connected the client with OAuth. Access tokens expire after one hour. |
-| **Recorded on the server** | Each call that reaches a server is in that server's audit log with the person's email and the client's name. Dagu Cloud keeps no log of calls. |
+| **Nothing kept in Dagu Cloud** | Dagu Cloud stores no answers and no record of calls. It stores only the connection, until it ends. |
+| **Recorded in your server's audit log** | Each call that reaches a server is in that server's audit log with the person's email and the client's name. |
 | **Revocable** | A change applies to the next request. Turning remote access off closes the connection at once. |
-| **Answers not stored** | Dagu Cloud passes answers from servers through without keeping them. |
 
 <picture>
   <source media="(max-width: 640px)" srcset="/mcp/mcp-call-portrait.svg" width="480" height="690">
@@ -80,7 +80,7 @@ Edit lets a client change DAGs, and DAG steps run commands on the host. Allow it
 
 - Values of declared secrets are masked in logs and error messages.
 - What a client reads goes to its model provider, such as Anthropic or OpenAI. Every level can read logs. To keep a server's logs from a provider, leave its remote access off and its monitoring level below `errors`.
-- Dagu Cloud keeps no log of calls. Reported runs are kept 30 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits).
+- What servers report for monitoring is kept 30 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits).
 
 ## Revoke Access
 
