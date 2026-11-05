@@ -293,7 +293,7 @@ Beside the time, each destination its opening went to shows its mark, with a gre
 Alert emails are plain text. A failure and a recovery that happen together arrive as one email. A failure quotes the last lines of its error when the server sends errors, and **Open in Dagu** appears when the server has a Dagu URL:
 
 ```text
-Subject: [Dagu] nightly-etl failed on etl-prod-1 (1 more alert)
+Subject: [DaguCloud] nightly-etl failed on etl-prod-1 (1 more alert)
 
 Failed
 
