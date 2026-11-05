@@ -776,7 +776,9 @@ steps:
 
 > **Note**: set `limit` on an `until` repeat that should give up. Without it the
 > step repeats indefinitely while the condition stays unmet, as a
-> [continuous step](#repeat-without-a-limit).
+> [continuous step](#repeat-without-a-limit). When the limit is reached before
+> the condition is met, the step still succeeds; check the condition again in a
+> later step when running out of attempts must fail the run.
 
 To poll the status URL of an HTTP job until the job finishes, see
 [Poll an Asynchronous Job](/step-types/http#poll-an-asynchronous-job).
