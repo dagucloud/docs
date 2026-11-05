@@ -105,6 +105,7 @@ Common references include:
 | `${context.attempt.id}` | Current DAG-run attempt ID |
 | `${context.attempt.started_at}` | UTC timestamp for the current attempt start |
 | `${context.step.name}` | Current step or handler name |
+| `${context.step.repeat_index}` | Zero-based execution index of a step with `repeat_policy` |
 | `${context.trigger.type}` | Trigger type, such as `manual`, `scheduler`, or `webhook` |
 | `${context.paths.log_file}` | Aggregated DAG-run log file path |
 | `${context.paths.work_dir}` | Per-run work directory path |

@@ -23,6 +23,7 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.attempt.started_at}` | After the run attempt starts | None |
 | `${context.step.id}` | Current executable step when it has an `id` | None |
 | `${context.step.name}` | Current step or handler | `DAG_RUN_STEP_NAME` |
+| `${context.step.repeat_index}` | Current step with `repeat_policy` | `DAG_RUN_STEP_REPEAT_INDEX` |
 | `${context.trigger.type}` | When the trigger type is known: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`, or `file` | None |
 | `${context.trigger.actor}` | Runs started by an attributable actor | None |
 | `${context.paths.log_file}` | All steps and handlers | `DAG_RUN_LOG_FILE` |
@@ -47,6 +48,7 @@ Webhook payloads, webhook headers, and parameter JSON payloads are object-valued
 
 - **Step execution**: Every step receives the run-level variables plus a step-specific name and log file paths while it executes.
 - **Push-back re-executions**: Steps re-executed because of an approval or [human-task](/writing-workflows/human-tasks#requesting-changes) push-back also receive `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the provided push-back inputs as individual environment variables. If the step had stdout before it was rewound, Dagu also provides `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`.
+- **Repeating steps**: A step with `repeat_policy` also receives `DAG_RUN_STEP_REPEAT_INDEX`, the zero-based index of the current execution. See [Repeat Index](/writing-workflows/control-flow#repeat-index).
 - **Lifecycle handlers**: `onInit`, `onExit`, `onSuccess`, `onFailure`, `onAbort`, and `onWait` handlers inherit the same variables. They additionally receive the `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for human input.
 - **Nested contexts**: When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
 
@@ -62,6 +64,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STEP_NAME` | Current step or handler only | Name field of the step that is currently executing. | `upload-artifacts` |
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step or handler only | File path backing the step's captured stdout stream. | `/var/log/dagu/daily-backup/upload-artifacts.stdout.log` |
 | `DAG_RUN_STEP_STDERR_FILE` | Current step or handler only | File path backing the step's captured stderr stream. | `/var/log/dagu/daily-backup/upload-artifacts.stderr.log` |
+| `DAG_RUN_STEP_REPEAT_INDEX` | Current step with `repeat_policy` only | Zero-based index of the current execution: `0` on the first execution, then one more for each repeat. A retry keeps the index of the execution it retries. | `2` |
 | `DAGU_OUTPUT_FILE` | Current step attempt when declared outputs can be written | File path used to publish declared step outputs. | `/var/log/dagu/daily-backup/upload-artifacts.output` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical status: `running` (init handler), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler). | `failed` |
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human-task completion or approval. | `release_review,security_review` |

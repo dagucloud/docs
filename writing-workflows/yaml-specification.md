@@ -1250,6 +1250,10 @@ steps:
       limit: 30
 ```
 
+Each execution sees its zero-based index as `${context.step.repeat_index}` and
+`DAG_RUN_STEP_REPEAT_INDEX`. See
+[Repeat Index](/writing-workflows/control-flow#repeat-index).
+
 ### Approval
 
 | Field | Type | Description |
@@ -1341,6 +1345,7 @@ Common structured references:
 | `${context.attempt.id}` | Current DAG-run attempt ID. |
 | `${context.attempt.started_at}` | UTC timestamp for the current attempt start. |
 | `${context.step.name}` | Current step or handler name. |
+| `${context.step.repeat_index}` | Zero-based execution index of a step with `repeat_policy`. |
 | `${context.trigger.type}` | Trigger type. |
 | `${context.paths.log_file}` | Path to the DAG-run log file. |
 | `${context.paths.work_dir}` | Per-run isolated work directory path. |
@@ -1359,6 +1364,7 @@ Common environment projections:
 | `DAG_RUN_STEP_NAME` | Current step name. |
 | `DAG_RUN_STEP_STDOUT_FILE` | Current step stdout file path. |
 | `DAG_RUN_STEP_STDERR_FILE` | Current step stderr file path. |
+| `DAG_RUN_STEP_REPEAT_INDEX` | Zero-based execution index of a step with `repeat_policy`. |
 | `DAG_RUN_WORK_DIR` | Per-run isolated work directory path. |
 | `DAG_RUN_ARTIFACTS_DIR` | Per-run artifact directory when artifacts are enabled. |
 | `DAGU_OUTPUT_FILE` | Current step output file path for declared outputs. |

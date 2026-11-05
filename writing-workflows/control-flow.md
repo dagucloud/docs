@@ -973,6 +973,33 @@ steps:
 
 The values must resolve to valid integers at runtime. If a variable reference cannot be resolved or does not produce an integer, the step fails during preparation.
 
+### Repeat Index
+
+Each execution of a repeating step sees its zero-based index as
+`${context.step.repeat_index}` and as the environment variable
+`DAG_RUN_STEP_REPEAT_INDEX`. The first execution is `0`, and each repeat adds
+one. A retry from `retry_policy` keeps the index of the execution it retries.
+
+```yaml
+steps:
+  - id: fetch_pages
+    run: curl -fsS "https://api.example.com/items?page=${context.step.repeat_index}" -o "page-${context.step.repeat_index}.json"
+    repeat_policy:
+      repeat: while       # Repeat while the fetch succeeds
+      interval_sec: 1
+      limit: 5            # Pages 0 to 4
+```
+
+Dagu resolves `run`, `script`, `with`, `stdin`, and step `env` again for every
+repeat, so they see the current index. `repeat_policy.condition` sees the index
+of the execution that just finished.
+
+`stdout`, `stderr`, `preconditions`, and the `repeat_policy` and `retry_policy`
+settings resolve once before the first execution, so they always see `0`. In
+steps without `repeat_policy` and in lifecycle handlers,
+`${context.step.repeat_index}` stays as written and `DAG_RUN_STEP_REPEAT_INDEX`
+is unset.
+
 ## Continue On Conditions
 
 ### Continue on Failure
