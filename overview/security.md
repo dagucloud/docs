@@ -90,7 +90,7 @@ An MCP client connected to Dagu Cloud reads what servers reported and, where rem
 - **The member's role on the workspace's servers**, set by its owners.
 - **The server's remote access [level](/overview/cloud-remote-access#levels)**, set by the server's administrator, for calls to the server itself.
 
-Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it. See [MCP Security Review](/mcp/security).
+Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it. See [MCP Security Model](/mcp/security).
 
 ## What You Trust Dagu Cloud With
 

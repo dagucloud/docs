@@ -52,16 +52,11 @@ The server's level limits live calls. It does not limit reads of what the server
 
 Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. No call gets `manager` or `admin` on a server.
 
-## Security
+## Security Model
 
-- **Nothing connects in.** Each server opens an outbound WebSocket to `relay.dagu.sh`. MCP clients connect to Dagu Cloud, never to your servers.
-- **Each live call is signed for one request.** Dagu Cloud signs it with Ed25519, for at most a minute, to be accepted once. The relay holds no key, and the server checks the signature with a public key built into the Dagu binary.
-- **The server keeps the final say.** Remote access is off until the server's administrator turns it on. Dagu Cloud cannot turn it on or raise it, and turning it off closes the connection at once.
-- **Revocation applies on the next call.** Ending a connection or lowering a limit does not wait for a token to expire.
-- **Each call is recorded twice**: in the server's own audit log under the person's email, and in the workspace's **Calls from Dagu Cloud** for 90 days.
-- **Answers are not stored.** Dagu Cloud passes answers from servers on without keeping them.
+Dagu servers open outbound connections to Dagu Cloud and accept no inbound connections for MCP. Dagu Cloud signs each call it sends to a server. The server verifies the signature, applies its own remote access level, and records the call in its audit log. Remote access is off by default, and only the server's administrator can turn it on or change its level. Dagu Cloud does not store the answers servers return, and keeps a log of each call for 90 days.
 
-See [MCP Security Review](/mcp/security) for identity, tokens, what reaches the AI provider, prompt injection, audit, and how to stop access.
+See [MCP Security Model](/mcp/security) for authentication, authorization, data exposure, the threat model, and known limitations.
 
 ## Requirements
 
