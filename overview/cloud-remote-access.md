@@ -85,7 +85,7 @@ With remote access on, a member acts on the server's runs from Dagu Console's pa
 - A run waiting for a person shows the step it waits at and what its approval gate asks for, with **Approve** and **Reject**. A task with a form, or a wait inside a sub-workflow, opens in Dagu. The Overview lists such runs under **Needs attention**.
 - A failure alert offers its run's log and **Retry**, and an alert of a run running too long, **Stop**. The alert's **Timeline** keeps who did it.
 
-What a member may do is the lower of their entry under **Server roles** on **MCP** and the server's remote access [level](#levels): reading needs `viewer`, and retrying, stopping, and deciding need `operator`. Deciding also needs [approvals](#approvals) on. A button the member may not use is shown disabled, saying why. These actions need the Team or Pro plan, or a trial. Each one is recorded on the server under the member's email, with **Dagu Console** as the app, and in the workspace's **Calls from Dagu Cloud** on **MCP**.
+What a member may do is the lower of their entry under **Server roles** on **MCP** and the server's remote access [level](#levels): reading needs `viewer`, and retrying, stopping, and deciding need `operator`. Deciding also needs [approvals](#approvals) on. A button the member may not use is shown disabled, saying why. These actions need the Team or Pro plan, or a trial. Each one is recorded on the server under the member's email, with **Dagu Console** as the app.
 
 ## Levels
 

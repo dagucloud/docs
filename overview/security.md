@@ -41,7 +41,7 @@ Off until you give a webhook a public URL. The scheduler holding the scheduler l
 Off until an administrator turns it on. Each `dagu server` or `dagu start-all` process keeps a WebSocket to `relay.dagu.sh`. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
 
 - **Sent**: answers to the calls MCP clients make, within the server's level. Dagu Cloud passes them on without storing them.
-- **Kept**: a log of each call for 90 days: tool, action, subject, outcome, user, and app, plus up to 300 characters of the error when a call fails.
+- **Kept**: nothing. Dagu Cloud keeps no log of calls. Each server records the calls it receives in its own audit log.
 
 ### Upgrade check and tracing
 
@@ -81,7 +81,7 @@ An MCP client connected to Dagu Cloud reads what servers reported and, where rem
 - **The member's role on the workspace's servers**, set by its owners.
 - **The server's remote access [level](/overview/cloud-remote-access#levels)**, set by the server's administrator, for calls to the server itself.
 
-Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it. See [MCP](/mcp/#security).
+Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and can end any of them. Members can end their own, and leaving a workspace ends a member's access to it. See [MCP](/mcp/#security).
 
 ## What You Trust Dagu Cloud With
 

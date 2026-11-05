@@ -163,7 +163,7 @@ dagu server or start-all ──▶ verifies the signature ──▶ MCP tools
 
 - Each process that serves the web UI holds its own connection to `relay.dagu.sh`, which it opens with a ticket from Dagu Console while remote access is on.
 - A call carries a signature that lasts one minute, is accepted once, and covers that request alone. The server runs it as the Dagu Cloud user, with the lower of the user's role and the server's level, and never as `manager` or `admin`.
-- Calls reach only the MCP tools. The answer goes back the same way; Dagu Cloud passes it on without storing it and keeps a log of each call for 90 days.
+- Calls reach only the MCP tools. The answer goes back the same way; Dagu Cloud passes it on without storing it and keeps no log of calls.
 - See [Dagu Cloud: Security and Data Flow](/overview/security) for what Dagu Cloud keeps and what it is trusted with.
 
 ## Distributed Execution Architecture
