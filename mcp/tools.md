@@ -367,3 +367,50 @@ When `dagu_read` with `target=run` lists a step as waiting with `approval` or `h
 - Without `wait`, the result includes `stepName` and the run's `status` and `statusLabel` observed after the decision.
 
 `attemptId` is optional on the server's own MCP endpoint. Calls from Dagu Cloud must pass it, and can decide steps only while the server allows [remote approvals](/overview/cloud-remote-access#approvals).
+
+## Through Dagu Cloud
+
+[Dagu Cloud's MCP endpoint](/mcp/) offers the same three tool names for every server in the workspaces a connection reaches. A connection is offered `dagu_execute` only where it may operate, and `dagu_change` only where it may edit.
+
+### Reading Reported Data
+
+Without `server`, `dagu_read` answers from what servers reported to Dagu Cloud, including while a server is offline.
+
+| `target` | Answer |
+|----------|--------|
+| `attention` (default) | What needs a person across the workspaces: runs waiting for a decision, open alerts, and failures, the most urgent first |
+| `servers` | Every server and how it is doing |
+| `server` | One server's health |
+| `alerts` | Open alerts, or resolved ones with `resolved=true` |
+| `alert` | One alert, by the `alert` ref an earlier answer gave, with what people did about it |
+| `runs` | Runs, in progress first, then newest first. Filter with `workflow`, `status`, and `since` (`24h`, `7d`, or `30d`). |
+| `workflows` | How each workflow went over `since` (`7d` or `30d`), the most failed first |
+
+`workspace` keeps one Dagu Cloud workspace. `server` takes `workspace/server`, a server name, or the `serverRef` an answer gave. Every row links to the same thing in Dagu Console.
+
+`dagu_execute` acts on an open alert, by its `alert` ref:
+
+| `action` | Effect |
+|----------|--------|
+| `acknowledge` | Records that a person is on the alert, stops its reminders, and tells PagerDuty |
+| `unacknowledge` | Takes the acknowledgement back |
+| `snooze` | Pauses the alert's reminders `for` `1h`, `4h`, `24h`, or until `morning`, 09:00 in the workspace's time zone |
+
+### Calling a Server
+
+With `server`, the tools call the server's own tools through [remote access](/overview/cloud-remote-access), with the inputs described above:
+
+- `dagu_read` targets: `run`, `run_logs`, `step_log`, `dags`, `dag`, `dag_spec`, `dag_profile`, `dag_search`, `wiki`, `wiki_page`, `wiki_search`, `references`, `reference`, `foreach_items`, and `foreach_item`. `workspace` then names the Dagu workspace on that server. `uri` reads a `dagu://` URI the server's answer gave.
+- `dagu_execute` actions: `start`, `enqueue`, `retry`, `stop`, `approve`, `reject`, and `push_back`. `wait` follows a run for up to 50 seconds. Decisions need the `attemptId` and [remote approvals](/overview/cloud-remote-access#approvals).
+- `dagu_change` types: `upsert_dag`, `rename_dag`, `delete_dag`, `set_dag_profile`, `clear_dag_profile`, `upsert_wiki_page`, `rename_wiki_page`, and `delete_wiki_page`, with `mode=preview` before `mode=apply`.
+
+Calls through Dagu Cloud offer no resource subscriptions. Read the run again, or pass `wait`.
+
+### Prompts
+
+| Prompt | Use |
+|--------|-----|
+| `dagu_triage` | Find what needs a person across the connected servers and say what to do first. Optional `workspace`. |
+| `dagu_debug_failed_run` | Explain why an alert's workflow fails, from its errors and recent runs, and propose a fix. Takes the `alert` ref. |
+
+MCP Apps hosts render live run answers in the [run inspector](/mcp/resources#mcp-app-run-inspector).

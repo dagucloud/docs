@@ -1,8 +1,28 @@
 # MCP Clients
 
-Dagu's MCP server is built into the Dagu HTTP server, so client setup means adding Dagu's Streamable HTTP endpoint to the tool. There is nothing to install per client.
+## Through Dagu Cloud
 
-## Before You Start
+Every client uses one URL and signs in with OAuth. No API key or header is needed.
+
+```text
+https://console.dagu.sh/mcp
+```
+
+| Client | Setup |
+|--------|-------|
+| Claude Code | `claude mcp add --transport http dagu https://console.dagu.sh/mcp` |
+| Claude (claude.ai, Desktop, and mobile) | Add a custom connector with the URL. |
+| ChatGPT | Add a connector with the URL in developer mode. |
+| Cursor | `{"mcpServers":{"dagu":{"url":"https://console.dagu.sh/mcp"}}}` in `.cursor/mcp.json` |
+| Other clients | Add a remote Streamable HTTP server with the URL. The client must support OAuth. |
+
+See the [Quickstart](/mcp/quickstart) for the server side and what to choose at sign-in.
+
+## Direct to a Server
+
+The rest of this page, and the client pages below, connect a client to one server's own `/mcp` endpoint. Dagu's MCP server is built into the Dagu HTTP server, so client setup means adding Dagu's Streamable HTTP endpoint to the tool. There is nothing to install per client.
+
+### Before You Start
 
 ```bash
 export DAGU_MCP_URL=http://localhost:8080/mcp
@@ -11,7 +31,7 @@ export DAGU_MCP_API_KEY=dagu_...
 
 Use the HTTPS URL for a remote or shared Dagu server. See [Quickstart](/mcp/quickstart) for the URL table and [Authentication](/mcp/authentication) for key roles and surfaces.
 
-## Pick Your Client
+### Pick Your Client
 
 | Client | Page |
 |--------|------|
@@ -29,7 +49,7 @@ Use the HTTPS URL for a remote or shared Dagu server. See [Quickstart](/mcp/quic
 
 For a repository-wide setup that teammates share, see [Team Setup](./team-setup).
 
-## Configuration Shapes
+### Configuration Shapes
 
 Clients agree on the concepts and disagree on the field names. This table is the fastest way to translate an example from one client to another.
 
@@ -48,11 +68,11 @@ Clients agree on the concepts and disagree on the field names. This table is the
 
 Two field names cause most failures: Gemini CLI uses `httpUrl` for Streamable HTTP and reserves `url` for SSE, and Windsurf uses `serverUrl` instead of `url`.
 
-## Transport
+### Transport
 
 Dagu serves Streamable HTTP at `/mcp` and does not expose an SSE endpoint. Clients that only speak stdio or SSE need the `mcp-remote` bridge described in [Other Clients](./other-clients).
 
-## Verify Any Client
+### Verify Any Client
 
 After the client connects, three tools should be listed:
 
@@ -66,7 +86,7 @@ A good first read is the built-in authoring reference:
 dagu://reference/authoring
 ```
 
-## Troubleshooting
+### Troubleshooting
 
 | Symptom | Cause |
 |---------|-------|

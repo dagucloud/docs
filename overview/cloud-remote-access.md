@@ -4,7 +4,7 @@ description: Let MCP clients connected to Dagu Cloud, and members in Dagu Consol
 
 # Remote Access from Dagu Cloud
 
-MCP clients connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on, and members can [act on runs from Dagu Console](#act-on-runs-from-dagu-console). Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key.
+MCP clients connected to [Dagu Cloud](https://console.dagu.sh), such as Claude and ChatGPT, can call a self-hosted server's [MCP tools](/mcp/tools) while remote access is on, and members can [act on runs from Dagu Console](#act-on-runs-from-dagu-console). Dagu Cloud carries each call over a connection the server opens, so the server needs no public address, open port, or API key. Without remote access, MCP clients still read what the server reports to Dagu Cloud. See [MCP](/mcp/).
 
 ```text
 Client ──MCP──▶ Dagu Cloud ── signed call ──┐
@@ -123,18 +123,13 @@ Calls from Dagu Cloud use the same three tools as the server's own [`/mcp` endpo
 
 ## Security
 
-- Each call carries an assertion that Dagu Cloud signs for that one request. It names the user, their role, and the MCP client, is good for at most a minute, and is accepted once. The server refuses a call whose assertion is invalid, expired, reused, or made for another server or request, and nothing runs.
-- Calls reach only the MCP endpoint and never get `manager` or `admin`, so they cannot open the terminal or manage users, API keys, the license, or these settings.
-- Turning remote access off closes the connection and ends the calls in flight. Calls that still arrive are refused.
-- Audit logs record each call with credential type `cloud`, the user's email, the MCP client, and the Dagu Cloud workspace. See [Calls From Dagu Cloud](/mcp/auditability#calls-from-dagu-cloud).
-- When [monitoring](/overview/console-monitoring#health) is on, health reports include the remote access level and whether approvals are on.
-- Dagu Cloud passes each answer on without storing it. It keeps a log of each call for 90 days: tool, action, subject, outcome, user, and app (**Dagu Console** for a member's own action), plus up to 300 characters of the error when a call fails.
-- An answer the MCP client receives also reaches the client's provider, such as Anthropic or OpenAI. Every level, viewer included, can read logs.
+See [MCP Security Review](/mcp/security) for how calls are verified, what Dagu Cloud keeps, what reaches the AI provider, and how to stop access, and [Dagu Cloud: Security and Data Flow](/overview/security) for every connection a server makes.
 
-See [Dagu Cloud: Security and Data Flow](/overview/security) for every connection, what Dagu Cloud keeps, and what it is trusted with.
+When [monitoring](/overview/console-monitoring#health) is on, health reports include the remote access level and whether approvals are on.
 
 ## Related Pages
 
+- [MCP Security Review](/mcp/security)
 - [Dagu Cloud: Security and Data Flow](/overview/security)
 - [MCP Tools](/mcp/tools)
 - [MCP Authentication](/mcp/authentication)

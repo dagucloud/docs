@@ -1,5 +1,5 @@
 ---
-description: Dagu Cloud is the control plane for self-hosted Dagu servers. Watch, alert on, and act on every server's runs from Dagu Console, and give ChatGPT, Claude, and other MCP clients one endpoint for all of them. Servers connect out; workflows run only on them.
+description: "Dagu Cloud is the control plane for self-hosted Dagu servers: watch, alert on, and act on runs from Dagu Console or MCP clients. Servers connect out; workflows run only on them."
 ---
 
 # Dagu Cloud
@@ -24,7 +24,7 @@ MCP clients ───── MCP ───────┘        │     ──�
 | **See** | Every server's health, runs, failures, and trends on one set of pages, with each machine's CPU, memory, load, and disk use over the last day, and each server's distributed workers. The Overview lists what needs a person: runs waiting for a decision, open alerts, and today's failures. See [Monitoring](/overview/console-monitoring). |
 | **Alert** | One alert per problem: a failed workflow, a missed deadline, a run far past its usual time, a server that stopped reporting, a disk almost full, too few workers. By email, and on a paid plan to chat channels, PagerDuty, or a webhook. See [Alerts and Email](/overview/console-monitoring-alerts). |
 | **Act** | Read a failed step's log, retry or stop a run, and approve or reject a step that waits for a person, from Dagu Console. See [Act on Runs from Dagu Console](/overview/cloud-remote-access#act-on-runs-from-dagu-console). |
-| **MCP** | One MCP endpoint, `https://console.dagu.sh/mcp`, for every server in a workspace. MCP clients read runs and logs, start and retry workflows, and edit DAGs, as each member's role and each server allow. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access). |
+| **MCP** | One MCP endpoint, `https://console.dagu.sh/mcp`, for every server in a workspace. MCP clients read runs and logs, start and retry workflows, and edit DAGs, as each member's role and each server allow. See [MCP](/mcp/) and [MCP Security Review](/mcp/security). |
 | **Team** | Up to 10 people per workspace, each with their own sign-in, and server roles that bound what each person and the MCP clients they connect may do. See [Dagu Console Members](/overview/console-members). |
 | **Licenses** | Each connected server gets its license from Dagu Cloud, which turns on SSO, RBAC, audit logging, and incident routing on the server. See [Self-hosted Plan Comparison](/overview/self-host-license). |
 

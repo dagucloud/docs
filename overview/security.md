@@ -81,16 +81,16 @@ Dagu server       verifies the signature, runs, audits
 - **Your server decides.** It verifies the signature with Dagu Cloud's public key and refuses a call that is expired, reused, or made for another server or request. It runs the call as `cloud:` and the user's ID, with the lower of the signed role and the server's own level, and never as `manager` or `admin`.
 - **Calls reach only the MCP tools**: never the terminal, users, API keys, the license, or the remote access settings. Each call is in the server's [audit log](/mcp/auditability#calls-from-dagu-cloud).
 
-## What an AI App May Do
+## What an MCP Client May Do
 
-A call gets the lowest of four limits:
+An MCP client connected to Dagu Cloud reads what servers reported and, where remote access is on, calls the servers themselves. A call gets the lowest of four limits:
 
-- **The connection**: the workspaces, servers, and access (read, operate, or edit) chosen when the app was connected.
+- **The connection**: the workspaces, servers, and access (read, operate, or edit) chosen when the client was connected.
 - **The workspace's MCP policy**, set by its owners in Dagu Console.
 - **The member's role on the workspace's servers**, set by its owners.
-- **The server's remote access [level](/overview/cloud-remote-access#levels)**, set by the server's administrator.
+- **The server's remote access [level](/overview/cloud-remote-access#levels)**, set by the server's administrator, for calls to the server itself.
 
-Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it.
+Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. Owners see every connection to their workspace and its calls, and can end any connection. Members can end their own, and leaving a workspace ends a member's access to it. See [MCP Security Review](/mcp/security).
 
 ## What You Trust Dagu Cloud With
 
@@ -100,7 +100,7 @@ Deciding a step that waits for a person also needs approvals allowed by the conn
 
 ## AI Providers
 
-When an MCP client reads a run or its logs through Dagu Cloud, the answer goes to the client and to its provider, such as Anthropic or OpenAI, under that provider's terms. Every level, viewer included, can read logs. Choose each server's level and the workspace's Agent policy with that in mind.
+When an MCP client reads a run or its logs through Dagu Cloud, the answer goes to the client and to its provider, such as Anthropic or OpenAI, under that provider's terms. Every level, viewer included, can read logs. Choose each server's level and the workspace's MCP policy with that in mind.
 
 ## Where Dagu Cloud Runs
 

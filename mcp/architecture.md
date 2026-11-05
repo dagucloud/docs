@@ -39,7 +39,7 @@ Step decisions go through the same REST handlers as the Web UI: the approval-gat
 
 ## Calls From Dagu Cloud
 
-With [remote access](/overview/cloud-remote-access) on, MCP clients connected to Dagu Cloud reach the same tools without the `/mcp` route. Each `dagu server` or `dagu start-all` process opens an outbound connection to `relay.dagu.sh`, which carries each call to an MCP handler inside that process. See [Dagu Cloud: Security and Data Flow](/overview/security) for how calls are checked and what Dagu Cloud keeps.
+MCP clients connected to [Dagu Cloud](/mcp/) talk to Dagu Cloud's own MCP server. It answers reads of what servers reported, such as alerts and run status, from its own data. Calls that name a server need [remote access](/overview/cloud-remote-access) on that server and reach the same tools without the `/mcp` route. Each `dagu server` or `dagu start-all` process opens an outbound connection to `relay.dagu.sh`, which carries each call to an MCP handler inside that process. See [Dagu Cloud: Security and Data Flow](/overview/security) for how calls are checked and what Dagu Cloud keeps.
 
 - The handler serves `dagu_read`, `dagu_change`, and `dagu_execute` and calls the same API service as the `/mcp` route. It is stateless and offers no resource subscriptions.
 - Each call runs as the Dagu Cloud user, with the lower of the server's remote access level and the role Dagu Cloud grants that user.

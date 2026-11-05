@@ -47,6 +47,8 @@ Calls that Dagu Cloud carries under [remote access](/overview/cloud-remote-acces
 
 On a server with audit logs, the **Remote access** section of **Plan & features** lists the latest of these calls.
 
+Dagu Cloud keeps its own record of every call in a workspace for 90 days, under **Calls from Dagu Cloud** on **MCP** in Dagu Console. It includes reads that Dagu Cloud answers from what servers reported, which never reach a server, and members' actions from Dagu Console. See [MCP Security Review](/mcp/security#audit).
+
 ## Request And Subscription Events
 
 Authentication, resource reads, and subscriptions are also auditable:
