@@ -153,7 +153,7 @@ The icons next to the run chip act on the selected run: stop, cancel auto-retry,
 
 For a queued run, **Run details** also shows its queued runtime conditions: the latest observed reason the run has not started yet. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact condition fields and reason names.
 
-When the selected run used a different definition from the saved file, a warning dot appears next to the run chip. Select it to show that run's definition, read-only, on the canvas. **Copy to editor** replaces the editor text with that definition.
+When the selected run used a different definition from the saved file, a warning dot appears next to the run chip. Select it to show that run's definition, read-only, on the canvas. **Revert to this run's YAML** replaces the editor text with that definition; nothing is saved until you save.
 
 ### Edit The Workflow
 
@@ -161,14 +161,15 @@ Users with write access edit the workflow on the canvas.
 
 - Press `N`, or select the **+** after a step, to add a step from the step palette.
 - Drag from one step to another to add a dependency. Right-click a step or the canvas for more actions.
-- **YAML** opens the whole file beside the canvas, with validation, schema-aware completion, formatting, and quick fixes.
-- **Workflow** opens the Workflow panel. Its **Overview** tab shows the description, schedule, parameters, handlers, and the runtime profile that applies. The **Wiki**, **Incidents**, and **Notifications** tabs hold the workflow's Wiki pages and its incident and notification overrides.
-- The **Manual**, **Cron**, and **Webhook** launchers on the canvas show how the workflow starts. **Cron** edits the schedule and previews upcoming runs. **Webhook** holds the webhook settings.
+- The right column beside the canvas has two tabs, **Workflow** and **YAML**. Switch between them, or collapse the column to a rail and open a tab from it again; the page remembers the choice. On a phone they open as panels over the canvas.
+- **YAML** shows the whole file, with validation, schema-aware completion, formatting, and quick fixes.
+- **Workflow** shows the Workflow panel. Its **Overview** tab shows the description, schedule, parameters, handlers, and the runtime profile that applies. The **Wiki**, **Incidents**, and **Notifications** tabs hold the workflow's Wiki pages and its incident and notification overrides.
+- The **Manual**, **Cron**, and **Webhook** launchers on the canvas show how the workflow starts. Select one to open its panel in a temporary tab of the right column. **Cron** edits the schedule and previews upcoming runs. **Webhook** holds the webhook settings.
 - **Save** shows the changes against the saved version before it writes the file. **Undo**, **Redo**, and **Revert to the last save** act on unsaved edits.
 
 ### Steps
 
-Click a step to open its panel over the right side of the canvas. The panel shows the step in the selected run: its status, **Retry step** and **Change status** when they apply, a **Details** tab with its run facts and definition, and tabs such as **Log**, **Output**, and **History**. `Esc`, the close button, or a click on empty canvas closes it.
+Click a step to show it in a temporary tab of the right column, so the canvas does not move. The tab shows the step in the selected run: its status, **Retry step** and **Change status** when they apply, a **Details** tab with its run facts and definition, and tabs such as **Log**, **Output**, and **History**. `Esc`, a click on empty canvas, or the **Workflow** or **YAML** tab closes it. On a phone the step opens in a panel over the canvas.
 
 Double-click a step, or press `Enter` on it, to open the node view. It shows the data from upstream steps, the step's form or YAML, and its result in the selected run.
 
@@ -306,7 +307,7 @@ See [DAG Secret Refs](/web-ui/secrets) for the Web UI workflow and [Workflow Sec
 
 System Status shows the health of the scheduler, coordinator, and the current machine.
 
-![Workers](/workers.webp)
+![Workers](/workers.png)
 
 This page helps you verify:
 

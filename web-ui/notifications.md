@@ -231,7 +231,7 @@ Use workspace overrides when teams have separate channels, such as `data`, `ops`
 
 ### DAG Overrides
 
-Open a workflow, select **Workflow** on the canvas toolbar, then use the **Notifications** tab of the Workflow panel for per-DAG exceptions.
+Open a workflow, select the **Workflow** tab of the right column (the **Workflow** button of the canvas toolbar on a phone), then use the **Notifications** tab of the Workflow panel for per-DAG exceptions.
 
 Keep DAG notifications inherited for most workflows. Configure a DAG override only when one workflow needs a different destination or event set from its workspace.
 
