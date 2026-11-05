@@ -4,6 +4,7 @@
 /quickstart /getting-started/quickstart 301
 /quickstart/ /getting-started/quickstart 301
 /mcp/clients /mcp/clients/ 301
+/mcp/security /mcp/ 301
 /overview/api /web-ui/api 301
 /overview/api/ /web-ui/api 301
 /step-types/sql/mysql /step-types/sql/ 301

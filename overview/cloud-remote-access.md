@@ -121,13 +121,13 @@ Calls from Dagu Cloud use the same three tools as the server's own [`/mcp` endpo
 
 ## Security
 
-See [MCP Security Model](/mcp/security) for how calls are verified, what Dagu Cloud keeps, what reaches the AI provider, and how to stop access, and [Dagu Cloud: Security and Data Flow](/overview/security) for every connection a server makes.
+See [MCP](/mcp/#security) for how calls are verified, what Dagu Cloud keeps, and how to stop access, and [Dagu Cloud: Security and Data Flow](/overview/security) for every connection a server makes.
 
 When [monitoring](/overview/console-monitoring#health) is on, health reports include the remote access level and whether approvals are on.
 
 ## Related Pages
 
-- [MCP Security Model](/mcp/security)
+- [MCP](/mcp/)
 - [Dagu Cloud: Security and Data Flow](/overview/security)
 - [MCP Tools](/mcp/tools)
 - [MCP Authentication](/mcp/authentication)

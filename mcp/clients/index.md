@@ -16,7 +16,7 @@ https://console.dagu.sh/mcp
 | Cursor | `{"mcpServers":{"dagu":{"url":"https://console.dagu.sh/mcp"}}}` in `.cursor/mcp.json` |
 | Other clients | Add a remote Streamable HTTP server with the URL. The client must support OAuth. |
 
-See the [Quickstart](/mcp/quickstart) for the server side and what to choose at sign-in.
+See [Connect](/mcp/#connect) for the server side and what to choose at sign-in.
 
 ## Direct to a Server
 

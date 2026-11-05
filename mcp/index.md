@@ -10,25 +10,28 @@ Dagu Cloud gives MCP clients one endpoint for every Dagu server in a workspace:
 https://console.dagu.sh/mcp
 ```
 
-A person adds the URL to an MCP client such as Claude, ChatGPT, Claude Code, or Cursor, signs in to Dagu Cloud, and chooses what the client may reach. The client can then read runs, alerts, and logs across the workspace's servers, start, retry, or stop runs, decide steps that wait for a person, and edit DAGs, as far as the [limits below](#what-a-call-may-do) allow.
+Clients read runs, alerts, and logs across the workspace's servers, and act on them: start, retry, and stop runs, decide steps that wait for a person, and edit DAGs, within the limits below. What servers report to Dagu Cloud stays readable while a server is offline.
 
 <picture>
   <source media="(max-width: 640px)" srcset="/mcp/mcp-architecture-portrait.svg" width="480" height="790">
   <img src="/mcp/mcp-architecture.svg" width="720" height="500" alt="An MCP client connects to Dagu Console at console.dagu.sh with OAuth. Dagu Console sends signed calls through the relay at relay.dagu.sh to Dagu servers over a WebSocket each server opens, and servers report to Dagu Console. Servers accept no inbound connections." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
-Workflows run only on your servers. Each server opens its own outbound connections, so it needs no public address, open port, or API key.
+## Connect
 
-## What a Client Can Do
+The workspace needs the Team or Pro plan, or a trial.
 
-Dagu Cloud's MCP server answers from two places.
+1. **Connect the server** to Dagu Console and turn on monitoring. See [Connect a Server](/overview/self-host-license#connect-a-server) and [Monitoring](/overview/console-monitoring#turn-it-on).
+2. **Turn on remote access** in **Plan & features** in Dagu, and choose the highest level calls get: `viewer`, `operator`, or `developer`. Without it, clients only read what the server reports. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
+3. **Add the URL to the client** and sign in. Choose the workspaces it may reach, read, operate, or edit in each, and whether it may decide waiting steps.
 
-| From | What a client can do | Needs on the server |
-| --- | --- | --- |
-| What servers report to Dagu Cloud | See what needs a person, each server's health, runs, and alerts, and how each workflow went. Acknowledge or snooze an alert. Answers while a server is offline. | [Monitoring](/overview/console-monitoring) |
-| The server itself, live | Read a run, its logs, DAGs, and Wiki pages. Start, enqueue, retry, and stop runs. Approve, reject, or push back a waiting step. Preview and apply DAG and Wiki changes. | [Remote access](/overview/cloud-remote-access) |
-
-The tools keep the names a Dagu server uses: `dagu_read`, `dagu_execute`, and `dagu_change`. A live call names its server. See [Through Dagu Cloud](/mcp/tools#through-dagu-cloud).
+| Client | Setup |
+| --- | --- |
+| Claude Code | `claude mcp add --transport http dagu https://console.dagu.sh/mcp` |
+| Claude | Add a custom connector with the URL. |
+| ChatGPT | Add a connector with the URL in developer mode. |
+| Cursor | `{"mcpServers":{"dagu":{"url":"https://console.dagu.sh/mcp"}}}` in `.cursor/mcp.json` |
+| Other clients | Add a remote MCP server with the URL. The client must support OAuth. |
 
 ## What a Call May Do
 
@@ -37,54 +40,57 @@ The tools keep the names a Dagu server uses: `dagu_read`, `dagu_execute`, and `d
   <img src="/mcp/mcp-access.svg" width="720" height="470" alt="A call gets the lowest of four limits: the connection, the MCP policy, the member's server role, and the server's remote access level. With edit, operate, developer, and viewer, the call may only read." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
-Each call gets the lowest of four limits, read again on every call:
-
 | Limit | Set by | Default |
 | --- | --- | --- |
-| The connection: its workspaces, its servers, and read, operate, or edit in each | The person, when they sign in from the client | Chosen at sign-in |
-| The workspace's **MCP policy** | Workspace owners, on **MCP** in Dagu Console | Read and operate, no approvals |
-| The member's **server role** | Workspace owners, on **MCP** | `developer` for owners, `viewer` for everyone else |
-| The server's [remote access level](/overview/cloud-remote-access#levels) | The server's administrator | `off` |
+| Connection | The member, at sign-in | Chosen at sign-in |
+| MCP policy | Workspace owners, on **MCP** in Dagu Console | Read and operate, no approvals |
+| Server role | Workspace owners, on **MCP** | `developer` for owners, `viewer` for others |
+| Remote access level | The server's administrator | `off` |
 
-The server's level limits live calls. It does not limit reads of what the server already reported to Dagu Cloud; the first three limits do.
+The server's level limits calls that reach the server, not reads of what it already reported. Deciding a waiting step also needs approvals at the connection, the MCP policy, and the server.
 
-Deciding a step that waits for a person also needs approvals allowed by the connection, the MCP policy, and the server. No call gets `manager` or `admin` on a server.
+::: warning Edit runs commands
+Edit lets a client change DAGs, and DAG steps run commands on the host. Allow it, and the server's `developer` level, only where you would allow shell access.
+:::
 
-## Security Model
+## Security
 
-Dagu servers open outbound connections to Dagu Cloud and accept no inbound connections for MCP. Dagu Cloud signs each call it sends to a server. The server verifies the signature, applies its own remote access level, and records the call in its audit log. Remote access is off by default, and only the server's administrator can turn it on or change its level. Dagu Cloud does not store the answers servers return, and keeps a log of each call for 90 days.
+| Property | Detail |
+| --- | --- |
+| **No inbound connections** | Servers connect out to `console.dagu.sh` and `relay.dagu.sh`. Clients never connect to your servers. |
+| **Off by default** | Only the server's administrator can turn remote access on or raise its level. |
+| **Server sets the ceiling** | Calls run at or below the server's level, reach only the MCP tools, and never get `manager` or `admin`. |
+| **Signed per call** | Each call is signed for one request and one server, valid for at most one minute, and accepted once. The relay cannot create or alter a call. |
+| **Runs as a person** | Each call runs as the member who connected the client with OAuth. Access tokens expire after one hour. |
+| **Recorded** | Each call is in the server's audit log with the person's email and the client's name, and in Dagu Console for 90 days. |
+| **Revocable** | A change applies to the next request. Turning remote access off closes the connection at once. |
+| **Answers not stored** | Dagu Cloud passes answers from servers through without keeping them. |
 
-See [MCP Security Model](/mcp/security) for authentication, authorization, call verification, and data exposure.
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-call-portrait.svg" width="480" height="690">
+  <img src="/mcp/mcp-call.svg" width="720" height="520" alt="1: the MCP client sends a tool call with its token. 2: Dagu Console checks the four limits. 3: it signs the call for one request and one server, valid for at most a minute. 4: the relay forwards it over the server's WebSocket. 5 to 7: the server verifies the signature, applies its level and runs the tool, and writes its audit log. 8: the answer returns, and Dagu Cloud does not store it." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
-## Requirements
+## Data
 
-- A workspace on the Team or Pro plan, or in a trial. Free monitoring includes no MCP.
-- Servers connected to Dagu Console with a license that checks in. Servers with offline licenses never connect to Dagu Cloud.
-- For live calls, Dagu v2.22 or later with remote access on.
-- Outbound HTTPS to `console.dagu.sh` and `relay.dagu.sh`.
+<picture>
+  <source media="(max-width: 640px)" srcset="/mcp/mcp-data-portrait.svg" width="480" height="860">
+  <img src="/mcp/mcp-data.svg" width="720" height="470" alt="A Dagu server's reports go to Dagu Console, which stores them. Answers to calls pass through the relay and Dagu Console without being stored. The MCP client passes what it reads to its model provider." style="width: 100%; height: auto; margin: 16px 0 24px;">
+</picture>
 
-Start with the [Quickstart](/mcp/quickstart).
+- Values of declared secrets are masked in logs and error messages.
+- What a client reads goes to its model provider, such as Anthropic or OpenAI. Every level can read logs. To keep a server's logs from a provider, leave its remote access off and its monitoring level below `errors`.
+- Dagu Cloud keeps reported runs for 30 days and the call log for 90 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits).
+
+## Revoke Access
+
+| To stop | Who | How |
+| --- | --- | --- |
+| One connection | Its member, or a workspace owner | **End** on **MCP** in Dagu Console |
+| All MCP clients in a workspace | A workspace owner | MCP policy: **Nothing: MCP is off** |
+| One member | A workspace owner | Remove the member from the workspace |
+| Calls to one server | The server's administrator | Turn remote access off |
 
 ## Connect Directly to a Server
 
-Each Dagu server also serves MCP itself at `/mcp`, with the same three tools, for that one server. Use it for local development, for automation that runs next to the server, or for a server that does not connect to Dagu Cloud. It authenticates with the server's API keys or its own sign-in, and the client must reach the server's address.
-
-| Goal | Start here |
-| --- | --- |
-| Connect to a server's `/mcp` | [Connect Directly to a Server](/mcp/quickstart#connect-directly-to-a-server) |
-| Configure Claude Code, Codex, Cursor, VS Code, or another client | [Clients](/mcp/clients/) |
-| Choose API key, role, surface, and attribution settings | [Authentication](/mcp/authentication) |
-| Understand the request path and audit flow | [Architecture](/mcp/architecture) |
-| Use `dagu://` resources or run-completion subscriptions | [Resources](/mcp/resources) |
-| Review what appears in audit logs | [Auditability](/mcp/auditability) |
-
-## Skill vs MCP
-
-The Dagu skill and Dagu MCP solve related but different problems.
-
-| Integration | Configure | Best for |
-|-------------|-----------|----------|
-| [Dagu skill](/ai/skills) | `gh skill install dagucloud/dagu dagu --scope user` | Teaching AI coding tools how to write valid Dagu workflow YAML. |
-| Dagu MCP | `https://console.dagu.sh/mcp`, or a server's `/mcp` | Letting MCP clients read Dagu state and Wiki pages, apply scoped DAG or Wiki page edits, and control runs. |
-
-Most AI-assisted workflow authoring setups benefit from both: install the skill for authoring guidance, then connect MCP when the tool should operate your Dagu servers.
+Each Dagu server also serves MCP at `/mcp` for that one server, authenticated with its own API keys. See the [Quickstart](/mcp/quickstart), [Clients](/mcp/clients/), and [Tools](/mcp/tools).
