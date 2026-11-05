@@ -56,7 +56,7 @@ Deciding a step that waits for a person also needs approvals allowed by the conn
 
 Dagu servers open outbound connections to Dagu Cloud and accept no inbound connections for MCP. Dagu Cloud signs each call it sends to a server. The server verifies the signature, applies its own remote access level, and records the call in its audit log. Remote access is off by default, and only the server's administrator can turn it on or change its level. Dagu Cloud does not store the answers servers return, and keeps a log of each call for 90 days.
 
-See [MCP Security Model](/mcp/security) for authentication, authorization, data exposure, the threat model, and known limitations.
+See [MCP Security Model](/mcp/security) for authentication, authorization, call verification, and data exposure.
 
 ## Requirements
 

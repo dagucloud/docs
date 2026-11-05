@@ -1,10 +1,10 @@
 ---
-description: "How MCP access through Dagu Cloud is authenticated, authorized, verified, and audited, what data it exposes and stores, its threat model, and its known limitations."
+description: "How MCP access through Dagu Cloud is authenticated, authorized, verified, and audited, and what data it exposes and stores."
 ---
 
 # MCP Security Model
 
-This page describes MCP access through Dagu Cloud's endpoint, `https://console.dagu.sh/mcp`: how calls are authenticated, authorized, verified, and audited, what data they expose and what Dagu Cloud stores, the threat model, and known limitations. For every connection a Dagu server makes, see [Dagu Cloud: Security and Data Flow](/overview/security).
+This page describes MCP access through Dagu Cloud's endpoint, `https://console.dagu.sh/mcp`: how calls are authenticated, authorized, verified, and audited, and what data they expose and what Dagu Cloud stores. For every connection a Dagu server makes, see [Dagu Cloud: Security and Data Flow](/overview/security).
 
 ## Components
 
@@ -12,7 +12,7 @@ This page describes MCP access through Dagu Cloud's endpoint, `https://console.d
 | --- | --- | --- | --- |
 | MCP client | You, or the client's vendor | Sends tool calls on behalf of one person | That person's OAuth tokens for Dagu Cloud |
 | Model provider | The client's vendor, such as Anthropic or OpenAI | Receives tool results as model input | Whatever the client reads |
-| Dagu Console, `console.dagu.sh` | Dagu Cloud | OAuth authorization server and MCP server. Checks access and signs calls to servers. | Connections, the call log, data servers report, and the signing key |
+| Dagu Console, `console.dagu.sh` | Dagu Cloud | OAuth authorization server and MCP server. Checks access and signs calls to servers. | Connections, the call log, and data servers report |
 | Relay, `relay.dagu.sh` | Dagu Cloud, on Cloudflare | Carries calls and answers between Dagu Console and servers | No signing key. Answers pass through in memory. |
 | Dagu server | You | Verifies each call, applies its own remote access level, runs the call, and writes its audit log | Workflows, logs, secrets, and the audit log |
 
@@ -21,7 +21,7 @@ This page describes MCP access through Dagu Cloud's endpoint, `https://console.d
 - MCP clients authenticate to Dagu Cloud with OAuth 2.1, using the authorization code flow with PKCE. Dagu servers never receive a token from the client.
 - Access tokens are signed JWTs valid for one hour. Refresh tokens rotate on each use and expire after 90 days without use.
 - A connection belongs to one person, who must be a member of each workspace it reaches. Every call runs as that person.
-- People sign in to Dagu Console with email or Google. Two-factor authentication is optional and set by each person. See [Dagu Console Account](/overview/console-account).
+- People can turn on two-factor authentication for their Dagu Console account. See [Dagu Console Account](/overview/console-account).
 - A connection ends when it is revoked, when its refresh token expires, or when it no longer reaches any workspace.
 
 ## Authorization
@@ -51,8 +51,6 @@ MCP client ──▶ console.dagu.sh   evaluates the four limits, signs the call
 - Dagu Console signs each call to a server with an Ed25519 key. The signed assertion names the person, their role, the MCP client, the Dagu Cloud workspace, and the target server. It contains a SHA-256 digest of the call's method, path, and body, and expires at most one minute after it is issued.
 - The server verifies the assertion with a public key built into the Dagu binary, and accepts each assertion once. It refuses an expired, reused, altered, or misdirected call before running anything.
 - The relay cannot produce an assertion that a server accepts.
-- The same key signs licenses. Each signed object states its purpose, and the server rejects one signed for another purpose.
-- The private key is stored in Google Secret Manager and loaded by the Dagu Console application. Because servers verify against the built-in public key, replacing the key requires a Dagu release.
 
 ## Data Exposure
 
@@ -108,28 +106,6 @@ See [Firewall](/overview/security#firewall) for every host Dagu can contact.
 | One member | A workspace owner | Remove the member from the workspace | Next request |
 | Calls to one server | The server's administrator | Turn remote access off | Immediately. Calls in progress end. |
 | Reported data from one server | The server's administrator | Lower or turn off monitoring | Next report. Stored data expires on its schedule. |
-
-## Threat Model
-
-| Scenario | Possible effect | Limited by |
-| --- | --- | --- |
-| A member's Dagu Console account is compromised | An attacker connects a client as that member and acts within the member's limits. | The member's server role, the MCP policy, each server's level, and approvals. Two-factor authentication on the account. Owners can end connections and remove the member. |
-| An MCP client's tokens are stolen | Calls as that person until the connection ends or the refresh token expires. | The person's limits. Access tokens expire after one hour. The connection can be ended on **MCP**. |
-| Text read from a server instructs the model | The model calls tools within the connection's access. | The tools offered for the connection's access, approvals at every limit, each server's level, and the client's confirmation of tools marked destructive. |
-| A model provider retains or exposes tool results | Logs and run data leave your control. | What the connection may read, each server's level, and its monitoring level. |
-| The relay or Cloudflare is compromised | Answers in transit can be read. Calls cannot be forged or altered. | Servers verify each signature and digest. |
-| Dagu Cloud or its signing key is compromised | Signed calls to every server with remote access on, up to each server's level and approvals setting. Exposure of the data Dagu Cloud stores. | Each server's level and approvals setting, turning remote access off, and the server's audit log. |
-| Dagu Cloud is unavailable | MCP through Dagu Cloud stops. | Workflows keep running. Each server's own `/mcp` endpoint keeps working. |
-
-## Limitations
-
-- Dagu Console does not sign in through a customer identity provider over SAML or OIDC, and does not provision members over SCIM.
-- Workspace owners cannot require two-factor authentication for members.
-- Operate access can start any existing DAG on a server, with any parameters the DAG accepts. Access cannot be limited to chosen DAGs.
-- Approval gates do not restrict who approves. A person, or a connection with approvals allowed, can approve a run it started.
-- Workspace owners cannot limit which MCP clients connect.
-- The call log in Dagu Console can be viewed but not exported.
-- Dagu Cloud runs in a single region, `us-central1`.
 
 ## Related Pages
 
