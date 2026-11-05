@@ -33,6 +33,7 @@ flowchart LR
 | Let a model call your DAGs as functions | `with.tools` on a completion | [Tool Calling](/features/chat/tool-calling) |
 | Get typed answers to several questions about the same material, then branch | `action: decision.evaluate` | [Decision Steps](/step-types/decision) |
 | Run Claude Code, Codex, Copilot, or another agent CLI as a step | `action: harness.run` | [Harness Steps](/step-types/harness/) |
+| Run an agent until a check passes, and let a person send its work back | `harness.run` with `repeat_policy`, and `human.task` | [Agent Loops](/ai/loops/) |
 | Let a model decide which declared step runs next | `type: agent` | [Agent DAGs](/writing-workflows/agent) |
 | Let an external AI client inspect and control a running server | Built-in MCP endpoint | [MCP](/mcp/) |
 | Have an AI tool write your workflows for you | MCP, or the skill with no server | [Write workflows with an AI tool](#write-workflows-with-an-ai-tool) |

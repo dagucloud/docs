@@ -563,6 +563,18 @@ const fullSidebar = [
       { text: "Decision Steps", link: "/step-types/decision" },
       { text: "Agent DAGs", link: "/writing-workflows/agent" },
       { text: "Harness", link: "/step-types/harness/" },
+      {
+        text: "Agent Loops",
+        link: "/ai/loops/",
+        collapsed: false,
+        items: [
+          { text: "Overview", link: "/ai/loops/" },
+          { text: "Open Loops", link: "/ai/loops/open-loop" },
+          { text: "Inner Loops", link: "/ai/loops/inner-loop" },
+          { text: "Outer Loops", link: "/ai/loops/outer-loop" },
+          { text: "Background Loops", link: "/ai/loops/background-loop" },
+        ],
+      },
       { text: "Skills", link: "/ai/skills" },
     ],
   },
