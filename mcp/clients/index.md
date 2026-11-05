@@ -2,21 +2,7 @@
 
 ## Through Dagu Cloud
 
-Every client uses one URL and signs in with OAuth. No API key or header is needed.
-
-```text
-https://console.dagu.sh/mcp
-```
-
-| Client | Setup |
-|--------|-------|
-| Claude Code | `claude mcp add --transport http dagu https://console.dagu.sh/mcp` |
-| Claude (claude.ai, Desktop, and mobile) | Add a custom connector with the URL. |
-| ChatGPT | Add a connector with the URL in developer mode. |
-| Cursor | `{"mcpServers":{"dagu":{"url":"https://console.dagu.sh/mcp"}}}` in `.cursor/mcp.json` |
-| Other clients | Add a remote Streamable HTTP server with the URL. The client must support OAuth. |
-
-See [Connect](/mcp/#connect) for the server side and what to choose at sign-in.
+Every client uses one URL, `https://console.dagu.sh/mcp`, and signs in with OAuth. No API key or header is needed. See [Connect](/mcp/#connect) for the prompt to give a coding agent and the steps for Claude and ChatGPT.
 
 ## Direct to a Server
 

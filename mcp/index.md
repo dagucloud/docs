@@ -23,15 +23,36 @@ The workspace needs the Team or Pro plan, or a trial.
 
 1. **Connect the server** to Dagu Console and turn on monitoring. See [Connect a Server](/overview/self-host-license#connect-a-server) and [Monitoring](/overview/console-monitoring#turn-it-on).
 2. **Turn on remote access** in **Plan & features** in Dagu, and choose the highest level calls get: `viewer`, `operator`, or `developer`. Without it, clients only read what the server reports. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
-3. **Add the URL to the client** and sign in. Choose the workspaces it may reach, read, operate, or edit in each, and whether it may decide waiting steps.
+3. **Add Dagu Cloud to the client** and sign in. Choose the workspaces it may reach, read, operate, or edit in each, and whether it may decide waiting steps.
+
+**Claude Code, Codex, Cursor, and other coding agents.** Paste this prompt into the agent. It adds Dagu Cloud and starts the sign-in.
+
+```text
+Add the Dagu Cloud MCP server to this tool so it works in every project.
+
+URL: https://console.dagu.sh/mcp
+Transport: Streamable HTTP
+Sign-in: OAuth in the browser. No API key or header.
+Name: dagu
+
+When it is added, start the sign-in, or tell me exactly what to run to sign in.
+```
+
+**Claude and ChatGPT.** A chat cannot change its own settings, so add Dagu Cloud in the app:
+
+| Client | Steps |
+| --- | --- |
+| Claude | Open **Customize**, then **Connectors**. Select **+ Add**, then **Add custom connector**. Paste the URL, select **Continue**, and sign in. On Team and Enterprise, an owner adds it first under **Organization settings**, then **Connectors**. |
+| ChatGPT | Open [Plugins](https://chatgpt.com/plugins). Select **+**, then **Add custom MCP server**. Paste the URL as the **Server URL**, choose OAuth, confirm, and select **Create as a plugin**. Install the plugin, then sign in. |
+
+**To add it yourself:**
 
 | Client | Setup |
 | --- | --- |
-| Claude Code | `claude mcp add --transport http dagu https://console.dagu.sh/mcp` |
-| Claude | Add a custom connector with the URL. |
-| ChatGPT | Add a connector with the URL in developer mode. |
-| Cursor | `{"mcpServers":{"dagu":{"url":"https://console.dagu.sh/mcp"}}}` in `.cursor/mcp.json` |
-| Other clients | Add a remote MCP server with the URL. The client must support OAuth. |
+| Cursor | [Add to Cursor](cursor://anysphere.cursor-deeplink/mcp/install?name=dagu&config=eyJ1cmwiOiJodHRwczovL2NvbnNvbGUuZGFndS5zaC9tY3AifQ%3D%3D), or add `{"mcpServers":{"dagu":{"url":"https://console.dagu.sh/mcp"}}}` to `~/.cursor/mcp.json`. |
+| Claude Code | `claude mcp add --transport http --scope user dagu https://console.dagu.sh/mcp`, then run `/mcp` in Claude Code to sign in. |
+| VS Code | `code --add-mcp '{"name":"dagu","type":"http","url":"https://console.dagu.sh/mcp"}'` |
+| Other clients | Add a remote Streamable HTTP server with the URL. The client must support OAuth. |
 
 ## What a Call May Do
 
