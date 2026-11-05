@@ -33,7 +33,7 @@ Times show in your browser's time zone; day totals are by UTC day. On a Team or 
 
 Each server's page has these tabs:
 
-- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services and queues from the last report; open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
+- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services and queues from the last report; on a paid plan or trial, its [workers](#workers); open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
 - **Runs**: the server's runs.
 - **Workflows**: each workflow's finished runs per UTC day over the last 14 days as bars, with runs, failures, success rate, and average and longest duration. **Failing** marks a workflow with an open alert, and **Muted** a [muted](/overview/console-monitoring-alerts#mute-a-workflow) one.
 - **Settings**, for owners: **Name**, [Dagu URL](#dagu-url), [Alert rules](/overview/console-monitoring-alerts#alert-rules), **Delete reports**, and **Disconnect server**.
@@ -49,6 +49,14 @@ Each **Machine** chart draws a dashed line, named **Alerts at** a percent, where
 | **Waiting for a worker** | Its next run waits for a worker. Hovering it says why. |
 | **Stalled** | Its next run has waited as long as the server's [queue alerts](/overview/console-monitoring-alerts#queue-stalled-alerts) allow, though the queue has room. |
 | No status | The queue moves, or its runs fill it and wait their turn. |
+
+### Workers
+
+On a paid plan or trial, **Workers** shows how many [distributed workers](/server-admin/distributed/) the last report counts live and lists each one: its ID and host, its labels, **Running**, the runs it runs of how many it may, its last heartbeat, and its machine's CPU, memory, and disk use. A figure at or over the percent where its [alert](/overview/console-monitoring-alerts#alerts-of-workers-machines) opens is marked.
+
+- Workers show with a Dagu release after v2.25.4, while the server runs a coordinator.
+- At `health`, the server sends only the count, and the page says so.
+- A report lists up to 256 workers. When it lists fewer than are live, a note under the table says so.
 
 ### Dagu URL
 
