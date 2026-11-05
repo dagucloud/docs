@@ -70,9 +70,9 @@ claude -p "Refactor the auth module" --dangerously-skip-permissions
 
 **Warning:** This skips all safety checks. Only use in isolated or trusted environments.
 
-## Approval Push-back
+## Push-back
 
-When combined with Dagu's approval gates, Claude Code steps can be reviewed and iterated:
+A [human task](/writing-workflows/human-tasks#requesting-changes) after a Claude Code step lets a reviewer send the work back:
 
 ```yaml
 steps:
@@ -83,12 +83,23 @@ steps:
       prompt: |
         Implement the requested feature
       model: opus
-    approval:
-      prompt: "Review the implementation"
-      input: [FEEDBACK]
+
+  - id: review
+    depends: [implement]
+    action: human.task
+    with:
+      prompt: Review the implementation
+      push_back:
+        rewind_to: implement
+        form:
+          type: object
+          required: [feedback]
+          properties:
+            feedback:
+              type: string
 ```
 
-On push-back, the prompt is augmented with reviewer feedback and the previous stdout log path.
+On push-back, the prompt is augmented with reviewer feedback and the previous stdout log path. See [Agent Loops](/ai/loops/) for repeating the step until a check passes and for review workflows.
 
 ## See Also
 

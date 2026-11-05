@@ -8,6 +8,8 @@ The selected CLI attempt's binary must either be available in `PATH` or be refer
 
 To run CLI agents inside a container sandbox, see [Harness Sandboxed Execution](./sandbox/). This is the recommended shape when an AI or coding agent should run with explicit filesystem mounts, toolchains, network mode, external egress controls, and credentials.
 
+To run an agent until a check passes, have a second agent review its work, or let a person send the work back with feedback, see [Agent Loops](/ai/loops/).
+
 ::: tip Prefer a desktop app?
 [Kitewell](https://kitewell.com/) is a separate app for running coding agents on your own Mac or Windows PC without YAML.
 :::
@@ -105,12 +107,40 @@ for an end-to-end workflow and the
 [`output_schema` workflow specification](/writing-workflows/yaml-specification#output)
 for the general step-level contract.
 
-## Approval Push-back
+## Repeating Until a Check Passes
 
-Harness steps automatically receive push-back context from an approval or a [human task](/writing-workflows/human-tasks#requesting-changes) when they are rewound and re-executed. Dagu appends a push-back context block to the prompt with:
+A harness step with `repeat_policy` runs the agent again until a check passes. Each repeat starts a new agent process and resolves `with` again, so the prompt can count attempts with `${context.step.repeat_index}` and read what the last check printed:
+
+```yaml
+working_dir: /srv/repos/app
+
+steps:
+  - id: fix
+    action: harness.run
+    with:
+      provider: codex
+      sandbox: workspace-write
+      prompt: |
+        Make `make test` pass. Earlier attempts: ${context.step.repeat_index}.
+        If ${context.paths.artifacts_dir}/test.log exists, read it first.
+    repeat_policy:
+      repeat: until
+      condition: make test > "${context.paths.artifacts_dir}/test.log" 2>&1
+      limit: 5
+
+  - id: tests_pass
+    depends: [fix]
+    run: make test
+```
+
+The step stops repeating when the condition command exits 0, or after five attempts. Reaching the limit does not fail the step, so `tests_pass` runs the check once more. [Inner Loops](/ai/loops/inner-loop) covers feedback files, protecting the check from the agent, attempts made of several steps, and reviewer agents.
+
+## Push-back
+
+Harness steps automatically receive push-back context from a [human task](/writing-workflows/human-tasks#requesting-changes) or an approval when they are rewound and re-executed. Dagu appends a push-back context block to the prompt with:
 
 - the current push-back iteration
-- reviewer-provided feedback inputs, such as `FEEDBACK`
+- reviewer-provided feedback inputs, such as `feedback`
 - the previous stdout log path, when the step had stdout before reset
 
 Dagu passes the previous stdout as a file path only. It does not inline stdout into the prompt because harness output can be large. The path is also available as `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`; the current iteration is available as `DAG_PUSHBACK_ITERATION`.
@@ -123,12 +153,23 @@ steps:
       prompt: |
         Implement the requested change and summarize what changed
       provider: codex
-    approval:
-      prompt: "Review the implementation"
-      input: [FEEDBACK]
+
+  - id: review
+    depends: [implement]
+    action: human.task
+    with:
+      prompt: Review the implementation
+      push_back:
+        rewind_to: implement
+        form:
+          type: object
+          required: [feedback]
+          properties:
+            feedback:
+              type: string
 ```
 
-On the first run, `implement` receives only the original prompt. If the reviewer pushes back with `FEEDBACK`, Dagu reruns the harness step and augments the prompt with the feedback, iteration number, and previous stdout log path.
+On the first run, `implement` receives only the original prompt. If the reviewer pushes back with `feedback`, Dagu reruns the harness step and augments the prompt with the feedback, iteration number, and previous stdout log path. A harness step that also has a `repeat_policy` gets the block on every repeat. [Outer Loops](/ai/loops/outer-loop) builds code review, plan approval, and hand-over to a person on this.
 
 For built-in CLI providers:
 

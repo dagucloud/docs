@@ -111,6 +111,8 @@ The feedback of one push-back, encoded as a JSON object, is limited to 16 KiB be
 
 See [Push-back Context](/writing-workflows/runtime-variables#push-back-context-dag-pushback) for the `DAG_PUSHBACK` payload format.
 
+[Outer Loops](/ai/loops/outer-loop) builds coding-agent review on push-back: sending code back to the agent, approving plans before implementation, and handing work to a person when the agent runs out of attempts.
+
 ## Acting on a Waiting Step
 
 | | Human task | Approval gate |

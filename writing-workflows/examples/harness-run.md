@@ -198,8 +198,48 @@ flowchart LR
     style A stroke:lime,stroke-width:1.6px,color:#333
 ```
 
+## Loop Until the Tests Pass
+
+Repeat the agent until `make test` passes, give each attempt the last failure, and stop after three attempts. See [Inner Loops](/ai/loops/inner-loop) for the full pattern.
+
+```yaml
+working_dir: /srv/repos/app
+
+steps:
+  - id: fix_tests
+    action: harness.run
+    with:
+      provider: codex
+      sandbox: workspace-write
+      prompt: |
+        Make `make test` pass without editing the tests.
+        If ${context.paths.artifacts_dir}/test.log exists, it holds the
+        output of the last failed run. Read it first.
+    repeat_policy:
+      repeat: until
+      condition: make test > "${context.paths.artifacts_dir}/test.log" 2>&1
+      limit: 3
+
+  - id: tests_pass
+    depends: [fix_tests]
+    run: make test
+```
+
+`tests_pass` fails the run when three attempts were not enough, because reaching the limit does not fail the repeating step.
+
+```mermaid
+flowchart LR
+    F["harness.run: codex · fix_tests"] --> C{"make test"}
+    C -- "fails · test.log" --> F
+    C -- "passes" --> T["tests_pass"]
+    style F stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:green,stroke-width:1.6px,color:#333
+    style T stroke:lime,stroke-width:1.6px,color:#333
+```
+
 ## See Also
 
+- [Agent Loops](/ai/loops/)
 - [Harness](/step-types/harness/)
 - [Harness Sandboxed Execution](/step-types/harness/sandbox/)
 - [Artifacts](/writing-workflows/artifacts)
