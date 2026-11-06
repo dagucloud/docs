@@ -40,7 +40,7 @@ The two questions are independent, but useful workflows tend to land in the same
 | Open loop | Nothing reaches the agent | `harness.run`, artifacts, an optional gate | One run | [Open Loops](./open-loop) |
 | Inner loop | A command | `repeat_policy` on `harness.run` or `dag.run` | Minutes | [Inner Loops](./inner-loop) |
 | Outer loop | A person | `human.task` with `push_back` | Hours | [Outer Loops](./outer-loop) |
-| Background loop | A schedule or an event | `schedule`, webhooks, `watch`, `parallel` | Days | [Background Loops](./background-loop) |
+| Background loop | The loops inside it; a schedule or an event starts it | `schedule`, webhooks, `watch`, `parallel` | Days | [Background Loops](./background-loop) |
 
 ## Gates and Loops
 
@@ -88,7 +88,7 @@ These rules follow from published results on self-correction, verifier-driven co
 5. **Start each attempt fresh and keep state in files.** Long sessions degrade. Each repeat of a `harness.run` step starts a new agent process, so the plan, progress notes, and check output belong in files the next attempt reads.
 6. **Review with a different model.** Model judges favour output from their own model ([Zheng et al.](https://arxiv.org/abs/2306.05685), [Panickssery et al.](https://arxiv.org/abs/2404.13076)). Give the reviewer a different provider, and give it the check results.
 7. **Put people at the plan and the merge, not in every turn.** A reviewed plan has more leverage than reviewed code, and passing tests does not make a change mergeable: maintainers would not merge about half of the benchmark pull requests that an automated grader passed ([METR](https://metr.org/notes/2026-03-10-many-swe-bench-passing-prs-would-not-be-merged-into-main/)).
-8. **Give the agent a way to ask for help.** An explicit "needs a person" exit cut test cheating from 54% to 9% for one frontier model ([Zhong et al.](https://arxiv.org/abs/2510.20270)). [Outer Loops](./outer-loop#let-the-agent-ask-for-help) shows the wiring.
+8. **Give the agent a way to ask for help.** An explicit "needs a person" exit cut test cheating from 54% to 9% for one frontier model ([Zhong et al.](https://arxiv.org/abs/2510.20270)). [Outer Loops](./outer-loop#hand-over-when-the-agent-gives-up) shows the wiring.
 
 ## In This Section
 
