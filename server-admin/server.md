@@ -33,7 +33,7 @@ port: 8080                # Web UI binding port
 public_url: ""            # External Web UI URL for generated links (e.g., "https://dagu.example.com")
 base_path: ""              # Base path for reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
-tz: "Asia/Tokyo"          # Server timezone
+tz: "Asia/Tokyo"          # Server timezone, also exported to steps as TZ
 debug: false              # Include DEBUG logs and HTTP request headers when true
 log_format: "text"         # Log format: "text" or "json"
 access_log_mode: "none"    # Access log mode: "all", "non-public", or "none" (default)
@@ -182,6 +182,26 @@ remote_nodes:
 
 See [Operations - Logging](/server-admin/operations#logging) for mode behavior, configuration examples, and current filtering limitations.
 
+## Timezone
+
+`tz` or `DAGU_TZ` sets the timezone Dagu uses for scheduling and display. Dagu also exports the value to every step as `TZ`, replacing any `TZ` in its own environment. Anything a step starts inherits it, including a system service that the step restarts.
+
+Without `tz`, Dagu uses the host's local time and does not add `TZ` to steps. A `TZ` already set in Dagu's environment still reaches them. On Linux and macOS, Dagu falls back to UTC if `TZ` is unset and `/etc/localtime` is missing.
+
+`tz` takes an IANA name such as `Europe/Paris`. Dagu includes its own timezone database, so it can accept a name that the host cannot resolve. Programs that use the host's C library may then run in UTC. To check a host, run `TZ=Europe/Paris date` with your zone. If the output shows UTC time or an abbreviation like `Europe` instead of `CET`, the host cannot resolve the name.
+
+On such a host, remove `tz` so that Dagu uses the host's local time. To set a zone for a single schedule, use [`CRON_TZ`](/writing-workflows/scheduling#timezone-support), which does not change `TZ` in steps.
+
+To keep `tz`, clear `TZ` in the steps that need the host's default:
+
+```yaml
+steps:
+  - id: restart_service
+    run: env -u TZ /path/to/restart-service
+```
+
+Setting `TZ: ""` in a DAG's `env` does not clear the variable. `TZ` stays set but empty, which is usually treated as UTC.
+
 ## Environment Variables
 
 All options support `DAGU_` prefix:
@@ -190,7 +210,7 @@ All options support `DAGU_` prefix:
 - `DAGU_HOST` - Host (default: `127.0.0.1`)
 - `DAGU_PORT` - Port (default: `8080`)
 - `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification DAG-run links
-- `DAGU_TZ` - Timezone
+- `DAGU_TZ` - Timezone, also exported to steps as `TZ`. See [Timezone](#timezone).
 - `DAGU_DEBUG` - Include DEBUG logs and HTTP request headers
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
 - `DAGU_ACCESS_LOG_MODE` - Access log mode: `all`, `non-public`, or `none` (default); see [Operations - Logging](/server-admin/operations#http-access-logs)

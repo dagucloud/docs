@@ -409,6 +409,8 @@ Built-in forwarded variables:
 - Windows exact names: `USERPROFILE`, `SYSTEMROOT`, `WINDIR`, `SYSTEMDRIVE`, `COMSPEC`, `PATHEXT`, `TEMP`, `TMP`, `PATH`, `PSMODULEPATH`, `HOME`, `TZ`, `APPDATA`, `LOCALAPPDATA`, `USERNAME`, `USERDOMAIN`, `PROGRAMFILES`, `PROGRAMFILES(X86)`, `PROGRAMDATA`, `SSH_AUTH_SOCK`, `SSH_AGENT_PID`, `DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_CERT_PATH`, `DOCKER_API_VERSION`
 - Prefixes on all platforms: `DAGU_`, `DAG_`, `LC_`, `KUBERNETES_`
 
+When `tz` or `DAGU_TZ` is set, steps receive that value as `TZ` instead of the forwarded one. See [Timezone](/server-admin/server#timezone).
+
 Dagu's own credentials, such as `DAGU_AUTH_BASIC_PASSWORD` and `DAGU_ENCRYPTION_KEY`, are never forwarded and never expanded, even though they start with `DAGU_`. See [Environment Variable Filtering](/server-admin/operations#environment-variable-filtering) for the full list and how to pass one to a step as a secret.
 
 You can add more forwarded variables with top-level config:

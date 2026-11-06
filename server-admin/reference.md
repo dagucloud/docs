@@ -15,7 +15,7 @@ port: 8080
 public_url: ""            # External Web UI URL for generated links
 base_path: ""              # For reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
-tz: "America/New_York"
+tz: "America/New_York"    # Also exported to steps as TZ
 debug: false              # Include DEBUG logs and HTTP request headers when true
 log_format: "text"         # "text" or "json"
 access_log_mode: "none"    # Access log mode: "all", "non-public", or "none" (default)
@@ -347,7 +347,7 @@ Variables ending in `_FILE` name a file that holds a secret. See [Secrets From F
 - `DAGU_BASE_PATH` - Base path for reverse proxy
 - `DAGU_API_BASE_PATH` - API endpoint base path (default: `/api/v1`)
 - `DAGU_API_BASE_URL` - **DEPRECATED** - Use `api_base_path` config instead
-- `DAGU_TZ` - Server timezone
+- `DAGU_TZ` - Server timezone, also exported to steps as `TZ`. See [Timezone](/server-admin/server#timezone).
 - `DAGU_ENV_PASSTHROUGH` - Comma-separated exact env var names to forward to step execution
 - `DAGU_ENV_PASSTHROUGH_PREFIXES` - Comma-separated env var prefixes to forward to step execution
 - `DAGU_DEBUG` - Include DEBUG logs and HTTP request headers

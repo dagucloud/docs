@@ -186,6 +186,8 @@ schedule: "CRON_TZ=Asia/Tokyo 0 9 * * *"  # 9 AM Tokyo time
 
 See [tz database timezones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for valid values.
 
+`CRON_TZ` applies only to that schedule and does not set `TZ` in steps. See [Timezone](/server-admin/server#timezone) for the server-wide setting.
+
 ## Business Days
 
 Name a [business calendar](/writing-workflows/business-calendars) to skip holidays, and add `business_days` to keep only chosen business days of each month:
