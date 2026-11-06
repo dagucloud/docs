@@ -37,7 +37,7 @@ On a Team or Pro plan, a server whose scheduler is down for 5 minutes opens an a
 
 On a Team or Pro plan, a server whose disk is 90% full or more, or the percent its [alert rules](#alert-rules) set, from 50 to 99, opens an alert. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
 
-- The disk is the one that holds the server's data directory, where runs, logs, and queues stop when it fills up. A Dagu release after v2.25.4 also sends the disk that holds the log directory, when that is another disk, and how many of each disk's inodes are in use. The fullest of these counts: a disk whose inodes run out can make no new file even with bytes to spare.
+- The disk is the one that holds the server's data directory, where runs, logs, and queues stop when it fills up. Dagu v2.25.7 or later also sends the disk that holds the log directory, when that is another disk, and how many of each disk's inodes are in use. The fullest of these counts: a disk whose inodes run out can make no new file even with bytes to spare.
 - The email or post says which disk filled up, and how full it is, by bytes or by inodes.
 - It resolves once that disk is 5 points under the percent, 85% by default, so a disk near the line alerts once rather than again and again.
 - Turning **Disk almost full** off in the [alert rules](#alert-rules) closes an open one without an email.
@@ -50,19 +50,19 @@ On a Team or Pro plan, a server whose memory use stays at or over 90% for 10 min
 - The alert opens as of when the use went over the percent. A single report over it opens nothing.
 - Use that drops under the percent starts the wait over.
 - It resolves once use is 5 points under the percent, and the email or post says how much is in use then.
-- In a container with a memory limit, a Dagu release after v2.25.4 measures the container's memory against that limit rather than the host's.
+- In a container with a memory limit, Dagu v2.25.7 or later measures the container's memory against that limit rather than the host's.
 - Turning **Memory high** off, or a report without memory use, closes an open one without an email.
 
 ## CPU High Alerts
 
 On a Team or Pro plan, workspace owners can turn on alerts of a server whose CPU use stays high. They are off by default. Once on, a server whose CPU use stays at or over 90% for 15 minutes, or the percent and minutes the [alert rules](#alert-rules) set, opens an alert, as for [memory](#memory-high-alerts).
 
-- CPU use is the average over the samples since the server's last report, from a Dagu release after v2.25.4, and the latest sample from earlier releases. In a container with a CPU limit, it is measured against that limit.
+- CPU use is the average over the samples since the server's last report, from Dagu v2.25.7 or later, and the latest sample from earlier releases. In a container with a CPU limit, it is measured against that limit.
 - It resolves once use is 5 points under the percent.
 
 ## Alerts of Workers' Machines
 
-With a Dagu release after v2.25.4 at `runs`, the [disk](#disk-almost-full-alerts), [memory](#memory-high-alerts), and [CPU](#cpu-high-alerts) alerts also watch each machine a server's [distributed workers](/server-admin/distributed/) run on, with the server's [alert rules](#alert-rules).
+With Dagu v2.25.7 or later at `runs`, the [disk](#disk-almost-full-alerts), [memory](#memory-high-alerts), and [CPU](#cpu-high-alerts) alerts also watch each machine a server's [distributed workers](/server-admin/distributed/) run on, with the server's [alert rules](#alert-rules).
 
 - An alert names the machine after its server, such as `etl-prod-1 (gpu-1)`. Workers on one machine share its alerts.
 - A worker's CPU use is its average over the last minute.
@@ -82,7 +82,7 @@ On a Team or Pro plan, a server's [queue](/server-admin/queues) opens an alert o
 
 ## Too Few Workers Alerts
 
-On a Team or Pro plan, a server opens an alert once fewer of its [distributed workers](/server-admin/distributed/) are live than its [alert rules](#alert-rules) want, for as long as they set: by default, none live for 5 minutes, so runs that need a worker wait. These alerts need a Dagu release after v2.25.4, at `health` or `runs`.
+On a Team or Pro plan, a server opens an alert once fewer of its [distributed workers](/server-admin/distributed/) are live than its [alert rules](#alert-rules) want, for as long as they set: by default, none live for 5 minutes, so runs that need a worker wait. These alerts need Dagu v2.25.7 or later, at `health` or `runs`.
 
 - A worker is live while its heartbeat reaches the server's coordinator, at most 30 seconds old. A server whose report counts no coordinator has no live worker, since none can take its runs.
 - Only a server that has reported a live worker is watched, so a server that runs a coordinator for no worker, as `dagu start-all` does by default, opens none.

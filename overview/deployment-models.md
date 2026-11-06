@@ -90,7 +90,7 @@ Every topology can report to [Dagu Console](/overview/console-monitoring), which
   <img src="/deployment-models/console-monitoring.svg" width="720" height="450" alt="Monitoring with Dagu Console: three servers, one per topology, report metadata to Dagu Console over outbound HTTPS; Dagu Console shows them together and emails you when a workflow fails or a server goes silent, while logs, outputs, and secrets stay on each server." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
-The always-on Dagu server sends the reports (`dagu server` or `dagu start-all`); workers never report themselves. With a Dagu release after v2.25.4 on a paid plan, the server also reports its distributed workers from their heartbeats to the coordinator. It reports the runs whose events reach its event store, `paths.event_store_dir`, which defaults to `logs/admin/events` under the Dagu home rather than under the data directory.
+The always-on Dagu server sends the reports (`dagu server` or `dagu start-all`); workers never report themselves. With Dagu v2.25.7 or later on a paid plan, the server also reports its distributed workers from their heartbeats to the coordinator. It reports the runs whose events reach its event store, `paths.event_store_dir`, which defaults to `logs/admin/events` under the Dagu home rather than under the data directory.
 
 | Topology | Runs reported |
 |----------|---------------|

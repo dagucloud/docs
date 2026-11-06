@@ -54,7 +54,7 @@ Each **Machine** chart draws a dashed line, named **Alerts at** a percent, where
 
 On a paid plan or trial, **Workers** shows how many [distributed workers](/server-admin/distributed/) the last report counts live and lists each one: its ID and host, its labels, **Running**, the runs it runs of how many it may, its last heartbeat, and its machine's CPU, memory, and disk use. A figure at or over the percent where its [alert](/overview/console-monitoring-alerts#alerts-of-workers-machines) opens is marked.
 
-- Workers show with a Dagu release after v2.25.4, while the server runs a coordinator.
+- Workers show with Dagu v2.25.7 or later, while the server runs a coordinator.
 - At `health`, the server sends only the count, and the page says so.
 - A report lists up to 256 workers. When it lists fewer than are live, a note under the table says so.
 

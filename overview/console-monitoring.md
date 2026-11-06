@@ -124,7 +124,7 @@ Sent at `health`, `runs`, and `errors`:
 - The scheduler's last tick, and whether it is paused
 - The [remote access](/overview/cloud-remote-access) level, and whether remote approvals are on
 - On a paid plan or trial, with Dagu v2.25.4 or later, how busy the server's machine is, from the latest sample Dagu takes every `monitoring.interval` (5 seconds by default): CPU use and the number of CPUs, the 1, 5, and 15 minute load averages, memory use, and the use of the disk that holds the data directory, in percent and bytes. A server on free monitoring sends none of it.
-- On a paid plan or trial, with a Dagu release after v2.25.4, how many [distributed workers](/server-admin/distributed/) are live: those whose heartbeat reached a registered coordinator in the last 30 seconds. A server without a coordinator, or on free monitoring, sends no count.
+- On a paid plan or trial, with Dagu v2.25.7 or later, how many [distributed workers](/server-admin/distributed/) are live: those whose heartbeat reached a registered coordinator in the last 30 seconds. A server without a coordinator, or on free monitoring, sends no count.
 
 ### Run status
 
@@ -133,7 +133,7 @@ Sent at `runs` and `errors`:
 - **Each top-level run that finishes**, once: the DAG name, run ID, attempt ID, status (succeeded, partially succeeded, failed, aborted, or rejected), how it was triggered (scheduler, manual, webhook, retry, or catchup), when it was queued, started, and finished, and the names of its failed steps, up to 50.
 - **The runs in progress**: the runs queued, running, or waiting, with the same fields up to the start time. A report lists up to 200 of them, the most recently started or queued first, and the total count.
 - **Each queue that holds queued or running runs**: its name, how many runs are queued and running, how many may run at once, when the next run in line was queued, and why that run cannot start when no worker can take it. A report lists up to 256 queues, those waiting for a worker first, and the total count. Sent by Dagu v2.25.3 or later.
-- **Each distributed worker**, on a paid plan or trial, with a Dagu release after v2.25.4: its ID, host, labels, how many runs it runs of how many it may, its last heartbeat, and how busy its machine is, as for the server's own. A report lists up to 256 of them, by ID, and the count covers them all.
+- **Each distributed worker**, on a paid plan or trial, with Dagu v2.25.7 or later: its ID, host, labels, how many runs it runs of how many it may, its last heartbeat, and how busy its machine is, as for the server's own. A report lists up to 256 of them, by ID, and the count covers them all.
 - **Each scheduled DAG**: its name, its next run, and its latest start-schedule slot that came due, with the outcome below. A report lists up to 500 of them, those whose slot failed, is planned, or was missed first, and the total count. When several processes share a data directory, the one that sends runs sends these.
 
 | Slot outcome | Meaning |
