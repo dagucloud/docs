@@ -207,7 +207,7 @@ The run has two outer loops, each with its own rewind target:
 - At `approve_plan`, a push-back reruns only the planner. A rerun replaces `plan.md` with the new plan.
 - At `review`, a push-back reruns `implement` and `evidence`, and leaves the approved plan alone.
 
-Feedback reaches further than its rewind target. Dagu appends a push-back's feedback to the prompt of every `harness.run` step that runs after it, so feedback on the plan also goes to each attempt of `implement`. Word it so that it makes sense there too: "use the existing retry helper" helps both agents, while "add a Risks section" sends the implementer looking for a section to add.
+Feedback goes into the prompt of an agent that has work to revise. `implement` has not run when someone pushes back at `approve_plan`, so it learns the change from the new `plan.md`, and the feedback stays out of its prompt. It can still read the feedback from its environment, as `$feedback`.
 
 The planner and the implementer are different agents. Claude Code plans without edit tools, and Codex implements inside its `workspace-write` sandbox.
 

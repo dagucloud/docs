@@ -59,6 +59,8 @@ What happens:
 | The check passes on some attempt | Succeeded | Succeeded | Continues |
 | Five attempts and the check still fails | Succeeded | Failed | Failed |
 
+`dagu status` shows how many times a repeating step ran, so a step that used up its limit stands out: `fix (2m 11s) [succeeded] ×5`.
+
 An attempt where the agent CLI itself exits non-zero does not end the loop either: the condition still decides whether another attempt runs.
 
 `test.log` lives in the artifact directory, not in the repository, so the agent cannot commit it and a reviewer can open it from the run's **Artifacts** tab.
