@@ -164,6 +164,40 @@ steps:
 
 Dagu fills in `NAME` inside the JSON body. The shell expands `TOKEN` from the environment, between the closed and reopened single quotes.
 
+## Model Output in Shell Commands
+
+Dagu does not escape a value it writes into a `run` command. That is usually your own data, but a model's reply can carry whatever text the model read, such as a bug report or a web page, so treat it as untrusted. No way of quoting it is safe:
+
+| Written in `run` as | An apostrophe | A quote that closes the span | `$(...)` or backticks |
+|---|---|---|---|
+| `'${triage.output.summary}'` | Breaks the step | Runs as code | Stays text |
+| `"${triage.output.summary}"` | Stays text | Stays text | Runs as code |
+| `${triage.output.summary}` | Breaks the step | Runs as code | Runs as code |
+
+Pass it through `env` instead. The value then reaches the command as data, whatever it contains:
+
+```yaml
+steps:
+  - id: triage
+    action: harness.run
+    with:
+      provider: codex
+      prompt: Summarize the bug report in REPORT.md. Return JSON with a summary field.
+    output_schema:
+      type: object
+      required: [summary]
+      properties:
+        summary: { type: string }
+
+  - id: page
+    depends: [triage]
+    env:
+      - SUMMARY: ${triage.output.summary}
+    run: ./page.sh "$SUMMARY"
+```
+
+`dagu validate` warns when the output of a `harness.run`, `chat.completion`, or agent step is written into a shell command. It does not warn for a field that `output_schema` declares with `enum`, or as `boolean`, `integer`, or `number`, because validation limits its values.
+
 ## Scripts That Need No Escaping
 
 [`js.run`](/step-types/js) passes `with.script` to its sandbox as written.

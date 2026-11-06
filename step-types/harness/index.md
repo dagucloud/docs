@@ -143,6 +143,8 @@ Harness steps automatically receive push-back context from a [human task](/writi
 - reviewer-provided feedback inputs, such as `feedback`
 - the previous stdout log path, when the step had stdout before reset
 
+A harness step that first runs after a push-back has no earlier work to revise, so its prompt stays as written. It can still read the feedback from its environment.
+
 Dagu passes the previous stdout as a file path only. It does not inline stdout into the prompt because harness output can be large. The path is also available as `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`; the current iteration is available as `DAG_PUSHBACK_ITERATION`.
 
 ```yaml
@@ -176,6 +178,37 @@ For built-in CLI providers:
 - the prompt is always passed on the command line
 - additional `with` keys become CLI flags, with `snake_case` keys normalized to kebab-case
 - `with.stdin`, if present, is piped or folded into the prompt as shown in the [provider table](#supported-providers)
+
+## Agent Configuration on the Host
+
+A built-in CLI provider runs under the account that runs Dagu, so it loads that account's configuration: instructions such as a global `CLAUDE.md` or `AGENTS.md`, hooks, plugins, and MCP servers. A personal rule like "keep diffs minimal" steers the workflow's agents too, and the same workflow can behave differently on another machine.
+
+For repeatable runs, run Dagu under a dedicated account whose agent configuration you control. To narrow what a step loads:
+
+| Provider | Setting | What it does |
+|---|---|---|
+| Claude Code | `setting_sources: project,local` under `with` | Leaves out the account's user settings |
+| Codex | `CODEX_HOME` in the step's `env` | Reads configuration from that directory, which must also hold the login, `auth.json` |
+
+```yaml
+steps:
+  - id: review
+    action: harness.run
+    with:
+      provider: claude
+      setting_sources: project,local
+      prompt: Review the change.
+
+  - id: fix
+    action: harness.run
+    env:
+      - CODEX_HOME: /srv/dagu/codex-home
+    with:
+      provider: codex
+      prompt: Fix what the review found.
+```
+
+Claude Code's `bare` flag also skips `CLAUDE.md` and hooks, but it authenticates only with `ANTHROPIC_API_KEY` or an `apiKeyHelper`, and never reads a subscription login. On a subscription, a step using it fails or moves to API billing.
 
 ## Custom Harness Definitions
 
