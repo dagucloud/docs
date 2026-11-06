@@ -143,7 +143,7 @@ Harness steps automatically receive push-back context from a [human task](/writi
 - reviewer-provided feedback inputs, such as `feedback`
 - the previous stdout log path, when the step had stdout before reset
 
-A harness step that first runs after a push-back has no earlier work to revise, so its prompt stays as written. It can still read the feedback from its environment.
+A harness step that first runs after a push-back has no earlier work to revise, so its prompt stays as written. The feedback is still in its environment, and you can hand it to the agent by referencing it in the prompt, such as `${feedback}`.
 
 Dagu passes the previous stdout as a file path only. It does not inline stdout into the prompt because harness output can be large. The path is also available as `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`; the current iteration is available as `DAG_PUSHBACK_ITERATION`.
 
@@ -188,7 +188,7 @@ For repeatable runs, run Dagu under a dedicated account whose agent configuratio
 | Provider | Setting | What it does |
 |---|---|---|
 | Claude Code | `setting_sources: project,local` under `with` | Leaves out the account's user settings |
-| Codex | `CODEX_HOME` in the step's `env` | Reads configuration from that directory, which must also hold the login, `auth.json` |
+| Codex | `CODEX_HOME` in the step's `env` | Reads configuration, and any stored login (`auth.json`), from that directory |
 
 ```yaml
 steps:

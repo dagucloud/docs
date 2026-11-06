@@ -102,7 +102,7 @@ steps:
     run: ./ticket.sh "$AREA" "$SUMMARY"
 ```
 
-Pass model output to commands through `env`, never by writing `${triage.output.summary}` into `run`. Dagu substitutes the text into the command before the shell reads it, so an apostrophe breaks the command, and text that came from a bug report can run as shell code.
+Pass model output to commands through `env`, never by writing `${triage.output.summary}` into `run`. Dagu substitutes the text into the command before the shell reads it, so an apostrophe breaks the command, and text that came from a bug report can run as shell code. In a container or another interpreter, read it differently; see [Model Output in Shell Commands](/writing-workflows/quoting-and-escaping#model-output-in-shell-commands).
 
 `output_schema` is a gate, not a loop. A malformed reply fails the step, and the retry runs the agent again with the same prompt; the agent never learns what was malformed. When that happens often, close the loop: [run a validator in the condition](./closed-loop#any-command-can-close-it) and send its message back.
 

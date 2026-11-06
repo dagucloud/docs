@@ -172,9 +172,10 @@ Dagu does not escape a value it writes into a `run` command. That is usually you
 |---|---|---|---|
 | `'${triage.output.summary}'` | Breaks the step | Runs as code | Stays text |
 | `"${triage.output.summary}"` | Stays text | Stays text | Runs as code |
+| `"Summary: ${triage.output.summary}"` | Stays text | Runs as code | Runs as code |
 | `${triage.output.summary}` | Breaks the step | Runs as code | Runs as code |
 
-Pass it through `env` instead. The value then reaches the command as data, whatever it contains:
+Pass it through `env` instead, and read it from the environment:
 
 ```yaml
 steps:
@@ -196,7 +197,18 @@ steps:
     run: ./page.sh "$SUMMARY"
 ```
 
-`dagu validate` warns when the output of a `harness.run`, `chat.completion`, or agent step is written into a shell command. It does not warn for a field that `output_schema` declares with `enum`, or as `boolean`, `integer`, or `number`, because validation limits its values.
+How to read it safely depends on what runs the command:
+
+| The command runs in | Read the value with | Because |
+|---|---|---|
+| A POSIX or Nix shell on the local host | `"$SUMMARY"` | The shell expands it after parsing the command. |
+| A container with a shell | `"$(printenv SUMMARY)"` | Dagu writes `$SUMMARY` into the command before the shell parses it, so `"$SUMMARY"` can run as code. |
+| A container without a shell | `"$SUMMARY"` | No shell parses the command, so the value reaches the program as one argument. |
+| Another interpreter, such as `shell: python3` | The language's API, such as `os.environ["SUMMARY"]` | Dagu writes `$SUMMARY` into the source before it runs. |
+
+An environment variable cannot hold a NUL byte, so a value containing one fails the step. Pass such data in a file.
+
+`dagu validate` warns when the output of a `harness.run`, `chat.completion`, or agent step is written into a shell command. It does not warn for a field that `output_schema` declares as `boolean`, `integer`, or `number`, or with an `enum`, because validation limits it to non-text values or to values you chose.
 
 ## Scripts That Need No Escaping
 

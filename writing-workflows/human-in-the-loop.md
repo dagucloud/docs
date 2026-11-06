@@ -105,7 +105,7 @@ Every step that runs again because of a push-back receives:
 - `DAG_PUSHBACK_ITERATION` and `${context.pushback.iteration}`, the current iteration
 - `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`, the path to the step's previous stdout log, when it had one
 
-AI steps also receive the feedback without any wiring. A [`chat.completion`](/step-types/llm/) step continues its previous conversation with the feedback as the next user message. A [`harness.run`](/step-types/harness/) step gets a push-back block appended to its prompt, with the previous stdout as a file path only, because harness output can be large. A step that first runs after a push-back has no earlier work to revise, so its prompt stays as written, and it reads the feedback only from its environment.
+AI steps also receive the feedback without any wiring. A [`chat.completion`](/step-types/llm/) step continues its previous conversation with the feedback as the next user message. A [`harness.run`](/step-types/harness/) step gets a push-back block appended to its prompt, with the previous stdout as a file path only, because harness output can be large. A step that first runs after a push-back has no earlier work to revise, so its prompt stays as written. The feedback is still in its environment, where a model cannot see it, so reference it in the prompt, such as `${feedback}`, if the model needs it.
 
 The feedback of one push-back, encoded as a JSON object, is limited to 16 KiB because it is passed as environment variables. A larger push-back is rejected before the run changes.
 
