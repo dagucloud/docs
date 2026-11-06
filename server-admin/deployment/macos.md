@@ -1,9 +1,5 @@
 # macOS Service
 
-::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.com/) is a separate app for running workflows on your own Mac without the command line.
-:::
-
 ## Install Dagu via Homebrew
 
 ```bash

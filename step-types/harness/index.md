@@ -10,10 +10,6 @@ To run CLI agents inside a container sandbox, see [Harness Sandboxed Execution](
 
 To run an agent until a check passes, have a second agent review its work, or let a person send the work back with feedback, see [Agent Loops](/ai/loops/).
 
-::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.com/) is a separate app for running coding agents on your own Mac or Windows PC without YAML.
-:::
-
 ## Supported Providers
 
 Dagu has built-in support for the following providers. Each adapter is pre-configured with the provider's non-interactive invocation and supplementary-input behavior:

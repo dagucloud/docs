@@ -10,10 +10,6 @@ A task that succeeded is recorded and replayed on later runs without the model, 
 
 Every model request goes through Dagu's own [LLM providers](/step-types/llm/providers), so the step uses the same `llm` configuration as `chat.completion`.
 
-::: tip Prefer a desktop app?
-[Kitewell](https://kitewell.com/) is a separate app for automating desktop applications on your own Mac or Windows PC without YAML.
-:::
-
 ## Requirements
 
 - Dagu v2.18.0 or later. Dagu v2.22.3 or later is needed for [window maximizing](#window-size), [checks on values](#checks-on-values), [handlers](#screens-that-come-up-sometimes), and `check` and `uncheck`, and on macOS for [exact checks](#exact-checks), [element replay](#replaying-by-element), and [pins](#pinned-steps). `with.visible` needs v2.24.0 or later, and [outlines](#outlines), [`with.refuse`](#buttons-a-step-never-presses), and `choose` need v2.25.0 or later.

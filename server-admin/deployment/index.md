@@ -9,7 +9,6 @@ Choose the simplest deployment that meets the workflow's execution needs.
 | Keep configuration in a Compose file | [Docker Compose](./docker-compose) |
 | Deploy into an existing Kubernetes cluster | [Kubernetes (Helm)](./kubernetes) |
 | Install a native background service | [Linux systemd](./systemd), [macOS](./macos), or [Windows](./windows) |
-| Run workflows on your own Mac or Windows PC from an app | [Kitewell](https://kitewell.com/download/), a separate desktop app with the Dagu engine bundled |
 | Isolate development, staging, and production | [Multi-Environment Deployments](./multi-environment) |
 
 For containers, review [Docker Images](./docker-images) before choosing a tag. For execution across multiple hosts, see [Distributed Execution](/server-admin/distributed/).
