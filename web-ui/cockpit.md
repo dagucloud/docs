@@ -2,7 +2,7 @@
 
 Cockpit is a kanban-style view for monitoring workflow runs across days. It provides a quick overview of what is queued, running, waiting for review, done, or failed.
 
-![Cockpit](/web-ui-cockpit-demo.png)
+![Cockpit](/cockpit.png)
 
 <video src="/cockpit-demo.mp4" poster="/cockpit-demo-poster.jpg" controls preload="none" playsinline aria-label="Cockpit demo" style="width: 100%; border-radius: 8px; margin: 16px 0 24px;"></video>
 

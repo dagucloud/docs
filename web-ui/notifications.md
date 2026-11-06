@@ -4,7 +4,7 @@ Notifications route DAG-run events to team destinations without hard-coding Micr
 
 Use notifications for ordinary message delivery: Microsoft Teams, Slack, Google Chat, email, Telegram, custom webhooks, or a local command on the Dagu server. Use [Incident Routing](/web-ui/incidents) only for systems that manage an incident lifecycle, such as PagerDuty or SolarWinds Incident Response.
 
-![Notification rules in light mode](/notification-rules-light.png)
+![Notification rules](/notification-rules-light.png)
 
 ## Mental Model
 

@@ -89,6 +89,8 @@ Unsaved drafts are kept in browser storage, and the editor reports external chan
 
 The Git Sync page displays workflows, calendars, Wiki content, and supporting files from the configured repository. Type and status filters make it easy to find scripts, templates, binaries, and other files.
 
+![Git Sync](/git-sync.png)
+
 Use the page to pull remote changes, review text or binary differences, publish selected edits, and resolve conflicts. Supporting-file diffs also show executable permissions and remote deletions when applicable. See [Git Sync](/server-admin/git-sync) for repository layout, configuration, CLI commands, and production guidance.
 
 ## Calendars
@@ -97,11 +99,13 @@ Open **Configure > Calendars** to list the business calendars that start schedul
 
 A calendar's page opens its YAML in an editor with schema completion and problems marked on their lines, beside a year view that follows each edit. It lists the DAGs and calendars that depend on the calendar, and a calendar in use cannot be deleted. See [Business Calendars](/writing-workflows/business-calendars).
 
+![Calendar page](/calendars.png)
+
 ## Activity
 
 The **Activity** tab of **Overview** gives you a broader operations view than Cockpit.
 
-![Dashboard](/dashboard.png)
+![Activity](/dashboard.png)
 
 Use it to review:
 
@@ -115,7 +119,7 @@ For a run list filtered by status, date, and name, open **Executions**.
 
 The **Workflows** page lists every workflow you can access and shows its current state.
 
-![Definitions](/dag-definitions.png)
+![Workflows](/dag-definitions.png)
 
 This is the best place to:
 
@@ -137,6 +141,8 @@ the list and excluded from scheduling until the files are renamed or removed.
 
 Open a workflow from **Workflows** to edit it and follow its runs on one page.
 
+![Workflow page](/workflow-page.png)
+
 The page has three parts:
 
 - the workflow bar at the top, with the name, labels, the selected run, its actions, and **Start**
@@ -149,6 +155,8 @@ The page shows the latest run until another run is selected. Select a run on the
 
 **Start** opens the start dialog. Set parameters, a runtime profile, and an optional run ID, then start or enqueue the run. For a [build workflow](/writing-workflows/incremental-workflows), the dialog also provides **Disable reuse for this run** when every eligible step should be recomputed. With unsaved edits, the menu next to **Start** offers **Run unsaved draft**.
 
+![Start dialog](/runtime-profile-start-dialog.png)
+
 The icons next to the run chip act on the selected run: stop, cancel auto-retry, reject, retry, reschedule, or dequeue, as its state allows. **Run details** shows the run's status, progress, timing, parameters, and reused outputs.
 
 For a queued run, **Run details** also shows its queued runtime conditions: the latest observed reason the run has not started yet. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact condition fields and reason names.
@@ -159,6 +167,8 @@ When the selected run used a different definition from the saved file, a warning
 
 Users with write access edit the workflow on the canvas.
 
+![Workflow canvas beside its YAML](/workflow-editor.png)
+
 - Press `N`, or select the **+** after a step, to add a step from the step palette.
 - Drag from one step to another to add a dependency. Right-click a step or the canvas for more actions.
 - The right column beside the canvas has two tabs, **Workflow** and **YAML**. Switch between them, or collapse the column to a rail and open a tab from it again; the page remembers the choice. On a phone they open as panels over the canvas.
@@ -167,9 +177,13 @@ Users with write access edit the workflow on the canvas.
 - The **Manual**, **Cron**, and **Webhook** launchers on the canvas show how the workflow starts. Select one to open its panel in a temporary tab of the right column. **Cron** edits the schedule and previews upcoming runs. **Webhook** holds the webhook settings.
 - **Save** shows the changes against the saved version before it writes the file. **Undo**, **Redo**, and **Revert to the last save** act on unsaved edits.
 
+![Step palette](/workflow-palette.png)
+
 ### Steps
 
 Click a step to show it in a temporary tab of the right column, so the canvas does not move. The tab shows the step in the selected run: its status, **Retry step** and **Change status** when they apply, a **Details** tab with its run facts and definition, and tabs such as **Log**, **Output**, and **History**. `Esc`, a click on empty canvas, or the **Workflow** or **YAML** tab closes it. On a phone the step opens in a panel over the canvas.
+
+![A failed step in the right column](/workflow-step.png)
 
 Double-click a step, or press `Enter` on it, to open the node view. It shows the data from upstream steps, the step's form or YAML, and its result in the selected run.
 
@@ -197,13 +211,21 @@ Select **Activity** at the bottom of the page to open the run panel. It shows a 
 
 **Log**, **History**, **Outputs**, and **Definition** are always present once the workflow has run. The other tabs appear only when the run has something to show in them. The run timeline can show a number of recent runs or a time range, and can filter runs by trigger.
 
+![Artifacts tab](/artifacts-tab-light.png)
+
 On the **History** tab, select a cell to show that run and step, or select a step name for that step's history: its success rate, usual duration, and recent results with links to their logs.
 
+![History tab](/workflow-history.png)
+
 When a run waits for an approval or a human task, the canvas shows a notice with **Open actions**, and the **Actions** tab shows how many items wait. Complete each generated form there, or select **Request changes** to push the work back when the task declares `with.push_back`. While the run is queued or running, open tasks stay visible but read-only, and typed input is kept. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
+
+![Actions tab](/workflow-actions.png)
 
 ### Logs
 
 The **Log** tab opens a failed step on its stderr. The run's scheduler log offers a download of the full log or of every step log as a ZIP file. `Cmd`/`Ctrl`+click **View stdout** or **View stderr** in a step's run facts to open that log on a page of its own in a new tab.
+
+![Log tab of a failed step](/workflow-logs.png)
 
 ### Keyboard Shortcuts
 
@@ -220,6 +242,24 @@ The **Log** tab opens a failed step on its stderr. The run's scheduler log offer
 | `Ctrl/Cmd+S` | Save |
 | `Ctrl/Cmd+K` | Open the command palette, including **Go to step** |
 | `Shift+?` | Show every canvas shortcut |
+
+## Executions
+
+The **Executions** page lists runs across every workflow. Filter them by workflow name, run ID, status, labels, and date.
+
+![Executions](/executions.png)
+
+## Queues
+
+The **Queues** page shows each queue's capacity, with how many runs are running and queued in it. See [Queues](/server-admin/queues).
+
+![Queues](/queues.png)
+
+## Artifacts
+
+The **Artifacts** page lists the files that runs produced. Filter them by workflow name, file name, and date. See [Artifacts](/writing-workflows/artifacts).
+
+![Artifacts](/artifacts.png)
 
 ## Notifications
 
@@ -278,6 +318,8 @@ Use profiles when the same DAG should run against different environments, such a
 
 The **Executions** list and the run facts on the workflow page show the selected profile name when a profile was used. Retries inherit the original run's profile.
 
+![Profiles tab](/runtime-profiles-management.png)
+
 See [Profiles](/web-ui/profiles) for the Web UI workflow and [Runtime Profiles](/writing-workflows/runtime-profiles) for CLI, API, permission, and retry behavior.
 
 ### Secret Refs
@@ -290,6 +332,8 @@ Use it to:
 - rotate the value without editing DAG YAML
 - disable or enable a secret for future runs
 - keep the plaintext value out of API responses and workflow files
+
+![Secret refs tab](/secret-refs.png)
 
 DAGs reference Web UI-managed secrets with `ref`:
 
@@ -307,7 +351,7 @@ See [DAG Secret Refs](/web-ui/secrets) for the Web UI workflow and [Workflow Sec
 
 System Status shows the health of the scheduler, coordinator, and the current machine.
 
-![Workers](/workers.png)
+![System Status](/workers.png)
 
 This page helps you verify:
 
