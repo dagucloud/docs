@@ -197,14 +197,14 @@ steps:
     run: ./page.sh "$SUMMARY"
 ```
 
-How to read it safely depends on what runs the command:
+This example needs a POSIX or Nix shell on the local host. How to read the value safely depends on what runs the command:
 
 | The command runs in | Read the value with | Because |
 |---|---|---|
 | A POSIX or Nix shell on the local host | `"$SUMMARY"` | The shell expands it after parsing the command. |
 | A container with a shell | `"$(printenv SUMMARY)"` | Dagu writes `$SUMMARY` into the command before the shell parses it, so `"$SUMMARY"` can run as code. |
 | A container without a shell | `"$SUMMARY"` | No shell parses the command, so the value reaches the program as one argument. |
-| Another interpreter, such as `shell: python3` | The language's API, such as `os.environ["SUMMARY"]` | Dagu writes `$SUMMARY` into the source before it runs. |
+| Another shell or interpreter, such as `fish` or `shell: python3` | The language's API, such as `os.environ["SUMMARY"]` | Dagu writes `$SUMMARY` into the source before it runs. |
 
 An environment variable cannot hold a NUL byte, so a value containing one fails the step. Pass such data in a file.
 
