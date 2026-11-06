@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { issueLinksPlugin } from "./theme/plugins/issueLinks.js";
+import { themedImagesPlugin } from "./theme/plugins/themedImages.js";
 
 const siteUrl = "https://docs.dagu.sh";
 const socialImage = `${siteUrl}/og-a736f269.png`;
@@ -865,6 +866,7 @@ export default withMermaid(
       config: (md) => {
         // Add issue links plugin
         md.use(issueLinksPlugin);
+        md.use(themedImagesPlugin);
 
         // Add custom link renderer to open external links in new tab
         const defaultLinkRender =

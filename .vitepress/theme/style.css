@@ -1061,6 +1061,25 @@ h1.title {
 }
 
 /* Theme-aware logo switching */
+.themed-shot {
+  display: block;
+  margin-block: 16px;
+}
+
+.themed-shot img {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+}
+
+.themed-shot--dark,
+.dark .themed-shot--light {
+  display: none;
+}
+
+.dark .themed-shot--dark {
+  display: block;
+}
+
 .logo-light {
   display: block;
 }
