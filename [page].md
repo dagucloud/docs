@@ -18,17 +18,20 @@ Define workflows in declarative YAML over your existing commands and tools. One 
 
 ## Simple declarative orchestration
 
-Your commands stay the same. One declarative YAML file adds the operational layer around them: schedule, retries, parallel runs, human tasks, monitoring, and run history:
+Your commands stay the same. One declarative YAML file adds the operational layer around them: schedule, retries, parallel runs, human tasks, and run history. [Monitoring](/overview/console-monitoring) works at the server level: the server reports its health and the status of every run to Dagu Console, which emails when a workflow fails or the server stops reporting.
 
 ```mermaid
-flowchart LR
-    C["Your command<br/>script · container · SSH"] --> W["One declarative YAML file"]
-    W --> S["Schedule"]
-    W --> R["Retries"]
-    W --> P["Parallel runs"]
-    W --> H["Human tasks"]
-    W --> L["Logs + Web UI"]
-    W --> M["Monitoring"]
+flowchart TB
+    subgraph D["Dagu server"]
+        direction LR
+        C["Your command<br/>script · container · SSH"] --> W["One declarative YAML file"]
+        W --> S["Schedule"]
+        W --> R["Retries"]
+        W --> P["Parallel runs"]
+        W --> H["Human tasks"]
+        W --> L["Logs + Web UI"]
+    end
+    D -->|"health · run status"| M["Monitoring"]
 
     style C stroke:lightblue,stroke-width:1.6px,color:#333
     style W stroke:orange,stroke-width:1.6px,color:#333
@@ -37,7 +40,7 @@ flowchart LR
     style P stroke:lime,stroke-width:1.6px,color:#333
     style H stroke:lime,stroke-width:1.6px,color:#333
     style L stroke:lime,stroke-width:1.6px,color:#333
-    style M stroke:lime,stroke-width:1.6px,color:#333
+    style M stroke:violet,stroke-width:1.6px,color:#333
 ```
 
 <div class="overview-card-grid overview-strengths-grid">
