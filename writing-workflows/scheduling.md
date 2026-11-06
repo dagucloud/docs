@@ -312,6 +312,8 @@ schedule:
 restart_wait_sec: 60  # Wait 60s before restart
 ```
 
+To keep a DAG running without a schedule, starting a new run whenever one ends, use `restart_policy`. See [Services](/writing-workflows/services).
+
 ## Skip Redundant Runs
 
 Skip a scheduled run when the DAG already succeeded since the previous scheduled time, for example after a manual run:
@@ -464,6 +466,7 @@ A pause has the same effect as suspending every DAG by hand:
 | Schedule | No runs are created |
 | Catchup | No runs are replayed |
 | Auto-retry | No retries are enqueued |
+| [Service](/writing-workflows/services) | No new runs are queued; an active run keeps going |
 | [Watched folder](/writing-workflows/watched-folders) | No runs start; arrived files wait and run after the resume |
 | Manual, webhook, sub-DAG | Unaffected |
 

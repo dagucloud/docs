@@ -284,7 +284,7 @@ Use `dagu_execute` for run control and for deciding steps that wait for a person
 | `dagRunId` | Run ID override for start/enqueue, or target run for the other actions |
 | `params` | Runtime parameters as a JSON object or JSON-encoded string |
 | `queue` | Queue override for `enqueue` |
-| `singleton` | Prevent duplicate running or queued runs for `start` and `enqueue` |
+| `singleton` | Prevent duplicate running or queued runs for `start` and `enqueue`. A DAG with a `restart_policy` has [one run at a time](/writing-workflows/services#one-run-at-a-time) without it, and `retry` is refused the same way |
 | `noReuse` | Run eligible build steps instead of reusing prior materializations for `start` and `enqueue` |
 | `labels` | Labels as `key=value` or key-only strings for `start` and `enqueue` |
 | `stepName` | Optional step name for retry; required for `approve`, `reject`, and `push_back` as the waiting step to decide |

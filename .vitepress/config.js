@@ -305,6 +305,7 @@ const fullSidebar = [
         items: [
           { text: "Control Flow", link: "/writing-workflows/control-flow" },
           { text: "Scheduling", link: "/writing-workflows/scheduling" },
+          { text: "Services", link: "/writing-workflows/services" },
           { text: "Business Calendars", link: "/writing-workflows/business-calendars" },
           { text: "Watched Folders", link: "/writing-workflows/watched-folders" },
           { text: "Execution Control", link: "/writing-workflows/execution-control" },

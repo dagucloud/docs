@@ -378,6 +378,8 @@ max_output_size: 1048576
 
 `hist_retention_days` defaults to `30`. Setting it to `0` also uses the default `30`-day retention. Negative values disable automatic cleanup.
 
+`restart_policy` cannot be set in a base configuration, since it would turn every DAG into a service. A DAG that sets it in its own file inherits `restart_wait_sec` and `hist_retention_runs`, and ignores an inherited `schedule`, DAG-level `retry_policy`, and `hist_retention_days`. See [Services](/writing-workflows/services).
+
 ### Custom Actions
 
 Define reusable actions in `base.yaml` when you want every DAG to share the same abstraction:

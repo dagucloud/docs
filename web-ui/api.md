@@ -685,6 +685,8 @@ An `outputs` entry must name a skipped step. The name must be declared by the st
 }
 ```
 
+A DAG that sets `restart_policy` has one run at a time. While a run is active, this request returns `409` with the code `conflict`, whether or not `singleton` is set. So do the synchronous start, enqueue, runs from an inline spec, retry, reschedule, edited retry, and webhook triggers. See [Services](/writing-workflows/services#one-run-at-a-time).
+
 #### Ephemeral runs
 
 With `ephemeral: true`, the selected steps run in a run that leaves no trace. `ephemeral: true` without `steps` returns `400`.

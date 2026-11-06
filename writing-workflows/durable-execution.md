@@ -10,6 +10,8 @@ Dagu has three automatic retry surfaces:
 
 Manual retry through `dagu retry`, the Web UI, or the API is separate from the automatic behavior described here.
 
+To start a new run after every run, whatever its status and without a limit, use [`restart_policy`](/writing-workflows/services). It cannot be combined with a DAG-level `retry_policy`.
+
 ## Step `retry_policy`
 
 Step retries run inside the current DAG attempt. They rerun the same step. They do not create a new DAG-run ID and they do not create a new DAG attempt.

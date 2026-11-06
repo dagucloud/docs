@@ -121,7 +121,7 @@ Queues must be enabled in `config.yaml`, otherwise the command returns an error.
 | `--queue` | `-u` | Override the DAG's `queue` field. |
 | `--labels` | | Comma-separated labels (`key=value` or key-only). |
 | `--default-working-dir` | | Default working directory for the DAG. |
-| `--trigger-type` | | How the run was initiated: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`. Default: `manual`. |
+| `--trigger-type` | | How the run was initiated: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`, `restart`. Default: `manual`. |
 
 ```bash
 # Enqueue with default settings

@@ -408,7 +408,7 @@ container:
 - `volumes` must use `source:target[:ro|rw]` format. Source-side `$VAR` and `${VAR}` values are expanded from the Dagu process environment; relative bind paths are resolved from the DAG `working_dir`; invalid formats fail.
 - `ports` accept `"80"`, `"8080:80"`, `"127.0.0.1:8080:80"`; container port may have `/tcp|udp|sctp` (default tcp); invalid formats fail.
 - `network` accepts `bridge`, `host`, `none`, `container:<name|id>`, or a custom network name.
-- `restart_policy` supports `no`, `always`, or `unless-stopped`; other values fail.
+- `restart_policy` supports `no`, `always`, or `unless-stopped`; other values fail. It is the Docker restart policy of the container. To keep a whole DAG running, see [Services](/writing-workflows/services).
 - `startup` must be one of `keepalive` (default), `entrypoint`, `command`; invalid values fail.
 - `wait_for` must be `running` (default) or `healthy`; if `healthy` is chosen but no healthcheck exists, Dagu falls back to `running` with a warning.
 - `log_pattern` must be a valid regex; readiness waits up to 120s (including `log_pattern`), then errors with the last known state.

@@ -203,6 +203,22 @@ flowchart LR
 
 <div class="example-card">
 
+### Keep a Worker Running
+
+```yaml
+restart_policy: always
+restart_wait_sec: 5
+hist_retention_runs: 100
+steps:
+  - run: python3 worker.py
+```
+
+<a href="/writing-workflows/services" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Global Queue Configuration
 
 ```yaml

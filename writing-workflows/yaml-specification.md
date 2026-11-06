@@ -174,7 +174,8 @@ steps:
 | `schedule` | string, array, or object | Cron expression or [schedule alias](/writing-workflows/scheduling#schedule-aliases), multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
 | `calendar` | string | [Business calendar](/writing-workflows/business-calendars) of every start schedule entry that names none: a calendar file name, the built-in `weekdays`, or `none`. | - |
 | `skip_if_successful` | boolean | Skip a scheduled run if the DAG already succeeded since the previous scheduled time. | `false` |
-| `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. | `0` |
+| `restart_policy` | string | Keeps a run of the DAG alive: `no`, `always`, or `unless-stopped`. Cannot be combined with `schedule` or a DAG-level `retry_policy`, or set in a base configuration. See [Services](/writing-workflows/services). | `no` |
+| `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. With `restart_policy`, the wait between the end of a run and the next one, which must be at least `1`. | `0` |
 | `catchup_window` | string | Duration for replaying missed cron runs after scheduler downtime. If omitted, missed runs are not replayed. | - |
 | `overlap_policy` | string | Catchup overlap behavior: `skip`, `all`, or `latest`. | `skip` |
 | `watch` | object | [Watched folder](/writing-workflows/watched-folders): `path` (required), `pattern`, and `interval`. Starts one run for each file that arrives, with `WATCH_FILE` and `WATCH_NAME`. | - |
@@ -285,7 +286,7 @@ retry_policy:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `hist_retention_days` | integer | Days of DAG-run history to retain. Must be `0` or greater. `0` uses the default when `hist_retention_runs` is not set. | `30` |
+| `hist_retention_days` | integer | Days of DAG-run history to retain. Must be `0` or greater. `0` uses the default when `hist_retention_runs` is not set. A DAG with a `restart_policy` keeps its latest 100 runs by default instead; see [Services](/writing-workflows/services#history). | `30` |
 | `hist_retention_runs` | integer | Number of DAG runs to retain. Must be greater than `0` if set. Cannot be set with `hist_retention_days`. | - |
 | `max_output_size` | integer | Maximum captured output size per step, in bytes. | `1048576` |
 

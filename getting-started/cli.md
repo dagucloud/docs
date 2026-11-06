@@ -106,6 +106,8 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 
 `dagu start` requires exactly one DAG name or file path.
 
+A DAG with `restart_policy: always` or `unless-stopped` has one run at a time, so `dagu start` fails while a run of it is active. See [Services](/writing-workflows/services#one-run-at-a-time).
+
 **Options:**
 - `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
@@ -184,6 +186,8 @@ dagu stop --run-id=20240101_120000 etl   # Stop specific run
 
 Restart a DAG run with a new ID.
 
+A DAG with `restart_policy: always` or `unless-stopped` is refused, because the scheduler starts its runs. Stop the active run instead. See [Services](/writing-workflows/services#stopping-a-service).
+
 ```bash
 dagu restart [options] DAG_NAME
 ```
@@ -199,6 +203,8 @@ dagu restart --run-id=20240101_120000 etl  # Restart a specific running DAG-run
 ### `retry`
 
 Retry a previous DAG run using the same run ID.
+
+For a DAG with `restart_policy: always` or `unless-stopped`, this fails while another run of it is active. See [Services](/writing-workflows/services#one-run-at-a-time).
 
 ```bash
 dagu retry [options] DAG_NAME_OR_FILE
@@ -1132,6 +1138,8 @@ Prints `Removed xlsx replay cache for step "fields" of DAG "quotes"` for each st
 ### `enqueue`
 
 Add a DAG to the execution queue.
+
+For a DAG with `restart_policy: always` or `unless-stopped`, this fails while a run of it is active. See [Services](/writing-workflows/services#one-run-at-a-time).
 
 ```bash
 dagu enqueue [options] DAG_NAME_OR_FILE [-- PARAMS...]
