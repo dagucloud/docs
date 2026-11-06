@@ -23,7 +23,7 @@ The four terms answer two different questions about a loop.
 - **Open loop.** The agent runs and its result is used as it is. Nothing the result reveals reaches the agent again. A nightly digest, a draft that a person edits, and a triage report are open loops.
 - **Closed loop.** A check measures each result, and a failure goes back to the agent, with what the check found, for another attempt. The loop ends when the check passes or a limit is reached.
 
-Repetition is not feedback. An agent that runs every night, or reruns after a crash, is still in an open loop if nothing looks at what it produced and tells it.
+Repetition is not feedback. An agent that runs every night, or reruns after a crash, is still in an open loop if nothing looks at what it produced and tells it. [Closed Loops](./closed-loop) covers what a closed loop needs, and the loops that only look closed.
 
 **Where does the loop sit, and what closes it?**
 
@@ -38,6 +38,7 @@ The two questions are independent, but useful workflows tend to land in the same
 |---|---|---|---|---|
 | Agent loop | The agent's own judgment | The agent CLI inside `harness.run` | Seconds | [Harness](/step-types/harness/) |
 | Open loop | Nothing reaches the agent | `harness.run`, artifacts, an optional gate | One run | [Open Loops](./open-loop) |
+| Closed loop | A check outside the agent | A signal, a route back, and a limit | Minutes to days | [Closed Loops](./closed-loop) |
 | Inner loop | A command | `repeat_policy` on `harness.run` or `dag.run` | Minutes | [Inner Loops](./inner-loop) |
 | Outer loop | A person | `human.task` with `push_back` | Hours | [Outer Loops](./outer-loop) |
 | Background loop | The loops inside it; a schedule or an event starts it | `schedule`, webhooks, `watch`, `parallel` | Days | [Background Loops](./background-loop) |
@@ -93,6 +94,7 @@ These rules follow from published results on self-correction, verifier-driven co
 ## In This Section
 
 - [Open Loops](./open-loop): run an agent once, keep its result reviewable, and gate what ships.
+- [Closed Loops](./closed-loop): send what a check found back to the agent, with a command, a reviewer agent, or a person, and spot the loops that only look closed.
 - [Inner Loops](./inner-loop): run an agent until a command passes, with the failure fed back each time.
 - [Outer Loops](./outer-loop): let a person send work back with feedback, review plans, and take over when the agent runs out of attempts.
 - [Background Loops](./background-loop): run loops on a schedule or an event, fan them out over many items, and review the results later.

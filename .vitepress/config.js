@@ -570,6 +570,7 @@ const fullSidebar = [
         items: [
           { text: "Overview", link: "/ai/loops/" },
           { text: "Open Loops", link: "/ai/loops/open-loop" },
+          { text: "Closed Loops", link: "/ai/loops/closed-loop" },
           { text: "Inner Loops", link: "/ai/loops/inner-loop" },
           { text: "Outer Loops", link: "/ai/loops/outer-loop" },
           { text: "Background Loops", link: "/ai/loops/background-loop" },

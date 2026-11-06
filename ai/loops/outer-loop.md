@@ -5,7 +5,7 @@ description: Let a person close the loop around a coding agent. Push work back w
 
 # Outer Loops
 
-An outer loop is closed by a person. Work that passed the inner loop's checks reaches a [human task](/writing-workflows/human-tasks). The person completes it, or pushes it back with feedback. A push-back reruns the coding agent and every step after it, with the feedback added to the agent's prompt, and the task opens again with the new result.
+An outer loop is [closed](./closed-loop) by a person. Work that passed the inner loop's checks reaches a [human task](/writing-workflows/human-tasks). The person completes it, or pushes it back with feedback. A push-back reruns the coding agent and every step after it, with the feedback added to the agent's prompt, and the task opens again with the new result.
 
 <picture>
   <source media="(max-width: 640px)" srcset="/loops/loops-outer-portrait.svg" width="480" height="640">

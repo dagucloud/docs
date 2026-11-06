@@ -5,7 +5,7 @@ description: Run agent loops that nobody starts by hand. Work through a backlog 
 
 # Background Loops
 
-Some loops run without anyone starting them: a nightly pass over a backlog, a run for every new issue, a sweep over forty files that need the same migration. A schedule or an event starts the run, [inner loops](./inner-loop) do the work, and a person reviews the results when it suits them, such as the next morning. What ships changes what the next run finds, which closes the loop at the slowest timescale.
+Some loops run without anyone starting them: a nightly pass over a backlog, a run for every new issue, a sweep over forty files that need the same migration. A schedule or an event starts the run, [inner loops](./inner-loop) do the work, and a person reviews the results when it suits them, such as the next morning. What ships changes what the next run finds, which [closes the loop](./closed-loop) at the slowest timescale.
 
 <picture>
   <source media="(max-width: 640px)" srcset="/loops/loops-background-portrait.svg" width="480" height="560">

@@ -97,7 +97,7 @@ steps:
     run: ./ticket.sh '${triage.output.area}' '${triage.output.summary}'
 ```
 
-`output_schema` is a gate, not a loop. A malformed reply fails the step, and the retry runs the agent again with the same prompt; the agent never learns what was malformed. When that happens often, close the loop: [Inner Loops](./inner-loop) shows how to send the failure back.
+`output_schema` is a gate, not a loop. A malformed reply fails the step, and the retry runs the agent again with the same prompt; the agent never learns what was malformed. When that happens often, close the loop: [run a validator in the condition](./closed-loop#any-command-can-close-it) and send its message back.
 
 ## Gate What Ships
 
@@ -144,7 +144,7 @@ Two fields rerun an agent without telling it anything:
 | `retry_policy` | The attempt fails: the CLI exits non-zero, or its output fails `output_schema` | Nothing |
 | `with.fallback` | The provider fails, for example on a rate limit or an outage | Nothing; the next provider gets the same prompt |
 
-Both keep an open loop running through transient failures. Neither makes the result better. A loop is closed only when what a check found reaches the next attempt.
+Both keep an open loop running through transient failures. Neither makes the result better. A loop is [closed](./closed-loop) only when what a check found reaches the next attempt.
 
 ## When to Close the Loop
 
@@ -154,4 +154,4 @@ Close an open loop when:
 - A command could tell a good result from a bad one: tests, a type checker, a linter, a schema, a benchmark.
 - The result feeds something that runs without a person, such as a deploy or a merge.
 
-The next step is an [inner loop](./inner-loop) when a command can decide, and an [outer loop](./outer-loop) when it takes a person.
+[Closed Loops](./closed-loop) shows what changes. The next step is an [inner loop](./inner-loop) when a command can decide, and an [outer loop](./outer-loop) when it takes a person.

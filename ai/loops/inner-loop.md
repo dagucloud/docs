@@ -5,7 +5,7 @@ description: Run a coding agent until a command passes. Feed each failure back t
 
 # Inner Loops
 
-An inner loop runs a coding agent until a command says the work is right. The agent makes an attempt, a check such as the test suite runs, and a failure goes back to the agent with the check's output. The loop is closed by a machine, so it can run while nobody watches, and it ends on evidence instead of on the agent's claim that it has finished.
+An inner loop runs a coding agent until a command says the work is right. The agent makes an attempt, a check such as the test suite runs, and a failure goes back to the agent with the check's output. The loop is [closed](./closed-loop) by a machine, so it can run while nobody watches, and it ends on evidence instead of on the agent's claim that it has finished.
 
 <picture>
   <source media="(max-width: 640px)" srcset="/loops/loops-inner-portrait.svg" width="480" height="470">
@@ -47,7 +47,7 @@ steps:
 What happens:
 
 1. Claude Code makes an attempt. `permission_mode`, `allowed_tools`, and `add_dir` are Claude Code flags: it may edit files, run `make test` itself, and read the run's artifact directory, which is outside the repository. Nothing else is allowed, because nobody is there to answer a permission prompt.
-2. After the attempt, Dagu runs the condition. A condition without `expected` is a command, and exit code `0` means met. `repeat: until` stops at the first met check.
+2. After the attempt, Dagu runs the condition. A condition without `expected` is a command, and exit code `0` means met. `repeat: until` stops at the first met check. Redirect the check's output instead of piping it: a pipeline exits with the status of its last command, so `make test | tee test.log` always passes.
 3. A failing check leaves its output in `test.log` in the run's artifact directory. The next attempt starts with `${context.step.repeat_index}` one higher and reads that file, so it knows what failed instead of guessing.
 4. `limit: 5` allows at most five attempts. `timeout_sec` bounds each attempt.
 5. `tests_pass` runs the check once more after the loop.
