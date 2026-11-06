@@ -63,6 +63,8 @@ An attempt where the agent CLI itself exits non-zero does not end the loop eithe
 
 `test.log` lives in the artifact directory, not in the repository, so the agent cannot commit it and a reviewer can open it from the run's **Artifacts** tab.
 
+The condition runs outside the agent's sandbox, so a sandbox cannot change the verdict. It can stop the agent from running the check itself, though. Codex's `workspace-write` sandbox blocks writes outside the working directory and the temp directories, so `go test` fails with `operation not permitted` on Go's build cache. Point the cache at a temp directory with `env` on the step, such as `GOCACHE: /tmp/go-cache`.
+
 ## What Each Attempt Sees
 
 Each repeat starts a new agent process. Nothing carries over in the agent's memory, so each attempt starts with a fresh context window, which is the core of the [Ralph](https://ghuntley.com/ralph/) technique. What carries over is on disk:
@@ -70,6 +72,7 @@ Each repeat starts a new agent process. Nothing carries over in the agent's memo
 - **The working tree.** The previous attempt's edits are still there. The next attempt continues from them.
 - **The feedback file.** Whatever the condition wrote, such as `test.log`.
 - **The prompt, resolved again.** Dagu resolves `with`, `stdin`, and step `env` again for every repeat, so `${context.step.repeat_index}` counts up. The condition sees the index of the attempt that just finished.
+- **The account's agent config.** Agent CLIs load user-level instructions and hooks, such as a global `CLAUDE.md`, so a personal rule like "keep diffs minimal" steers the workflow's agents too. Run workflows under a dedicated account when that matters.
 
 For work that spans many attempts, ask the agent to keep notes:
 
@@ -82,6 +85,21 @@ For work that spans many attempts, ask the agent to keep notes:
 ```
 
 Short notes in a file are cheaper and more reliable than a long session that has to remember everything.
+
+## Say That the Check Decides
+
+Sending the failure back is not enough. The prompt also has to say what to do with it. Given "Implement the change described in TASK.md" and a test failure that TASK.md does not mention, an agent can read the failure, decide it is out of scope, and leave it, attempt after attempt, until the limit runs out.
+
+State the goal as the check, and tell the agent to act on what it reports:
+
+```text
+Implement the change described in TASK.md. The work is done only when
+`make test` passes. If /…/test.log exists, it holds the output of the last
+failed `make test`. Read it first and fix what it reports, even if TASK.md
+does not mention it.
+```
+
+If a failure can be out of scope for a good reason, give the agent a way to say so: [hand the work to a person](./outer-loop#hand-over-when-the-agent-gives-up).
 
 ## Keep the Check Honest
 
@@ -169,7 +187,9 @@ steps:
       sandbox: workspace-write
       prompt: |
         Implement the change described in TASK.md. This is round ${params.round}.
-        If ${params.state}/check.log exists, it holds the last failure.
+        The work is done only when `make lint test` passes.
+        If ${params.state}/check.log exists, it holds the last failure. Read it
+        first and fix what it reports, even if TASK.md does not mention it.
 
   - id: check
     depends: [implement]
@@ -229,11 +249,14 @@ steps:
       sandbox: workspace-write
       prompt: |
         Implement TASK.md. This is round ${params.round}.
+        The work is done only when `make test` passes.
+        If ${params.state}/test.log exists, it holds the last failed `make test`.
+        Fix what it reports, even if TASK.md does not mention it.
         If ${params.state}/review.json exists, fix every issue it lists.
 
   - id: test
     depends: [implement]
-    run: make test
+    run: make test > "${params.state}/test.log" 2>&1 && rm "${params.state}/test.log"
 
   - id: review
     depends: [test]
@@ -242,10 +265,15 @@ steps:
       provider: claude
       model: opus
       disallowed_tools: "Edit Write"
+      add_dir: ${params.state}
       prompt: |
-        Review the uncommitted changes against TASK.md. The tests pass.
+        Review the uncommitted changes against TASK.md. The tests pass, and
+        any change that `make test` requires is in scope.
+        If ${params.state}/review.json exists, it holds your last review.
+        Do not reverse it.
         List only issues that must be fixed before merge.
-        Return only one JSON object: {"approved": true|false, "issues": ["..."]}
+        Return only one JSON object, with no Markdown fences:
+        {"approved": true|false, "issues": ["..."]}
     stdout: ${params.state}/review-${params.round}.json
     output_schema:
       type: object
@@ -262,10 +290,13 @@ steps:
 ```
 
 - **Tests run before the review.** A command is cheaper and more reliable than a reviewer, so the reviewer only sees work that already passes.
+- **A failed test goes back too.** `test` leaves its output in `test.log` and removes the file on success, so the next round sees only a failure that still stands. Without it, a failing test ends the round and the next attempt has nothing to read.
 - **The reviewer uses a different provider.** Models favour output from their own model. Codex writes and Claude Code reviews here; any two of the [supported providers](/step-types/harness/#supported-providers) work.
 - **The reviewer cannot edit.** `disallowed_tools: "Edit Write"` is a Claude Code flag that keeps it a reviewer.
 - **The verdict is validated.** `output_schema` rejects anything but the declared JSON, so `verdict` reads a real boolean.
 - **Only blocking issues count.** A reviewer asked for every possible improvement never approves. Ask for what must change before merge.
+- **The reviewer sees its last verdict.** Each round starts a new reviewer with no memory, and one can order back what the last one asked for. `add_dir` lets it read `review.json`, which is outside the repository.
+- **The reviewer knows what the tests require.** Told only to compare against TASK.md, a reviewer can order the removal of a change the tests need. The implementer complies, the tests fail, and the two undo each other until the limit runs out.
 - **Every review is kept.** Each round writes `review-<round>.json` to the parent's artifact directory, and `review.json` is the latest, which the next round reads.
 
 A reviewer agent is still a model judging work, and it can be wrong. Keep tests first, and keep a person on the outer loop for anything that ships: [Outer Loops](./outer-loop).

@@ -20,12 +20,11 @@ The person's attention is the scarcest thing in the loop. The workflow should sp
 working_dir: /srv/repos/app
 
 steps:
-  - id: base
-    run: git rev-parse HEAD
-    output: BASE
+  - id: branch
+    run: git switch -c agent/task-${context.run.id} main
 
   - id: implement
-    depends: [base]
+    depends: [branch]
     action: harness.run
     with:
       provider: claude
@@ -34,9 +33,10 @@ steps:
       allowed_tools: "Bash(make test)"
       add_dir: ${context.paths.artifacts_dir}
       prompt: |
-        Implement the change described in TASK.md.
-        If ${context.paths.artifacts_dir}/test.log exists, it holds the
-        output of the last failed `make test`. Read it first.
+        Implement the change described in TASK.md. The work is done only when
+        `make test` passes. If ${context.paths.artifacts_dir}/test.log exists,
+        it holds the output of the last failed `make test`. Read it first and
+        fix what it reports, even if TASK.md does not mention it.
     repeat_policy:
       repeat: until
       condition: make test > "${context.paths.artifacts_dir}/test.log" 2>&1
@@ -46,7 +46,8 @@ steps:
     depends: [implement]
     run: |
       make test
-      git diff ${BASE} > "${DAG_RUN_ARTIFACTS_DIR}/change.diff"
+      git add -A
+      git diff --cached main > "${DAG_RUN_ARTIFACTS_DIR}/change.diff"
 
   - id: review
     depends: [evidence]
@@ -70,10 +71,14 @@ steps:
 
   - id: open_pr
     depends: [review]
-    run: git push -u origin HEAD && gh pr create --fill
+    run: |
+      git add -A
+      git diff --cached --quiet || git commit -m "Implement TASK.md"
+      git push -u origin HEAD
+      gh pr create --fill
 ```
 
-`implement` is the [inner loop](./inner-loop): it repeats until `make test` passes. `evidence` fails the run if the inner loop ran out of attempts, and otherwise saves the diff. The run then waits at `review` without holding a process, for minutes or for days.
+`branch` gives the work its own branch. `implement` is the [inner loop](./inner-loop): it repeats until `make test` passes. `evidence` fails the run if the inner loop ran out of attempts, and otherwise saves the diff, with new files included. The run then waits at `review` without holding a process, for minutes or for days. `open_pr` commits only after the person accepts, so a push-back never has to undo a commit.
 
 The reviewer opens the run from **Cockpit**, reads `change.diff` and `test.log` on the **Actions** tab, and chooses:
 
@@ -87,9 +92,10 @@ The reviewer opens the run from **Cockpit**, reads `change.diff` and `test.log` 
 3. Every attempt of that inner loop gets the feedback appended to its prompt:
 
    ```text
-   Implement the change described in TASK.md.
-   If /…/test.log exists, it holds the
-   output of the last failed `make test`. Read it first.
+   Implement the change described in TASK.md. The work is done only when
+   `make test` passes. If /…/test.log exists,
+   it holds the output of the last failed `make test`. Read it first and
+   fix what it reports, even if TASK.md does not mention it.
 
    ## Push-back Context
 
@@ -141,32 +147,42 @@ steps:
             feedback:
               type: string
 
-  - id: implement
+  - id: branch
     depends: [approve_plan]
+    run: git switch -c agent/task-${context.run.id} main
+
+  - id: implement
+    depends: [branch]
     action: harness.run
     with:
       provider: codex
       sandbox: workspace-write
       prompt: |
         Implement the approved plan in ${context.paths.artifacts_dir}/plan.md.
-        If ${context.paths.artifacts_dir}/test.log exists, it holds the
-        output of the last failed `make test`. Read it first.
+        The work is done only when `make test` passes.
+        If ${context.paths.artifacts_dir}/test.log exists, it holds the output
+        of the last failed `make test`. Read it first and fix what it reports,
+        even if the plan does not mention it.
     repeat_policy:
       repeat: until
       condition: make test > "${context.paths.artifacts_dir}/test.log" 2>&1
       limit: 5
 
-  - id: tests_pass
+  - id: evidence
     depends: [implement]
-    run: make test
+    run: |
+      make test
+      git add -A
+      git diff --cached main > "${DAG_RUN_ARTIFACTS_DIR}/change.diff"
 
   - id: review
-    depends: [tests_pass]
+    depends: [evidence]
     action: human.task
     with:
       prompt: Review the implementation of the approved plan.
       artifacts:
         - plan.md
+        - change.diff
         - test.log
       push_back:
         rewind_to: implement
@@ -179,13 +195,19 @@ steps:
 
   - id: open_pr
     depends: [review]
-    run: git push -u origin HEAD && gh pr create --fill
+    run: |
+      git add -A
+      git diff --cached --quiet || git commit -m "Implement TASK.md"
+      git push -u origin HEAD
+      gh pr create --fill
 ```
 
 The run has two outer loops, each with its own rewind target:
 
 - At `approve_plan`, a push-back reruns only the planner. A rerun replaces `plan.md` with the new plan.
-- At `review`, a push-back reruns `implement` and `tests_pass`, and leaves the approved plan alone.
+- At `review`, a push-back reruns `implement` and `evidence`, and leaves the approved plan alone.
+
+Feedback reaches further than its rewind target. Dagu appends a push-back's feedback to the prompt of every `harness.run` step that runs after it, so feedback on the plan also goes to each attempt of `implement`. Word it so that it makes sense there too: "use the existing retry helper" helps both agents, while "add a Risks section" sends the implementer looking for a section to add.
 
 The planner and the implementer are different agents. Claude Code plans without edit tools, and Codex implements inside its `workspace-write` sandbox.
 
@@ -198,7 +220,11 @@ type: graph
 working_dir: /srv/repos/app
 
 steps:
+  - id: branch
+    run: git switch -c agent/task-${context.run.id} main
+
   - id: prepare
+    depends: [branch]
     run: rm -f "${DAG_RUN_ARTIFACTS_DIR}/blocked.md"
 
   - id: implement
@@ -211,8 +237,10 @@ steps:
       allowed_tools: "Bash(make test)"
       add_dir: ${context.paths.artifacts_dir}
       prompt: |
-        Implement the change described in TASK.md.
-        If ${context.paths.artifacts_dir}/test.log exists, read it first.
+        Implement the change described in TASK.md. The work is done only when
+        `make test` passes. If ${context.paths.artifacts_dir}/test.log exists,
+        it holds the output of the last failed `make test`. Read it first and
+        fix what it reports, even if TASK.md does not mention it.
         If you cannot finish without a decision from a person, write your
         question to ${context.paths.artifacts_dir}/blocked.md and stop.
     repeat_policy:
@@ -262,13 +290,18 @@ steps:
               title: Guidance for the agent
 
   - id: open_pr
-    run: git push -u origin HEAD && gh pr create --fill
+    run: |
+      git add -A
+      git diff --cached --quiet || git commit -m "Implement TASK.md"
+      git push -u origin HEAD
+      gh pr create --fill
 ```
 
 - The condition ends the inner loop early when the agent writes `blocked.md`, so a stuck agent does not spend its remaining attempts.
 - `check` turns the outcome into a value, and `route` sends `pass` straight on and `fail` or `blocked` to `rescue`.
 - A push-back from `rescue` reruns `prepare`, which clears the old question, and then the whole inner loop, with the guidance in the agent's prompt.
 - When the work passes, `rescue` is skipped and nobody is asked anything.
+- Completing `rescue` ends the run `Succeeded` with no pull request, because only `route` starts `open_pr`. Complete it only when you have taken the work over yourself.
 
 Giving the agent a sanctioned way to stop is not only a convenience. When agents have an explicit "needs a person" exit, they cheat on impossible tests far less often ([Zhong et al.](https://arxiv.org/abs/2510.20270)).
 

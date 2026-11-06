@@ -43,9 +43,10 @@ steps:
       add_dir: ${context.paths.artifacts_dir}
       prompt: |
         Take the first unchecked item in BACKLOG.md. Implement only that
-        item, then check it off in BACKLOG.md.
-        If ${context.paths.artifacts_dir}/test.log exists, it holds the
-        output of the last failed `make test`. Read it first.
+        item, then check it off in BACKLOG.md. The work is done only when
+        `make test` passes. If ${context.paths.artifacts_dir}/test.log exists,
+        it holds the output of the last failed `make test`. Read it first and
+        fix what it reports, even if the item does not mention it.
     timeout_sec: 1800
     repeat_policy:
       repeat: until
@@ -135,8 +136,10 @@ steps:
       sandbox: workspace-write
       prompt: |
         Resolve the issue in ${context.paths.artifacts_dir}/issue.md.
-        If ${context.paths.artifacts_dir}/test.log exists, it holds the
-        output of the last failed `make test`. Read it first.
+        The work is done only when `make test` passes.
+        If ${context.paths.artifacts_dir}/test.log exists, it holds the output
+        of the last failed `make test`. Read it first and fix what it reports,
+        even if the issue does not mention it.
     timeout_sec: 1800
     repeat_policy:
       repeat: until

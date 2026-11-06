@@ -194,6 +194,7 @@ These are easy to build by accident, and most of them finish green.
 | The agent can edit what the check runs | **Signal.** The agent can change the answer. | [Keep the check honest](./inner-loop#keep-the-check-honest). |
 | `condition: make test \| tee test.log` | **Signal.** A pipeline exits with the status of its last command, so the check always passes and the loop ends after one attempt. The same goes for `\| tail`. | Redirect with `>`, or set `shell: bash -o pipefail` on the DAG. |
 | `condition: make test` | **Route back.** The check can end the loop, but the next attempt is not told what failed. | Write the output to a file, and name the file in the prompt. |
+| The prompt says only "implement TASK.md" | **Route back.** The failure reaches the agent, but nothing tells it to act. When the check tests more than the task, the agent can read the failure, call it out of scope, and spend every attempt saying so. | [Say that the check decides](./inner-loop#say-that-the-check-decides). |
 | `retry_policy` or `with.fallback` | **Route back.** The next attempt gets the same prompt. | Keep them for crashes and outages, and add `repeat_policy` for the work itself. |
 | A test step after the agent | **Route back.** It is a gate: it can fail the run, but it cannot send anything back. | Make the test the condition. |
 | `output_schema` | **Route back.** It is a gate: the step fails, and the agent never learns why. | [Run a validator in the condition](#any-command-can-close-it). |

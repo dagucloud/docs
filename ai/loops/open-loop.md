@@ -91,11 +91,18 @@ steps:
         low: [file_ticket]
 
   - id: page_oncall
-    run: ./page.sh '${triage.output.summary}'
+    env:
+      - SUMMARY: ${triage.output.summary}
+    run: ./page.sh "$SUMMARY"
 
   - id: file_ticket
-    run: ./ticket.sh '${triage.output.area}' '${triage.output.summary}'
+    env:
+      - AREA: ${triage.output.area}
+      - SUMMARY: ${triage.output.summary}
+    run: ./ticket.sh "$AREA" "$SUMMARY"
 ```
+
+Pass model output to commands through `env`, never by writing `${triage.output.summary}` into `run`. Dagu substitutes the text into the command before the shell reads it, so an apostrophe breaks the command, and text that came from a bug report can run as shell code.
 
 `output_schema` is a gate, not a loop. A malformed reply fails the step, and the retry runs the agent again with the same prompt; the agent never learns what was malformed. When that happens often, close the loop: [run a validator in the condition](./closed-loop#any-command-can-close-it) and send its message back.
 
