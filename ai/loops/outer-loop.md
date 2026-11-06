@@ -8,8 +8,8 @@ description: Let a person close the loop around a coding agent. Push work back w
 An outer loop is [closed](./closed-loop) by a person. Work that passed the inner loop's checks reaches a [human task](/writing-workflows/human-tasks). The person completes it, or pushes it back with feedback. A push-back reruns the coding agent and every step after it, with the feedback added to the agent's prompt, and the task opens again with the new result.
 
 <picture>
-  <source media="(max-width: 640px)" srcset="/loops/loops-outer-portrait.svg" width="480" height="640">
-  <img src="/loops/loops-outer.svg" width="720" height="360" alt="Work that passes the inner loop reaches a person in a human.task step. Completing the task lets the workflow ship. Pushing it back reruns the coding agent, and every step after it, with the person's feedback appended to the agent's prompt; the inner loop runs again before the task reopens." style="width: 100%; height: auto; margin: 16px 0 24px;">
+  <source media="(max-width: 640px)" srcset="/loops/loops-outer-portrait.svg" width="480" height="560">
+  <img src="/loops/loops-outer.svg" width="720" height="330" alt="Work that passes the inner loop reaches a person in a human.task step. Completing the task lets the workflow ship. Pushing it back reruns the coding agent, and every step after it, with the person's feedback appended to the agent's prompt; the inner loop runs again before the task reopens." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
 The person's attention is the scarcest thing in the loop. The workflow should spend it only on work that machines have already checked, show it the evidence, and make sending work back as cheap as accepting it.

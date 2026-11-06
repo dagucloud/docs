@@ -8,8 +8,8 @@ description: Run a coding agent until a command passes. Feed each failure back t
 An inner loop runs a coding agent until a command says the work is right. The agent makes an attempt, a check such as the test suite runs, and a failure goes back to the agent with the check's output. The loop is [closed](./closed-loop) by a machine, so it can run while nobody watches, and it ends on evidence instead of on the agent's claim that it has finished.
 
 <picture>
-  <source media="(max-width: 640px)" srcset="/loops/loops-inner-portrait.svg" width="480" height="470">
-  <img src="/loops/loops-inner.svg" width="720" height="440" alt="A harness.run step makes an attempt, then its repeat_policy condition runs a check. A failing check writes its output to a feedback file and the step runs again with the next repeat_index, reading that file. A passing check lets dependent steps run. When the limit is reached first, the workflow fails or hands the work to a person." style="width: 100%; height: auto; margin: 16px 0 24px;">
+  <source media="(max-width: 640px)" srcset="/loops/loops-inner-portrait.svg" width="480" height="452">
+  <img src="/loops/loops-inner.svg" width="720" height="272" alt="A harness.run step makes an attempt, then its repeat_policy condition runs a check. A failing check writes its output to a feedback file and the step runs again with the next repeat_index, reading that file. A passing check lets dependent steps run. When the limit is reached first, the workflow fails or hands the work to a person." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
 ## Run Until a Check Passes

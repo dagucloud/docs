@@ -10,8 +10,8 @@ A coding agent that runs once produces a draft. What makes the result trustworth
 In Dagu that loop is part of the workflow, not part of the prompt. [`harness.run`](/step-types/harness/) runs the agent. A check that the agent cannot edit decides whether it runs again. A [`human.task`](/writing-workflows/human-tasks) brings in a person where the decision needs judgment. The run is durable throughout: it survives restarts, waits for people without holding a process, and records every attempt.
 
 <picture>
-  <source media="(max-width: 640px)" srcset="/loops/loops-nested-portrait.svg" width="480" height="770">
-  <img src="/loops/loops-nested.svg" width="720" height="444" alt="A coding agent runs its own tool loop inside a harness.run step. Around it, an inner loop sends the agent's changes to a check, such as tests, and sends failures back until the check passes. Around that, an outer loop sends work that passed to a person in a human.task step, who completes it or pushes it back with feedback. Completed work moves on." style="width: 100%; height: auto; margin: 16px 0 24px;">
+  <source media="(max-width: 640px)" srcset="/loops/loops-nested-portrait.svg" width="480" height="670">
+  <img src="/loops/loops-nested.svg" width="720" height="420" alt="A coding agent runs its own tool loop inside a harness.run step. Around it, an inner loop sends the agent's changes to a check, such as tests, and sends failures back until the check passes. Around that, an outer loop sends work that passed to a person in a human.task step, who completes it or pushes it back with feedback. Completed work moves on." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
 ## Four Terms, Two Questions

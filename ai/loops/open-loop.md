@@ -8,8 +8,8 @@ description: Run a coding agent once and use its result as it is. Keep the resul
 In an open loop, a coding agent runs and its result is used as it is. Nothing the result reveals goes back to the agent. That is the right shape when a person reads the result anyway, when a bad result costs little, or when the next step is cheaper to redo by hand than to explain to an agent.
 
 <picture>
-  <source media="(max-width: 640px)" srcset="/loops/loops-open-closed-portrait.svg" width="480" height="760">
-  <img src="/loops/loops-open-closed.svg" width="720" height="420" alt="In an open loop, a prompt goes to a coding agent and its result is used as it is: nothing goes back to the agent. In a closed loop, the result goes to a check; a failure goes back to the agent for another attempt, and a pass lets the next step run." style="width: 100%; height: auto; margin: 16px 0 24px;">
+  <source media="(max-width: 640px)" srcset="/loops/loops-open-closed-portrait.svg" width="480" height="758">
+  <img src="/loops/loops-open-closed.svg" width="720" height="384" alt="In an open loop, a prompt goes to a coding agent and its result is used as it is: nothing goes back to the agent. In a closed loop, the result goes to a check; a failure goes back to the agent for another attempt, and a pass lets the next step run." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
 Open does not mean careless. An open loop still has a schedule, retries, logs, an artifact a person can open, and optionally a gate that stops bad results from moving on. What it lacks is a path for the agent to learn what was wrong.

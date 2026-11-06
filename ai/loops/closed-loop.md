@@ -10,8 +10,8 @@ In a closed loop, something outside a coding agent checks each result, and what 
 The term comes from control engineering. A heater on a timer runs open loop: it never learns the temperature of the room. A thermostat measures the room and corrects, so it runs closed. Closed does not mean unattended, as the word sometimes does in operations. The check can be a person, and for work that ships, one of the checks usually should be.
 
 <picture>
-  <source media="(max-width: 640px)" srcset="/loops/loops-closed-portrait.svg" width="480" height="630">
-  <img src="/loops/loops-closed.svg" width="720" height="420" alt="A coding agent in a harness.run step produces a result. A signal from outside the agent measures it: a command in repeat_policy, a reviewer agent with output_schema, or a person in a human.task step. A failure takes the route back to the agent with what the check found. A pass lets the next step run. When the limit is reached, the workflow fails or hands the work over." style="width: 100%; height: auto; margin: 16px 0 24px;">
+  <source media="(max-width: 640px)" srcset="/loops/loops-closed-portrait.svg" width="480" height="600">
+  <img src="/loops/loops-closed.svg" width="720" height="410" alt="A coding agent in a harness.run step produces a result. A signal from outside the agent measures it: a command in repeat_policy, a reviewer agent with output_schema, or a person in a human.task step. A failure takes the route back to the agent with what the check found. A pass lets the next step run. When the limit is reached, the workflow fails or hands the work over." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
 ## The Three Parts

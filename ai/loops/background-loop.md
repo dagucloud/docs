@@ -8,8 +8,8 @@ description: Run agent loops that nobody starts by hand. Work through a backlog 
 Some loops run without anyone starting them: a nightly pass over a backlog, a run for every new issue, a sweep over forty files that need the same migration. A schedule or an event starts the run, [inner loops](./inner-loop) do the work, and a person reviews the results when it suits them, such as the next morning. What ships changes what the next run finds, which [closes the loop](./closed-loop) at the slowest timescale.
 
 <picture>
-  <source media="(max-width: 640px)" srcset="/loops/loops-background-portrait.svg" width="480" height="560">
-  <img src="/loops/loops-background.svg" width="720" height="420" alt="A schedule, a webhook, or a watched folder starts a run. The run gives each item its own inner loop, then a person reviews the results in a human.task step and pushes back any that need another pass. What ships changes what the next run finds." style="width: 100%; height: auto; margin: 16px 0 24px;">
+  <source media="(max-width: 640px)" srcset="/loops/loops-background-portrait.svg" width="480" height="540">
+  <img src="/loops/loops-background.svg" width="720" height="256" alt="A schedule, a webhook, or a watched folder starts a run. The run gives each item its own inner loop, then a person reviews the results in a human.task step and pushes back any that need another pass. What ships changes what the next run finds." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
 A background loop has nobody watching while it runs, so everything that a person would normally catch must be a field: the check, the attempt limit, the timeouts, the sandbox, and the point where the work stops and waits.
