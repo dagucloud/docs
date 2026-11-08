@@ -4,11 +4,11 @@ description: Run Dagu as a Windows service that starts with the computer, and kn
 
 # Windows Service
 
-The Windows installer can register Dagu as a Windows service that starts with the computer and restarts after a failure. The service is a version-pinned [WinSW](https://github.com/winsw/winsw) wrapper around `dagu start-all`.
+The Windows installers can register Dagu as a Windows service that starts with the computer and restarts after a failure. The service is a version-pinned [WinSW](https://github.com/winsw/winsw) wrapper around `dagu start-all`.
 
 ## Install the Service
 
-Start PowerShell as Administrator and run:
+Run the [graphical installer](/getting-started/installation/windows#installer-recommended) and choose *As a Windows service*, or start PowerShell as Administrator and run:
 
 ```powershell
 $daguInstaller = [scriptblock]::Create(
@@ -57,7 +57,7 @@ $daguInstaller = [scriptblock]::Create(
 & $daguInstaller -Uninstall
 ```
 
-This removes the binary, the service, and the `PATH` entry, and keeps `C:\ProgramData\Dagu`. Add `-PurgeData` to delete that as well. See [Uninstall](/getting-started/installation/uninstall).
+This removes the binary, the service, and the `PATH` entry, and keeps `C:\ProgramData\Dagu`. Add `-PurgeData` to delete that as well. If you used the graphical installer, uninstall Dagu from **Settings > Apps** instead. See [Uninstall](/getting-started/installation/uninstall).
 
 ## Access
 

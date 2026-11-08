@@ -87,6 +87,15 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.cmd -o installer.cmd && .\installer.cmd -Version latest -InstallDir "C:\tools\dagu" && del installer.cmd
 ```
 
+## Scoop
+
+```powershell
+scoop bucket add dagu https://github.com/dagucloud/scoop-bucket
+scoop install dagu
+```
+
+Scoop installs `dagu.exe` without a service. Upgrade with `scoop update dagu`.
+
 ## Manual binary
 
 Download the Windows archive from [GitHub Releases](https://github.com/dagucloud/dagu/releases), extract `dagu.exe`, and add its folder to your `PATH`.

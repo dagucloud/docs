@@ -41,6 +41,18 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 ## Windows
 
+### Graphical installer
+
+Uninstall Dagu from **Settings > Apps**, or silently:
+
+```powershell
+& "C:\Program Files\Dagu\unins000.exe" /VERYSILENT
+```
+
+This removes the binary, the Windows service, and the `PATH` entry the installer added. It keeps `C:\ProgramData\Dagu`; delete that directory to remove the data as well.
+
+### Script installer
+
 ```powershell
 $daguInstaller = [scriptblock]::Create(
   (irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)
@@ -75,6 +87,12 @@ brew uninstall dagu
 
 ```bash
 npm uninstall -g @dagucloud/dagu
+```
+
+## Scoop
+
+```powershell
+scoop uninstall dagu
 ```
 
 ## Docker

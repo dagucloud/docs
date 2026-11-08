@@ -32,7 +32,7 @@ brew install dagu
 
 :::
 
-The script installers run a guided wizard for PATH setup, background service setup, and the first admin account. Homebrew, npm, and Docker install the binary or container only.
+The script installers run a guided wizard for PATH setup, background service setup, and the first admin account. On Windows, the [graphical installer](/getting-started/installation/windows#installer-recommended) covers PATH and service setup. Homebrew, npm, and Docker install the binary or container only.
 
 Full options (specific versions, custom directories, service scope, uninstall, CI/non-interactive): [Installation Guide](/getting-started/installation/).
 
@@ -145,10 +145,10 @@ docker run --rm \
 
 :::
 
-Visit <http://localhost:8080>. On first launch, create the admin account unless the installer wizard already created one. Open a workflow from **Workflows** to see its graph with live step status, its run history, and logs per step, and to edit it visually or as YAML.
+Visit <http://localhost:8080>. On first launch, create the admin account unless a script installer already created one. Open a workflow from **Workflows** to see its graph with live step status, its run history, and logs per step, and to edit it visually or as YAML.
 The `--dags .` flag loads every YAML file in the current folder as a workflow, which is why `hello.yaml` lives in an empty folder.
 
-If the script installer set up the background service, Dagu is already running at <http://localhost:8080>. Add workflows from the UI, or copy `hello.yaml` into the DAGs directory the installer printed, instead of starting a second server.
+If an installer set up the background service, Dagu is already running, by default at <http://localhost:8080>. Add workflows from the UI, or copy `hello.yaml` into its DAGs directory (the one the script installer printed, or `C:\ProgramData\Dagu\dags` for the Windows graphical installer), instead of starting a second server.
 
 On first launch against an empty DAGs directory, Dagu creates six example workflows (`example-01-basic-sequential.yaml` through `example-06-retry-on-failure.yaml`). The first attempt of `example-06-retry-on-failure` fails and a retry succeeds, which shows how a step recovers from a flaky dependency. The default binary directory is `~/.config/dagu/dags/`, or `~/.dagu/dags/` once `~/.dagu` exists, as after a script installer service setup; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
 

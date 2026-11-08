@@ -9,7 +9,7 @@ Pick the guide for your platform.
 - [**macOS**](/getting-started/installation/macos): Homebrew or the guided script installer (LaunchAgent service)
 - [**Linux**](/getting-started/installation/linux): Guided script installer with systemd service, or a manual binary
 - [**npm**](/getting-started/installation/npm): Global package that downloads the Dagu binary during postinstall
-- [**Windows**](/getting-started/installation/windows): PowerShell script installer with optional Windows service
+- [**Windows**](/getting-started/installation/windows): Graphical or PowerShell script installer with optional Windows service, or Scoop
 - [**Docker**](/getting-started/installation/docker): `docker run`, Compose, and mounting the host Docker socket
 - [**Kubernetes**](/getting-started/installation/kubernetes): Official Helm chart
 - [**Build from source**](/getting-started/installation/source): Go + Node toolchain
@@ -18,7 +18,7 @@ Pick the guide for your platform.
 
 | Situation | Install method |
 |---|---|
-| Trying Dagu locally on a laptop | **Homebrew** (macOS) or **script installer** (Linux/Windows) |
+| Trying Dagu locally on a laptop | **Homebrew** (macOS), **script installer** (Linux), or **graphical installer** (Windows) |
 | Running a shared server | **Script installer** with `--service yes` |
 | Running in a container | **Docker** |
 | Running on a cluster | **Kubernetes (Helm)** |
@@ -35,7 +35,9 @@ The `installer.sh` / `installer.ps1` / `installer.cmd` scripts open a guided wiz
 - Create and verify the first admin account
 - Install the [Dagu AI skill](/ai/skills) for the AI coding tools it detects
 
-Homebrew, npm, Docker, Helm, and manual downloads install without the guided wizard, service setup, or admin bootstrap.
+The Windows graphical installer can add Dagu to your `PATH` and set it up as a Windows service. It does not create the admin account or install the AI skill.
+
+Homebrew, npm, Scoop, Docker, Helm, and manual downloads install without the guided wizard, service setup, or admin bootstrap.
 
 ## Where Dagu Keeps Things
 
@@ -53,7 +55,7 @@ After installation, Dagu uses these paths by default. These are the main locatio
     └── suspend/   # Suspend flags
 ```
 
-A background service set up by a script installer keeps everything in one directory instead: `~/.dagu`, `/var/lib/dagu` for a Linux system service, or `C:\ProgramData\Dagu` for a Windows service. It has the [`DAGU_HOME` layout](/server-admin/configuration#dagu-home), with workflows in `dags/`. Once `~/.dagu` exists, the `dagu` command uses it too.
+A background service set up by an installer keeps everything in one directory instead: `~/.dagu`, `/var/lib/dagu` for a Linux system service, or `C:\ProgramData\Dagu` for a Windows service. It has the [`DAGU_HOME` layout](/server-admin/configuration#dagu-home), with workflows in `dags/`. Once `~/.dagu` exists, the `dagu` command uses it too.
 
 Override any path with environment variables:
 
@@ -74,4 +76,4 @@ Then run the [Quickstart](/getting-started/quickstart) to create your first work
 
 ## Uninstalling
 
-The script installers also uninstall. See [Uninstall](/getting-started/installation/uninstall).
+The script installers also uninstall. Uninstall Dagu installed by the Windows graphical installer from **Settings > Apps**. See [Uninstall](/getting-started/installation/uninstall).
