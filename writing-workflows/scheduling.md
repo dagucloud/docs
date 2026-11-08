@@ -14,19 +14,18 @@ Or use `dagu start-all` to run both scheduler and web server.
 
 ### High Availability
 
-Dagu supports running multiple scheduler instances for high availability with automatic failover:
+Dagu can run standby schedulers that take over automatically when the active scheduler fails. Every scheduler must use the same `DAGU_HOME` on storage that all of them can reach, such as NFS:
 
 ```bash
-# Start primary scheduler
-dagu scheduler
-
-# Start standby schedulers (on other machines)
-dagu scheduler  # Will wait for lock and take over if primary fails
+# On each host, with the same DAGU_HOME on shared storage
+dagu scheduler  # One instance becomes active; the others wait as standbys
 ```
 
-The scheduler uses directory-based locking to ensure only one instance is active at a time. When the primary scheduler fails, a standby automatically takes over within 30 seconds.
+The scheduler uses directory-based locking so that one instance is active at a time. When the active scheduler stops cleanly, it releases the lock and a standby takes over within about 5 seconds. When it dies without releasing the lock, a standby takes over once the lock goes stale, usually 23 to 35 seconds later with the default settings, plus the time the new scheduler needs to start.
 
-The first scheduler updates the lock file every 7 seconds to ensure it remains the active instance, tolerating 4 missed updates before considering the lock stale. This allows a standby scheduler to take over if the primary fails.
+The active scheduler updates the lock every 7 seconds, and the lock goes stale after 30 seconds without an update.
+
+Runs on a host that failed are marked failed and are not resumed. To run them again automatically, set a DAG-level [`retry_policy`](/writing-workflows/durable-execution) or a [`restart_policy`](/writing-workflows/services).
 
 ### Health Check Monitoring
 

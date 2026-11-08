@@ -41,8 +41,8 @@ For operating choices across single-server, temporary-worker, and distributed-wo
 ### 2. Scheduler
 - Monitors and triggers DAGs based on cron expressions
 - Consumes queued DAG runs and executes them
-- Supports high availability through directory-based locking
-- Automatic failover when primary scheduler fails
+- Runs active and standby instances on shared storage through directory-based locking
+- A standby takes over automatically when the active scheduler fails
 - See [Scheduling](/writing-workflows/scheduling) for details
 
 ### 3. Agent
@@ -273,6 +273,8 @@ dagu coordinator --coordinator.host=0.0.0.0 --coordinator.advertise=coordinator.
 dagu worker --worker.coordinators=coordinator.internal:50055 --worker.labels gpu=true
 dagu worker --worker.coordinators=coordinator.internal:50055 --worker.labels region=us-east-1
 ```
+
+To keep the coordinator available when one fails or is replaced, run several coordinators on the same server state and list each one in `--worker.coordinators`.
 
 ### Requirements
 
