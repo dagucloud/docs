@@ -130,6 +130,10 @@ While the scheduler is down, nothing fails such a left-behind run, and a queued 
 
 The DAG list and the DAG's details show the policy and the wait. A service shows **Enabled** or **Suspended** where a scheduled DAG shows **Live**, and the switch suspends and resumes it. The active filter of the DAG list includes services that are not suspended.
 
+## In the API
+
+`GET /api/v1/service-dags` lists these DAGs with their state, the error of a failed latest run, and how many runs in a row failed. `excludeServiceDAGRuns=true` keeps every run of these DAGs out of `GET /api/v1/dag-runs`, including runs started by hand. See the [API reference](/web-ui/api#list-service-dags).
+
 ## A Health Probe
 
 A service can also be one long run that repeats a check, with a restart as the fallback when the check fails:

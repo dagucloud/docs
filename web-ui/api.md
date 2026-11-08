@@ -199,6 +199,59 @@ Schedule aliases in authored YAML are returned as canonical cron expressions. Fo
 
 `sort=status` orders DAGs by the status of their latest run: running, waiting, queued, failed, rejected, aborted, partially succeeded, then succeeded. `sort=lastRun` orders them by the start time of their latest run. Both sorts read every matching DAG, so the order holds across pages. DAGs without a run come last in either order, sorted by name. Above 300 matching DAGs, the list is sorted by `name` instead and `errors` says why. Pinned DAGs are listed first; the sort applies within the pinned and unpinned parts.
 
+### List Service DAGs
+
+**Endpoint**: `GET /api/v1/service-dags`
+
+Returns the DAGs that set a `restart_policy`, each as one object with its state. This list has no pages, and the state and latest run change at each restart.
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| workspace | string | `all`, `default`, or a workspace name | `all` |
+| remoteNode | string | Remote node name | "local" |
+
+**Response (200)**:
+```json
+{
+  "dags": [
+    {
+      "fileName": "worker",
+      "name": "worker",
+      "restartPolicy": "always",
+      "restartWaitSec": 5,
+      "state": "running",
+      "suspended": false,
+      "consecutiveFailures": 3,
+      "latestRun": {
+        "dagRunId": "019a2f3c-7d10-7c3e-9a55-3f1d2e6b8c01",
+        "status": 1,
+        "startedAt": "2026-11-06T10:00:00Z"
+      }
+    }
+  ],
+  "errors": []
+}
+```
+
+- `consecutiveFailures`: how many of the newest ended runs in a row did not succeed, up to 10. A success or a stop by an operator ends the count. Above zero while the DAG is `running`, it means the DAG keeps failing.
+- `latestRun.error`: the first failed step and its error, such as `serve: exit status 3`, once the latest run has ended without success.
+- `readError`: why the state of the DAG could not be read. It comes with the state `failing`.
+- `errors`: problems with the listing itself, such as DAG files that cannot be read.
+
+**States**:
+
+| State | Meaning |
+|-------|---------|
+| `pending` | No run is alive yet: the DAG has no run, or its latest run waits in the queue. |
+| `running` | A run is alive. |
+| `restarting` | The latest run succeeded, or an operator stopped the latest run of an `always` DAG, and the next run is due. |
+| `failing` | The latest run did not succeed and the next run is due, or the latest run cannot be read, which `readError` reports. |
+| `suspended` | The DAG is suspended and gets no new run. |
+| `stopped` | An operator stopped the latest run of an `unless-stopped` DAG, so no run follows. |
+
+`latestRun` is left out for a DAG with no run. See [Services](/writing-workflows/services).
+
 ### Create DAG
 
 **Endpoint**: `POST /api/v1/dags`
@@ -1052,6 +1105,7 @@ Retrieves the newest DAG runs with forward-only cursor pagination.
 | limit | integer | Page size (max 500) | 100 |
 | cursor | string | Opaque cursor returned by the previous page | - |
 | labels | string | Filter by DAG labels. Comma-separated. Same syntax as DAG filtering. Supports `*` and `?` wildcards. AND logic. | - |
+| excludeServiceDAGRuns | boolean | Leave out every run of the service DAGs, whoever started it. The service DAGs come from the DAG index, so a DAG file edited outside Dagu counts after the next DAG listing. | `false` |
 | remoteNode | string | Remote node name | "local" |
 
 The response includes `nextCursor` when older results are available. Repeat the same request with `cursor=<nextCursor>` to continue.
