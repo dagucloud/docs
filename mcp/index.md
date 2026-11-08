@@ -74,6 +74,22 @@ The server's level limits calls that reach the server, not reads of what it alre
 Edit lets a client change DAGs, and DAG steps run commands on the host. Allow it, and the server's `developer` level, only where you would allow shell access.
 :::
 
+## In the Chat
+
+Claude and other clients that support [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview) draw Dagu Cloud in the conversation. Ask what needs attention, or for your servers, alerts, runs, or one run. The client calls `dagu_show`, and you work in the view:
+
+- See what needs a person across every server, and move between **Attention**, **Servers**, **Alerts**, **Runs**, and **Workflows**.
+- Open a run with its steps and logs, retry it from the start or from a failed step, or stop it.
+- In a run with many steps, start from what failed, is running, or waits, then filter or search the rest. Open the items of a foreach step page by page.
+- Approve or reject a step that waits for a person, and complete a human task, with the inputs its form asks for.
+- Acknowledge or snooze an alert.
+- Ask the client to explain a failure. The question goes into the conversation.
+- Compare a DAG or Wiki change with what is on the server before you apply it.
+
+The view shows the actions that would work. Where a plan, a limit, or the server's remote access stands in the way, it says so and links to where to change it. What you do in the view reaches the client's model, so it does not repeat your action.
+
+Clients without MCP Apps get the same answers as text. An agent's own lookups use `dagu_read`, which draws nothing.
+
 ## Security
 
 | Property | Detail |
