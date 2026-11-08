@@ -10,7 +10,7 @@ Download and run the latest installer:
 
 The installer is signed by Descarty株式会社, and the wizard asks two things:
 
-- **How should Dagu run?** *Run as a Windows service* (recommended) starts Dagu with Windows and keeps the web UI available in your browser. *Command-line tool only* installs `dagu.exe` and leaves starting it to you.
+- **How should Dagu run?** *As a Windows service* (recommended) starts Dagu with Windows and keeps the web UI available in your browser. *Command-line tool only* installs `dagu.exe` and leaves starting it to you. A checkbox on the same page, on by default, adds Dagu to the system `PATH`.
 - **Network ports** (service only). The web UI port defaults to 8080 and the coordinator port to 50055. The wizard refuses a port that another program already uses.
 
 On the last page the wizard can open the web UI, where you create the admin account on your first visit. The service stores its data and logs under `C:\ProgramData\Dagu`, and the Start menu gets an *Open Dagu* shortcut.
@@ -18,10 +18,10 @@ On the last page the wizard can open the web UI, where you create the admin acco
 ### Silent install
 
 ```powershell
-dagu-windows-amd64-setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=service,path /PORT=8080 /COORDINATORPORT=50055
+.\dagu-windows-amd64-setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=service,path /PORT=8080 /COORDINATORPORT=50055
 ```
 
-Use `/TASKS=manual,path` for the command-line tool only, and drop `path` to leave the `PATH` alone. Uninstall from *Apps & features*, or silently with `"C:\Program Files\Dagu\unins000.exe" /VERYSILENT`. Uninstalling removes the service and the `PATH` entry but keeps `C:\ProgramData\Dagu`.
+Use `/TASKS=manual,path` for the command-line tool only, and drop `path` to leave the `PATH` alone. Uninstall from **Settings > Apps**, or silently with `& "C:\Program Files\Dagu\unins000.exe" /VERYSILENT`. Uninstalling removes the service and the `PATH` entry but keeps `C:\ProgramData\Dagu`.
 
 ## PowerShell
 
