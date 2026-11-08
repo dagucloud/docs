@@ -1636,7 +1636,7 @@ The coordinator service enables distributed task execution by:
 - Accepting task polling requests from workers
 - Matching tasks to workers based on labels
 - Tracking worker health via heartbeats
-- Providing the task distribution API, with workers failing over between the coordinators they are given
+- Providing the task distribution API, with workers failing over between the coordinators they are given, which must share server state
 - Receiving run status, logs, artifacts, and state requests over gRPC
 
 When run directly, the coordinator also exposes `GET /health` on `--coordinator.health-port` for per-instance liveness checks. `dagu start-all` does not expose this dedicated coordinator health port.

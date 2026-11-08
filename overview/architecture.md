@@ -274,7 +274,7 @@ dagu worker --worker.coordinators=coordinator.internal:50055 --worker.labels gpu
 dagu worker --worker.coordinators=coordinator.internal:50055 --worker.labels region=us-east-1
 ```
 
-To keep the coordinator available when one fails or is replaced, run several coordinators on the same server state and list each one in `--worker.coordinators`.
+To keep the coordinator available when one fails or is replaced, run several coordinators on the same server state and list each one in `--worker.coordinators`. Each coordinator needs a distinct hostname or port, because the service registry identifies it by the two together.
 
 ### Requirements
 

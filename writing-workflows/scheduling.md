@@ -14,7 +14,7 @@ Or use `dagu start-all` to run both scheduler and web server.
 
 ### High Availability
 
-Dagu can run standby schedulers that take over automatically when the active scheduler fails. Every scheduler must use the same `DAGU_HOME` on storage that all of them can reach, such as NFS:
+Dagu can run standby schedulers that take over automatically when the active scheduler fails. Every scheduler must use the same data directory and DAG directory on storage that all of them can reach, such as NFS. A shared `DAGU_HOME` provides both, unless a path such as `DAGU_DATA_DIR` overrides it:
 
 ```bash
 # On each host, with the same DAGU_HOME on shared storage
@@ -23,9 +23,11 @@ dagu scheduler  # One instance becomes active; the others wait as standbys
 
 The scheduler uses directory-based locking so that one instance is active at a time. When the active scheduler stops cleanly, it releases the lock and a standby takes over within about 5 seconds. When it dies without releasing the lock, a standby takes over once the lock goes stale, usually 23 to 35 seconds later with the default settings, plus the time the new scheduler needs to start.
 
-The active scheduler updates the lock every 7 seconds, and the lock goes stale after 30 seconds without an update.
+The active scheduler updates the lock every 7 seconds, and the lock goes stale after 30 seconds without an update. A standby judges the lock's age with its own clock, so keep the clocks of every scheduler host and the storage server synchronized.
 
-Runs on a host that failed are marked failed and are not resumed. To run them again automatically, set a DAG-level [`retry_policy`](/writing-workflows/durable-execution) or a [`restart_policy`](/writing-workflows/services).
+Failover does not make scheduling exactly-once. A scheduler that was paused past the stale threshold can dispatch a slot after another instance has taken over, so that slot can run twice.
+
+[Zombie detection](#zombie-detection) marks runs on a failed host as failed, and they are not resumed. To run a scheduled DAG again automatically, set a DAG-level [`retry_policy`](/writing-workflows/durable-execution). An always-on [service](/writing-workflows/services) restarts through its `restart_policy`.
 
 ### Health Check Monitoring
 
