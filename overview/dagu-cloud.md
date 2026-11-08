@@ -49,7 +49,8 @@ MCP clients ───── MCP ───────┘        │     ──�
 | Alerts | Email to owners and admins | Email, chat, PagerDuty, webhook | Email, chat, PagerDuty, webhook |
 | Run history | 7 days | 30 days | 30 days |
 | Machine CPU, memory, and disk, with disk alerts | No | Yes | Yes |
-| Act on runs, MCP | No | Yes | Yes |
+| Act on runs | No | Yes | Yes |
+| MCP clients | Read what the server reports | Also read logs, act on runs, and edit DAGs | Also read logs, act on runs, and edit DAGs |
 | People | Just you | Up to 10 | Up to 10 |
 | Price | Free | $50/month | $150/month |
 

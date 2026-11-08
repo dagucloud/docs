@@ -19,7 +19,7 @@ Clients read runs, alerts, and logs across the workspace's servers, and act on t
 
 ## Connect
 
-The workspace needs the Team or Pro plan, or a trial.
+Without a plan or a trial, a client connects read only and reads what the servers report. Reading a server's logs and acting on its runs need the Team or Pro plan, or a trial.
 
 1. **Connect the server** to Dagu Console and turn on monitoring. See [Connect a Server](/overview/self-host-license#connect-a-server) and [Monitoring](/overview/console-monitoring#turn-it-on).
 2. **Turn on remote access** in **Plan & features** in Dagu, and choose the highest level calls get: `viewer`, `operator`, or `developer`. Without it, clients only read what the server reports. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).

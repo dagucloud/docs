@@ -46,6 +46,7 @@ A workspace without a plan or trial monitors one server for free. Free monitorin
 | Alert emails | Owners and admins | Owners, admins, and the members and addresses you add |
 | Chat, PagerDuty, and webhook destinations | None | Up to 10 per workspace, each with [the alerts it gets](/overview/console-monitoring-alerts#which-alerts-a-destination-gets) |
 | [Alert rules](/overview/console-monitoring-alerts#alert-rules) and deadlines | The defaults | Per workspace, server, and workflow |
+| [MCP clients](/mcp/) | Read what the server reports | Also read logs and act on runs |
 
 A trial gives everything a plan's monitoring does for 14 days, with no card. Workspace owners get an email three days before it ends and another when it ended.
 
