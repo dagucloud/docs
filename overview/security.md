@@ -91,7 +91,7 @@ Deciding a step that waits for a person also needs approvals allowed by the conn
 
 ## AI Providers
 
-When an MCP client reads a run or its logs through Dagu Cloud, the answer goes to the client and to its provider, such as Anthropic or OpenAI, under that provider's terms. Every level, viewer included, can read logs. Choose each server's level and the workspace's MCP policy with that in mind.
+When an MCP client reads a run or its logs through Dagu Cloud, the answer goes to the client and to its provider, such as Anthropic or OpenAI, under that provider's terms. Every level, viewer included, can read logs. Choose each server's level and the workspace's MCP policy with that in mind. How long a provider keeps that data depends on your agreement with it and on the client you use. Zero data retention, where offered, is arranged with the provider, not in Dagu. It limits storage, not processing, and does not cover every client, so check yours.
 
 ## Where Dagu Cloud Runs
 

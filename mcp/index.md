@@ -117,6 +117,7 @@ Clients without MCP Apps get the same answers as text. An agent's own lookups us
 
 - Values of declared secrets are masked in logs and error messages.
 - What a client reads goes to its model provider, such as Anthropic or OpenAI. Every level can read logs. To keep a server's logs from a provider, leave its remote access off and its monitoring level below `errors`.
+- How long a provider keeps that data depends on your agreement with it and on the client you use. Zero data retention, where offered, is arranged with the provider, not in Dagu. It limits storage, not processing, and does not cover every client, so check yours.
 - What servers report for monitoring is kept 30 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits).
 
 ## Revoke Access
