@@ -708,11 +708,101 @@ const kilnCodeTheme = {
   ],
 };
 
+const jaSidebar = [
+  {
+    text: "はじめに",
+    items: [
+      { text: "概要", link: "/ja/" },
+      { text: "インストール", link: "/ja/getting-started/installation/" },
+      { text: "Linux", link: "/ja/getting-started/installation/linux" },
+      { text: "Docker", link: "/ja/getting-started/installation/docker" },
+      { text: "Windows", link: "/ja/getting-started/installation/windows" },
+      { text: "クイックスタート", link: "/ja/getting-started/quickstart" },
+    ],
+  },
+  {
+    text: "構成",
+    items: [
+      { text: "動作環境", link: "/ja/server-admin/system-requirements" },
+      { text: "Linux (systemd)", link: "/ja/server-admin/deployment/systemd" },
+      { text: "Windows サービス", link: "/ja/server-admin/deployment/windows" },
+      { text: "高可用性", link: "/ja/server-admin/deployment/high-availability" },
+      { text: "閉域網", link: "/ja/server-admin/deployment/closed-network" },
+    ],
+  },
+  {
+    text: "運用",
+    items: [
+      { text: "バックアップと復旧", link: "/ja/server-admin/backup-restore" },
+      { text: "アップグレード", link: "/ja/server-admin/upgrades" },
+      { text: "トラブルシューティング", link: "/ja/server-admin/troubleshooting" },
+      { text: "サポート方針", link: "/ja/server-admin/support-policy" },
+    ],
+  },
+  {
+    text: "セキュリティとライセンス",
+    items: [
+      { text: "セキュリティとデータの流れ", link: "/ja/overview/security" },
+      { text: "リリースの検証", link: "/ja/server-admin/verify-releases" },
+      { text: "プランとライセンス", link: "/ja/overview/self-host-license" },
+      { text: "ライセンス FAQ", link: "/ja/overview/licensing-faq" },
+    ],
+  },
+  {
+    text: "移行",
+    items: [
+      { text: "Rundeck から", link: "/ja/migration/from-rundeck" },
+      { text: "JP1/AJS3 から", link: "/ja/migration/from-jp1" },
+    ],
+  },
+  {
+    text: "SIer・情報システム部門向け",
+    items: [
+      { text: "導入資料の一覧", link: "/ja/enterprise/" },
+      { text: "非機能要求グレード対応表", link: "/ja/enterprise/non-functional-requirements" },
+      { text: "構成例", link: "/ja/enterprise/architectures" },
+      { text: "パラメータシート", link: "/ja/enterprise/parameter-sheet" },
+      { text: "運用手順書テンプレート", link: "/ja/enterprise/runbook-template" },
+      { text: "セキュリティチェックシート回答例", link: "/ja/enterprise/security-checksheet" },
+      { text: "PoC 手順", link: "/ja/enterprise/poc" },
+    ],
+  },
+];
+
 export default withMermaid(
   defineConfig({
     title: "Dagu",
     description: siteDescription,
     lang: "en-US",
+    locales: {
+      root: { label: "English", lang: "en-US" },
+      ja: {
+        label: "日本語",
+        lang: "ja",
+        link: "/ja/",
+        description: "SIer・情報システム部門向けの Dagu 導入ドキュメント。動作環境、高可用性、運用、セキュリティ、移行手順をまとめています。",
+        themeConfig: {
+          nav: [
+            { text: "導入資料", link: "/ja/enterprise/", activeMatch: "^/ja/enterprise/" },
+            { text: "インストール", link: "/ja/getting-started/installation/", activeMatch: "^/ja/getting-started/" },
+            { text: "運用", link: "/ja/server-admin/system-requirements", activeMatch: "^/ja/server-admin/" },
+            { text: "English docs", link: "/" },
+          ],
+          sidebar: { "/ja/": jaSidebar },
+          outline: { level: [2, 3], label: "このページの内容" },
+          docFooter: { prev: "前のページ", next: "次のページ" },
+          editLink: {
+            pattern: "https://github.com/dagucloud/docs/edit/main/:path",
+            text: "GitHub でこのページを編集",
+          },
+          lastUpdated: { text: "最終更新", formatOptions: { dateStyle: "medium", timeStyle: "short" } },
+          returnToTopLabel: "ページの先頭へ",
+          sidebarMenuLabel: "メニュー",
+          darkModeSwitchLabel: "表示モード",
+          langMenuLabel: "言語を変更",
+        },
+      },
+    },
     lastUpdated: true,
     cleanUrls: true,
     srcExclude: ["README.md", "feature-request-*.md", "superpowers/**"],
@@ -794,6 +884,8 @@ export default withMermaid(
     themeConfig: {
       logo: { light: "/logo-light.png", dark: "/logo-dark.png" },
       siteTitle: "Dagu",
+      // Only some pages are translated, so a locale switch goes to that locale's home.
+      i18nRouting: false,
       logoLink: "https://docs.dagu.sh/",
 
       appearance: {
