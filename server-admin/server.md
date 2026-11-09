@@ -769,6 +769,12 @@ When enabled, the following events are recorded:
 
 Audit logs are written as daily records and can be reviewed in the Web UI at **Settings > Audit Logs**. Keep the admin log directory on persistent storage if you want that history to survive restarts.
 
+### Long-Term Retention and Forwarding
+
+The 7-day default is short for most audit requirements. Set `audit.retention_days` to the period your policy requires, or `0` to keep every file.
+
+Dagu has no built-in forwarder. Audit files are daily JSON Lines at `logs/admin/audit/YYYY-MM-DD.jsonl`, so a log shipper such as Fluent Bit can tail them into your SIEM.
+
 ## Event Store
 
 The centralized event store persists operational events such as DAG-run outcomes and LLM usage records. It is enabled by default in `dagu server` and `dagu start-all`.
