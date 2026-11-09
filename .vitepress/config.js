@@ -610,6 +610,7 @@ const fullSidebar = [
       { text: "Members", link: "/overview/console-members" },
       { text: "Account", link: "/overview/console-account" },
       { text: "Plans and Licenses", link: "/overview/self-host-license" },
+      { text: "Licensing FAQ", link: "/overview/licensing-faq" },
     ],
   },
   {
