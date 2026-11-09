@@ -58,7 +58,7 @@ A 14-day trial covers one server with Team's features, acting on runs, MCP, and 
 
 ## Private Deployment
 
-Organizations that cannot connect to Dagu Cloud, or that want the control plane inside their own network, can have Dagu Console deployed there. This is available on request under an Enterprise agreement. See [Private Dagu Console](/server-admin/deployment/closed-network#private-dagu-console).
+Organizations that cannot connect to Dagu Cloud, or that want the control plane inside their own network, can have it deployed there. This is available on request under an Enterprise agreement. See [Private Control Plane](/server-admin/deployment/closed-network#private-control-plane).
 
 ## Related Pages
 

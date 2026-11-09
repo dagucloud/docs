@@ -62,7 +62,7 @@ For Japanese holidays, replace `weekdays` with a [calendar file](/writing-workfl
 - **Availability.** Only one scheduler is active at a time. A [standby on shared storage](/server-admin/deployment/high-availability) takes over if it fails, and the storage is yours to provide. Runs on a failed host are marked failed and are not resumed.
 - **Support.** Team and Pro licenses do not include support. Enterprise agreements add response targets. See the [support policy](/server-admin/support-policy).
 - **Operator access.** SSO, roles, and audit logs need a [self-host license](/overview/self-host-license). Roles apply to a whole server or a workspace, not to a single job.
-- **Deadline alerts.** Alerts for missed deadlines and late starts come from Dagu Console. A closed network needs a [private Dagu Console](/server-admin/deployment/closed-network#private-dagu-console), available on request under an Enterprise agreement, or [its own checks](/server-admin/deployment/closed-network#alerts-without-dagu-console).
+- **Deadline alerts.** Alerts for missed deadlines and late starts come from Dagu Console. A closed network needs a [private control plane](/server-admin/deployment/closed-network#private-control-plane), available on request under an Enterprise agreement, or [its own checks](/server-admin/deployment/closed-network#alerts-without-dagu-console).
 
 ## Steps
 

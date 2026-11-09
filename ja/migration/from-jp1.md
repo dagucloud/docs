@@ -62,7 +62,7 @@ handler_on:
 - **可用性。** 同時にアクティブになるスケジューラは 1 つだけです。スケジューラに障害が発生すると、[共有ストレージ上のスタンバイ](/ja/server-admin/deployment/high-availability)が引き継ぎます。ストレージはお客様にてご用意ください。障害が発生したホスト上の実行は失敗としてマークされ、再開されません。
 - **サポート。** Team および Pro ライセンスにサポートは含まれません。Enterprise 契約では応答目標が追加されます。[サポートポリシー](/ja/server-admin/support-policy)を参照してください。
 - **運用担当者のアクセス。** SSO、ロール、監査ログには[セルフホストライセンス](/ja/overview/self-host-license)が必要です。ロールはサーバー全体またはワークスペースに適用され、個々のジョブには適用されません。
-- **期限のアラート。** 期限超過と開始遅延のアラートは Dagu Console が発行します。閉域網では、Enterprise 契約でご依頼に応じて提供する[社内に置く Dagu Console](/ja/server-admin/deployment/closed-network#private-dagu-console)、または[独自の確認の仕組み](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)が必要です。
+- **期限のアラート。** 期限超過と開始遅延のアラートは Dagu Console が発行します。閉域網では、Enterprise 契約でご依頼に応じて提供する[社内に置く Control Plane](/ja/server-admin/deployment/closed-network#private-control-plane)、または[独自の確認の仕組み](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)が必要です。
 
 ## 手順 {#steps}
 

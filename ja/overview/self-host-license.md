@@ -92,7 +92,7 @@ Dagu は、サーバーの ID とライセンスをデータディレクトリ (
 
 Dagu Console に到達できないサーバーでは、オフラインライセンスを使用します。コンソールの **Instances** ページの **Add offline server** でライセンスを作成し、`DAGU_LICENSE` または `DAGU_LICENSE_FILE` でインストールします。オフラインサーバーは、ライセンスが取り消されるまでスロットを消費します。
 
-閉域網での集中監視とアラートについては、[社内に置く Dagu Console](/ja/server-admin/deployment/closed-network#private-dagu-console) を参照してください。
+閉域網での集中監視とアラートについては、[社内に置く Control Plane](/ja/server-admin/deployment/closed-network#private-control-plane) を参照してください。
 
 ## 関連ページ {#related-pages}
 

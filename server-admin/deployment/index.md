@@ -12,6 +12,6 @@ Choose the simplest deployment that meets the workflow's execution needs.
 | Isolate development, staging, and production | [Multi-Environment Deployments](./multi-environment) |
 | Keep scheduling through the failure of one host | [Scheduler High Availability](./high-availability) |
 | Run without internet access | [Closed Networks](./closed-network) |
-| Run Dagu Console inside your own network | [Private Dagu Console](./closed-network#private-dagu-console), on request under an Enterprise agreement |
+| Run the control plane inside your own network | [Private Control Plane](./closed-network#private-control-plane), on request under an Enterprise agreement |
 
 For containers, review [Docker Images](./docker-images) before choosing a tag. For execution across multiple hosts, see [Distributed Execution](/server-admin/distributed/).
