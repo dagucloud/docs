@@ -17,13 +17,21 @@ Clients read runs, alerts, and logs across the workspace's servers, and act on t
   <img src="/mcp/mcp-architecture.svg" width="720" height="500" alt="An MCP client connects to Dagu Console at console.dagu.sh with OAuth. Dagu Console sends signed calls through the relay at relay.dagu.sh to Dagu servers over a WebSocket each server opens, and servers report to Dagu Console. Servers accept no inbound connections." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
+## Before You Connect
+
+- **Nothing is reachable until you turn it on.** Remote access is off on every server until its administrator turns it on. Until then, a client reads only what the administrator chose to report.
+- **You choose what a client can reach.** At sign-in, choose its workspaces and servers, and whether it reads, operates, or edits. It decides steps that wait for a person only if you, the workspace's owners, and the server's administrator all allow it.
+- **Dagu Cloud stores nothing a client reads from a server.** Answers pass through without being stored, and Dagu Cloud keeps no record of calls.
+- **Your model provider receives what the client reads.** [Data](#data) lists what that covers and how to limit it.
+- **You can check and stop it.** Each call is in the server's own audit log, and you can end a connection at any time. See [Revoke Access](#revoke-access).
+
 ## Connect
 
 Without a plan or a trial, a client connects read only and reads what the servers report. Reading a server's logs and acting on its runs need the Team or Pro plan, or a trial.
 
 1. **Connect the server** to Dagu Console and turn on monitoring. See [Connect a Server](/overview/self-host-license#connect-a-server) and [Monitoring](/overview/console-monitoring#turn-it-on).
 2. **Turn on remote access** in **Plan & features** in Dagu, and choose the highest level calls get: `viewer`, `operator`, or `developer`. Without it, clients only read what the server reports. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
-3. **Add Dagu Cloud to the client** and sign in. Choose the workspaces it may reach, read, operate, or edit in each, and whether it may decide waiting steps.
+3. **Add Dagu Cloud to the client** and sign in. Choose which workspaces and servers it may reach, whether it may read, operate, or edit in each workspace, and whether it may decide waiting steps.
 
 **Claude Code, Codex, Cursor, and other coding agents.** Paste this prompt into the agent. It adds Dagu Cloud and starts the sign-in.
 
@@ -99,8 +107,8 @@ Clients without MCP Apps get the same answers as text. An agent's own lookups us
 | **Server sets the ceiling** | Calls run at or below the server's level, reach only the MCP tools, and never get `manager` or `admin`. |
 | **Signed per call** | Each call is signed for one request and one server, valid for at most one minute, and accepted once. The relay cannot create or alter a call. |
 | **Runs as a person** | Each call runs as the member who connected the client with OAuth. Access tokens expire after one hour. |
-| **Nothing kept in Dagu Cloud** | Dagu Cloud stores no answers and no record of calls. It stores only the connection, until it ends. |
-| **Recorded in your server's audit log** | Each call that reaches a server is in that server's audit log with the person's email and the client's name. |
+| **No answers or call records in Dagu Cloud** | Dagu Cloud stores no answers and no record of calls. For each connection it stores who connected, the client's name, what the connection may reach, and when it was last used, until the connection ends. A connection unused for 90 days ends by itself. |
+| **Recorded in your server's audit log** | Each call that reaches a server is in that server's audit log with the person's email and the client's name. Audit logging is on by default and keeps entries for 7 days unless you change it. See [MCP Auditability](/mcp/auditability). |
 | **Revocable** | A change applies to the next request. Turning remote access off closes the connection at once. |
 
 <picture>
@@ -110,15 +118,32 @@ Clients without MCP Apps get the same answers as text. An agent's own lookups us
 
 ## Data
 
+Dagu Cloud stores what servers report for monitoring, and nothing a client reads from a server. What a client reads goes to its model provider, such as Anthropic or OpenAI, under that provider's terms.
+
 <picture>
   <source media="(max-width: 640px)" srcset="/mcp/mcp-data-portrait.svg" width="480" height="860">
   <img src="/mcp/mcp-data.svg" width="720" height="470" alt="A Dagu server's reports go to Dagu Console, which stores them. Answers to calls pass through the relay and Dagu Console without being stored. The MCP client passes what it reads to its model provider." style="width: 100%; height: auto; margin: 16px 0 24px;">
 </picture>
 
-- Values of declared secrets are masked in logs and error messages.
-- What a client reads goes to its model provider, such as Anthropic or OpenAI. Every level can read logs. To keep a server's logs from a provider, leave its remote access off and its monitoring level below `errors`.
-- How long a provider keeps that data depends on your agreement with it and on the client you use. Zero data retention, where offered, is arranged with the provider, not in Dagu. It limits storage, not processing, and does not cover every client, so check yours.
-- What servers report for monitoring is kept 30 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits).
+| Data | Stored in Dagu Cloud | Reaches the model provider |
+| --- | --- | --- |
+| Logs, outputs, parameters, and DAG YAML | No. They pass through when a client reads them. | When a client reads them, which needs remote access on |
+| Run status, and DAG, queue, and step names | At monitoring level `runs` or `errors` | When a client reads them |
+| Failed steps' error messages | At monitoring level `errors` only | When a client reads them |
+| Values of declared secrets | No | Masked in logs and error messages |
+
+Finished runs are kept for 30 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits) for the rest.
+
+### Limit What a Client Sees
+
+| To | Do this |
+| --- | --- |
+| Keep a server's logs from the model provider | Leave its remote access off and its monitoring level below `errors`. |
+| Keep DAG, queue, and step names from it too | Also set the monitoring level to `health`. |
+| Limit a client to some servers | At sign-in, choose **Only these servers**. The default is all servers in the workspace, including ones connected later. |
+| Let a client only read | Choose **Read** at sign-in. To hold every client on a server to reading, set its level to `viewer`. Every level can read logs. |
+| Mask a credential | Load it through [`secrets:`](/writing-workflows/secrets). Values loaded through `env:` or `dotenv:` are not masked. |
+| Stop the provider keeping what it reads | Use a client covered by a zero data retention (ZDR) agreement with that provider. ZDR is arranged with the provider, not in Dagu. It limits storage, not processing, and does not cover every client, so check yours. Without it, retention follows your agreement with the provider. |
 
 ## Revoke Access
 
