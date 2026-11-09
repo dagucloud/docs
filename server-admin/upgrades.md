@@ -2,7 +2,7 @@
 
 This page is the procedure for upgrading a production server. [Self-Upgrade](/server-admin/self-upgrade) describes the `dagu upgrade` command itself.
 
-Only the latest stable release receives fixes. See the [support policy](/server-admin/support-policy).
+Only the latest stable release series receives fixes. See the [support policy](/server-admin/support-policy).
 
 ## Before you upgrade
 
