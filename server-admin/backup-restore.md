@@ -67,7 +67,7 @@ In an active and standby pair, stop Dagu on both hosts, or the other host keeps 
 
    ```bash
    dagu history --limit 5
-   curl -s http://localhost:8090/health
+   curl -s http://localhost:8090/health # dagu scheduler only, not start-all
    ```
 
    Open a DAG that uses a secret and run it, to confirm the encryption key was restored.

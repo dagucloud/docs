@@ -1,6 +1,6 @@
 # Migrating from JP1/AJS3
 
-There is no automatic converter. Because Dagu's definitions are plain YAML, a migration is a script you write and can rerun: export the unit definitions as text, generate DAG files, and validate them. Move one jobnet group at a time, and run it in parallel with JP1/AJS3 before cutting over.
+There is no automatic converter. Because Dagu's definitions are plain YAML, a migration is a script you write and can rerun: export the unit definitions as text, generate DAG files, and validate them. Move one job group at a time, and run it in parallel with JP1/AJS3 before cutting over.
 
 JP1 is a suite. Dagu replaces only the job scheduling part. Monitoring, asset management, and other JP1 products need their own replacements.
 
@@ -66,7 +66,7 @@ For Japanese holidays, replace `weekdays` with a [calendar file](/writing-workfl
 
 ## Steps
 
-1. Export the unit definitions of one jobnet group as text.
+1. Export the unit definitions of one job group as text.
 2. Map them with a script: unit to step, predecessor link to `depends`, recovery unit to `handler_on.failure`.
 3. Run `dagu validate` on every generated file.
 4. Recreate calendars, and compare the next fire times with `dagu calendar fires`.

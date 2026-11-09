@@ -16,7 +16,7 @@ Workflow YAML, scripts, and programs that Dagu starts are separate programs that
 
 **Can a contractor operate Dagu for us?**
 
-Yes. GPLv3 section 2 lets you give copies to others so that they run the software or modify it exclusively on your behalf, without that counting as conveying.
+Yes. GPLv3 section 2 lets you convey copies to others for the sole purpose of having them run the software for you or modify it exclusively for you. They must work on your behalf, under your direction and control, on terms that prohibit copies outside that relationship.
 
 ## Delivering Dagu to a customer
 

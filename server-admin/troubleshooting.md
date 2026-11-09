@@ -9,7 +9,7 @@ dagu ps                             # runs in progress on this host
 dagu history --limit 20             # recent runs
 dagu status --run-id <run-id> <dag> # one run in detail
 journalctl -u dagu-scheduler -n 200 # service logs, on systemd
-curl -s http://localhost:8090/health
+curl -s http://localhost:8090/health # dagu scheduler only, not start-all
 ```
 
 Each run's log files are under `logs/<dag name>/`. Audit logs are in `logs/admin/audit/`.
@@ -30,7 +30,7 @@ Each run's log files are under `logs/<dag name>/`. Audit logs are in `logs/admin
 
 **A schedule did not run.**
 
-1. Confirm that a scheduler is active: `curl -s 'http://localhost:8090/health?role=active'`.
+1. Confirm that a scheduler is active. With `dagu scheduler`, run `curl -s 'http://localhost:8090/health?role=active'`. With `dagu start-all`, check that the service is running.
 2. Check whether the DAG is suspended.
 3. Check the schedule's time zone. `CRON_TZ=` applies per schedule, and otherwise the server's time zone applies.
 4. Check its business calendar with `dagu calendar fires`.
