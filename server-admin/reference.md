@@ -279,6 +279,7 @@ scheduler:
   port: 8090              # Health check port (0 to disable)
   lock_stale_threshold: "30s"  # Time after which a scheduler lock is considered stale
   lock_retry_interval: "5s"   # Interval between lock acquisition attempts
+  failover_recovery_window: "2m"  # How far back a takeover replays missed slots (0s to disable)
   zombie_detection_interval: "45s"  # Interval for detecting zombie DAG runs (0 to disable)
   retry_failure_window: "24h"  # Lookback window for DAG-level retry scanning (0 to disable). Current limitation: window uses the original DAG-run time bucket, not the latest failed attempt timestamp.
   failure_threshold: 3             # Consecutive stale checks before marking a run as failed
@@ -556,6 +557,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_SCHEDULER_PORT` - Health check server port (default: `8090`)
 - `DAGU_SCHEDULER_LOCK_STALE_THRESHOLD` - Time after which a scheduler lock is considered stale (default: `30s`)
 - `DAGU_SCHEDULER_LOCK_RETRY_INTERVAL` - Interval between lock acquisition attempts (default: `5s`)
+- `DAGU_SCHEDULER_FAILOVER_RECOVERY_WINDOW` - How far back a takeover replays missed slots (default: `2m`, `0s` to disable)
 - `DAGU_SCHEDULER_ZOMBIE_DETECTION_INTERVAL` - Interval for detecting zombie DAG runs (default: `45s`, `0` to disable)
 - `DAGU_SCHEDULER_RETRY_FAILURE_WINDOW` - Lookback window for DAG-level retry scanning (default: `24h`, `0` to disable)
 - `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)

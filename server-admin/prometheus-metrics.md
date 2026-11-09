@@ -39,6 +39,7 @@ export DAGU_SERVER_METRICS=public
 | `dagu_info` | Gauge | Build information (version, go_version labels) |
 | `dagu_uptime_seconds` | Gauge | Time since server start |
 | `dagu_scheduler_running` | Gauge | Whether the scheduler is running (1) or not (0) |
+| `dagu_scheduler_instances` | Gauge | Scheduler instances by `status`, `active` or `standby` |
 | `dagu_dags_total` | Gauge | Total number of DAGs |
 
 ### Aggregate DAG Run Metrics

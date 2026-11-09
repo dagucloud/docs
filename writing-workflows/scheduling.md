@@ -21,11 +21,13 @@ Dagu can run standby schedulers that take over automatically when the active sch
 dagu scheduler  # One instance becomes active; the others wait as standbys
 ```
 
-The scheduler uses directory-based locking so that one instance is active at a time. When the active scheduler stops cleanly, it releases the lock and a standby takes over within about 5 seconds. When it dies without releasing the lock, a standby takes over once the lock goes stale, usually 23 to 35 seconds later with the default settings, plus the time the new scheduler needs to start.
+The scheduler uses directory-based locking so that one instance is active at a time. When the active scheduler stops cleanly, it releases the lock and a standby takes over within about 5 seconds. When it dies without releasing the lock, a standby takes over once the lock goes stale, within 40 seconds with the default settings, plus the time the new scheduler needs to start.
 
-The active scheduler updates the lock every 7 seconds, and the lock goes stale after 30 seconds without an update. A standby judges the lock's age with its own clock, so keep the clocks of every scheduler host and the storage server synchronized.
+The active scheduler updates the lock every 7 seconds, and the lock goes stale after 30 seconds without an update.
 
-Failover does not make scheduling exactly-once. A scheduler that was paused past the stale threshold can dispatch a slot after another instance has taken over, so that slot can run twice.
+In 2.26.0 and earlier, a standby judges the lock's age with its own clock, so keep the clocks of every scheduler host and the storage server synchronized. A scheduler that was paused past the stale threshold can also dispatch a slot after another instance has taken over, so that slot can run twice. Later releases close both gaps.
+
+For storage requirements, setup, guarantees, and monitoring, see [Scheduler High Availability](/server-admin/deployment/high-availability).
 
 [Zombie detection](#zombie-detection) marks runs on a failed host as failed, and they are not resumed. To run a scheduled DAG again automatically, set a DAG-level [`retry_policy`](/writing-workflows/durable-execution). An always-on [service](/writing-workflows/services) restarts through its `restart_policy`.
 
@@ -41,7 +43,7 @@ scheduler:
 
 When enabled, access the health endpoint at `http://localhost:8090/health`.
 
-In high-availability deployments, every scheduler process exposes `/health`, including standby instances that are still waiting on the scheduler lock. Use the system status view or service registry status to distinguish the active scheduler from inactive standbys.
+In high-availability deployments, every scheduler process exposes `/health`, including standby instances that are still waiting on the scheduler lock. After 2.26.0, the response has a `role` of `active` or `standby`, and `/health?role=active` answers `503` on an instance that is not active. In earlier releases, use the system status view or service registry status to distinguish the active scheduler from inactive standbys.
 
 **Note**: The health check only runs when using `dagu scheduler` directly, not with `dagu start-all`.
 
@@ -62,9 +64,9 @@ The zombie detector runs every `scheduler.zombie_detection_interval` (default: 4
 3. After `scheduler.failure_threshold` consecutive stale checks, re-read the run's status. If it is still running, write status "failed". If the run is queued or waiting, which needs no process, or has completed (succeeded/cancelled/failed), do nothing.
 4. Independent of the background detector, status reads also repair verified stale local runs immediately once no fresh local proc heartbeat remains, so `dagu server` and direct CLI execution do not leave runs stuck in `running`.
 
-With defaults, a truly dead process is detected by the background scheduler in at most `scheduler.failure_threshold × scheduler.zombie_detection_interval` = 3 × 45s = **135 seconds**. A transiently stale process (GC pause, I/O lag) survives as long as it recovers within that window.
+With defaults, a truly dead process is detected by the background scheduler in at most `proc.stale_threshold + scheduler.failure_threshold × scheduler.zombie_detection_interval` = 90s + 3 × 45s = **225 seconds**. A transiently stale process (GC pause, I/O lag) survives as long as it recovers within that window.
 
-That 135-second worst case applies to the background scheduler detector only. `dagu server` and direct CLI status reads can repair sooner because they do not wait for `scheduler.failure_threshold` once the local proc heartbeat is already stale.
+That worst case applies to the background scheduler detector only. `dagu server` and direct CLI status reads can repair sooner because they do not wait for `scheduler.failure_threshold` once the local proc heartbeat is already stale.
 
 If a heartbeat file is deleted externally while the process is still alive, the heartbeat goroutine detects the missing file and recreates it on the next tick.
 
