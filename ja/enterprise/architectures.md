@@ -12,6 +12,7 @@ description: Dagu の代表的な構成である単一ノード、アクティ�
 | ホストの障害時は、手動の復旧で間に合う | [単一ノード](#single-node) |
 | ホストの障害でスケジュールを止めたくない | [アクティブ/スタンバイ](#active-standby) |
 | ジョブを別のホストやネットワークで動かしたい | [分散ワーカー](#distributed-workers) |
+| 閉域網の中で集中監視とアラートが必要 | [社内に置く Dagu Console](#private-console) |
 
 ## 単一ノード {#single-node}
 
@@ -81,6 +82,31 @@ description: Dagu の代表的な構成である単一ノード、アクティ�
 | 手順 | [Distributed Execution](/server-admin/distributed/) (英語) |
 
 アクティブ/スタンバイと分散ワーカーは組み合わせられます。Kubernetes の場合は [Helm チャートの分散モード](/server-admin/deployment/kubernetes#distributed-mode) (英語) を参照してください。
+
+## 社内に置く Dagu Console {#private-console}
+
+```text
+ +----------------------------+
+ | Private Dagu Console       |
+ | (inside your network)      |
+ +-------------+--------------+
+               ^  HTTPS (reports)
+       +-------+--------+
+       |                |
+ +-----+------+   +-----+------+
+ | Dagu server|   | Dagu server|
+ +------------+   +------------+
+```
+
+Enterprise 契約のもとで、ご依頼に応じて提供します。範囲と時期は案件ごとに取り決めます。
+
+| 項目 | 内容 |
+| --- | --- |
+| 必要なもの | Console 用のホスト、PostgreSQL、社内のメールサーバーまたは通知先 |
+| ライセンス | Enterprise 契約 |
+| Dagu サーバー障害時の影響 | Console はサーバーとは別に動くため、報告が途絶えたことをアラートできます。 |
+| Console 障害時の影響 | アラートは止まりますが、ジョブは動き続けます。 |
+| 手順 | [閉域網](/ja/server-admin/deployment/closed-network#private-dagu-console) |
 
 ## 環境の分離 {#environments}
 

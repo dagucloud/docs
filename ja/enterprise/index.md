@@ -22,7 +22,7 @@ Dagu の導入を検討する SIer と情報システム部門のための資料
 - **二重化:** アクティブ/スタンバイ構成には、利用者が用意する共有ストレージが必要です。障害が起きたホストで実行中だったジョブは失敗扱いとなり、途中から再開はしません。詳しくは[高可用性](/ja/server-admin/deployment/high-availability)を参照してください。
 - **権限:** ロールはサーバー全体またはワークスペース単位で割り当てます。ジョブ単位のアクセス制御はありません。
 - **移行:** 既存製品の定義を自動で変換するツールはありません。
-- **閉域網:** 期限超過や開始遅れの通知は Dagu Console の機能のため、閉域網では使えません。代わりの方法は[閉域網](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)を参照してください。
+- **閉域網:** 期限超過や開始遅れの通知は Dagu Console の機能です。閉域網では、Enterprise 契約でご依頼に応じて提供する[社内に置く Dagu Console](/ja/server-admin/deployment/closed-network#private-dagu-console)、または[独自の確認の仕組み](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)が必要です。
 
 ## 相談窓口
 

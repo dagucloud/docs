@@ -56,6 +56,10 @@ MCP clients ───── MCP ───────┘        │     ──�
 
 A 14-day trial covers one server with Team's features, acting on runs, MCP, and your team included, and needs no credit card. See [Free and Paid](/overview/console-monitoring#free-and-paid) and [pricing](https://dagu.sh/pricing).
 
+## Private Deployment
+
+Organizations that cannot connect to Dagu Cloud, or that want the control plane inside their own network, can have Dagu Console deployed there. This is available on request under an Enterprise agreement. See [Private Dagu Console](/server-admin/deployment/closed-network#private-dagu-console).
+
 ## Related Pages
 
 - [Monitoring](/overview/console-monitoring)

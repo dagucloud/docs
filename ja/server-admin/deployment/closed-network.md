@@ -43,11 +43,17 @@ Dagu Console に接続できないサーバーでは、オフラインライセ�
 
 データディレクトリを共有するアクティブ/スタンバイのペアに必要なライセンスは 1 つです。
 
+## 社内に置く Dagu Console {#private-dagu-console}
+
+閉域網の中で集中監視とアラートが必要な組織向けに、Dagu Console を自社ネットワーク内に構築できます。Enterprise 契約のもとで、ご依頼に応じて提供します。範囲と時期は案件ごとに取り決めます。`company@descarty.com` にお問い合わせください。
+
+各サーバーは Dagu Cloud の代わりに社内の Console へ報告します。Console はサーバーとは別に動くため、サーバーからの報告が途絶えたときにもアラートを出せます。
+
 ## 接続が必要な機能 {#what-needs-a-connection}
 
 | 機能 | 接続先 | 接続できない場合 |
 | --- | --- | --- |
-| [Dagu Console での監視](/overview/console-monitoring)(失敗したワークフロー、期限超過、報告が途絶えたサーバーのアラートを含む) | `console.dagu.sh` | 利用できません。以下を参照してください。 |
+| [Dagu Console での監視](/overview/console-monitoring)(失敗したワークフロー、期限超過、報告が途絶えたサーバーのアラートを含む) | `console.dagu.sh` | [社内に置く Dagu Console](#private-dagu-console) を使うか、[こちら](#alerts-without-dagu-console)を参照してください。 |
 | [公開 Webhook URL](/server-admin/authentication/public-webhook-urls) | `console.dagu.sh`、`relay.dagu.sh` | ネットワーク内からローカルの Webhook エンドポイントを使用してください。 |
 | [Dagu Cloud からのリモートアクセス](/overview/cloud-remote-access) | `console.dagu.sh`、`relay.dagu.sh` | MCP クライアントをサーバーに直接接続してください。 |
 | `dagu upgrade` | GitHub | [バイナリを手動で置き換えてください](/ja/server-admin/upgrades)。 |
@@ -57,7 +63,7 @@ Dagu Console に接続できないサーバーでは、オフラインライセ�
 
 ## Dagu Console を使用しないアラート {#alerts-without-dagu-console}
 
-期限、開始遅延、サーバー停止のアラートは Dagu Console が発行するため、閉域網では利用できません。必要なアラートは、ローカルで動作する機能を使って構築してください。
+期限、開始遅延、サーバー停止のアラートは Dagu Console が発行します。[社内に置く Dagu Console](#private-dagu-console) を使わない場合は、必要なアラートをローカルで動作する機能を使って構築してください。
 
 - **失敗したワークフロー:** [`handler_on.failure`](/writing-workflows/lifecycle-handlers) ステップ、または社内メールサーバー経由の[メール](/writing-workflows/email-notifications)。
 - **スケジューラの正常性:** `dagu_scheduler_instances` などの [Prometheus メトリクス](/server-admin/prometheus-metrics)、およびスケジューラの `GET /health`。

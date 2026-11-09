@@ -92,6 +92,8 @@ Connected servers check in with Dagu Console every hour, and right away when Dag
 
 Servers that cannot reach Dagu Console use an offline license. Create one with **Add offline server** on the console's **Instances** page and install it with `DAGU_LICENSE` or `DAGU_LICENSE_FILE`. An offline server takes a slot until its license is revoked.
 
+For central monitoring and alerts in an air-gapped network, see [Private Dagu Console](/server-admin/deployment/closed-network#private-dagu-console).
+
 ## Related Pages
 
 - [Monitoring](/overview/console-monitoring)

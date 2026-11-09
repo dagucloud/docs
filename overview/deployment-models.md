@@ -82,6 +82,14 @@ Unlike temporary workers, these stay up between runs, which is what buys label r
 | Route Docker, private-network, or data-local steps to hosts you keep running. | Distributed workers |
 | Keep scheduling through the failure of one host. | Any of these, with a [standby scheduler](/server-admin/deployment/high-availability) |
 
+## Where Dagu Console Runs
+
+| Option | Where it runs | Availability |
+|--------|---------------|--------------|
+| None | Run servers without a console. | Community |
+| Dagu Cloud | Hosted at `console.dagu.sh`. Servers connect out. | Free monitoring, Team, and Pro |
+| [Private Dagu Console](/server-admin/deployment/closed-network#private-dagu-console) | Inside your own network. Nothing connects to Dagu Cloud. | On request, under an Enterprise agreement |
+
 ## Monitoring Across Topologies
 
 Every topology can report to [Dagu Console](/overview/console-monitoring), which shows your servers together and emails you when a workflow fails or a server stops reporting. Several independent servers, such as one per site, each connect to the same workspace and appear side by side.

@@ -43,11 +43,17 @@ An offline server takes a license slot until its license is revoked. Paid featur
 
 An active and standby pair that shares a data directory needs one license.
 
+## Private Dagu Console
+
+Organizations that need central monitoring and alerts inside a closed network can have Dagu Console deployed in their own network. This is available on request under an Enterprise agreement, with the scope and schedule agreed per engagement. Contact `company@descarty.com`.
+
+Your servers report to it instead of Dagu Cloud. Because it runs separately from them, it can also alert when a server stops reporting.
+
 ## What needs a connection
 
 | Feature | Needs | Without it |
 | --- | --- | --- |
-| [Monitoring in Dagu Console](/overview/console-monitoring), including alerts for failed workflows, missed deadlines, and servers that stop reporting | `console.dagu.sh` | Not available. See below. |
+| [Monitoring in Dagu Console](/overview/console-monitoring), including alerts for failed workflows, missed deadlines, and servers that stop reporting | `console.dagu.sh` | Use a [private Dagu Console](#private-dagu-console), or see [below](#alerts-without-dagu-console). |
 | [Public webhook URLs](/server-admin/authentication/public-webhook-urls) | `console.dagu.sh`, `relay.dagu.sh` | Use the local webhook endpoint from inside your network. |
 | [Remote access from Dagu Cloud](/overview/cloud-remote-access) | `console.dagu.sh`, `relay.dagu.sh` | Connect MCP clients to the server directly. |
 | `dagu upgrade` | GitHub | [Replace the binary by hand](/server-admin/upgrades). |
@@ -57,7 +63,7 @@ An active and standby pair that shares a data directory needs one license.
 
 ## Alerts without Dagu Console
 
-Deadline, late-start, and server-stopped alerts come from Dagu Console, so they are not available in a closed network. Build the alerts you need from what runs locally:
+Deadline, late-start, and server-stopped alerts come from Dagu Console. Without a [private Dagu Console](#private-dagu-console), build the alerts you need from what runs locally:
 
 - **Failed workflows:** a [`handler_on.failure`](/writing-workflows/lifecycle-handlers) step, or [email](/writing-workflows/email-notifications) through your internal mail server.
 - **Scheduler health:** the `dagu_scheduler_instances` and other [Prometheus metrics](/server-admin/prometheus-metrics), and `GET /health` on the scheduler.
