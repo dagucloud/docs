@@ -43,7 +43,7 @@ For operating choices across single-server, temporary-worker, and distributed-wo
 - Consumes queued DAG runs and executes them
 - Runs active and standby instances on shared storage through directory-based locking
 - A standby takes over automatically when the active scheduler fails
-- See [Scheduling](/writing-workflows/scheduling) for details
+- See [Scheduling](/writing-workflows/scheduling) and [High Availability](/server-admin/deployment/high-availability) for details
 
 ### 3. Agent
 - Manages complete lifecycle of a single DAG run

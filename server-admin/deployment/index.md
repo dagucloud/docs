@@ -10,5 +10,7 @@ Choose the simplest deployment that meets the workflow's execution needs.
 | Deploy into an existing Kubernetes cluster | [Kubernetes (Helm)](./kubernetes) |
 | Install a native background service | [Linux systemd](./systemd), [macOS](./macos), or [Windows](./windows) |
 | Isolate development, staging, and production | [Multi-Environment Deployments](./multi-environment) |
+| Keep scheduling through the failure of one host | [Scheduler High Availability](./high-availability) |
+| Run without internet access | [Closed Networks](./closed-network) |
 
 For containers, review [Docker Images](./docker-images) before choosing a tag. For execution across multiple hosts, see [Distributed Execution](/server-admin/distributed/).

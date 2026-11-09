@@ -250,6 +250,19 @@ workerPools:
 
 Non-empty `nodeSelector`, `tolerations`, and `affinity` values on a worker pool override their global counterparts for that pool.
 
+### Standby schedulers
+
+The scheduler defaults to one replica in distributed mode. Set two to keep a standby ready:
+
+```yaml
+scheduler:
+  replicas: 2
+```
+
+The replicas share the `ReadWriteMany` volume and compete for one lock. The replica holding the lock schedules runs and consumes queues, and another takes over when the lock is released or stops being renewed. See [Scheduler High Availability](/server-admin/deployment/high-availability) for the storage requirements and what is guaranteed.
+
+Image tag `2.26.0` and earlier can run one schedule slot twice when a scheduler stalls past `scheduler.lock_stale_threshold`. Later releases stop dispatching before the lock can be taken over.
+
 ## Configuration and environment variables
 
 The chart renders a minimal Dagu configuration into `dagu-config` and mounts it at `/etc/dagu/dagu.yaml`. Every Deployment receives a checksum annotation, so configuration changes trigger a rollout.

@@ -80,6 +80,7 @@ Unlike temporary workers, these stay up between runs, which is what buys label r
 | Try Dagu, or run scheduled work on a single host. | Single server |
 | Give each run its own compute and hold no capacity between jobs. | Temporary workers |
 | Route Docker, private-network, or data-local steps to hosts you keep running. | Distributed workers |
+| Keep scheduling through the failure of one host. | Any of these, with a [standby scheduler](/server-admin/deployment/high-availability) |
 
 ## Monitoring Across Topologies
 

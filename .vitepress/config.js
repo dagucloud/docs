@@ -174,6 +174,8 @@ const fullSidebar = [
           { text: "Docker", link: "/server-admin/deployment/docker" },
           { text: "Docker Compose", link: "/server-admin/deployment/docker-compose" },
           { text: "Kubernetes (Helm)", link: "/server-admin/deployment/kubernetes" },
+          { text: "High Availability", link: "/server-admin/deployment/high-availability" },
+          { text: "Closed Networks", link: "/server-admin/deployment/closed-network" },
         ],
       },
       {
@@ -198,6 +200,8 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "From Cron", link: "/migration/from-cron" },
+          { text: "From Rundeck", link: "/migration/from-rundeck" },
+          { text: "From JP1/AJS3", link: "/migration/from-jp1" },
         ],
       },
     ],
@@ -548,6 +552,12 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "Operations", link: "/server-admin/operations" },
+          { text: "System Requirements", link: "/server-admin/system-requirements" },
+          { text: "Backup and Restore", link: "/server-admin/backup-restore" },
+          { text: "Upgrades", link: "/server-admin/upgrades" },
+          { text: "Troubleshooting", link: "/server-admin/troubleshooting" },
+          { text: "Verify Releases", link: "/server-admin/verify-releases" },
+          { text: "Support Policy", link: "/server-admin/support-policy" },
           { text: "Git Sync", link: "/server-admin/git-sync" },
           { text: "Remote Nodes", link: "/server-admin/remote-nodes" },
           { text: "Tunnel (Tailscale)", link: "/server-admin/tunnel" },
