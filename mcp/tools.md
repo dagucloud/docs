@@ -286,6 +286,7 @@ Use `dagu_execute` for run control and for deciding steps that wait for a person
 | `queue` | Queue override for `enqueue` |
 | `singleton` | Prevent duplicate running or queued runs for `start` and `enqueue`. A DAG with a `restart_policy` has [one run at a time](/writing-workflows/services#one-run-at-a-time) without it, and `retry` is refused the same way |
 | `noReuse` | Run eligible build steps instead of reusing prior materializations for `start` and `enqueue` |
+| `scheduleTime` | Schedule slot for `start` and `enqueue` of a stored DAG: `latest`, a date, a time in the schedule's zone, or RFC 3339. The run gets that slot's schedule time and window. A slot later than now is refused; a time that is not a fire time adds an entry to `warnings` in the result |
 | `labels` | Labels as `key=value` or key-only strings for `start` and `enqueue` |
 | `stepName` | Optional step name for retry; required for `approve`, `reject`, and `push_back` as the waiting step to decide |
 | `includeDownstream` | With `stepName`, retry that step and every reachable descendant |

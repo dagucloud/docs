@@ -416,6 +416,10 @@ steps:
 
 See [Queue Assignment](/writing-workflows/queues).
 
+## Schedule Slot
+
+A child run takes the schedule slot of a parent run that has one: `${context.run.scheduled_at}`, the [schedule window](/writing-workflows/runtime-variables#schedule-window), and its timezone. A shared child DAG with no schedule of its own then processes the same window as the scheduled parent, including when the parent reruns a past slot. A child of a parent with no slot has none.
+
 ## What a Child Run Does Not Inherit
 
 ### Working Directory

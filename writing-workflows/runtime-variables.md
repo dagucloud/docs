@@ -16,7 +16,11 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.dag.name}` | All steps and handlers | `DAG_NAME` |
 | `${context.run.id}` | All steps and handlers | `DAG_RUN_ID` |
 | `${context.run.status}` | Lifecycle handlers and other status-aware surfaces | `DAG_RUN_STATUS` |
-| `${context.run.scheduled_at}` | Scheduled, catchup, and one-off scheduled runs | None |
+| `${context.run.scheduled_at}` | Runs with a schedule slot: scheduled, catchup, and one-off runs, runs started with `--scheduled-at`, their reruns, and their sub-DAG runs | None |
+| `${context.run.interval_start}` | Runs with a slot, when the DAG has a recurring schedule | None |
+| `${context.run.interval_end}` | Runs with a slot | None |
+| `${context.run.next_scheduled_at}` | Runs with a slot, when the DAG has a recurring schedule | None |
+| `${context.run.timezone}` | Runs with a slot | None |
 | `${context.run.root_name}` | Sub-DAG runs only | None |
 | `${context.run.root_id}` | Sub-DAG runs only | None |
 | `${context.attempt.id}` | Run-attempt-aware scopes | None |
@@ -43,6 +47,22 @@ Unknown fields under the `context` namespace are preserved at runtime. Inspectio
 Older workflows may still contain short built-in context aliases such as `${run.id}`, `${dag.name}`, `${paths.log_file}`, or `${step.name}`. These aliases remain supported only for the exact fields that existed before the `context` namespace was introduced. New workflows and documentation should use `${context.*}`. Dagu does not reserve arbitrary descendants of the short aliases, so text such as `${step.xxx.foo}` is not a built-in context reference.
 
 Webhook payloads, webhook headers, and parameter JSON payloads are object-valued compatibility environment variables. They are not structured `${context.*}` string references.
+
+### Schedule Window
+
+A run of a schedule slot owns the window from the previous fire of the DAG's schedule up to its own fire: `[interval_start, interval_end)`. For a run fired at 12:00 by `*/30 * * * *`, `interval_start` is 11:30 and `next_scheduled_at` is 12:30.
+
+```yaml
+schedule: "CRON_TZ=Asia/Tokyo */30 * * * *"
+steps:
+  - id: load
+    run: ./load.sh --from ${context.run.interval_start} --to ${context.run.interval_end}
+```
+
+- The window is derived from the schedule, not from earlier runs, and is recorded when the run is created. A retry processes the same window after the schedule is edited.
+- The bounds are UTC RFC 3339 timestamps. `timezone` names the zone the slot's schedule is evaluated in, such as `Asia/Tokyo`, or its UTC offset when the zone has no name.
+- Only recurring start schedules for the run's profile count. One-off `at` schedules never bound a window, and a fire skipped by a [business calendar](/writing-workflows/business-calendars) is not a fire: Monday's window starts at Friday's fire.
+- A DAG with no recurring schedule has no `interval_start` or `next_scheduled_at`.
 
 ## Availability
 

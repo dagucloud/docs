@@ -112,7 +112,8 @@ A DAG with `restart_policy: always` or `unless-stopped` has one run at a time, s
 - `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--run-id, -r` - Custom run ID
-- `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
+- `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run, for its schedule slot
+- `--scheduled-at` - Run for a schedule slot: `latest`, a date, a time in the schedule's zone, or RFC 3339. See [Running a Past Slot](/writing-workflows/scheduling#running-a-past-slot)
 - `--params-stdin` - Read parameters from piped or redirected stdin, up to 1 MiB; `--` and `--params` take precedence
 - `--profile` - Runtime profile to apply to this run
 - `--no-reuse` - Recompute eligible build steps instead of reusing prior materializations
@@ -156,6 +157,9 @@ dagu start --name my_custom_name my-workflow.yaml
 # Clone parameters from a historic run
 dagu start --from-run-id 20241031_235959 example-dag.yaml
 
+# Run the slot of November 9 again
+dagu start --scheduled-at 2026-11-09 etl.yaml
+
 # Run one step on its own
 dagu start --only scrape example-dag.yaml
 
@@ -194,6 +198,7 @@ dagu restart [options] DAG_NAME
 
 **Options:**
 - `--run-id, -r` - Run to restart (optional)
+- `--scheduled-at` - Schedule slot for the new run. Without it, the new run keeps the slot of the run it restarts
 
 ```bash
 dagu restart my-workflow                   # Restart the currently running DAG-run
@@ -745,9 +750,11 @@ dagu dry [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--profile` - Runtime profile to use during the dry run
 - `--no-reuse` - Preview a build run with reuse disabled
 - `--format, -f` - Output format for dry-run checks: `text` (default) or `json`
+- `--scheduled-at` - Simulate the run of a schedule slot, including one that has not come yet, and print the slot and its window
 
 ```bash
 dagu dry my-workflow.yaml
+dagu dry --scheduled-at 2026-11-30 etl.yaml  # Preview the month-end slot
 dagu dry etl.yaml -- DATE=2024-01-01  # With parameters
 dagu dry --name my_custom_name my-workflow.yaml  # Override DAG name
 dagu dry --profile prod my-workflow.yaml
@@ -1150,6 +1157,7 @@ dagu enqueue [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--queue, -u` - Override DAG-level queue name for this enqueue
+- `--scheduled-at` - Run for a schedule slot, as for `start`
 - `--params-stdin` - Read parameters from piped or redirected stdin, up to 1 MiB; `--` and `--params` take precedence
 - `--profile` - Runtime profile to apply when the queued run starts
 - `--no-reuse` - Recompute eligible build steps when the queued run starts

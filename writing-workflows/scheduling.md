@@ -436,6 +436,27 @@ Live scheduled runs are also blocked while a catchup run is queued for the same 
 
 At most 1000 missed runs are buffered per DAG. If more than 1000 runs were missed, only the 1000 most recent are replayed.
 
+## Running a Past Slot
+
+Each scheduled run owns a slot: its fire time, and the [window](/writing-workflows/runtime-variables#schedule-window) from the previous fire up to it. To run a slot again, for example after fixing a bug, start a run for it:
+
+```bash
+dagu start --scheduled-at latest etl.yaml
+dagu start --scheduled-at 2026-11-09 etl.yaml               # the only fire that day
+dagu start --scheduled-at 2026-11-09T02:00 etl.yaml         # in the schedule's zone
+dagu start --scheduled-at 2026-11-09T02:00:00+09:00 etl.yaml
+```
+
+The run gets the schedule time and window the scheduled run of that slot got, so the DAG needs no date parameters. The same works with `dagu enqueue`, the `scheduleTime` field of the start and enqueue API and of the MCP execute tool, and **Scheduled at** in the run dialog, which lists the latest slots.
+
+- **A slot later than now is refused**, so no run loads a day that has no data yet. `dagu dry --scheduled-at` accepts one and prints the slot and its window, to check a month end before it comes.
+- **A date** names the only fire of that day. On a schedule that fires zero or several times that day, the command fails and lists the fires.
+- **A time without an offset** is read in the schedule's zone. If the schedules use different zones, give an offset. A local time skipped by a daylight saving change is refused.
+- **A time that is not a fire time** is accepted with a warning naming the nearest fires, since a slot from before a schedule edit is no longer one.
+- **A schedule whose [calendar](/writing-workflows/business-calendars) file does not load** makes the request fail, since that schedule would drop out of the window.
+- **The run is manual.** The scheduler reads it by when it ran, as any manual run, so it never stands in for the scheduled run of its slot.
+- **Reruns keep the slot.** `dagu restart`, `dagu start --from-run-id`, and **Retry as a new run** start the new run for the historic run's slot unless another is named. A [child DAG](/writing-workflows/sub-dags#schedule-slot) takes its parent's slot.
+
 ## Pausing the Scheduler
 
 Suspending a single DAG stops that DAG only. To freeze every scheduled run at once, for a maintenance window or an incident, pause the scheduler.
