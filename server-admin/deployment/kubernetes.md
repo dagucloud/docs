@@ -127,7 +127,7 @@ Open <https://dagu.example.com>. Because the bundled UI and API use the same ori
 When OIDC is enabled, set `auth.oidc.clientUrl` to the same external URL and register its `/oidc-callback` path with the identity provider.
 
 ::: warning Proxy authentication
-Proxy-header authentication cannot use the chart-managed Ingress. The authenticating proxy must be the only path to the UI Service. Keep `ingress.enabled=false` and follow [Proxy Authentication](/server-admin/authentication/proxy).
+Proxy-header authentication cannot use the chart-managed Ingress. The authenticating proxy must be the only path to the UI Service. Keep `ingress.enabled=false` and follow [Proxy Authentication](/server-admin/authentication/proxy). On Dagu releases after v2.26.0, also list the pod range of the component that forwards requests to Dagu in `config.ipAccess.trustedProxies`.
 :::
 
 ### LoadBalancer or NodePort

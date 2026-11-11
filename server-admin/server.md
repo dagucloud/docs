@@ -347,6 +347,8 @@ When Dagu runs behind a reverse proxy or ingress, add only that proxy's address 
 
 Configure the proxy to remove client-supplied forwarding headers before setting or appending the verified client address. Keep trusted proxy ranges as narrow as possible.
 
+On Dagu releases after v2.26.0, [proxy authentication](/server-admin/authentication/proxy#trusted-proxy-addresses) also uses `trusted_proxies`: it accepts identity headers only from a listed peer, or only from loopback when the list is empty.
+
 ## Common Setups
 
 ### Development

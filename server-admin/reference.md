@@ -30,7 +30,7 @@ cache: "normal"            # Cache mode
 # HTTP client IP allowlist
 ip_access:
   allowed_ips: []         # IPv4/IPv6 addresses or CIDR ranges; empty disables filtering
-  trusted_proxies: []     # Proxies permitted to supply forwarded client IP headers
+  trusted_proxies: []     # Proxies permitted to supply forwarded client IP and proxy login headers
 
 # Terminal (web-based shell access)
 terminal:
@@ -360,7 +360,7 @@ Variables ending in `_FILE` name a file that holds a secret. See [Secrets From F
 - `DAGU_SKIP_EXAMPLES` - Skip automatic creation of example DAGs (default: `false`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 - `DAGU_IP_ACCESS_ALLOWED_IPS` - Comma-separated IPv4/IPv6 addresses and CIDR ranges allowed to access the HTTP server. An empty value disables filtering.
-- `DAGU_IP_ACCESS_TRUSTED_PROXIES` - Comma-separated proxy addresses and CIDR ranges permitted to supply forwarded client IP headers.
+- `DAGU_IP_ACCESS_TRUSTED_PROXIES` - Comma-separated proxy addresses and CIDR ranges permitted to supply forwarded client IP headers and, on releases after v2.26.0, proxy authentication identity headers.
 - `DAGU_CACHE` - Cache mode (default: `normal`)
 - `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated origins allowed for cross-origin browser access (`cors_allowed_origins`; default: empty, which disables it). See [Cross-Origin Browser Access](/server-admin/server#cross-origin-browser-access).
 - `DAGU_ALLOWED_HOSTS` - Comma-separated host names accepted, beyond those always accepted, on every request with `auth.mode: none` and on first-admin setup (`allowed_hosts`; default: empty). An entry is an exact name, `.example.com` for a domain and its subdomains, or `*` to turn the check off. See [Allowed Host Names](/server-admin/server#allowed-host-names).
@@ -895,7 +895,7 @@ peer:
 - `cors_allowed_origins`: empty (cross-origin browser access disabled)
 - `allowed_hosts`: empty (only the always-accepted host names)
 - `ip_access.allowed_ips`: empty (HTTP client IP filtering disabled)
-- `ip_access.trusted_proxies`: empty (forwarded client IP headers are ignored)
+- `ip_access.trusted_proxies`: empty (forwarded client IP headers are ignored, and proxy authentication accepts only loopback peers)
 - `default_execution_mode`: `local`
 - `coordinator.enabled`: `true`
 - `coordinator.worker_wait_timeout`: `2m`

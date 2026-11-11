@@ -5,13 +5,16 @@ authenticated identity headers. It is an optional login method under
 `auth.mode: builtin`, so local login, OIDC, and API keys remain available.
 
 ::: danger Protect the Dagu UI service
-Dagu treats the configured user header as proof of identity. Dagu does not
-check the source IP of the request. If a client can reach the UI service
-without passing through the authenticating proxy, that client can impersonate
-another user.
+Dagu treats the configured user header as proof of identity. On Dagu releases
+after v2.26.0, it accepts the header only from a
+[trusted proxy address](#trusted-proxy-addresses). Earlier releases accept it
+from any client. Either way, a client that can reach the UI service from a
+trusted address without passing through the authenticating proxy can
+impersonate another user.
 
 Make the proxy the only network path to the UI service. Enforce this with
-private service exposure, firewall rules, or a Kubernetes NetworkPolicy.
+private service exposure, firewall rules, or a Kubernetes NetworkPolicy, and
+keep the trusted proxy list narrow.
 :::
 
 Proxy authentication requires a self-host license with SSO. See the
@@ -39,6 +42,9 @@ other route. Use [API keys](./api-keys) for programmatic access.
 - Supply a stable, unique user identifier that will not be reassigned.
 - Run one Dagu UI process. The Helm chart enforces one UI replica when proxy
   authentication is enabled.
+- Connect the proxy to Dagu from a trusted address: loopback, or an address
+  listed in `ip_access.trusted_proxies`. See
+  [Trusted proxy addresses](#trusted-proxy-addresses).
 - Disable the builtin tunnel. Dagu rejects proxy authentication with
   `tunnel.enabled: true` because the tunnel creates another ingress path.
 - Do not use proxy authentication with `headless: true` or an auth mode other
@@ -125,6 +131,47 @@ DAGU_AUTH_PROXY_WORKSPACE_MAPPINGS='{"payments-team":[{"workspace":"payments","r
 
 Invalid JSON, duplicate object keys, unknown grant fields, or trailing input
 prevents startup.
+
+### Trusted proxy addresses
+
+On Dagu releases after v2.26.0, `/proxy-login` reads the identity headers only
+when the direct TCP peer is a trusted proxy:
+
+- With `ip_access.trusted_proxies` set, the peer must match one of its
+  addresses or CIDR ranges. Loopback is not trusted unless it is listed.
+- With the list empty, only loopback peers (`127.0.0.0/8` and `::1`) are
+  trusted.
+
+`X-Forwarded-For` and `X-Real-IP` do not change the peer for this check. A
+request from any other peer returns `403 access denied`, and Dagu logs
+`Proxy login denied` with `reason=untrusted_source` and the peer address.
+
+The peer is the component that opens the connection to Dagu, which is not
+always the authentication service:
+
+| Deployment | Peer that Dagu sees | Configuration |
+|------------|---------------------|---------------|
+| Proxy and Dagu on one host, no containers | `127.0.0.1` | None |
+| Proxy sidecar in the Dagu pod, or a container sharing its network namespace | `127.0.0.1` | None |
+| Proxy on the host, Dagu in Docker with a published port | The Docker bridge gateway, usually `172.17.0.1` | List the gateway |
+| Proxy in another container on a Docker network | That container's address | List the container or network |
+| Gateway, ingress controller, or proxy pod in Kubernetes | That pod's address | List the pod range |
+| Proxy on another host | That host's address | List the host |
+
+```yaml
+ip_access:
+  trusted_proxies:
+    - 10.42.0.0/16
+```
+
+The environment-variable form is
+`DAGU_IP_ACCESS_TRUSTED_PROXIES=10.42.0.0/16`. Separate multiple entries with
+commas. The peer address in the `Proxy login denied` log line shows what to
+list.
+
+The same list decides which peers may supply forwarded client addresses for
+`ip_access.allowed_ips`. See
+[IP Access Allowlist](/server-admin/server#ip-access-allowlist).
 
 ## Identity header contract
 
@@ -217,9 +264,9 @@ extraArgs:
 `X-Auth-Request-Groups` from its auth endpoint. Verify that the chosen provider
 puts a stable identifier in the user header.
 
-`trusted-proxy-ip` is an oauth2-proxy setting for forwarded headers. It is not a
-Dagu source-IP check. Restrict it to the gateways that can reach oauth2-proxy.
-Also restrict direct access to oauth2-proxy itself.
+`trusted-proxy-ip` is an oauth2-proxy setting for forwarded headers, separate
+from Dagu's `ip_access.trusted_proxies`. Restrict it to the gateways that can
+reach oauth2-proxy. Also restrict direct access to oauth2-proxy itself.
 
 Configure the gateway to call `/oauth2/auth`, redirect unauthenticated users to
 `/oauth2/start`, and copy only the two configured identity headers to Dagu. The
@@ -275,6 +322,12 @@ auth:
       groupMappings:
         dagu-admins: admin
       workspaceMappings: {}
+
+config:
+  ipAccess:
+    # Pod range of the component that forwards requests to Dagu.
+    trustedProxies:
+      - 10.42.0.0/16
 ```
 
 The chart rejects proxy authentication when `ui.replicas` is not `1`, when
@@ -298,6 +351,8 @@ Check these cases before exposing Dagu:
 
 - A valid proxy session creates the expected user and access.
 - A forged user or groups header is rejected or overwritten.
+- A request to `/proxy-login` from an untrusted address returns
+  `403 access denied`.
 - An unrelated host or pod cannot reach the Dagu UI service directly.
 - An unmatched identity is rejected when `require_mapping` is enabled.
 - A disabled Dagu user cannot sign in.
@@ -311,7 +366,7 @@ Typical `/proxy-login` responses are:
 | `400 invalid request` | The request has a query string or body. |
 | `400 invalid proxy identity` | The user header is duplicated, or a value is invalid or too large. |
 | `401 proxy identity unavailable` | The user header is missing or empty, or a required groups header is absent. An empty groups value is valid. |
-| `403 access denied` | The license, signup policy, mapping policy, or account state denied login. |
+| `403 access denied` | The request did not come from a trusted proxy address, or the license, signup policy, mapping policy, or account state denied login. |
 | `404 not found` | Proxy authentication is disabled. |
 | `405 method not allowed` | The endpoint received a method other than `GET`. |
 
