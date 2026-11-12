@@ -288,6 +288,7 @@ retry_policy:
 |-------|------|-------------|---------|
 | `hist_retention_days` | integer | Days of DAG-run history to retain. Must be `0` or greater. `0` uses the default when `hist_retention_runs` is not set. A DAG with a `restart_policy` keeps its latest 100 runs by default instead; see [Services](/writing-workflows/services#history). | `30` |
 | `hist_retention_runs` | integer | Number of DAG runs to retain. Must be greater than `0` if set. Cannot be set with `hist_retention_days`. | - |
+| `slot_retention_days` | integer | Days Dagu keeps the record of each schedule slot, which a [backfill](/writing-workflows/backfill) reads to skip slots that already ran. It outlasts the run history. Must be greater than `0`. | `730` |
 | `max_output_size` | integer | Maximum captured output size per step, in bytes. | `1048576` |
 
 ### Data, Environment, And Files

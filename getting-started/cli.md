@@ -1319,6 +1319,70 @@ dagu calendar fires payroll
 dagu calendar fires payroll.yaml --from 2027-01-01T00:00:00+09:00 --count 20
 ```
 
+### `backfill`
+
+Run a scheduled DAG for past schedule slots. See [Backfill](/writing-workflows/backfill).
+
+#### `backfill start`
+
+```bash
+dagu backfill start <DAG> (--from <time> [--to <time>] | --slot <time>...) [flags]
+```
+
+Plans a backfill, prints the plan, and starts it once confirmed. The scheduler queues the runs.
+
+| Flag | Meaning | Default |
+| --- | --- | --- |
+| `--from` | First slot, inclusive: a date, a time without an offset, or an RFC 3339 time | required without `--slot` |
+| `--to` | Last slot, inclusive | now |
+| `--slot` | A slot to run; repeatable. Excludes `--from`, `--to`, and `--rerun` | - |
+| `--rerun` | `none`, `failed`, or `all` | `none` |
+| `--max-concurrency` | Runs of the backfill at once | `1` |
+| `--on-failure` | `stop` or `continue` | `stop` |
+| `--params` | Params for every run | the DAG's defaults |
+| `--profile` | Runtime profile for every run | the DAG's default |
+| `--dry-run` | Print the plan and start nothing | off |
+| `--format` | `text` or `json` | `text` |
+| `--yes`, `-y` | Start without asking; required without a terminal | off |
+
+```bash
+dagu backfill start etl --from 2026-10-02 --to 2026-11-01
+dagu backfill start etl --from 2026-10-02 --rerun failed --dry-run
+dagu backfill start etl --slot 2026-10-05T02:00 --slot 2026-10-09T02:00 --yes
+```
+
+#### `backfill ls`
+
+```bash
+dagu backfill ls [<DAG>]
+```
+
+Lists backfills, oldest first, with their status and number of slots.
+
+#### `backfill status`
+
+```bash
+dagu backfill status <backfill id> [--format text|json]
+```
+
+Shows a backfill's status and the state and run of each slot.
+
+#### `backfill cancel`
+
+```bash
+dagu backfill cancel <backfill id> [--stop-running]
+```
+
+Withdraws the backfill's queued runs and cancels the slots it has not reached. Running runs finish unless `--stop-running` stops them.
+
+#### `backfill resume`
+
+```bash
+dagu backfill resume <backfill id> [--max-concurrency <n>] [--on-failure stop|continue] [--dry-run] [--format text|json] [--yes]
+```
+
+Plans again the slots that have not succeeded, with the DAG's current definition, and runs them with new runs.
+
 ### `example`
 
 List bundled example DAGs or print one example by numeric ID.

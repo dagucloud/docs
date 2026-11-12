@@ -284,6 +284,7 @@ scheduler:
   retry_failure_window: "24h"  # Lookback window for DAG-level retry scanning (0 to disable). Current limitation: window uses the original DAG-run time bucket, not the latest failed attempt timestamp.
   failure_threshold: 3             # Consecutive stale checks before marking a run as failed
   wake_hold: "0"                   # Longest the scheduler holds its ticks after the host wakes from sleep (0 = never hold)
+  backfill_max_slots: 10000        # Most slots one backfill may cover
 
 # Local proc heartbeat/liveness (used by all local run owners: server, scheduler, CLI runs, and workers)
 proc:
@@ -562,6 +563,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_SCHEDULER_RETRY_FAILURE_WINDOW` - Lookback window for DAG-level retry scanning (default: `24h`, `0` to disable)
 - `DAGU_SCHEDULER_FAILURE_THRESHOLD` - Consecutive stale checks before marking a run as failed (default: `3`)
 - `DAGU_SCHEDULER_WAKE_HOLD` - Longest the scheduler holds its ticks after the host wakes from sleep, paused by `scheduler` until the pause is cleared (`scheduler.wake_hold`; default: `0`, never hold). See [Wake hold](/writing-workflows/scheduling#wake-hold).
+- `DAGU_SCHEDULER_BACKFILL_MAX_SLOTS` - Most slots one [backfill](/writing-workflows/backfill) may cover (`scheduler.backfill_max_slots`; default: `10000`)
 
 ### Signal Handling
 - `DAGU_SIGNAL_PROPAGATION` - Forward shutdown signals (`SIGINT`/`SIGTERM`) received by `dagu server`, `dagu scheduler`, or `dagu start-all` to the DAG runs it started, and wait for their cleanup before exiting (default: `false`). See [Graceful Shutdown](/server-admin/operations#graceful-shutdown).

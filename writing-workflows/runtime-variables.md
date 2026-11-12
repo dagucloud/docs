@@ -28,7 +28,7 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.step.id}` | Current executable step when it has an `id` | None |
 | `${context.step.name}` | Current step or handler | `DAG_RUN_STEP_NAME` |
 | `${context.step.repeat_index}` | Current step with `repeat_policy` | `DAG_RUN_STEP_REPEAT_INDEX` |
-| `${context.trigger.type}` | When the trigger type is known: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`, `restart`, or `file` | None |
+| `${context.trigger.type}` | When the trigger type is known: `scheduler`, `manual`, `webhook`, `subdag`, `retry`, `catchup`, `restart`, `file`, or `backfill`. A retry of a [backfill](/writing-workflows/backfill) run stays `backfill`. | None |
 | `${context.trigger.actor}` | Runs started by an attributable actor | None |
 | `${context.paths.log_file}` | All steps and handlers | `DAG_RUN_LOG_FILE` |
 | `${context.paths.work_dir}` | When a per-run work directory is available | `DAG_RUN_WORK_DIR` |

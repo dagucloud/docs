@@ -457,6 +457,8 @@ The run gets the schedule time and window the scheduled run of that slot got, so
 - **The run is manual.** The scheduler reads it by when it ran, as any manual run, so it never stands in for the scheduled run of its slot.
 - **Reruns keep the slot.** `dagu restart`, `dagu start --from-run-id`, and **Retry as a new run** start the new run for the historic run's slot unless another is named. A [child DAG](/writing-workflows/sub-dags#schedule-slot) takes its parent's slot.
 
+To run every slot of a range, skipping those that already ran, use a [backfill](/writing-workflows/backfill).
+
 ## Pausing the Scheduler
 
 Suspending a single DAG stops that DAG only. To freeze every scheduled run at once, for a maintenance window or an incident, pause the scheduler.
