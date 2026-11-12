@@ -220,6 +220,7 @@ Returns the DAGs that set a `restart_policy`, each as one object with its state.
       "name": "worker",
       "restartPolicy": "always",
       "restartWaitSec": 5,
+      "queue": "worker",
       "state": "running",
       "suspended": false,
       "consecutiveFailures": 3,
@@ -234,6 +235,9 @@ Returns the DAGs that set a `restart_policy`, each as one object with its state.
 }
 ```
 
+- `queue`: the queue the runs of the DAG enter: the queue the DAG sets, or its name when it sets none.
+- `nextRestartAt`: when the scheduler starts the next run, with the states `restarting` and `failing`. It is `restart_wait_sec` after the latest run ended, or longer while runs fail soon after they start; see [Backoff](/writing-workflows/services#backoff).
+- `restartHold`: why no next run comes, in place of `nextRestartAt`: `paused` while an operator has paused the scheduler, `noScheduler` while no scheduler is running.
 - `consecutiveFailures`: how many of the newest ended runs in a row did not succeed, up to 10. A success or a stop by an operator ends the count. Above zero while the DAG is `running`, it means the DAG keeps failing.
 - `latestRun.error`: the first failed step and its error, such as `serve: exit status 3`, once the latest run has ended without success.
 - `readError`: why the state of the DAG could not be read. It comes with the state `failing`.
@@ -245,6 +249,7 @@ Returns the DAGs that set a `restart_policy`, each as one object with its state.
 |-------|---------|
 | `pending` | No run is alive yet: the DAG has no run, or its latest run waits in the queue. |
 | `running` | A run is alive. |
+| `waiting` | A run is alive but waits for a person, such as an approval. |
 | `restarting` | The latest run succeeded, or an operator stopped the latest run of an `always` DAG, and the next run is due. |
 | `failing` | The latest run did not succeed and the next run is due, or the latest run cannot be read, which `readError` reports. |
 | `suspended` | The DAG is suspended and gets no new run. |
