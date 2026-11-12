@@ -385,7 +385,7 @@ When `dagu_read` with `target=run` lists a step as waiting with `approval` or `h
 
 - The result holds the `plan` and, once submitted, `backfillId`. `existing: true` means a backfill with the same options was already open.
 - If the slots' history changed since the dry run, the call fails with `conflict`, starts nothing, and returns the new plan in `details.plan`.
-- `backfill_resume` runs again the backfill's slots that have not succeeded; `backfill_cancel` cancels it.
+- `backfill_resume` runs again the backfill's slots that have neither succeeded nor been skipped; `backfill_cancel` cancels it. Both need `name` to be the backfill's DAG and fail with `invalid_tool_input` otherwise.
 
 ## Through Dagu Cloud
 
