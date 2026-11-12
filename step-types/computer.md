@@ -602,6 +602,7 @@ It exits nonzero and prints a `Problem:` line for each missing condition. With `
 - macOS ties the grants to the binary. After replacing an unsigned `dagu` binary, grant them again.
 - The Accessibility permission also lets steps read windows' elements for [exact checks](#exact-checks), [element replay](#replaying-by-element), and [extract binding](#outputs). An Electron or Chromium application builds its element tree when a step first asks for it.
 - Keep the user logged in and turn off the automatic screen lock. While a step uses the desktop, Dagu keeps the display and the Mac awake, but a screen that locks, or another user's session taking the display, fails the step.
+- Typed text goes through an ASCII-capable input source. While the keyboard is on an input method, such as Japanese Hiragana, a step selects the current ASCII-capable input source, such as ABC, before it types and selects the previous one again after. Keep one ASCII-capable input source enabled in System Settings > Keyboard > Input Sources; without one, typing fails.
 
 **Windows**
 
