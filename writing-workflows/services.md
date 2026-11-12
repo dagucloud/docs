@@ -136,7 +136,7 @@ A service that keeps failing, or whose run waits for approval, is listed under *
 
 ## In the API
 
-`GET /api/v1/service-dags` lists these DAGs with their state, the error of a failed latest run, how many runs in a row failed, and when the next run starts or why none comes. `excludeServiceDAGRuns=true` keeps every run of these DAGs out of `GET /api/v1/dag-runs`, including runs started by hand. See the [API reference](/web-ui/api#list-service-dags).
+`GET /api/v1/service-dags` lists these DAGs with their state, the error of a failed latest run, how many runs in a row failed, and when the next run is due or why none comes. `excludeServiceDAGRuns=true` keeps every run of these DAGs out of `GET /api/v1/dag-runs`, including runs started by hand. See the [API reference](/web-ui/api#list-service-dags).
 
 ## A Health Probe
 

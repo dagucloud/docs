@@ -236,7 +236,7 @@ Returns the DAGs that set a `restart_policy`, each as one object with its state.
 ```
 
 - `queue`: the queue the runs of the DAG enter: the queue the DAG sets, or its name when it sets none.
-- `nextRestartAt`: when the scheduler starts the next run, with the states `restarting` and `failing`. It is `restart_wait_sec` after the latest run ended, or longer while runs fail soon after they start; see [Backoff](/writing-workflows/services#backoff).
+- `nextRestartAt`: when the next run is due, with the states `restarting` and `failing`. It is `restart_wait_sec` after the latest run ended, or later while runs fail soon after they start; see [Backoff](/writing-workflows/services#backoff). The scheduler then queues the run, so a busy queue can start it later.
 - `restartHold`: why no next run comes, in place of `nextRestartAt`: `paused` while an operator has paused the scheduler, `noScheduler` while no scheduler is running.
 - `consecutiveFailures`: how many of the newest ended runs in a row did not succeed, up to 10. A success or a stop by an operator ends the count. Above zero while the DAG is `running`, it means the DAG keeps failing.
 - `latestRun.error`: the first failed step and its error, such as `serve: exit status 3`, once the latest run has ended without success.
