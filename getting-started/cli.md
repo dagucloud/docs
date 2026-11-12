@@ -1362,10 +1362,10 @@ Lists backfills, oldest first, with their status and number of slots.
 #### `backfill status`
 
 ```bash
-dagu backfill status <backfill id> [--format text|json]
+dagu backfill status <backfill id> [--watch] [--format text|json]
 ```
 
-Shows a backfill's status and the state and run of each slot.
+Shows a backfill's status, the state and run of each slot, and why an open backfill makes no progress. `--watch` follows the backfill until it ends and exits 0 only when it succeeds.
 
 #### `backfill cancel`
 

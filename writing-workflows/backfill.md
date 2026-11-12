@@ -52,7 +52,8 @@ Fires       2026-10-02 02:00 to 2026-11-01 02:00
 Windows     2026-10-01 02:00 to 2026-11-01 02:00
 
 31 slots: run 28, skip succeeded 2, skip active 1
-Concurrency 1, on failure stop
+Concurrency 1 (queue limit 1), on failure stop
+Estimate 56m from recent runs
 
 SLOT              WINDOW START      ACTION
 2026-10-02 02:00  2026-10-01 02:00  run
@@ -66,7 +67,10 @@ SLOT              WINDOW START      ACTION
 Start 28 runs? [y/N]
 ```
 
-The plan warns when no scheduler is running, when the DAG is suspended, which `handler_on` steps will run once per slot, and how many slots run because the schedule's cadence changed. Pass `--yes` to start without asking; with no terminal, the command needs it.
+- **Concurrency** is the lower of `--max-concurrency` and the limit of the DAG's [queue](/writing-workflows/queues).
+- **The estimate** is the median duration of the DAG's recent successful runs, up to 20, times the rounds the runs take at that concurrency. The plan leaves it out when the DAG has no successful run.
+
+The plan warns when no scheduler is running, when the DAG is suspended, when the queue's limit lowers the concurrency, when live runs may wait behind an executing backfill run, which `handler_on` steps will run once per slot, and how many slots run because the schedule's cadence changed. Pass `--yes` to start without asking; with no terminal, the command needs it.
 
 Submitting the same backfill while it is open starts nothing and names the open one. A backfill with nothing to run is not recorded.
 
@@ -108,28 +112,38 @@ A backfill does not get in the way of the live schedule:
 
 ```bash
 dagu backfill ls [<DAG>]
-dagu backfill status <id> [--format json]
+dagu backfill status <id> [--watch] [--format json]
 dagu backfill cancel <id> [--stop-running]
 dagu backfill resume <id> [--max-concurrency <n>] [--on-failure stop|continue] [--yes]
 ```
 
 - `status` shows each slot as `pending`, `queued`, `running`, `waiting`, `succeeded`, `failed`, `skipped`, `not run`, or `cancelled`. An open backfill shows `waiting for scheduler` while no scheduler runs.
+- `status` also says why an open backfill makes no progress: `Blocked: the run of slot 2026-10-05 02:00 is waiting for a person`, or where its next run stands in the queue, such as `Waiting: queue at limit, 2 runs ahead`.
+- `status --watch` prints a line each time the progress changes and exits 0 only when the backfill succeeds, so a script can wait for a backfill and act on its result.
 - `cancel` withdraws the queued runs, so their slots count as missing again, and cancels the slots not reached. Running runs finish unless `--stop-running` stops them.
 - `resume` plans again the slots that have not succeeded, with the DAG's current definition, and runs them with new runs. On an open backfill it first withdraws the queued runs. Use it after fixing the DAG, or to change the concurrency.
 
 A backfill whose DAG is renamed or deleted ends cancelled.
 
+`dagu status <DAG>` ends with the DAG's latest backfill: its open backfill, or else its newest backfill that ended failed, until the slots it failed succeed.
+
+```text
+Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 (dagu backfill status 3f9a1c2e)
+```
+
 ## API
 
 | Endpoint | Purpose |
 | --- | --- |
-| `POST /api/v1/dags/{fileName}/backfills` | Plan and submit. `dryRun: true` returns the plan only. |
+| `POST /api/v1/dags/{fileName}/backfills` | Plan and submit. `dryRun: true` returns the plan only, with `concurrency`, `queueLimit`, and `estimateSeconds`. |
 | `GET /api/v1/dags/{fileName}/slots?from=&to=` | A DAG's slots in a range with their state |
 | `GET /api/v1/backfills` | List backfills, optionally of one `dag` |
-| `GET /api/v1/backfills/{id}` | A backfill's status and slot counts |
+| `GET /api/v1/backfills/{id}` | A backfill's status, slot counts, and `waiting`, the reason `status` gives |
 | `GET /api/v1/backfills/{id}/slots` | A backfill's slots, paged, filtered by `state` |
 | `POST /api/v1/backfills/{id}/cancel` | Cancel, with `stopRunning` |
 | `POST /api/v1/backfills/{id}/resume` | Resume, with `maxConcurrency` and `onFailure` |
+
+`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`.
 
 A plan returns a `revision`. Send it with the submit to start exactly the plan you saw: if the slots' history changed in between, nothing starts and the response is a 409 with the new plan.
 
