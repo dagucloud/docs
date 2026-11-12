@@ -426,7 +426,7 @@ steps:
       columns: [品名, 数量, 金額]
 ```
 
-For CSV, `encoding` is `utf-8` (default, no byte order mark), `utf-8-bom` so that Excel opens the file as UTF-8 by double click, or `shift_jis` as Windows uses it (code page 932; `cp932`, `windows-31j`, `sjis`, and `ms932` are accepted spellings), and `delimiter` is one character, a comma by default. The file is written through a temporary file and renamed into place. The step publishes `path`, `format`, `count`, `sheet`, `range`, `warnings`, and with `artifact: true` the copy's path as `artifact`. The other direction, a file into a workbook, is [`xlsx.write` with `input`](#writing-rows).
+For CSV, `encoding` is `utf-8-bom` (the default: the byte order mark lets Excel open the file as UTF-8 by double click, where a file without one opens in the system code page), `utf-8` for no byte order mark, or `shift_jis` as Windows uses it (code page 932; `cp932`, `windows-31j`, `sjis`, and `ms932` are accepted spellings), and `delimiter` is one character, a comma by default. The file is written through a temporary file and renamed into place. The step publishes `path`, `format`, `count`, `sheet`, `range`, `warnings`, and with `artifact: true` the copy's path as `artifact`. The other direction, a file into a workbook, is [`xlsx.write` with `input`](#writing-rows).
 
 ## Extracting Fields from a Form
 
