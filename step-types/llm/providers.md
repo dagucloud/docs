@@ -90,6 +90,7 @@ OpenRouter can pass over an endpoint, such as one with a regional surcharge, unl
 
 - Dagu sends the list as OpenRouter's `provider.order` on every request of the step, including Agent DAG decisions and the model calls of browser, computer, and xlsx steps. Every `llm` block accepts it, including the DAG-level one.
 - OpenRouter can still fall back to providers outside the list, within the account's data policy.
+- A request that carries tools, or forces a tool call, also sets OpenRouter's `provider.require_parameters`, so OpenRouter routes it only to endpoints that support `tools` and `tool_choice`. This covers the forced `respond` call behind structured answers of browser, computer, xlsx, and chat steps, which an endpoint without tool support would answer in plain text.
 - An entry of a [`model` fallback list](/step-types/llm/reliability#model-fallback) can set its own `provider_order`, which replaces the shared one for that entry.
 - Only the `openrouter` provider accepts it. Validation rejects `provider_order` for any other provider, including a fallback entry that inherits a shared list. A provider given by a value reference is checked once it resolves.
 
