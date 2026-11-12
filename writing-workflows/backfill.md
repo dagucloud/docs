@@ -106,7 +106,7 @@ A backfill does not get in the way of the live schedule:
 - A DAG's latest run, in the DAG list, `dagu status`, and the scheduler's checks, is its newest run that is not a backfill run. A failed run of an old slot does not turn a healthy DAG red.
 - A DAG's run history leaves out backfill runs, so a long backfill does not push the live runs out of the run timeline. The `GET /api/v1/dags/{fileName}/dag-runs` endpoint lists them with `includeBackfill=true`. A DAG whose only runs are backfill runs shows them.
 - Catchup skips a slot whose latest backfill run is active or succeeded.
-- `mail_on` and notification routes do not fire for backfill runs, except for a run waiting for a person.
+- `mail_on` and notification routes do not fire for backfill runs, except for a run waiting for a person. A backfill run neither opens nor resolves an [incident](/web-ui/incidents).
 
 ## Following, Cancelling, and Resuming
 
