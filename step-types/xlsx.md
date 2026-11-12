@@ -190,7 +190,7 @@ steps:
 - Appended fields are matched to the header row by exact name: a name the header has only loosely, differing in case or spacing, fails with `column "amount" not found in header row 1; did you mean "Amount"?`; a name the header lacks adds a column at the right, counted in `columns_added`; header columns no field carries stay empty. Array rows have no names and are written by position. `header: false` says the sheet has no header row: rows are written by position, and an empty sheet gets no header.
 - With `output`, `xlsx.append` writes the result to that workbook and leaves the one at `path` as it was; a `path` that does not exist starts a new workbook at `output`. An existing `output` is replaced, not appended to, so an append with a fixed `output` inside a `foreach` keeps only the last iteration's rows. `output` follows the rules of [`xlsx.write_cells`](#filling-a-template). `xlsx.write` takes no `output`, also with `mode: append`.
 
-A CSV `input` takes `encoding` (`utf-8`, the default, `utf-8-bom`, or `shift_jis`) and `delimiter`, one character:
+A CSV `input` takes `encoding` (`utf-8`, `utf-8-bom`, or `shift_jis`) and `delimiter`, one character. Without `encoding` the file's encoding is detected: a UTF-8 byte order mark or valid UTF-8 is UTF-8, and otherwise the file is read as Shift_JIS, which is how Excel on Japanese Windows saves a CSV, so most files need no `encoding` at all. A file that is neither fails naming it, as does a file that is not UTF-8 under `encoding: utf-8`; bytes that are not UTF-8 are never written as replacement characters.
 
 ```yaml
 steps:
