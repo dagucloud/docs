@@ -612,7 +612,7 @@ The step enters **Waiting** with the question in the step's **Agent** tab. The b
 
 Answers are stored in the run's history, like other human input. Use `ask` for short-lived codes, not long-term secrets.
 
-`ask` is not supported on Windows, where the browser cannot outlive the step process; such a step fails at the start.
+`ask` is not supported on Windows, where the browser cannot outlive the step process. A step with an `ask` that has no `when` fails at the start. An `ask` guarded by `when` fails only when it runs, at that operation, and is skipped as on other hosts when its condition does not hold. To run such a step on Windows, sign the profile in once in a headed browser session, `dagu browser session open <url> --headed --profile <name>`, as in [Building a Step in a Browser Session](#building-a-step-in-a-browser-session); while the profile stays signed in, the site asks for no code and the `ask` is skipped.
 
 ## Write Gate
 
@@ -817,7 +817,8 @@ Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/s
 | `... rejected the client certificate ...` | The site refused the certificate presented. | Check that the certificate is the one the site expects and has not expired or been revoked. |
 | `... presented a server certificate that is not trusted ...` | The proxy could not verify the site's server certificate. | Add the site's CA with [trusted_cas](#trusted-certificate-authorities). |
 | `with.browser.client_certificates[0]: ... passphrase` | The certificate file could not be read with its passphrase. | Check the passphrase secret and the file. |
-| `ask operations are not supported on Windows` or `write_gate ask is not supported on Windows` | The browser cannot outlive the step process on Windows. | Run the step on Linux or macOS. |
+| `ask operations are not supported on Windows` | The browser cannot outlive the step process on Windows, and an `ask` ran: it has no `when`, or its `when` held. | Sign the profile in once in a headed browser session (`dagu browser session open <url> --headed --profile <name>`) and guard the `ask` with `when`, so it is skipped while the profile stays signed in; or run the step on Linux or macOS. |
+| `write_gate ask is not supported on Windows` | The browser cannot outlive the step process on Windows. | Run the step on Linux or macOS. |
 | `write_blocked: the write gate blocked ..., which no approved commit point of this operation sends` | Under `record` or `ask`, the operation sent a write no approved commit point names. Nothing was saved. | Check the write in the step log or `write-gate.json`. If the step should send it, approve it with `dagu browser writes approve`. See [Commit Points](#commit-points). |
 | `the page has N file inputs; with into, say which one to use` | An `upload` without `into` found several file inputs. | Name the one to use with `into`. |
 | `clicking the element opened no file picker, and no single file input is near it` | The `into` element is not a file input, opens no picker, and has no file input of its own nearby. | Name the file input itself, or the button that opens the picker. Open a menu or dialog with an `act` first when the picker sits behind one. |
