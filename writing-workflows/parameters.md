@@ -189,12 +189,12 @@ Top-level inline JSON Schema and `params.schema` use the same runtime validation
 Use `eval` when a parameter should derive its effective default from the runtime environment.
 
 ```yaml
-env:
-  - BASE_DIR: /srv/data
+consts:
+  - base_dir: /srv/data
 
 params:
   - name: output_dir
-    eval: "${env.BASE_DIR}/out"
+    eval: "${consts.base_dir}/out"
     default: /tmp/out
   - name: today
     eval: "`date +%Y-%m-%d`"
@@ -213,7 +213,7 @@ Behavior:
 - `default` stays literal. It is never executed.
 - Precedence is: runtime override, then `eval`, then literal `default`.
 - Params are evaluated top-to-bottom, so later params can reference earlier params.
-- The evaluation scope includes OS environment variables, resolved DAG `env:` values, and earlier resolved params.
+- The evaluation scope includes OS environment variables, `consts` (including those from the [base config](/server-admin/base-config)), and earlier resolved params. Root `env:` values are not visible: `env` is evaluated after params, so it can reference them.
 - Eval results are coerced and validated when the param declares a type.
 - If `eval` fails and `default` exists, Dagu falls back to `default`.
 - If `eval` fails and there is no `default`, the run fails before any step starts.
