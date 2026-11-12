@@ -277,7 +277,7 @@ Use `dagu_execute` for run control and for deciding steps that wait for a person
 
 | Input | Values |
 |-------|--------|
-| `action` | `start`, `enqueue`, `retry`, `stop`, `approve`, `reject`, or `push_back` |
+| `action` | `start`, `enqueue`, `retry`, `stop`, `approve`, `reject`, `push_back`, `backfill`, `backfill_resume`, or `backfill_cancel` |
 | `targetType` | `dag`, `inline_spec`, or `run`; inferred when omitted |
 | `name` | Required DAG name, including the identity used for an inline spec run |
 | `spec` | Inline DAG YAML for `start` or `enqueue` with `targetType=inline_spec` |
@@ -296,6 +296,11 @@ Use `dagu_execute` for run control and for deciding steps that wait for a person
 | `attemptId` | For step decisions, the run's `attemptId` from the `dagu_read` result the decision is based on |
 | `wait` | Wait for the identified run to reach a terminal state or a waiting checkpoint |
 | `waitTimeoutSeconds` | Wait limit from 1 to 300 seconds; requires `wait` and defaults to 60 |
+| `backfillId` | Backfill for `backfill_resume` and `backfill_cancel` |
+| `from`, `to`, `slots`, `rerun` | Slots for `backfill`, as for [`dagu backfill start`](/writing-workflows/backfill) |
+| `maxConcurrency`, `onFailure` | For `backfill` and `backfill_resume`: runs at once, and `stop` or `continue` after a failed slot |
+| `dryRun`, `revision` | For `backfill` and `backfill_resume`: return the plan only; refuse a plan that changed since `revision` |
+| `stopRunning` | For `backfill_cancel`: also stop running runs |
 
 Start a stored DAG:
 
@@ -368,6 +373,19 @@ When `dagu_read` with `target=run` lists a step as waiting with `approval` or `h
 - Without `wait`, the result includes `stepName` and the run's `status` and `statusLabel` observed after the decision.
 
 `attemptId` is optional on the server's own MCP endpoint. Calls from Dagu Cloud must pass it, and can decide steps only while the server allows [remote approvals](/overview/cloud-remote-access#approvals).
+
+### Backfilling
+
+`backfill` runs a scheduled DAG for past slots, as [`dagu backfill start`](/writing-workflows/backfill) does. Call it with `dryRun: true` first, show the plan, then submit with the plan's `revision`:
+
+```json
+{"action": "backfill", "name": "etl", "from": "2026-10-02", "to": "2026-11-01", "dryRun": true}
+{"action": "backfill", "name": "etl", "from": "2026-10-02", "to": "2026-11-01", "revision": "<plan.revision>"}
+```
+
+- The result holds the `plan` and, once submitted, `backfillId`. `existing: true` means a backfill with the same options was already open.
+- If the slots' history changed since the dry run, the call fails with `conflict`, starts nothing, and returns the new plan in `details.plan`.
+- `backfill_resume` runs again the backfill's slots that have not succeeded; `backfill_cancel` cancels it.
 
 ## Through Dagu Cloud
 
