@@ -119,7 +119,7 @@ dagu backfill resume <id> [--max-concurrency <n>] [--on-failure stop|continue] [
 
 - `status` shows each slot as `pending`, `queued`, `running`, `waiting`, `succeeded`, `failed`, `skipped`, `not run`, or `cancelled`. An open backfill shows `waiting for scheduler` while no scheduler runs.
 - `status` also says why an open backfill makes no progress: `Blocked: the run of slot 2026-10-05 02:00 is waiting for a person`, or where its next run stands in the queue, such as `Waiting: queue at limit, 2 runs ahead`.
-- `status --watch` prints a line each time the progress changes and exits 0 only when the backfill succeeds, so a script can wait for a backfill and act on its result.
+- `status --watch` prints a line each time the progress changes and exits 0 only when the backfill succeeds, so a script can wait for a backfill and act on its result. With `--format json`, the progress lines go to stderr and stdout holds only the final status.
 - `cancel` withdraws the queued runs, so their slots count as missing again, and cancels the slots not reached. Running runs finish unless `--stop-running` stops them.
 - `resume` plans again the slots that have not succeeded, with the DAG's current definition, and runs them with new runs. On an open backfill it first withdraws the queued runs; its running runs finish as part of the resumed backfill and count against its concurrency. Use it after fixing the DAG, or to change the concurrency.
 
