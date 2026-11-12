@@ -113,7 +113,7 @@ On a Team or Pro plan, a scheduled run that did not start opens an alert once it
 
 On a Team or Pro plan, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
 
-- A workflow's limit is twice how long 95% of its runs took over the last 14 UTC days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
+- A workflow's limit is twice how long 95% of its runs took over the last 14 days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
 - A workflow's [alert rules](#alert-rules) can fix the limit instead, from 1 minute to 7 days, whatever its runs took.
 - Only a running run counts. A queued run, or one waiting for approval, does not.
 - A workflow has one such alert at a time. It names the oldest run past the limit, how long the workflow's runs usually take, and the limit, or the fixed limit it passed.
@@ -156,9 +156,9 @@ A workspace owner chooses who is emailed in **Settings** under **Alert emails**.
 - A recipient gets Dagu server alerts while **Dagu servers** is checked on its row. Clear it and select **Save changes** to stop them, for example on **Owners and admins**.
 - On [free monitoring](/overview/console-monitoring#free-and-paid), only **Owners and admins** get Dagu server alerts. The **Dagu servers** box on other rows is unavailable and keeps its setting for when the workspace has a trial or plan.
 - **Send test** emails the row a test alert. **Remove** takes a member or address off the list.
-- Up to 20 members and addresses besides owners and admins, of which up to 5 may wait to be verified. Verification and test emails are capped per workspace each UTC day.
+- Up to 20 members and addresses besides owners and admins, of which up to 5 may wait to be verified. Verification and test emails are capped per workspace each day.
 - **Email language** sets the language of alert, test, and verification emails: English (default), Français, 日本語, 简体中文, العربية, or 한국어.
-- **Time zone** sets the zone that times in alert emails and chat posts are shown in, such as `2026-10-12 14:41 JST`. Until an owner saves one, times are UTC and the field suggests the browser's zone. Daily run limits and usage still count UTC days.
+- **Time zone** sets when the workspace's days begin and the zone alert emails and chat posts show times in, such as `2026-10-12 14:41 JST`. Daily counts and charts, the daily run limit, deadlines, and the weekly summary follow it. Until an owner saves one, the workspace takes the browser zone of the first owner who opens Dagu Console, and UTC before that.
 - An address that the email service refuses is skipped. The other recipients still get the email.
 
 ## Weekly Summary
@@ -289,7 +289,7 @@ An alert about a workflow stays open until the workflow does what resolves it, s
 
 On the **Notifications** page, a workspace owner sets **Reminders** to **Every hour**, **Every 4 hours**, or **Every day**. An open alert no one acknowledged is then posted again to its chat destinations and webhooks at that interval, up to 6 times, saying it is still failing, still without a success, still running long, still not running on schedule, still not reporting, its scheduler is still stopped, its disk is still almost full, its memory or CPU use is still high, its queue is still stalled, or it still has too few workers, with a link to its page. A webhook gets it as an `alert.reminder` event. PagerDuty is not reminded, since it escalates on its own. Reminders are part of paid plans.
 
-Acknowledging an alert stops its reminders. To pause them without acknowledging, any member selects **Snooze reminders** on the alert's page for 1 hour, 4 hours, 1 day, or until 9:00 in the workspace's [time zone](#who-gets-alert-emails); **Resume reminders** ends the snooze early. Reminders and snoozes appear on the alert's **Timeline**. A muted workflow's alerts are not reminded of.
+Acknowledging an alert stops its reminders. To pause them without acknowledging, any member selects **Snooze reminders** on the alert's page for 1 hour, 4 hours, 1 day, or until 9:00 in the member's browser time zone; **Resume reminders** ends the snooze early. Reminders and snoozes appear on the alert's **Timeline**. A muted workflow's alerts are not reminded of.
 
 ## Mute a Workflow
 

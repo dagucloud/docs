@@ -40,7 +40,7 @@ A workspace without a plan or trial monitors one server for free. Free monitorin
 | Dagu version | v2.19.2 or later | v2.19.1 or later |
 | Reports | Every 5 minutes; early reports at most once every 30 seconds | Every 60 seconds; early reports within about 5 seconds |
 | Stopped-reporting alert | After 25 minutes without a report | After 10 minutes without a report |
-| Finished runs stored | 100 per UTC day | 500 per UTC day |
+| Finished runs stored | 100 per day | 500 per day |
 | Run history shown | 7 days | 30 days |
 | Insights and workflow pages | 7 or 30 days | 7, 30, or 90 days |
 | Alert emails | Owners and admins | Owners, admins, and the members and addresses you add |
@@ -195,11 +195,11 @@ Dagu Console keeps:
 
 A server that sends no report for 30 days is removed from monitoring, with its daily totals and alerts.
 
-Each workspace stores up to 500 finished runs per UTC day, or 100 on free monitoring, counted by when Dagu Console records them. Past the limit, runs are still counted in the daily totals and still open and resolve alerts, but they are not stored, so they never appear in run lists. Storing resumes at 00:00 UTC. Until then:
+Each workspace stores up to 500 finished runs per day, or 100 on free monitoring, counted by when Dagu Console records them. A day begins at midnight in the workspace's [time zone](/overview/console-monitoring-alerts#who-gets-alert-emails). Past the limit, runs are still counted in the daily totals and still open and resolve alerts, but they are not stored, so they never appear in run lists. Storing resumes at the next midnight. Until then:
 
 - the console's **Overview** shows **Daily run limit reached** with the time;
 - workspace owners get one email that day;
-- the server's **Monitoring** section on **Plan & features** shows **Run history paused until** 00:00 UTC.
+- the server's **Monitoring** section on **Plan & features** shows **Run history paused until** that midnight.
 
 To raise the limit, [contact the Dagu team](https://dagu.sh/contact).
 

@@ -8,18 +8,18 @@ The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar ho
 
 ## Overview
 
-- **Failed today (UTC)**, **Open alerts**, **In progress**, and **Success (7 UTC days)** with each day's runs.
-- **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Disk almost full, Failing workflows, Events lost, Monitoring off, and, for owners, Over capacity. Then the open alerts, the runs of Dagu servers waiting for a person, and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
+- **Failed today**, **Open alerts**, **In progress**, and **Success (7 days)** with each day's runs.
+- **Needs attention**: problems to act on, each naming the servers it affects: Not reporting, Not checking in, Offline, Scheduler stopped, Disk almost full, Failing workflows, Events lost, Monitoring off, Waiting for first report, and, for owners, Over capacity. Then the open alerts, the runs of Dagu servers waiting for a person, and today's failures, up to 10 of each, each with its failed steps, the last line of its error when the server [sends errors](/overview/console-monitoring#error-messages), and **Open in Dagu** when the server has a [Dagu URL](#dagu-url). Failures include aborted and rejected runs. With none of these, it shows **All clear**.
 - **In progress**: the runs queued, running, or waiting, latest first; a run waiting for someone stands out.
 - **Instances**: Dagu servers, then Kitewell computers, each by name, those with a problem first.
 
 When failures listed here say nothing of why, owners see a note above them: some servers [send no errors](/overview/console-monitoring#error-messages), with a link to the first one's license page in Dagu, or the workspace keeps no errors of Kitewell computers, with a link to **Settings**.
 
-Times show in your browser's time zone; day totals are by UTC day. On a Team or Pro plan, the Overview, Runs, Alerts, and server pages update themselves every 30 seconds while they are open.
+Times show in your browser's time zone, and hovering over one shows its date, time, and zone. Days begin at midnight in the workspace's [time zone](/overview/console-monitoring-alerts#who-gets-alert-emails): **Failed today**, day totals, and charts follow it. On a Team or Pro plan, the Overview, Runs, Alerts, and server pages update themselves every 30 seconds while they are open.
 
 ## Instances
 
-**Dagu servers** lists each server with its status, Dagu version, last report, failures today (UTC), success rate over 7 UTC days, and open alerts. On a paid plan or trial, **Machine** shows each reporting server's CPU, memory, and disk use from its last report, and **Disk almost full** when its data directory's disk is 90% full or more. When Kitewell computers reported in the last 14 days, **Kitewell computers** lists them after the servers.
+**Dagu servers** lists each server with its status, Dagu version, last report, failures today, success rate over 7 days, and open alerts. On a paid plan or trial, **Machine** shows each reporting server's CPU, memory, and disk use from its last report, and **Disk almost full** when its data directory's disk is 90% full or more. When Kitewell computers reported in the last 14 days, **Kitewell computers** lists them after the servers.
 
 | Status | Meaning |
 | --- | --- |
@@ -33,9 +33,9 @@ Times show in your browser's time zone; day totals are by UTC day. On a Team or 
 
 Each server's page has these tabs:
 
-- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services and queues from the last report; on a paid plan or trial, its [workers](#workers); open alerts; and failures as far back as runs show: 30 days on Team or Pro, 14 on a trial, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
+- **Overview**: the server's details, such as its ID, Dagu version, OS and architecture, process start, last report, whether [stopped-reporting alerts](/overview/console-monitoring-alerts#stopped-reporting-alerts) are on, and last check-in; on a paid plan or trial, **Machine**: CPU use and the number of CPUs, load averages, memory use, and the data directory's disk use from the last report, with charts of the highest use in each 5 minutes over the last 24 hours; the services and queues from the last report; on a paid plan or trial, its [workers](#workers); open alerts; and failures as far back as runs show: 30 days on a trial, Team, or Pro, or 7 on [free monitoring](/overview/console-monitoring#free-and-paid).
 - **Runs**: the server's runs.
-- **Workflows**: each workflow's finished runs per UTC day over the last 14 days as bars, with runs, failures, success rate, and average and longest duration. **Failing** marks a workflow with an open alert, and **Muted** a [muted](/overview/console-monitoring-alerts#mute-a-workflow) one.
+- **Workflows**: each workflow's finished runs per day over the last 14 days as bars, with runs, failures, success rate, and average and longest duration. **Failing** marks a workflow with an open alert, and **Muted** a [muted](/overview/console-monitoring-alerts#mute-a-workflow) one.
 - **Settings**, for owners: **Name**, [Dagu URL](#dagu-url), [Alert rules](/overview/console-monitoring-alerts#alert-rules), **Delete reports**, and **Disconnect server**.
 
 ### Machine and Queues
@@ -69,7 +69,7 @@ Runs in progress come first, then finished runs, newest recorded first. Filter b
 - **Server**
 - **Workflow**
 - **Status**: Failed (including aborted and rejected), Succeeded (including partially succeeded), Running, Waiting, or Queued
-- Range: **Last hour**, **Last 24 hours** (default), **Last 7 days**, **Last 14 days**, or, on Team or Pro, **Last 30 days**, by when Dagu Console recorded the run. Free monitoring shows up to **Last 7 days**.
+- Range: **Last hour**, **Last 24 hours** (default), **Last 7 days**, **Last 14 days**, or, on a trial, Team, or Pro, **Last 30 days**, by when Dagu Console recorded the run. Free monitoring shows up to **Last 7 days**.
 
 Each run has a permalink to a page with its status, start, duration, failed steps, and attempts. When the server [sends errors](/overview/console-monitoring#error-messages), the page shows **Why it failed**: each failed step's error in full, with **Copy**. Without them, it says how to have the server send them. A run in progress on a server that has not reported for 5 minutes shows **Unknown**. A workflow's name opens [its page](#workflow-pages).
 
@@ -93,7 +93,7 @@ For owners. Lists where the workspace's alerts go: the alert emails, and each [c
 
 ![Insights over the last 30 days: runs, failures, and success rate against the previous period, runs per day, success rate, and each workflow with its p95 duration and change](/monitoring/insights-light.png)
 
-**Insights** shows how the workspace's workflows went over the last **7**, **30**, or **90** UTC days, today's runs so far included, against as many days before. Free monitoring offers 7 or 30.
+**Insights** shows how the workspace's workflows went over the last **7**, **30**, or **90** days, today's runs so far included, against as many days before. Free monitoring offers 7 or 30.
 
 - **Runs**, **Failed**, and **Success**, each with its change against the previous period. A change is shown only when both periods have at least 10 runs.
 - **Runs per day**, succeeded and failed, and **Success rate**. **Show as table** lists the same numbers.
@@ -108,7 +108,7 @@ Filter by **Server** and **Workflow**.
 A workflow's name in **Insights**, **Runs**, **Alerts**, or a server's **Workflows** tab opens its page:
 
 - **Details**: the workflow's key, server, last run, open alert, and whether it is muted.
-- Over 7, 30, or 90 UTC days: **Runs**, **Failed**, **Success**, and **p95**, with **Runs per day**, **Success rate**, and **Duration** (p50 and p95) charts.
+- Over 7, 30, or 90 days: **Runs**, **Failed**, **Success**, and **p95**, with **Runs per day**, **Success rate**, and **Duration** (p50 and p95) charts.
 - **Recent runs**: the last 10 finished runs. **View all** lists the rest on **Runs**.
 - **Failures by step**: failed, aborted, and rejected runs over the last 30 days on a trial, Team, or Pro, or 7 on free monitoring, by the step they failed at.
 - For owners: **Mute** or **Unmute**.
