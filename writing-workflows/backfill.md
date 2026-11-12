@@ -106,7 +106,7 @@ A backfill does not get in the way of the live schedule:
 - A DAG's latest run, in the DAG list, `dagu status`, and the scheduler's checks, is its newest run that is not a backfill run. A failed run of an old slot does not turn a healthy DAG red.
 - A DAG's run history leaves out backfill runs, so a long backfill does not push the live runs out of the run timeline. The `GET /api/v1/dags/{fileName}/dag-runs` endpoint lists them with `includeBackfill=true`. A DAG whose only runs are backfill runs shows them.
 - Catchup skips a slot whose latest backfill run is active or succeeded.
-- `mail_on` and notification routes do not fire for backfill runs, except for a run waiting for a person. A backfill run neither opens nor resolves an [incident](/web-ui/incidents).
+- `mail_on`, a step's `mail_on_error`, and notification routes do not fire for backfill runs, except for a run waiting for a person. A backfill run neither opens nor resolves an [incident](/web-ui/incidents).
 
 ## Following, Cancelling, and Resuming
 
@@ -121,9 +121,9 @@ dagu backfill resume <id> [--max-concurrency <n>] [--on-failure stop|continue] [
 - `status` also says why an open backfill makes no progress: `Blocked: the run of slot 2026-10-05 02:00 is waiting for a person`, or where its next run stands in the queue, such as `Waiting: queue at limit, 2 runs ahead`.
 - `status --watch` prints a line each time the progress changes and exits 0 only when the backfill succeeds, so a script can wait for a backfill and act on its result.
 - `cancel` withdraws the queued runs, so their slots count as missing again, and cancels the slots not reached. Running runs finish unless `--stop-running` stops them.
-- `resume` plans again the slots that have not succeeded, with the DAG's current definition, and runs them with new runs. On an open backfill it first withdraws the queued runs. Use it after fixing the DAG, or to change the concurrency.
+- `resume` plans again the slots that have not succeeded, with the DAG's current definition, and runs them with new runs. On an open backfill it first withdraws the queued runs; its running runs finish as part of the resumed backfill and count against its concurrency. Use it after fixing the DAG, or to change the concurrency.
 
-A backfill whose DAG is renamed or deleted ends cancelled.
+A backfill whose DAG is renamed or deleted ends cancelled, including a rename of the DAG's `name` inside its file.
 
 `dagu status <DAG>` ends with the DAG's latest backfill: its open backfill, or else its newest backfill that ended failed, until the slots it failed succeed.
 
