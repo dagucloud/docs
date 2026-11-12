@@ -128,11 +128,15 @@ While the scheduler is down, nothing fails such a left-behind run, and a queued 
 
 ## In the Web UI
 
-The DAG list and the DAG's details show the policy and the wait. A service shows **Enabled** or **Suspended** where a scheduled DAG shows **Live**, and the switch suspends and resumes it. The active filter of the DAG list includes services that are not suspended.
+The DAG list and the DAG's details show the policy and the wait. A service shows **Enabled**, **Stopped** after an operator stopped an `unless-stopped` service, or **Suspended** where a scheduled DAG shows **Live**, and the switch suspends and resumes it. The active filter of the DAG list includes services that are not suspended.
+
+A service restarts without end, so its runs do not fill the run lists. The Overview, the Cockpit, and the Executions page leave them out and show a card for each service: its state, how long it has been up or when it restarts, and why it keeps failing. On the Executions page a card opens the latest runs of its service, and a search by name, run ID, status, or labels lists them with the other runs.
+
+A service that keeps failing, or whose run waits for approval, is listed under **Needs attention** on the Overview. A run that waits for approval also stays in the review column of the Cockpit. The Queues page lists the queue of each service that does not set `queue` apart from the other queues.
 
 ## In the API
 
-`GET /api/v1/service-dags` lists these DAGs with their state, the error of a failed latest run, and how many runs in a row failed. `excludeServiceDAGRuns=true` keeps every run of these DAGs out of `GET /api/v1/dag-runs`, including runs started by hand. See the [API reference](/web-ui/api#list-service-dags).
+`GET /api/v1/service-dags` lists these DAGs with their state, the error of a failed latest run, how many runs in a row failed, and when the next run is due or why none comes. `excludeServiceDAGRuns=true` keeps every run of these DAGs out of `GET /api/v1/dag-runs`, including runs started by hand. See the [API reference](/web-ui/api#list-service-dags).
 
 ## A Health Probe
 
