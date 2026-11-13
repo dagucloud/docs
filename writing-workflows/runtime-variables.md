@@ -63,6 +63,7 @@ steps:
 - The bounds are UTC RFC 3339 timestamps. `timezone` names the zone the slot's schedule is evaluated in, such as `Asia/Tokyo`, or its UTC offset when the zone has no name.
 - Only recurring start schedules for the run's profile count. One-off `at` schedules never bound a window, and a fire skipped by a [business calendar](/writing-workflows/business-calendars) is not a fire: Monday's window starts at Friday's fire.
 - A DAG with no recurring schedule has no `interval_start` or `next_scheduled_at`.
+- To load a date such as the day before the slot, declare it once in [`dates`](/writing-workflows/schedule-dates) and read `${dates.NAME}`.
 
 ## Availability
 

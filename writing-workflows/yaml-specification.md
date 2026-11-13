@@ -173,6 +173,7 @@ steps:
 |-------|------|-------------|---------|
 | `schedule` | string, array, or object | Cron expression or [schedule alias](/writing-workflows/scheduling#schedule-aliases), multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
 | `calendar` | string | [Business calendar](/writing-workflows/business-calendars) of every start schedule entry that names none: a calendar file name, the built-in `weekdays`, or `none`. | - |
+| `dates` | object | [Dates derived from the run's schedule slot](/writing-workflows/schedule-dates), read as `${dates.NAME}`. | - |
 | `skip_if_successful` | boolean | Skip a scheduled run if the DAG already succeeded since the previous scheduled time. | `false` |
 | `restart_policy` | string | Keeps a run of the DAG alive: `no`, `always`, or `unless-stopped`. Cannot be combined with `schedule` or a DAG-level `retry_policy`, or set in a base configuration. See [Services](/writing-workflows/services). | `no` |
 | `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. With `restart_policy`, the wait between the end of a run and the next one, which must be at least `1`. | `0` |

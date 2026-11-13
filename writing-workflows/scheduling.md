@@ -447,7 +447,7 @@ dagu start --scheduled-at 2026-11-09T02:00 etl.yaml         # in the schedule's 
 dagu start --scheduled-at 2026-11-09T02:00:00+09:00 etl.yaml
 ```
 
-The run gets the schedule time and window the scheduled run of that slot got, so the DAG needs no date parameters. The same works with `dagu enqueue`, the `scheduleTime` field of the start and enqueue API and of the MCP execute tool, and **Scheduled at** in the run dialog, which lists the latest slots.
+The run gets the schedule time, window, and [dates](/writing-workflows/schedule-dates) the scheduled run of that slot got, so the DAG needs no date parameters. The same works with `dagu enqueue`, the `scheduleTime` field of the start and enqueue API and of the MCP execute tool, and **Scheduled at** in the run dialog, which lists the latest slots.
 
 - **A slot later than now is refused**, so no run loads a day that has no data yet. `dagu dry --scheduled-at` accepts one and prints the slot and its window, to check a month end before it comes.
 - **A date** names the only fire of that day. On a schedule that fires zero or several times that day, the command fails and lists the fires.

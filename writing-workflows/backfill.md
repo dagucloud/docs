@@ -136,6 +136,7 @@ Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 
 ## In the Web UI
 
 - **A backfill's page**, `/backfills/<id>`, says where it stands in one sentence, such as `Running: 12 of 28 slots done, 1 failed` or `Stopped: 1 failed, 4 not run`, with the reason when something holds it. A bar and a legend show the slots by state; pick a state to list its slots. The slot grid has a row per day for an hourly schedule, or per month for a daily one; each slot opens its run. **Cancel** asks whether to stop the runs in progress. **Resume** shows the plan for the concurrency and failure behavior you choose before it runs anything. **View runs** lists the backfill's runs.
+- **Backfill in the Run button's menu** of a scheduled workflow opens the start panel with its range to pick: the last 7 or 30 days, since the last slot that succeeded, or fire times typed in, read in the schedule's zone. The panel folds its options under **Options**, which also takes the runtime profile.
 - **A workflow's Backfills tab**, for a workflow with a schedule, shows its slots and lists its backfills, newest first.
   - **Slots** shows each fire time of the schedule over the last 24 hours, 7, 30, or 90 days, in the state its runs give it: missing, failed, active, or succeeded. At most the newest 2000 are drawn.
   - A user who may run the workflow picks slots: one at a time, with Shift for a run of them, or with **Pick missing** and **Pick missing and failed**. **Backfill N slots** runs the picked slots; with none picked, **Backfill this range** runs the range.
