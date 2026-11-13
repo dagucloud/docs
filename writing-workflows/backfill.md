@@ -142,8 +142,9 @@ Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 
 | `GET /api/v1/backfills/{id}/slots` | A backfill's slots, paged, filtered by `state` |
 | `POST /api/v1/backfills/{id}/cancel` | Cancel, with `stopRunning` |
 | `POST /api/v1/backfills/{id}/resume` | Resume, with `maxConcurrency` and `onFailure` |
+| `GET /api/v1/dag-runs?backfillId={id}` | A backfill's runs, from its submission on unless `fromDate` or `toDate` is set |
 
-`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`.
+`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`. Every run carries the `backfillId` of the backfill that started it, which a retry keeps.
 
 A plan returns a `revision`. Send it with the submit to start exactly the plan you saw: if the slots' history changed in between, nothing starts and the response is a 409 with the new plan.
 
