@@ -235,6 +235,8 @@ The default directory is `<repository-root>.worktrees/<branch>`. A branch such a
 
 The `test` step reads the absolute worktree path directly from the add action. Worktree actions have fixed outputs, so the workflow does not declare an `output`, `outputs`, or `stdout.outputs` field.
 
+On Dagu releases after v2.26.0, a step `working_dir` resolves `${steps.worktree.outputs.path}`. Earlier releases keep the reference as text and run the step in a directory with that name. On those releases, set `path` from a value that resolves there, such as `${context.run.id}` or a parameter, and use the same expression in `working_dir`, as the [background loop](/ai/loops/background-loop) does.
+
 ### Create an explicit branch
 
 Set `create_branch: true` when an explicitly named branch may need to be created. `base` can name a local commit, local branch, `origin` remote-tracking branch, or tag. It defaults to the repository's current `HEAD`.
