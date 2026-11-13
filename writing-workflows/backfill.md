@@ -82,6 +82,7 @@ The scheduler runs backfills, so `dagu scheduler` or `dagu start-all` must be ru
 - **Definition.** Every run uses the DAG's definition as it was at submit, with `--params` and `--profile` if given. An edit during the backfill does not change later slots.
 - **Recheck.** At its turn, a slot that gained a run since the submit that `--rerun` would skip is skipped.
 - **Failure.** By default the first failed slot stops the backfill: running runs finish, and the slots it did not reach are not run. `--on-failure continue` goes on. The DAG's own retry policy applies to each run first, and a retried backfill run stays a backfill run.
+- **Retries.** The backfill follows a retry of its runs, by hand or by the retry policy. A retry of a run of a backfill that ended `succeeded` or `failed` opens it again until the retry ends; the slots a stopped backfill did not reach stay `not run`. A cancelled backfill stays cancelled.
 - **Run IDs** are `backfill-<id>-<generation>-<slot>`. A scheduler that restarts finds the runs it queued and queues none of them twice.
 - **Pause and suspension.** A paused scheduler queues nothing new and holds the backfill's queued runs until it resumes. A suspended DAG's backfill runs still run.
 
@@ -130,6 +131,15 @@ A backfill whose DAG is renamed or deleted ends cancelled, including a rename of
 ```text
 Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 (dagu backfill status 3f9a1c2e)
 ```
+
+## In the Web UI
+
+- **A backfill's page**, `/backfills/<id>`, says where it stands in one sentence, such as `Running: 12 of 28 slots done, 1 failed` or `Stopped: 1 failed, 4 not run`, with the reason when something holds it. A bar and a legend show the slots by state; pick a state to list its slots. The slot grid has a row per day for an hourly schedule, or per month for a daily one; each slot opens its run. **Cancel** asks whether to stop the runs in progress. **Resume** shows the plan for the concurrency and failure behavior you choose before it runs anything. **View runs** lists the backfill's runs.
+- **A workflow's Backfills tab**, for a workflow with a schedule, lists its backfills, newest first.
+- **The workflow page** shows a notice for the latest backfill: its progress while it runs, or that it failed until a slot it failed succeeds. A failure notice can be dismissed.
+- **A backfill run's trigger** links to its backfill.
+
+An open backfill's page updates as its runs change, while the browser tab is visible; an ended one is read once.
 
 ## API
 
