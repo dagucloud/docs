@@ -46,8 +46,9 @@ steps:
 | `host` | Yes | - | SSH hostname |
 | `ip` | No | - | Alias for `host` |
 | `port` | No | `22` | SSH port |
-| `key` | No | Auto-detect | Private key path |
-| `password` | No | - | SSH password |
+| `key` | No | Auto-detect | Private key: a path, `{ file: <path> }`, or `{ secret: <ref> }` |
+| `password` | No | - | SSH password: a string or `{ secret: <ref> }`. Used only when no key is set |
+| `passphrase` | No | - | Passphrase of an encrypted private key: a string or `{ secret: <ref> }` |
 | `strict_host_key` | No | `true` | Enable host key verification |
 | `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `timeout` | No | `30s` | Connection timeout |
@@ -55,6 +56,20 @@ steps:
 | `source` | Yes | - | Source path (local for upload, remote for download) |
 | `destination` | Yes | - | Destination path (remote for upload, local for download) |
 | `bastion` | No | - | Bastion host configuration (same as SSH) |
+
+`key`, `password`, and `passphrase` follow the SSH rules, including values read from the secret registry. See [Credentials from Secrets](/step-types/ssh#credentials-from-secrets).
+
+```yaml
+steps:
+  - id: upload_release
+    action: sftp.upload
+    with:
+      user: deploy
+      host: server.example.com
+      key: { secret: ssh/deploy-key }
+      source: /local/release.tar.gz
+      destination: /remote/release.tar.gz
+```
 
 The SSH `timeout` field limits connection establishment. DAG-level and step-level `timeout_sec` cover connection setup and the complete transfer. When execution is canceled or reaches either deadline, Dagu closes the SSH transport so blocked uploads and downloads can finish promptly.
 

@@ -41,6 +41,8 @@ steps:
       command: echo "Hello from remote server"
 ```
 
+Connection fields under `with` replace the DAG-level `ssh` as a whole. A step that sets any of them inherits nothing from it.
+
 ## Configuration
 
 ### DAG-Level Fields
@@ -50,8 +52,9 @@ steps:
 | `user` | Yes | - | SSH username |
 | `host` | Yes | - | Hostname or IP address |
 | `port` | No | `22` | SSH port |
-| `key` | No | Auto-detect | Private key path (see below) |
-| `password` | No | - | Password (not recommended) |
+| `key` | No | Auto-detect | Private key: a path, `{ file: <path> }`, or `{ secret: <ref> }` (see [Credentials from Secrets](#credentials-from-secrets)) |
+| `password` | No | - | Password: a string or `{ secret: <ref> }`. Used only when no key is set |
+| `passphrase` | No | - | Passphrase of an encrypted private key: a string or `{ secret: <ref> }` |
 | `strict_host_key` | No | `true` | Enable host key verification |
 | `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `shell` | No | - | Shell for remote command execution (string or array, e.g., `"/bin/bash -e"` or `["/bin/bash","-e"]`) |
@@ -66,8 +69,9 @@ steps:
 | `host` | Yes | - | Hostname or IP address |
 | `ip` | No | - | Alias for `host` |
 | `port` | No | `22` | SSH port |
-| `key` | No | Auto-detect | Private key path (see below) |
-| `password` | No | - | Password (not recommended) |
+| `key` | No | Auto-detect | Private key: a path, `{ file: <path> }`, or `{ secret: <ref> }` |
+| `password` | No | - | Password: a string or `{ secret: <ref> }`. Used only when no key is set |
+| `passphrase` | No | - | Passphrase of an encrypted private key: a string or `{ secret: <ref> }` |
 | `strict_host_key` | No | `true` | Enable host key verification |
 | `known_host_file` | No | `~/.ssh/known_hosts` | Known hosts file path |
 | `shell` | No | - | Shell for remote command execution (string form only; e.g., `"/bin/bash -e"`) |
@@ -178,6 +182,66 @@ If no key is specified, Dagu automatically tries these default SSH keys in order
 3. `~/.ssh/id_ed25519`
 4. `~/.ssh/id_dsa`
 
+Set `passphrase` to unlock an encrypted default key.
+
+## Credentials from Secrets
+
+`key`, `password`, and `passphrase` can read their values from Dagu's [secret registry](/web-ui/secrets). The private key and password then live neither on the Dagu host nor in the DAG file.
+
+```yaml
+ssh:
+  user: deploy
+  host: app.example.com
+  key: { secret: ssh/deploy-key }
+  passphrase: { secret: ssh/deploy-passphrase }
+  bastion:
+    host: jump.example.com
+    user: jump-user
+    password: { secret: ssh/jump-password }
+
+steps:
+  - run: hostname
+```
+
+The same forms work at DAG level, under `with` for `ssh.run`, `sftp.upload`, and `sftp.download`, and in each `bastion`:
+
+| Field | Forms |
+|-------|-------|
+| `key` | A path, `{ file: <path> }`, or `{ secret: <ref> }` |
+| `password` | A string or `{ secret: <ref> }` |
+| `passphrase` | A string or `{ secret: <ref> }` |
+
+`<ref>` names a Dagu-managed secret, such as `ssh/deploy-key`. It resolves in the DAG's workspace first and then in **Global**, as [`secrets[].ref`](/writing-workflows/secrets#registry-refs) does. The ref is literal: Dagu does not resolve `${...}` inside it.
+
+`dagu validate` rejects a credential object with an unknown field, with both `secret` and `file`, or with a `secret` that is not a valid ref or contains `${...}`. The error names the field, such as `steps.deploy.with.key.secret`.
+
+### Authentication Method
+
+Each hop, the target host and its bastion, authenticates with one method:
+
+1. A set `key`, unlocked with `passphrase` when the key is encrypted.
+2. Otherwise a set `password`.
+3. Otherwise the first default key found (see [SSH Key Auto-Detection](#ssh-key-auto-detection)), unlocked with `passphrase` when the key is encrypted.
+
+A passphrase is ignored when the key is not encrypted.
+
+### Resolution and Masking
+
+- Each distinct ref that an authentication method uses resolves once when the run starts, together with `secrets:`. Every connection, step, and `foreach` item reads that value. A ref that no method uses, such as a password ref next to a key, is not resolved.
+- A ref that fails to resolve fails the run before any step starts. The error names the field and the ref.
+- Resolved values are masked wherever [`secrets:` values are masked](/writing-workflows/secrets#masking). They are not exported as environment variables, so step processes cannot read them.
+- On a [distributed worker](/server-admin/distributed/workers/shared-nothing), the coordinator resolves the refs. It answers only refs that the DAG declares in `secrets:` or uses for SSH.
+
+### Storing a Private Key
+
+A private key must keep its line breaks. In the Web UI, select **Multi-line or file** when you create or rotate the secret, then paste the key or choose the key file. See [Create A Secret](/web-ui/secrets#create-a-secret).
+
+When a key read from a secret does not parse, the error names the ref and never includes the value. A key that lost its line breaks is reported as not a private key.
+
+### Inheritance
+
+A credential set in a DAG's `ssh` or in a workspace `base.yaml` replaces the one inherited from a [base config](/server-admin/base-config#ssh-configuration), whatever the form of either. Setting `key` also drops the inherited `passphrase`, which belongs to the key it unlocks. Setting `password` replaces only the password.
+
 ## Bastion Host
 
 Connect through a jump host:
@@ -217,8 +281,9 @@ steps:
 | `host` | Yes | - | Bastion hostname |
 | `port` | No | `22` | Bastion SSH port |
 | `user` | Yes | - | Bastion username |
-| `key` | No | Auto-detect | Bastion private key path |
-| `password` | No | - | Bastion password |
+| `key` | No | Auto-detect | Bastion private key: a path, `{ file: <path> }`, or `{ secret: <ref> }` |
+| `password` | No | - | Bastion password: a string or `{ secret: <ref> }`. Used only when no key is set |
+| `passphrase` | No | - | Passphrase of the bastion's encrypted private key: a string or `{ secret: <ref> }` |
 
 ## Multiple Commands
 
@@ -258,6 +323,7 @@ Instead of duplicating the SSH executor `with` block, `preconditions`, `retry_po
    - Prefer keys over passwords at all times
    - Use dedicated deployment keys with limited permissions
    - Rotate keys regularly
+   - Store keys in the secret registry with `key: { secret: <ref> }` instead of on the Dagu host
 
 3. **Known Hosts Management**:
    ```bash

@@ -460,6 +460,10 @@ ssh:
   shell: bash
 ```
 
+`key`, `password`, and `passphrase` can name a registry secret instead, such as `key: { secret: ssh/deploy-key }`. See [Credentials from Secrets](/step-types/ssh#credentials-from-secrets).
+
+A credential set in a workspace `base.yaml` or in a DAG replaces the inherited one, whatever the form of either. Setting `key` also drops the inherited `passphrase`. Setting `password` replaces only the password.
+
 #### S3 Configuration
 
 ```yaml

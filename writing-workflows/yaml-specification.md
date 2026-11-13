@@ -567,7 +567,9 @@ steps:
       command: systemctl status myapp
 ```
 
-Step-level SSH values under `with` override the DAG-level SSH config for that step.
+Step-level SSH connection fields under `with` replace the DAG-level SSH config as a whole for that step.
+
+`key` also accepts `{ file: <path> }` or `{ secret: <ref> }`. `password` and `passphrase` accept a string or `{ secret: <ref> }`. A `secret` reads the value from the secret registry when the run starts. See [Credentials from Secrets](/step-types/ssh#credentials-from-secrets).
 
 ### S3
 
