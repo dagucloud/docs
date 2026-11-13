@@ -81,7 +81,7 @@ The scheduler runs backfills, so `dagu scheduler` or `dagu start-all` must be ru
 - **Order.** With `--max-concurrency 1`, the default, a slot is queued after the slot before it finished.
 - **Definition.** Every run uses the DAG's definition as it was at submit, with `--params` and `--profile` if given. An edit during the backfill does not change later slots.
 - **Recheck.** At its turn, a slot that gained a run since the submit that `--rerun` would skip is skipped.
-- **Failure.** By default the first failed slot stops the backfill: running runs finish, and the slots it did not reach are not run. `--on-failure continue` goes on. The DAG's own retry policy applies to each run first, and a retried backfill run stays a backfill run.
+- **Failure.** By default the first failed slot stops the backfill: running runs finish, and the slots it did not reach are not run. `--on-failure continue` goes on. The DAG's own retry policy applies to each run first: a failed run with retries left, within `scheduler.retry_failure_window`, keeps its slot active until its retries succeed or run out. A retried backfill run stays a backfill run.
 - **Retries.** The backfill follows a retry of its runs, by hand or by the retry policy. A retry of a run of a backfill that ended `succeeded` or `failed` opens it again until the retry ends; the slots a stopped backfill did not reach stay `not run`. A cancelled backfill stays cancelled.
 - **Run IDs** are `backfill-<id>-<generation>-<slot>`. A scheduler that restarts finds the runs it queued and queues none of them twice.
 - **Pause and suspension.** A paused scheduler queues nothing new and holds the backfill's queued runs until it resumes. A suspended DAG's backfill runs still run.
