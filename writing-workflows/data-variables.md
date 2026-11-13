@@ -100,6 +100,8 @@ params:
 
 `eval` can also read the run's [dates](/writing-workflows/schedule-dates) and its `${context.run.*}` values, such as `${context.run.id}` and `${context.run.scheduled_at}`. Such an eval, and every `eval` after it, runs when the run starts rather than when the DAG loads.
 
+A run the scheduler queues, a catch-up, webhook, watched-file, or backfill run, evaluates every `eval` when it starts, in its own process. A DAG whose map-form `worker_selector` reads a value is the exception: the selector routes the run, so its params are evaluated when the run is queued.
+
 Runtime overrides from the CLI, API, and sub-DAG calls stay literal.
 
 ## Parameter JSON Payload
