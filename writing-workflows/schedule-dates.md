@@ -88,3 +88,10 @@ An entry is shifted and formatted in its `timezone`, else the zone of the entry 
 - A run started without a slot, by hand, from a webhook, from a [watched folder](/writing-workflows/watched-folders), or as a sub-DAG of a parent with none, gets the **default slot**: the latest fire at or before it was created. A monthly load started on the 15th loads what its run of the 1st loaded. The run counts as that slot's run and records that the slot was the default.
 - On a DAG without a recurring schedule, `scheduled_at` is the minute the run was created, and a date that needs a window, from `interval_start` or `next_scheduled_at`, or a list, is refused before the run is created. `dagu validate` warns about such a date.
 - `dagu validate` reports a `${dates.NAME}` the DAG does not declare.
+
+## Previewing Dates
+
+- The upcoming runs on a workflow's page and in `GET /api/v1/dags/{fileName}` list the dates each run will get. The MCP `dag` read returns them as `upcomingRunDates`.
+- `GET /api/v1/dags/{fileName}/slot-preview?scheduledAt=2026-11-09` returns the slot a start would get, its window, and its dates, without starting a run. With no `scheduledAt`, it previews the default slot.
+- A run's details, and the MCP `run` read, show the dates it recorded and whether its slot was the default.
+
