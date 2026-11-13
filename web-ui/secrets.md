@@ -14,6 +14,15 @@ secrets:
 
 The DAG receives `DB_PASSWORD` as an environment variable when the run starts. The plaintext value is not stored in the DAG file.
 
+SSH and SFTP connections can also read a private key, password, or passphrase with `{ secret: <ref> }`. Those values are not exported as environment variables. See [Credentials from Secrets](/step-types/ssh#credentials-from-secrets).
+
+```yaml
+ssh:
+  user: deploy
+  host: app.example.com
+  key: { secret: ssh/deploy-key }
+```
+
 ## Secret Scopes
 
 Secrets can be global or workspace-scoped. The same ref can exist globally and in multiple workspace scopes with different values.
@@ -39,6 +48,8 @@ Do not include the scope or workspace name in the ref. A DAG in `workspace=payme
 4. Keep provider set to **Dagu Managed**.
 5. Enter a ref such as `prod/db-password`. Refs use lowercase slug segments separated by `/`.
 6. Enter the value and save.
+
+The value field is a masked single-line input. For a value with line breaks, such as a PEM private key, select **Multi-line or file**. Then paste the value under **Text**, or choose a file under **File**. For a file, the page shows only its name and size, never its contents. The **Rotate** dialog offers the same choice.
 
 The value is write-only. After saving, the API and UI return metadata such as ref, status, version, and timestamps, but not the plaintext value. On the Dagu host, [`dagu secret resolve`](/getting-started/cli#secret) prints it.
 
@@ -71,7 +82,7 @@ See [Workflow Secrets](/writing-workflows/secrets) for the full YAML behavior an
 
 Runtime profile secret entries are profile-owned. This includes entries on named profiles, Global profile defaults, and workspace profile defaults. Manage those values from the **Profiles** tab so the profile entry and its backing secret stay in sync.
 
-Do not create a DAG secret ref with the same intent and then expect a runtime profile to pick it up by ref. DAG secret refs are resolved only when DAG YAML references them with `secrets[].ref`.
+Do not create a DAG secret ref with the same intent and then expect a runtime profile to pick it up by ref. DAG secret refs are resolved only when DAG YAML references them with `secrets[].ref` or with an SSH credential's `{ secret: <ref> }`.
 
 ## Storage
 

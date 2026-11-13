@@ -55,6 +55,10 @@ Do not include the scope or workspace name in `ref`; use `ref: prod/db-password`
 
 Registry refs currently resolve Dagu-managed secrets. External registry providers such as Vault, cloud secret managers, and Kubernetes-backed registry records are request-based and are not creatable through the secret management API yet. Use [Request access](https://dagu.sh/contact) to contact the Dagu team. Existing direct provider refs still work as described below.
 
+### SSH Credentials
+
+An SSH or SFTP `key`, `password`, or `passphrase` can read a registry ref directly with `{ secret: <ref> }`. The value resolves at run start together with `secrets:` and is masked the same way, but it is not exported as an environment variable. See [Credentials from Secrets](/step-types/ssh#credentials-from-secrets).
+
 ## Direct Provider Refs
 
 Use `provider` plus `key` when the DAG should fetch a secret directly from a provider at runtime:
@@ -181,7 +185,7 @@ If any secret fails to resolve, run initialization fails and steps do not execut
 
 ## Distributed Runs
 
-For distributed runs, the coordinator that owns the task resolves Dagu-managed registry refs for the active worker. Nested child DAGs resolve refs against each child's workspace. Workers do not need the server secret store or data volume.
+For distributed runs, the coordinator that owns the task resolves Dagu-managed registry refs for the active worker. It answers only refs that the DAG declares in `secrets:` or uses for SSH credentials. Nested child DAGs resolve refs against each child's workspace. Workers do not need the server secret store or data volume.
 
 Direct provider refs resolve where the DAG executes. A distributed worker therefore needs the provider configuration, credentials, files, identity, and network access used by those refs. For example, a `file` provider path must exist on that worker.
 
@@ -232,7 +236,7 @@ The encryption key is resolved from the same data directory. Back up the data di
 
 ## Masking
 
-Dagu creates a masker from non-empty resolved secret values. The replacement string is `*******`.
+Dagu creates a masker from non-empty resolved secret values, including [SSH credentials](#ssh-credentials) read from the registry. The replacement string is `*******`.
 
 The masker is applied to:
 

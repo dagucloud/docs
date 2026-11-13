@@ -30,7 +30,7 @@ The DAG definition is sent with each dispatched task. If a step also needs files
 
 ### Runtime Profiles and Secrets
 
-The coordinator that owns a task resolves Global, workspace, and selected [runtime profile](/writing-workflows/runtime-profiles) layers. It also resolves Dagu-managed [`secrets[].ref`](/writing-workflows/secrets#registry-refs) values. Workers do not need server profile or secret stores. Child DAGs inherit the selected profile and resolve defaults and managed secret refs against the child's workspace.
+The coordinator that owns a task resolves Global, workspace, and selected [runtime profile](/writing-workflows/runtime-profiles) layers. It also resolves Dagu-managed [`secrets[].ref`](/writing-workflows/secrets#registry-refs) values and the [SSH credential refs](/step-types/ssh#credentials-from-secrets) a DAG uses. Workers do not need server profile or secret stores. Child DAGs inherit the selected profile and resolve defaults and managed secret refs against the child's workspace.
 
 Direct secret providers resolve where the DAG executes. Give workers the provider configuration, credentials, files, and network access required by those providers. These workflow resources are separate from the Dagu server data volume.
 
