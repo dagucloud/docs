@@ -41,6 +41,16 @@ What counts as a slot's run:
 - A run that [history retention](/writing-workflows/yaml-specification) removed keeps counting with its final status. Dagu keeps a record of each slot for `slot_retention_days`, 730 by default, so old slots do not run again after their runs are gone.
 - After a schedule moves, for example from 02:00 to 01:00, the scheduler's 02:00 run of a day covers that day's 01:00 slot. This holds when both schedules fire on the same days, once a day or once an hour. A manual run counts only for its own slot.
 
+## Selecting by Date
+
+`--by` names a [`dates`](/writing-workflows/schedule-dates) entry, and `--from` and `--to` are then dates of that entry instead of fire times:
+
+```bash
+dagu backfill start etl --by target_day --from 2026-10-01 --to 2026-10-31
+```
+
+The backfill runs every slot whose entry falls in the range, in the entry's zone, whatever its format; for a list entry, any of its values. On an hourly DAG with `target_day: -1d`, that is the 744 fires that load October. A range that reaches today runs to now.
+
 ## The Plan
 
 `dagu backfill start` prints the plan and asks before starting. `--dry-run` prints it and stops; `--format json` prints every slot.
@@ -69,6 +79,7 @@ Start 28 runs? [y/N]
 
 - **Concurrency** is the lower of `--max-concurrency` and the limit of the DAG's [queue](/writing-workflows/queues).
 - **The estimate** is the median duration of the DAG's recent successful runs, up to 20, times the rounds the runs take at that concurrency. The plan leaves it out when the DAG has no successful run.
+- **Dates.** For a DAG with [`dates`](/writing-workflows/schedule-dates), the plan adds a column for the `--by` entry, else the first entry, and a `Loads <first> to <last>` line over the slots it runs, so an off-by-one is visible before the submit. `--format json` and the API return every slot's dates.
 
 The plan warns when no scheduler is running, when the DAG is suspended, when the queue's limit lowers the concurrency, when live runs may wait behind an executing backfill run, which `handler_on` steps will run once per slot, and how many slots run because the schedule's cadence changed. Pass `--yes` to start without asking; with no terminal, the command needs it.
 
