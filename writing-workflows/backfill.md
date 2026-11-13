@@ -85,6 +85,7 @@ The scheduler runs backfills, so `dagu scheduler` or `dagu start-all` must be ru
 - **Retries.** The backfill follows a retry of its runs, by hand or by the retry policy. A retry of a run of a backfill that ended `succeeded` or `failed` opens it again until the retry ends; the slots a stopped backfill did not reach stay `not run`. A cancelled backfill stays cancelled.
 - **Run IDs** are `backfill-<id>-<generation>-<slot>`. A scheduler that restarts finds the runs it queued and queues none of them twice.
 - **Pause and suspension.** A paused scheduler queues nothing new and holds the backfill's queued runs until it resumes. A suspended DAG's backfill runs still run.
+- **Removal.** A backfill that ended more than `slot_retention_days` ago is removed, with its record and progress, when its DAG next gets a backfill. Its runs follow the run history's own retention.
 
 A backfill run's `context.trigger.type` is `backfill`. To keep an alert handler from running once per slot, give it a precondition:
 
