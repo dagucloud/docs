@@ -105,7 +105,7 @@ A backfill does not get in the way of the live schedule:
 - Backfill runs wait behind every other run of the queue. A live slot that fires during a backfill is queued ahead of the backfill's queued runs, and waits only for the backfill run executing, if the queue's limit is reached.
 - A queued or running backfill run does not make the scheduler skip a live slot, and does not count for `skip_if_successful`.
 - A DAG's latest run, in the DAG list, `dagu status`, and the scheduler's checks, is its newest run that is not a backfill run. A failed run of an old slot does not turn a healthy DAG red.
-- A DAG's run history leaves out backfill runs, so a long backfill does not push the live runs out of the run timeline. The `GET /api/v1/dags/{fileName}/dag-runs` endpoint lists them with `includeBackfill=true`. A DAG whose only runs are backfill runs shows them.
+- A DAG's run history leaves out backfill runs, so a long backfill does not push the live runs out of the run timeline. The `GET /api/v1/dags/{fileName}/dag-runs` endpoint lists them with `includeBackfill=true`, and the run timeline with **Show backfill runs**. A DAG whose only runs are backfill runs shows them.
 - Catchup skips a slot whose latest backfill run is active or succeeded.
 - `mail_on`, a step's `mail_on_error`, and notification routes do not fire for backfill runs, except for a run waiting for a person. A backfill run neither opens nor resolves an [incident](/web-ui/incidents).
 
@@ -135,9 +135,14 @@ Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 
 ## In the Web UI
 
 - **A backfill's page**, `/backfills/<id>`, says where it stands in one sentence, such as `Running: 12 of 28 slots done, 1 failed` or `Stopped: 1 failed, 4 not run`, with the reason when something holds it. A bar and a legend show the slots by state; pick a state to list its slots. The slot grid has a row per day for an hourly schedule, or per month for a daily one; each slot opens its run. **Cancel** asks whether to stop the runs in progress. **Resume** shows the plan for the concurrency and failure behavior you choose before it runs anything. **View runs** lists the backfill's runs.
-- **A workflow's Backfills tab**, for a workflow with a schedule, lists its backfills, newest first.
+- **A workflow's Backfills tab**, for a workflow with a schedule, shows its slots and lists its backfills, newest first.
+  - **Slots** shows each fire time of the schedule over the last 24 hours, 7, 30, or 90 days, in the state its runs give it: missing, failed, active, or succeeded. At most the newest 2000 are drawn.
+  - A user who may run the workflow picks slots: one at a time, with Shift for a run of them, or with **Pick missing** and **Pick missing and failed**. **Backfill N slots** runs the picked slots; with none picked, **Backfill this range** runs the range.
+  - The start dialog offers what to run for a range (**Fill gaps**, **Fill gaps and redo failed**, **Redo everything**), with the count each one runs. Running again slots that succeeded needs a confirmation that names how many. It also sets the runs at once, the failure behavior, and params. It shows the plan before anything runs: the slots, the first and last, an estimate, and warnings. **Start N runs** starts that plan. If the slots changed meanwhile, it shows the new plan instead of starting.
+  - A user who may not run the workflow sees each slot link to its run.
 - **The workflow page** shows a notice for the latest backfill: its progress while it runs, or that it failed until a slot it failed succeeds. A failure notice can be dismissed.
 - **A backfill run's trigger** links to its backfill.
+- **Show backfill runs**, in the run timeline's View menu of a scheduled workflow, adds the backfill runs to the timeline. The browser remembers it.
 
 An open backfill's page updates as its runs change, while the browser tab is visible; an ended one is read once.
 
