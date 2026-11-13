@@ -94,6 +94,7 @@ An entry is shifted and formatted in its `timezone`, else the zone of the entry 
 - `dagu dry --scheduled-at 2026-11-09 etl.yaml` prints the slot, its window, and the dates the real run of that slot records; with no `--scheduled-at` it takes the default slot.
 - `dagu calendar fires etl.yaml` lists the dates beside each upcoming fire.
 - `dagu start` and `dagu enqueue` print the slot and dates of the run they create.
+- The run dialog of a DAG with `dates` shows the slot the run would get, its window, and its dates, and updates them as **Scheduled at** or **Profile** changes. When a date cannot resolve, it shows the reason and holds **Start** and **Enqueue**.
 - The upcoming runs in `GET /api/v1/dags/{fileName}` list the dates each run will get. The MCP `dag` read returns them as `upcomingRunDates`.
 - `GET /api/v1/dags/{fileName}/slot-preview?scheduledAt=2026-11-09` returns the slot a start would get, its window, and its dates, without starting a run. With no `scheduledAt`, it previews the default slot.
 - A run's details, and the MCP `run` read, show the dates it recorded and whether its slot was the default.
