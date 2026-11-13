@@ -98,6 +98,8 @@ params:
 
 `eval` can read earlier params and the host environment. It cannot read the DAG `env` block, which is evaluated after params.
 
+`eval` can also read the run's [dates](/writing-workflows/schedule-dates) and its `${context.run.*}` values, such as `${context.run.id}` and `${context.run.scheduled_at}`. Such an eval, and every `eval` after it, runs when the run starts rather than when the DAG loads.
+
 Runtime overrides from the CLI, API, and sub-DAG calls stay literal.
 
 ## Parameter JSON Payload

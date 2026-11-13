@@ -83,7 +83,8 @@ An entry is shifted and formatted in its `timezone`, else the zone of the entry 
 ## Where Dates Resolve
 
 - A run resolves its dates once, when it is created, and records them. A retry reads the recorded dates, even after the DAG or its calendar changed.
-- `${dates.NAME}` resolves wherever `${params.NAME}` does, including `env`, except in the fields that resolve while the DAG loads: `consts`, `params[].eval`, and the map form of `worker_selector`. Pass a date to a script through `env`.
+- `${dates.NAME}` resolves wherever `${params.NAME}` does, including `env`, except in the fields that resolve while the DAG loads: `consts` and the map form of `worker_selector`. Pass a date to a script through `env`.
+- A param can follow the slot with `eval: ${dates.target_day}`. Such an eval, and every `eval` after it, runs when the run starts, after its dates resolve and before `env`. A caller's value overrides it, as for any param, without changing the date: `dagu start etl -- date=2026-11-01`. A queued run evaluates it when it starts, from the dates recorded when it was created. A DAG's details show the param without a value.
 - A sub-DAG resolves its own `dates` from its parent's slot.
 - A run started without a slot, by hand, from a webhook, from a [watched folder](/writing-workflows/watched-folders), or as a sub-DAG of a parent with none, gets the **default slot**: the latest fire at or before it was created. A monthly load started on the 15th loads what its run of the 1st loaded. The run counts as that slot's run and records that the slot was the default.
 - On a DAG without a recurring schedule, `scheduled_at` is the minute the run was created, and a date that needs a window, from `interval_start` or `next_scheduled_at`, or a list, is refused before the run is created. `dagu validate` warns about such a date.
