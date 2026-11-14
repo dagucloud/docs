@@ -118,6 +118,7 @@ Common examples:
 | `DAGU_CALENDARS_DIR` | `paths.calendars_dir` | Business calendar files |
 | `DAGU_DAG_DISCOVERY_RECURSIVE` | `dag_discovery.recursive` | Discover DAG definitions in subdirectories |
 | `DAGU_DAG_DISCOVERY_SYMLINKS` | `dag_discovery.symlinks` | Include DAG file symlinks and allow external targets |
+| `DAGU_DAG_DISCOVERY_SKIP_DIRECTORIES` | `dag_discovery.skip_directories` | Directories directly under `paths.dags_dir` that recursive discovery skips |
 | `DAGU_DATA_DIR` | `paths.data_dir` | Data directory used by derived stores |
 | `DAGU_LOG_DIR` | `paths.log_dir` | Log directory |
 | `DAGU_ARTIFACT_DIR` | `paths.artifact_dir` | DAG-run artifact directory |
@@ -332,6 +333,30 @@ itself is supported.
 Without the opt-in, top-level YAML file symlinks whose targets remain inside
 `paths.dags_dir` continue to work in the default non-recursive mode. File
 symlinks encountered during recursive discovery are skipped.
+
+### Skipped Directories
+
+Keep directories directly under `paths.dags_dir` out of recursive discovery,
+such as a tree of child DAGs or build output:
+
+```yaml
+dag_discovery:
+  recursive: true
+  skip_directories: [jobs, build]
+```
+
+The equivalent environment variable takes a comma-separated list:
+
+```bash
+export DAGU_DAG_DISCOVERY_SKIP_DIRECTORIES=jobs,build
+```
+
+DAGs in a skipped directory are not listed on the Workflows page, scheduled,
+or watched for changes, and they do not count toward the unique file name and
+DAG name rules. A parent DAG can still run one by path, for example
+`call: jobs/child`. Entries are case-sensitive directory names: `jobs` skips
+`jobs/` but not `team/jobs/`, and `./jobs` or `jobs/` mean the same as `jobs`.
+Changing the list rebuilds the DAG index once on the next load.
 
 ### Persistent State Directory
 

@@ -73,6 +73,7 @@ paths:
 dag_discovery:
   recursive: false      # Discover DAGs below paths.dags_dir
   symlinks: false       # Include DAG file symlinks and allow external targets
+  skip_directories: []  # Directories directly under paths.dags_dir to skip
 
 # Permissions
 permissions:
@@ -226,6 +227,7 @@ All options support `DAGU_` prefix:
 - `DAGU_DAGS_DIR` - DAGs directory
 - `DAGU_DAG_DISCOVERY_RECURSIVE` - Discover DAG definitions recursively below `paths.dags_dir` (default: `false`)
 - `DAGU_DAG_DISCOVERY_SYMLINKS` - Include DAG file symlinks in recursive discovery and allow external targets (default: `false`)
+- `DAGU_DAG_DISCOVERY_SKIP_DIRECTORIES` - Comma-separated directories directly under `paths.dags_dir` that recursive discovery skips (default: none)
 - `DAGU_LOG_DIR` - Logs
 - `DAGU_DATA_DIR` - Data
 - `DAGU_TOOLS_DIR` - Managed DAG tool cache

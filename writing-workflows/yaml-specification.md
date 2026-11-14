@@ -222,6 +222,13 @@ schedule:
   - expression: "30 */2 * * *"
     profile: dev
 
+# Parameters per schedule entry
+schedule:
+  - expression: "0 5 * * *"
+    params: {mode: incremental}
+  - expression: "0 23 * * SUN"
+    params: {mode: full}
+
 # Business-day schedules
 calendar: jp-banking
 schedule:
@@ -585,7 +592,7 @@ s3:
 steps:
   - action: s3.upload
     with:
-      local_path: ./report.csv
+      source: ./report.csv
       key: daily/report.csv
 ```
 
@@ -1467,7 +1474,6 @@ handler_on:
       to: data-team@example.com
       subject: "ETL failed - ${params.DATE}"
       message: "Check logs at ${context.paths.log_file}"
-      attach_logs: true
   exit:
     run: ./scripts/cleanup.sh "${params.DATE}"
 
