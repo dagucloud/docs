@@ -175,6 +175,7 @@ Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 
   - A user who may not run the workflow sees each slot link to its run.
 - **The workflow page** shows a notice for the latest backfill: its progress while it runs, or that it failed until a slot it failed succeeds. A failure notice can be dismissed.
 - **A backfill run's trigger** links to its backfill.
+- **The run list and a queue's page** pick every run, all but backfill runs, or backfill runs only. The run list keeps the choice in its URL (`backfill=exclude` or `only`) and in a saved run view. The API takes the same `backfill` parameter on `GET /api/v1/dag-runs` and `GET /api/v1/queues/{name}/items`.
 - **Show backfill runs**, in the run timeline's View menu of a scheduled workflow, adds the backfill runs to the timeline. The browser remembers it.
 
 An open backfill's page updates as its runs change, while the browser tab is visible; an ended one is read once.
