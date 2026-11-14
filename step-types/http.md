@@ -30,6 +30,7 @@ steps:
 | `format` | Stdout format. `"json"` writes a structured JSON object to stdout. | `"json"` |
 | `output` | File path to write the response body to instead of stdout. | `"${context.paths.artifacts_dir}/data.bin"` |
 | `skip_tls_verify` | Skip TLS certificate verification | `true` |
+| `status_exit_codes` | Map a non-2xx status code or class to the step exit code (0-255). See [Exit Codes](#exit-codes). | `"5xx": 75` |
 
 ## Examples
 
@@ -164,7 +165,7 @@ Without `silent` (or on a non-2xx response), stdout also includes status code an
 }
 ```
 
-If the response body is not valid JSON, the step fails.
+A successful response must carry valid JSON, or the step fails. A failed response whose body is not JSON, such as an HTML error page, reports the body as a string and the step fails with its status.
 
 ### Poll an Asynchronous Job
 
@@ -237,7 +238,7 @@ steps:
 
 `with.output` always writes only the response body bytes to the file. Status lines and headers are stdout output only.
 
-Relative `with.output` paths resolve from the step working directory. Parent directories are created automatically. Existing files are replaced atomically only after a successful 2xx response; non-2xx responses fail the step and do not replace the target file.
+Relative `with.output` paths resolve from the step working directory. Parent directories are created automatically. Existing files are replaced atomically only after a successful response: a 2xx status, or one that `status_exit_codes` maps to `0`. Any other response fails the step, writes the error body to stdout, and leaves the target file unchanged.
 
 When `with.output` references `${context.paths.artifacts_dir}`, artifact storage is auto-enabled and the downloaded file appears as a run artifact.
 
@@ -246,10 +247,14 @@ When `with.output` references `${context.paths.artifacts_dir}`, artifact storage
 | HTTP Status | Exit Code | Description |
 |-------------|-----------|-------------|
 | 2xx | 0 | Success |
-| 4xx, 5xx | 1 | Client/server error |
+| 3xx, 4xx, 5xx | 1 | Not a success, unless `status_exit_codes` maps it |
 | Timeout/network error | 1 | Connection failed |
 
+`status_exit_codes` maps a status code (`"404"`) or a class (`"5xx"`) to the step exit code, so `retry_policy` and `continue_on` can treat statuses differently. An exact code wins over a class. A status mapped to `0` is a success: the step succeeds and the response is written like a 2xx response. Keys must be `300`-`599` or `3xx`-`5xx`, and values `0`-`255`. A non-2xx status not in the map exits `1`.
+
 ### Error Handling
+
+Retry server errors, accept a missing resource, and fail fast on anything else:
 
 ```yaml
 steps:
@@ -259,12 +264,17 @@ steps:
       method: GET
       url: https://api.example.com/data
       timeout: 30
+      status_exit_codes:
+        "404": 0    # A missing resource is fine
+        "429": 75   # Rate limited
+        "5xx": 75   # Server error
     retry_policy:
       limit: 3
       interval_sec: 5
-    continue_on:
-      exit_code: [1]  # Non-2xx status codes
+      exit_code: [75]
 ```
+
+Without `status_exit_codes`, every non-2xx status exits `1`, so `retry_policy` retries client errors such as `400` as well.
 
 ### Webhook Notification
 
