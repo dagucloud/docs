@@ -1,8 +1,18 @@
-# License Comparison
+# Plans and Licenses
 
-This page compares the Community, Team, and Pro self-host plans. It does not list prices; see the [pricing page](https://dagu.sh/pricing) for current commercial terms.
+Dagu is open source and free to self-host on any number of servers; this is the Community plan. A Team or Pro license turns on single sign-on, user management with roles, audit logs, incident routing, and unlimited API keys on each server it covers, and gives those servers paid monitoring in [Dagu Cloud](/overview/dagu-cloud). Team and Pro differ only in how many servers they cover.
+
+| Plan | Price | Servers with license features |
+| --- | --- | --- |
+| Community | Free | None; any number of servers run without them |
+| Team | $50 per month, or $500 per year | 3 |
+| Pro | $150 per month, or $1,500 per year | 15 |
+
+Workers do not count as servers. For more servers or other terms, [contact the Dagu team](https://dagu.sh/contact). The [pricing page](https://dagu.sh/pricing) lists the same prices.
 
 ## At a Glance
+
+### On Each Server
 
 | Capability | Community | Team | Pro |
 | --- | --- | --- | --- |
@@ -10,30 +20,57 @@ This page compares the Community, Team, and Pro self-host plans. It does not lis
 | Web UI | ✓ | ✓ | ✓ |
 | Workers | ✓ | ✓ | ✓ |
 | Docker run action | ✓ | ✓ | ✓ |
-| API keys | △ Up to 2 | ✓ | ✓ |
-| OIDC/SSO | - | ✓ | ✓ |
-| User management | - | ✓ | ✓ |
-| Audit logs | - | ✓ | ✓ |
 | Notification routing | ✓ | ✓ | ✓ |
+| API keys | △ Up to 2 | Unlimited | Unlimited |
+| OIDC/SSO | - | ✓ | ✓ |
+| User management and roles (RBAC) | - | ✓ | ✓ |
+| Audit logs | - | ✓ | ✓ |
 | Incident routing | - | ✓ | ✓ |
-| Monitoring in Dagu Console | △ 1 server, free | ✓ | ✓ |
+
+### In Dagu Cloud
+
+A Community server in Dagu Cloud uses free monitoring. [Free and Paid](/overview/console-monitoring#free-and-paid) lists every limit.
+
+| Capability | Community | Team | Pro |
+| --- | --- | --- | --- |
+| Servers monitored | △ 1, with free monitoring | 3 | 15 |
+| Reports and run history | △ Every 5 minutes, 7 days | Every 60 seconds, 30 days | Every 60 seconds, 30 days |
+| Alert emails | △ Owners and admins | Owners, admins, and the members and addresses you add | Owners, admins, and the members and addresses you add |
+| Chat, PagerDuty, and webhook alerts | - | ✓ | ✓ |
+| Alert rules and deadlines per workspace, server, and workflow | - | ✓ | ✓ |
+| Machine CPU, memory, and disk | - | ✓ | ✓ |
+| Weekly summary | - | ✓ | ✓ |
 | [People in a Dagu Console workspace](/overview/console-members) | △ Owner only | Up to 10 | Up to 10 |
-| Public webhook URLs through Dagu Cloud | △ 1 per server, with free monitoring | ✓ | ✓ |
+| Public webhook URLs through Dagu Cloud | △ 1, with free monitoring | Up to 1,000 per server | Up to 1,000 per server |
 | Remote access from Dagu Cloud (MCP) | - | ✓ | ✓ |
 
 ## Notes
 
 - **Workers:** run jobs outside the server. Self-hosted workers are not licensed separately.
-- **Server licenses:** Team includes 3 self-host server licenses; Pro includes 15.
-- **API keys:** Community self-host supports up to 2 API keys.
+- **API keys:** a Community server has up to 2 API keys. Team and Pro remove the limit.
 - **OIDC/SSO:** login with an external identity provider.
-- **User management:** create, update, disable, and delete users.
+- **User management and roles (RBAC):** create, update, disable, and delete users, and give each user a role.
 - **Audit logs:** review administrative and security-relevant activity.
 - **Notification routing:** send workflow events to team channels.
 - **Incident routing:** open and resolve provider incidents for failed workflows.
 - **Monitoring in Dagu Console:** see connected servers' health, runs, and trends in one place, and get an email when a workflow fails or a server stops reporting. A Community server can be monitored for free, one per workspace and with lower limits; it stays on Community. See [Free and Paid](/overview/console-monitoring#free-and-paid).
-- **Public webhook URLs through Dagu Cloud:** give a DAG's webhook an address on the internet, so GitHub, Stripe, or Slack can start it on a server with no public address. A connected server has up to 1,000; a server on free monitoring has one. See [Public Webhook URLs](/server-admin/authentication/public-webhook-urls).
+- **Public webhook URLs through Dagu Cloud:** give a DAG's webhook an address on the internet, so GitHub, Stripe, or Slack can start it on a server with no public address. A server on Team or Pro has up to 1,000; a server on free monitoring or in a trial has one. See [Public Webhook URLs](/server-admin/authentication/public-webhook-urls).
 - **Remote access from Dagu Cloud (MCP):** let MCP clients connected to Dagu Cloud use the server's MCP tools over a connection the server opens, up to a role the server's administrator chooses. It needs a Team or Pro plan, or a trial. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
+
+## Trial
+
+A 14-day trial covers one server with everything Team and Pro include, except that the workspace cannot invite people, the server has one public webhook URL, and offline licenses are not available. It needs no credit card. Start it with **Also try paid features free for 14 days** when you connect a server, or with **Start free trial** on **Plan & features** for a server on free monitoring. Workspace owners get an email three days before the trial ends and another when it has ended.
+
+## When a Plan or Trial Ends
+
+When a plan ends, its license is suspended. At each server's next check-in, within an hour:
+
+- One server on Dagu v2.19.2 or later moves to free monitoring, provided no other server holds the free slot.
+- Every other server stops using the license and runs as Community.
+
+Single sign-on, user management, audit logs, and incident routing turn off on all of them, and no API key can be created past the second; existing keys keep working. A server that cannot reach Dagu Cloud keeps these features until 14 days after the license's end date.
+
+When a trial ends, its server moves to free monitoring the same way. Its paid features stop when the trial ends, with no 14-day period.
 
 ## Connect a Server
 
