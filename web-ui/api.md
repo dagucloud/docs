@@ -1153,6 +1153,7 @@ Current reasons:
 | `AttemptIdentityMissing` | The queued attempt lacks the identity that worker assignment needs. |
 | `DAGSnapshotUnavailable` | The run's stored DAG snapshot cannot be read. |
 | `LaunchFailed` | A local launch failed before the run reported that it started. |
+| `ExecutableMissing` | The Dagu executable that launches local runs does not exist. The run stays queued until the executable exists again, usually after a scheduler restart. |
 | `StartupNotObserved` | No heartbeat, lease, or status change was seen within the startup wait window. |
 | `RunLivenessUnavailable` | Run liveness could not be checked while waiting for startup. |
 | `QueueStateUnavailable` | The queue state could not be read. |
