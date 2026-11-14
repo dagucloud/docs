@@ -144,7 +144,7 @@ A backfill whose DAG is renamed or deleted ends cancelled, including a rename of
 
 ### Summary Notification
 
-When a backfill ends succeeded or failed, the scheduler sends one summary to the [notification](/web-ui/notifications#backfill-summaries) targets that a run of the DAG with that outcome would notify. Those are the DAG's notification settings, or else its workspace's rules. The backfill's own runs send no per-run notifications. The summary gives:
+When a backfill ends succeeded or failed, the scheduler sends one summary to the [notification](/web-ui/notifications#backfill-summaries) targets that a run of the DAG with that outcome would notify. Those are the DAG's notification settings, or else its workspace's rules. The backfill's runs send no notifications of their own, except a run that waits for a person. The summary gives:
 
 - the slot counts and the time from submission to the end;
 - up to 10 groups of failed slots, by failing step and error, each with a link to its first run;
