@@ -217,7 +217,7 @@ Behavior:
 - Eval results are coerced and validated when the param declares a type.
 - If `eval` fails and `default` exists, Dagu falls back to `default`.
 - If `eval` fails and there is no `default`, the run fails before any step starts.
-- Metadata-only loads skip `eval`, which is why computed defaults may not appear prefilled in UI/API metadata.
+- Metadata-only loads skip `eval`, which is why computed defaults may not appear prefilled in UI/API metadata. The start dialog leaves such a param empty, with the hint `Computed when the run starts`; a value typed there overrides `eval`.
 - External-schema-backed `params.schema` defaults are not evaluated.
 
 Example of parameter chaining:
