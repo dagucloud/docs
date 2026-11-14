@@ -142,6 +142,21 @@ dagu backfill resume <id> [--max-concurrency <n>] [--on-failure stop|continue] [
 
 A backfill whose DAG is renamed or deleted ends cancelled, including a rename of the DAG's `name` inside its file.
 
+### Summary Notification
+
+When a backfill ends succeeded or failed, the scheduler sends one summary to the [notification](/web-ui/notifications#backfill-summaries) targets that a run of the DAG with that outcome would notify. Those are the DAG's notification settings, or else its workspace's rules. The backfill's own runs send no per-run notifications. The summary gives:
+
+- the slot counts and the time from submission to the end;
+- up to 10 groups of failed slots, by failing step and error, each with a link to its first run;
+- a link to the backfill's page.
+
+```text
+Backfill 3f9a1c2e of daily-report failed: 28 slots, 25 succeeded, 3 failed, in 1h40m
+2 slots at step load: connection refused, first 2026-10-02 02:00 UTC: https://dagu.example.com/dag-runs/daily-report/backfill-3f9a1c2e-0-20261002T020000Z
+```
+
+A cancelled backfill sends no summary, and neither do command channels. The DAG's own `mail_on` mail sends none either.
+
 `dagu status <DAG>` ends with the DAG's latest backfill: its open backfill, or else its newest backfill that ended failed, until the slots it failed succeed.
 
 ```text

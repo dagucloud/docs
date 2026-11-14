@@ -327,6 +327,31 @@ Generic webhook channels send JSON. Leave **Webhook JSON body template** blank t
 }
 ```
 
+### Backfill Summaries
+
+A [backfill](/writing-workflows/backfill#summary-notification) that ends succeeded or failed sends one summary instead of a notification per run. It goes to the channels a run of the same DAG with that outcome would notify. Slack, Teams, Telegram, email, and webhook channels receive it; local command channels do not. A webhook gets:
+
+```json
+{
+  "type": "backfill.ended",
+  "backfill": {
+    "id": "3f9a1c2e",
+    "dag": "daily-report",
+    "succeeded": false,
+    "slots": 28,
+    "succeededSlots": 25,
+    "failedSlots": 3,
+    "skippedSlots": 0,
+    "notRunSlots": 0,
+    "durationSeconds": 6000,
+    "failures": [
+      {"step": "load", "error": "connection refused", "slots": 2, "slot": "2026-10-02T02:00:00Z", "runId": "backfill-3f9a1c2e-0-20261002T020000Z"}
+    ]
+  },
+  "message": "Backfill 3f9a1c2e of daily-report failed: 28 slots, 25 succeeded, 3 failed, in 1h40m\n..."
+}
+```
+
 ### Custom JSON Body
 
 Set **Webhook JSON body template** when the receiving service expects a different JSON shape. For example, many chat webhooks accept a single `text` field:
