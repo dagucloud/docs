@@ -88,6 +88,7 @@ paths:
 dag_discovery:
   recursive: false          # Discover DAGs below paths.dags_dir (default: false)
   symlinks: false           # Include DAG file symlinks and allow external targets
+  skip_directories: []      # Directories directly under paths.dags_dir to skip
 
 # External Secret Providers
 secrets:
@@ -422,6 +423,7 @@ Variables ending in `_FILE` name a file that holds a secret. See [Secrets From F
 ### DAG Discovery
 - `DAGU_DAG_DISCOVERY_RECURSIVE` - Discover `.yaml` and `.yml` DAG definitions recursively below `paths.dags_dir` (default: `false`)
 - `DAGU_DAG_DISCOVERY_SYMLINKS` - Include DAG file symlinks in recursive discovery and allow targets outside `paths.dags_dir` (default: `false`)
+- `DAGU_DAG_DISCOVERY_SKIP_DIRECTORIES` - Comma-separated directories directly under `paths.dags_dir` that recursive discovery skips (default: none)
 
 When recursive discovery is enabled, file stems and effective DAG names must
 each be unique across the discovered tree. Conflicting DAGs are excluded until
