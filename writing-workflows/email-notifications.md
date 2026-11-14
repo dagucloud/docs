@@ -174,7 +174,7 @@ mail_on:
   wait: true       # Email when waiting for human input
 ```
 
-A [backfill](/writing-workflows/backfill#summary-notification)'s runs send no `mail_on` mail, and the backfill sends no summary through `mail_on` either. To get the summary by email, notify the DAG through an [email channel](/web-ui/notifications#email-delivery).
+A [backfill](/writing-workflows/backfill#summary-notification)'s runs send no `mail_on` mail, except a run that waits for a person, and the backfill sends no summary through `mail_on` either. To get the summary by email, notify the DAG through an [email channel](/web-ui/notifications#email-delivery).
 
 ### Step-Level Errors
 
