@@ -6,7 +6,7 @@ Only the latest stable release series receives fixes. See the [support policy](/
 
 ## Before you upgrade
 
-1. Read the release notes for every version between yours and the target: https://github.com/dagucloud/dagu/releases
+1. Read the "Upgrading from" sections below for every version you skip. They list the changes that need action. The release notes have the full list: https://github.com/dagucloud/dagu/releases
 2. [Back up](/server-admin/backup-restore) configuration, DAGs, and the data directory.
 3. Install the target version on a staging server first if your workflows are critical. See [Multi-Environment Deployments](/server-admin/deployment/multi-environment).
 

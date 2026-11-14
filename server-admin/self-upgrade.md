@@ -107,7 +107,13 @@ The Windows service wrapper ends every process of the service when it restarts, 
 
 ## Update Notifications
 
-Dagu caches update check results for 24 hours. When automatic checks are enabled, an available update appears as a notification in the web UI. The notification shows the update command for the detected installation method, such as `dagu upgrade` or `brew upgrade dagu`. Container installs show no command.
+Dagu checks for a new release when the server starts and every 24 hours after. When an update is available, the server logs a line like this:
+
+```
+level=INFO msg="Update available" version=2.20.0 latest-version=v2.27.0 command="dagu upgrade"
+```
+
+Administrators also see a notice in the web UI. It shows the update command for the detected installation method, such as `dagu upgrade` or `brew upgrade dagu`, with a copy button. A container install is told to update its image instead. The notice links to [Upgrades](/server-admin/upgrades). Once dismissed, it stays hidden through patch releases and shows again for the next minor release.
 
 When the binary a running server started from is replaced, by `dagu upgrade` or a package manager, the web UI shows a restart notice instead, with the restart command from [Restarting After an Upgrade](#restarting-after-an-upgrade) when one is found. When that restart would also end runs in progress, the notice says so.
 

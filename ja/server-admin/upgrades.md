@@ -6,7 +6,7 @@
 
 ## アップグレードの前に {#before-you-upgrade}
 
-1. 現在のバージョンから目的のバージョンまでの間にある、すべてのバージョンのリリースノートを確認します。https://github.com/dagucloud/dagu/releases
+1. 飛ばすすべてのバージョンについて、このページの「以前からのアップグレード」の節を確認します。対応が必要な変更がまとめられています。すべての変更はリリースノートにあります。https://github.com/dagucloud/dagu/releases
 2. 設定、DAG、データディレクトリを[バックアップ](/ja/server-admin/backup-restore)します。
 3. ワークフローが重要な場合は、先にステージングサーバーへ目的のバージョンをインストールします。[マルチ環境へのデプロイ](/server-admin/deployment/multi-environment)を参照してください。
 
