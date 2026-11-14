@@ -139,6 +139,7 @@ dagu backfill resume <id> [--max-concurrency <n>] [--on-failure stop|continue] [
 - `status --watch` prints a line each time the progress changes and exits 0 only when the backfill succeeds, so a script can wait for a backfill and act on its result. With `--format json`, the progress lines go to stderr and stdout holds only the final status.
 - `cancel` withdraws the queued runs, so their slots count as missing again, and cancels the slots not reached. Running runs finish unless `--stop-running` stops them.
 - `resume` plans again the slots that have not succeeded, with the DAG's current definition, and runs them with new runs. On an open backfill it first withdraws the queued runs; its running runs finish as part of the resumed backfill and count against its concurrency. Use it after fixing the DAG, or to change the concurrency.
+- When the DAG's definition changed since the backfill started, the resume plan says so: new runs use the current definition, and runs still active keep theirs. Every run records a digest of the YAML it ran, so `status` marks a slot whose run ran another definition, as `running (older definition)`, and the slot grid on the backfill's page draws such a slot with a dashed border. The API gives it as `otherDefinition` on a slot.
 
 A backfill whose DAG is renamed or deleted ends cancelled, including a rename of the DAG's `name` inside its file.
 
