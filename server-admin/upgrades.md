@@ -14,9 +14,10 @@ Only the latest stable release series receives fixes. See the [support policy](/
 
 ```bash
 dagu upgrade --version v2.26.0
-sudo systemctl restart dagu
 dagu version
 ```
+
+`dagu upgrade` offers to restart the service the installer set up. With `--yes`, it prints the restart command instead, such as `sudo systemctl restart dagu`.
 
 Without internet access, replace the binary by hand as described in [Closed Networks](/server-admin/deployment/closed-network#install).
 
@@ -26,7 +27,9 @@ A restart stops runs in progress unless the service keeps them running. See [Kee
 
 Each run is a separate process, so it can outlive the Dagu process that started it and record its own result. systemd's default, `KillMode=control-group`, ends every process of the service when it stops, runs included. `KillMode=process` ends only Dagu itself.
 
-Open an override for the service:
+The installer sets `KillMode=process`. A service set up by an older installer keeps the default until the installer runs again or the override below is added. `dagu upgrade` detects this and offers to add the override before it restarts the service.
+
+To add the override by hand, open it for the service:
 
 ```bash
 sudo systemctl edit dagu
@@ -40,6 +43,8 @@ KillMode=process
 ```
 
 For a user service, use `systemctl --user edit dagu`. `systemctl edit` reloads systemd, so the next restart already keeps runs.
+
+On macOS, the launchd agent the installer sets up already leaves runs running. On Windows, the service wrapper ends every process the service started, runs included, so restart when no critical run is in progress.
 
 Stopping a container stops the runs inside it. To keep runs going while Dagu restarts in a container, run them on [workers](/server-admin/distributed/) outside it.
 

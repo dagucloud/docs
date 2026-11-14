@@ -14,9 +14,10 @@
 
 ```bash
 dagu upgrade --version v2.26.0
-sudo systemctl restart dagu
 dagu version
 ```
+
+`dagu upgrade` は、インストーラーが設定したサービスの再起動を提案します。`--yes` を指定した場合は、代わりに `sudo systemctl restart dagu` などの再起動コマンドを表示します。
 
 インターネットに接続できない場合は、[閉域網](/ja/server-admin/deployment/closed-network#install)の説明に従って、バイナリを手動で置き換えてください。
 
@@ -26,7 +27,9 @@ dagu version
 
 各実行は独立したプロセスなので、それを開始した Dagu のプロセスが終了しても動き続け、自身の結果を記録できます。systemd のデフォルトの `KillMode=control-group` では、サービスの停止時に、実行を含むサービスのすべてのプロセスが終了します。`KillMode=process` にすると、終了するのは Dagu 本体だけです。
 
-サービスのオーバーライドを開きます。
+インストーラーは `KillMode=process` を設定します。古いインストーラーで設定したサービスは、インストーラーを再実行するか、次のオーバーライドを追加するまでデフォルトのままです。`dagu upgrade` はこれを検出し、サービスを再起動する前にオーバーライドの追加を提案します。
+
+オーバーライドを手動で追加するには、サービスのオーバーライドを開きます。
 
 ```bash
 sudo systemctl edit dagu
@@ -40,6 +43,8 @@ KillMode=process
 ```
 
 ユーザーサービスの場合は `systemctl --user edit dagu` を使います。`systemctl edit` は systemd を再読み込みするので、次の再起動からすでに実行が残ります。
+
+macOS では、インストーラーが設定する launchd エージェントはすでに実行を残します。Windows では、サービスラッパーがサービスの開始したすべてのプロセスを実行も含めて終了するため、重要な実行が進行していないときに再起動してください。
 
 コンテナを停止すると、その中の実行も停止します。コンテナ内の Dagu を再起動しても実行を続けるには、コンテナの外の[ワーカー](/server-admin/distributed/)で実行してください。
 

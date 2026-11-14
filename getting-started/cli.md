@@ -1415,7 +1415,7 @@ dagu upgrade --version vX.Y.Z
 dagu upgrade --dry-run
 ```
 
-Use `--yes` to skip prompts in automation. `--backup` keeps a copy of the current binary, `--pre-release` includes pre-release versions, and `--force, -f` allows a downgrade. Self-upgrade is unavailable for package-manager or container installs such as Homebrew, Snap, `go install`, Docker, Podman, and Kubernetes. After a successful upgrade, the command prints how to restart running Dagu processes; see [Restarting After an Upgrade](/server-admin/self-upgrade#restarting-after-an-upgrade).
+Use `--yes` to skip prompts in automation. `--backup` keeps a copy of the current binary, `--pre-release` includes pre-release versions, and `--force, -f` allows a downgrade. Self-upgrade is unavailable for package-manager or container installs such as Homebrew, Snap, `go install`, Docker, Podman, and Kubernetes. After a successful upgrade, the command offers to restart the service the installer set up, or with `--yes` prints how to restart it; see [Restarting After an Upgrade](/server-admin/self-upgrade#restarting-after-an-upgrade).
 
 ### `license`
 

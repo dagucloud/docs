@@ -60,11 +60,28 @@ If the install directory is not writable, the command fails with a permission er
 3. **Verification**: Validates SHA256 checksum
 4. **Backup** (optional): Creates `.bak` file of current binary
 5. **Installation**: Atomically replaces the binary
-6. **Restart Hint**: Prints how to restart Dagu so running processes use the new binary
+6. **Restart**: Offers to restart the service the installer set up, or prints how to restart Dagu
 
 ## Restarting After an Upgrade
 
-`dagu upgrade` does not restart running Dagu processes. A restart stops runs in progress unless the service keeps them; see [Keep runs across restarts](/server-admin/upgrades#keep-runs-across-restarts). After a successful upgrade, it prints the restart command for the background service the Dagu installer set up:
+After a successful upgrade, `dagu upgrade` offers to restart the background service the Dagu installer set up, so the new binary takes effect:
+
+```
+Restart Dagu now to use the new version? [Y/n]:
+Restarted Dagu.
+```
+
+When the restart would also end runs in progress, it first offers to change the service so runs keep going, then asks again. See [Keep runs across restarts](/server-admin/upgrades#keep-runs-across-restarts).
+
+```
+Restarting Dagu also ends runs in progress. This command keeps them running across restarts:
+  sudo sh -c 'mkdir -p /etc/systemd/system/dagu.service.d && printf "[Service]\nKillMode=process\n" > /etc/systemd/system/dagu.service.d/keep-runs.conf && systemctl daemon-reload'
+Run it now? [Y/n]:
+```
+
+If the change is declined or fails, the restart prompt defaults to no and says that runs in progress will end.
+
+With `--yes`, or when no terminal is attached, it asks nothing and prints the commands instead:
 
 ```
 Restart Dagu to use the new version:
@@ -80,6 +97,8 @@ Restart Dagu to use the new version:
 
 When no installer service is found, it prints `Restart any running Dagu processes to use the new version.`
 
+The Windows service wrapper ends every process of the service when it restarts, so on Windows the prompt always says that runs in progress will end.
+
 ## Supported Platforms
 
 - **macOS**: amd64, arm64
@@ -90,7 +109,7 @@ When no installer service is found, it prints `Restart any running Dagu processe
 
 Dagu caches update check results for 24 hours. When automatic checks are enabled, an available update appears as a notification in the web UI. The notification shows the update command for the detected installation method, such as `dagu upgrade` or `brew upgrade dagu`. Container installs show no command.
 
-When the binary a running server started from is replaced, by `dagu upgrade` or a package manager, the web UI shows a restart notice instead, with the restart command from [Restarting After an Upgrade](#restarting-after-an-upgrade) when one is found.
+When the binary a running server started from is replaced, by `dagu upgrade` or a package manager, the web UI shows a restart notice instead, with the restart command from [Restarting After an Upgrade](#restarting-after-an-upgrade) when one is found. When that restart would also end runs in progress, the notice says so.
 
 Automatic checks are controlled by the main server config and are enabled by default:
 
