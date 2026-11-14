@@ -592,7 +592,7 @@ s3:
 steps:
   - action: s3.upload
     with:
-      local_path: ./report.csv
+      source: ./report.csv
       key: daily/report.csv
 ```
 
@@ -1474,7 +1474,6 @@ handler_on:
       to: data-team@example.com
       subject: "ETL failed - ${params.DATE}"
       message: "Check logs at ${context.paths.log_file}"
-      attach_logs: true
   exit:
     run: ./scripts/cleanup.sh "${params.DATE}"
 

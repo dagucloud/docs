@@ -2,6 +2,7 @@
 
 The `dates` block names the dates a scheduled run loads, once, derived from its [schedule slot](/writing-workflows/runtime-variables#schedule-window). Every run of a slot gets the same dates: the scheduler's run, a run started for the slot with `--scheduled-at`, a retry, and a [backfill](/writing-workflows/backfill) run.
 
+<!-- dagu-example: no-validate; this workflow requires the jp-banking calendar file from Business Calendars -->
 ```yaml
 schedule: "CRON_TZ=Asia/Tokyo 0 2 * * *"
 calendar: jp-banking
