@@ -156,7 +156,7 @@ Backfill 3f9a1c2e of daily-report failed: 28 slots, 25 succeeded, 3 failed, in 1
 2 slots at step load: connection refused, first 2026-10-02 02:00 UTC: https://dagu.example.com/dag-runs/daily-report/backfill-3f9a1c2e-0-20261002T020000Z
 ```
 
-A cancelled backfill sends no summary, and neither do command channels. The DAG's own `mail_on` mail sends none either.
+A cancelled backfill sends no summary, and neither do command channels. The DAG's own `mail_on` mail sends none either; to get the summary by email, notify the DAG through an [email channel](/web-ui/notifications#email-delivery).
 
 `dagu status <DAG>` ends with the DAG's latest backfill: its open backfill, or else its newest backfill that ended failed, until the slots it failed succeed.
 
