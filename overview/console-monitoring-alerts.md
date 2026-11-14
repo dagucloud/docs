@@ -4,7 +4,7 @@ description: When Dagu Console opens and resolves monitoring alerts, who gets th
 
 # Monitoring Alerts and Email
 
-Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a paid plan, when a server's [scheduler stops](#scheduler-alerts), a server's [disk is almost full](#disk-almost-full-alerts), its [memory](#memory-high-alerts) or [CPU](#cpu-high-alerts) use stays high, one of its [queues stalls](#queue-stalled-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a paid plan, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
+Dagu Console opens an alert when a workflow fails or a server stops reporting, and, on a Team or Pro plan or in a trial, when a server's [scheduler stops](#scheduler-alerts), a server's [disk is almost full](#disk-almost-full-alerts), its [memory](#memory-high-alerts) or [CPU](#cpu-high-alerts) use stays high, one of its [queues stalls](#queue-stalled-alerts), a workflow [misses its deadline](#deadline-alerts), a scheduled run [does not start](#missed-schedule-alerts), or a run runs [much longer than usual](#running-too-long-alerts). It emails the workspace's alert recipients when it opens and when it resolves. On a Team or Pro plan, or in a trial, it also sends the alert to the workspace's [chat channels, PagerDuty services, and webhooks](#chat-pagerduty-and-webhooks). See [Monitoring](/overview/console-monitoring) to connect a server, and [Alerts](/overview/console-monitoring-pages#alerts) for the page that lists them.
 
 ## Workflow Alerts
 
@@ -26,7 +26,7 @@ A server that sends no report for 10 minutes, or 25 minutes on [free monitoring]
 
 ## Scheduler Alerts
 
-On a Team or Pro plan, a server whose scheduler is down for 5 minutes opens an alert, since no scheduled workflow starts while it lasts. These alerts need `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server whose scheduler is down for 5 minutes opens an alert, since no scheduled workflow starts while it lasts. These alerts need `health` or `runs`.
 
 - The scheduler counts as down when the server's report counts no running scheduler, or when one runs but has not ticked for 5 minutes and nobody paused it. A paused scheduler opens no alert.
 - Only a server that has reported a running scheduler before is watched, so a server that never runs one, such as one whose runs start on [temporary workers](/overview/deployment-models#temporary-workers), opens none.
@@ -35,7 +35,7 @@ On a Team or Pro plan, a server whose scheduler is down for 5 minutes opens an a
 
 ## Disk Almost Full Alerts
 
-On a Team or Pro plan, a server whose disk is 90% full or more, or the percent its [alert rules](#alert-rules) set, from 50 to 99, opens an alert. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server whose disk is 90% full or more, or the percent its [alert rules](#alert-rules) set, from 50 to 99, opens an alert. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
 
 - The disk is the one that holds the server's data directory, where runs, logs, and queues stop when it fills up. Dagu v2.25.7 or later also sends the disk that holds the log directory, when that is another disk, and how many of each disk's inodes are in use. The fullest of these counts: a disk whose inodes run out can make no new file even with bytes to spare.
 - The email or post says which disk filled up, and how full it is, by bytes or by inodes.
@@ -45,7 +45,7 @@ On a Team or Pro plan, a server whose disk is 90% full or more, or the percent i
 
 ## Memory High Alerts
 
-On a Team or Pro plan, a server whose memory use stays at or over 90% for 10 minutes, or the percent and minutes its [alert rules](#alert-rules) set, opens an alert. These alerts need Dagu v2.25.4 or later, at `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server whose memory use stays at or over 90% for 10 minutes, or the percent and minutes its [alert rules](#alert-rules) set, opens an alert. These alerts need Dagu v2.25.4 or later, at `health` or `runs`.
 
 - The alert opens as of when the use went over the percent. A single report over it opens nothing.
 - Use that drops under the percent starts the wait over.
@@ -55,7 +55,7 @@ On a Team or Pro plan, a server whose memory use stays at or over 90% for 10 min
 
 ## CPU High Alerts
 
-On a Team or Pro plan, workspace owners can turn on alerts of a server whose CPU use stays high. They are off by default. Once on, a server whose CPU use stays at or over 90% for 15 minutes, or the percent and minutes the [alert rules](#alert-rules) set, opens an alert, as for [memory](#memory-high-alerts).
+On a Team or Pro plan, or in a trial, workspace owners can turn on alerts of a server whose CPU use stays high. They are off by default. Once on, a server whose CPU use stays at or over 90% for 15 minutes, or the percent and minutes the [alert rules](#alert-rules) set, opens an alert, as for [memory](#memory-high-alerts).
 
 - CPU use is the average over the samples since the server's last report, from Dagu v2.25.7 or later, and the latest sample from earlier releases. In a container with a CPU limit, it is measured against that limit.
 - It resolves once use is 5 points under the percent.
@@ -72,7 +72,7 @@ With Dagu v2.25.7 or later at `runs`, the [disk](#disk-almost-full-alerts), [mem
 
 ## Queue Stalled Alerts
 
-On a Team or Pro plan, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `runs`.
+On a Team or Pro plan, or in a trial, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `runs`.
 
 - A queue whose runs fill it is not stalled: its next run waits its turn.
 - A run that waits for a [worker](/server-admin/distributed/) says why: no worker matches its selector, every worker that matches is busy or unhealthy, or runs cannot be sent to workers.
@@ -82,7 +82,7 @@ On a Team or Pro plan, a server's [queue](/server-admin/queues) opens an alert o
 
 ## Too Few Workers Alerts
 
-On a Team or Pro plan, a server opens an alert once fewer of its [distributed workers](/server-admin/distributed/) are live than its [alert rules](#alert-rules) want, for as long as they set: by default, none live for 5 minutes, so runs that need a worker wait. These alerts need Dagu v2.25.7 or later, at `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server opens an alert once fewer of its [distributed workers](/server-admin/distributed/) are live than its [alert rules](#alert-rules) want, for as long as they set: by default, none live for 5 minutes, so runs that need a worker wait. These alerts need Dagu v2.25.7 or later, at `health` or `runs`.
 
 - A worker is live while its heartbeat reaches the server's coordinator, at most 30 seconds old. A server whose report counts no coordinator has no live worker, since none can take its runs.
 - Only a server that has reported a live worker is watched, so a server that runs a coordinator for no worker, as `dagu start-all` does by default, opens none.
@@ -92,7 +92,7 @@ On a Team or Pro plan, a server opens an alert once fewer of its [distributed wo
 
 ## Deadline Alerts
 
-On a Team or Pro plan, a workspace owner gives a workflow a deadline in its [alert rules](#alert-rules): a time of day, on chosen days of the week, in the workspace's [time zone](#who-gets-alert-emails). When a deadline comes and no run of the workflow succeeded since the one before, an alert opens, as of the deadline.
+On a Team or Pro plan, or in a trial, a workspace owner gives a workflow a deadline in its [alert rules](#alert-rules): a time of day, on chosen days of the week, in the workspace's [time zone](#who-gets-alert-emails). When a deadline comes and no run of the workflow succeeded since the one before, an alert opens, as of the deadline.
 
 - A workflow has one such alert at a time. Each later deadline it misses adds to its count.
 - A run that succeeds resolves it, and the email or post says it succeeded after its deadline.
@@ -102,7 +102,7 @@ On a Team or Pro plan, a workspace owner gives a workflow a deadline in its [ale
 
 ## Missed-Schedule Alerts
 
-On a Team or Pro plan, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `runs` level.
+On a Team or Pro plan, or in a trial, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `runs` level.
 
 - A workflow has one such alert at a time. Later slots that do not start add to its count. It says when the run was due, why it did not start, and when the next run is.
 - It resolves when a later slot's run starts, or when the workflow is no longer scheduled.
@@ -111,7 +111,7 @@ On a Team or Pro plan, a scheduled run that did not start opens an alert once it
 
 ## Running-Too-Long Alerts
 
-On a Team or Pro plan, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
+On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
 
 - A workflow's limit is twice how long 95% of its runs took over the last 14 days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
 - A workflow's [alert rules](#alert-rules) can fix the limit instead, from 1 minute to 7 days, whatever its runs took.
@@ -122,7 +122,7 @@ On a Team or Pro plan, a run still running well past its workflow's usual time o
 
 ## Alert Rules
 
-On a Team or Pro plan, workspace owners choose when Dagu server workflows, and servers' machines, queues, and workers, alert. Rules apply to new alerts; alerts already open stay until they resolve. Turning a machine, queue, or worker rule off closes its open alerts without an email.
+On a Team or Pro plan, or in a trial, workspace owners choose when Dagu server workflows, and servers' machines, queues, and workers, alert. Rules apply to new alerts; alerts already open stay until they resolve. Turning a machine, queue, or worker rule off closes its open alerts without an email.
 
 | Rule | Choices | Default |
 | --- | --- | --- |
@@ -163,7 +163,7 @@ A workspace owner chooses who is emailed in **Settings** under **Alert emails**.
 
 ## Weekly Summary
 
-On a Team or Pro plan, each owner gets a summary of the workspace's week every Monday from 8:00 in the workspace's [time zone](#who-gets-alert-emails), covering Monday to Sunday:
+On a Team or Pro plan, or in a trial, each owner gets a summary of the workspace's week every Monday from 8:00 in the workspace's [time zone](#who-gets-alert-emails), covering Monday to Sunday:
 
 - finished runs and their success rate, against the week before;
 - alerts opened and resolved, with the median time to acknowledge and to resolve them, and the longest;
@@ -181,7 +181,7 @@ An address that unsubscribed gets no alert emails from the workspace, even when 
 
 ## Chat, PagerDuty, and Webhooks
 
-On a Team or Pro plan, a workspace owner adds up to 10 destinations on the **Notifications** page. Each one gets Dagu server alerts, Kitewell alerts, or both. An alert goes to each destination that gets its product when it opens and when it resolves, as for its email. Under **Add a destination**, each kind opens a short setup that says where to find what it needs.
+On a Team or Pro plan, or in a trial, a workspace owner adds up to 10 destinations on the **Notifications** page. Each one gets Dagu server alerts, Kitewell alerts, or both. An alert goes to each destination that gets its product when it opens and when it resolves, as for its email. Under **Add a destination**, each kind opens a short setup that says where to find what it needs.
 
 | Destination | What it takes | What it gets |
 | --- | --- | --- |

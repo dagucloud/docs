@@ -25,8 +25,8 @@ MCP clients ───── MCP ───────┘        │     ──�
 | **Alert** | One alert per problem: a failed workflow, a missed deadline, a run far past its usual time, a server that stopped reporting, a disk almost full, too few workers. By email, and on a paid plan to chat channels, PagerDuty, or a webhook. See [Alerts and Email](/overview/console-monitoring-alerts). |
 | **Act** | Read a failed step's log, retry or stop a run, and approve or reject a step that waits for a person, from Dagu Console. See [Act on Runs from Dagu Console](/overview/cloud-remote-access#act-on-runs-from-dagu-console). |
 | **MCP** | One MCP endpoint, `https://console.dagu.sh/mcp`, for every server in a workspace. MCP clients read runs and logs, start and retry workflows, and edit DAGs, as each member's role and each server allow. See [MCP](/mcp/). |
-| **Team** | Up to 10 people per workspace, each with their own sign-in, and server roles that bound what each person and the MCP clients they connect may do. See [Dagu Console Members](/overview/console-members). |
-| **Licenses** | Each connected server gets its license from Dagu Cloud, which turns on SSO, RBAC, audit logging, and incident routing on the server. See [Self-hosted Plan Comparison](/overview/self-host-license). |
+| **Team** | Up to 10 people per workspace on Team or Pro, each with their own sign-in, and server roles that bound what each person and the MCP clients they connect may do. See [Dagu Console Members](/overview/console-members). |
+| **Licenses** | On Team or Pro, or in a trial, each connected server gets its license from Dagu Cloud, which turns on SSO, RBAC, audit logging, and incident routing on the server. A server on free monitoring stays on Community. See [Plans and Licenses](/overview/self-host-license). |
 
 ## Connect a Server
 
@@ -46,15 +46,16 @@ MCP clients ───── MCP ───────┘        │     ──�
 | | Free | Team | Pro |
 | --- | --- | --- | --- |
 | Servers | 1, monitoring only | 3 | 15 |
+| SSO, RBAC, audit logs, and incident routing on the server | No | Yes | Yes |
 | Alerts | Email to owners and admins | Email, chat, PagerDuty, webhook | Email, chat, PagerDuty, webhook |
 | Run history | 7 days | 30 days | 30 days |
-| Machine CPU, memory, and disk, with disk alerts | No | Yes | Yes |
+| Machine CPU, memory, and disk, with alerts | No | Yes | Yes |
 | Act on runs | No | Yes | Yes |
 | MCP clients | Read what the server reports | Also read logs, act on runs, and edit DAGs | Also read logs, act on runs, and edit DAGs |
 | People | Just you | Up to 10 | Up to 10 |
-| Price | Free | $50/month | $150/month |
+| Price | Free | $50/month or $500/year | $150/month or $1,500/year |
 
-A 14-day trial covers one server with Team's features, acting on runs, MCP, and your team included, and needs no credit card. See [Free and Paid](/overview/console-monitoring#free-and-paid) and [pricing](https://dagu.sh/pricing).
+A 14-day trial covers one server with Team's features, acting on runs and MCP included, and needs no credit card. Inviting people needs Team or Pro. See [Plans and Licenses](/overview/self-host-license), [Free and Paid](/overview/console-monitoring#free-and-paid), and [pricing](https://dagu.sh/pricing).
 
 ## Private Deployment
 
@@ -68,5 +69,5 @@ Organizations that cannot connect to Dagu Cloud, or that want the control plane 
 - [Remote Access from Dagu Cloud](/overview/cloud-remote-access)
 - [Dagu Console Members](/overview/console-members)
 - [Dagu Console Account](/overview/console-account)
-- [Self-hosted Plan Comparison](/overview/self-host-license)
+- [Plans and Licenses](/overview/self-host-license)
 - [Security](/overview/security)

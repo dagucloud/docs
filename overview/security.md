@@ -111,4 +111,4 @@ Email `company@descarty.com` with a subject such as `Security report: Dagu`, or 
 - [Public Webhook URLs](/server-admin/authentication/public-webhook-urls)
 - [Remote Access from Dagu Cloud](/overview/cloud-remote-access)
 - [Architecture](/overview/architecture)
-- [Self-hosted Plan Comparison](/overview/self-host-license)
+- [Plans and Licenses](/overview/self-host-license)

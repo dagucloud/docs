@@ -15,7 +15,7 @@ The **Monitoring** group in [Dagu Console](https://console.dagu.sh)'s sidebar ho
 
 When failures listed here say nothing of why, owners see a note above them: some servers [send no errors](/overview/console-monitoring#error-messages), with a link to the first one's license page in Dagu, or the workspace keeps no errors of Kitewell computers, with a link to **Settings**.
 
-Times show in your browser's time zone, and hovering over one shows its date, time, and zone. Days begin at midnight in the workspace's [time zone](/overview/console-monitoring-alerts#who-gets-alert-emails): **Failed today**, day totals, and charts follow it. On a Team or Pro plan, the Overview, Runs, Alerts, and server pages update themselves every 30 seconds while they are open.
+Times show in your browser's time zone, and hovering over one shows its date, time, and zone. Days begin at midnight in the workspace's [time zone](/overview/console-monitoring-alerts#who-gets-alert-emails): **Failed today**, day totals, and charts follow it. On a Team or Pro plan, or in a trial, the Overview, Runs, Alerts, and server pages update themselves every 30 seconds while they are open.
 
 ## Instances
 

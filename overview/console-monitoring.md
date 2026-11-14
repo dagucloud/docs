@@ -7,8 +7,8 @@ description: See every self-hosted Dagu server in one place, get an email when a
 Connect your Dagu servers to [Dagu Console](https://console.dagu.sh) and see all of them in one place:
 
 - **Every server at a glance**: which servers report, what failed today, open alerts, and what needs attention, such as a stopped scheduler or a server that went silent.
-- **Alerts by email, chat, PagerDuty, or webhook**: when a workflow fails and when it recovers, when it misses its deadline, and when a server stops reporting or its scheduler stops, with [rules](/overview/console-monitoring-alerts#alert-rules) for each workflow and server, to the members and addresses you choose, and on a paid plan to Slack, Microsoft Teams, Google Chat, and Discord channels, PagerDuty services, and webhooks. Each alert links to its run.
-- **Trends**: runs, success rate, and p50 and p95 duration for each workflow over 7, 30, or 90 days.
+- **Alerts by email, chat, PagerDuty, or webhook**: an email to owners and admins when a workflow fails and when it recovers, and when a server stops reporting. On a Team or Pro plan, or in a trial, also when a workflow misses its deadline or a server's scheduler stops, with [rules](/overview/console-monitoring-alerts#alert-rules) for each workflow and server, to the members and addresses you choose, and to Slack, Microsoft Teams, Google Chat, and Discord channels, PagerDuty services, and webhooks. Each alert links to its run.
+- **Trends**: runs, success rate, and p50 and p95 duration for each workflow over 7 or 30 days, and over 90 days on a Team or Pro plan or in a trial.
 - **Full logs stay on the server**: reporting is opt-in, outbound HTTPS only, and carries metadata, plus failed steps' [error messages](#error-messages) only at the level that names them. Full logs, outputs, parameters, and secrets are [never sent](#never-sent), and each server shows the exact JSON it last sent.
 - **Free for one server**: a workspace without a plan monitors one server at no cost, with the limits in [Free and Paid](#free-and-paid).
 
@@ -25,7 +25,7 @@ Dagu server ── HTTPS, outbound, every 60 s ──▶ Dagu Console ──▶ 
 ## Requirements
 
 - Dagu v2.19.1 or later; v2.19.2 or later for free monitoring.
-- A Dagu Console workspace. Without a plan, it monitors one server for free. On the Team or Pro plan, or in a trial, it monitors as many servers as the plan includes. See [Free and Paid](#free-and-paid) and [License Comparison](/overview/self-host-license).
+- A Dagu Console workspace. Without a plan, it monitors one server for free. On the Team or Pro plan, or in a trial, it monitors as many servers as the plan includes. See [Free and Paid](#free-and-paid) and [Plans and Licenses](/overview/self-host-license).
 - The server is connected to Dagu Console with a license that checks in: approved from **Plan & features**, activated with `dagu license activate`, or started with a server key. See [Connect a Server](/overview/self-host-license#connect-a-server). Servers with offline licenses do not report.
 - The server can reach `https://console.dagu.sh` over HTTPS.
 - For run status, the [event store](/server-admin/reference#event-store) is enabled. It is by default. Runs on temporary workers or under a standalone coordinator are reported only when they write to the server's event store; see [Monitoring Across Topologies](/overview/deployment-models#monitoring-across-topologies).
@@ -36,7 +36,7 @@ A workspace without a plan or trial monitors one server for free. Free monitorin
 
 | | Free | Trial, Team, or Pro |
 | --- | --- | --- |
-| Servers | 1 | As many as the plan includes |
+| Servers | 1 | 1 in a trial, 3 on Team, 15 on Pro |
 | Dagu version | v2.19.2 or later | v2.19.1 or later |
 | Reports | Every 5 minutes; early reports at most once every 30 seconds | Every 60 seconds; early reports within about 5 seconds |
 | Stopped-reporting alert | After 25 minutes without a report | After 10 minutes without a report |
@@ -47,8 +47,11 @@ A workspace without a plan or trial monitors one server for free. Free monitorin
 | Chat, PagerDuty, and webhook destinations | None | Up to 10 per workspace, each with [the alerts it gets](/overview/console-monitoring-alerts#which-alerts-a-destination-gets) |
 | [Alert rules](/overview/console-monitoring-alerts#alert-rules) and deadlines | The defaults | Per workspace, server, and workflow |
 | [MCP clients](/mcp/) | Read what the server reports | Also read logs and act on runs |
+| Machine CPU, memory, and disk, and workers | None | Each server's machine over the last 24 hours and its workers, with alerts |
+| Weekly summary | None | Mondays at 8:00 in the workspace's time zone, to each owner |
+| [Inviting people](/overview/console-members) | No | Up to 10 people per workspace on Team or Pro; not in a trial |
 
-A trial gives everything a plan's monitoring does for 14 days, with no card. Workspace owners get an email three days before it ends and another when it ended.
+A trial gives one server everything a plan's monitoring does for 14 days, with no card, except inviting people. Workspace owners get an email three days before it ends and another when it ended.
 
 Starting a trial or a plan moves the free server onto it. Dagu picks up the new license as soon as you come back to **Plan & features** from Dagu Console, at the server's next report while monitoring is on, or at its next hourly check-in; **Check now** picks it up at any time. When the plan or trial ends, the server returns to free monitoring at its next check-in, provided no other server holds the free slot.
 

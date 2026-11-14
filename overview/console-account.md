@@ -43,4 +43,4 @@ In **Your account**, select **Turn off** under **Two-factor authentication**. Si
 
 - [Dagu Console Members](/overview/console-members)
 - [Monitoring](/overview/console-monitoring)
-- [Self-hosted Plan Comparison](/overview/self-host-license)
+- [Plans and Licenses](/overview/self-host-license)

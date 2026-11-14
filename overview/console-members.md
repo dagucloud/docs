@@ -60,4 +60,4 @@ Anyone can select **Leave** next to their own name. The only owner cannot leave 
 
 - [Dagu Console Account](/overview/console-account)
 - [Monitoring](/overview/console-monitoring)
-- [Self-hosted Plan Comparison](/overview/self-host-license)
+- [Plans and Licenses](/overview/self-host-license)
