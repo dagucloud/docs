@@ -64,7 +64,7 @@ If the install directory is not writable, the command fails with a permission er
 
 ## Restarting After an Upgrade
 
-`dagu upgrade` does not restart running Dagu processes, because a restart can stop running workflows. After a successful upgrade, it prints the restart command for the background service the Dagu installer set up:
+`dagu upgrade` does not restart running Dagu processes. A restart stops runs in progress unless the service keeps them; see [Keep runs across restarts](/server-admin/upgrades#keep-runs-across-restarts). After a successful upgrade, it prints the restart command for the background service the Dagu installer set up:
 
 ```
 Restart Dagu to use the new version:

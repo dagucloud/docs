@@ -20,7 +20,28 @@ dagu version
 
 Without internet access, replace the binary by hand as described in [Closed Networks](/server-admin/deployment/closed-network#install).
 
-Runs in progress end when the service restarts unless its process manager leaves them running. Restart when no critical run is in progress, or set `KillMode=process` as in [High Availability](/server-admin/deployment/high-availability#set-up-with-systemd).
+A restart stops runs in progress unless the service keeps them running. See [Keep runs across restarts](#keep-runs-across-restarts).
+
+## Keep runs across restarts
+
+Each run is a separate process, so it can outlive the Dagu process that started it and record its own result. systemd's default, `KillMode=control-group`, ends every process of the service when it stops, runs included. `KillMode=process` ends only Dagu itself.
+
+Open an override for the service:
+
+```bash
+sudo systemctl edit dagu
+```
+
+Add these lines, then save and exit:
+
+```ini
+[Service]
+KillMode=process
+```
+
+For a user service, use `systemctl --user edit dagu`. `systemctl edit` reloads systemd, so the next restart already keeps runs.
+
+Stopping a container stops the runs inside it. To keep runs going while Dagu restarts in a container, run them on [workers](/server-admin/distributed/) outside it.
 
 ## Active and standby pair
 

@@ -27,7 +27,8 @@ ExecStart=/usr/local/bin/dagu start-all
 # Graceful shutdown
 ExecStop=/bin/kill -TERM $MAINPID
 TimeoutStopSec=30
-KillMode=mixed
+# End only Dagu on stop, so runs in progress keep going across restarts
+KillMode=process
 KillSignal=SIGTERM
 
 # Restart policy

@@ -20,7 +20,28 @@ dagu version
 
 インターネットに接続できない場合は、[閉域網](/ja/server-admin/deployment/closed-network#install)の説明に従って、バイナリを手動で置き換えてください。
 
-進行中の実行は、プロセスマネージャーが実行を残す設定になっている場合を除き、サービスの再起動時に終了します。重要な実行が進行していないときに再起動するか、[高可用性](/ja/server-admin/deployment/high-availability#set-up-with-systemd)の説明のとおり `KillMode=process` を設定してください。
+サービスが実行を残す設定になっていない場合、再起動すると進行中の実行は終了します。[再起動しても実行を続ける](#keep-runs-across-restarts)を参照してください。
+
+## 再起動しても実行を続ける {#keep-runs-across-restarts}
+
+各実行は独立したプロセスなので、それを開始した Dagu のプロセスが終了しても動き続け、自身の結果を記録できます。systemd のデフォルトの `KillMode=control-group` では、サービスの停止時に、実行を含むサービスのすべてのプロセスが終了します。`KillMode=process` にすると、終了するのは Dagu 本体だけです。
+
+サービスのオーバーライドを開きます。
+
+```bash
+sudo systemctl edit dagu
+```
+
+次の行を追加して、保存して終了します。
+
+```ini
+[Service]
+KillMode=process
+```
+
+ユーザーサービスの場合は `systemctl --user edit dagu` を使います。`systemctl edit` は systemd を再読み込みするので、次の再起動からすでに実行が残ります。
+
+コンテナを停止すると、その中の実行も停止します。コンテナ内の Dagu を再起動しても実行を続けるには、コンテナの外の[ワーカー](/server-admin/distributed/)で実行してください。
 
 ## アクティブ/スタンバイのペア {#active-and-standby-pair}
 
