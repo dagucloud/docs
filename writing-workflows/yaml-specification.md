@@ -222,6 +222,13 @@ schedule:
   - expression: "30 */2 * * *"
     profile: dev
 
+# Parameters per schedule entry
+schedule:
+  - expression: "0 5 * * *"
+    params: {mode: incremental}
+  - expression: "0 23 * * SUN"
+    params: {mode: full}
+
 # Business-day schedules
 calendar: jp-banking
 schedule:

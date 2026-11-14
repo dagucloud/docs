@@ -179,6 +179,36 @@ steps:
 
 The `profile` field does not override the runtime profile used by the run. It only controls whether the schedule entry is active for that scheduler environment.
 
+## Parameters per Schedule
+
+A start entry, recurring or one-off, can set `params` for the runs it starts. Keys it leaves out keep the DAG's defaults:
+
+```yaml
+params:
+  mode: full
+  region: us
+schedule:
+  - expression: "0 5 * * *"
+    params: {mode: incremental}
+  - expression: "0 23 * * SUN"
+    params: {mode: full, region: eu}
+steps:
+  - run: ./sync.sh --mode "${params.mode}" --region "${params.region}"
+```
+
+The values are literal. They are checked against the DAG's `params` when the DAG loads, so a value the DAG does not accept, such as one outside an `enum`, fails validation. Only `start` entries take `params`; `stop` and `restart` entries do not.
+
+Which inputs a run gets:
+
+- A scheduled run and a [catchup](#catchup-missed-run-replay) run use the entry that fired.
+- A [backfill](/writing-workflows/backfill) run uses the recurring entry that fires at its slot, unless the backfill passes its own `--params`.
+- A retry reuses the run's saved inputs.
+- A manual start uses its own inputs and the DAG's defaults.
+
+When several entries fire at the same time, the scheduler picks a due one-off entry first, then the first matching recurring entry in YAML order. Catchup and backfill pick the first matching recurring entry. Editing only an entry's `params` keeps its identity, so a one-off entry that already ran does not run again.
+
+[Upcoming runs](#preview-upcoming-runs) show how many parameters each run's entry overrides.
+
 ## Timezone Support
 
 Specify timezone with `CRON_TZ`:
