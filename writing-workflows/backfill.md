@@ -174,6 +174,7 @@ Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 
   - The start dialog offers what to run for a range (**Fill gaps**, **Fill gaps and redo failed**, **Redo everything**), with the count each one runs. Running again slots that succeeded needs a confirmation that names how many. It also sets the runs at once and the failure behavior, and, under **Options**, the params, in the same form as the start dialog of one run. Params are sent only once one is changed, since they then apply to every slot; untouched, each run takes its schedule's params, the defaults, and its `eval` results. It shows the plan before anything runs: the slots, the first and last, an estimate, and warnings. **Start N runs** starts that plan. If the slots changed meanwhile, it shows the new plan instead of starting.
   - A user who may not run the workflow sees each slot link to its run.
 - **The workflow page** shows a notice for the latest backfill: its progress while it runs, or that it failed until a slot it failed succeeds. A failure notice can be dismissed.
+- **The workflow list** marks a workflow with its open backfill and its progress, such as `Backfill 12/28, 1 failed`, or in red with a backfill that ended failed, until the slots it failed succeed. The mark opens the backfill. Dismissing a failed one hides it there and on the workflow page.
 - **A backfill run's trigger** links to its backfill.
 - **The run list and a queue's page** pick every run, all but backfill runs, or backfill runs only. The run list keeps the choice in its URL (`backfill=exclude` or `only`) and in a saved run view. The API takes the same `backfill` parameter on `GET /api/v1/dag-runs` and `GET /api/v1/queues/{name}/items`.
 - **Show backfill runs**, in the run timeline's View menu of a scheduled workflow, adds the backfill runs to the timeline. The browser remembers it.
@@ -193,7 +194,7 @@ An open backfill's page updates as its runs change, while the browser tab is vis
 | `POST /api/v1/backfills/{id}/resume` | Resume, with `maxConcurrency` and `onFailure` |
 | `GET /api/v1/dag-runs?backfillId={id}` | A backfill's runs, from its submission on unless `fromDate` or `toDate` is set |
 
-`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`. Every run carries the `backfillId` of the backfill that started it, which a retry keeps.
+`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`. `GET /api/v1/dags` gives each DAG the backfill it mentions as `backfill`, with its slot count and how many slots are done and failed. Every run carries the `backfillId` of the backfill that started it, which a retry keeps.
 
 A plan returns a `revision`. Send it with the submit to start exactly the plan you saw: if the slots' history changed in between, nothing starts and the response is a 409 with the new plan.
 
