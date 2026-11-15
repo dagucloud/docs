@@ -40,7 +40,7 @@ A workspace without a plan or trial monitors one server for free. Free monitorin
 | Dagu version | v2.19.2 or later | v2.19.1 or later |
 | Reports | Every 5 minutes; early reports at most once every 30 seconds | Every 60 seconds; early reports within about 5 seconds |
 | Stopped-reporting alert | After 25 minutes without a report | After 10 minutes without a report |
-| Finished runs stored | 100 per day | 500 per day |
+| Finished runs stored | 100 per day | 2,000 per day |
 | Run history shown | 7 days | 30 days |
 | Insights and workflow pages | 7 or 30 days | 7, 30, or 90 days |
 | Alert emails | Owners and admins | Owners, admins, and the members and addresses you add |
@@ -198,13 +198,13 @@ Dagu Console keeps:
 
 A server that sends no report for 30 days is removed from monitoring, with its daily totals and alerts.
 
-Each workspace stores up to 500 finished runs per day, or 100 on free monitoring, counted by when Dagu Console records them. A day begins at midnight in the workspace's [time zone](/overview/console-monitoring-alerts#who-gets-alert-emails). Past the limit, runs are still counted in the daily totals and still open and resolve alerts, but they are not stored, so they never appear in run lists. Storing resumes at the next midnight. Until then:
+Each workspace stores up to 2,000 finished runs per day, or 100 on free monitoring, counted by when Dagu Console records them. A day begins at midnight in the workspace's [time zone](/overview/console-monitoring-alerts#who-gets-alert-emails). Past the limit, runs are still counted in the daily totals and still open and resolve alerts, but they are not stored, so they never appear in run lists. Storing resumes at the next midnight. Until then:
 
-- the console's **Overview** shows **Daily run limit reached** with the time;
+- the console's **Overview** and **Runs** pages show **Daily run limit reached** with the time;
 - workspace owners get one email that day;
 - the server's **Monitoring** section on **Plan & features** shows **Run history paused until** that midnight.
 
-To raise the limit, [contact the Dagu team](https://dagu.sh/contact).
+On free monitoring, the **Overview** and **Runs** pages show **Near the daily run limit** once 80 runs are stored that day, and both notices offer owners **See plans**. A plan or a trial raises the limit to 2,000. To raise a plan's limit, [contact the Dagu team](https://dagu.sh/contact).
 
 ## Turn It Off
 
