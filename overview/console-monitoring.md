@@ -204,7 +204,9 @@ Each workspace stores up to 2,000 finished runs per day, or 100 on free monitori
 - workspace owners get one email that day;
 - the server's **Monitoring** section on **Plan & features** shows **Run history paused until** that midnight.
 
-On free monitoring, the **Overview** and **Runs** pages show **Near the daily run limit** once 80 runs are stored that day, and both notices offer owners **See plans**. A plan or a trial raises the limit to 2,000. To raise a plan's limit, [contact the Dagu team](https://dagu.sh/contact).
+On free monitoring, the **Overview** and **Runs** pages show **Near the daily run limit** once 80 runs are stored that day, and both notices offer owners **See plans**. A plan or a trial raises the limit to 2,000.
+
+The **Usage** page, under **Account** in the console's sidebar, shows the runs stored today against the limit, the finished runs of each of the last 14 days with about how many went past the limit, and the run history and servers the plan gives. A workspace without a plan also sees what a plan or a trial adds. To raise a plan's limit, use the [contact form](https://dagu.sh/contact) or email company@descarty.com.
 
 ## Turn It Off
 
