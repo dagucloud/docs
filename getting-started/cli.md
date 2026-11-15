@@ -1312,7 +1312,7 @@ To check that the DAGs naming a calendar find it, run `dagu validate` on them.
 dagu calendar fires [--from <RFC 3339 time>] [--count <n>] <DAG>
 ```
 
-Lists the next times a DAG's start schedules fire, ten by default, with the business day each fire matched and the holidays it skipped. `--from` sets only where the listing starts; schedules without a time zone prefix are still evaluated in `core.tz`.
+Lists the next times a DAG's start schedules fire, ten by default, with the business day each fire matched and the holidays it skipped. For a DAG with [`dates`](/writing-workflows/schedule-dates), a `DATES` column shows the dates each fire's run gets: each entry as `name=date`, and a list as `name=first..last`. `--from` sets only where the listing starts, so a past `--from` lists past fires; schedules without a time zone prefix are still evaluated in `core.tz`.
 
 ```bash
 dagu calendar fires payroll
@@ -1326,7 +1326,7 @@ Run a scheduled DAG for past schedule slots. See [Backfill](/writing-workflows/b
 #### `backfill start`
 
 ```bash
-dagu backfill start <DAG> (--from <time> [--to <time>] | --slot <time>...) [flags]
+dagu backfill start <DAG> (--from <time> [--to <time>] [--by <dates entry>] | --slot <time>...) [flags]
 ```
 
 Plans a backfill, prints the plan, and starts it once confirmed. The scheduler queues the runs.
@@ -1335,6 +1335,7 @@ Plans a backfill, prints the plan, and starts it once confirmed. The scheduler q
 | --- | --- | --- |
 | `--from` | First slot, inclusive: a date, a time without an offset, or an RFC 3339 time | required without `--slot` |
 | `--to` | Last slot, inclusive | now |
+| `--by` | A [`dates`](/writing-workflows/schedule-dates) entry: `--from` and `--to` then name its dates, and the slots whose entry falls in that range run | - |
 | `--slot` | A slot to run; repeatable. Excludes `--from`, `--to`, and `--rerun` | - |
 | `--rerun` | `none`, `failed`, or `all` | `none` |
 | `--max-concurrency` | Runs of the backfill at once | `1` |

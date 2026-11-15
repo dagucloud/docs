@@ -79,7 +79,7 @@ An entry is shifted and formatted in its `timezone`, else the zone of the entry 
 
 ## Business Days
 
-`bd`, `bd_or_next`, and `bd_or_prev` use the calendar of the schedule entry that fires the slot, its own or the DAG's. A sub-DAG uses the DAG's `calendar`. `dagu validate` fails when a recurring start schedule has no calendar.
+`bd`, `bd_or_next`, and `bd_or_prev` use the calendar of the schedule entry that fires the slot, its own or the DAG's. A sub-DAG uses the DAG's `calendar`. `dagu validate` fails when a recurring start schedule has no calendar, or when the DAG has neither a recurring start schedule nor a `calendar`.
 
 ## Where Dates Resolve
 

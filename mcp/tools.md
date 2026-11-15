@@ -297,7 +297,7 @@ Use `dagu_execute` for run control and for deciding steps that wait for a person
 | `wait` | Wait for the identified run to reach a terminal state or a waiting checkpoint |
 | `waitTimeoutSeconds` | Wait limit from 1 to 300 seconds; requires `wait` and defaults to 60 |
 | `backfillId` | Backfill for `backfill_resume` and `backfill_cancel` |
-| `from`, `to`, `slots`, `rerun` | Slots for `backfill`, as for [`dagu backfill start`](/writing-workflows/backfill) |
+| `from`, `to`, `by`, `slots`, `rerun` | Slots for `backfill`, as for [`dagu backfill start`](/writing-workflows/backfill): with `by`, a `dates` entry, `from` and `to` name its dates |
 | `maxConcurrency`, `onFailure` | For `backfill` and `backfill_resume`: runs at once, and `stop` or `continue` after a failed slot |
 | `dryRun`, `revision` | For `backfill` and `backfill_resume`: return the plan only; refuse a plan that changed since `revision` |
 | `stopRunning` | For `backfill_cancel`: also stop running runs |
