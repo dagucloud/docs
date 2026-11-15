@@ -31,6 +31,7 @@ flowchart LR
 |---|---|---|
 | Send a prompt or message list to a model provider | `action: chat.completion` | [LLM Steps](/step-types/llm/) |
 | Let a model call your DAGs as functions | `with.tools` on a completion | [Tool Calling](/features/chat/tool-calling) |
+| Call a tool on a remote MCP server from a step, with no model | `action: mcp.call` | [MCP Call](/step-types/mcp) |
 | Get typed answers to several questions about the same material, then branch | `action: decision.evaluate` | [Decision Steps](/step-types/decision) |
 | Run Claude Code, Codex, Copilot, or another agent CLI as a step | `action: harness.run` | [Harness Steps](/step-types/harness/) |
 | Run an agent until a check passes, and let a person send its work back | `harness.run` with `repeat_policy`, and `human.task` | [Agent Loops](/ai/loops/) |

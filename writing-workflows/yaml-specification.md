@@ -943,6 +943,7 @@ Accepted built-in action names:
 | `k8s.run`, `kubernetes.run` | Kubernetes job execution. |
 | `log.write` | Write a log message. |
 | `mail.organize`, `mail.search`, `mail.send` | Find, organize, and send email. See [Mailbox](/step-types/mailbox) and [Mail](/step-types/mail). |
+| `mcp.call` | Call one tool on a remote MCP server over Streamable HTTP. See [MCP Call](/step-types/mcp). |
 | `noop` | Placeholder step. |
 | `outputs.write` | Write run-level or action outputs. |
 | `postgres.query`, `postgres.import` | PostgreSQL query/import actions. |

@@ -357,6 +357,38 @@ flowchart LR
 
 <div class="example-card">
 
+### MCP Tool Call
+
+```yaml
+steps:
+  - id: scrape
+    action: mcp.call
+    with:
+      url: https://mcp.example.com/mcp
+      tool: scrape
+      arguments: {url: https://example.com}
+      headers:
+        Authorization: Bearer ${MCP_TOKEN}
+    output: PAGE
+  - run: echo "${PAGE.content[0].text}"
+    depends: scrape
+```
+
+```mermaid
+flowchart LR
+    A["mcp.call · scrape"] --> E["mcp.example.com/mcp"]
+    E --> B["next step reads PAGE"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style E stroke:green,stroke-width:1.6px,color:#333
+    style B stroke:lime,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/mcp" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Wait for Readiness
 
 ```yaml
