@@ -27,6 +27,7 @@ $daguInstaller = [scriptblock]::Create(
 | `C:\Program Files\Dagu\dagu-service.xml` | サービス定義。`DAGU_HOME`、`DAGU_HOST`、`DAGU_PORT` を設定します |
 | `C:\ProgramData\Dagu\` | `DAGU_HOME`: `dags\` 内のワークフロー、`config.yaml`、実行データ |
 | `C:\ProgramData\Dagu\logs\` | 実行ログとサービスラッパーのログ |
+| `C:\ProgramData\Dagu\data\run-binaries\` | 実行が使う `dagu.exe` のコピー。実行中でもアップグレードで `dagu.exe` を置き換えられます |
 
 環境変数は `config.yaml` より優先されます。そのため、アドレスまたはポートは `dagu-service.xml` で変更し、サービスを再起動してください。
 
@@ -40,6 +41,8 @@ Restart-Service Dagu    # Apply changes to config.yaml or dagu-service.xml
 Stop-Service Dagu
 Start-Service Dagu
 ```
+
+サービスを再起動しても、アップグレード後の再起動を含め、進行中の実行は続きます。
 
 ## サービスからアクセスできる範囲 {#what-the-service-can-reach}
 

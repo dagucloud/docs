@@ -63,6 +63,7 @@ See [Worker Deployment](./shared-nothing) for deployment examples. Existing shar
 The Workers page in the Web UI shows:
 - Connected workers and their labels
 - Worker health status
+- Each worker's Dagu version, marked when it is older or newer than the server
 - Currently running tasks on each worker
 - Task hierarchy (root/parent/sub DAGs)
 
@@ -109,6 +110,8 @@ Response:
   ]
 }
 ```
+
+Each worker also has `version`, the Dagu version it runs, and `versionDrift`: `none`, `behind`, `ahead`, or `unknown`, compared with the server that answers. A worker of an earlier release reports no version.
 
 ## Configuration Reference
 

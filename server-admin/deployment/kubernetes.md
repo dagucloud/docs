@@ -425,6 +425,15 @@ helm upgrade dagu dagu/dagu \
   --wait
 ```
 
+To let the runs in a pod finish during an upgrade, set `shutdown.drainTimeoutSeconds` (chart 2.0.8 or later):
+
+```yaml
+shutdown:
+  drainTimeoutSeconds: 300
+```
+
+A stopping pod then starts no new runs and waits up to that long for its running runs, and each pod's `terminationGracePeriodSeconds` grows to match. In standalone mode the upgrade waits for the drain, so give `helm upgrade --wait` a `--timeout` longer than the drain plus the new pod's startup, such as `--timeout 10m` for 300 seconds. Image tag `2.26.0` and earlier do not drain.
+
 Inspect the proposed manifests before applying them:
 
 ```bash

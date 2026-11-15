@@ -27,6 +27,7 @@ Without `-AdminUsername` and `-AdminPassword`, create the first admin account at
 | `C:\Program Files\Dagu\dagu-service.xml` | The service definition, which sets `DAGU_HOME`, `DAGU_HOST`, and `DAGU_PORT` |
 | `C:\ProgramData\Dagu\` | `DAGU_HOME`: workflows in `dags\`, `config.yaml`, and run data |
 | `C:\ProgramData\Dagu\logs\` | Run logs and the service wrapper's logs |
+| `C:\ProgramData\Dagu\data\run-binaries\` | The copy of `dagu.exe` that runs execute, so an upgrade can replace `dagu.exe` while runs continue |
 
 Environment variables take precedence over `config.yaml`, so change the address or port in `dagu-service.xml`, then restart the service.
 
@@ -40,6 +41,8 @@ Restart-Service Dagu    # Apply changes to config.yaml or dagu-service.xml
 Stop-Service Dagu
 Start-Service Dagu
 ```
+
+Runs in progress keep going when the service restarts, including the restart after an upgrade.
 
 ## What the Service Can Reach
 

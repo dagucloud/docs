@@ -44,9 +44,9 @@ KillMode=process
 
 ユーザーサービスの場合は `systemctl --user edit dagu` を使います。`systemctl edit` は systemd を再読み込みするので、次の再起動からすでに実行が残ります。
 
-macOS では、インストーラーが設定する launchd エージェントはすでに実行を残します。Windows では、サービスラッパーがサービスの開始したすべてのプロセスを実行も含めて終了するため、重要な実行が進行していないときに再起動してください。
+macOS では、インストーラーが設定する launchd エージェントはすでに実行を残します。Windows では、サービスを再起動やアップグレードしても実行は続きます。
 
-コンテナを停止すると、その中の実行も停止します。コンテナ内の Dagu を再起動しても実行を続けるには、コンテナの外の[ワーカー](/server-admin/distributed/)で実行してください。
+コンテナを停止すると、その中の実行も停止します。アップグレードの間に実行を最後まで終えるには、`signal_handling.drain_timeout` を設定します。停止する Dagu は新しい実行を開始せず、実行中のものが終わるまで最大でその時間だけ待ちます。[Graceful Shutdown](/server-admin/operations#graceful-shutdown) と、Helm の場合は [Kubernetes](/server-admin/deployment/kubernetes#upgrade) を参照してください。コンテナの外の[ワーカー](/server-admin/distributed/)で動く実行は、Dagu の再起動中も続きます。
 
 ## アクティブ/スタンバイのペア {#active-and-standby-pair}
 
@@ -76,6 +76,10 @@ macOS では、インストーラーが設定する launchd エージェント�
    curl -s -o /dev/null -w '%{http_code}\n' 'http://host-b:8090/health?role=active'
    ```
 
+## ワーカー {#workers}
+
+各ワーカーホストのバイナリまたはイメージも更新してください。[ワーカーページ](/server-admin/distributed/workers/#web-ui-workers-page)には各ワーカーの Dagu のバージョンが表示され、サーバーより古いワーカーや新しいワーカーには印が付きます。すべてのワーカーの更新が終わったかをここで確認できます。
+
 ## 2.26.0 以前からのアップグレード {#upgrading-from-2-26-0-or-earlier}
 
 それより後のリリースでは、スケジューラの動作が 4 点変更されています。
@@ -84,6 +88,8 @@ macOS では、インストーラーが設定する launchd エージェント�
 - **データディレクトリは、すべてのホストで同じパスでなければなりません。** データディレクトリが各スロットの実行 ID の一部になったためです。
 - **ロックを失ったスケジューラは、0 ではなくステータス 1 で終了します。** 再起動の仕組みが必要です。
 - **スケジューラを停止しても、そのスケジューラがキューから開始した実行は停止しなくなりました。** `scheduler.failover_recovery_window` が新たに追加され、デフォルトで有効(2 分)です。
+
+Windows では、サービスが新しいバージョンで動き始めると、再起動しても実行は続きます。新しいバージョンを入れる再起動では 2.26.0 が開始した実行が終了するため、重要な実行が進行していないときにアップグレードしてください。
 
 ## Kubernetes {#kubernetes}
 

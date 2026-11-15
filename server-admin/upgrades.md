@@ -44,9 +44,9 @@ KillMode=process
 
 For a user service, use `systemctl --user edit dagu`. `systemctl edit` reloads systemd, so the next restart already keeps runs.
 
-On macOS, the launchd agent the installer sets up already leaves runs running. On Windows, the service wrapper ends every process the service started, runs included, so restart when no critical run is in progress.
+On macOS, the launchd agent the installer sets up already leaves runs running. On Windows, the service keeps runs going through restarts and upgrades.
 
-Stopping a container stops the runs inside it. To keep runs going while Dagu restarts in a container, run them on [workers](/server-admin/distributed/) outside it.
+Stopping a container stops the runs inside it. To let runs finish across an upgrade, set `signal_handling.drain_timeout`: a stopping Dagu then starts no new runs and waits up to that long for the running ones. See [Graceful Shutdown](/server-admin/operations#graceful-shutdown), and for Helm, [Kubernetes](/server-admin/deployment/kubernetes#upgrade). Runs on [workers](/server-admin/distributed/) outside the container keep going while Dagu restarts.
 
 ## Active and standby pair
 
@@ -76,6 +76,10 @@ Upgrade the standby first. The upgraded instance then takes over once, and an ol
    curl -s -o /dev/null -w '%{http_code}\n' 'http://host-b:8090/health?role=active'
    ```
 
+## Workers
+
+Upgrade the binary or image on each worker host as well. The [Workers page](/server-admin/distributed/workers/#web-ui-workers-page) shows the Dagu version of each worker and marks a worker older or newer than the server, so it shows when every worker is upgraded.
+
 ## Upgrading from 2.26.0 or earlier
 
 Later releases change how the scheduler behaves in four ways:
@@ -84,6 +88,8 @@ Later releases change how the scheduler behaves in four ways:
 - **The data directory must have the same path on every host,** because it is now part of each slot's run ID.
 - **A scheduler that loses the lock exits with status 1,** not 0. It needs a supervisor that restarts it.
 - **Stopping the scheduler no longer stops runs it started from a queue.** `scheduler.failover_recovery_window` is new and on by default, at 2 minutes.
+
+On Windows, the service keeps runs going through restarts once it runs the new version. The restart that installs it ends the runs 2.26.0 started, so upgrade when no critical run is in progress.
 
 ## Kubernetes
 

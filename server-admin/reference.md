@@ -295,6 +295,7 @@ proc:
 # Shutdown signal handling (server, scheduler, start-all)
 signal_handling:
   enable_propagation: false  # Forward SIGINT/SIGTERM to running DAG runs and wait for their cleanup
+  drain_timeout: "0s"        # On SIGINT/SIGTERM, start no new runs and wait up to this long for running ones to finish (0 = no wait)
 
 # Resource Monitoring
 monitoring:
@@ -541,7 +542,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_WORKER_ID` - Worker instance ID (default: `hostname@PID`)
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
 - `DAGU_WORKER_HEALTH_PORT` - Worker HTTP health check port (default: `8092`, `0` to disable)
-- `DAGU_WORKER_SHUTDOWN_TIMEOUT` - How long a worker that stops on `SIGINT` or `SIGTERM` waits for running DAG runs to finish before it cancels them (`worker.shutdown_timeout`; default: `60s`, `0` waits without a bound). Set the supervisor's stop timeout at least 15s above this value: systemd `TimeoutStopSec` defaults to 90s, `docker stop` to 10s, and Kubernetes `terminationGracePeriodSeconds` to 30s.
+- `DAGU_WORKER_SHUTDOWN_TIMEOUT` - How long a worker that stops on `SIGINT` or `SIGTERM` waits for running DAG runs to finish before it cancels them (`worker.shutdown_timeout`; default: `60s`, `0` waits without a bound). Set the supervisor's stop timeout at least 15s above this value plus `signal_handling.drain_timeout`: systemd `TimeoutStopSec` defaults to 90s, `docker stop` to 10s, and Kubernetes `terminationGracePeriodSeconds` to 30s.
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
 - `DAGU_WORKER_COORDINATORS` - Coordinator addresses required by `dagu worker` (`host:port,...`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
@@ -569,6 +570,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 
 ### Signal Handling
 - `DAGU_SIGNAL_PROPAGATION` - Forward shutdown signals (`SIGINT`/`SIGTERM`) received by `dagu server`, `dagu scheduler`, or `dagu start-all` to the DAG runs it started, and wait for their cleanup before exiting (default: `false`). See [Graceful Shutdown](/server-admin/operations#graceful-shutdown).
+- `DAGU_SIGNAL_DRAIN_TIMEOUT` - How long a stopping `dagu start-all`, `dagu server`, `dagu scheduler`, or `dagu worker` waits for its running DAG runs to finish, starting no new ones (`signal_handling.drain_timeout`; default: `0`, no wait). See [Graceful Shutdown](/server-admin/operations#graceful-shutdown).
 
 ### Proc Liveness
 These settings apply to all locally owned DAG runs, not just `dagu scheduler`.

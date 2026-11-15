@@ -97,7 +97,7 @@ Restart Dagu to use the new version:
 
 When no installer service is found, it prints `Restart any running Dagu processes to use the new version.`
 
-The Windows service wrapper ends every process of the service when it restarts, so on Windows the prompt always says that runs in progress will end.
+On Windows, the service keeps runs going through the restart.
 
 ## Supported Platforms
 

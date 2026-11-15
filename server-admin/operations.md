@@ -178,7 +178,22 @@ While Dagu waits for runs to clean up:
 - A repeated `SIGTERM` is ignored. Container runtimes and service managers can deliver `SIGTERM` more than once, for example to a whole process group and again through `sudo`, and they force a stop with `SIGKILL` when their own timeout expires.
 - A second `SIGINT`, such as pressing Ctrl+C again, exits immediately without waiting.
 
-Give the service manager enough time for the slowest run to clean up: raise `TimeoutStopSec` in the systemd unit, or set `stop_grace_period` in Docker Compose. `docker stop` waits 10 seconds by default.
+To let runs finish before Dagu stops, set a drain timeout:
+
+```yaml
+# config.yaml
+signal_handling:
+  drain_timeout: 5m
+```
+
+Or set `DAGU_SIGNAL_DRAIN_TIMEOUT=5m`. A stopping `start-all`, `server`, `scheduler`, or `worker` then starts no new runs and waits up to that long for its running runs to finish. Runs still going at the timeout receive the signal when signal propagation is enabled, and keep running otherwise. A worker stops its remaining tasks within `worker.shutdown_timeout`. The default, `0`, does not wait. This suits containers, where stopping the container ends the runs inside it.
+
+```
+level=INFO msg="Waiting for running DAG processes to finish" processes=1 timeout=5m0s
+level=INFO msg="Running DAG processes finished"
+```
+
+Give the service manager enough time for the drain and the slowest run to clean up: raise `TimeoutStopSec` in the systemd unit, or set `stop_grace_period` in Docker Compose. `docker stop` waits 10 seconds by default.
 
 ### Monitoring Across Servers
 
