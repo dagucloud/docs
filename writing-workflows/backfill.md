@@ -81,7 +81,7 @@ Start 28 runs? [y/N]
 - **The estimate** is the median duration of the DAG's recent successful runs, up to 20, times the rounds the runs take at that concurrency. The plan leaves it out when the DAG has no successful run.
 - **Dates.** For a DAG with [`dates`](/writing-workflows/schedule-dates), the plan adds a column for the `--by` entry, else the first entry, and a `Loads <first> to <last>` line over the slots it runs, so an off-by-one is visible before the submit. `--format json` and the API return every slot's dates.
 
-The plan warns when no scheduler is running, when the DAG is suspended, when the queue's limit lowers the concurrency, when live runs may wait behind an executing backfill run, which `handler_on` steps will run once per slot, and how many slots run because the schedule's cadence changed. Pass `--yes` to start without asking; with no terminal, the command needs it.
+The plan warns when no scheduler is running, when the DAG is suspended, when the DAG does not read its slot so every run does the same work, when the queue's limit lowers the concurrency, when live runs may wait behind an executing backfill run, which `handler_on` steps will run once per slot, and how many slots run because the schedule's cadence changed. Pass `--yes` to start without asking; with no terminal, the command needs it.
 
 Submitting the same backfill while it is open starts nothing and names the open one. A backfill with nothing to run is not recorded.
 
@@ -175,6 +175,7 @@ Latest backfill 3f9a1c2e: running; succeeded 12, failed 1, queued 1, pending 14 
   - A user who may not run the workflow sees each slot link to its run.
 - **The workflow page** shows a notice for the latest backfill: its progress while it runs, or that it failed until a slot it failed succeeds. A failure notice can be dismissed.
 - **Missed slots.** When a workflow's slots pass without a run because it was suspended, the scheduler was paused, or no scheduler ran for longer than its `catchup_window`, the workflow page says so, such as `12 slots passed from 2026-11-01 09:00 to 2026-11-01 21:00 while this DAG was suspended`. Slots skipped because the workflow was busy raise no notice.
+  - Only a workflow that reads its slot shows the notice: one that declares `dates`, refers to `${context.run.scheduled_at}`, `interval_start`, `interval_end`, `next_scheduled_at`, or `${dates.*}` in its definition or base config, or calls a sub-DAG, which inherits the slot. The runs of any other workflow all do the same work, so backfilling it would only repeat one run.
   - For a user who may run the workflow, **Backfill** opens the start panel on that span. Its bounds show in the zone the span was recorded in and stay editable, since a span may hold more slots than one backfill may run.
   - Once the scheduler picks up a backfill of a range, the notice drops the slots it runs, from the span's first slot up to the first one the backfill skips: it is gone when the backfill runs them all, and otherwise counts the slots left. A backfill that names its slots or selects them `--by` a date leaves the notice as it is.
   - Only the latest span is kept. Dismissing the notice hides that span in this browser until another is missed, also as a backfill shortens it.
@@ -198,7 +199,7 @@ An open backfill's page updates as its runs change, while the browser tab is vis
 | `POST /api/v1/backfills/{id}/resume` | Resume, with `maxConcurrency` and `onFailure` |
 | `GET /api/v1/dag-runs?backfillId={id}` | A backfill's runs, from its submission on unless `fromDate` or `toDate` is set |
 
-`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`, and its latest missed span as `missedSlots`: `from`, `to`, `reason` (`suspended`, `paused`, or `down`), and `slots`, counted up to 10,000. `GET /api/v1/dags` gives each DAG the backfill it mentions as `backfill`, with its slot count and how many slots are done and failed. Every run carries the `backfillId` of the backfill that started it, which a retry keeps.
+`GET /api/v1/dags/{fileName}` returns the DAG's latest backfill as `latestBackfill`, and, for a DAG that reads its slot, its latest missed span as `missedSlots`: `from`, `to`, `reason` (`suspended`, `paused`, or `down`), and `slots`, counted up to 10,000. `GET /api/v1/dags` gives each DAG the backfill it mentions as `backfill`, with its slot count and how many slots are done and failed. Every run carries the `backfillId` of the backfill that started it, which a retry keeps.
 
 A plan returns a `revision`. Send it with the submit to start exactly the plan you saw: if the slots' history changed in between, nothing starts and the response is a 409 with the new plan.
 
