@@ -105,7 +105,7 @@ steps:
 | `goto` | URL | Navigate the current tab. |
 | `act` | Instruction, or `{instruction, ai, cache}` | Perform one action described in natural language: click, type, select, scroll, press a key. |
 | `upload` | `{files, into, ai, cache}` | Give local files to a file input. See [Uploads](#uploads). |
-| `extract` | `{instruction, schema}` | Extract data from the page. The schema must be a JSON Schema with `type: object`. |
+| `extract` | `{instruction, schema, pages}` | Extract data from the page. The schema must be a JSON Schema with `type: object`. `pages` reads a list across the pages a button turns; see [Lists Across Pages](#lists-across-pages). |
 | `expect` | [Condition](#conditions) | Fail the step unless the condition holds. |
 | `wait` | `{selector}` or `{duration}` | Wait until a CSS selector is visible, or pause, such as `2s`. |
 | `screenshot` | Name | Save a PNG of the page as a run artifact. |
@@ -122,11 +122,13 @@ An `act` performs a single action. "Sign in with %user% and %password%" types in
 
 A browser that stops responding fails the step instead of hanging it: an operation is abandoned a few seconds after its `timeout`, and a screenshot or page check after 30 seconds.
 
+A `goto`, an `upload`, or an `act`, performed or replayed, ends once the page settles, so the next operation reads what it brought. A page it loaded waits until its network is idle, and a page it changed in place until its requests end and it stops changing for half a second. A load the page begins a moment after the action, such as a search a press posts into a frame, counts too, even when the page is slow to answer. A page that has not settled after five seconds is read as it is.
+
 An operation can open a window while the page behind it loads, as a search does that shows a "searching" window until its answer arrives. Operations keep working on the page that opened such a window until the window closes, or until it stays open half a second past the load. A window still open then, such as one to fill in and close, is the page later operations work on. A step that fails on a window left open in front of its page, such as a "searching" window over an error, names that page in its error and, unless `browser.screenshots` is `never`, saves it as `NN-failure-opener.png`.
 
 `with.url` is opened before the first operation.
 
-Each run of the step drives a browser of its own. In a `foreach` body, every item gets its own browser. A retry of the step closes the browser its earlier attempt left open.
+Each run of the step drives a browser of its own, unless the step [shares one](#shared-browsers). In a `foreach` body, every item gets its own browser. A retry of the step closes the browser its earlier attempt left open.
 
 ## Conditions
 
@@ -140,6 +142,8 @@ Each run of the step drives a browser of its own. In a `foreach` body, every ite
 | `url` | `expect: {url: /billing}` | The current URL contains it. |
 
 Fixed checks (`text`, `selector`, `url`) make no model call and give the same answer on every run, so prefer them for monitoring. A `selector` check holds when any matching element is visible.
+
+A `text` check folds full-width letters, digits, and punctuation to half-width and collapses whitespace on both sides, so `{text: ABC123}` holds on a page that shows `ＡＢＣ１２３`. A `text` of only whitespace fails validation. A `url` check compares the URL as written.
 
 `text` and `selector` checks, and `wait: {selector}`, read the page and the frames it shows from its own origin, nested ones too, so they work on sites built of frames. A selector also matches inside open shadow roots. A hidden frame, or one from another origin, is not read. `wait` passes a selector that hops into frames with `>>`, or an XPath, to the browser runtime as written.
 
@@ -227,6 +231,8 @@ Declared secrets and `ask` answers of four or more characters are replaced with 
 
 The top-level properties each `extract` schema lists become step outputs, readable as `${steps.<id>.outputs.<name>}` and checked when the DAG loads. Fields a schema does not list are dropped. Two extracts in one step cannot list the same property.
 
+Every browser step also publishes `downloads`, the files it saved; see [Screenshots and Downloads](#screenshots-and-downloads). An `extract` schema cannot list a property named `downloads`.
+
 A field for the address a link points to needs `format: uri`. The model sees each link as an element id, and only a field with that format gets the link's address in place of the id. Without it the field holds the id, such as `0-11` or `[0-11]`, and the step still succeeds. List the field under `required` too, since some models leave it out otherwise:
 
 ```yaml
@@ -243,7 +249,7 @@ schema:
         required: [name, link]
 ```
 
-When the step succeeds with outputs, stdout is one JSON object of them, so `output:` also works. Operation progress is written to the step's stderr log:
+When the step succeeds, stdout is one JSON object of its outputs, so `output:` also works. Operation progress is written to the step's stderr log:
 
 ```text
 [start] goto "https://portal.vendor.com/billing" (completed, 0 tokens, 800ms)
@@ -252,6 +258,49 @@ When the step succeeds with outputs, stdout is one JSON object of them, so `outp
 [5/6] extract "The most recent invoice" → {"invoice_number":"INV-8812","total":412.5} (completed, 1204 tokens, 2.1s, via model)
 [6/6] download "invoice-8812.pdf" → browser/invoice/downloads/invoice-8812.pdf (completed, 0 tokens, 0s)
 ```
+
+## Lists Across Pages
+
+An `extract` with `pages` reads a list whose pages a button turns in place, such as a table with a Next button:
+
+```yaml
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
+
+steps:
+  - id: orders
+    action: browser.run
+    with:
+      url: https://portal.example.com/orders
+      do:
+        - extract:
+            instruction: The unshipped orders the list shows
+            schema:
+              type: object
+              properties:
+                orders:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      number: { type: string }
+                      total: { type: number }
+            pages:
+              next: Click the Next page button
+```
+
+The step extracts the page, performs `next` as an `act`, waits for the page text to change and stop changing, and extracts again. The items of the schema's top-level array properties are joined across pages in order. Other properties keep the first page's values. A schema without a top-level array property fails validation.
+
+| Field | Description |
+|-------|-------------|
+| `next` | The act that turns to the next page. Required. A `%name%` in it must be a `with.variables` key. |
+| `max` | The most pages read, the first included: 2 to 100. Defaults to 20. |
+| `within` | How long the page gets to change after `next`. Defaults to `10s`. |
+
+The list ends when `next` finds nothing to click, when the page does not change within `within`, as with a disabled Next button, when a page gives the same items as the page before, or after `max` pages. Reaching `max` adds a warning to the step log.
+
+`next` is recorded and replayed as an act is. On the first run, the model finds the button on the first page, and that click turns every later page. Later runs replay the click without the model. Once a page has turned, a replay whose button is gone ends the list without a model request.
 
 ## Screenshots and Downloads
 
@@ -265,6 +314,16 @@ Browser steps store files as [run artifacts](/writing-workflows/artifacts) under
 | `never` | None. `screenshot` operations still save. |
 
 Files the page downloads are saved under `browser/<step id>/downloads/` with the name the site suggests. Only `act` and `goto` start downloads. Once one has run, the step waits for running downloads after every operation, and before it ends or pauses for an `ask` it waits a few seconds for a late download to begin. A download may run for the longest timeout of the acts and gotos run so far; give a large export's act a long `timeout`. A canceled download, or one still running at that timeout, fails the step. Downloaded files appear in the timeline.
+
+The step publishes the files as the `downloads` output: a JSON array of their absolute paths, in the order they finished, and empty when the step saved none. A step in a `foreach` body publishes the files its own item saved, and a step that paused for an `ask` also publishes the files saved before the pause. Pass the output to a later `run`, an `upload`'s `files`, or `chat.completion` `files` instead of building the path:
+
+```yaml
+- id: archive
+  depends: invoice
+  env:
+    - FILES: ${steps.invoice.outputs.downloads}
+  run: echo "$FILES" | jq -r '.[]'
+```
 
 With `artifacts.enabled: false`, no screenshots are saved, a `screenshot` operation fails, and the browser refuses downloads.
 
@@ -312,7 +371,7 @@ steps:
 - a path, relative to the step's working directory, or under `~`;
 - a glob pattern, such as `invoices/*.pdf`, whose matches upload in sorted order;
 - several paths or patterns, one per line;
-- an earlier step's output holding a JSON list of paths, of objects with a `path`, or of `mail.search` emails, whose attachments saved with `save_attachments: true` upload.
+- an earlier step's output holding a JSON list of paths, such as a browser step's [`downloads`](#screenshots-and-downloads), of objects with a `path`, or of `mail.search` emails, whose attachments saved with `save_attachments: true` upload.
 
 Each file is uploaded once, in the order named, and can be up to 50 MB. A file that does not exist, a directory, a pattern that matches nothing, or an attachment that was not saved fails the operation before the page is touched.
 
@@ -336,18 +395,28 @@ The step log shows how the files reached the page:
 
 ## Dialogs
 
-The step accepts every JavaScript dialog a page opens, so a dialog never blocks the page: `alert`, `confirm`, and `beforeunload` are accepted, and a `prompt` is answered with its default text. An act that raises "Are you sure?" therefore goes through. Each accepted dialog appears in the step log and the timeline after the operation that opened it:
+The step answers every JavaScript dialog a page opens, so a dialog never blocks the page. `alert` and `beforeunload` are accepted, a `prompt` is answered with its default text, and a `confirm` is answered as `browser.on_confirm` says:
+
+| `on_confirm` | A `confirm` dialog is |
+|--------------|-----------------------|
+| `accept` (default) | Accepted. An act that raises "Are you sure?" goes through. |
+| `dismiss` | Canceled, and the step goes on. |
+| `fail` | Canceled, and the operation that opened it fails with the dialog's message, such as `confirm dialog "Delete the row?" was not expected`. |
+
+Each answered dialog appears in the step log and the timeline after the operation that opened it:
 
 ```text
 [2/3] dialog "Delete the row?" → accepted confirm (completed, 0 tokens, 0s)
 ```
+
+Under `dismiss` and `fail` the entry reads `dismissed confirm`, and under `fail` its status is `failed`. Use `fail` for a step that should never agree to a confirm, so an act that clicks the wrong button stops the step instead of confirming it.
 
 ## Replay Cache
 
 An `act` records the actions it performed, and the recordings are kept when the step succeeds. The next run of the same step on the same host replays them without asking the model when the operation's position, its instruction, and the page URL (without query or fragment) match. When a replay fails because the page changed, the step asks the model again, records the new actions, and marks the operation `healed` in the log. A recorded element that is gone, or still on the page but hidden, such as a field in a closed dialog, fails the replay.
 
 - Recordings are kept only when the whole step succeeds. When an operation fails on the page after a replay, the step drops the recordings it replayed, so the next run asks the model again. A failure of the model, the browser, a download, or an `ask`, or a canceled run, leaves them.
-- The cache covers `act` and `upload`. `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
+- The cache covers `act`, `upload`, and the `next` act of a [list across pages](#lists-across-pages). `extract` and statement conditions call the model on every run. With fixed conditions, a rerun calls the model only for `extract`.
 - A replay clicks the recorded element location. After a layout change it can hit a different element without failing, so follow important acts with an `expect`, preferably a fixed one; when the `expect` fails, the replay is dropped.
 - A recording whose actions never use a variable the instruction names, as when the page already showed the value, replays only while that variable holds the value it had when recorded. The recording keeps a salted digest of that value, never the value. With another value the model acts and its actions replace the recording, and the step log warns `not replayed: its recording does nothing with %name%, ...`; under `ai: never` the act fails. Name in an instruction only the variables its actions use.
 - To have the model act on every run, or never, set `ai`; see [How Much AI Decides](#how-much-ai-decides).
@@ -440,7 +509,7 @@ While you reword `act` instructions or adjust `expect` conditions, run the brows
 dagu start --only checkout workflow.yaml
 ```
 
-The other steps are recorded as skipped, and the run keeps the workflow's name, so the replay cache and `browser.profile` apply as in a full run. With a profile, a site stays signed in, so the step does not need the sign-in steps before it. When the step reads an earlier step's output, take it from a finished run with `--outputs-from <run-id>`, or take one step's outputs with `--output-from <step>=<run-id>`. See [Running One Step](/writing-workflows/outputs#running-one-step).
+The other steps are recorded as skipped, and the run keeps the workflow's name, so the replay cache and `browser.profile` apply as in a full run. With a profile, a site stays signed in, so the step does not need the sign-in steps before it. When the step reads an earlier step's output, take it from a finished run with `--outputs-from <run-id>`, or take one step's outputs with `--output-from <step>=<run-id>`. See [Running One Step](/writing-workflows/outputs#running-one-step). A step that [shares a browser](#shared-browsers) gets a new browser when it runs alone, so it starts on its `url`, or on a blank page without one.
 
 ## Profiles
 
@@ -461,21 +530,89 @@ with:
 
 The sign-in acts run only while the login form is showing. Profiles are stored on the host that runs the step. Runs that use the same profile run one at a time. A run fails immediately when another run is waiting for input with the same profile open, or when a [browser session](#building-a-step-in-a-browser-session) holds it.
 
+## Shared Browsers
+
+`browser.share` names a browser that the steps of one DAG run use in turn. Each step starts on the page the step before it left, with its cookies, session cookies included, and storage. A task can then run as several steps, such as signing in and collecting, without signing in again in each:
+
+```yaml
+secrets:
+  - name: PORTAL_PASSWORD
+    provider: env
+    key: PORTAL_PASSWORD
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-5
+
+steps:
+  - id: sign_in
+    action: browser.run
+    with:
+      url: https://portal.example.com/login
+      browser:
+        share: portal
+      variables:
+        password: ${PORTAL_PASSWORD}
+      do:
+        - act: Type %password% into the password field
+        - act: Click the Sign in button
+        - expect: {text: Dashboard}
+
+  - id: orders
+    depends: sign_in
+    action: browser.run
+    with:
+      browser:
+        share: portal
+      do:
+        - act: Click the Orders link
+        - extract:
+            instruction: The open orders
+            schema:
+              type: object
+              properties:
+                orders: { type: array }
+```
+
+- The first step that gives the name starts the browser. When it ends, the browser stays open for the next step that gives the name. A step without `url` starts on the page the step before left.
+- The name sets no order among the steps; `depends` does. The steps take turns, `foreach` items included: a step waits while another uses the browser, and the timeline shows `Waiting for step "..." to finish with the browser shared as "portal"`.
+- A step that fails leaves the browser open for the next step, or for its own retry. A shared browser that stopped answering is replaced with a new one.
+- The steps give the same `headless`, `executable`, `viewport`, `proxy`, `profile`, `client_certificates`, and `write_gate`. A step that gives others fails and names the step that started the browser. Each step keeps its own `allowed_domains`, `on_confirm`, `screenshots`, downloads, replay cache, and model.
+- The browser closes when the run ends, including a run that waits for a person between the steps. A retry of the run starts a new browser. Add `browser.profile` for a sign-in that should last across runs.
+- While open, the browser holds its profile, so another step of the run that names the profile without the share fails at once. The run's shared browsers also count toward [`browser.max_open`](#limiting-open-browsers) until the run ends; a launch in the same run that would wait for their places fails at once.
+- A step that waits for an [`ask`](#human-input) keeps the browser to itself until it resumes and ends. Meanwhile, the next step that gives the name starts a new browser.
+- A run started with `dagu start --reuse-from` also runs every step that shares a browser with a step it runs, so a changed step still starts on the page the step before it leaves.
+
 ## Refused Pages
 
 A browser without a window looks to sites like the same Chrome with one. It sends the user agent its Chrome sends with a window, never `HeadlessChrome`, and reports a screen of 1920x1080, or the viewport's size when that is larger. `headless: false` therefore does not change how a site treats the step, and a check passed in a shown window with a [profile](#profiles) holds for the headless step too, for as long as the site keeps it.
 
 The first time a Chrome executable runs without a window, Dagu starts it once on a temporary profile to learn its user agent, and keeps it under `browser/user-agents/` in the data directory. After Chrome updates, the next launch learns it again. When the user agent cannot be learned or kept, the step runs and warns.
 
-A page counts as refused when its site answers with a bot check in place of it, such as Cloudflare's challenge, or with `403 Forbidden` or `429 Too Many Requests`. After the start URL and after every operation, a refused page adds a line to the step log and the timeline:
+A page counts as refused when:
+
+- its site answers with a bot check in place of it: Cloudflare's challenge, or an AWS WAF challenge or CAPTCHA;
+- it shows a reCAPTCHA, hCaptcha, or Cloudflare Turnstile challenge in a frame. A hidden frame, or an invisible reCAPTCHA badge, is not a check;
+- its site answers `403 Forbidden` or `429 Too Many Requests`.
+
+After the start URL and after every operation, a refused page adds a line to the step log and the timeline, once while the browser keeps showing it:
 
 ```text
-[start] page refused shop.example.com answered with a Cloudflare bot check (HTTP 403) in place of the page
+[start] page refused: shop.example.com answered with a Cloudflare bot check (HTTP 403) in place of the page
+[2/4] page refused: portal.example.com shows a reCAPTCHA challenge (HTTP 200)
 ```
 
-A refusal usually makes a later operation fail, so a step that fails while the browser shows a refused page ends its error with the same sentence. It keeps the [recordings](#replay-cache) it replayed, since the refusal says nothing about them. [Browser sessions](/getting-started/cli#browser-session-open) report the refusal as `refused`.
+A refused page is not one to work on. An `act`, `upload`, `expect`, or `extract` that would run on it fails before it runs, with the same sentence as its error, such as `do[1] extract failed: shop.example.com answered with a Cloudflare bot check (HTTP 403) in place of the page`. An `extract` therefore never returns empty values read from a bot check.
 
-When the start URL or an operation lands on a bot check, the step waits up to 10 seconds for the check to pass, as checks that need no person do. A check still showing after that is reported as above. To pass one that needs a person:
+- An operation with a `when` is skipped when the condition does not hold and runs when it holds, as on any other page. An `extract` never runs on a refused page.
+- `goto`, `wait`, `screenshot`, and `ask` run: a `goto` leaves the page, a `wait` can outlast a rate limit, a `screenshot` keeps what the page shows, and an `ask` lets a person pass the check.
+- A step whose last operation leaves a refused page, or whose `url` opens one that no operation fails on, fails at its end with the sentence.
+- A step that fails for another reason on a refused page ends its error with the sentence.
+- A step that fails on a refused page keeps the [recordings](#replay-cache) it replayed, since the refusal says nothing about them.
+
+[Browser sessions](/getting-started/cli#browser-session-open) report the refusal as `refused`.
+
+When the start URL or an operation lands on a bot check, the step waits up to 10 seconds for the check to pass, as checks that need no person do. A check still showing after that is reported, and fails the operations after it, as above. To pass one that needs a person:
 
 1. On the host that runs the step, open a browser session with a window and the step's profile, and pass the check in the window:
 
@@ -740,7 +877,7 @@ noise_hosts:
 - The browser runtime applies `browser.allowed_domains` to the page's HTTP(S) requests, including scripts, images, and API calls, so list the CDN and sign-in hosts a site loads from. WebSocket connections are not covered, and the runtime's check has a known bypass. `example.com` matches only that host; `*.example.com` matches its subdomains but not `example.com`. An entry is a host name with at least two labels, without a scheme, port, or path, and `*` may appear only as a leading `*.`.
 - Blocked requests are logged after the operation that made them, such as `allowed_domains blocked 3 requests: cdn.example.net (3)`, and a failed step's error lists them. A page that breaks for no clear reason often needs a host added.
 - Dagu itself checks only the page URL: it rejects a `goto` or `url` outside the list, and after every operation fails the step if a redirect or a click left the allowed domains.
-- Dialogs are accepted automatically, so an act that clicks the wrong button also confirms it. Keep instructions for destructive actions specific and check the result with an `expect`.
+- Confirm dialogs are accepted by default, so an act that clicks the wrong button also confirms it. Keep instructions for destructive actions specific, check the result with an `expect`, and set `browser.on_confirm: fail` when the step should never confirm anything; see [Dialogs](#dialogs).
 - To keep a step from saving anything a person has not approved, put it behind the [write gate](#write-gate).
 - The browser runs with the permissions of the Dagu process.
 
@@ -754,7 +891,7 @@ Browser steps run on the worker that picks them up, which needs Chrome. Profiles
 
 ## Web UI
 
-The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, downloads, accepted dialogs, and the writes the [write gate](#write-gate) decided, and holds pending questions.
+The step's **Agent** tab shows each operation with its status, token use, screenshot thumbnails, downloads, answered dialogs, and the writes the [write gate](#write-gate) decided, and holds pending questions.
 
 ## Options
 
@@ -782,7 +919,9 @@ The step's **Agent** tab shows each operation with its status, token use, screen
 | `browser.proxy` | Proxy server URL. Authenticated proxies are not supported. |
 | `browser.allowed_domains` | Hosts the page's HTTP(S) requests may reach. |
 | `browser.screenshots` | `on_failure`, `final`, `each`, or `never`. |
+| `browser.on_confirm` | How a `confirm` dialog is answered: `accept` (default), `dismiss`, or `fail`. See [Dialogs](#dialogs). |
 | `browser.profile` | Persistent profile name. |
+| `browser.share` | Name of a browser the steps of the run use in turn. See [Shared Browsers](#shared-browsers). |
 | `browser.client_certificates` | TLS client certificates and the hosts they are presented to. See [Client Certificates](#client-certificates). |
 | `browser.write_gate` | `off` (default), `record`, `ask`, or `rehearse`. See [Write Gate](#write-gate). |
 
@@ -810,9 +949,15 @@ Set `trusted_cas` and `guard_client_certificates` in the host's [config.yaml](/s
 | `the instruction uses %name%, but the ask that sets it did not run` | The `ask` was skipped because its `when` did not hold. | Give the act the same `when` as the `ask`. |
 | `download of ... did not finish within ...` | The download ran longer than the longest `act` or `goto` timeout. | Raise the `timeout` of the act that starts it. |
 | `the browser did not respond within ...` | The page stopped responding. | Check the page; raise `timeout` for slow pages. |
-| `... answered with a Cloudflare bot check (HTTP 403) in place of the page` | The site showed a bot check that did not pass on its own within 10 seconds. | Pass it once in a browser session with a window and the step's profile. See [Refused Pages](#refused-pages). |
+| `... answered with a Cloudflare bot check (HTTP 403) in place of the page`, `... answered with an AWS WAF CAPTCHA (HTTP 405) in place of the page`, or `... shows a reCAPTCHA challenge (HTTP 200)` | The site showed a bot check that did not pass on its own within 10 seconds. | Pass it once in a browser session with a window and the step's profile. See [Refused Pages](#refused-pages). |
 | `... refused the page (HTTP 403 Forbidden)` or `(HTTP 429 Too Many Requests)` | The account may not open the page, the site blocks the host's network, or the site wants fewer requests. | Check the account's access, ask the site's owner to allow the host, or run less often. See [Refused Pages](#refused-pages). |
 | `browser profile "..." is held by DAG run ..., which is waiting for input` | Another run holds the profile while it waits for an answer. | Answer or cancel that run. |
+| `browser profile "..." is held by the browser shared as "..." in this run` | A step names the profile of the run's shared browser without sharing it. | Give the step the same `browser.share`, or another profile. See [Shared Browsers](#shared-browsers). |
+| `browser.share "...": step "..." started the shared browser with other browser settings` | Steps that share a browser give different launch settings. | Give them the same `headless`, `executable`, `viewport`, `proxy`, `profile`, `client_certificates`, and `write_gate`. |
+| `browser.max_open allows N open browsers, and this run keeps M open until it ends for its shared browsers ...` | The run's shared browsers fill `browser.max_open`. | Raise `browser.max_open`, or give the step the `browser.share` of one of them. |
+| `confirm dialog "..." was not expected` | Under `on_confirm: fail`, the operation opened a confirm dialog. The step canceled it. | Check the act that opened it. If the step should confirm it, set `on_confirm: accept`. See [Dialogs](#dialogs). |
+| `output "downloads" is reserved for the files the step downloads` | An `extract` schema lists a `downloads` property. | Rename the property. The step publishes `downloads` itself. |
+| `extract pages collects the items of the schema's top-level array properties, and the schema lists none` | An `extract` with `pages` has no top-level array property. | Put the list under a top-level property with `type: array`. See [Lists Across Pages](#lists-across-pages). |
 | `... asks for a TLS client certificate, and none is configured for it (ERR_...)` | The site requires a client certificate and no entry names its host. | Add it to `browser.client_certificates`. See [Client Certificates](#client-certificates). |
 | `... rejected the client certificate ...` | The site refused the certificate presented. | Check that the certificate is the one the site expects and has not expired or been revoked. |
 | `... presented a server certificate that is not trusted ...` | The proxy could not verify the site's server certificate. | Add the site's CA with [trusted_cas](#trusted-certificate-authorities). |
