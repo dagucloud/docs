@@ -39,6 +39,7 @@ log_format: "text"         # Log format: "text" or "json"
 access_log_mode: "none"    # Access log mode: "all", "non-public", or "none" (default)
 headless: false           # Run without Web UI
 check_updates: true       # Automatic web UI update checks (default: true)
+allow_web_upgrade: false  # Let administrators upgrade from the web UI (default: false)
 metrics: "private"        # Metrics endpoint access: "private" (default) or "public"
 cors_allowed_origins: []  # Empty disables cross-origin browser access (default)
 allowed_hosts: []         # Extra host names accepted where no login is needed (see Allowed Host Names)
@@ -216,6 +217,7 @@ All options support `DAGU_` prefix:
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
 - `DAGU_ACCESS_LOG_MODE` - Access log mode: `all`, `non-public`, or `none` (default); see [Operations - Logging](/server-admin/operations#http-access-logs)
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
+- `DAGU_ALLOW_WEB_UPGRADE` - Let administrators upgrade Dagu from the web UI (default: `false`). See [Upgrade From the Web UI](/server-admin/self-upgrade#upgrade-from-the-web-ui).
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 - `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`). An empty value disables cross-origin browser access. An explicit `*` allows any origin without credentials and emits a security warning.
 - `DAGU_ALLOWED_HOSTS` - Comma-separated host names accepted where no login is needed (e.g. `dagu.example.com,.corp.example.com`). See [Allowed Host Names](#allowed-host-names).

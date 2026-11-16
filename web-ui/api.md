@@ -119,6 +119,31 @@ Pauses or resumes scheduled run creation for every DAG at once. Admin only.
 
 Manual, webhook, and sub-DAG runs keep working while paused. Queued scheduled runs are aborted and catchup windows are discarded rather than deferred. See [Pausing the Scheduler](/writing-workflows/scheduling#pausing-the-scheduler) for the full behavior.
 
+### Upgrade from the Web UI
+
+**Endpoints**: `GET /api/v1/system/upgrade` and `POST /api/v1/system/upgrade`
+
+`POST` starts upgrading this Dagu to the latest stable release and returns `202` with the state. `GET` returns the state. Both are admin only. See [Upgrade From the Web UI](/server-admin/self-upgrade#upgrade-from-the-web-ui) for when the upgrade is offered.
+
+**Response (200)**:
+```json
+{
+  "available": true,
+  "state": "downloading",
+  "targetVersion": "v2.27.0",
+  "downloadedBytes": 10485760,
+  "totalBytes": 26214400
+}
+```
+
+**Response Fields**:
+- `available`: Whether an administrator can upgrade this Dagu from the web UI
+- `state`: `idle`, `downloading`, `installing`, `restarting` (Dagu exits so its service starts the new binary), or `failed`
+- `targetVersion`, `downloadedBytes`, `totalBytes`: The release being installed and the download progress, once known
+- `error`: Why the last upgrade failed, with `state` `failed`. The binary is unchanged.
+
+`POST` returns `409` when the upgrade is not offered or one is already in progress. After `restarting`, poll [`GET /api/v1/health`](#health-check) until it reports the new `version`.
+
 ### OpenAPI Document
 
 **Endpoint**: `GET /api/v1/openapi.json`
@@ -634,7 +659,8 @@ Validates a DAG YAML specification without persisting any changes. Returns a lis
 - `dag` field may contain partial DAG details even when validation fails
 - Use this endpoint to validate DAG specs before creating or updating DAGs
 - `warnings` lists non-fatal spec warnings; they do not affect `valid`
-- `issues` lists the same errors, warnings, and notices as objects with `severity` (`error`, `warning`, or `notice`), `source` (`load`, `build`, `warning`, or `valueReference`), and `message`. An issue also has `stepName`, `stepPath` (such as `steps[3]` or `handler_on.failure`), `fieldPath` (such as `steps[3].with.url`), `line`, and `column` when known
+- `issues` lists the same errors, warnings, and notices as objects with `severity` (`error`, `warning`, or `notice`), `source` (`load`, `build`, `warning`, `valueReference`, or `host`), and `message`. An issue also has `stepName`, `stepPath` (such as `steps[3]` or `handler_on.failure`), `fieldPath` (such as `steps[3].with.url`), `line`, and `column` when known
+- An issue with `source` `host` is a `warning` that depends on the server host, not on the spec: a step command whose executable the host does not have, such as `step "build": command '/usr/bin/my-cmd' was not found on the server host`. It is also listed in `warnings`. Dagu checks only local command steps of a DAG that runs on the server host, and only for a caller who may edit DAGs in the DAG's workspace. `dagu validate` does not run this check
 - `valueReferenceNotices` lists value-reference notices produced while loading the spec. They are not persisted
 - `referenceScope` lists what a step can reference: `params`, `consts`, `env` and `secrets` names (without their values), and `steps` with the outputs other steps can use. Each entry has its canonical `reference` token, such as `${params.region}` or `${steps.fetch.outputs.body}`. A step's `outputsKnown` is `static` when the spec gives its outputs and `runtime` when only a run does
 
@@ -705,6 +731,7 @@ Creates and starts a DAG run with optional parameters.
 | outputs | object | Outputs of skipped steps, keyed by step name or ID and then by output name, with string values. Wins over `outputsFromRunId` and `outputsFromRuns`. Requires `steps` | No |
 | outputsSources | object | The run each step of `outputs` was captured from, keyed by step name or ID, as `{"runId": "...", "capturedAt": "<RFC 3339>"}`; `capturedAt` is optional. Requires `steps` | No |
 | ephemeral | boolean | If true, the run leaves no trace. See [Ephemeral runs](#ephemeral-runs). Requires `steps` | No |
+| reuseFrom | string | Finished DAG-run of the same DAG whose unchanged steps this run reuses instead of running. Changed steps, the steps after them, and steps that share a browser with them run; the others are recorded as skipped, carry their outputs, and the run takes that run's work directory. When no step can be reused, or none changed, every step runs. Cannot be sent with `steps`, `outputsFromRunId`, `outputsFromRuns`, `outputs`, or `outputsSources`. An unknown run returns `404`, an unfinished run `400`. Not supported for agent DAGs | No |
 
 > **Tip:** Set `steps` to try one step against the current definition without re-running the steps before it. The run is recorded like any other under the DAG's name. Only a skipped step that a selected step depends on, directly or through other steps, carries outputs. They come from `outputsFromRunId`, `outputsFromRuns`, or `outputs`; without them, references to those outputs stay unresolved. Retrying a failed selected-steps run follows normal retry rules, so steps downstream of the failed one run too.
 
@@ -1111,6 +1138,7 @@ Retrieves the newest DAG runs with forward-only cursor pagination.
 | cursor | string | Opaque cursor returned by the previous page | - |
 | labels | string | Filter by DAG labels. Comma-separated. Same syntax as DAG filtering. Supports `*` and `?` wildcards. AND logic. | - |
 | excludeServiceDAGRuns | boolean | Leave out every run of the service DAGs, whoever started it. The service DAGs come from the DAG index, so a DAG file edited outside Dagu counts after the next DAG listing. | `false` |
+| backfill | string | `exclude` leaves out [backfill](/writing-workflows/backfill) runs, and `only` lists only them. Another value returns `400`. | - |
 | remoteNode | string | Remote node name | "local" |
 
 The response includes `nextCursor` when older results are available. Repeat the same request with `cursor=<nextCursor>` to continue.
@@ -1263,6 +1291,7 @@ Inline specifications have no source directory, so they cannot supply [file depe
 | outputs | object | Outputs of skipped steps, keyed by step and then output name. Requires `steps` | No |
 | outputsSources | object | The run each step of `outputs` was captured from. Requires `steps` | No |
 | ephemeral | boolean | Run the selected steps in a run that leaves no trace. See [Ephemeral runs](#ephemeral-runs). Requires `steps` | No |
+| reuseFrom | string | Finished DAG-run of the same DAG whose unchanged steps this run reuses instead of running. See [Start DAG](#start-dag) | No |
 
 **Response (200)**:
 ```json
@@ -1529,7 +1558,7 @@ The body steps of a `foreach` item, as returned by `GET /api/v1/dag-runs/{name}/
 
 **Endpoint**: `POST /api/v1/dag-runs/{name}/{dagRunId}/stop`
 
-Forcefully stops a running DAG run, or cancels a failed root DAG run that is still pending DAG-level automatic retry.
+Forcefully stops a running DAG run, ends a root DAG run that is waiting for an approval or a human task as `aborted` without running its remaining steps, or cancels a failed root DAG run that is still pending DAG-level automatic retry. Stopping a waiting sub-DAG run returns `400`; stop its root run. A stop that races with a resume returns `409` and changes nothing.
 
 **Response (200)**: Success
 
@@ -3027,6 +3056,7 @@ Returns one page of the queued DAG-runs of a queue, from the head of the queue t
 |-----------|------|-------------|---------|
 | limit | integer | Items per page (max 500) | 100 |
 | cursor | string | Opaque cursor returned by the previous page | - |
+| backfill | string | `exclude` leaves out [backfill](/writing-workflows/backfill) runs, and `only` lists only them | - |
 | remoteNode | string | Remote node name | "local" |
 
 **Response (200)**:

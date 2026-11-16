@@ -21,6 +21,7 @@ log_format: "text"         # "text" or "json"
 access_log_mode: "none"    # Access log mode: "all", "non-public", or "none" (default)
 headless: false
 check_updates: true       # Automatic web UI update checks (default: true)
+allow_web_upgrade: false  # Let administrators upgrade from the web UI (default: false)
 skip_examples: false       # Skip creating example DAGs
 metrics: "private"        # Metrics endpoint: "private" (default) or "public"
 cors_allowed_origins: []  # Empty disables cross-origin browser access (default)
@@ -359,6 +360,7 @@ Variables ending in `_FILE` name a file that holds a secret. See [Secrets From F
 - `DAGU_ACCESS_LOG_MODE` - Access log mode (`all`, `non-public`, or `none`; default: `none`); see [Operations - Logging](/server-admin/operations#http-access-logs)
 - `DAGU_HEADLESS` - Run without UI
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
+- `DAGU_ALLOW_WEB_UPGRADE` - Let administrators upgrade Dagu from the web UI (default: `false`). See [Upgrade From the Web UI](/server-admin/self-upgrade#upgrade-from-the-web-ui).
 - `DAGU_LATEST_STATUS_TODAY` - Show only today's status
 - `DAGU_SKIP_EXAMPLES` - Skip automatic creation of example DAGs (default: `false`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
@@ -897,6 +899,7 @@ peer:
 - `port`: `8080`
 - `public_url`: empty
 - `check_updates`: `true`
+- `allow_web_upgrade`: `false`
 - `metrics`: `private`
 - `cors_allowed_origins`: empty (cross-origin browser access disabled)
 - `allowed_hosts`: empty (only the always-accepted host names)

@@ -130,6 +130,8 @@ This is the best place to:
 
 Click a row to open its [workflow page](#workflow-page) over the list, at the page's own URL. The list stays below with its location and filters. `Up` and `Down`, or the arrow buttons at the top, step through the rows of the list. Drag the left edge to change the width; double-click it to reset. **Open workflow** keeps the workflow page as the page. The browser's Back button, the close button, a click outside, or `Esc` when the workflow page has nothing left to close returns to the list. `Ctrl`/`Cmd`+click a row or **Open workflow** to open the page in a new tab. Runs listed on **Executions**, **Activity**, and **Cockpit** open the same way, on the selected run. On screens narrower than 768 pixels, a click opens the page directly.
 
+The pencil on a row opens the workflow page on its **YAML** tab. It shows only to users who can write in the workflow's workspace. To rename a workflow, use the pencil next to its name on the workflow page.
+
 Sorting by status or last run is available while 300 or fewer workflows match.
 
 When [recursive DAG discovery](/server-admin/configuration#recursive-dag-discovery)
@@ -153,11 +155,13 @@ The page shows the latest run until another run is selected. Select a run on the
 
 ### Start And Control Runs
 
-**Start** opens the start dialog. Set parameters, a runtime profile, and an optional run ID, then start or enqueue the run. For a [build workflow](/writing-workflows/incremental-workflows), the dialog also provides **Disable reuse for this run** when every eligible step should be recomputed. With unsaved edits, the menu next to **Start** offers **Run unsaved draft**.
+**Start** opens the start dialog. Set parameters, a runtime profile, and an optional run ID, then start or enqueue the run. For a [build workflow](/writing-workflows/incremental-workflows), the dialog also provides **Disable reuse for this run** when every eligible step should be recomputed.
 
 ![Start dialog](/runtime-profile-start-dialog.png)
 
-The icons next to the run chip act on the selected run: stop, cancel auto-retry, reject, retry, reschedule, or dequeue, as its state allows. **Run details** shows the run's status, progress, timing, parameters, and reused outputs.
+With unsaved edits, **Start** asks which version to run. **Save & Run** saves the edits, then opens the start dialog with the parameters of the saved definition. **Run anyway** runs the last saved version. **Save & Run** skips the change review that **Save** shows, and a failed save starts nothing. The menu next to **Start** also offers **Save & Run** and **Run unsaved draft**. **Save & Run** shows only to users who can both edit and run the workflow.
+
+The icons next to the run chip act on the selected run: stop, cancel auto-retry, reject, retry, reschedule, or dequeue, as its state allows. **Run details** shows the run's status, progress, timing, parameters, and reused outputs. For a workflow with [`dates`](/writing-workflows/schedule-dates), it also shows the run's slot and the first date it loads, such as `Nov 10 02:00, loads 2026-11-09`, with every date on hover.
 
 For a queued run, **Run details** also shows its queued runtime conditions: the latest observed reason the run has not started yet. See [Queued Runtime Conditions](/server-admin/queues#queued-runtime-conditions) for the exact condition fields and reason names.
 
@@ -173,8 +177,10 @@ Users with write access edit the workflow on the canvas.
 - Drag from one step to another to add a dependency. Right-click a step or the canvas for more actions.
 - The right column beside the canvas has two tabs, **Workflow** and **YAML**. Switch between them, or collapse the column to a rail and open a tab from it again; the page remembers the choice. On a phone they open as panels over the canvas.
 - **YAML** shows the whole file, with validation, schema-aware completion, formatting, and quick fixes.
+- The editor warns when a step's command names an executable that the server host does not have, such as `/usr/bin/my-cmd`. The warning does not block saving or running. Steps that run in a container, over SSH, or on a worker are not checked, and neither are commands built from variables or relative paths. A bare name such as `jq` is looked up in the server's `PATH` unless the workflow or step sets `PATH` or uses `tools` or `shell_packages`.
 - **Workflow** shows the Workflow panel. Its **Overview** tab shows the description, schedule, parameters, handlers, and the runtime profile that applies. The **Wiki**, **Incidents**, and **Notifications** tabs hold the workflow's Wiki pages and its incident and notification overrides.
-- The **Manual**, **Cron**, and **Webhook** launchers on the canvas show how the workflow starts. Select one to open its panel in a temporary tab of the right column. **Cron** edits the schedule and previews upcoming runs. **Webhook** holds the webhook settings.
+- The **Manual**, **Cron**, and **Webhook** launchers on the canvas show how the workflow starts. Select one to open its panel in a temporary tab of the right column. **Cron** edits the schedule and previews upcoming runs. For a workflow with `dates`, each upcoming run shows the first date it loads. **Webhook** holds the webhook settings.
+- In the **Cron** panel, a form builds a cron expression from a frequency (every few minutes, hourly, daily, weekly, or monthly) and its time, and describes the schedule in words. **Edit with the form** opens a listed expression in the same form, and a change there updates the YAML at once. The expression stays editable as text, and the form follows it. An expression the form cannot show, such as `@daily` or one with a `CRON_TZ=` prefix, stays as written until a frequency is picked. Times are in the scheduler's time zone.
 - **Save** shows the changes against the saved version before it writes the file. **Undo**, **Redo**, and **Revert to the last save** act on unsaved edits.
 
 ![Step palette](/workflow-palette.png)
@@ -198,7 +204,7 @@ Select **Activity** at the bottom of the page to open the run panel. It shows a 
 | Tab | Shows |
 | --- | --- |
 | **Log** | The log of the selected step, or the run's scheduler log when no step is selected |
-| **Agent** | Agent sessions, and the decision timeline of an [agent DAG](/writing-workflows/agent) run |
+| **Agent** | Agent sessions, and the decision timeline of an [agent DAG](/writing-workflows/agent) run. Answering an agent's request or restarting its session needs permission to run the workflow. |
 | **Actions** | Approvals and [human tasks](/writing-workflows/human-tasks) that wait for input |
 | **Timeline** | When each step ran and for how long |
 | **History** | Each step's status across the runs on the timeline |
@@ -217,7 +223,7 @@ On the **History** tab, select a cell to show that run and step, or select a ste
 
 ![History tab](/workflow-history.png)
 
-When a run waits for an approval or a human task, the canvas shows a notice with **Open actions**, and the **Actions** tab shows how many items wait. Complete each generated form there, or select **Request changes** to push the work back when the task declares `with.push_back`. While the run is queued or running, open tasks stay visible but read-only, and typed input is kept. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again.
+When a run waits for an approval or a human task, the canvas shows a notice with **Open actions**, and the **Actions** tab shows how many items wait. Complete each generated form there, or select **Request changes** to push the work back when the task declares `with.push_back`. While the run is queued or running, open tasks stay visible but read-only, and typed input is kept. If the input was stored but the resume could not be queued, the same tab displays **Retry queue** so the run can recover without entering the values again. **Review** on a waiting run under **Needs attention** in **Activity** opens the run on this tab.
 
 ![Actions tab](/workflow-actions.png)
 
@@ -245,13 +251,15 @@ The **Log** tab opens a failed step on its stderr. The run's scheduler log offer
 
 ## Executions
 
-The **Executions** page lists runs across every workflow. Filter them by workflow name, run ID, status, labels, and date.
+The **Executions** page lists runs across every workflow. Filter them by workflow name, run ID, status, labels, and date, and by [backfill](/writing-workflows/backfill) runs: **All runs**, **Without backfills**, or **Backfill runs only**. The URL and a saved view keep the backfill choice.
+
+Runs of [service DAGs](/writing-workflows/services) are left out until a name, run ID, status, or label filter is set. A card for each service shows its state, and its arrow lists the latest runs of the service.
 
 ![Executions](/executions.png)
 
 ## Queues
 
-The **Queues** page shows each queue's capacity, with how many runs are running and queued in it. See [Queues](/server-admin/queues).
+The **Queues** page shows each queue's capacity, with how many runs are running and queued in it. A [service DAG](/writing-workflows/services) that does not set `queue` has its queue listed apart under **Service DAGs**, also while it waits to restart. A queue's page filters its queued runs by backfill runs, as **Executions** does. See [Queues](/server-admin/queues).
 
 ![Queues](/queues.png)
 
@@ -356,10 +364,10 @@ System Status shows the health of the scheduler, coordinator, and the current ma
 This page helps you verify:
 
 - scheduler and coordinator availability
-- connected workers and all of their labels
+- connected workers, all of their labels, and how many run an older Dagu version than the server
 - current CPU, memory, disk, and load trends
 
-If you use distributed execution, this is the first place to look when workers appear missing or overloaded.
+If you use distributed execution, this is the first place to look when workers appear missing or overloaded. The [Workers page](/server-admin/distributed/workers/#web-ui-workers-page) shows each worker's Dagu version and marks a worker older or newer than the server.
 
 Administrators can also pause the scheduler here, which stops scheduled runs for every DAG without stopping the process. While it is paused, a banner appears on every page showing who paused it and why, so anyone can see why nothing is starting. See [Pausing the Scheduler](/writing-workflows/scheduling#pausing-the-scheduler).
 
@@ -382,6 +390,8 @@ Depending on your role and license, the navigation can also include pages such a
 - **Plan & features**
 
 These pages are intended for administrators and operators rather than day-to-day workflow users.
+
+Administrators also see a notice when a new Dagu release is available, with the command that upgrades this installation, or **Update now** when [upgrading from the web UI](/server-admin/self-upgrade#upgrade-from-the-web-ui) is on. See [Update Notifications](/server-admin/self-upgrade#update-notifications).
 
 ## Optional Features
 
@@ -406,6 +416,8 @@ remote_nodes:
     auth_type: token
     auth_token: ${PROD_TOKEN}
 ```
+
+A request to a remote node needs the signed-in user's local role as well as the role of the stored credential on that node. See [Local Permissions](/server-admin/authentication/remote-nodes#local-permissions).
 
 ### Branding
 

@@ -145,6 +145,23 @@ remote_nodes:
 - **Network Security**: Use HTTPS and consider VPN/private networks between servers
 - **Audit Trail**: API key usage is tracked via `lastUsedAt` on the remote server
 
+## Local Permissions
+
+Dagu checks the signed-in user's local role before it forwards a request to a remote node. The remote node then applies the role of the stored credential, so a request needs both.
+
+| Local role | Requests forwarded |
+|------------|--------------------|
+| Any signed-in user | Reads of workflows, runs, logs, queues, calendars, Wiki pages, and Git Sync status |
+| `operator` and above | Run control: start, enqueue, stop, retry, reschedule, dequeue, suspend, approvals, human tasks, and agent session actions |
+| `developer` and above | Changes to workflows, calendars, Wiki pages, and Git Sync; runs from an edited or inline spec; system status, workers, and workspace changes |
+| `manager` and above | Audit and event logs |
+| `admin` | Every other request |
+
+- A request the local role does not allow returns `403` and is not forwarded.
+- A user with access to selected workspaces only cannot use remote nodes, because local workspace grants do not map to the remote node's workspaces.
+- Login, setup, password changes, metrics, and webhook triggers are never forwarded.
+- With `auth.mode: none` or `basic`, no roles apply, but `permissions.run_dags` and `permissions.write_dags` still apply to forwarded requests.
+
 ## TLS Options
 
 ### Skip TLS Verification

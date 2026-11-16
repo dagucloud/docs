@@ -30,6 +30,8 @@ WorkingDirectory=/var/lib/dagu
 ExecStart=/usr/local/bin/dagu start-all
 Restart=always
 RestartSec=10
+# End only Dagu on stop, so runs in progress keep going across restarts
+KillMode=process
 
 Environment="DAGU_HOST=0.0.0.0"
 Environment="DAGU_PORT=8525"
@@ -38,6 +40,8 @@ Environment="DAGU_HOME=/var/lib/dagu"
 [Install]
 WantedBy=multi-user.target
 ```
+
+`KillMode=process` がない場合、サービスを停止または再起動すると、進行中の実行も終了します。[再起動しても実行を続ける](/ja/server-admin/upgrades#keep-runs-across-restarts)を参照してください。
 
 ## サービスの起動 {#start-service}
 

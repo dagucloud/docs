@@ -41,6 +41,8 @@ remote_nodes:
 
 API keys provide fine-grained role-based permissions (admin, manager, developer, operator, viewer) and usage tracking. See [Remote Nodes Authentication](/server-admin/authentication/remote-nodes) for detailed setup instructions.
 
+The local server also checks the signed-in user's own role before it forwards a request, so a user cannot do more on a remote node than their local role allows. See [Local Permissions](/server-admin/authentication/remote-nodes#local-permissions).
+
 ## See Also
 
 - [Server Configuration](/server-admin/server)

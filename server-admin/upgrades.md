@@ -13,11 +13,13 @@ Fixes ship in the latest stable release series. See the [support policy](/server
 ## Single server
 
 ```bash
-dagu upgrade --version v2.26.0
+dagu upgrade --version v2.27.0
 dagu version
 ```
 
 `dagu upgrade` offers to restart the service the installer set up. With `--yes`, it prints the restart command instead, such as `sudo systemctl restart dagu`.
+
+With `allow_web_upgrade: true`, an administrator can instead select **Update now** in the web UI's update notice. Dagu installs the latest stable release and restarts through its service. See [Upgrade From the Web UI](/server-admin/self-upgrade#upgrade-from-the-web-ui).
 
 Without internet access, replace the binary by hand as described in [Closed Networks](/server-admin/deployment/closed-network#install).
 

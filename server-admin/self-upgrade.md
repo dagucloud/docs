@@ -99,6 +99,26 @@ When no installer service is found, it prints `Restart any running Dagu processe
 
 On Windows, the service keeps runs going through the restart.
 
+## Upgrade From the Web UI
+
+An administrator can also upgrade Dagu from the update notice in the web UI. It is off by default. Turn it on in the main server config:
+
+```yaml
+allow_web_upgrade: true
+```
+
+Or set `DAGU_ALLOW_WEB_UPGRADE=true`.
+
+The notice then shows **Update now** in place of the command, when all of these hold:
+
+- Dagu is a binary install, not Homebrew, Snap, `go install`, or a container.
+- Dagu runs under the service the installer set up, and that service starts Dagu again after it exits: the installer's systemd unit with `Restart=always` or `on-success`, the launchd agent with `KeepAlive` set to true, or the Windows service.
+- The user Dagu runs as can write its binary.
+
+**Update now** asks for confirmation, which says whether the restart keeps runs in progress, with a link to [Keep runs across restarts](/server-admin/upgrades#keep-runs-across-restarts) when it does not. Dagu then downloads the latest stable release, verifies its SHA256 checksum and the new binary, replaces its binary, and exits so that the service starts the new version. The notice shows the download progress, then **Restarting Dagu…**, and the page reloads once the server reports the new version. If the restart takes longer than two minutes, the notice says to check the Dagu service on the server.
+
+If the upgrade fails, the binary stays as it was, and the notice shows why with **Try again**. Each start is recorded in the audit log as `self_upgrade`. To install a specific version or a pre-release, use `dagu upgrade`. See also the [API](/web-ui/api#upgrade-from-the-web-ui).
+
 ## Supported Platforms
 
 - **macOS**: amd64, arm64

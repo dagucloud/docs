@@ -31,16 +31,21 @@ MCP clients connected to [Dagu Cloud](https://console.dagu.sh), such as Claude a
 1. Open **Plan & features** as an administrator and select **Turn on** in the **Remote access** section.
 2. Choose **Viewer**, **Operator**, or **Developer**. The dialog lists what each allows.
 3. Select **Turn on**.
-4. To let calls decide waiting steps, turn on the **Approvals** switch. See [Approvals](#approvals).
+4. To let calls decide waiting steps, turn on the **Human tasks** switch. See [Approvals](#approvals).
 
 The **Remote access** section shows:
 
 - **Access**: the level, with **Change** and **Turn off**.
-- **Approvals**: whether calls may approve, reject, or push back steps waiting for a person.
+- **Human tasks**: whether calls may approve, reject, or push back steps waiting for a person.
 - **Connection**: **Connected**, **Connecting…**, or why the connection failed or Dagu Cloud refused it, such as a workspace without a plan.
+- **Last call**: the app, the person, and the time of the latest call served through Dagu Cloud, or **No calls yet**. It needs no audit logs.
+- **MCP URL**: the Dagu Cloud MCP URL, with a copy button.
+- **Connect a client**: the steps to add the URL in Claude and ChatGPT, and the `claude mcp add` command for Claude Code, with a copy button. A link opens Dagu Cloud for other clients and connections.
 - **Agent activity**: on a server with audit logs, the latest calls from Dagu Cloud, with the tool, action, resource, and user, and whether a call failed or was denied.
 
-A change applies at once, without a restart, and is kept in the data directory (`cloud/access-settings.json` under `paths.data_dir`). Other processes that share the data directory apply it within a few seconds. Turning remote access off closes the connection and ends the calls in flight.
+During a trial, the section also says until when MCP clients keep working.
+
+A change applies at once, without a restart, and is kept in the data directory (`cloud/access-settings.json` under `paths.data_dir`). Other processes that share the data directory apply it within a few seconds. Turning remote access off closes the connection and ends the calls in flight. The last call is kept in `cloud/access-last-call.json` in the same directory, written at most once a minute for each app and person.
 
 ### In configuration
 
@@ -64,7 +69,7 @@ Add Dagu Cloud's MCP server URL to the MCP client as a custom connector:
 https://console.dagu.sh/mcp
 ```
 
-1. Add the URL in Claude, ChatGPT, Cursor, or another client that connects to remote MCP servers. **MCP** in [Dagu Console](https://console.dagu.sh/mcp-access) shows the URL and the steps for each client.
+1. Add the URL in Claude, ChatGPT, Cursor, or another client that connects to remote MCP servers. **MCP** in [Dagu Console](https://console.dagu.sh/mcp-access) shows the URL and the steps for each client. With remote access on, the **Remote access** section in Dagu shows the URL and the steps for Claude, ChatGPT, and Claude Code.
 2. Sign in to Dagu Cloud when the client asks. Choose the workspaces the client may reach, what it may do in each (read, operate, or edit), on all servers or chosen ones, and whether it may decide steps waiting for a person.
 
 A call gets the lowest of:
@@ -106,7 +111,7 @@ DAG steps run commands, so `developer` lets the Dagu Cloud users it reaches run 
 
 ## Approvals
 
-With **Approvals** on, a call at `operator` or above can approve, reject, or push back a step that waits for a person, through [`dagu_execute`](/mcp/tools#deciding-waiting-steps).
+With the **Human tasks** switch on, a call at `operator` or above can approve, reject, or push back a step that waits for a person, through [`dagu_execute`](/mcp/tools#deciding-waiting-steps).
 
 - Each decision must pass the `attemptId` the caller read from the run, so a decision based on an earlier attempt is refused. A decision without it fails with `invalid_tool_input`.
 - With approvals off, decisions fail with `unauthorized`, and nothing changes.

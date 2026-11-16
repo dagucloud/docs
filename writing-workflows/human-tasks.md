@@ -68,7 +68,7 @@ steps:
       prompt: Deploy ${steps.prepare.outputs.version} to ${params.environment}?
 ```
 
-The resolved prompt is stored with the run. The Web UI, the REST API, and `dagu status` show the text the person saw, even if the YAML file changes later.
+The resolved prompt is stored with the run. The Web UI, the REST API, and `dagu status` show the text the person saw, even if the YAML file changes later. The Web UI renders the prompt as Markdown and keeps its line breaks.
 
 ## Artifacts
 
@@ -215,9 +215,11 @@ Input is validated against the form stored with the run. A valid completion mark
 
 ### Web UI
 
-1. Open the waiting run from **Cockpit** or the workflow's run history.
+1. Open the waiting run from **Cockpit** or the workflow's run history. **Review** next to the run under **Needs attention** in **Overview** opens it on the **Actions** tab.
 2. Select **Open actions** on the canvas notice, or the **Actions** tab of the Activity panel.
 3. Fill in the form and select **Complete task**.
+
+When the form has only one property, that property is required, and it offers at most four `enum` or `oneOf` choices, the tab shows a button for each choice instead of the form. A click on a button completes the task with that value.
 
 While the run is queued or running, open tasks are visible but read-only. Input already typed into the form is kept until the run waits again.
 

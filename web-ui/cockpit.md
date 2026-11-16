@@ -36,6 +36,8 @@ Cockpit groups runs by date and status:
 
 Each card shows the workflow name, status, elapsed time, and a short parameter preview. Click a card to open the run over the board without leaving it.
 
+Runs of [service DAGs](/writing-workflows/services) restart without end, so the default board leaves them out. A **Service DAGs** strip above it has a card for each service with its state, when it restarts, and why it keeps failing.
+
 ## Browsing Older Runs
 
 Cockpit starts with recent days. Scroll down and click **Load older day** to inspect earlier activity. Today's runs update live while the page is open.

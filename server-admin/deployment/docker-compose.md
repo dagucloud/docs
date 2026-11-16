@@ -111,6 +111,20 @@ The socket grants workflows control of the host daemon. See
 [Run container steps when Dagu runs in Docker](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker)
 before enabling it.
 
+## Let Runs Finish on Stop
+
+Stopping the container, as `docker compose down` or an image update does, ends the DAG runs inside it. To let them finish first, set a drain timeout and a grace period longer than it:
+
+```yaml
+services:
+  dagu:
+    stop_grace_period: 6m
+    environment:
+      - DAGU_SIGNAL_DRAIN_TIMEOUT=5m
+```
+
+A stopping Dagu then starts no new runs and waits up to 5 minutes for the running ones. See [Graceful Shutdown](/server-admin/operations#graceful-shutdown).
+
 ## Commands
 
 ```bash

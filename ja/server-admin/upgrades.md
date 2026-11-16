@@ -13,11 +13,13 @@
 ## 単一サーバー {#single-server}
 
 ```bash
-dagu upgrade --version v2.26.0
+dagu upgrade --version v2.27.0
 dagu version
 ```
 
 `dagu upgrade` は、インストーラーが設定したサービスの再起動を提案します。`--yes` を指定した場合は、代わりに `sudo systemctl restart dagu` などの再起動コマンドを表示します。
+
+`allow_web_upgrade: true` を設定すると、管理者は Web UI の更新通知で **Update now** を選んでアップグレードすることもできます。Dagu は最新の安定版をインストールし、サービスを通じて再起動します。[Web UI からのアップグレード](/server-admin/self-upgrade#upgrade-from-the-web-ui)を参照してください。
 
 インターネットに接続できない場合は、[閉域網](/ja/server-admin/deployment/closed-network#install)の説明に従って、バイナリを手動で置き換えてください。
 
