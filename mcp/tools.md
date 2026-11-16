@@ -157,6 +157,10 @@ Read the default runtime profile of a DAG. The result has `configuredProfile`, `
 
 Successful reads return a stable envelope with `target`, normalized `data`, built-in `references`, and `uri` when the result has a canonical resource URI. DAG and run lists include canonical URIs; run summaries include numeric and human-readable statuses; run details include the current `attemptId`, step statuses, errors, log URIs, and child-run references.
 
+- **Run error.** A run's own `error` is in its details, such as the reason a run failed before any step started.
+- **Run outputs.** A finished run, root or child, carries its `outputs`, the values that `GET /dag-runs/{name}/{dagRunId}/outputs` returns. `outputs` holds at most 50 values, none over 4 KiB, and 32 KiB in total. A value that does not fit is left out whole, and `outputsOmitted` counts the values left out. When the outputs cannot be read, or another attempt recorded them, the run comes back with `outputsError` instead. A run that has not finished, or has no outputs, has none of these fields.
+- **[Schedule dates](/writing-workflows/schedule-dates#previewing-dates).** For a DAG that declares `dates`, the `dag` read lists the dates each upcoming run gets as `upcomingRunDates`, each with its `time` and `dates`. The `run` read gives the `dates` the run recorded, and `defaultSlot: true` when the run took the default slot.
+
 ## `dagu_change`
 
 Use `dagu_change` to create, update, rename, or delete DAG definitions and to maintain Markdown Wiki pages. Preview does not write; apply uses the same authorization, Git Sync write policy, mutation notifications, and audit path as the REST API.
@@ -339,7 +343,7 @@ Stop a run:
 { "action": "stop", "name": "nightly-report", "dagRunId": "20260522T010000" }
 ```
 
-When a run can be identified, `dagu_execute` returns canonical resource links for run details and logs. Without `wait`, it also returns subscription guidance. With `wait=true`, the result reports whether the run completed, its last observed status, and the normalized run and step summary after terminal completion. A wait timeout does not stop the run.
+When a run can be identified, `dagu_execute` returns canonical resource links for run details and logs. Without `wait`, it also returns subscription guidance. With `wait=true`, the result reports whether the run completed, its last observed status, and the normalized run and step summary after terminal completion, with the run's `outputs` as `dagu_read` returns them. A wait timeout does not stop the run.
 
 Tool errors use structured codes such as `invalid_tool_input`, `resource_not_found`, `conflict`, and `resource_unavailable`. When a stored DAG name is close to an existing name, `resource_not_found` may include suggestions under `details.didYouMean`.
 

@@ -137,9 +137,11 @@ Without `range`, the data block is detected: leading empty rows and columns are 
 | Text, including text-formatted numbers | A string, so leading zeros survive. `trim: true` removes surrounding white space, including the full-width space. |
 | Text under a pinned `number`, `integer`, `date`, `datetime`, or `boolean` | Japanese forms are read. Amounts: full-width digits, `￥123,000`, `123,000円`, `¥123,000-`, `▲1,000`, `(1,000)`, `10%`, `税込1,000`, `1,000（税込）`, `12万3,500円`, `1.5億`, `金壱拾弐万参千円也`. Dates: `2026年10月3日`, `二〇二六年十月三日`, `2026.10.3`, `令和8年10月3日`, `R8.10.3`, `㋿8.10.3`, a month alone (`2026年10月`) as its first day, a month and day with no year (`10月3日`) in the current year of the host, a weekday mark dropped, and a time of day after the date (`14:30`, `14時30分`, `午後2時30分`). Yes/no under `boolean`: `はい`/`いいえ`, `有`/`無`, `済`/`未`, `可`/`否`, `○`/`×`, check marks and boxes, a dash for none. Text outside these forms fails the type with the text quoted. The spec lists every form. |
 | Boolean | `true` or `false`. |
-| Formula | Its cached value. `formulas: text` yields the formula with its `=`; `formulas: calculate` evaluates it. A formula without a cached value is evaluated with a warning. |
+| Formula | Its cached value. `formulas: text` yields the formula with its `=`; `formulas: calculate` evaluates it. A formula without a cached value is evaluated with a warning. A stale cached value is read with a warning; see below. |
 | Error such as `#N/A` | `null`, with a warning naming the cell. |
 | Empty | `null`. Trailing rows whose cells are all empty are dropped unless `keep_empty_rows: true`. |
+
+A workbook that a script or an export tool saved without recalculating keeps the results of the last calculation. A cached read evaluates the formulas of the cells it returns, and when a result differs from the cache it still returns the cached value, with one warning that names up to five cells and counts the rest: `Orders!D2, Orders!D3: cached formula value is stale; set formulas: calculate to read current values`. Rows that `where` drops, rows past `max_rows`, columns not read, and formulas that cannot be evaluated are not checked. `xlsx.info`, `xlsx.validate`, `xlsx.convert`, and `xlsx.extract` warn the same way.
 
 `types` pins columns to `string`, `number`, `integer`, `boolean`, `date`, or `datetime`. A cell that cannot convert fails the step naming the cell, as `orders.xlsx Orders!D17: expected number, found "N/A"`. With `on_type_error: warn` (also spelled `null`) it becomes `null` with a warning instead. With `on_type_error: keep` it keeps the value it was read as, such as the text `"N/A"`, with the same warning, so a reader can show a person what to fix.
 
@@ -190,7 +192,7 @@ steps:
 - Appended fields are matched to the header row by exact name: a name the header has only loosely, differing in case or spacing, fails with `column "amount" not found in header row 1; did you mean "Amount"?`; a name the header lacks adds a column at the right, counted in `columns_added`; header columns no field carries stay empty. Array rows have no names and are written by position. `header: false` says the sheet has no header row: rows are written by position, and an empty sheet gets no header.
 - With `output`, `xlsx.append` writes the result to that workbook and leaves the one at `path` as it was; a `path` that does not exist starts a new workbook at `output`. An existing `output` is replaced, not appended to, so an append with a fixed `output` inside a `foreach` keeps only the last iteration's rows. `output` follows the rules of [`xlsx.write_cells`](#filling-a-template). `xlsx.write` takes no `output`, also with `mode: append`.
 
-A CSV `input` takes `encoding` (`utf-8`, `utf-8-bom`, or `shift_jis`) and `delimiter`, one character. Without `encoding` the file's encoding is detected: a UTF-8 byte order mark or valid UTF-8 is UTF-8, and otherwise the file is read as Shift_JIS, which is how Excel on Japanese Windows saves a CSV, so most files need no `encoding` at all. A file that is neither fails naming it, as does a file that is not UTF-8 under `encoding: utf-8`; bytes that are not UTF-8 are never written as replacement characters.
+A CSV `input` takes `encoding` (`utf-8`, `utf-8-bom`, or `shift_jis`) and `delimiter`, one character. Without `encoding` the file's encoding is detected: a UTF-8 byte order mark or valid UTF-8 is UTF-8, and otherwise the file is read as Shift_JIS, which is how Excel on Japanese Windows saves a CSV, so most files need no `encoding` at all. A file that is neither fails naming it, as does a file that is not UTF-8 under `encoding: utf-8` or `utf-8-bom`, and a `.json` or `.jsonl` input that is not UTF-8; bytes that are not UTF-8 are never written as replacement characters.
 
 ```yaml
 steps:
@@ -539,7 +541,7 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `rows` | `write`, `append`, `update_rows` | Rows to write, or the aggregate output of a `foreach` step for `update_rows`. |
 | `input` | `write`, `append` | A `.json`, `.jsonl`, or `.csv` file to write instead of `rows`. |
 | `format` | `write`, `append`, `convert` | File format when the extension does not say. |
-| `encoding`, `delimiter` | `write`, `append`, `convert` | CSV encoding and delimiter. |
+| `encoding`, `delimiter` | `write`, `append`, `convert` | CSV encoding and delimiter. An empty or null `encoding` is the same as none. |
 | `mode` | `write` | `replace` (default) or `append`. |
 | `style` | `write` | `table` (default) or `none`. |
 | `key` | `update_rows` | The column that identifies a row, or `_row`. Required. |

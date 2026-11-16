@@ -245,14 +245,16 @@ steps:
 ```
 
 - A leading `~` is the home directory, and a relative path resolves from the step's working directory. Each file is read once, in the order named, before any request.
-- Text files (`.txt`, `.md`, `.csv`, `.tsv`, `.json`, `.jsonl`, `.yaml`, `.yml`, `.xml`, `.html`, `.htm`, `.log`), Word documents (`.docx`), and Excel workbooks (`.xlsx`, `.xlsm`) are given as text, a paragraph or row a line. A text file in Shift_JIS is decoded.
+- Text files (`.txt`, `.md`, `.csv`, `.tsv`, `.json`, `.jsonl`, `.yaml`, `.yml`, `.xml`, `.html`, `.htm`, `.log`), Word documents (`.docx`), and Excel workbooks (`.xlsx`, `.xlsm`) are given as text, a paragraph or row a line. A text file in Shift_JIS is decoded, and one in neither UTF-8 nor Shift_JIS fails the step.
 - A PDF is given page by page as text. A page without text of its own, such as a scan, is rendered to an image, which the text names as `--- page 2: image 1 ---`.
 - PNG, JPEG, GIF, and WebP files are given as images, scaled down to a long edge of 1568 pixels when larger. Choose a model that accepts images when a file is an image or a scan.
 - The text goes ahead of the last user message, each file in a `<file name="…">` block. The images go with that message, and the text names each by its place, such as `[Image 1 is receipt.png.]`.
-- Together the files may hold up to 1,000,000 characters of text and 50 images. A file over 50 MB, a file of another kind, a missing file, and a pattern that matches nothing fail the step before any request.
+- Together the files may hold up to `max_file_chars` characters of text, 1,000,000 by default, and 50 images. Set `max_file_chars` to what the model's context window holds: 1,000,000 characters is about 250K tokens of English, but 500K or more of Japanese. More text fails the step before any request with `the files hold N characters of text; the step takes up to M, so raise max_file_chars or give it fewer or smaller files`.
+- A file over 50 MB, a file of another kind, a missing file, and a pattern that matches nothing fail the step before any request.
+- When the provider refuses the request for its length, the step error ends with `; the files held N characters of text`, so the work can be split across steps. Such a refusal is not retried.
 - The [session](#sessions) keeps the text, so a later chat step that inherits the session still reads it. The images go with the one request and are not kept. A push-back resends the feedback without the files.
 
-`files` is an LLM configuration field: a step that sets it replaces the DAG-level `llm` block, so it needs its own `provider` and `model`. A DAG-level `llm` block rejects `files`, since files belong with the prompt that asks about them.
+`files` and `max_file_chars` are LLM configuration fields: a step that sets one replaces the DAG-level `llm` block, so it needs its own `provider` and `model`. A DAG-level `llm` block rejects both, since files belong with the prompt that asks about them.
 
 ## Sessions
 
@@ -297,6 +299,7 @@ All action-specific fields belong under `with`, except `output_schema`, which si
 | `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds, at least 1. |
 | `web_search` | object | disabled | [Built-in web-search integration](/step-types/llm/reasoning-web-search#web-search) settings. |
 | `files` | string or array | - | [Files](#files) the model reads with the prompt: paths, glob patterns, or a list an earlier step published. Not valid in the DAG-level `llm` block. |
+| `max_file_chars` | integer | `1000000` | Most characters of text the `files` may hold together, at least 1. Not valid in the DAG-level `llm` block. |
 
 `messages[].content`, `system`, `base_url`, and `files` support scoped value references such as `${params.TOPIC}` and `${env.LLM_BASE_URL}`.
 

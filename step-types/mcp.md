@@ -49,6 +49,7 @@ steps:
 | `arguments` | No | Tool arguments as an object, or a `${...}` reference that resolves to a JSON object. |
 | `headers` | No | Request headers sent with every request of the session. Use `${...}` references to [secrets](/writing-workflows/secrets) for credentials. |
 | `include_raw` | No | When `true`, also writes the full MCP result under `raw`. Default `false`. |
+| `save_binary` | No | When `true`, saves image, audio, and blob resource data as run artifacts instead of writing it as base64. Default `false`. See [Binary Content](#binary-content). |
 
 Unknown fields fail validation.
 
@@ -93,13 +94,14 @@ Integers in a JSON string keep full precision, so IDs beyond 2<sup>53</sup> reac
 A completed call writes one JSON object to stdout:
 
 ```json
-{"content": [{"type": "text", "text": "# Example Domain"}], "structured_content": {"pages": 1}, "is_error": false}
+{"content": [{"type": "text", "text": "# Example Domain"}], "structured_content": {"pages": 1}, "json": null, "is_error": false}
 ```
 
 | Field | Description |
 |-------|-------------|
 | `content` | The tool's content list, or `[]` when the tool returned none. |
 | `structured_content` | The tool's structured result, or `null`. |
+| `json` | The parsed JSON object or array, when the tool sent no structured result and its content is exactly one text item holding one. Otherwise `null`. |
 | `is_error` | The MCP `isError` flag. |
 | `raw` | The full MCP result. Present only with `include_raw: true`. |
 
@@ -126,7 +128,36 @@ steps:
     run: printf '%s\n' "$CONTENT" > content.json
 ```
 
-Numbers in `structured_content` and `raw` are decoded as 64-bit floating point, so integers beyond 2<sup>53</sup> lose precision. A tool that returns such IDs should return them as strings.
+Many tools return JSON as text instead of a structured result. References cannot read into a JSON string, so read such a result through `json`, as `${PAGE.json.title}`. Because `json` repeats that text, the result counts about twice toward the DAG's `max_output_size` (1MB by default) when the step sets `output`.
+
+Numbers in `structured_content` and `raw` are decoded as 64-bit floating point, so integers beyond 2<sup>53</sup> lose precision. A tool that returns such IDs should return them as strings. Numbers in `json` keep every digit.
+
+### Binary Content
+
+Image and audio items carry their data as base64 in `data`, and embedded resources in `resource.blob`. A large image can then push the output past `max_output_size`. With `save_binary: true`, each such item's data is written to the run's [artifacts](/writing-workflows/artifacts), and the item carries `path` in place of the data:
+
+```json
+{"type": "image", "mimeType": "image/png", "path": "mcp/chart/1234567/content-1.png"}
+```
+
+```yaml
+steps:
+  - id: chart
+    action: mcp.call
+    with:
+      url: ${MCP_URL}
+      tool: chart
+      save_binary: true
+    output: CHART
+
+  - id: archive
+    depends: chart
+    run: cp "$DAG_RUN_ARTIFACTS_DIR/${CHART.content[1].path}" ./chart.png
+```
+
+- `path` is relative to the artifacts directory: `mcp/<step id>/<call>/content-<index><ext>`. Each call writes into its own directory, so retries and `foreach` items keep separate files. `<index>` is the item's position in `content`, and `<ext>` follows the MIME type, `.bin` when unknown.
+- The item's other fields are kept. The data is written as received and is not masked, and `raw` keeps the base64.
+- `save_binary` enables artifacts for the DAG. A DAG that sets `artifacts.enabled: false` fails the step before it connects.
 
 ## Errors
 

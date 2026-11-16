@@ -212,7 +212,7 @@ The LLM can call multiple tools across multiple turns to complete the task.
 When the LLM requests a tool call:
 
 1. **Tool DAG Execution**: The tool DAG runs as a sub-DAG with parameters passed as DAG params
-2. **Parameter Mapping**: Tool arguments → DAG parameters in `KEY=value` format
+2. **Parameter Mapping**: Tool arguments → DAG parameters in `KEY=value` format, with numbers in decimal form (`0.00001`, not `1e-05`) and arrays and objects as JSON
 3. **Output Collection**: DAG `output` fields collected and returned as JSON
 4. **Result Format**: If DAG has outputs, they're returned as JSON. If no outputs, status message is returned.
 5. **Sub-DAG Tracking**: Each tool execution creates a sub-DAG run for UI drill-down

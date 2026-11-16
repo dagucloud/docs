@@ -244,7 +244,7 @@ These are the decision endpoints and are separate from the providers available t
 
 Missing required fields, an unsupported provider or question type, invalid criteria, and invalid literal URLs are rejected when the DAG is built. Values containing runtime references are checked after they resolve.
 
-At run time the step fails on an invalid JSON response, missing or mismatched answers, invalid answer fields, exhausted HTTP retries, cancellation, and timeout. Validation errors never include the response content. Without a step `timeout_sec` the request has no deadline of its own, so set one for a bounded run.
+At run time the step fails on an invalid JSON response, missing or mismatched answers, invalid answer fields, exhausted HTTP retries, cancellation, and timeout. Validation errors never include the response content. An HTTP error response fails the step with the status and the provider's reason, such as `decision request failed (HTTP 402): Insufficient credits`. The reason is the message of a JSON error body, or else the body itself, on one line and cut to 200 characters, with declared secrets masked. Without a step `timeout_sec` the request has no deadline of its own, so set one for a bounded run.
 
 ## Related
 

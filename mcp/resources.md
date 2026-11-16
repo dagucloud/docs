@@ -14,6 +14,7 @@ Dagu exposes MCP resources for DAG specs, Markdown Wiki pages, DAG-run details, 
 | `dagu://reference/execute-tool` | `text/markdown` | Detailed `dagu_execute` input, output, and error contract. |
 | `dagu://reference/apps` | `text/markdown` | Interactive run inspector behavior for MCP Apps hosts. |
 | `dagu://reference/notifications` | `text/markdown` | How run-completion notifications work over MCP resources. |
+| `dagu://reference/feedback` | `text/markdown` | How to draft a Dagu bug, UX gap, or reference gap report for the user to submit. |
 | `dagu://dags` | `application/json` | DAG summaries visible to the caller. |
 | `dagu://dags?{+query}` | `application/json` | DAG summaries filtered by a query string accepted by `target=dags`. |
 | `dagu://dags/{name}/spec` | `application/yaml` | Current YAML spec for a DAG. |
@@ -22,15 +23,17 @@ Dagu exposes MCP resources for DAG specs, Markdown Wiki pages, DAG-run details, 
 | `dagu://wiki/{workspace}/{path}` | `text/markdown` | Current Markdown content for one Wiki page. |
 | `dagu://runs` | `application/json` | DAG-run summaries visible to the caller. |
 | `dagu://runs?{+query}` | `application/json` | DAG-run summaries filtered by a query string accepted by `target=runs`. `status` may repeat. |
-| `dagu://runs/{name}/{dagRunId}` | `application/json` | Current DAG-run details. |
+| `dagu://runs/{name}/{dagRunId}` | `application/json` | Current DAG-run details under `dagRunDetails`, with the run's [`outputs`](/mcp/tools#dagu-read) beside it. |
 | `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | Scheduler log and step log metadata. |
 | `dagu://runs/{name}/{dagRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one step. |
-| `dagu://runs/{name}/{dagRunId}/sub/{subRunId}` | `application/json` | Current details for a child DAG run addressed under its root run. |
+| `dagu://runs/{name}/{dagRunId}/sub/{subRunId}` | `application/json` | Current details for a child DAG run addressed under its root run, with its `outputs`, as for run details. |
 | `dagu://runs/{name}/{dagRunId}/sub/{subRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one child-run step. |
 | `dagu://runs/{name}/{dagRunId}/steps/{stepName}/foreach` | `application/json` | Items of a foreach step, with the status each body run reached. Supports `parent`, `status`, `page`, and `perPage`. |
 | `dagu://runs/{name}/{dagRunId}/steps/{stepName}/foreach/{item}` | `application/json` | One item of a foreach step, with the status of each body step. |
 | `dagu://runs/{name}/{dagRunId}/steps/{stepName}/foreach/{item}/steps/{bodyStepName}/logs` | `application/json` | Standard output and standard error for one body step of a foreach item. |
 | `ui://dagu/run-inspector/v10` | `text/html;profile=mcp-app` | Run inspector app for [MCP Apps hosts](#mcp-app-run-inspector). |
+
+The server instructions tell a connected agent to read the authoring reference before writing or editing DAG YAML, and the feedback reference when Dagu misbehaves or its errors or references mislead. The feedback reference has the agent search existing issues, draft a redacted report with the server's Dagu version, and give the user a prefilled GitHub issue link. The user reviews and submits it; Dagu files nothing.
 
 Use `dagu_read` with a `uri` to read any resource directly:
 
