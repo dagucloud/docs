@@ -273,7 +273,7 @@ DAG-run node responses expose who acted in `approvedBy`/`approvedById`, `rejecte
 ## Limitations
 
 - A DAG with approval steps cannot set `worker_selector`, and a `dag.run` step with a worker selector cannot run it as a child.
-- There is no CLI command for approving, pushing back, or rejecting a step. MCP clients use [`dagu_execute`](/mcp/tools#deciding-waiting-steps) with `approve`, `push_back`, or `reject`.
+- Approve, push back, or reject a step from the Web UI, the REST API, or an MCP client with [`dagu_execute`](/mcp/tools#deciding-waiting-steps) `approve`, `push_back`, or `reject`. Need a CLI command for it? [Request it](https://github.com/dagucloud/dagu/issues).
 
 ## See Also
 

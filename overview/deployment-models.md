@@ -92,7 +92,7 @@ Unlike temporary workers, these stay up between runs, which is what buys label r
 
 ## Monitoring Across Topologies
 
-Every topology can report to [Dagu Console](/overview/console-monitoring), which shows your servers together and emails you when a workflow fails or a server stops reporting. Several independent servers, such as one per site, each connect to the same workspace and appear side by side.
+Every topology can report to [Dagu Console](/overview/console-monitoring), which shows your servers together and alerts you by email, chat, PagerDuty, or webhook when a workflow fails, misses its deadline, or a server stops reporting. Several independent servers, such as one per site, each connect to the same workspace and appear side by side.
 
 <picture>
   <source media="(max-width: 640px)" srcset="/deployment-models/console-monitoring-portrait.svg" width="480" height="804">

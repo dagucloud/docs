@@ -197,7 +197,7 @@ Give the service manager enough time for the drain and the slowest run to clean 
 
 ### Monitoring Across Servers
 
-To see several Dagu servers in one place and get an email when a workflow fails or a server stops reporting, connect them to Dagu Console and turn on [Monitoring](/overview/console-monitoring). The server reports over outbound HTTPS and sends metadata only. Resource monitoring and Prometheus metrics below stay on each server.
+To see several Dagu servers in one place, connect them to Dagu Console and turn on [Monitoring](/overview/console-monitoring). Dagu Console alerts by email, chat, PagerDuty, or webhook when a workflow fails, misses its deadline, or runs far past its usual time, and when a server stops reporting or its disk is almost full. See [Alerts and Email](/overview/console-monitoring-alerts). The server reports over outbound HTTPS and sends metadata only. Resource monitoring and Prometheus metrics below stay on each server.
 
 ### Resource Monitoring
 
@@ -283,7 +283,7 @@ The application log verbosity and HTTP access logging are configured separately.
 
 Request headers can make each HTTP access log entry much larger. Keep `debug` disabled unless diagnostic details are needed.
 
-Arbitrary log thresholds such as `WARN` or `ERROR` are not currently configurable.
+Need a `WARN` or `ERROR` threshold? Request it at [GitHub Issues](https://github.com/dagucloud/dagu/issues).
 
 ```yaml
 # config.yaml
@@ -342,7 +342,7 @@ export DAGU_DEBUG=false
 export DAGU_ACCESS_LOG_MODE=none
 ```
 
-Restart the server after changing these settings. Filtering access logs by status code, latency, or arbitrary path is not currently supported. When a reverse proxy already records HTTP requests, `access_log_mode: none` avoids duplicate access logs.
+Restart the server after changing these settings. When a reverse proxy already records HTTP requests, `access_log_mode: none` avoids duplicate access logs. Need access logs filtered by status code, latency, or path? Request it at [GitHub Issues](https://github.com/dagucloud/dagu/issues).
 
 #### Log Cleanup
 

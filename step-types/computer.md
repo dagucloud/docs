@@ -715,6 +715,8 @@ The step's **Agent** tab shows each operation with its status, token use, durati
 - Displays other than the primary one. A window on another display moves to the main display when it is [maximized](#window-size).
 - Operating a desktop from a Dagu process that runs as a service, or from another machine.
 
+Need one of these? [Request it](https://github.com/dagucloud/dagu/issues).
+
 ## Related
 
 - [Browser](/step-types/browser)

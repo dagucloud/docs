@@ -18,7 +18,7 @@ Define workflows in declarative YAML over your existing commands and tools. One 
 
 ## Simple declarative orchestration
 
-Your commands stay the same. One declarative YAML file adds the operational layer around them: schedule, retries, parallel runs, human tasks, and run history. [Monitoring](/overview/console-monitoring) works at the server level: the server reports its health and the status of every run to Dagu Console, which emails when a workflow fails or the server stops reporting.
+Your commands stay the same. One declarative YAML file adds the operational layer around them: schedule, retries, parallel runs, human tasks, and run history. [Monitoring](/overview/console-monitoring) works at the server level: the server reports its health and the status of every run to Dagu Console, which alerts by email, chat, PagerDuty, or webhook when a workflow fails, misses its deadline, or the server stops reporting.
 
 ```mermaid
 flowchart TB
@@ -201,7 +201,7 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
 
 ## Watch every server from one place
 
-Running Dagu on more than one server? Connect them to [Dagu Console](https://console.dagu.sh) and see them together: which servers report, what failed today, open alerts, and run and duration trends for each workflow. You get an email when a workflow fails or a server stops reporting.
+Running Dagu on more than one server? Connect them to [Dagu Console](https://console.dagu.sh) and see them together: which servers report, what failed today, open alerts, and run and duration trends for each workflow. You get alerts by email, Slack, Microsoft Teams, Google Chat, Discord, PagerDuty, or webhook when a workflow fails, misses its deadline, or runs far past its usual time, and when a server stops reporting or its disk is almost full. With [remote access](/overview/cloud-remote-access) on, you read logs, retry or stop runs, and approve or reject waiting steps from Dagu Console.
 
 ![Dagu Console Overview: two of three servers reporting, failures today, open alerts including a server that stopped reporting, and the 7-day success rate](/monitoring/overview-light.png)
 
@@ -244,7 +244,7 @@ The degu (*Octodon degus*), a small rodent native to Chile related to chinchilla
   </div>
   <div class="step-card">
     <h3><a href="/overview/console-monitoring">Monitoring</a></h3>
-    <p>See every server in one place and get an email when a workflow fails or a server stops reporting.</p>
+    <p>See every server in one place and get alerts when a workflow fails, misses its deadline, or a server stops reporting.</p>
   </div>
   <div class="step-card">
     <h3><a href="/overview/deployment-models">Deployment models</a></h3>

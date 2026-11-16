@@ -57,6 +57,7 @@ For operating choices across single-server, temporary-worker, and distributed-wo
 - HTTP: Makes API requests
 - Mail: Sends email notifications
 - JQ: JSON data processing
+- Kubernetes, SQL, S3, SFTP, Redis, Git, LLM, and more. See [Step Types](/step-types/shell).
 
 ### 5. Persistence Layer
 - DAG Store: Manages DAG definitions
@@ -120,7 +121,7 @@ Dagu follows the XDG Base Directory specification for file organization:
 
 ## Monitoring in Dagu Console (Optional)
 
-A Dagu server can report its health and run status to [Dagu Console](/overview/console-monitoring), which shows every connected server in one place and emails alert recipients. The reporter sits beside the engine, not in its path: workflows run, retry, and finish the same whether or not the console can be reached.
+A Dagu server can report its health and run status to [Dagu Console](/overview/console-monitoring), which shows every connected server in one place and sends alerts by email, chat, PagerDuty, or webhook. The reporter sits beside the engine, not in its path: workflows run, retry, and finish the same whether or not the console can be reached.
 
 ```text
 Scheduler, runs, coordinator ──▶ event store ──▶ reporter ── HTTPS, outbound, every 60 s ──▶ Dagu Console

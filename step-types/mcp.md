@@ -188,3 +188,5 @@ The action sets no timeout of its own, and a tool may run as long as the server 
 - Server-initiated requests such as sampling and elicitation.
 - OAuth sign-in flows. Send a token the server accepts in `headers`.
 - Connection pooling. Each run opens and closes its own session.
+
+Need one of these? [Request it](https://github.com/dagucloud/dagu/issues).

@@ -282,7 +282,7 @@ scheduler:
   lock_retry_interval: "5s"   # Interval between lock acquisition attempts
   failover_recovery_window: "2m"  # How far back a takeover replays missed slots (0s to disable)
   zombie_detection_interval: "45s"  # Interval for detecting zombie DAG runs (0 to disable)
-  retry_failure_window: "24h"  # Lookback window for DAG-level retry scanning (0 to disable). Current limitation: window uses the original DAG-run time bucket, not the latest failed attempt timestamp.
+  retry_failure_window: "24h"  # Lookback window for DAG-level retry scanning (0 to disable). The window is measured from the original DAG-run time bucket, not the latest failed attempt timestamp.
   failure_threshold: 3             # Consecutive stale checks before marking a run as failed
   wake_hold: "0"                   # Longest the scheduler holds its ticks after the host wakes from sleep (0 = never hold)
   backfill_max_slots: 10000        # Most slots one backfill may cover

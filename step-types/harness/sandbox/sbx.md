@@ -226,8 +226,8 @@ for the full list of agents.
 - Stopping or timing out a step does not stop the agent inside the sandbox.
   Use `sbx stop` or `sbx rm --force` in an `exit` handler, as in the examples
   above.
-- Dagu does not manage the sandbox. Creating, reusing, and removing it is up to
-  the DAG or the operator.
+- The DAG or the operator creates, reuses, and removes the sandbox with `sbx`,
+  as in the examples above.
 - Do not combine these providers with a harness `container:`. With
   `container:`, Dagu runs the provider binary inside the container, where
   `sbx` is not available.

@@ -81,7 +81,7 @@ Examples:
 
 ## Current Limitations
 
-The local-model path is intended for standard text chat.
+The local provider sends standard OpenAI-compatible chat requests. [Tool calling](/features/chat/tool-calling) works when the local server and model support function calling.
 
 Consider these constraints:
 

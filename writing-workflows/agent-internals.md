@@ -218,12 +218,12 @@ per message, so the growth of the conversation is visible turn by turn.
 
 The decisions also add up as [model usage](/step-types/llm/#model-usage) on the
 run's `__agent__` node, and the run details sum the usage of every step, cost
-included when the provider reports it. There is no budget:
-Dagu does not stop a run at a spend threshold. The working controls are
+included when the provider reports it. The working controls are
 `llm.max_tool_iterations`, which
 bounds how many completions a run can make; `llm.observation_max_bytes`, which
 bounds each new observation; and `llm.max_context_tokens`, which starts aging
-the older part of the transcript.
+the older part of the transcript. Need a run to stop at a spend threshold?
+[Request it](https://github.com/dagucloud/dagu/issues).
 
 ## Secrets in the transcript
 

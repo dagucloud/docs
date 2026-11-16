@@ -148,6 +148,8 @@ remote_nodes:
 
 Use a dedicated API key with the minimum required role for each remote connection. Remote nodes improve navigation; the remote deployment remains the authority for authentication, execution, and stored data.
 
+To watch every deployment's health, runs, and alerts in one place, connect each one to [Dagu Console](/overview/console-monitoring). Each appears there as its own server.
+
 ## Deployment Checklist
 
 Before promoting workflows to production, verify that:

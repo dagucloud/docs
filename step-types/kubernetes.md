@@ -550,7 +550,7 @@ The current executor does not expose:
 - Windows-specific security options
 - SELinux, AppArmor, or `proc_mount` settings
 
-If a field is not listed on this page, the executor does not currently support it.
+If a field is not listed on this page, the executor does not currently support it. Need one? [Request it](https://github.com/dagucloud/dagu/issues).
 
 ## See Also
 

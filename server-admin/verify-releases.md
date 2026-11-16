@@ -31,7 +31,7 @@ Get-AuthenticodeSignature .\dagu-windows-amd64-setup.exe | Format-List Status, S
 
 ## Container images
 
-Container images are not signed and have no attestation. To be sure of what you run, pin the image by digest:
+To be sure of the container image you run, pin it by digest:
 
 ```bash
 docker buildx imagetools inspect ghcr.io/dagucloud/dagu:2.26.0
@@ -40,6 +40,8 @@ docker buildx imagetools inspect ghcr.io/dagucloud/dagu:2.26.0
 ```yaml
 image: ghcr.io/dagucloud/dagu@sha256:<digest>
 ```
+
+Images carry no signature or attestation, so the digest is what identifies them. Need signed images? [Request them](https://github.com/dagucloud/dagu/issues).
 
 The project scans its images with Trivy on image-related changes and every week.
 
@@ -53,4 +55,4 @@ npm audit signatures
 
 ## Software bill of materials
 
-Releases do not include an SBOM. To produce one, run a scanner such as Syft or Trivy against the binary or image you deploy.
+Generate an SBOM with a scanner such as Syft or Trivy, run against the binary or image you deploy.

@@ -2,7 +2,7 @@
 
 This page is the procedure for upgrading a production server. [Self-Upgrade](/server-admin/self-upgrade) describes the `dagu upgrade` command itself.
 
-Only the latest stable release series receives fixes. See the [support policy](/server-admin/support-policy).
+Fixes ship in the latest stable release series. See the [support policy](/server-admin/support-policy).
 
 ## Before you upgrade
 
@@ -102,7 +102,7 @@ helm show chart dagu/dagu | grep -E '^(version|appVersion):'
 
 ## Roll back
 
-Dagu does not promise that an older version can read state written by a newer one, and downgrades are not tested. To roll back:
+Roll back by restoring the backup taken before the upgrade, because an older version may not read state that a newer one wrote:
 
 1. Stop Dagu on every host.
 2. [Restore](/server-admin/backup-restore#restore) the backup taken before the upgrade.

@@ -1,7 +1,7 @@
 # Proxy authentication
 
 Proxy authentication lets a reverse proxy sign users in to Dagu by sending
-authenticated identity headers. It is an optional login method under
+authenticated identity headers. It adds a login method to
 `auth.mode: builtin`, so local login, OIDC, and API keys remain available.
 
 ::: danger Protect the Dagu UI service

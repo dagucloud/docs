@@ -143,7 +143,7 @@ auth:
       - "email"
 ```
 
-Note: Dagu does not support refresh tokens. Sessions expire after 24 hours.
+Note: After an OIDC login, Dagu issues its own session token, valid for `auth.builtin.token.ttl` (24 hours by default). Signing in again starts a new session.
 
 ### Organizations
 
@@ -226,5 +226,5 @@ Monitor usage in Auth0 Dashboard > Monitoring.
 - Issuer URL must include trailing slash
 - Auth0 supports standard OIDC discovery
 - Free tier sufficient for small teams
-- Session duration controlled by Auth0 token settings
+- Dagu session duration is set by `auth.builtin.token.ttl` (24 hours by default)
 - Auth0 Universal Login provides customizable UI

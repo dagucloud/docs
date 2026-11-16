@@ -30,7 +30,7 @@ Repetition is not feedback. An agent that runs every night, or reruns after a cr
 - **Inner loop.** The fastest loop around one piece of work. The agent changes something, a command checks it, and failures go straight back. Each turn takes seconds to minutes, and no person is involved.
 - **Outer loop.** A loop that contains inner loops and crosses a boundary such as a person's review, a schedule, a pull request, or production. Each turn takes hours to days.
 
-Inner and outer are relative: every loop is inner to the loop around it. The innermost loop runs inside the agent itself, as Claude Code or Codex calls tools until it decides to stop. Dagu does not see inside that loop. It starts the agent, and it owns every loop above it.
+Inner and outer are relative: every loop is inner to the loop around it. The innermost loop runs inside the agent itself, as Claude Code or Codex calls tools until it decides to stop. Dagu starts the agent and owns every loop above it.
 
 The two questions are independent, but useful workflows tend to land in the same place: a closed inner loop that a command closes, nested in a closed outer loop that a person closes.
 

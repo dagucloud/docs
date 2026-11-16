@@ -47,6 +47,8 @@ In high-availability deployments, every scheduler process exposes `/health`, inc
 
 **Note**: The health check only runs when using `dagu scheduler` directly, not with `dagu start-all`.
 
+On a Team or Pro plan, or in a trial, [Dagu Cloud](/overview/console-monitoring-alerts#scheduler-alerts) also opens an alert when a connected server's scheduler is down for 5 minutes.
+
 ### Zombie Detection
 
 The scheduler detects and cleans up "zombie" DAG runs: processes whose status file says "running" but whose process is no longer alive (e.g., after `kill -9`, system crash, or OOM kill).

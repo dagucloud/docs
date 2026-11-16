@@ -67,7 +67,7 @@ Workers stream step stdout/stderr and scheduler logs to the coordinator via the 
 4. The Web UI can display the streamed output while the run is still active
 5. The worker flushes remaining output and sends a final marker when execution completes
 
-Log streaming is best-effort: failures don't fail the step execution. Some logs may be lost if network issues occur during streaming.
+A log stream failure does not fail the step. The worker keeps output the coordinator has not acknowledged and sends it again when the stream reconnects. During a coordinator outage it keeps the last 16 MiB of each step's stdout and stderr, and it retries the final delivery for up to 3 minutes after the step ends.
 
 ### Persistent State
 

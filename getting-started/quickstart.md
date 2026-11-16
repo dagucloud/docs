@@ -277,4 +277,4 @@ steps:
 - [CLI Reference](/getting-started/cli): every command and flag
 - [MCP Quickstart](/mcp/quickstart): connect external AI tools to a running Dagu server
 - [MCP Server](/mcp/): connect MCP-capable clients to a running Dagu server
-- [Monitoring](/overview/console-monitoring): get an email when a workflow fails or a server stops reporting
+- [Monitoring](/overview/console-monitoring): see every server in one place, with alerts by email, chat, PagerDuty, or webhook when a workflow fails, misses its deadline, or a server stops reporting

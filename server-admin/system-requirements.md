@@ -4,7 +4,7 @@ Dagu is one binary. It needs no database, message broker, or language runtime.
 
 ## Platforms
 
-Dagu's automated tests run on Linux x86-64 and Windows x86-64 on every change. The other builds are compiled from the same source at each release, but no automated test runs on them.
+Dagu's automated tests run on Linux x86-64 and Windows x86-64 on every change. The other builds are compiled from the same source at each release.
 
 | Operating system | Builds | Tested on every change |
 | --- | --- | --- |

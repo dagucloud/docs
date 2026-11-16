@@ -53,7 +53,7 @@ A DAG in `workspace=payments` first checks the `payments` secret scope, then the
 
 Do not include the scope or workspace name in `ref`; use `ref: prod/db-password`, not `ref: payments/prod/db-password`. If a more specific scoped secret exists but is disabled, Dagu fails the run instead of falling back to a global secret with the same ref.
 
-Registry refs currently resolve Dagu-managed secrets. External registry providers such as Vault, cloud secret managers, and Kubernetes-backed registry records are request-based and are not creatable through the secret management API yet. Use [Request access](https://dagu.sh/contact) to contact the Dagu team. Existing direct provider refs still work as described below.
+Registry refs resolve Dagu-managed secrets. For registry records backed by Vault, a cloud secret manager, or Kubernetes, [request access](https://dagu.sh/contact) from the Dagu team. [Direct provider refs](#direct-provider-refs), described below, read those stores from DAG YAML.
 
 ### SSH Credentials
 

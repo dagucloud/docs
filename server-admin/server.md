@@ -181,7 +181,7 @@ remote_nodes:
 
 `debug` controls application log verbosity and whether HTTP request headers are included in access logs. `access_log_mode` independently controls which HTTP requests are logged. Setting it to `none` disables access logs without disabling application warnings or errors.
 
-See [Operations - Logging](/server-admin/operations#logging) for mode behavior, configuration examples, and current filtering limitations.
+See [Operations - Logging](/server-admin/operations#logging) for mode behavior, configuration examples, and access log filtering.
 
 ## Timezone
 
@@ -777,7 +777,7 @@ Audit logs are written as daily records and can be reviewed in the Web UI at **S
 
 The 7-day default is short for most audit requirements. Set `audit.retention_days` to the period your policy requires, or `0` to keep every file.
 
-Dagu has no built-in forwarder. Audit files are daily JSON Lines at `logs/admin/audit/YYYY-MM-DD.jsonl`, so a log shipper such as Fluent Bit can tail them into your SIEM.
+Audit files are daily JSON Lines at `logs/admin/audit/YYYY-MM-DD.jsonl`. To forward them to your SIEM, tail them with a log shipper such as Fluent Bit.
 
 ## Event Store
 

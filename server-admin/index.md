@@ -61,7 +61,7 @@ docker run -d \
 
 **[Monitoring in Dagu Console](/overview/console-monitoring)**
 - Every server's health, runs, and trends in one place
-- Email when a workflow fails or a server stops reporting
+- Alerts by email, chat, PagerDuty, or webhook when a workflow fails, misses its deadline, or a server stops reporting
 - Opt-in, outbound HTTPS only, metadata only
 
 **[Configuration](/server-admin/configuration)**
@@ -181,7 +181,7 @@ dagu start-all
 - [Configure base defaults](/server-admin/base-config) for shared DAG settings
 - [Configure Git Sync](/server-admin/git-sync) for repository-managed DAGs and supporting files
 - [Configure Wiki](/web-ui/wiki) for Markdown runbooks and Git Sync
-- [Monitor servers from Dagu Console](/overview/console-monitoring) for one view across servers and alert emails
+- [Monitor servers from Dagu Console](/overview/console-monitoring) for one view across servers and alerts by email, chat, PagerDuty, or webhook
 - [Configure resource monitoring](/server-admin/operations#resource-monitoring) and [Prometheus metrics](/server-admin/operations#prometheus-metrics) for each server
 - [Set up distributed execution](/server-admin/distributed/) for scaling
 - [Review all options](/server-admin/reference) for fine-tuning

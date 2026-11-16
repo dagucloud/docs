@@ -9,7 +9,7 @@ secrets:
     key: kv/data/prod/api/key
 ```
 
-The resolver supports token-based client configuration. It does not implement AppRole, Kubernetes auth, AWS auth, or any Vault login flow.
+The resolver authenticates to Vault with a token. Need it to sign in through AppRole, Kubernetes auth, AWS auth, or another Vault login method? [Request it](https://github.com/dagucloud/dagu/issues).
 
 ## Client Settings
 

@@ -260,7 +260,7 @@ DAG tools currently apply to host-executed command steps. They are not supported
 - `k8s.run` or `kubernetes.run`
 - `ssh.run`
 
-For those execution modes, install the needed binary inside the container image, Kubernetes image, or remote host instead.
+For those execution modes, install the needed binary inside the container image, Kubernetes image, or remote host instead. Need `tools` in one of these modes? [Request it](https://github.com/dagucloud/dagu/issues).
 
 ## Troubleshooting
 

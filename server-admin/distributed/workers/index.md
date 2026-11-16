@@ -113,6 +113,10 @@ Response:
 
 Each worker also has `version`, the Dagu version it runs, and `versionDrift`: `none`, `behind`, `ahead`, or `unknown`, compared with the server that answers. A worker of an earlier release reports no version.
 
+### Dagu Console
+
+With [monitoring](/overview/console-monitoring) on a Team or Pro plan, or in a trial, the server reports its workers to [Dagu Console](https://console.dagu.sh). The console lists each worker with its labels, running runs, last heartbeat, and machine CPU, memory, and disk use, and alerts when fewer workers are live than its rules want, or when a worker's disk is almost full or its memory or CPU use stays high. This needs Dagu v2.25.7 or later. See [Workers](/overview/console-monitoring-pages#workers), [Too Few Workers Alerts](/overview/console-monitoring-alerts#too-few-workers-alerts), and [Alerts of Workers' Machines](/overview/console-monitoring-alerts#alerts-of-workers-machines).
+
 ## Configuration Reference
 
 ### Worker Configuration

@@ -17,8 +17,8 @@ steps:
 
 This is a run-level setting. Dagu applies it to processes or containers started for the DAG run where the current executor and operating system support enforcement.
 
-::: tip Best-Effort Enforcement
-Resource limits are a best-effort runtime capability. If Dagu cannot apply the requested limits, it logs a warning and continues the run.
+::: tip When Limits Cannot Be Applied
+If Dagu cannot apply the requested limits, it logs a warning and continues the run.
 
 Invalid limit values are still rejected during DAG validation.
 :::

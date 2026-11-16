@@ -49,7 +49,7 @@ claude -p "Review the current branch for bugs and style issues" --model sonnet
 
 ## YOLO Mode
 
-By default, Claude Code asks for approval before running commands. In a Dagu workflow this is not possible, so you should run in non-interactive mode:
+By default, Claude Code asks for approval before running commands. A `harness.run` step has no terminal to answer those prompts, so run in non-interactive mode:
 
 ```yaml
 steps:

@@ -30,7 +30,7 @@ This page describes releases after 2.26.0. In 2.26.0 and earlier:
 
 Schedulers that share a data directory compete for one lock. The holder is **active**, and only it schedules runs and consumes queues. Every other instance is a **standby**, which waits and watches the holder renew the lock.
 
-`dagu server` is not part of this. It runs on both hosts at once, and either one can serve the UI and API because both read the same files. A load balancer in front of them is yours to provide.
+`dagu server` is not part of this. It runs on both hosts at once, and either one can serve the UI and API because both read the same files. To serve one address, put a load balancer in front of them.
 
 Runs execute on the host whose scheduler started them. A standby starts no scheduled work until it becomes active.
 
@@ -57,16 +57,16 @@ These hold when the [requirements](#requirements) are met.
 - A run keeps going when the scheduler that started it stops or fails, as long as the process manager leaves it running. See [`KillMode`](#set-up-with-systemd). `signal_handling.enable_propagation` is the exception: with it, a stopping scheduler stops the runs it started.
 - A scheduler that loses the lock exits with a non-zero status.
 
-**Best effort**
+**Missed slots**
 
 - A scheduler that takes over a stale lock replays slots of recurring schedules missed since the failed scheduler's last tick, as far back as `scheduler.failover_recovery_window`. Older slots are replayed only if the DAG's own `catchup_window` reaches them. Nothing is replayed when queues are disabled.
 - A replayed run follows the DAG's `overlap_policy`. If a DAG still counts as running at takeover, that policy decides whether the replay runs.
 
-**Not provided**
+**Runs, storage, and sites**
 
-- Exactly-once side effects, or resuming a step after a crash. Runs on a failed host are [marked failed](/writing-workflows/scheduling#zombie-detection) and are not resumed. To run a scheduled DAG again automatically, set a DAG-level [`retry_policy`](/writing-workflows/durable-execution).
-- Availability of the shared storage. While it is unavailable, no scheduler can hold the lock, and scheduling stops until it returns.
-- Failover between sites.
+- Runs on a failed host are [marked failed](/writing-workflows/scheduling#zombie-detection). To run a scheduled DAG again automatically, set a DAG-level [`retry_policy`](/writing-workflows/durable-execution). A retry starts each interrupted step from the beginning, so make side effects safe to repeat.
+- Scheduling follows the shared storage. While it is unavailable, no scheduler can hold the lock, and scheduling resumes when it returns.
+- Failover covers the hosts that share one storage system. For several sites, run a server at each and watch them together in [Dagu Console](/overview/console-monitoring).
 
 ## Requirements
 

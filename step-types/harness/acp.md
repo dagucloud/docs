@@ -205,6 +205,8 @@ steps:
 - Client filesystem and terminal callbacks are not offered to the agent.
 - Session resume, automatic reconnect, and replay after a disconnect are not supported.
 
+Need one of these? [Request it](https://github.com/dagucloud/dagu/issues).
+
 ## See Also
 
 - [Harness](./) for the shared step contract, fallbacks, and DAG-level defaults
