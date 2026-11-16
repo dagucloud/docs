@@ -16,7 +16,7 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.dag.name}` | All steps and handlers | `DAG_NAME` |
 | `${context.run.id}` | All steps and handlers | `DAG_RUN_ID` |
 | `${context.run.status}` | Lifecycle handlers and other status-aware surfaces | `DAG_RUN_STATUS` |
-| `${context.run.scheduled_at}` | Runs with a schedule slot: scheduled, catchup, and one-off runs, runs started with `--scheduled-at`, their reruns, and their sub-DAG runs | None |
+| `${context.run.scheduled_at}` | Runs with a schedule slot: scheduled, catchup, one-off, and [backfill](/writing-workflows/backfill) runs, runs started with `--scheduled-at`, runs of a DAG with [`dates`](/writing-workflows/schedule-dates) that take the default slot, their reruns, and their sub-DAG runs | None |
 | `${context.run.interval_start}` | Runs with a slot, when the DAG has a recurring schedule | None |
 | `${context.run.interval_end}` | Runs with a slot | None |
 | `${context.run.next_scheduled_at}` | Runs with a slot, when the DAG has a recurring schedule | None |
@@ -59,8 +59,9 @@ steps:
     run: ./load.sh --from ${context.run.interval_start} --to ${context.run.interval_end}
 ```
 
-- The window is derived from the schedule, not from earlier runs, and is recorded when the run is created. A retry processes the same window after the schedule is edited.
-- The bounds are UTC RFC 3339 timestamps. `timezone` names the zone the slot's schedule is evaluated in, such as `Asia/Tokyo`, or its UTC offset when the zone has no name.
+- The window is derived from the schedule, not from earlier runs, and is recorded when the run is created. A retry processes the same window after the schedule is edited. So does a rerun with `dagu restart` or `dagu start --from-run-id`, unless `--scheduled-at` names another slot.
+- The bounds are UTC RFC 3339 timestamps. `timezone` names the zone the slot's schedule is evaluated in, such as `Asia/Tokyo`, or its UTC offset when the zone has no name. It is the schedule's `CRON_TZ` or `TZ` zone, else the server zone; `@every` schedules use `UTC`.
+- A sub-DAG run takes its parent's slot, window, and timezone instead of computing its own. See [Schedule Slot](/writing-workflows/sub-dags#schedule-slot).
 - Only recurring start schedules for the run's profile count. One-off `at` schedules never bound a window, and a fire skipped by a [business calendar](/writing-workflows/business-calendars) is not a fire: Monday's window starts at Friday's fire.
 - A DAG with no recurring schedule has no `interval_start` or `next_scheduled_at`.
 - To load a date such as the day before the slot, declare it once in [`dates`](/writing-workflows/schedule-dates) and read `${dates.NAME}`.

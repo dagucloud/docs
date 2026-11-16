@@ -249,6 +249,8 @@ watch:
 
 `profile` is an activation filter. A profile-scoped schedule participates in scheduling only when it matches the DAG's effective default runtime profile from the server-side DAG settings. Unscoped schedule entries are always active. If a DAG has no default runtime profile, profile-scoped entries are ignored. `profile` does not override the runtime profile used by the run.
 
+A start entry, recurring or one-off, accepts `params`: literal values that override the DAG's `params` for the runs it starts. Keys it leaves out keep the DAG's defaults. See [Parameters per Schedule](/writing-workflows/scheduling#parameters-per-schedule).
+
 An object-form start entry also accepts `calendar`, which overrides the DAG-level `calendar` or opts out with `none`, and `business_days`, a list of business days of the month from 1 to 23 or -23 to -1 (`-1` is the last). A fire on a day that is not a business day is dropped. One-off entries and stop or restart schedules take neither key. See [Business Calendars](/writing-workflows/business-calendars).
 
 `watch.path` is the folder read; a leading `~` is the home directory. `watch.pattern` is a glob the file name must match, such as `*.pdf`, and matches every file when omitted. `watch.interval` is a duration of at least `1s` and defaults to `10s`. A DAG with `watch` needs no `schedule`. See [Watched Folders](/writing-workflows/watched-folders).
@@ -391,7 +393,7 @@ Rich parameter fields use snake_case:
 | `min_length`, `max_length` | integer | String length bounds. |
 | `pattern` | string | RE2 regex for string validation. |
 
-`default` values are literal. `eval` is optional and runs at execution time. Runtime precedence is: explicit override, then `eval`, then `default`. DAG `env` is evaluated before params, and params are evaluated from top to bottom so later params can reference earlier params.
+`default` values are literal. `eval` is optional and runs at execution time. Runtime precedence is: explicit override, then `eval`, then `default`. Params are evaluated from top to bottom, before DAG `env`, so later params can reference earlier params and `env` can reference params. An `eval` can read `consts`, and the run's `${dates.NAME}` and `${context.*}` values; see [Dynamic Defaults with `eval`](/writing-workflows/parameters#dynamic-defaults-with-eval).
 
 JSON Schema parameter mode is also accepted:
 
@@ -619,7 +621,7 @@ steps:
 
 Supported provider values are `openai`, `openai-codex`, `anthropic`, `gemini`, `google`, `openrouter`, `zai`, `zhipu`, `zhipuai`, `glm`, `opencode`, `local`, `ollama`, `vllm`, and `llama`.
 
-LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `provider_order`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`. [`provider_order`](/step-types/llm/providers#openrouter-provider-order) lists the OpenRouter upstream providers to try first and is accepted only with the `openrouter` provider. A `chat.completion` step also accepts [`files`](/step-types/llm/#files) under `with`, the files the model reads with the prompt; the DAG-level `llm` block rejects it.
+LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `provider_order`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`. [`provider_order`](/step-types/llm/providers#openrouter-provider-order) lists the OpenRouter upstream providers to try first and is accepted only with the `openrouter` provider. A `chat.completion` step also accepts [`files`](/step-types/llm/#files) under `with`, the files the model reads with the prompt, and `max_file_chars`, the most characters of text those files may hold (1,000,000 by default); the DAG-level `llm` block rejects both.
 
 `model` accepts either a model-name string paired with `provider`, or an
 ordered array used by `chat.completion` actions and Agent DAG decisions:
@@ -838,7 +840,7 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `action` | string | Built-in, custom, or remote action name. |
 | `with` | object | Inputs for `action`, or shell config for `run`. |
 | `dependencies` | string or array | Files, directories, or glob patterns snapshotted into the run work directory for local and distributed execution. |
-| `working_dir` | string | Step working directory. |
+| `working_dir` | string | Step working directory. Resolved when the step starts, so it can read an earlier step's output, such as `${steps.worktree.outputs.path}`. |
 | `env` | array or object | Step-specific environment variables. |
 | `stdin` | string | File path piped to the step command's standard input. Only `run` steps accept it. |
 | `stdout` | string or object | Redirect stdout to a file, artifact, or run outputs. |
@@ -928,7 +930,7 @@ Accepted built-in action names:
 | `container.run` | Container executor. |
 | `dag.run` | Run a child DAG synchronously. |
 | `dag.enqueue` | Enqueue a child DAG asynchronously. |
-| `data.convert`, `data.pick` | Data conversion and selection helpers. |
+| `data.convert`, `data.pick`, `data.filter` | Data conversion, selection, and row filtering helpers. See [Data](/step-types/data). |
 | `decision.evaluate` | Typed model answers for classification, scoring, and yes/no questions. |
 | `docker.run` | Docker executor. |
 | `exec` | Direct process execution without shell parsing. |
@@ -1082,7 +1084,7 @@ Inside each parallel child run, `ITEM` is set to the current item.
 | `foreach.max_concurrent` | integer | Maximum item bodies running at once, from `1` to `1000`. Defaults to `defaults.max_concurrent`, or `10`. |
 | `foreach.collect` | object | Output names mapped to expressions copied from each successful item body into the aggregate. |
 
-Body steps read `${foreach.item}` (or `${foreach.<as>}`), `${foreach.index}`, and `${foreach.key}`.
+Body steps read `${foreach.item}` (or `${foreach.<as>}`), `${foreach.index}`, and `${foreach.key}`. They also see the `foreach` step's own `env` and the `output:` variables of the steps before it, as the `foreach` step does; a body step's own `env` wins. A child run that a body step starts does not inherit these values; pass them with [`pass_env`](/writing-workflows/sub-dags#passing-environment-values).
 
 ```yaml
 steps:
@@ -1252,6 +1254,7 @@ steps:
 | `condition` | string | Condition to evaluate. |
 | `expected` | string | Exact value, regex pattern with `re:`, or numeric comparison with `num:`. |
 | `exit_code` | array | Exit codes that trigger repeat. |
+| `on_limit` | string | Outcome of an `until` step that reaches `limit` with its condition unmet: `succeed` (default) keeps the last attempt's result, `fail` fails the step. `fail` requires `repeat: until`, `condition`, and `limit`. See [Fail at the Limit](/writing-workflows/control-flow#fail-at-the-limit). |
 
 ```yaml
 steps:

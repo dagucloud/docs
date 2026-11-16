@@ -243,10 +243,10 @@ The masker is applied to:
 - Step stdout and stderr log writers.
 - Step stdout and stderr redirect writers.
 - Final `outputs.json` values collected from string-form `output: NAME`, `stdout.outputs`, and `outputs.write`.
-- Stored run status: error messages, output variables, published step outputs, including values written to `DAGU_OUTPUT_FILE`, and step configuration. A secret that appears in escaped form inside JSON text is masked too.
+- Stored run status: error messages, output variables, published step outputs, including values written to `DAGU_OUTPUT_FILE`, and step configuration.
 - Chat step messages immediately before they are sent to the LLM provider.
 
-The matcher replaces exact secret values. It does not mask empty values. It also does not mask values loaded through `env:` or `dotenv:` unless those values are resolved through `secrets:`.
+The matcher replaces each secret as written and as JSON escaping writes it inside a JSON string: with `\"`, `\\`, `\n`, and `\u` escapes, including the HTML-safe form (`<` as `\u003c`) and the ASCII-only form (`é` as `\u00e9`). A secret inside JSON text, such as a provider's error body or a step that prints JSON, is masked in every place listed above. It does not mask empty values. It also does not mask values loaded through `env:` or `dotenv:` unless those values are resolved through `secrets:`.
 
 Masking is not a process sandbox. The step process receives the raw secret in its environment and can write it to files, databases, APIs, child processes, or output variables used by later steps.
 

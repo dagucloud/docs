@@ -57,7 +57,7 @@ labels:
 
 ## API Filtering
 
-Filter DAGs and DAG runs using the `labels` query parameter.
+Filter DAGs and DAG runs using the `labels` query parameter. [`dagu history --labels`](/getting-started/cli#history) takes the same filter.
 
 ### Filter Syntax
 
@@ -65,12 +65,15 @@ Filter DAGs and DAG runs using the `labels` query parameter.
 |--------|-------------|
 | `key` | Match any item with this key (any value) |
 | `key=value` | Match exact key-value pair |
-| `!key` | Match items WITHOUT this key |
+| `key=` | Match items with this key and no value |
 | `key*` | Wildcard: match keys starting with `key` |
 | `key=value*` | Wildcard: match values starting with `value` |
 | `te?m` | Wildcard: `?` matches single character |
+| `!` before any term | Match items that do not match the term, such as `!deprecated`, `!env=dev`, or `!region=us-*` |
 
-Multiple filters use AND logic.
+Multiple filters use AND logic. Keys and values match without case.
+
+A term that has none of these forms, such as `env==prod`, `=prod`, or a lone `!`, is an error. The API returns `400` with `invalid label filter "<term>"`, and `dagu history` exits non-zero.
 
 ### Wildcard Patterns
 
@@ -105,6 +108,9 @@ GET /api/v1/dags?labels=env=prod,team
 # DAGs without "deprecated" key
 GET /api/v1/dags?labels=!deprecated
 
+# DAGs not labeled env=dev
+GET /api/v1/dags?labels=!env=dev
+
 # Combined: env=prod AND has team AND not deprecated
 GET /api/v1/dags?labels=env=prod,team,!deprecated
 ```
@@ -126,4 +132,4 @@ GET /api/v1/dag-runs?labels=env=prod,team
 
 ## UI
 
-The label filter dropdown is available on both the DAG list and DAG runs pages. Select labels to filter; multiple labels use AND logic.
+The label filter dropdown is available on both the DAG list and DAG runs pages. Select labels to filter; multiple labels use AND logic. A typed term follows the same syntax, and an invalid one shows the error instead of the list.

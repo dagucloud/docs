@@ -35,6 +35,24 @@ This is more explicit than a bare `${VERSION}` reference:
 
 Human-task outputs use the same `${steps.<step_id>.outputs.<output_name>}` reference and dependency rules. See [Human Tasks](/writing-workflows/human-tasks#generated-step-outputs) for the generated-output behavior.
 
+A step's `working_dir` can read an output too, so a step can run in a directory an earlier step created:
+
+```yaml
+steps:
+  - id: workspace
+    run: |
+      dir=$(mktemp -d)
+      printf 'path=%s\n' "$dir" >> "$DAGU_OUTPUT_FILE"
+    outputs:
+      - name: path
+
+  - id: build
+    working_dir: ${steps.workspace.outputs.path}
+    run: make
+```
+
+A lifecycle handler's `working_dir` keeps such a reference as written.
+
 ## Output File Format
 
 For each step attempt, Dagu creates an output file and exposes its path as `DAGU_OUTPUT_FILE`.
@@ -104,6 +122,8 @@ The separate `${<step_id>.output.<path>}` form reads into a step's captured JSON
 
 The matching `${<step_id>.outputs<path>}` form reads into the payload a step published on its outputs channel, which need not be an object. A [`parallel` step](/writing-workflows/sub-dags#reading-child-outputs-without-capturing-the-aggregate) publishes an array there, so `${fanout.outputs}` is the whole array and `${fanout.outputs[0].NAME}` is one entry's value. Array indexes are valid in both path forms.
 
+A reference inserts a number in decimal form: `1045000` stays `1045000`, not `1.045e+06`, and `0.0000042` stays `0.0000042`.
+
 ## Dependencies
 
 A step output reference makes the consuming step depend on the producing step. An explicit `depends` entry is optional.
@@ -149,6 +169,22 @@ dagu start --only deploy --outputs-from 20260925_101500 --output-from build=2026
 - `--output <step>.<name>=<value>` is deprecated; use `--output-from`.
 
 The REST API takes the same selection as `steps`, `outputsFromRunId`, and `outputsFromRuns`; see [Start DAG](/web-ui/api#start-dag) and the [`start` command](/getting-started/cli#start).
+
+## Rerunning Changed Steps
+
+While editing a DAG, `dagu start --reuse-from <run-id>` runs only the steps that changed since that run, and the steps after them. Dagu chooses the steps itself:
+
+```bash
+dagu start --reuse-from 20260925_101500 pipeline.yaml
+```
+
+- A step is reused when its definition, the rest of the DAG's definition, the base config, the parameters, the runtime profile, and the steps it depends on are as they were in that run, and it succeeded there or carried its outputs into it.
+- A reused step is recorded as skipped and carries its outputs, as with `--output-from`. The run takes that run's work directory.
+- Every other step runs, with every step after it and every step that [shares its browser](/step-types/browser#shared-browsers).
+- When nothing changed, or nothing can be reused, every step runs and nothing is carried.
+- The run must be a finished run of the same DAG. `--reuse-from` cannot be combined with `--only` or its output flags.
+
+The REST API takes the same request as `reuseFrom` on [Start DAG](/web-ui/api#start-dag).
 
 ## Output Names
 

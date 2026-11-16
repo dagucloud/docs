@@ -777,11 +777,44 @@ steps:
 > **Note**: set `limit` on an `until` repeat that should give up. Without it the
 > step repeats indefinitely while the condition stays unmet, as a
 > [continuous step](#repeat-without-a-limit). When the limit is reached before
-> the condition is met, the step still succeeds; check the condition again in a
-> later step when running out of attempts must fail the run.
+> the condition is met, the step ends with the result of its last attempt, so it
+> can succeed. Set [`on_limit: fail`](#fail-at-the-limit) to fail it instead.
 
 To poll the status URL of an HTTP job until the job finishes, see
 [Poll an Asynchronous Job](/step-types/http#poll-an-asynchronous-job).
+
+### Fail at the Limit
+
+`on_limit: fail` fails an `until` step that reaches its `limit` while its
+condition is still unmet, so downstream steps do not run on work that never
+finished:
+
+```yaml
+steps:
+  - id: wait_for_tests
+    run: ./test-status.sh
+    output: TEST_STATUS
+    repeat_policy:
+      repeat: until
+      condition: "${TEST_STATUS}"
+      expected: "passed"
+      interval_sec: 60
+      limit: 30
+      on_limit: fail
+
+  - id: open_pr
+    depends: [wait_for_tests]
+    run: ./open-pr.sh
+```
+
+After the last allowed attempt, Dagu checks the condition once more. A met
+condition keeps the attempt's result. An unmet condition fails the step with
+`repeat limit 30 reached; condition not met`, and a condition that cannot be
+evaluated fails it with that error. A failed attempt's own error is kept in the
+message. `continue_on` applies as to any failed step.
+
+`on_limit` takes `fail` or `succeed`, the default. `fail` requires
+`repeat: until`, a `condition`, and a `limit`.
 
 ### Repeat Without a Condition
 

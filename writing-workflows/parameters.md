@@ -214,6 +214,7 @@ Behavior:
 - Precedence is: runtime override, then `eval`, then literal `default`.
 - Params are evaluated top-to-bottom, so later params can reference earlier params.
 - The evaluation scope includes OS environment variables, `consts` (including those from the [base config](/server-admin/base-config)), and earlier resolved params. Root `env:` values are not visible: `env` is evaluated after params, so it can reference them.
+- An `eval` can also read the run's [`${dates.NAME}`](/writing-workflows/schedule-dates) and its `${context.*}` values known at creation: the DAG name, the run ID, `context.run.scheduled_at`, the [schedule window](/writing-workflows/runtime-variables#schedule-window), and `context.run.timezone`. Such an `eval`, and every `eval` after it, runs when the run starts, after its dates resolve. Until then the param has no value, so a DAG's details show it empty.
 - Eval results are coerced and validated when the param declares a type.
 - If `eval` fails and `default` exists, Dagu falls back to `default`.
 - If `eval` fails and there is no `default`, the run fails before any step starts.

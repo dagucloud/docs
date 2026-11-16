@@ -95,7 +95,7 @@ Each step that runs again receives the feedback through the [push-back context](
 
 ### Reject
 
-While an approval waits, the run's action bar shows **Reject** in place of **Stop**. The reviewer can enter an optional reason. The rejected step becomes `Rejected`, the run ends with status `Rejected`, and steps that depend on the rejected step do not run.
+While an approval waits, the run's action bar shows **Reject** next to **Stop**. The reviewer can enter an optional reason. The rejected step becomes `Rejected`, the run ends with status `Rejected`, and steps that depend on the rejected step do not run.
 
 The step records the rejection:
 

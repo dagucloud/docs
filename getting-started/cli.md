@@ -112,7 +112,7 @@ A DAG with `restart_policy: always` or `unless-stopped` has one run at a time, s
 - `--params, -p` - Parameters as `key=value` pairs, positional values, or a JSON object
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--run-id, -r` - Custom run ID
-- `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run, for its schedule slot
+- `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run, for its schedule slot unless `--scheduled-at` names another
 - `--scheduled-at` - Run for a schedule slot: `latest`, a date, a time in the schedule's zone, or RFC 3339. See [Running a Past Slot](/writing-workflows/scheduling#running-a-past-slot)
 - `--params-stdin` - Read parameters from piped or redirected stdin, up to 1 MiB; `--` and `--params` take precedence
 - `--profile` - Runtime profile to apply to this run
@@ -124,8 +124,12 @@ A DAG with `restart_policy: always` or `unless-stopped` has one run at a time, s
 - `--outputs-from` - Finished run of the same DAG whose work directory, and the outputs of the skipped steps that the `--only` steps depend on, feed the run
 - `--output-from` - Run that gives the outputs of one skipped step, as `<step>=<run-id>`; repeatable, and wins over `--outputs-from` for that step
 - `--output` - Deprecated; use `--output-from`. Output of a step skipped by `--only`, as `<step>.<name>=<value>`; repeatable, and wins over `--outputs-from` and `--output-from`
+- `--reuse-from` - Finished run of the same DAG whose unchanged steps the run reuses instead of running. See [Rerunning Changed Steps](/writing-workflows/outputs#rerunning-changed-steps)
+- `--recursive-output` - Expand sub-DAG runs in the summary printed when the run ends, as [`status --recursive-output`](#status) does. Local context only
 
 > **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
+
+> **Note:** `--reuse-from` chooses the steps to run itself. A step is reused when its definition, the rest of the DAG's definition, the base config, the parameters, the runtime profile, and the steps it depends on are as they were in that run, and it succeeded there or carried its outputs into it. A reused step is recorded as skipped and carries its outputs, and the run takes that run's work directory. Every other step runs, with every step after it and every step that [shares its browser](/step-types/browser#shared-browsers). When nothing changed, or nothing can be reused, every step runs. `--reuse-from` cannot be combined with `--only`, `--outputs-from`, `--output-from`, `--output`, or `--from-run-id`.
 
 > **Note:** `--only` starts a new run of the current definition, with its env, secrets, and params, under the DAG's own name. Only the selected steps run. Preconditions and `handler_on.init` apply as usual. The `success`, `failure`, `abort`, `wait`, and `exit` handlers run only when a selected step is a graph end step, one that no other step depends on.
 > - Only a skipped step that a selected step depends on, directly or through other steps, carries outputs. They come from `--outputs-from`, `--output-from`, `--output`, or none of them. Without them, a `${steps.<id>.outputs.<name>}` reference to a skipped step stays unresolved.
@@ -168,11 +172,17 @@ dagu start --only test --only report --outputs-from 20241031_235959 example-dag.
 
 # Take one upstream step's outputs from a different run
 dagu start --only report --outputs-from 20241031_235959 --output-from test=20241101_080000 example-dag.yaml
+
+# After an edit, run only the steps that changed since a run
+dagu start --reuse-from 20241031_235959 example-dag.yaml
+
+# Show the steps and output of each sub-DAG run in the summary
+dagu start --recursive-output pipeline.yaml
 ```
 
 ### `stop`
 
-Stop a running DAG.
+Stop a running or waiting DAG run.
 
 ```bash
 dagu stop [options] DAG_NAME_OR_FILE
@@ -185,6 +195,8 @@ dagu stop [options] DAG_NAME_OR_FILE
 dagu stop my-workflow                     # Stop current run
 dagu stop --run-id=20240101_120000 etl   # Stop specific run
 ```
+
+With `--run-id`, a root run that is waiting for an [approval](/writing-workflows/approval) or a [human task](/writing-workflows/human-tasks) ends as `aborted`. Its waiting steps become `aborted`, and the steps that have not started do not run. A [retry](#retry) of the run opens its human tasks again.
 
 ### `restart`
 
@@ -322,9 +334,11 @@ dagu status [options] DAG_NAME_OR_FILE
 **Options:**
 - `--run-id, -r` - Check specific run (optional)
 - `--sub-run-id, -s` - Check a sub DAG-run of `--run-id` (optional)
+- `--recursive-output` - Expand each sub-DAG run in the tree, with its steps and output
 
 ```bash
 dagu status my-workflow  # Latest run status
+dagu status --recursive-output my-workflow  # Include sub-DAG runs
 ```
 
 **Output:**
@@ -350,6 +364,24 @@ Result: Succeeded
 ```
 
 Log paths are shortened here.
+
+A step that runs a sub-DAG lists each sub-DAG run as a `subdag: <run-id>` line. With `--recursive-output`, the line also names the child DAG and its status, and the child's steps and output follow it:
+
+```
+└─load (164ms) [failed]
+  ├─subdag: 12qQXWdFzFVm8A2eSvg5RY (child: failed)
+  │ ├─fetch (61ms) [succeeded]
+  │ │ ...
+  │ └─check (53ms) [failed]
+  │   ├─stderr: .../check....err
+  │   │   row 42 is invalid
+  │   │
+  │   └─error: exit status 1
+  │
+  └─error: exit status 1
+```
+
+Expansion covers up to 5 levels of nesting, 20 failed sub-runs, and 30 other sub-runs, failed ones first. Sub-runs past these limits, or whose status cannot be read, keep their `subdag:` line, and a notice after the tree counts them and prints the `dagu status <dag> --run-id <id> --sub-run-id <sub-run-id>` command that shows one. `--recursive-output` works with local and remote contexts.
 
 ### `ps`
 
@@ -441,7 +473,7 @@ dagu history [flags] [DAG_NAME]
 - `--status` - Filter by one or more statuses. Use a single status or a comma-separated list with OR logic: `running`, `succeeded`, `failed`, `aborted`, `queued`, `waiting`, `rejected`, `not_started`, `partially_succeeded`
   - Aliases: `success` (succeeded), `failure` (failed), `canceled`/`cancelled`/`cancel` (aborted)
 - `--run-id` - Filter by run ID (partial match supported)
-- `--labels` - Filter by labels, comma-separated with AND logic (e.g., `prod,critical`)
+- `--labels` - Filter by labels, comma-separated with AND logic: `key`, `key=value`, `key=` (no value), globs with `*` and `?`, and `!` before any term to negate it (e.g., `critical,!env=dev`). See [Label Filters](/writing-workflows/labels#filter-syntax)
 - `--format`, `-f` - Output format: `table` (default), `json`, or `csv`
 - `--limit`, `-l` - Max results (default: `100`, max: `1000`)
 
@@ -475,6 +507,9 @@ dagu history --format csv --limit 500 > history.csv
 
 # Label filtering (AND logic)
 dagu history --labels "prod,critical"
+
+# Critical runs not labeled env=dev
+dagu history --labels "critical,!env=dev"
 
 # Combined filters
 dagu history my-workflow --status failed,partially_succeeded --last 24h --limit 10
@@ -527,6 +562,10 @@ Error: invalid status 'invalid'. Valid values: running, succeeded, failed, ...
 # Date validation
 $ dagu history --from 2026-02-01 --to 2026-01-01
 Error: --from date (2026-02-01) must be before --to date (2026-01-01)
+
+# Invalid label filter term
+$ dagu history --labels "env==prod"
+Error: invalid label filter "env==prod": a term is key, key=value, or a glob of either, and a leading ! negates it
 ```
 
 **See Also:**

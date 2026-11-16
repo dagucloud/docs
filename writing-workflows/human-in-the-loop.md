@@ -29,7 +29,9 @@ runs its command                  (approval gate only)
         │
         ├── complete / approve ──▶ Succeeded; dependents can run
         │
-        └── reject ─────────────▶ Rejected; the run ends   (approval gate only)
+        ├── reject ─────────────▶ Rejected; the run ends   (approval gate only)
+        │
+        └── stop ───────────────▶ Aborted; the run ends
 ```
 
 While a step waits:
@@ -37,6 +39,10 @@ While a step waits:
 - The step and the DAG run have status `Waiting`. Steps that depend on the waiting step stay `Not Started`.
 - Branches that do not depend on the waiting step keep running. When nothing else can run, the run stops in `Waiting` and releases its process or worker slot.
 - The waiting step has no timeout. It stays open until someone acts on it or the run is stopped.
+
+### Stopping a Waiting Run
+
+Stopping a waiting root run ends it as `Aborted` without running anything: its waiting steps become `Aborted`, steps that have not started never run, and waiting sub-DAG runs it waits on end `Aborted` too. Use **Stop** in the Web UI, [`dagu stop --run-id <id> <dag>`](/getting-started/cli#stop), the [REST API stop endpoint](/web-ui/api#stop-or-cancel-dag-run), or MCP `dagu_execute` `stop`. A waiting sub-DAG run cannot be stopped on its own; stop its root run. A retry of the stopped run opens its human tasks again.
 
 ### Resuming
 

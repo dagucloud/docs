@@ -125,6 +125,8 @@ with:
     build: ${steps.build.outputs.version}
 ```
 
+A number in `params` reaches the child in decimal form, with every digit of an integer kept: `1234567890123456789`, not `1.2345678901234568e+18`.
+
 Runtime overrides passed this way stay literal in the child. See [Parameters](/writing-workflows/parameters).
 
 ## Passing Environment Values
