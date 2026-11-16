@@ -791,6 +791,8 @@ dagu dry [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--format, -f` - Output format for dry-run checks: `text` (default) or `json`
 - `--scheduled-at` - Simulate the run of a schedule slot, including one that has not come yet, and print the slot and its window
 
+For a DAG with [`dates`](/writing-workflows/schedule-dates), the text output also lists the dates the run of that slot loads. Without `--scheduled-at`, the dates come from the [default slot](/writing-workflows/schedule-dates#where-dates-resolve).
+
 ```bash
 dagu dry my-workflow.yaml
 dagu dry --scheduled-at 2026-11-30 etl.yaml  # Preview the month-end slot
