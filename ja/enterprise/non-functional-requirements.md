@@ -17,12 +17,12 @@ IPA「非機能要求グレード」の 6 つの大項目に沿って、Dagu が
 | --- | --- | --- |
 | スケジューラの継続性 | アクティブ/スタンバイ構成に対応します。アクティブが停止すると、既定の設定で 40 秒以内 (起動処理の時間を除く) にスタンバイが引き継ぎます。 | スタンバイ用のホスト、再起動の仕組み (systemd の `Restart=always` など) |
 | スケジュールの重複 | 定期スケジュールの各スロットの実行は、フェイルオーバーの前後を含めて最大 1 回です。 | 要件に示された[前提条件](/ja/server-admin/deployment/high-availability#requirements)を満たす環境 |
-| 引き継ぎ中のスケジュール | 引き継ぎの間に過ぎたスロットを、既定で 2 分前まで再実行します (ベストエフォート、キューが有効な場合)。 | `scheduler.failover_recovery_window` の値、各 DAG の `overlap_policy` |
-| 実行中のジョブ | 稼働中のホストの実行は継続します。障害が起きたホストの実行は失敗扱いとなり、再開はしません。 | DAG 単位の `retry_policy`、ジョブの冪等性、手動再実行の判断基準 |
-| 共有ストレージ | 提供しません。 | NFS または `ReadWriteMany` ボリュームの冗長化 |
+| 引き継ぎ中のスケジュール | 引き継ぎの間に過ぎたスロットを、既定で 2 分前まで再実行します (キューが有効な場合)。 | `scheduler.failover_recovery_window` の値、各 DAG の `overlap_policy` |
+| 実行中のジョブ | 稼働中のホストの実行は継続します。障害が起きたホストの実行は失敗としてマークされ、DAG 単位の `retry_policy` で自動的に再実行できます。リトライでは、中断されたステップを最初から実行します。 | DAG 単位の `retry_policy`、ジョブの冪等性、手動再実行の判断基準 |
+| 共有ストレージ | NFSv3、NFSv4.x、または Kubernetes の `ReadWriteMany` ボリュームで動作します。 | NFS または `ReadWriteMany` ボリュームの冗長化 |
 | Web UI・API | `dagu server` は複数のホストで同時に動かせます。 | ロードバランサー |
 | ワーカー | 複数のワーカーを起動し、ラベルで実行先を選べます。 | ワーカーの台数と配置 |
-| 災害対策 | 拠点間のフェイルオーバーは提供しません。 | 別拠点へのバックアップ転送、復旧手順、許容する RPO・RTO |
+| 災害対策 | フェイルオーバーの対象は、1 つのストレージシステムを共有するホストです。拠点ごとにサーバーを実行し、[Dagu Console](/overview/console-monitoring) でまとめて監視できます。状態はファイルのため、別拠点に転送したバックアップから復旧できます。 | 別拠点へのバックアップ転送、復旧手順、許容する RPO・RTO |
 | バックアップ・復旧 | 状態はすべてファイルのため、ファイルのコピーでバックアップできます。手順は[バックアップと復旧](/ja/server-admin/backup-restore)にあります。 | 取得頻度、保管先、暗号鍵の管理 |
 
 ## 性能・拡張性
@@ -32,7 +32,7 @@ IPA「非機能要求グレード」の 6 つの大項目に沿って、Dagu が
 | 処理量の見積もり | 実行 1 件につき 1 プロセスです。[実測値](/ja/server-admin/system-requirements#sizing)を公開しています。 | 自社の負荷での測定 |
 | 同時実行数の制御 | 名前付きキューの `max_concurrency` と、実行内の `max_active_steps` で制御します。 | 業務ごとの上限値 |
 | スケジュールの粒度 | cron 形式で、最小単位は 1 分です。 | 業務の開始時刻の設計 |
-| 性能目標値 | Dagu としての目標値は定めていません。 | オンライン応答、バッチ時間の目標と測定 |
+| 性能目標値 | 業務の要件に合わせて設定します。Dagu 自体のメモリとディスクの[実測値](/ja/server-admin/system-requirements#sizing)を公開しています。 | オンライン応答、バッチ時間の目標と測定 |
 | 拡張方式 | ワーカーの追加で実行能力を増やせます。ワーカーはライセンス数に影響しません。 | ワーカーのリソース |
 | データ量 | 実行 1 件あたりのファイル数と容量を公開しています。 | `hist_retention_days` の値、ディスクと inode の容量 |
 
@@ -40,41 +40,41 @@ IPA「非機能要求グレード」の 6 つの大項目に沿って、Dagu が
 
 | 項目 | Dagu の対応 | 利用者が用意・決定すること |
 | --- | --- | --- |
-| 監視 | スケジューラの `/health`、[Prometheus メトリクス](/server-admin/prometheus-metrics)、[OpenTelemetry](/server-admin/opentelemetry) を提供します。 | 監視基盤、しきい値、通報先 |
-| 実行状況の確認 | Web UI、CLI、API で確認できます。 | 運用担当者の権限 |
-| ジョブの再実行・停止 | `dagu retry`、`dagu restart`、`dagu stop`、Web UI で行います。ステップ単位の再実行にも対応します。 | 再実行の手順と判断基準 |
+| 監視 | スケジューラの `/health`、[Prometheus メトリクス](/server-admin/prometheus-metrics)、[OpenTelemetry](/server-admin/opentelemetry) を提供します。[Dagu Console](/overview/console-monitoring) では、すべてのサーバーの稼働状態、実行、失敗、傾向を 1 か所で確認できます。Team と Pro では、マシンの CPU、メモリ、ディスクとワーカーも確認できます。 | 監視基盤、しきい値、通報先 |
+| 実行状況の確認 | Web UI、CLI、API、Dagu Console で確認できます。 | 運用担当者の権限 |
+| ジョブの再実行・停止 | `dagu retry`、`dagu restart`、`dagu stop`、Web UI で行います。ステップ単位の再実行にも対応します。[リモートアクセス](/overview/cloud-remote-access)を有効にすると、Dagu Console からも再実行、停止、承認ができます。 | 再実行の手順と判断基準 |
 | 業務カレンダー | [業務カレンダー](/writing-workflows/business-calendars)で休日と営業日を扱います。 | 休日ファイルの管理 |
 | 承認フロー | 人の承認を待つステップを定義できます。 | 承認者と手順 |
 | ログ | 実行ごとのログをファイルに保存します。 | 保持期間、転送先 |
-| 障害通知 | `handler_on.failure`、メールなどで通知します。Dagu Console では失敗、期限超過、サーバー停止の通知も利用できます。閉域網向けには、Enterprise 契約でご依頼に応じて Control Plane を社内に構築します。 | 通知先 |
+| 障害通知 | `handler_on.failure`、メールなどで通知します。[Dagu Console](/overview/console-monitoring-alerts) は、ワークフローの失敗、期限超過、通常より大幅に長い実行、サーバーからの報告の途絶、ディスク残量の不足、ワーカーの不足を、メール、Slack、Microsoft Teams、Google Chat、Discord、PagerDuty、Webhook に通知します。プランごとの範囲は[プランとライセンス](/ja/overview/self-host-license#in-dagu-cloud)を参照してください。閉域網向けには、Enterprise 契約でご依頼に応じて Control Plane を社内に構築します。 | 通知先 |
 | アップグレード | [手順](/ja/server-admin/upgrades)を公開しています。アクティブ/スタンバイ構成では順番に更新できます。 | 実施時期、検証環境 |
-| 保守期間 | 修正は最新の安定版のみに提供します。LTS はありません。 | 定期的なバージョンアップの計画 |
-| サポート体制 | Community、Team、Pro はベストエフォートです。Enterprise 契約では、平日 9:00 から 18:00 (日本時間、日本の祝日を除く) を営業時間とする初回応答目標があります。深刻度 1 と 2 は 1 営業日以内、深刻度 3 は 2 営業日以内です。詳細は [SLA](https://dagu.sh/sla) を参照してください。 | 一次受けの体制 |
+| 保守期間 | 修正は最新の安定版リリース系列で提供します。LTS が必要な場合は[リクエストしてください](https://github.com/dagucloud/dagu/issues)。 | 定期的なバージョンアップの計画 |
+| サポート体制 | Community、Team、Pro では、GitHub Issues と Discord でメンテナーとコミュニティが回答します。Enterprise 契約では、平日 9:00 から 18:00 (日本時間、日本の祝日を除く) を営業時間とする初回応答目標があります。深刻度 1 と 2 は 1 営業日以内、深刻度 3 は 2 営業日以内です。詳細は [SLA](https://dagu.sh/sla) を参照してください。 | 一次受けの体制 |
 
 ## 移行性
 
 | 項目 | Dagu の対応 | 利用者が用意・決定すること |
 | --- | --- | --- |
-| 定義の移行 | 自動変換ツールはありません。定義は YAML のため、スクリプトで生成できます。`dagu validate` で検証できます。 | 変換スクリプト、移行順序 |
+| 定義の移行 | 定義は YAML のため、スクリプトで生成し、`dagu validate` で検証できます。変換ツールが必要な場合は[リクエストしてください](https://github.com/dagucloud/dagu/issues)。 | 変換スクリプト、移行順序 |
 | 対応表 | [JP1/AJS3](/ja/migration/from-jp1) と [Rundeck](/ja/migration/from-rundeck) の対応表と手順を公開しています。 | 個別の機能差の調査 |
 | 並行稼働 | 既存製品と同時に動かせます。 | 比較の方法、切り替え基準 |
-| 実行履歴の移行 | 既存製品の実行履歴を取り込む機能はありません。 | 旧履歴の保管方法 |
+| 実行履歴の移行 | 実行履歴は Dagu で実行した分から記録します。既存製品の履歴の取り込みが必要な場合は[リクエストしてください](https://github.com/dagucloud/dagu/issues)。 | 旧履歴の保管方法 |
 
 ## セキュリティ
 
 | 項目 | Dagu の対応 | 利用者が用意・決定すること |
 | --- | --- | --- |
 | 認証 | ビルトイン認証、OIDC、プロキシ認証、Basic 認証に対応します。SSO (OIDC、プロキシ認証) にはライセンスが必要です。 | ID 基盤、多要素認証 (ID 基盤側で実施) |
-| 権限管理 | `admin`、`manager`、`developer`、`operator`、`viewer` の 5 ロールを、サーバー全体またはワークスペース単位で割り当てます。ジョブ単位の制御はありません。 | ロールの設計 |
+| 権限管理 | `admin`、`manager`、`developer`、`operator`、`viewer` の 5 ロールを、サーバー全体またはワークスペース単位で割り当てます。ジョブごとに権限を分けるには、ジョブをワークスペースに分けます。 | ロールの設計 |
 | 監査ログ | 認証、ユーザー管理、API キー、Webhook、シークレット、ターミナル操作を記録します。ライセンスが必要です。既定の保持期間は 7 日です。 | `audit.retention_days` の値、SIEM への転送 |
 | 通信の暗号化 | Web UI・API の HTTPS、ワーカー通信の mTLS に対応します。 | 証明書の発行と更新 |
 | 保存データの暗号化 | シークレットは AES-GCM で暗号化して保存します。実行ログと成果物は平文のファイルです。 | ディスク暗号化、バックアップの暗号化 |
 | アクセス制限 | `ip_access.allowed_ips` で接続元 IP を制限できます。 | 許可する範囲、ファイアウォール |
 | コマンドの実行権限 | ジョブのコマンドは Dagu の OS ユーザーの権限で動きます。 | 専用 OS ユーザーの作成、DAG 編集権限の制限 |
 | 外部通信 | スケジュールとジョブの実行に外部通信は不要です。任意の機能が使う接続先は[一覧](/ja/overview/security#firewall)にあります。 | 通信の許可範囲 |
-| 脆弱性対応 | 報告窓口と手順を[セキュリティポリシー](https://github.com/dagucloud/dagu/blob/main/SECURITY.md)に定めています。修正は最新の安定版のみです。 | 適用の計画 |
-| 供給網の検証 | [チェックサムと署名の検証手順](/ja/server-admin/verify-releases)を公開しています。コンテナイメージの署名と SBOM はありません。 | 検証の実施、必要な場合の SBOM 生成 |
-| マルウェア対策 | 提供しません。 | EDR などの導入 |
+| 脆弱性対応 | 報告窓口と手順を[セキュリティポリシー](https://github.com/dagucloud/dagu/blob/main/SECURITY.md)に定めています。修正は最新の安定版リリース系列で提供します。 | 適用の計画 |
+| 供給網の検証 | [チェックサムと署名の検証手順](/ja/server-admin/verify-releases)を公開しています。コンテナイメージはダイジェストで固定して検証します。SBOM は Syft や Trivy で生成できます。 | 検証の実施、必要な場合の SBOM 生成 |
+| マルウェア対策 | ホストに導入した EDR などの対策のもとで動作します。 | EDR などの導入 |
 
 ## システム環境・エコロジー
 
@@ -84,4 +84,4 @@ IPA「非機能要求グレード」の 6 つの大項目に沿って、Dagu が
 | 前提ソフトウェア | データベースや言語ランタイムは不要です。 | ジョブが必要とするソフトウェア |
 | コンテナ | `linux/amd64`、`linux/arm64`、`linux/arm/v7` のイメージと、Kubernetes 1.19 以降向けの Helm チャートを提供します。 | コンテナ基盤 |
 | 時刻同期 | 二重化の場合、ホスト間で 1 秒以内の同期が必要です。 | NTP または chrony |
-| 適合規格 | 公開している第三者認証はありません。 | 自社の基準での評価 |
+| 適合規格 | ソースコード、[セキュリティポリシー](https://github.com/dagucloud/dagu/blob/main/SECURITY.md)、[リリースの検証手順](/ja/server-admin/verify-releases)を公開しています。特定の認証が必要な場合は [Dagu チームにお問い合わせ](https://dagu.sh/contact)ください。 | 自社の基準での評価 |

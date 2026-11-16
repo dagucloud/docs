@@ -97,7 +97,7 @@ dagu history 〈DAG 名〉 --last 1h
 ## 5. 本番までに決めること
 
 - 再実行の判断基準
-- 監視と通報の先
+- 監視と通報の先 ([Dagu Console](/overview/console-monitoring) を使う場合は、アラートの送信先)
 - バックアップの頻度と保管先
 - バージョンアップの周期
 - サポートの範囲 ([サポート方針](/ja/server-admin/support-policy)を参照)

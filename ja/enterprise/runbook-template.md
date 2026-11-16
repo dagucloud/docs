@@ -45,6 +45,7 @@ systemctl status dagu-scheduler dagu-server
 | 直近の失敗 | `dagu history --status failed --last 24h` | 想定外の失敗がない |
 | ディスク | `df -h 〈/srv/dagu〉`、`df -i 〈/srv/dagu〉` | 使用率が 〈80〉% 未満 |
 | 監査ログ | Web UI の **Settings > Audit Logs** | 想定外の操作がない |
+| 全サーバーの状態 (Dagu Console で監視している場合) | [Dagu Console](https://console.dagu.sh) の **Overview** | 未対応のアラートと想定外の失敗がない |
 
 ## 4. ジョブの操作
 

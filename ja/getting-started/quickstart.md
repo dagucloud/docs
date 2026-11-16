@@ -275,4 +275,4 @@ steps:
 - [CLI リファレンス](/getting-started/cli): すべてのコマンドとフラグ
 - [MCP クイックスタート](/mcp/quickstart): 外部の AI ツールを稼働中の Dagu サーバーに接続する
 - [MCP サーバー](/mcp/): MCP 対応クライアントを稼働中の Dagu サーバーに接続する
-- [監視](/overview/console-monitoring): ワークフローの失敗時やサーバーからの報告が途絶えたときにメールを受け取る
+- [監視](/overview/console-monitoring): すべてのサーバーを 1 か所で確認し、ワークフローの失敗時、期限超過時、サーバーからの報告が途絶えたときに、メール、チャット、PagerDuty、Webhook でアラートを受け取る

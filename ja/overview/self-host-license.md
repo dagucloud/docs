@@ -53,7 +53,7 @@ Dagu Cloud では、Community サーバーは無料の監視を利用します�
 - **監査ログ:** 管理操作およびセキュリティに関わるアクティビティを確認します。
 - **通知ルーティング:** ワークフローのイベントをチームのチャンネルに送信します。
 - **インシデントルーティング:** 失敗したワークフローについて、プロバイダのインシデントを起票および解決します。
-- **Dagu Console での監視:** 接続したサーバーの稼働状態、実行、傾向を 1 か所で確認できます。ワークフローの失敗時やサーバーからの報告が途絶えたときには、メールを受け取れます。Community サーバーは、ワークスペースごとに 1 台まで、低い上限で無料で監視できます。この場合もサーバーは Community のままです。詳細は[無料と有料](/overview/console-monitoring#free-and-paid)を参照してください。
+- **Dagu Console での監視:** 接続したサーバーの稼働状態、実行、傾向を 1 か所で確認できます。ワークフローの失敗時、期限超過時、サーバーからの報告が途絶えたときには、アラートを受け取れます。Community サーバーは、ワークスペースごとに 1 台まで、低い上限で無料で監視できます。この場合もサーバーは Community のままです。詳細は[無料と有料](/overview/console-monitoring#free-and-paid)を参照してください。
 - **Dagu Cloud 経由の公開 Webhook URL:** DAG の Webhook にインターネット上のアドレスを割り当てます。これにより、パブリックアドレスを持たないサーバー上の DAG を、GitHub、Stripe、Slack から起動できます。Team または Pro のサーバーでは最大 1,000 個、無料の監視またはトライアルのサーバーでは 1 個です。詳細は[公開 Webhook URL](/server-admin/authentication/public-webhook-urls)を参照してください。
 - **Dagu Cloud からのリモートアクセス (MCP):** Dagu Cloud に接続した MCP クライアントが、サーバーの MCP ツールを使用できるようにします。接続はサーバーが開始し、サーバーの管理者が選択したロールが上限です。Team プランまたは Pro プラン、もしくはトライアルが必要です。詳細は [Dagu Cloud からのリモートアクセス](/overview/cloud-remote-access)を参照してください。
 
@@ -76,7 +76,7 @@ Dagu Cloud では、Community サーバーは無料の監視を利用します�
 
 [Dagu Console](https://console.dagu.sh) の Team または Pro のワークスペースには、一定数のサーバースロットがあります。プランのないワークスペースには、Dagu v2.19.2 以降の[無料の監視](/overview/console-monitoring#free-and-paid)用に 1 つのスロットがあります。ワークスペースのライセンスを使用する Dagu サーバーは、それぞれ 1 スロットを消費します。コンソールの **Instances** ページには、すべてのサーバーが名前、最終チェックイン、Dagu のバージョンとともに表示されます。ワーカーはスロットを消費しません。
 
-サーバーの[監視](/overview/console-monitoring)、[公開 Webhook URL](/server-admin/authentication/public-webhook-urls)、[リモートアクセス](/overview/cloud-remote-access)が有効でない限り、接続によって共有されるのはライセンスのチェックインのみです。詳細は [Dagu Cloud: セキュリティとデータの流れ](/ja/overview/security)を参照してください。監視を有効にすると、コンソールに各サーバーの稼働状態と実行が表示され、ワークフローの失敗時やサーバーからの報告が途絶えたときにメールが届きます。Community サーバーでは、**Monitor this server for free** カードを使うと、接続の一環として監視が有効になります。
+サーバーの[監視](/overview/console-monitoring)、[公開 Webhook URL](/server-admin/authentication/public-webhook-urls)、[リモートアクセス](/overview/cloud-remote-access)が有効でない限り、接続によって共有されるのはライセンスのチェックインのみです。詳細は [Dagu Cloud: セキュリティとデータの流れ](/ja/overview/security)を参照してください。監視を有効にすると、コンソールに各サーバーの稼働状態と実行が表示され、ワークフローの失敗時、期限超過時、サーバーからの報告が途絶えたときにアラートが届きます。Community サーバーでは、**Monitor this server for free** カードを使うと、接続の一環として監視が有効になります。
 
 ### Web UI から接続する {#from-the-web-ui}
 

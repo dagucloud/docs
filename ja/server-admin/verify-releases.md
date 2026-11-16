@@ -31,7 +31,7 @@ Get-AuthenticodeSignature .\dagu-windows-amd64-setup.exe | Format-List Status, S
 
 ## コンテナイメージ {#container-images}
 
-コンテナイメージには署名がなく、構成証明もありません。実行するイメージを確実にするには、ダイジェストでイメージを固定します。
+実行するコンテナイメージを確実にするには、ダイジェストでイメージを固定します。
 
 ```bash
 docker buildx imagetools inspect ghcr.io/dagucloud/dagu:2.26.0
@@ -40,6 +40,8 @@ docker buildx imagetools inspect ghcr.io/dagucloud/dagu:2.26.0
 ```yaml
 image: ghcr.io/dagucloud/dagu@sha256:<digest>
 ```
+
+イメージには署名や構成証明がないため、イメージを識別するのはダイジェストです。署名付きのイメージが必要な場合は、[リクエストしてください](https://github.com/dagucloud/dagu/issues)。
 
 プロジェクトでは、イメージに関連する変更があったとき、および毎週、Trivy でイメージをスキャンしています。
 
@@ -53,4 +55,4 @@ npm audit signatures
 
 ## ソフトウェア部品表 {#software-bill-of-materials}
 
-リリースに SBOM は含まれません。SBOM を作成するには、デプロイするバイナリまたはイメージに対して Syft や Trivy などのスキャナーを実行してください。
+SBOM は、デプロイするバイナリまたはイメージに対して Syft や Trivy などのスキャナーを実行して生成します。

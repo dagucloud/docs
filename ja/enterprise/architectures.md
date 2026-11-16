@@ -52,8 +52,8 @@ description: Dagu の代表的な構成である単一ノード、アクティ�
 | --- | --- |
 | 必要なもの | ホスト 2 台、冗長化した共有ストレージ、時刻同期、再起動の仕組み、必要に応じてロードバランサー |
 | ライセンス | データディレクトリを共有する 2 台で 1 サーバー |
-| ホスト障害時の影響 | 既定の設定で 40 秒以内 (起動処理の時間を除く) にスタンバイが引き継ぎます。障害が起きたホストで実行中のジョブは失敗扱いになります。 |
-| 残るリスク | 共有ストレージの障害、拠点全体の障害 |
+| ホスト障害時の影響 | 既定の設定で 40 秒以内 (起動処理の時間を除く) にスタンバイが引き継ぎます。障害が起きたホストで実行中のジョブは失敗としてマークされ、DAG 単位の `retry_policy` で自動的に再実行できます。 |
+| 共有ストレージと拠点の障害への備え | 共有ストレージを冗長化します。拠点の障害には、拠点ごとのサーバーと別拠点へのバックアップで備え、[Dagu Console](/overview/console-monitoring) でまとめて監視します。 |
 | 手順 | [高可用性](/ja/server-admin/deployment/high-availability) |
 
 ## 分散ワーカー {#distributed-workers}
@@ -78,7 +78,7 @@ description: Dagu の代表的な構成である単一ノード、アクティ�
 | --- | --- |
 | 必要なもの | サーバー 1 台以上、ワーカー、証明書 (mTLS の場合) |
 | ライセンス | Dagu サーバーの台数分。ワーカーは数えません。 |
-| ワーカー障害時の影響 | そのワーカーで実行中のジョブが影響を受けます。 |
+| ワーカー障害時の影響 | そのワーカーで実行中のジョブが影響を受けます。[Dagu Console](/overview/console-monitoring-alerts#too-few-workers-alerts) は、稼働中のワーカーが不足したときにアラートを出します。 |
 | 手順 | [Distributed Execution](/server-admin/distributed/) (英語) |
 
 アクティブ/スタンバイと分散ワーカーは組み合わせられます。Kubernetes の場合は [Helm チャートの分散モード](/server-admin/deployment/kubernetes#distributed-mode) (英語) を参照してください。
@@ -105,7 +105,7 @@ Enterprise 契約のもとで、ご依頼に応じて提供します。範囲と
 | 必要なもの | Control Plane 用のホスト、PostgreSQL、社内のメールサーバーまたは通知先 |
 | ライセンス | Enterprise 契約 |
 | Dagu サーバー障害時の影響 | Control Plane はサーバーとは別に動くため、報告が途絶えたことをアラートできます。 |
-| Control Plane 障害時の影響 | アラートは止まりますが、ジョブは動き続けます。 |
+| Control Plane 障害時の影響 | ジョブは動き続けます。各サーバーは、届かなかった報告を Control Plane の復旧後に送信します。 |
 | 手順 | [閉域網](/ja/server-admin/deployment/closed-network#private-control-plane) |
 
 ## 環境の分離 {#environments}

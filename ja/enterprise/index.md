@@ -18,11 +18,11 @@ Dagu の導入を検討する SIer と情報システム部門のための資料
 
 ## 導入前に確認していただきたいこと
 
-- **サポート:** 修正が提供されるのは最新の安定版のみで、長期サポート (LTS) はありません。Team と Pro のライセンスにサポートは含まれません。応答目標を伴うサポートは Enterprise 契約で提供します。詳しくは[サポート方針](/ja/server-admin/support-policy)を参照してください。
-- **二重化:** アクティブ/スタンバイ構成には、利用者が用意する共有ストレージが必要です。障害が起きたホストで実行中だったジョブは失敗扱いとなり、途中から再開はしません。詳しくは[高可用性](/ja/server-admin/deployment/high-availability)を参照してください。
-- **権限:** ロールはサーバー全体またはワークスペース単位で割り当てます。ジョブ単位のアクセス制御はありません。
-- **移行:** 既存製品の定義を自動で変換するツールはありません。
-- **閉域網:** 期限超過や開始遅れの通知は Dagu Console の機能です。閉域網では、Enterprise 契約でご依頼に応じて提供する[社内に置く Control Plane](/ja/server-admin/deployment/closed-network#private-control-plane)、または[独自の確認の仕組み](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)が必要です。
+- **サポート:** 修正は最新の安定版リリース系列で提供します。Community、Team、Pro では GitHub Issues と Discord でメンテナーとコミュニティが回答します。応答目標を伴うサポートは Enterprise 契約で提供します。詳しくは[サポート方針](/ja/server-admin/support-policy)を参照してください。
+- **二重化:** アクティブ/スタンバイ構成では、共有ストレージ (NFS または `ReadWriteMany` ボリューム) を介してスタンバイがスケジューラを引き継ぎます。障害が起きたホストで実行中だったジョブは失敗としてマークされ、DAG 単位の `retry_policy` で自動的に再実行できます。詳しくは[高可用性](/ja/server-admin/deployment/high-availability)を参照してください。
+- **権限:** ロールはサーバー全体またはワークスペース単位で割り当てます。ジョブごとに権限を分けるには、ジョブをワークスペースに分けます。
+- **移行:** [JP1/AJS3 から](/ja/migration/from-jp1)と [Rundeck から](/ja/migration/from-rundeck)に、対応表と移行手順があります。定義は YAML のため、スクリプトで変換できます。変換ツールが必要な場合は[リクエストしてください](https://github.com/dagucloud/dagu/issues)。
+- **閉域網:** スケジュールとジョブの実行にインターネット接続は不要です。期限超過や開始遅れのアラートを含む集中監視は、Enterprise 契約でご依頼に応じて構築する[社内に置く Control Plane](/ja/server-admin/deployment/closed-network#private-control-plane) で利用できます。[ローカルで動作する機能](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)でアラートを構成することもできます。
 
 ## 相談窓口
 

@@ -20,5 +20,6 @@ Dagu は、ジョブのスケジュール実行と管理を 1 つのバイナリ
 | 二重化する | [高可用性](/ja/server-admin/deployment/high-availability) |
 | インターネットに接続せずに使う | [閉域網](/ja/server-admin/deployment/closed-network) |
 | 運用する | [バックアップと復旧](/ja/server-admin/backup-restore)、[アップグレード](/ja/server-admin/upgrades)、[トラブルシューティング](/ja/server-admin/troubleshooting) |
+| すべてのサーバーを 1 か所で監視し、アラートを受け取る | [Dagu Console での監視](/overview/console-monitoring) (英語) |
 | 既存のジョブ管理製品から移行する | [JP1/AJS3 から](/ja/migration/from-jp1)、[Rundeck から](/ja/migration/from-rundeck) |
 | ライセンスを確認する | [プランとライセンス](/ja/overview/self-host-license)、[ライセンス FAQ](/ja/overview/licensing-faq) |
