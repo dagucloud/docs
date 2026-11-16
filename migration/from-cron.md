@@ -11,7 +11,7 @@ If your cron jobs look like this:
 Run them through Dagu instead and get:
 - Persistent logs with automatic rotation
 - Web dashboard showing all runs (status, duration, exit codes)
-- Notifications on failure (email, webhooks)
+- Notifications on failure (email, webhooks), and alerts from [Dagu Console](/overview/dagu-cloud) by email, Slack, Microsoft Teams, PagerDuty, or webhook
 - Run history and status tracking
 - No need to change your scripts
 
@@ -230,7 +230,7 @@ Secrets are resolved during execution. Dagu does not serialize the resolved secr
 
 ## Lifecycle Hooks via Base Configuration
 
-While `dagu exec` doesn't support lifecycle hook flags, you can define handlers in `base.yaml` that apply to all exec commands:
+Define lifecycle handlers in `base.yaml` to apply them to every `dagu exec` command:
 
 ```yaml
 # ~/.config/dagu/base.yaml

@@ -1,8 +1,8 @@
 # Migrating from JP1/AJS3
 
-There is no automatic converter. Because Dagu's definitions are plain YAML, a migration is a script you write and can rerun: export the unit definitions as text, generate DAG files, and validate them. Move one job group at a time, and run it in parallel with JP1/AJS3 before cutting over.
+A JP1/AJS3 jobnet becomes a Dagu DAG: one YAML file you keep in Git. This page maps JP1/AJS3 concepts to Dagu and Dagu Cloud, shows a converted jobnet, and moves job groups one at a time.
 
-JP1 is a suite. Dagu replaces only the job scheduling part. Monitoring, asset management, and other JP1 products need their own replacements.
+If you want a migration tool for your JP1/AJS3 definitions, [request it](https://dagu.sh/contact).
 
 ## How the concepts map
 
@@ -19,6 +19,10 @@ JP1 is a suite. Dagu replaces only the job scheduling part. Monitoring, asset ma
 | File-wait start condition | [`wait.file`](/step-types/wait) step |
 | Agent host | [SSH](/step-types/ssh), or a [worker](/server-admin/distributed/) selected by `worker_selector` |
 | Concurrency limit | `max_active_steps` within a run, or a named [queue](/server-admin/queues) across runs |
+| Operator console | [Web UI](/overview/web-ui) in a browser, and the `dagu` CLI |
+| Operator permissions | [Roles](/server-admin/authentication/user-management) per server or per workspace, with SSO and audit logs |
+| Delay and end-time monitoring | [Deadline, missed-schedule, and running-too-long alerts](/overview/console-monitoring-alerts) in Dagu Console |
+| Job monitoring across servers | [Dagu Console](/overview/console-monitoring): every server's runs, failures, and machines on one set of pages |
 | Manager host database | Files in the data directory |
 
 ## Example
@@ -57,19 +61,19 @@ handler_on:
 
 For Japanese holidays, replace `weekdays` with a [calendar file](/writing-workflows/business-calendars).
 
-## What to plan for
+## Operations after the move
 
-- **Availability.** Only one scheduler is active at a time. A [standby on shared storage](/server-admin/deployment/high-availability) takes over if it fails, and the storage is yours to provide. Runs on a failed host are marked failed and are not resumed.
-- **Support.** Team and Pro licenses do not include support. Enterprise agreements add response targets. See the [support policy](/server-admin/support-policy).
-- **Operator access.** SSO, roles, and audit logs need a [self-host license](/overview/self-host-license). Roles apply to a whole server or a workspace, not to a single job.
-- **Deadline alerts.** Alerts for missed deadlines and late starts come from Dagu Console. A closed network needs a [private control plane](/server-admin/deployment/closed-network#private-control-plane), available on request under an Enterprise agreement, or [its own checks](/server-admin/deployment/closed-network#alerts-without-dagu-console).
+- **Monitoring and alerts.** [Dagu Console](/overview/dagu-cloud) shows every server's runs and failures, and alerts on failed jobs, missed deadlines, scheduled runs that did not start, and runs far past their usual time, by email, Slack, Microsoft Teams, PagerDuty, or webhook. Inside a closed network, the control plane can be deployed in your network under an Enterprise agreement. See [Private Control Plane](/server-admin/deployment/closed-network#private-control-plane).
+- **Availability.** A [standby scheduler on shared storage](/server-admin/deployment/high-availability) takes over automatically when the active one stops.
+- **Operator access.** The `operator` role runs and stops jobs without editing them, and `viewer` is read-only. Sign-in goes through your identity provider with SSO, and audit logs record changes. See [Plans and Licenses](/overview/self-host-license).
+- **Support.** Enterprise agreements include support with response targets. See the [support policy](/server-admin/support-policy) and [contact us](https://dagu.sh/contact).
 
 ## Steps
 
 1. Export the unit definitions of one job group as text.
-2. Map them with a script: unit to step, predecessor link to `depends`, recovery unit to `handler_on.failure`.
+2. Convert them to DAG files: unit to step, predecessor link to `depends`, recovery unit to `handler_on.failure`. A script does this mechanically, or an [AI client connected over MCP](/ai/#write-workflows-with-an-ai-tool) writes each DAG and checks it against the server before saving.
 3. Run `dagu validate` on every generated file.
 4. Recreate calendars, and compare the next fire times with `dagu calendar fires`.
 5. Run the group in parallel with JP1/AJS3, on test data or with side effects turned off, and compare results.
 6. Stop the group in JP1/AJS3 and enable its schedules in Dagu.
-7. Set up [backups](/server-admin/backup-restore) and [alerts](/server-admin/prometheus-metrics) before you move the next group.
+7. Set up [backups](/server-admin/backup-restore) and [alerts](/overview/console-monitoring-alerts) before you move the next group.

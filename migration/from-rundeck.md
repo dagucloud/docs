@@ -1,6 +1,8 @@
 # Migrating from Rundeck
 
-There is no importer. A migration means rewriting each job as a YAML file, which is usually mechanical. Plan to move a few jobs at a time and run them in parallel with Rundeck before cutting over.
+A Rundeck job becomes a Dagu DAG: one YAML file you keep in Git. This page maps Rundeck concepts to Dagu, shows a converted job, and moves jobs a few at a time.
+
+If you want a migration tool for your Rundeck job definitions, or a Rundeck feature you rely on, [request it](https://github.com/dagucloud/dagu/issues).
 
 ## How the concepts map
 
@@ -15,7 +17,7 @@ There is no importer. A migration means rewriting each job as a YAML file, which
 | Node dispatch over SSH | [`ssh`](/step-types/ssh), per DAG or per step |
 | Agent on a node | [Worker](/server-admin/distributed/) selected by `worker_selector` |
 | Job reference | [`dag.run`](/writing-workflows/sub-dags) step |
-| Key Storage | Secrets |
+| Key Storage | [Secrets](/writing-workflows/secrets) |
 | Webhook | [Webhooks](/server-admin/authentication/webhooks) |
 | Project | [Workspace](/web-ui/workspaces) |
 | Job definitions in the database | Files in Git, checked with `dagu validate` |
@@ -58,22 +60,23 @@ handler_on:
     run: /opt/ops/page-oncall.sh
 ```
 
-## What does not carry over
+## Running jobs across many nodes
 
-- **Node filters and resource models.** Dagu has no fleet inventory. Name hosts directly, or use worker labels, and express a fan-out with [`parallel`](/writing-workflows/control-flow).
-- **Per-job ACLs.** Roles apply to a whole server or a workspace, so you cannot hand a single job to a group. To limit a group to certain jobs, give those jobs their own workspace.
-- **Plugins.** Rundeck plugins do not run on Dagu. Use a [step type](/step-types/shell) or call the same tool from a command.
-- **Cluster mode.** Dagu has one active scheduler with [standbys on shared storage](/server-admin/deployment/high-availability), which is a different design from a Rundeck cluster.
+- **Node targeting.** Name a host per DAG or per step with [`ssh`](/step-types/ssh), or label [workers](/server-admin/distributed/) and route steps with `worker_selector`. Fan one command out across a list of hosts with [`parallel`](/writing-workflows/control-flow).
+- **Delegating jobs to a group.** Put the jobs in their own [workspace](/web-ui/workspaces) and give the group the `operator` role there. Operators run and stop those jobs without editing them. Map identity-provider groups to workspace roles with [OIDC Workspace Access](/server-admin/authentication/oidc-workspace-access).
+- **Plugins.** Use a built-in [step type](/step-types/shell), an official or [custom action](/dagu-actions/custom), or call the same tool from a command.
+- **High availability.** A [standby scheduler on shared storage](/server-admin/deployment/high-availability) takes over automatically when the active one stops.
+- **Monitoring and alerts.** [Dagu Console](/overview/dagu-cloud) shows every server's runs and failures, and alerts by email, Slack, Microsoft Teams, PagerDuty, or webhook.
 
-SSO, roles, and audit logs need a [self-host license](/overview/self-host-license).
+SSO, roles, and audit logs come with a [self-host license](/overview/self-host-license).
 
 ## Steps
 
 1. List jobs by how often they run and who depends on them. Start with low-risk ones.
 2. Export the job definitions as YAML from the Rundeck web console or API.
-3. Write a script that turns the export into DAG files, or convert a few by hand to learn the mapping.
+3. Convert the export to DAG files with a script, or have an [AI client connected over MCP](/ai/#write-workflows-with-an-ai-tool) write each DAG and check it against the server before saving.
 4. Run `dagu validate` on every file in CI.
 5. Move secrets out of Key Storage.
 6. Run the new DAG alongside the Rundeck job, on a test target or with the Rundeck job's side effects turned off, and compare results.
 7. Disable the Rundeck schedule and enable the Dagu one.
-8. Set up [backups](/server-admin/backup-restore) and [alerts](/server-admin/prometheus-metrics) before you retire Rundeck.
+8. Set up [backups](/server-admin/backup-restore) and [alerts](/overview/console-monitoring-alerts) before you retire Rundeck.

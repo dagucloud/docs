@@ -1,6 +1,8 @@
 # Rundeck からの移行 {#migrating-from-rundeck}
 
-インポートツールはありません。移行では、各ジョブを YAML ファイルとして書き直します。通常、この作業は機械的に行えます。数個のジョブずつ移行し、切り替える前に Rundeck と並行して実行する計画を立ててください。
+Rundeck のジョブは、Dagu の DAG に対応します。DAG は 1 つの YAML ファイルで、Git で管理できます。このページでは、Rundeck の概念と Dagu の対応、変換したジョブの例、数個のジョブずつ移行する手順を説明します。
+
+Rundeck のジョブ定義を移行するツールや、お使いの Rundeck の機能が必要な場合は、[リクエストしてください](https://github.com/dagucloud/dagu/issues)。
 
 ## 概念の対応 {#how-the-concepts-map}
 
@@ -15,7 +17,7 @@
 | SSH によるノードへのディスパッチ | [`ssh`](/step-types/ssh)(DAG 単位またはステップ単位) |
 | ノード上のエージェント | `worker_selector` で選択した[ワーカー](/server-admin/distributed/) |
 | ジョブ参照 | [`dag.run`](/writing-workflows/sub-dags) ステップ |
-| Key Storage | シークレット |
+| Key Storage | [シークレット](/writing-workflows/secrets) |
 | Webhook | [Webhook](/server-admin/authentication/webhooks) |
 | プロジェクト | [ワークスペース](/web-ui/workspaces) |
 | データベース内のジョブ定義 | Git で管理するファイル(`dagu validate` で検証) |
@@ -58,22 +60,23 @@ handler_on:
     run: /opt/ops/page-oncall.sh
 ```
 
-## 移行できないもの {#what-does-not-carry-over}
+## 多数のノードでのジョブ実行 {#running-jobs-across-many-nodes}
 
-- **ノードフィルターとリソースモデル。** Dagu にはフリートのインベントリがありません。ホストを直接指定するか、ワーカーラベルを使用し、ファンアウトは [`parallel`](/writing-workflows/control-flow) で表現してください。
-- **ジョブ単位の ACL。** ロールはサーバー全体またはワークスペースに適用されます。そのため、1 つのジョブだけをグループに割り当てることはできません。グループを特定のジョブに限定するには、それらのジョブ専用のワークスペースを用意してください。
-- **プラグイン。** Rundeck のプラグインは Dagu では動作しません。[ステップタイプ](/step-types/shell)を使用するか、コマンドから同じツールを呼び出してください。
-- **クラスターモード。** Dagu は、1 つのアクティブなスケジューラと、[共有ストレージ上のスタンバイ](/ja/server-admin/deployment/high-availability)で構成します。これは Rundeck クラスターとは異なる設計です。
+- **ノードの指定。** [`ssh`](/step-types/ssh) で DAG 単位またはステップ単位にホストを指定するか、[ワーカー](/server-admin/distributed/)にラベルを付けて `worker_selector` でステップを振り分けます。1 つのコマンドを複数のホストに展開するには [`parallel`](/writing-workflows/control-flow) を使用します。
+- **グループへのジョブの委任。** 対象のジョブを専用の[ワークスペース](/web-ui/workspaces)に置き、そのワークスペースでグループに `operator` ロールを付与します。operator はジョブの実行と停止ができ、定義は編集できません。ID プロバイダーのグループは、[OIDC ワークスペースアクセス](/server-admin/authentication/oidc-workspace-access)でワークスペースのロールに対応付けられます。
+- **プラグイン。** 組み込みの[ステップタイプ](/step-types/shell)、公式アクションや[カスタムアクション](/dagu-actions/custom)を使用するか、コマンドから同じツールを呼び出します。
+- **高可用性。** [共有ストレージ上のスタンバイスケジューラ](/ja/server-admin/deployment/high-availability)が、アクティブなスケジューラの停止時に自動で引き継ぎます。
+- **監視とアラート。** [Dagu Console](/overview/dagu-cloud) で、すべてのサーバーの実行と失敗を確認でき、メール、Slack、Microsoft Teams、PagerDuty、Webhook にアラートを通知します。
 
-SSO、ロール、監査ログには[セルフホストライセンス](/ja/overview/self-host-license)が必要です。
+SSO、ロール、監査ログは[セルフホストライセンス](/ja/overview/self-host-license)で利用できます。
 
 ## 手順 {#steps}
 
 1. 実行頻度と、そのジョブに依存している関係者の観点で、ジョブを一覧にします。リスクの低いジョブから始めてください。
 2. Rundeck の Web コンソールまたは API から、ジョブ定義を YAML としてエクスポートします。
-3. エクスポートを DAG ファイルに変換するスクリプトを作成します。または、対応関係を把握するために、いくつかを手動で変換します。
+3. スクリプトでエクスポートを DAG ファイルに変換します。[MCP で接続した AI クライアント](/ai/#write-workflows-with-an-ai-tool)に任せると、DAG を書き、保存前にサーバーで検証します。
 4. CI で、すべてのファイルに対して `dagu validate` を実行します。
 5. シークレットを Key Storage から移行します。
 6. テスト対象に対して、または Rundeck ジョブの副作用を無効にした状態で、新しい DAG を Rundeck ジョブと並行して実行し、結果を比較します。
 7. Rundeck のスケジュールを無効にし、Dagu のスケジュールを有効にします。
-8. Rundeck を廃止する前に、[バックアップ](/ja/server-admin/backup-restore)と[アラート](/server-admin/prometheus-metrics)を設定します。
+8. Rundeck を廃止する前に、[バックアップ](/ja/server-admin/backup-restore)と[アラート](/overview/console-monitoring-alerts)を設定します。

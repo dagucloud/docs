@@ -1,8 +1,8 @@
 # JP1/AJS3 からの移行 {#migrating-from-jp1-ajs3}
 
-自動変換ツールはありません。Dagu の定義はプレーンな YAML であるため、移行はお客様が作成する、再実行可能なスクリプトとして行います。ユニット定義をテキストでエクスポートし、DAG ファイルを生成して、検証します。ジョブグループを 1 つずつ移行し、切り替える前に JP1/AJS3 と並行して実行してください。
+JP1/AJS3 のジョブネットは、Dagu の DAG に対応します。DAG は 1 つの YAML ファイルで、Git で管理できます。このページでは、JP1/AJS3 の概念と Dagu および Dagu Cloud の対応、変換したジョブネットの例、ジョブグループ単位での移行手順を説明します。
 
-JP1 は製品群です。Dagu が置き換えるのはジョブスケジューリングの部分だけです。監視、資産管理など、その他の JP1 製品には、それぞれ別の代替が必要です。
+JP1/AJS3 の定義を移行するツールが必要な場合は、[リクエストしてください](https://dagu.sh/ja/contact)。
 
 ## 概念の対応 {#how-the-concepts-map}
 
@@ -19,6 +19,10 @@ JP1 は製品群です。Dagu が置き換えるのはジョブスケジュー�
 | ファイル待ちの起動条件 | [`wait.file`](/step-types/wait) ステップ |
 | エージェントホスト | [SSH](/step-types/ssh)、または `worker_selector` で選択した[ワーカー](/server-admin/distributed/) |
 | 同時実行数の制限 | 実行内では `max_active_steps`、実行をまたぐ場合は名前付きの[キュー](/server-admin/queues) |
+| 操作画面 | ブラウザで使う [Web UI](/overview/web-ui) と `dagu` CLI |
+| 操作権限 | サーバー単位またはワークスペース単位の[ロール](/server-admin/authentication/user-management)。SSO と監査ログに対応 |
+| 開始遅延・終了遅延の監視 | Dagu Console の[期限、スケジュール未実行、長時間実行のアラート](/overview/console-monitoring-alerts) |
+| 複数サーバーのジョブ監視 | [Dagu Console](/overview/console-monitoring)。すべてのサーバーの実行、失敗、マシンの状態を 1 か所で確認 |
 | マネージャーホストのデータベース | データディレクトリ内のファイル |
 
 ## 例 {#example}
@@ -57,19 +61,19 @@ handler_on:
 
 日本の祝日に対応するには、`weekdays` を[カレンダーファイル](/writing-workflows/business-calendars)に置き換えてください。
 
-## 計画時の考慮事項 {#what-to-plan-for}
+## 移行後の運用 {#operations-after-the-move}
 
-- **可用性。** 同時にアクティブになるスケジューラは 1 つだけです。スケジューラに障害が発生すると、[共有ストレージ上のスタンバイ](/ja/server-admin/deployment/high-availability)が引き継ぎます。ストレージはお客様にてご用意ください。障害が発生したホスト上の実行は失敗としてマークされ、再開されません。
-- **サポート。** Team および Pro ライセンスにサポートは含まれません。Enterprise 契約では応答目標が追加されます。[サポートポリシー](/ja/server-admin/support-policy)を参照してください。
-- **運用担当者のアクセス。** SSO、ロール、監査ログには[セルフホストライセンス](/ja/overview/self-host-license)が必要です。ロールはサーバー全体またはワークスペースに適用され、個々のジョブには適用されません。
-- **期限のアラート。** 期限超過と開始遅延のアラートは Dagu Console が発行します。閉域網では、Enterprise 契約でご依頼に応じて提供する[社内に置く Control Plane](/ja/server-admin/deployment/closed-network#private-control-plane)、または[独自の確認の仕組み](/ja/server-admin/deployment/closed-network#alerts-without-dagu-console)が必要です。
+- **監視とアラート。** [Dagu Console](/overview/dagu-cloud) で、すべてのサーバーの実行と失敗を確認できます。ジョブの失敗、期限超過、スケジュールどおりに開始しなかった実行、通常より大幅に長い実行をアラートとして、メール、Slack、Microsoft Teams、PagerDuty、Webhook に通知します。閉域網では、Enterprise 契約により Control Plane をお客様のネットワーク内に配置できます。[社内に置く Control Plane](/ja/server-admin/deployment/closed-network#private-control-plane) を参照してください。
+- **可用性。** [共有ストレージ上のスタンバイスケジューラ](/ja/server-admin/deployment/high-availability)が、アクティブなスケジューラの停止時に自動で引き継ぎます。
+- **運用担当者のアクセス。** `operator` ロールはジョブの実行と停止ができ、定義は編集できません。`viewer` は参照のみです。サインインは SSO でお客様の ID プロバイダーを使用し、変更は監査ログに記録されます。[プランとライセンス](/ja/overview/self-host-license)を参照してください。
+- **サポート。** Enterprise 契約には、応答目標を定めたサポートが含まれます。[サポートポリシー](/ja/server-admin/support-policy)を参照し、[お問い合わせ](https://dagu.sh/ja/contact)ください。
 
 ## 手順 {#steps}
 
 1. 1 つのジョブグループについて、ユニット定義をテキストでエクスポートします。
-2. スクリプトで対応付けます。ユニットはステップに、関連線は `depends` に、リカバリーユニットは `handler_on.failure` に対応付けます。
+2. DAG ファイルに変換します。ユニットはステップに、関連線は `depends` に、リカバリーユニットは `handler_on.failure` に対応付けます。スクリプトで機械的に変換できます。[MCP で接続した AI クライアント](/ai/#write-workflows-with-an-ai-tool)に任せると、DAG を書き、保存前にサーバーで検証します。
 3. 生成したすべてのファイルに対して `dagu validate` を実行します。
 4. カレンダーを再作成し、`dagu calendar fires` で次回の起動時刻を比較します。
 5. テストデータを使用して、または副作用を無効にした状態で、ジョブグループを JP1/AJS3 と並行して実行し、結果を比較します。
 6. JP1/AJS3 でジョブグループを停止し、Dagu でそのスケジュールを有効にします。
-7. 次のジョブグループを移行する前に、[バックアップ](/ja/server-admin/backup-restore)と[アラート](/server-admin/prometheus-metrics)を設定します。
+7. 次のジョブグループを移行する前に、[バックアップ](/ja/server-admin/backup-restore)と[アラート](/overview/console-monitoring-alerts)を設定します。
