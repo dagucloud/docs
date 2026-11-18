@@ -220,6 +220,12 @@ Retrieves DAG definitions with optional filtering by name and labels.
 
 `schedule` entries are recurring cron objects such as `{"expression":"0 * * * *"}` or typed one-off start entries such as `{"kind":"at","at":"2026-03-29T09:30:00+09:00"}`. `nextRun` is the scheduler-aware next planned run time for that DAG. For a pending one-off start entry, `nextRun` can remain visible even after that timestamp has passed, until the scheduler consumes it.
 
+A start entry with [parameters](/writing-workflows/scheduling#parameters-per-schedule) also carries `paramOverrides`, its overrides by name, and `paramOverrideCount`. A value that is not a string is given as its JSON text, so `count: 5` reads `"5"`:
+
+```json
+{"expression": "0 5 * * *", "paramOverrideCount": 2, "paramOverrides": {"mode": "incremental", "count": "5"}}
+```
+
 Schedule aliases in authored YAML are returned as canonical cron expressions. For example, `"@daily"` becomes `"0 0 * * *"` in schedule metadata.
 
 `sort=status` orders DAGs by the status of their latest run: running, waiting, queued, failed, rejected, aborted, partially succeeded, then succeeded. `sort=lastRun` orders them by the start time of their latest run. Both sorts read every matching DAG, so the order holds across pages. DAGs without a run come last in either order, sorted by name. Above 300 matching DAGs, the list is sorted by `name` instead and `errors` says why. Pinned DAGs are listed first; the sort applies within the pinned and unpinned parts.

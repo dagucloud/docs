@@ -209,7 +209,9 @@ Which inputs a run gets:
 
 When several entries fire at the same time, the scheduler picks a due one-off entry first, then the first matching recurring entry in YAML order. Catchup and backfill pick the first matching recurring entry. Editing only an entry's `params` keeps its identity, so a one-off entry that already ran does not run again.
 
-[Upcoming runs](#preview-upcoming-runs) show how many parameters each run's entry overrides.
+The **Cron** launcher on the workflow canvas edits the overrides of plain expressions and of entries with only `expression` and `params`. Each such entry shows one field per named DAG parameter, with the DAG's default in grey; a parameter with an `eval` says that its value is computed when the run starts. A value is saved to the entry's `params` when the field loses focus or on Enter. Emptying the field, or selecting the reset button beside it, removes the override. A plain expression becomes an `expression` object on its first override and turns back into a plain expression when its last override is removed. Other entries, such as ones with `calendar`, `profile`, or `at`, keep their `params` in the YAML.
+
+[Upcoming runs](#preview-upcoming-runs) show the overrides of each run's entry, such as `mode: incremental`.
 
 ## Timezone Support
 
