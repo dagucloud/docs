@@ -249,7 +249,7 @@ schema:
         required: [name, link]
 ```
 
-An extract on a page with nothing to find completes when every value the model read is null or empty. The step log warns `extract found nothing on <url>`, and the page is saved as a [screenshot](#screenshots-and-downloads). List rows whose fields are all null or empty are dropped from the outputs; lists of plain values keep every entry.
+An extract on a page with nothing to find completes when every output it would publish is null or empty. The step log warns `extract found nothing on <url>`, and the page is saved as a [screenshot](#screenshots-and-downloads). A [browser session](#building-a-step-in-a-browser-session) returns the same warning and saves no screenshot. List rows whose fields are all null or empty are dropped from the outputs; lists of plain values keep every entry.
 
 When the step succeeds, stdout is one JSON object of its outputs, so `output:` also works. Operation progress is written to the step's stderr log:
 
