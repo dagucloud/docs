@@ -249,6 +249,8 @@ schema:
         required: [name, link]
 ```
 
+An extract on a page with nothing to find completes when every value the model read is null or empty. The step log warns `extract found nothing on <url>`, and the page is saved as a [screenshot](#screenshots-and-downloads). List rows whose fields are all null or empty are dropped from the outputs; lists of plain values keep every entry.
+
 When the step succeeds, stdout is one JSON object of its outputs, so `output:` also works. Operation progress is written to the step's stderr log:
 
 ```text
@@ -312,6 +314,8 @@ Browser steps store files as [run artifacts](/writing-workflows/artifacts) under
 | `final` | When the step fails, and at the end of a successful step. |
 | `each` | After every operation, plus the `final` ones. |
 | `never` | None. `screenshot` operations still save. |
+
+Under `on_failure` and `final`, an extract that finds nothing also saves the page as `NN-found-nothing.png`.
 
 Files the page downloads are saved under `browser/<step id>/downloads/` with the name the site suggests. Only `act` and `goto` start downloads. Once one has run, the step waits for running downloads after every operation, and before it ends or pauses for an `ask` it waits a few seconds for a late download to begin. A download may run for the longest timeout of the acts and gotos run so far; give a large export's act a long `timeout`. A canceled download, or one still running at that timeout, fails the step. Downloaded files appear in the timeline.
 
