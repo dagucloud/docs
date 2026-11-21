@@ -250,6 +250,22 @@ The **Log** tab opens a failed step on its stderr. The run's scheduler log offer
 | `Ctrl/Cmd+K` | Open the command palette, including **Go to step** |
 | `Shift+?` | Show every canvas shortcut |
 
+### Try The Demo Workflows
+
+The Dagu repository has demo workflows that use the features on this page: step outputs, a router, reuse of earlier outputs, repeating steps, schedules, groups, and a webhook. Copy them into a new data directory and start Dagu on it:
+
+```bash
+git clone --depth 1 https://github.com/dagucloud/dagu.git
+./dagu/examples/workspace-demo/setup.sh ~/dagu-demo
+DAGU_HOME=~/dagu-demo dagu start-all
+```
+
+::: warning
+Use a new directory. `setup.sh` overwrites files with the same names, and six of the workflows run on schedules once the scheduler loads them. `always-running` repeats until you stop it.
+:::
+
+The [demo README](https://github.com/dagucloud/dagu/tree/main/examples/workspace-demo) lists what each workflow shows.
+
 ## Executions
 
 The **Executions** page lists runs across every workflow. Filter them by workflow name, run ID, status, labels, and date, and by [backfill](/writing-workflows/backfill) runs: **All runs**, **Without backfills**, or **Backfill runs only**. The URL and a saved view keep the backfill choice.
