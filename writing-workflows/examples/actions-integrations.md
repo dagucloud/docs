@@ -389,6 +389,53 @@ flowchart LR
 
 <div class="example-card">
 
+### A2A Agent Task
+
+```yaml
+env:
+  - A2A_URL: https://agents.example.com/diagnostics
+
+steps:
+  - id: send
+    action: a2a.send
+    with:
+      agent_url: ${A2A_URL}
+      message: Diagnose TICKET-123
+      headers:
+        Authorization: Bearer ${A2A_TOKEN}
+    output: SEND
+  - id: wait
+    depends: send
+    action: a2a.get_task
+    with:
+      agent_url: ${A2A_URL}
+      task_id: ${SEND.task_id}
+      history_length: 0
+      headers:
+        Authorization: Bearer ${A2A_TOKEN}
+    output: TASK
+    repeat_policy:
+      repeat: until
+      condition: ${TASK.state}
+      expected: "re:^(completed|failed|canceled|rejected|input-required|auth-required)$"
+      interval_sec: 10
+```
+
+```mermaid
+flowchart LR
+    A["a2a.send"] --> E["remote agent"]
+    E --> B["a2a.get_task · repeat until done"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style E stroke:green,stroke-width:1.6px,color:#333
+    style B stroke:lime,stroke-width:1.6px,color:#333
+```
+
+<a href="/step-types/a2a" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Wait for Readiness
 
 ```yaml

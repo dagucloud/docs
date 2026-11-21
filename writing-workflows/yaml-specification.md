@@ -921,6 +921,7 @@ Accepted built-in action names:
 
 | Action | Purpose |
 |--------|---------|
+| `a2a.get_task`, `a2a.send` | Send a message to a remote A2A agent and read the task it starts, over JSON-RPC and HTTPS. See [A2A](/step-types/a2a). |
 | `artifact.list`, `artifact.read`, `artifact.write` | DAG-run artifact operations. |
 | `archive.create`, `archive.extract`, `archive.list` | Archive operations. |
 | `browser.extract`, `browser.run` | Browser automation in a local Chrome. See [Browser](/step-types/browser). |

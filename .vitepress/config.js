@@ -426,6 +426,7 @@ const fullSidebar = [
             items: [
               { text: "HTTP", link: "/step-types/http" },
               { text: "MCP Call", link: "/step-types/mcp" },
+              { text: "A2A", link: "/step-types/a2a" },
               { text: "Mail", link: "/step-types/mail" },
               { text: "Mailbox", link: "/step-types/mailbox" },
               { text: "SSH", link: "/step-types/ssh" },
