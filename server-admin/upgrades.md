@@ -82,6 +82,14 @@ Upgrade the standby first. The upgraded instance then takes over once, and an ol
 
 Upgrade the binary or image on each worker host as well. The [Workers page](/server-admin/distributed/workers/#web-ui-workers-page) shows the Dagu version of each worker and marks a worker older or newer than the server, so it shows when every worker is upgraded.
 
+## Upgrading from 2.27.0 or earlier
+
+A DAG file whose name ends in `.test.yaml` or `.test.yml` becomes a [workflow test](/writing-workflows/workflow-tests) file. It leaves the DAG list, the scheduler stops running it, and `dagu start` refuses it. Before the upgrade, list such files in the DAGs directory, `paths.dags_dir`, and rename them, for example `smoke.test.yaml` to `smoke-test.yaml`. With the default directory:
+
+```bash
+find ~/.config/dagu/dags -name '*.test.yaml' -o -name '*.test.yml'
+```
+
 ## Upgrading from 2.26.0 or earlier
 
 Later releases change how the scheduler behaves in four ways:

@@ -82,6 +82,14 @@ macOS では、インストーラーが設定する launchd エージェント�
 
 各ワーカーホストのバイナリまたはイメージも更新してください。[ワーカーページ](/server-admin/distributed/workers/#web-ui-workers-page)には各ワーカーの Dagu のバージョンが表示され、サーバーより古いワーカーや新しいワーカーには印が付きます。すべてのワーカーの更新が終わったかをここで確認できます。
 
+## 2.27.0 以前からのアップグレード {#upgrading-from-2-27-0-or-earlier}
+
+ファイル名が `.test.yaml` または `.test.yml` で終わる DAG ファイルは、[ワークフローテスト](/writing-workflows/workflow-tests)のファイルとして扱われるようになります。DAG 一覧に表示されなくなり、スケジューラも実行せず、`dagu start` も受け付けません。アップグレードの前に DAG ディレクトリ(`paths.dags_dir`)でこのようなファイルを探し、名前を変更してください(例: `smoke.test.yaml` を `smoke-test.yaml` に変更)。デフォルトのディレクトリの場合は次のとおりです。
+
+```bash
+find ~/.config/dagu/dags -name '*.test.yaml' -o -name '*.test.yml'
+```
+
 ## 2.26.0 以前からのアップグレード {#upgrading-from-2-26-0-or-earlier}
 
 それより後のリリースでは、スケジューラの動作が 4 点変更されています。
