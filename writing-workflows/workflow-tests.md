@@ -10,6 +10,8 @@ A workflow test checks how a DAG behaves without running its commands. A test fi
 
 A missing mock never reaches a real system. When a step with side effects has no mock and is not listed as real, the case is invalid and nothing runs.
 
+This page shows how to write and run tests. [Workflow Test Reference](/writing-workflows/workflow-test-reference) lists every field, error, and report format.
+
 ## Requirements
 
 - A Dagu release after v2.27.0.
@@ -89,7 +91,7 @@ workflows/
 
 DAG discovery, the DAGs directory watcher, and DAG name lookup skip every file whose name ends in `.test.yaml` or `.test.yml`. The DAG list does not show a test file, the scheduler never runs one, and a change to one reloads nothing. `dagu start release.test` fails with a message that names `dagu test`.
 
-A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier). `dagu test` reports a file with top-level `steps` and no `cases` as invalid and asks for the rename.
+A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier).
 
 ## Running Tests
 
@@ -102,19 +104,17 @@ dagu test [flags] [<test file or directory>...]
 - Without an argument, `dagu test` runs every test file under the DAGs directory of the loaded configuration.
 - Test files run one at a time, in path order. The cases of a file run one at a time, in file order.
 - An invalid test file or case does not stop the others.
-
-| Flag | Default | Meaning |
-|------|---------|---------|
-| `--run <regexp>` | none | Run only the cases whose `name` the RE2 regular expression matches, anywhere in the name. |
-| `--timeout <duration>` | `5m` | Longest a case may run, such as `30s`. A case that runs longer fails with a `timeout` failure. |
-| `--format`, `-f` | `text` | `text` or `json`. See [JSON Report](#json-report). |
-| `--keep` | off | Keep each case directory, with its logs and redirect files, and print its path. |
+- Each case runs in its own temporary directory, which holds its run history and logs. The configured data directory is not read or written. See [What changes under test](/writing-workflows/workflow-test-reference#what-changes-under-test).
 
 ```bash
-dagu test workflows/release.test.yaml
-dagu test --run 'failed build' workflows/
-dagu test --format json --keep workflows/
+dagu test workflows/release.test.yaml         # One test file
+dagu test --run 'failed build' workflows/     # Cases whose name matches an RE2 expression
+dagu test --timeout 30s workflows/            # Fail a case that runs longer than 30s (default 5m)
+dagu test --keep workflows/                   # Keep each case directory and print its path
+dagu test --format json workflows/            # One JSON object for CI
 ```
+
+See the [CLI Reference](/getting-started/cli#test) for every flag.
 
 ### Reading the Report
 
@@ -129,73 +129,21 @@ FAIL workflows/release.test.yaml: a failed build skips the deploy (0.19s)
 2 cases: 1 passed, 1 failed
 ```
 
-A failed case lists every failed assertion, not only the first. Under each case that ran, the report also lists:
+A failed case lists every failed assertion, not only the first. Under each case that ran, the report also lists the steps that took the [default mock](#the-default-mock), the waits [approved automatically](#steps-that-wait-for-a-person), and the notifications the run would have sent. An invalid case lists its errors and ends with the [fix](#the-fix-ready-to-paste).
 
-- `default mock: <steps>`, the steps that took the [default mock](#the-default-mock);
-- `approved automatically: <steps>`, the waits approved with no values (see [Steps that wait for a person](#steps-that-wait-for-a-person));
-- `notification <kind>: <recipients>`, each notification the run would have sent;
-- `case directory <path>`, with `--keep`.
+## Writing a Test File
 
-An invalid case lists its errors and ends with the [fix](#the-fix-ready-to-paste). An invalid test file has one `INVALID <file>` line with its errors, and none of its cases runs.
+Fields at the top of a test file apply to every case: `params`, `env`, `secrets`, `mocks`, `default_mock`, and `real`. A case sets its own `params`, `env`, `mocks`, `default_mock`, and `real`, plus `trigger`, `scheduled_at`, `precondition`, and the required `name` and `expect`.
 
-## The Test File
+- A case's `params` and `env` merge over the file's, by name.
+- A case's mock of a step replaces the file's mock of that step as a whole. Fields of the two mocks do not merge.
+- A case's `real` adds to the file's.
 
-| Field | Required | Meaning |
-|-------|----------|---------|
-| `dag` | No | Path of the tested DAG file. Defaults to the DAG beside the test file. |
-| `params` | No | Run parameters for every case, by name. |
-| `env` | No | DAG-level `env` entries for every case, by name. |
-| `secrets` | No | Values for DAG `secrets` entries and SSH credential refs. Needed only in a case with a real step. See [Secrets](#secrets). |
-| `mocks` | No | Mocks for every case, by step key. |
-| `default_mock` | No | A mock for every step that needs one and that `mocks` and `real` do not name. |
-| `real` | No | Step keys of the steps that run their real action in every case. |
-| `cases` | Yes | The cases. Must not be empty. |
-
-Each case is one run of the DAG:
-
-| Field | Required | Meaning |
-|-------|----------|---------|
-| `name` | Yes | Unique in the file. |
-| `params` | No | Merged over the file's `params`, by name. |
-| `env` | No | Merged over the file's `env`, by name. |
-| `mocks` | No | Replaces the file's mock of each step it names, as a whole. Fields of the two mocks do not merge. |
-| `default_mock` | No | Replaces the file's `default_mock`. |
-| `real` | No | Added to the file's `real`. |
-| `precondition` | No | `met` or `not_met`: the outcome of the DAG-level preconditions that run a command. |
-| `trigger` | No | `context.trigger.type` of the run: `manual` (default), `scheduler`, `webhook`, `retry`, `catchup`, `restart`, `backfill`, or `file`. It changes nothing else. |
-| `scheduled_at` | No | Schedule slot of the run, in the forms `dagu dry --scheduled-at` takes. |
-| `expect` | Yes | The [assertions](#assertions). |
-
-A test file accepts only these fields. Any other field makes the file invalid. `params` and `env` values are YAML scalars. An `env` value is used as written, without variable expansion. Each `params` entry is one `name=value` assignment, as `dagu start -- name=value` takes it. A param given a value does not run its `eval`.
-
-### Step Keys
-
-`mocks`, `real`, and `expect.steps` name steps by step key:
-
-- the `id` or `name` of a step of the tested DAG;
-- `handler_on.<event>` for a lifecycle handler: `init`, `success`, `failure`, `abort`, `exit`, or `wait`, including a handler that the [base configuration](/server-admin/base-config) adds.
-
-A key that names no step or handler makes the case invalid. Steps of other documents in the DAG file and `foreach` body steps have no key.
+`mocks`, `real`, and `expect.steps` name a step by its `id` or `name`, and a lifecycle handler as `handler_on.<event>`, such as `handler_on.failure`. A key that names no step or handler makes the case invalid. See [Workflow Test Reference](/writing-workflows/workflow-test-reference#the-test-file) for every field.
 
 ## Mocks
 
-A mock replaces what a step's action returns. Result fields script one execution. Step fields script what happens around the action, once for the step.
-
-| Result field | Default | Meaning |
-|--------------|---------|---------|
-| `exit_code` | `0` | Exit code of the execution. A non-zero code fails the attempt. |
-| `stdout` | empty | Written to the step's stdout as given. |
-| `stderr` | empty | Written to the step's stderr as given. |
-| `outputs` | none | Named outputs the execution publishes. |
-| `condition` | none | `met` or `not_met`: the outcome of a command-check `repeat_policy.condition` after this execution. |
-| `results` | none | One result per execution. Each item takes the fields above. |
-
-| Step field | Meaning |
-|------------|---------|
-| `precondition` | `met` or `not_met`: the outcome of the step's preconditions that run a command. |
-| `review` | How each wait of the step is settled. See [Steps that wait for a person](#steps-that-wait-for-a-person). |
-
-`{}` is a valid mock. On a step with side effects, it succeeds with exit code 0 and no output.
+A mock replaces what a step's action returns. Its result fields, `exit_code`, `stdout`, `stderr`, `outputs`, and `condition`, script one execution. Its step fields, `precondition` and `review`, script what happens around the action. `{}` is a valid mock: on a step with side effects, it succeeds with exit code 0 and no output.
 
 A mocked step keeps everything around its action. Retries read its exit code, `continue_on` and status propagation apply, string-form `output: VAR` captures its `stdout`, and its `env`, `with`, and `run` fields resolve as in a real run. It starts no process, opens no connection, creates no container, and reads no file.
 
@@ -204,47 +152,41 @@ A mocked step keeps everything around its action. Retries read its exit code, `c
 `results` scripts each execution in turn: the first attempt takes the first result, and each retry and each repeat iteration takes the next. After the last result, later executions take the last result again.
 
 ```yaml
-# workflows/implement.yaml
+# workflows/poll.yaml
 steps:
-  - id: implement
-    run: agent implement
-    retry_policy:
-      limit: 2
-      interval_sec: 60
+  - id: poll
+    run: ./poll.sh
+    repeat_policy:
+      repeat: while
+      condition: test -f pending.flag
+      interval_sec: 30
+      limit: 10
 ```
 
 ```yaml
-# workflows/implement.test.yaml
+# workflows/poll.test.yaml
 cases:
-  - name: a flaky step passes on the third attempt
+  - name: polls until nothing is pending
     mocks:
-      implement:
+      poll:
         results:
-          - exit_code: 1
-          - exit_code: 1
-          - exit_code: 0
+          - condition: met
+          - condition: met
+          - condition: not_met
     expect:
-      status: succeeded
       steps:
-        implement:
+        poll:
           status: succeeded
           attempts: 3
 ```
 
-The case passes at once. Dagu does not wait for the two 60-second retry intervals.
+`condition` decides the command-check repeat condition after each execution, so `test -f pending.flag` never runs. `met` keeps a `while` step repeating and stops an `until` step. The case passes at once: Dagu does not wait for repeat or retry intervals. A step that retries takes its results the same way, as the [agent pipeline](#example-an-agent-pipeline) shows.
 
 A mock sets either `results` or inline result fields, not both. Step fields sit beside `results`, never inside an item.
 
 ### Mocked Outputs
 
-A step that declares outputs, through `outputs`, `output_schema`, object-form `output`, `stdout.outputs`, or its action, has known outputs.
-
-- A mock under `mocks` with exit code 0 sets every known output and no other name. A missing or extra name makes the case invalid, as a real run would fail the step.
-- `outputs` needs a step with an `id`.
-- A `type: json` output takes any YAML value and publishes it as JSON. A string output takes a YAML string.
-- A step whose output names are known only at run time, such as a `dag.run` step, takes any name.
-- A result with a non-zero exit code publishes no outputs.
-- Dagu does not parse `stdout` to publish outputs and does not check `output_schema` against mocked values.
+A step that declares outputs, through `outputs`, `output_schema`, object-form `output`, `stdout.outputs`, or its action, has known outputs. A mock with exit code 0 sets every known output and no other name. A missing or extra name makes the case invalid, as a real run would fail the step. A `type: json` output takes any YAML value. See [Mocked outputs](/writing-workflows/workflow-test-reference#mocked-outputs) for the rules.
 
 ### Steps That Run for Real
 
@@ -263,7 +205,7 @@ To run a step with side effects for real, list it under `real`:
 real: [lint]
 ```
 
-Only a line in `real` runs such a step. A mock on a real step may set step fields, such as `precondition` or `review`, but no result field. A real `dag.run` or `parallel` step runs its child DAG in the case, and the child takes no mocks, so a child step with side effects makes the case invalid. Mock the parent step instead. `real` takes no `foreach` step.
+Only a line in `real` runs such a step. A mock on a real step may set step fields, such as `precondition` or `review`, but no result field. A real `dag.run` or `parallel` step runs its child DAG in the case, and the child takes no mocks, so a child step with side effects makes the case invalid. Mock the parent step instead.
 
 ### The Default Mock
 
@@ -276,31 +218,17 @@ cases:
   - name: every step succeeds by default
     expect:
       status: succeeded
-  - name: a failed build stops the deploy
-    mocks:
-      build:
-        exit_code: 1
-    expect:
-      steps:
-        build: failed
-        deploy: aborted
 ```
 
 ```text
 PASS workflows/release.test.yaml: every step succeeds by default (0.16s)
   default mock: build, deploy
-PASS workflows/release.test.yaml: a failed build stops the deploy (0.13s)
-  default mock: deploy
-2 cases: 2 passed, 0 failed
+1 case: 1 passed, 0 failed
 ```
 
-- The report lists the steps it applied to, so steps the test never scripted stay visible.
-- It sets no `outputs`. A step it replaces publishes each known output as an empty string, or `null` for a `type: json` output.
-- Each field applies only where the step needs it: `precondition` to a step with a command precondition, `condition` to a step with a command repeat condition, and `review` to a wait that needs values.
-- It does not handle DAG-level preconditions, `params[].eval`, or secrets.
-- A step with a side-effect-free action and nothing else to handle runs for real, as without a mock.
+The report lists the steps it applied to, so the steps a test never scripted stay visible. It sets no `outputs`: `build` publishes `image_tag` as an empty string. A step named under `mocks` takes its own mock instead. The default mock does not handle DAG-level preconditions, `params[].eval`, or secrets.
 
-### Preconditions and Repeat Conditions
+### Preconditions
 
 A precondition that compares a value, such as `${steps.plan.outputs.risk}` with `expected`, evaluates as in a real run, against mocked outputs and the case's params and env. A precondition that runs a command, or an `eval` with command substitution, never runs under test. The test decides its outcome:
 
@@ -343,9 +271,6 @@ cases:
 
 - `precondition` in a mock decides the step's command conditions, after `negate` applies. `not_met` skips the step. The step's value conditions still evaluate.
 - `precondition` in a case decides the DAG-level command conditions. `not_met` aborts the run before any step starts.
-- `condition` in each result of a mock decides a command-check `repeat_policy.condition` after that execution. `met` keeps a `while` step repeating and stops an `until` step. See [Repetition](/writing-workflows/control-flow#repetition).
-
-A mocked step that repeats without a `limit` runs one execution per result, then stops, since nothing else bounds it under test.
 
 ### Steps That Wait for a Person
 
@@ -397,54 +322,17 @@ cases:
         announce: not_started
 ```
 
-In the first case, the gate of `release` needs no values, so it is approved automatically, and the report lists `approved automatically: release`. The gate of `announce` takes its `review`.
-
-| `review` field | Meaning |
-|----------------|---------|
-| `decision` | `approve` or `reject`. Settles every wait of the step. |
-| `values` | The completion input of a `human.task`, or the inputs of an `approval` gate. |
-
-`reject` on an approval gate ends the step and the run `rejected`. A `human.task` takes only `approve`, and its `values` must pass its form. See [Approval Gates](/writing-workflows/approval) and [Human Tasks](/writing-workflows/human-tasks).
+In the first case, the gate of `release` needs no values, so it is approved automatically, and the report lists `approved automatically: release`. The gate of `announce` takes its `review`. `reject` on an approval gate ends the step and the run `rejected`. A `human.task` takes only `approve`, and its `values` must pass its form. See [Approval Gates](/writing-workflows/approval) and [Human Tasks](/writing-workflows/human-tasks).
 
 ### Sub-DAG, Parallel, and Foreach Steps
 
 - A mock of a `dag.run`, `dag.enqueue`, or `parallel` step replaces its child runs. No child starts or is queued. The mock's result and `outputs` are the step's.
-- A mock of a `foreach` step replaces the whole construct: items, body, and aggregate status. Individual body steps take no mock.
+- A mock of a `foreach` step replaces the whole construct: items, body, and aggregate status. Individual body steps take no mock, and `real` takes no `foreach` step.
 - A `foreach` step whose body steps are all side-effect free runs for real, over items from mocked upstream outputs.
 
 ## Assertions
 
-`expect` holds at least one assertion. A step without an assertion is not checked.
-
-```yaml
-expect:
-  status: failed
-  attempts: 1
-  steps:
-    test:
-      status: failed
-      stderr:
-        contains: FAIL ./uploader
-    route: aborted
-    handler_on.failure: succeeded
-  notifications:
-    - kind: mail_on.failure
-```
-
-| Field | Meaning |
-|-------|---------|
-| `status` | Run status: `succeeded`, `failed`, `aborted`, `partially_succeeded`, or `rejected`. |
-| `attempts` | Run attempts, counting retries of a DAG-level `retry_policy`. |
-| `steps.<key>` | A step status, or a map with one or more of `status`, `attempts`, `outputs`, `stdout`, and `stderr`. |
-| `steps.<key>.status` | `succeeded`, `failed`, `aborted`, `skipped`, `partially_succeeded`, `rejected`, or `not_started`. |
-| `steps.<key>.attempts` | Executions of the step's action, counting retries and repeat iterations. A skipped step has 0. |
-| `steps.<key>.outputs` | Expected named outputs. |
-| `steps.<key>.stdout`, `stderr` | `contains` (text), `matches` (RE2 regular expression), or both, on the last execution's stream. |
-| `notifications` | The notifications the run would have sent. |
-
-A case passes when the run reaches a terminal status and every assertion holds.
-
-### Outputs, Logs, and Notifications
+`expect` holds at least one assertion: the run `status` or `attempts`, an entry under `steps`, or `notifications`. A step entry is a status, or a map of `status`, `attempts`, `outputs`, `stdout`, and `stderr`. A step without an entry is not checked. A case passes when the run reaches a terminal status and every assertion holds.
 
 ```yaml
 # workflows/report.yaml
@@ -501,33 +389,23 @@ cases:
           to: [oncall@example.com]
 ```
 
-`summary` runs its real `log.write` action with the mocked count.
+`summary` runs its real `log.write` action with the mocked count, so the stream assertion checks the message the DAG builds. `notifications: []` asserts that the first case would send no mail. The second case asserts the failure mail. No mail is sent under test.
 
-- A string output matches a YAML string exactly. A `type: json` output, or any expected value that is not a string, matches when every listed key matches, recursively. Keys it does not list are ignored, and arrays and scalars match exactly.
-- An output assertion on a mocked step checks only what the test supplied. It is most useful on side-effect-free steps, which run for real.
-- A stream assertion reads the step's log of its last execution, with secrets masked. A step that never ran fails it.
-- `notifications` compares without regard to order. Each item has `kind`: `mail_on.failure`, `mail_on.success`, `mail_on.wait`, or `mail_on_error`. It may set `to`, compared as a set, and, for `mail_on_error`, `step`. `notifications: []` asserts that the run would send none. No mail is sent under test.
+An output assertion on a mocked step checks only what the test supplied. It is most useful on side-effect-free steps, which run for real. See [Assertions](/writing-workflows/workflow-test-reference#assertions) for status values and matching rules.
 
 ## The Fail-Closed Rule
 
-A case is invalid, and nothing runs, when the DAG has something that would run a command or reach a real system and the case does not handle it. The rule covers every step and handler, reached or not, so the outcome does not depend on the branch a case takes.
+A case is invalid, and nothing runs, when the DAG has something that would run a command or reach a real system and the case does not handle it:
 
-| Error label | Source | What the case adds |
-|-------------|----------------|--------------------|
-| `step <step>` | An action with side effects | A mock, `{}` included, or the step under `real` |
-| `step <step>` | A precondition that runs a command | `precondition` in the step's mock, or the step under `real` |
-| `step <step>` | A repeat condition that runs a command | `condition` in every result of the step's mock, or the step under `real` |
-| `step <step>` | An object-form `output` with `from: file` | A mock that replaces the action, or the step under `real` |
-| `step <step>` | A side-effect-free step that repeats without a `limit` | A mock with a result field, or the step under `real` |
-| `step <step>, body step <body>` | A `foreach` body step with side effects | A mock of the `foreach` step |
-| `step <step>` | A wait that needs values | `review` in the step's mock, also for a real step |
-| `handler_on.<event>` | Any of the above on a handler | The same, keyed by `handler_on.<event>` |
-| `secret <name>` | A secret, in a case with a real step | A value under the test file's `secrets` |
-| `precondition` | A DAG-level precondition that runs a command | The case's `precondition` |
-| `param <name>` | A `params[].eval` with command substitution | A value under `params` |
-| `step <step>, child <dag>, ...` | Anything above in the child DAG of a real step | Nothing. Mock the parent step |
+- a step action with side effects;
+- a precondition or repeat condition that runs a command;
+- an object-form `output` that reads a file;
+- a side-effect-free step that repeats without a limit;
+- a wait that needs values;
+- a `params[].eval` with command substitution;
+- a secret, in a case with a real step.
 
-`<step>` is the step's `id`, or its `name` when it has none.
+The rule covers every step and handler, reached or not, so the outcome does not depend on the branch a case takes. [Fail-closed sources](/writing-workflows/workflow-test-reference#fail-closed-sources) lists each error label and what it asks for.
 
 ### The Fix, Ready to Paste
 
@@ -584,11 +462,9 @@ INVALID workflows/ship.test.yaml: ships
 1 case: 0 passed, 0 failed, 1 invalid
 ```
 
-Paste the lines under `fix, ready to paste:` into the case, merged with the fields it already has, and the case runs. A missing secret value appears under `fix for the test file, ready to paste:`, for the test file's `secrets`.
+`env` has no command substitution, so it needs nothing. Paste the lines under `fix, ready to paste:` into the case, merged with the fields it already has, and the case runs. A missing secret value appears under `fix for the test file, ready to paste:`, for the test file's `secrets`.
 
-The fix uses neutral values: `{}` for an action, `""` for each declared output, `precondition: met`, a `condition` that stops a repeat, and `review` with `decision: approve` and a value for each required input. Edit them into the scenario the case tests. A value that a form constraint such as `pattern` rejects carries the comment `# replace with a value the form accepts`, and the case stays invalid until it is replaced.
-
-Other mistakes also make a case invalid, each with an error that names the field: a key that names no step, an output the step does not declare, an unknown status, a `matches` value that is not a valid RE2 expression, or a `review` on a step that does not wait.
+The fix uses neutral values: `{}` for an action, `""` for each declared output, `precondition: met`, a `condition` that stops a repeat, and `review` with `decision: approve` and a value for each required input. Edit them into the scenario the case tests.
 
 ## Secrets
 
@@ -635,40 +511,17 @@ The first case would pass without `secrets`: `API_TOKEN` would resolve to its pl
 
 Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file never holds a real credential, and a case does not depend on the environment of the host that runs it.
 
-## What Changes Under Test
-
-| Behavior | Under test |
-|----------|------------|
-| Retry and repeat intervals, backoff, and `delay_sec` | Not waited for, except by real steps. The order and count of executions do not change. |
-| `timeout_sec` | Applies as in a real run. A mocked action returns at once. |
-| Run history, logs, artifacts, and `state` | Kept in a temporary case directory, removed when the case ends unless `--keep` is set. The configured data directory is not read or written. |
-| `mail_on` and `mail_on_error` | Not sent. The report lists each notification the run would have sent. |
-| OpenTelemetry export | Off. |
-| `stdout` and `stderr` redirect files | Written inside the case directory. |
-| The DAG's `working_dir`, DAG-level `container` and `ssh`, `tools`, and native resource limits | Set up only when the case has a real step. |
-| A DAG-level `retry_policy` | `dagu test` retries the run in the same case without waiting. Mock results keep counting across run attempts. |
-| `queue` and `worker_selector` | Ignored. The case runs locally, in the `dagu test` process. |
-
-A test runs beside live runs of the same DAG. Neither sees the other, and the test's run does not appear in the DAG's history.
-
 ## Writing Tests Faster
-
-### Start From the Fix
-
-Write a case with the expectation you want, run it, and paste the fix:
-
-1. Create the test file with one case and its `expect`.
-2. Run `dagu test` on it. The case is invalid and lists every source the DAG has.
-3. Paste the fix into the case, or move the mocks to the file level to share them across cases.
-4. Change the pasted values into the scenario, such as a failing `exit_code` or a `high` risk output, and run again.
-
-`default_mock: {}` is a shorter start: every step with side effects succeeds with no output, and the report lists the steps that took it.
 
 ### Generate a Test File
 
 ::: info Coming in a later release
 `dagu test --init <dag file>` writes the DAG's test file beside it, with a mock for every source the fail-closed rule needs and one case named `initial` whose `expect` holds the result of a run with those mocks. It refuses to replace an existing test file. It ships in a release after `dagu test` itself.
 :::
+
+### When the DAG Changes
+
+A step with side effects added to the DAG makes every case invalid until the test handles it, and each case prints the [fix](#the-fix-ready-to-paste) for it. Paste the fix into the file's `mocks`, or set `default_mock: {}` to cover new steps without a line each. The report then lists the steps that took the default mock.
 
 ### Editor Support
 
@@ -700,15 +553,7 @@ The schema rejects unknown fields and wrong types. `dagu test` stays the authori
 
 ## Running Tests in CI
 
-`dagu test` runs headless. Its exit status tells the result:
-
-| Status | Meaning |
-|--------|---------|
-| `0` | Every selected case passed, or no case was selected. |
-| `1` | At least one case failed. |
-| `2` | At least one test file or case is invalid, or the arguments are invalid. |
-
-The highest status that applies wins: a run with a failed case and an invalid case exits 2.
+`dagu test` runs headless. It exits 0 when every selected case passed, 1 when a case failed, and 2 when a test file, a case, or the arguments are invalid. The highest status that applies wins.
 
 ```yaml
 # .github/workflows/dagu-test.yaml
@@ -730,13 +575,7 @@ Pass the directory that holds the DAGs. Without an argument, `dagu test` reads t
 
 A case without a real step needs no credential, container runtime, or network access, so a job that runs only such cases needs no CI secrets.
 
-### JSON Report
-
-`--format json` writes exactly one JSON object to stdout once every case has ended. Logs go to stderr. For the failing test file of [Reading the Report](#reading-the-report):
-
-```bash
-dagu test --format json workflows/release.test.yaml
-```
+`--format json` writes exactly one JSON object to stdout once every case has ended, and logs go to stderr. For the failing test file of [Reading the Report](#reading-the-report):
 
 ```json
 {"cases":[{"file":"workflows/release.test.yaml","name":"deploys the built image","result":"pass","duration_ms":207},{"file":"workflows/release.test.yaml","name":"a failed build skips the deploy","result":"fail","duration_ms":138,"failures":[{"step":"deploy","field":"status","expected":"skipped","actual":"aborted"}]}]}
@@ -748,21 +587,7 @@ To list only the cases that did not pass:
 dagu test --format json workflows/ | jq '.cases[] | select(.result != "pass")'
 ```
 
-| Case field | Present | Meaning |
-|------------|---------|---------|
-| `file` | Always | The test file. |
-| `name` | Always | The case name. |
-| `result` | Always | `pass`, `fail`, or `invalid`. |
-| `duration_ms` | When the case ran | Wall-clock time in milliseconds. |
-| `failures` | When `result` is `fail` | One object per failed assertion: `step`, `field`, `expected`, and `actual`. `field` is `status`, `attempts`, `outputs.<name>`, `stdout.contains`, `stdout.matches`, `stderr.contains`, `stderr.matches`, `notifications`, `timeout`, `limit`, or `error`. |
-| `errors` | When `result` is `invalid` | One object per error: `source`, the label, and `message`. |
-| `fix`, `file_fix` | When an invalid case has a fix | The fix for the case, and for the test file's `secrets`, as YAML text. |
-| `default_mocked` | When the default mock applied | Step labels. |
-| `auto_approved` | When a wait was approved automatically | Step labels. |
-| `notifications` | When the run would have sent one | Objects with `kind`, `to`, and, for `mail_on_error`, `step`. |
-| `case_dir` | With `--keep` | Absolute path of the kept case directory. |
-
-An invalid test file appears under a top-level `invalid_files` list, each with `file` and `errors`.
+See [JSON report](/writing-workflows/workflow-test-reference#json-report) for every field.
 
 ## Example: An Agent Pipeline
 
@@ -871,7 +696,7 @@ cases:
         handler_on.failure: succeeded
 ```
 
-`route` runs its real `router.route` action, so the cases test the routing the DAG defines. No agent, `make`, or `gh` command runs, and the four cases finish without waiting for either 60-second retry interval. Removing the `handler_on.failure` mock makes every case invalid before any step runs.
+`route` runs its real `router.route` action, so the cases test the routing the DAG defines. No agent, `make`, or `gh` command runs, and the flaky case finishes without waiting for either 60-second retry interval. Removing the `handler_on.failure` mock makes every case invalid before any step runs.
 
 ## Limits
 
