@@ -149,6 +149,26 @@ dagu worker \
 
 The server CA and client CA can be the same CA if one CA issues both coordinator and client certificates.
 
+## Peer Token
+
+The coordinator and the processes that call it, such as workers, the scheduler, and the Web UI/API process, identify each other with a peer token. Processes that share the coordinator's data directory need no setup.
+
+To choose the token yourself, give the coordinator and every process that calls it the same `peer.token`:
+
+```yaml
+peer:
+  token: "<a long random string>"
+```
+
+To accept only processes that send the token, set this on the coordinator:
+
+```yaml
+coordinator:
+  require_token: true
+```
+
+`coordinator.require_token` defaults to `false`. The peer token works with or without TLS.
+
 ## Kubernetes
 
 Mount peer certificates into the coordinator, scheduler, Web UI/API, and worker pods that need to serve or dial coordinator gRPC.
@@ -170,7 +190,7 @@ For mTLS:
 
 ## Environment Variables
 
-The peer TLS settings can also be configured with environment variables:
+The peer TLS and token settings can also be configured with environment variables:
 
 | Config key | Environment variable |
 |------------|----------------------|
@@ -179,6 +199,8 @@ The peer TLS settings can also be configured with environment variables:
 | `peer.key_file` | `DAGU_PEER_KEY_FILE` |
 | `peer.client_ca_file` | `DAGU_PEER_CLIENT_CA_FILE` |
 | `peer.skip_tls_verify` | `DAGU_PEER_SKIP_TLS_VERIFY` |
+| `peer.token` | `DAGU_PEER_TOKEN` |
+| `coordinator.require_token` | `DAGU_COORDINATOR_REQUIRE_TOKEN` |
 
 ## Troubleshooting
 
