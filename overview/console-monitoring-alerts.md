@@ -8,7 +8,7 @@ Dagu Console opens an alert when a workflow fails or a server stops reporting, a
 
 ## Workflow Alerts
 
-Workflow alerts need the `errors` or `runs` level. An alert belongs to one workflow on one server.
+Workflow alerts need the `runs` level. An alert belongs to one workflow on one server.
 
 - A run with status failed opens an alert, or, when the workflow's [alert rules](#alert-rules) ask for several failures in a row, the last of them does. The alert opens as of the first of them and counts them all. Further failures add to its count.
 - A later run that succeeds or partially succeeds resolves it, or any member [resolves it by hand](#resolve-an-alert-by-hand).
@@ -62,7 +62,7 @@ On a Team or Pro plan, or in a trial, workspace owners can turn on alerts of a s
 
 ## Alerts of Workers' Machines
 
-With Dagu v2.25.7 or later at `errors` or `runs`, the [disk](#disk-almost-full-alerts), [memory](#memory-high-alerts), and [CPU](#cpu-high-alerts) alerts also watch each machine a server's [distributed workers](/server-admin/distributed/) run on, with the server's [alert rules](#alert-rules).
+With Dagu v2.25.7 or later at `runs`, the [disk](#disk-almost-full-alerts), [memory](#memory-high-alerts), and [CPU](#cpu-high-alerts) alerts also watch each machine a server's [distributed workers](/server-admin/distributed/) run on, with the server's [alert rules](#alert-rules).
 
 - An alert names the machine after its server, such as `etl-prod-1 (gpu-1)`. Workers on one machine share its alerts.
 - A worker's CPU use is its average over the last minute.
@@ -72,7 +72,7 @@ With Dagu v2.25.7 or later at `errors` or `runs`, the [disk](#disk-almost-full-a
 
 ## Queue Stalled Alerts
 
-On a Team or Pro plan, or in a trial, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `errors` or `runs`.
+On a Team or Pro plan, or in a trial, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `runs`.
 
 - A queue whose runs fill it is not stalled: its next run waits its turn.
 - A run that waits for a [worker](/server-admin/distributed/) says why: no worker matches its selector, every worker that matches is busy or unhealthy, or runs cannot be sent to workers.
@@ -102,7 +102,7 @@ On a Team or Pro plan, or in a trial, a workspace owner gives a workflow a deadl
 
 ## Missed-Schedule Alerts
 
-On a Team or Pro plan, or in a trial, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `errors` or `runs` level.
+On a Team or Pro plan, or in a trial, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `runs` level.
 
 - A workflow has one such alert at a time. Later slots that do not start add to its count. It says when the run was due, why it did not start, and when the next run is.
 - It resolves when a later slot's run starts, or when the workflow is no longer scheduled.
@@ -111,7 +111,7 @@ On a Team or Pro plan, or in a trial, a scheduled run that did not start opens a
 
 ## Running-Too-Long Alerts
 
-On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert. These alerts need the `errors` or `runs` level.
+On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
 
 - A workflow's limit is twice how long 95% of its runs took over the last 14 days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
 - A workflow's [alert rules](#alert-rules) can fix the limit instead, from 1 minute to 7 days, whatever its runs took.

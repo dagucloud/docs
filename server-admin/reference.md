@@ -614,7 +614,7 @@ Legacy YAML keys `scheduler.heartbeat_interval` and `scheduler.stale_threshold` 
 - `DAGU_LICENSE_SERVER_NAME` - Name this server reports to Dagu Console (`license.server_name`; default: the hostname). A name set in Dagu Console or Dagu is shown in its place
 
 ### Dagu Console Monitoring
-- `DAGU_CLOUD_REPORT` - What the server reports to Dagu Console: `off`, `health`, or, on v2.22 or later, `errors` (`cloud.report`; `runs` is read as `errors` from v2.28; default: empty, which reports nothing until an administrator chooses in the web UI). A set value, `off` included, fixes the level and the web UI shows it read-only. See [Monitoring](/overview/console-monitoring).
+- `DAGU_CLOUD_REPORT` - What the server reports to Dagu Console: `off`, `health`, or `runs` (`cloud.report`; from v2.28, `runs` also sends error messages and `errors`, which added them on v2.22 to v2.27, is read as `runs`; default: empty, which reports nothing until an administrator chooses in the web UI). A set value, `off` included, fixes the level and the web UI shows it read-only. See [Monitoring](/overview/console-monitoring).
 - `DAGU_CLOUD_REMOTE_ACCESS` - Highest role a Dagu Cloud user gets on calls Dagu Cloud carries to this server: `off`, `viewer`, `operator`, or `developer` (`cloud.remote_access`; default: empty, which leaves the choice to an administrator in the web UI, where it starts at `off`). A set value fixes it.
 - `DAGU_CLOUD_REMOTE_APPROVALS` - Whether those calls, at `operator` or above, may approve, reject, or push back steps waiting for a person (`cloud.remote_approvals`; default: unset, which leaves the choice to the web UI, where it starts off). A set value fixes it.
 

@@ -72,12 +72,12 @@ Monitoring is off by default. Upgrading or connecting a server sends nothing bey
 ### From the web UI
 
 1. Open **Plan & features** as an administrator and select **Turn on** in the **Monitoring** section.
-2. Choose **Health only** or **Health, run status, and error messages**, which is recommended. The dialog says in a line what each choice sends, and links to [What Is Sent](#what-is-sent). Before Dagu v2.28 it also offered **Health and run status**, without error messages.
+2. Choose **Health only** or **Health, run status, and error messages** (`runs`), which is recommended. The dialog says in a line what each choice sends, and links to [What Is Sent](#what-is-sent). Before Dagu v2.28 it also offered **Health and run status**, without error messages.
 3. Select **Turn on**.
 
 Dagu also asks on its own. On a server that was connected without choosing a level, such as with a server key, administrators see a **Monitor this server from Dagu Console** notice above other pages until they choose a level or dismiss it.
 
-From Dagu v2.28, a server set to **Health and run status** (`runs`) also sends error messages. It logs a warning at each start until an administrator chooses a level again, or the configuration says `errors` or `health`.
+From Dagu v2.28, `runs` also sends error messages, and `errors` is read as `runs`. A server whose `runs` was chosen or configured before v2.28 logs one warning at its first start after the upgrade. Choose **Health only** to send no run data.
 
 The choice applies at once, without a restart, and is kept in the data directory (`cloud/report-settings.json` under `paths.data_dir`). Persist that directory in containers, as you do for the [license](/overview/self-host-license#keep-the-server-s-identity).
 
@@ -89,10 +89,10 @@ The **Monitoring** section on **Plan & features** shows:
 
 ### From the command line
 
-`dagu license activate` without a key connects the server from a shell and, on Dagu v2.22 or later, chooses the level as well: pass `--report errors`, `health`, or `off`, or answer the question it asks with the same choices as the web UI. The level is saved once the server is approved. A level set in configuration wins over both.
+`dagu license activate` without a key connects the server from a shell and, on Dagu v2.22 or later, chooses the level as well: pass `--report runs`, `health`, or `off`, or answer the question it asks with the same choices as the web UI. From v2.28, `--report errors` is read as `runs`. The level is saved once the server is approved. A level set in configuration wins over both.
 
 ```bash
-dagu license activate --report errors
+dagu license activate --report runs
 ```
 
 ### In configuration
@@ -101,18 +101,18 @@ For servers managed as code, set the level in the [configuration file](/server-a
 
 ```yaml
 cloud:
-  report: errors   # off, health, or errors
+  report: runs   # off, health, or runs
 ```
 
-or with `DAGU_CLOUD_REPORT=errors`.
+or with `DAGU_CLOUD_REPORT=runs`.
 
 | `cloud.report` | Shown in the web UI as | Sends |
 | --- | --- | --- |
 | empty (default) | Off, until an administrator chooses | Nothing beyond the license check-in |
 | `off` | Off | Nothing beyond the license check-in |
 | `health` | Health only | [Health](#health) |
-| `errors` (v2.22 or later) | Health, run status, and error messages | [Health](#health), [run status](#run-status), and [error messages](#error-messages) |
-| `runs` | Same as `errors` from v2.28; before that, Health and run status | Same as `errors` from v2.28; before that, [health](#health) and [run status](#run-status) |
+| `runs` | Health, run status, and error messages; before v2.28, Health and run status | [Health](#health), [run status](#run-status), and, from v2.28, [error messages](#error-messages) |
+| `errors` (v2.22 or later) | Same as `runs` from v2.28 | [Health](#health), [run status](#run-status), and [error messages](#error-messages) |
 
 A configured value, `off` included, wins over the choice in the web UI. The **Monitoring** section shows **Set in configuration** and offers no **Turn on**, **Change**, or **Turn off**. To change the level, change the configuration and restart Dagu.
 
@@ -156,7 +156,7 @@ DAG names, queue names, and step names are sent only at `runs` and `errors`. Cho
 
 ### Error messages
 
-Sent at `errors` on Dagu v2.22 or later, and at `runs` from v2.28. With them, Dagu Console shows why a run failed on its run page, and alert emails and chat posts quote the end of the error.
+Sent at `runs` from Dagu v2.28, and at `errors` on v2.22 or later, which v2.28 reads as `runs`. With them, Dagu Console shows why a run failed on its run page, and alert emails and chat posts quote the end of the error.
 
 - For each finished run that failed, was aborted, or was rejected: the error messages of its failed steps and handlers, in run order, up to 5, or the run's own error when no step has one.
 - Each is sent without terminal escapes and cut to its last 2048 bytes. A command step's error ends with the last 1 KiB of its stderr.
