@@ -8,7 +8,7 @@ Dagu Console opens an alert when a workflow fails or a server stops reporting, a
 
 ## Workflow Alerts
 
-Workflow alerts need the `runs` level. An alert belongs to one workflow on one server.
+Workflow alerts need the `errors` or `runs` level. An alert belongs to one workflow on one server.
 
 - A run with status failed opens an alert, or, when the workflow's [alert rules](#alert-rules) ask for several failures in a row, the last of them does. The alert opens as of the first of them and counts them all. Further failures add to its count.
 - A later run that succeeds or partially succeeds resolves it, or any member [resolves it by hand](#resolve-an-alert-by-hand).
@@ -16,7 +16,7 @@ Workflow alerts need the `runs` level. An alert belongs to one workflow on one s
 
 ## Stopped-Reporting Alerts
 
-Stopped-reporting alerts need `health` or `runs`.
+Stopped-reporting alerts need any level but `off`.
 
 A server that sends no report for 10 minutes, or 25 minutes on [free monitoring](/overview/console-monitoring#free-and-paid), opens an alert, and its [recipients](#who-gets-alert-emails) are emailed. A server's [alert rules](#alert-rules) can wait longer, up to 24 hours. Its next report resolves the alert, and that email says how long the server was silent.
 
@@ -26,7 +26,7 @@ A server that sends no report for 10 minutes, or 25 minutes on [free monitoring]
 
 ## Scheduler Alerts
 
-On a Team or Pro plan, or in a trial, a server whose scheduler is down for 5 minutes opens an alert, since no scheduled workflow starts while it lasts. These alerts need `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server whose scheduler is down for 5 minutes opens an alert, since no scheduled workflow starts while it lasts. These alerts need any level but `off`.
 
 - The scheduler counts as down when the server's report counts no running scheduler, or when one runs but has not ticked for 5 minutes and nobody paused it. A paused scheduler opens no alert.
 - Only a server that has reported a running scheduler before is watched, so a server that never runs one, such as one whose runs start on [temporary workers](/overview/deployment-models#temporary-workers), opens none.
@@ -35,7 +35,7 @@ On a Team or Pro plan, or in a trial, a server whose scheduler is down for 5 min
 
 ## Disk Almost Full Alerts
 
-On a Team or Pro plan, or in a trial, a server whose disk is 90% full or more, or the percent its [alert rules](#alert-rules) set, from 50 to 99, opens an alert. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server whose disk is 90% full or more, or the percent its [alert rules](#alert-rules) set, from 50 to 99, opens an alert. These alerts need Dagu v2.25.4 or later, which sends the machine's figures with each report, at any level but `off`.
 
 - The disk is the one that holds the server's data directory, where runs, logs, and queues stop when it fills up. Dagu v2.25.7 or later also sends the disk that holds the log directory, when that is another disk, and how many of each disk's inodes are in use. The fullest of these counts: a disk whose inodes run out can make no new file even with bytes to spare.
 - The email or post says which disk filled up, and how full it is, by bytes or by inodes.
@@ -45,7 +45,7 @@ On a Team or Pro plan, or in a trial, a server whose disk is 90% full or more, o
 
 ## Memory High Alerts
 
-On a Team or Pro plan, or in a trial, a server whose memory use stays at or over 90% for 10 minutes, or the percent and minutes its [alert rules](#alert-rules) set, opens an alert. These alerts need Dagu v2.25.4 or later, at `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server whose memory use stays at or over 90% for 10 minutes, or the percent and minutes its [alert rules](#alert-rules) set, opens an alert. These alerts need Dagu v2.25.4 or later, at any level but `off`.
 
 - The alert opens as of when the use went over the percent. A single report over it opens nothing.
 - Use that drops under the percent starts the wait over.
@@ -62,7 +62,7 @@ On a Team or Pro plan, or in a trial, workspace owners can turn on alerts of a s
 
 ## Alerts of Workers' Machines
 
-With Dagu v2.25.7 or later at `runs`, the [disk](#disk-almost-full-alerts), [memory](#memory-high-alerts), and [CPU](#cpu-high-alerts) alerts also watch each machine a server's [distributed workers](/server-admin/distributed/) run on, with the server's [alert rules](#alert-rules).
+With Dagu v2.25.7 or later at `errors` or `runs`, the [disk](#disk-almost-full-alerts), [memory](#memory-high-alerts), and [CPU](#cpu-high-alerts) alerts also watch each machine a server's [distributed workers](/server-admin/distributed/) run on, with the server's [alert rules](#alert-rules).
 
 - An alert names the machine after its server, such as `etl-prod-1 (gpu-1)`. Workers on one machine share its alerts.
 - A worker's CPU use is its average over the last minute.
@@ -72,7 +72,7 @@ With Dagu v2.25.7 or later at `runs`, the [disk](#disk-almost-full-alerts), [mem
 
 ## Queue Stalled Alerts
 
-On a Team or Pro plan, or in a trial, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `runs`.
+On a Team or Pro plan, or in a trial, a server's [queue](/server-admin/queues) opens an alert once its next run has waited 10 minutes, or the minutes the [alert rules](#alert-rules) set, while the queue has room to run it or no worker takes it. These alerts need Dagu v2.25.3 or later at `errors` or `runs`.
 
 - A queue whose runs fill it is not stalled: its next run waits its turn.
 - A run that waits for a [worker](/server-admin/distributed/) says why: no worker matches its selector, every worker that matches is busy or unhealthy, or runs cannot be sent to workers.
@@ -82,7 +82,7 @@ On a Team or Pro plan, or in a trial, a server's [queue](/server-admin/queues) o
 
 ## Too Few Workers Alerts
 
-On a Team or Pro plan, or in a trial, a server opens an alert once fewer of its [distributed workers](/server-admin/distributed/) are live than its [alert rules](#alert-rules) want, for as long as they set: by default, none live for 5 minutes, so runs that need a worker wait. These alerts need Dagu v2.25.7 or later, at `health` or `runs`.
+On a Team or Pro plan, or in a trial, a server opens an alert once fewer of its [distributed workers](/server-admin/distributed/) are live than its [alert rules](#alert-rules) want, for as long as they set: by default, none live for 5 minutes, so runs that need a worker wait. These alerts need Dagu v2.25.7 or later, at any level but `off`.
 
 - A worker is live while its heartbeat reaches the server's coordinator, at most 30 seconds old. A server whose report counts no coordinator has no live worker, since none can take its runs.
 - Only a server that has reported a live worker is watched, so a server that runs a coordinator for no worker, as `dagu start-all` does by default, opens none.
@@ -102,7 +102,7 @@ On a Team or Pro plan, or in a trial, a workspace owner gives a workflow a deadl
 
 ## Missed-Schedule Alerts
 
-On a Team or Pro plan, or in a trial, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `runs` level.
+On a Team or Pro plan, or in a trial, a scheduled run that did not start opens an alert once it is 5 minutes late, or as late as its [alert rules](#alert-rules) allow. These alerts need the `errors` or `runs` level.
 
 - A workflow has one such alert at a time. Later slots that do not start add to its count. It says when the run was due, why it did not start, and when the next run is.
 - It resolves when a later slot's run starts, or when the workflow is no longer scheduled.
@@ -111,7 +111,7 @@ On a Team or Pro plan, or in a trial, a scheduled run that did not start opens a
 
 ## Running-Too-Long Alerts
 
-On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
+On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert. These alerts need the `errors` or `runs` level.
 
 - A workflow's limit is twice how long 95% of its runs took over the last 14 days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
 - A workflow's [alert rules](#alert-rules) can fix the limit instead, from 1 minute to 7 days, whatever its runs took.

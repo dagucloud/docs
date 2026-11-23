@@ -128,7 +128,7 @@ Scheduler, runs, coordinator ──▶ event store ──▶ reporter ── HTT
 ```
 
 - The reporter runs in `dagu server` or `dagu start-all`, the process that holds the license. It reads run events from the event store (`paths.event_store_dir`), sends each finished top-level run once, and keeps its place, so after an outage it sends what it missed without duplicates.
-- Reports carry health, at the `runs` level the status and timing of runs and the names of failed steps, and at the `errors` level also failed steps' error messages. Full logs, outputs, parameters, and secrets are never sent. See [What Is Sent](/overview/console-monitoring#what-is-sent).
+- Reports carry health and, at the `errors` level, the status and timing of runs, the names of failed steps, and their error messages. From v2.28, `runs` is read as `errors`. Full logs, outputs, parameters, and secrets are never sent. See [What Is Sent](/overview/console-monitoring#what-is-sent).
 - Nothing is reported until an administrator chooses a level in the web UI or sets `cloud.report`.
 
 ## Public Webhook URLs through Dagu Cloud (Optional)

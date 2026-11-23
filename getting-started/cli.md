@@ -1464,7 +1464,7 @@ Use `--yes` to skip prompts in automation. `--backup` keeps a copy of the curren
 Connect to Dagu Console, activate, deactivate, or check Dagu license status.
 
 ```bash
-dagu license activate [--report errors|runs|health|off]
+dagu license activate [--report errors|health|off]
 dagu license activate <key>
 dagu license check
 dagu license deactivate
