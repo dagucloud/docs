@@ -122,7 +122,7 @@ The profile answers what a few sample rows cannot: `values` gives the exact text
 |-------|-------------|
 | `sheet` | The sheet, the first by default. Names match exactly, then case-insensitively when that is unique. |
 | `range` | `A2:F200`, `A2:F` or `A:F` (open end at the last used row), a single cell, `Sheet1!A2:F` or `'My Sheet'!A2:F` (the sheet in the range wins over `sheet`), a defined name, or a table name. |
-| `header` | `true` (default): the first row of the range names the columns. `false`: columns are named `A`, `B`, `C`. A row number, or a list such as `[3, 4]` whose cells are joined with a space, so `Amount` merged over `Net` and `Tax` yields `Amount Net` and `Amount Tax`. |
+| `header` | `true` (default): the first row of the range names the columns. `false`: columns are named `A`, `B`, `C`. A row number, or a list such as `[3, 4]` whose cells are joined with a space, so `Amount` merged over `Net` and `Tax` yields `Amount Net` and `Amount Tax`, while `Invoice No` merged down over both rows yields `Invoice No` once. |
 | `columns` | Columns to keep, in order: names, or `{Invoice No: invoice_no}` entries to rename. A name that matches no header fails the step listing the headers present. |
 | `merged` | `fill` (default): a merged value is read in every cell it covers. `first`: only in the top-left cell. |
 
@@ -137,7 +137,7 @@ Without `range`, the data block is detected: leading empty rows and columns are 
 | Text, including text-formatted numbers | A string, so leading zeros survive. `trim: true` removes surrounding white space, including the full-width space. |
 | Text under a pinned `number`, `integer`, `date`, `datetime`, or `boolean` | Japanese forms are read. Amounts: full-width digits, `￥123,000`, `123,000円`, `¥123,000-`, `▲1,000`, `(1,000)`, `10%`, `税込1,000`, `1,000（税込）`, `12万3,500円`, `1.5億`, `金壱拾弐万参千円也`. Dates: `2026年10月3日`, `二〇二六年十月三日`, `2026.10.3`, `令和8年10月3日`, `R8.10.3`, `㋿8.10.3`, a month alone (`2026年10月`) as its first day, a month and day with no year (`10月3日`) in the current year of the host, a weekday mark dropped, and a time of day after the date (`14:30`, `14時30分`, `午後2時30分`). Yes/no under `boolean`: `はい`/`いいえ`, `有`/`無`, `済`/`未`, `可`/`否`, `○`/`×`, check marks and boxes, a dash for none. Text outside these forms fails the type with the text quoted. The spec lists every form. |
 | Boolean | `true` or `false`. |
-| Formula | Its cached value. `formulas: text` yields the formula with its `=`; `formulas: calculate` evaluates it. A formula without a cached value is evaluated with a warning. A stale cached value is read with a warning; see below. |
+| Formula | Its cached value. `formulas: text` yields the formula with its `=`; `formulas: calculate` evaluates it. A formula without a cached value, such as one [a write cleared](#formulas-after-a-write), is evaluated, with one warning naming up to five such cells. A stale cached value is read with a warning; see below. |
 | Error such as `#N/A` | `null`, with a warning naming the cell. |
 | Empty | `null`. Trailing rows whose cells are all empty are dropped unless `keep_empty_rows: true`. |
 
@@ -189,6 +189,7 @@ steps:
 - Values are written by type: numbers as numbers, booleans as booleans, `2026-10-01` and `2026-10-01T14:30:00` strings as dates, other strings as text. `types` pins a column: `number` and `date` convert strings, `string` keeps ISO-looking text as text.
 - `style: table` (default) gives a new or replaced sheet a bold header on a light fill, frozen panes below it, fitted column widths, and number formats by column: dates `yyyy-mm-dd`, decimals with two places, text `@`. `style: none` writes bare cells.
 - `xlsx.append`, and `mode: append`, write below the last used row with no header, and each new cell copies the style of the cell above it, so a date column stays a date column. An append that starts an empty sheet writes the header, so the first run creates the table.
+- `formats` sets a column's number format on `xlsx.write` and `xlsx.append`, such as `{Total: "#,##0", Rate: "0.0%"}`. Every cell written to that column takes it under either `style`, in place of the format of the column's kind or of the cell above; an appended cell keeps the rest of the style it copies.
 - Appended fields are matched to the header row by exact name: a name the header has only loosely, differing in case or spacing, fails with `column "amount" not found in header row 1; did you mean "Amount"?`; a name the header lacks adds a column at the right, counted in `columns_added`; header columns no field carries stay empty. Array rows have no names and are written by position. `header: false` says the sheet has no header row: rows are written by position, and an empty sheet gets no header.
 - With `output`, `xlsx.append` writes the result to that workbook and leaves the one at `path` as it was; a `path` that does not exist starts a new workbook at `output`. An existing `output` is replaced, not appended to, so an append with a fixed `output` inside a `foreach` keeps only the last iteration's rows. `output` follows the rules of [`xlsx.write_cells`](#filling-a-template). `xlsx.write` takes no `output`, also with `mode: append`.
 
@@ -210,7 +211,7 @@ Both fields require `input` and a CSV format.
 
 ## Writing Results Back
 
-`xlsx.update_rows` writes columns into existing rows. `rows` is a list of objects, each carrying the `key` column and optionally `_row`; `key` is the column that identifies a row, or `_row` to address rows by number alone; `set` maps sheet columns to what they receive:
+`xlsx.update_rows` writes columns into existing rows. `rows` is a list of objects, each carrying the `key` column, or the `key_field` field when given, and optionally `_row`; `key` is the column that identifies a row, or `_row` to address rows by number alone; `set` maps sheet columns to what they receive:
 
 ```yaml
 with:
@@ -223,9 +224,23 @@ with:
     Code: {value: "007", type: string}   # pinned, so the zeros stay
 ```
 
-A literal that is text in the canonical form of a number, such as `"100"` or `"-12.5"`, is written as a number, because a reference interpolated into `with` arrives as text; `type` pins it the way a column type does, so `{value: "007", type: string}` stays text. Without `set`, every field other than the key and `_row` goes to the column of the same name. A column the sheet lacks is added at the right of the header. `rows` also accepts the aggregate output of a `foreach` step, as in the [quick start](#quick-start): its collected objects of the items that succeeded are written.
+A literal that is text in the canonical form of a number, such as `"100"` or `"-12.5"`, is written as a number, because a reference interpolated into `with` arrives as text; `type` pins it the way a column type does, so `{value: "007", type: string}` stays text. Without `set`, every field other than the key, `key_field`, and `_row` goes to the column of the same name. A column the sheet lacks is added at the right of the header when a row is written. An empty `rows`, such as a scheduled run with nothing pending, succeeds and changes nothing. `rows` also accepts the aggregate output of a `foreach` step, as in the [quick start](#quick-start): its collected objects of the items that succeeded are written.
 
 Rows are matched by `_row` when present, else by the key column, with keys compared as trimmed text so `7` and `"7"` match. A key found at two rows is an error. A key not found does what `missing` says: `fail` (default), `skip` with a warning, or `append` below the last used row, copying the styles of the row above.
+
+When the rows name the key differently from the sheet, `key` names the sheet column and `key_field` the row field. That is the case after a read that renames the key column, and it is how a Japanese key header comes back from a `foreach`, whose `collect` takes only ASCII names:
+
+```yaml
+with:
+  path: orders.xlsx
+  key: 注文番号          # the column on the sheet
+  key_field: order_id    # the row field, from a read with columns: [{注文番号: order_id}]
+  rows: ${RESULTS}
+  set:
+    状態: status
+```
+
+`key_field` defaults to `key`. The row's `key_field` value finds the row, is compared with the key column of a row addressed by `_row`, and fills the key column of an appended row. With `key_field` given, a row that lacks the field fails the step before anything is saved, even when it carries `_row`. `key_field` cannot be blank or combined with `key: _row`.
 
 Only the columns in `set` change. A row that does not carry a mapped field leaves that cell alone; an explicit `null` empties it. A cell that already holds the value is not counted as a change, and the number `7` and the text `7` are different values.
 
@@ -485,7 +500,7 @@ Every writer (`write`, `append`, `update_rows`, `write_cells`, `sheet`) publishe
 | `wait_for_unlock` | How long to retry a workbook another program holds open, such as `5m`, waiting two seconds and doubling to one minute between tries. Without it the step fails at once. |
 | `artifact` | `true` keeps a copy of the saved workbook, or of the converted file, under `xlsx/<step id>/` in the run's [artifacts](/writing-workflows/artifacts) and publishes its path as `artifact`. It enables artifact storage for the DAG. A copy that fails after the save is a warning, not a failed step, so a retry does not repeat the write. |
 
-Excel's `~$name.xlsx` lock file is checked before a write. A lock file another process still holds, which on Windows means Excel has the workbook open, fails the step with `orders.xlsx is open in another program; close it and retry`; a lock file nobody holds is a leftover of a crash, so the step warns and continues.
+Excel's `~$name.xlsx` lock file is checked before a write. When Excel has the workbook open, the step fails with `orders.xlsx is open in another program; close it and retry`. On Windows that means a process still holds the lock file. On macOS it means `lsof` shows Microsoft Excel holding the workbook itself; the check runs only when the lock file exists, gives up after two seconds, and other programs reading the workbook do not block the write. A lock file nobody is found holding is taken as a leftover of a crash, so the step warns and continues. The macOS check cannot see a workbook that Excel loaded without keeping it open.
 
 Preview what an append would change, then do it:
 
@@ -505,6 +520,14 @@ steps:
       path: log.xlsx
       rows: ${params.ROWS}
 ```
+
+### Formulas After a Write
+
+A write that changes a cell clears the cached results of the formulas that depend on it and asks the spreadsheet application to recalculate the workbook on open, so a total over the written cells is not read from the old calculation. This applies to `write_cells`, `update_rows`, `append`, `write` into an existing workbook, and `sheet`, for which an added, replaced, renamed, or deleted sheet counts as changed throughout.
+
+A formula depends on a change when one of its references covers a changed cell, directly, through a defined name, or through a table reference, or when it reads a formula already cleared. Formulas whose text does not show what they read are cleared by any change: those that call `INDIRECT`, `OFFSET`, `CELL`, `INFO`, `SHEET`, `SHEETS`, or a user-defined function, those with a 3-D or spill reference, and data tables. References to other workbooks never depend on a change. Other formulas keep their cached values, and formula text, styles, and calculation settings such as manual mode are kept.
+
+A later `xlsx.read` evaluates a cleared formula. One the calculation library cannot evaluate reads as `null` with a warning, and a cell filled by a cleared array formula reads as empty until a spreadsheet application recalculates the workbook. A dry run, and a write that changes nothing, leave the caches as they are.
 
 ## Checking a Workflow Before It Runs
 
@@ -544,7 +567,9 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `encoding`, `delimiter` | `write`, `append`, `convert` | CSV encoding and delimiter. An empty or null `encoding` is the same as none. |
 | `mode` | `write` | `replace` (default) or `append`. |
 | `style` | `write` | `table` (default) or `none`. |
+| `formats` | `write`, `append` | Number format per column, such as `{Total: "#,##0"}`. |
 | `key` | `update_rows` | The column that identifies a row, or `_row`. Required. |
+| `key_field` | `update_rows` | The row field that carries the key when it differs from `key`, such as a `columns` alias. Defaults to `key`. |
 | `set` | `update_rows` | Columns to write, from row fields or literals; a literal takes `{value: v, type: t}` to pin its type. |
 | `missing` | `update_rows`, `sheet` | `fail`, `skip`, or `append` for a key not found; `fail` or `skip` for a sheet not found. |
 | `required`, `not_blank`, `unique`, `allowed` | `validate` | The rules. See [Validating a Workbook](#validating-a-workbook). |
@@ -581,7 +606,7 @@ A field that still holds a reference to a step output is skipped, since no step 
 | `no header row found; use header: false to append rows by position` | An append onto a sheet with rows found no header row to match names against. | Set `header: false` to write by position. |
 | `Orders!A17: expected key "INV-17", found "INV-18"; the sheet changed since it was read` | Rows moved between the read and the write-back. | Run the workflow again from the read. |
 | `key "INV-99" not found` | A row to update is not in the sheet and `missing` is `fail`. | Set `missing: skip` or `missing: append`. |
-| `orders.xlsx is open in another program; close it and retry` | Excel holds the workbook on Windows. | Close it, or set `wait_for_unlock` so the step retries. |
+| `orders.xlsx is open in another program; close it and retry` | Excel has the workbook open, on Windows or macOS. | Close it, or set `wait_for_unlock` so the step retries. |
 | `2 problems found in orders.xlsx Orders` | `xlsx.validate` with `on_problem: fail` found problems. | Read them in the step log; keep `on_problem: warn` to act on them in the workflow. |
 | `template.xlsx: "A1:B2" is not a single cell` | A `cells` address names a range, a named range, or a table. | Address one cell. |
 | `report.xlsx: sheet "October" already exists` | The sheet `add`, `copy`, or `rename` would create exists and `if_exists` is `fail`. | Set `if_exists: skip` for a rerun, or `replace`. |
