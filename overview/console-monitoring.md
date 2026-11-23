@@ -72,12 +72,12 @@ Monitoring is off by default. Upgrading or connecting a server sends nothing bey
 ### From the web UI
 
 1. Open **Plan & features** as an administrator and select **Turn on** in the **Monitoring** section.
-2. Choose **Health only** or **Health, run status, and error messages** (`runs`), which is recommended. The dialog says in a line what each choice sends, and links to [What Is Sent](#what-is-sent). Before Dagu v2.28 it also offered **Health and run status**, without error messages.
+2. Choose **Health only**, **Health and run status**, which is recommended, or, on Dagu v2.22 or later, **Health, run status, and error messages**. The dialog lists exactly what each choice sends and what is never sent.
 3. Select **Turn on**.
 
 Dagu also asks on its own. On a server that was connected without choosing a level, such as with a server key, administrators see a **Monitor this server from Dagu Console** notice above other pages until they choose a level or dismiss it.
 
-From Dagu v2.28, `runs` also sends error messages, and `errors` is read as `runs`. A server whose `runs` was chosen or configured before v2.28 logs one warning at its first start after the upgrade. Choose **Health only** to send no run data.
+A server whose administrators chose **Health and run status** in the web UI before Dagu v2.22 offers error messages once, with a **Show why runs fail in Dagu Console** notice. **Send error messages** opens the dialog with **Health, run status, and error messages** selected. Choosing a level, cancelling the dialog, or dismissing the notice ends the offer. A server whose level is set in configuration never shows it.
 
 The choice applies at once, without a restart, and is kept in the data directory (`cloud/report-settings.json` under `paths.data_dir`). Persist that directory in containers, as you do for the [license](/overview/self-host-license#keep-the-server-s-identity).
 
@@ -89,7 +89,7 @@ The **Monitoring** section on **Plan & features** shows:
 
 ### From the command line
 
-`dagu license activate` without a key connects the server from a shell and, on Dagu v2.22 or later, chooses the level as well: pass `--report runs`, `health`, or `off`, or answer the question it asks with the same choices as the web UI. From v2.28, `--report errors` is read as `runs`. The level is saved once the server is approved. A level set in configuration wins over both.
+`dagu license activate` without a key connects the server from a shell and, on Dagu v2.22 or later, chooses the level as well: pass `--report errors`, `runs`, `health`, or `off`, or answer the question it asks with the same choices as the web UI. The level is saved once the server is approved. A level set in configuration wins over both.
 
 ```bash
 dagu license activate --report runs
@@ -101,7 +101,7 @@ For servers managed as code, set the level in the [configuration file](/server-a
 
 ```yaml
 cloud:
-  report: runs   # off, health, or runs
+  report: runs   # off, health, runs, or errors (v2.22 or later)
 ```
 
 or with `DAGU_CLOUD_REPORT=runs`.
@@ -111,8 +111,8 @@ or with `DAGU_CLOUD_REPORT=runs`.
 | empty (default) | Off, until an administrator chooses | Nothing beyond the license check-in |
 | `off` | Off | Nothing beyond the license check-in |
 | `health` | Health only | [Health](#health) |
-| `runs` | Health, run status, and error messages; before v2.28, Health and run status | [Health](#health), [run status](#run-status), and, from v2.28, [error messages](#error-messages) |
-| `errors` (v2.22 or later) | Same as `runs` from v2.28 | [Health](#health), [run status](#run-status), and [error messages](#error-messages) |
+| `runs` | Health and run status | [Health](#health) and [run status](#run-status) |
+| `errors` (v2.22 or later) | Health, run status, and error messages | [Health](#health), [run status](#run-status), and [error messages](#error-messages) |
 
 A configured value, `off` included, wins over the choice in the web UI. The **Monitoring** section shows **Set in configuration** and offers no **Turn on**, **Change**, or **Turn off**. To change the level, change the configuration and restart Dagu.
 
@@ -156,17 +156,17 @@ DAG names, queue names, and step names are sent only at `runs` and `errors`. Cho
 
 ### Error messages
 
-Sent at `runs` from Dagu v2.28, and at `errors` on v2.22 or later, which v2.28 reads as `runs`. With them, Dagu Console shows why a run failed on its run page, and alert emails and chat posts quote the end of the error.
+Sent at `errors` only, on Dagu v2.22 or later. With them, Dagu Console shows why a run failed on its run page, and alert emails and chat posts quote the end of the error.
 
 - For each finished run that failed, was aborted, or was rejected: the error messages of its failed steps and handlers, in run order, up to 5, or the run's own error when no step has one.
 - Each is sent without terminal escapes and cut to its last 2048 bytes. A command step's error ends with the last 1 KiB of its stderr.
 - The values of workflow secrets are masked in them, as in logs.
 
-Error messages often contain hosts, paths, or data a step printed, and masking covers only the values of declared secrets. Choose `health` if you would not send them; it sends no run status either.
+Error messages often contain hosts, paths, or data a step printed, and masking covers only the values of declared secrets. Choose `runs` if you would not send them.
 
 ### Never sent
 
-Full logs, outputs, parameters, environment, step commands, DAG YAML, schedule expressions, and the values of workflow secrets are never sent, at any level.
+Full logs, outputs, parameters, environment, step commands, DAG YAML, schedule expressions, and the values of workflow secrets are never sent, at any level. Error messages are sent only at `errors`.
 
 Every report also carries what identifies and authenticates the server, as its license check-in does: the protocol version, license ID, server ID, and heartbeat secret. It also carries the level and, at any level but `off`, the time the report was built by the server's clock. At `runs` and `errors`, it also carries the reporter's position in the event store and, after events were lost, the time they were lost from.
 

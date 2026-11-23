@@ -129,7 +129,7 @@ Dagu Cloud stores what servers report for monitoring, and nothing a client reads
 | --- | --- | --- |
 | Logs, outputs, parameters, and DAG YAML | No. They pass through when a client reads them. | When a client reads them, which needs remote access on |
 | Run status, and DAG, queue, and step names | At monitoring level `runs` or `errors` | When a client reads them |
-| Failed steps' error messages | At monitoring level `runs` from Dagu v2.28, or `errors` | When a client reads them |
+| Failed steps' error messages | At monitoring level `errors` only | When a client reads them |
 | Values of declared secrets | No | Masked in logs and error messages |
 
 Finished runs are kept for 30 days. See [Retention and Limits](/overview/console-monitoring#retention-and-limits) for the rest.
@@ -138,7 +138,7 @@ Finished runs are kept for 30 days. See [Retention and Limits](/overview/console
 
 | To | Do this |
 | --- | --- |
-| Keep a server's logs from the model provider | Leave its remote access off and its monitoring level at `health` or `off`. |
+| Keep a server's logs from the model provider | Leave its remote access off and its monitoring level below `errors`. |
 | Keep DAG, queue, and step names from it too | Also set the monitoring level to `health`. |
 | Limit a client to some servers | At sign-in, choose **Only these servers**. The default is all servers in the workspace, including ones connected later. |
 | Let a client only read | Choose **Read** at sign-in. To hold every client on a server to reading, set its level to `viewer`. Every level can read logs. |
