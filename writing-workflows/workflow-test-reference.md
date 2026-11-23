@@ -4,7 +4,7 @@ description: Every field of a Dagu workflow test file, the fail-closed sources a
 
 # Workflow Test Reference
 
-This page lists every field of a workflow test file, the errors `dagu test` reports, and its report formats. [Workflow Tests](/writing-workflows/workflow-tests) shows how to write and run tests.
+This page lists every field of a workflow test file, the errors `dagu test` reports, and its report formats. [Workflow Tests](/writing-workflows/workflow-tests) shows how to write and run tests. `dagu schema test` prints the JSON Schema of the same fields.
 
 ## The Test File
 

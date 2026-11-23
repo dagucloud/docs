@@ -559,6 +559,8 @@ Dagu publishes a JSON Schema for test files, so an editor with YAML schema suppo
 dagu schema test > workflow-test.schema.json
 ```
 
+Write the file again after upgrading Dagu, since the schema follows the binary. `dagu schema test <path>` prints one part, such as `dagu schema test cases.expect` for the assertions.
+
 A running Dagu server also serves it at `/assets/workflow-test.schema.json`, under the server's base path, so an editor can use that URL instead of a file.
 
 Name the schema in the first line of a test file:
