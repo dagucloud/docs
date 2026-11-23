@@ -251,6 +251,7 @@ const fullSidebar = [
           { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
           { text: "Labels", link: "/writing-workflows/labels" },
           { text: "Tags", link: "/writing-workflows/tags" },
+          { text: "Workflow Tests", link: "/writing-workflows/workflow-tests" },
         ],
       },
       {
