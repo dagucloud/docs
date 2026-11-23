@@ -804,13 +804,13 @@ dagu dry --no-reuse report-pipeline.yaml
 
 ### `test`
 
-Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. Requires a Dagu release after v2.27.0.
+Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. A step the case lists under `real` runs its real action. Requires a Dagu release after v2.27.0.
 
 ```bash
 dagu test [options] [TEST_FILE_OR_DIRECTORY...]
 ```
 
-A file argument must end in `.test.yaml` or `.test.yml`. A directory argument runs every test file under it. Without an argument, every test file under the DAGs directory runs.
+A file argument must end in `.test.yaml` or `.test.yml`. A directory argument runs every test file under it, skipping directories whose names start with `.` and not following symbolic links. Without an argument, every test file under the DAGs directory runs. Selecting no test file is not an error and exits `0`.
 
 With `--init`, the one argument is a DAG file, and Dagu writes its test file beside it instead of running tests. See [Generate a Test File](/writing-workflows/workflow-tests#generate-a-test-file).
 

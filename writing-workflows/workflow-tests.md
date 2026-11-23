@@ -91,7 +91,7 @@ workflows/
 
 DAG discovery, the DAGs directory watcher, and DAG name lookup skip every file whose name ends in `.test.yaml` or `.test.yml`. The DAG list does not show a test file, the scheduler never runs one, and a change to one reloads nothing. `dagu start release.test` fails with a message that names `dagu test`.
 
-A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier).
+A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`, and update the DAGs that start it by its old name. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier).
 
 ## Running Tests
 
@@ -100,7 +100,7 @@ dagu test [flags] [<test file or directory>...]
 ```
 
 - A file argument must be a test file.
-- A directory argument runs every test file under it, at any depth. Directories whose names start with `.` are skipped.
+- A directory argument runs every test file under it, at any depth. Directories whose names start with `.` are skipped, and symbolic links are not followed.
 - Without an argument, `dagu test` runs every test file under the DAGs directory of the loaded configuration.
 - Test files run one at a time, in path order. The cases of a file run one at a time, in file order.
 - An invalid test file or case does not stop the others.
@@ -230,7 +230,7 @@ The report lists the steps it applied to, so the steps a test never scripted sta
 
 ### Preconditions
 
-A precondition that compares a value, such as `${steps.plan.outputs.risk}` with `expected`, evaluates as in a real run, against mocked outputs and the case's params and env. A precondition that runs a command, or an `eval` with command substitution, never runs under test. The test decides its outcome:
+A precondition that compares a value, such as `${steps.plan.outputs.risk}` with `expected`, evaluates as in a real run, against mocked outputs and the case's params and env. A precondition that runs a command, or an `eval` with command substitution, runs only on a [real step](#steps-that-run-for-real) whose mock sets no `precondition`. Otherwise the test decides its outcome:
 
 ```yaml
 # workflows/migrate.yaml

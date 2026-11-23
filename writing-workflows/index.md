@@ -84,7 +84,7 @@ dagu start --only report pipeline.yaml  # Run one step on its own
 dagu history pipeline                   # List recent runs
 ```
 
-To check failure branches, retries, and handlers without running commands, write a [workflow test](/writing-workflows/workflow-tests) beside the DAG and run it with `dagu test`.
+To check failure branches, retries, and handlers without running commands, write a [workflow test](/writing-workflows/workflow-tests) beside the DAG and run it with `dagu test pipeline.test.yaml`.
 
 Start the server to inspect the same workflows in the Web UI:
 
