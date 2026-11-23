@@ -1342,7 +1342,7 @@ Values are shown as read from the file, the environment, or the defaults, before
 
 ### `schema`
 
-Browse the JSON schema for DAG definitions, server configuration, or calendar files.
+Browse the JSON schema for DAG definitions, server configuration, calendar files, or workflow test files.
 
 ```bash
 dagu schema dag
@@ -1352,7 +1352,11 @@ dagu schema config
 dagu schema config server
 dagu schema calendar
 dagu schema calendar holidays
+dagu schema test
+dagu schema test cases.expect
 ```
+
+Save the test file schema for an editor with `dagu schema test > workflow-test.schema.json`. See [Editor Support](/writing-workflows/workflow-tests#editor-support).
 
 ### `calendar`
 

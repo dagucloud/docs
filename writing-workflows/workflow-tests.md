@@ -553,12 +553,18 @@ A step with side effects added to the DAG makes every case invalid until the tes
 
 ### Editor Support
 
-Dagu publishes a JSON Schema for test files, so an editor with YAML schema support validates and completes them. A running Dagu server serves it at `/assets/workflow-test.schema.json`, under the server's base path, and the Dagu repository holds it at `schemas/workflow-test.schema.json`.
+Dagu publishes a JSON Schema for test files, so an editor with YAML schema support validates and completes them. `dagu schema test` prints it; save it beside your DAGs:
+
+```bash
+dagu schema test > workflow-test.schema.json
+```
+
+A running Dagu server also serves it at `/assets/workflow-test.schema.json`, under the server's base path, so an editor can use that URL instead of a file.
 
 Name the schema in the first line of a test file:
 
 ```yaml
-# yaml-language-server: $schema=http://localhost:8080/assets/workflow-test.schema.json
+# yaml-language-server: $schema=./workflow-test.schema.json
 mocks:
   deploy: {}
 cases:
@@ -572,7 +578,7 @@ Or map every test file to it in VS Code `settings.json`, with the YAML extension
 ```json
 {
   "yaml.schemas": {
-    "http://localhost:8080/assets/workflow-test.schema.json": ["*.test.yaml", "*.test.yml"]
+    "./workflow-test.schema.json": ["*.test.yaml", "*.test.yml"]
   }
 }
 ```
