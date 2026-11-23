@@ -84,7 +84,7 @@ Upgrade the binary or image on each worker host as well. The [Workers page](/ser
 
 ## Upgrading from 2.27.0 or earlier
 
-A DAG file whose name ends in `.test.yaml` or `.test.yml` becomes a [workflow test](/writing-workflows/workflow-tests) file. It leaves the DAG list, the scheduler stops running it, and `dagu start` refuses it. Before the upgrade, rename such files, for example `smoke.test.yaml` to `smoke-test.yaml`, and update every DAG that starts one by its old name or path, such as the `dag` of a `dag.run` step.
+A DAG file whose name ends in `.test.yaml` or `.test.yml` becomes a [workflow test](/writing-workflows/workflow-tests) file. It leaves the DAG list, the scheduler stops running it, and `dagu start` refuses it. Before the upgrade, rename such files, for example `smoke.test.yaml` to `smoke-test.yaml`, and update everything that starts one by its old name or path, such as the `dag` of a `dag.run` step or a script that runs `dagu start`.
 
 To find them, read `paths.dags_dir` from `dagu config --values`, run as the server runs, with its configuration and environment. A service installed by the script installer keeps its data under `/var/lib/dagu` for a system service or `~/.dagu` for a user service. Then search that directory:
 

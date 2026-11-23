@@ -91,7 +91,7 @@ workflows/
 
 DAG discovery, the DAGs directory watcher, and DAG name lookup skip every file whose name ends in `.test.yaml` or `.test.yml`. The DAG list does not show a test file, the scheduler never runs one, and a change to one reloads nothing. `dagu start release.test` fails with a message that names `dagu test`.
 
-A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`, and update the DAGs that start it by its old name. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier).
+A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`, and update whatever starts it by its old name, such as a `dag.run` step or a script that runs `dagu start`. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier).
 
 ## Running Tests
 

@@ -84,7 +84,7 @@ macOS では、インストーラーが設定する launchd エージェント�
 
 ## 2.27.0 以前からのアップグレード {#upgrading-from-2-27-0-or-earlier}
 
-ファイル名が `.test.yaml` または `.test.yml` で終わる DAG ファイルは、[ワークフローテスト](/writing-workflows/workflow-tests)のファイルとして扱われるようになります。DAG 一覧に表示されなくなり、スケジューラも実行せず、`dagu start` も受け付けません。アップグレードの前に、このようなファイルの名前を変更してください(例: `smoke.test.yaml` を `smoke-test.yaml` に変更)。あわせて、古い名前やパスでその DAG を開始している DAG(`dag.run` ステップの `dag` など)も更新してください。
+ファイル名が `.test.yaml` または `.test.yml` で終わる DAG ファイルは、[ワークフローテスト](/writing-workflows/workflow-tests)のファイルとして扱われるようになります。DAG 一覧に表示されなくなり、スケジューラも実行せず、`dagu start` も受け付けません。アップグレードの前に、このようなファイルの名前を変更してください(例: `smoke.test.yaml` を `smoke-test.yaml` に変更)。あわせて、古い名前やパスでその DAG を開始しているもの(`dag.run` ステップの `dag` や、`dagu start` を実行するスクリプトなど)もすべて更新してください。
 
 対象のファイルを探すには、サーバーと同じ設定と環境で `dagu config --values` を実行し、`paths.dags_dir` を確認します。スクリプトインストーラーで登録したサービスは、システムサービスでは `/var/lib/dagu`、ユーザーサービスでは `~/.dagu` の下にデータを置きます。確認したディレクトリを検索します。
 
