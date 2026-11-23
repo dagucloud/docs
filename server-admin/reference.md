@@ -310,6 +310,7 @@ cloud:
   report: ""              # "off", "health", "runs", or "errors"; empty (default) = choose in the web UI
   remote_access: ""       # "off", "viewer", "operator", or "developer"; empty (default) = choose in the web UI
   # remote_approvals: true # Let Dagu Cloud calls decide waiting steps; omit (default) to choose in the web UI
+  run_key: ""             # Run key (drk_...) from Dagu Console; top-level runs report as job runs (v2.28 or later)
 
 # Git Sync
 git_sync:
@@ -617,6 +618,7 @@ Legacy YAML keys `scheduler.heartbeat_interval` and `scheduler.stale_threshold` 
 - `DAGU_CLOUD_REPORT` - What the server reports to Dagu Console: `off`, `health`, `runs`, or, on v2.22 or later, `errors` (`cloud.report`; default: empty, which reports nothing until an administrator chooses in the web UI). A set value, `off` included, fixes the level and the web UI shows it read-only. See [Monitoring](/overview/console-monitoring).
 - `DAGU_CLOUD_REMOTE_ACCESS` - Highest role a Dagu Cloud user gets on calls Dagu Cloud carries to this server: `off`, `viewer`, `operator`, or `developer` (`cloud.remote_access`; default: empty, which leaves the choice to an administrator in the web UI, where it starts at `off`). A set value fixes it.
 - `DAGU_CLOUD_REMOTE_APPROVALS` - Whether those calls, at `operator` or above, may approve, reject, or push back steps waiting for a person (`cloud.remote_approvals`; default: unset, which leaves the choice to the web UI, where it starts off). A set value fixes it.
+- `DAGU_CLOUD_RUN_KEY` - Run key from Dagu Console, starting with `drk_` (`cloud.run_key`; default: empty). With it, a top-level run of `dagu start`, `exec`, `retry`, or `restart` reports itself to Dagu Console as a job run, at `cloud.report`, or `runs` when that is empty. Steps never inherit it. Needs v2.28 or later. See [Job Runs](/overview/console-job-runs).
 
 ### External Secrets
 - `DAGU_SECRETS_VAULT_ADDRESS` - Default Vault server address for the `vault` secret provider

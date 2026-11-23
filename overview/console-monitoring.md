@@ -216,6 +216,7 @@ The **Usage** page, under **Account** in the console's sidebar, shows the runs s
 
 - [Alerts and Email](/overview/console-monitoring-alerts)
 - [Console Pages](/overview/console-monitoring-pages)
+- [Job Runs](/overview/console-job-runs): report runs from Kubernetes Jobs and CI steps with a run key
 - [Connect a Server](/overview/self-host-license#connect-a-server)
 - [Public Webhook URLs](/server-admin/authentication/public-webhook-urls)
 - [Remote Access from Dagu Cloud](/overview/cloud-remote-access)

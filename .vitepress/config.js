@@ -607,6 +607,7 @@ const fullSidebar = [
           { text: "Overview", link: "/overview/console-monitoring" },
           { text: "Alerts and Email", link: "/overview/console-monitoring-alerts" },
           { text: "Console Pages", link: "/overview/console-monitoring-pages" },
+          { text: "Job Runs", link: "/overview/console-job-runs" },
         ],
       },
       { text: "MCP", link: "/mcp/" },
