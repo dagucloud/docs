@@ -5,7 +5,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - Both formats: `start`, `stop`, `status`, `retry`, `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `browser writes`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `test`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `browser writes`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
 
 ## Global Options
 
@@ -801,6 +801,30 @@ dagu dry --name my_custom_name my-workflow.yaml  # Override DAG name
 dagu dry --profile prod my-workflow.yaml
 dagu dry --no-reuse report-pipeline.yaml
 ```
+
+### `test`
+
+Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. Requires a Dagu release after v2.27.0.
+
+```bash
+dagu test [options] [TEST_FILE_OR_DIRECTORY...]
+```
+
+A file argument must end in `.test.yaml` or `.test.yml`. A directory argument runs every test file under it. Without an argument, every test file under the DAGs directory runs.
+
+**Options:**
+- `--run` - Run only the cases whose name this RE2 regular expression matches
+- `--timeout` - Longest a case may run, such as `30s` (default: `5m`)
+- `--format, -f` - Report format: `text` (default) or `json`
+- `--keep` - Keep each case directory and print its path
+
+```bash
+dagu test workflows/
+dagu test --run 'failed build' --timeout 30s workflows/release.test.yaml
+dagu test --format json --keep workflows/
+```
+
+Exits `0` when every case passed, `1` when a case failed, and `2` when a test file, a case, or the arguments are invalid. See [Running Tests in CI](/writing-workflows/workflow-tests#running-tests-in-ci).
 
 ### `browser cache clear`
 
