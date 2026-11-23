@@ -812,16 +812,20 @@ dagu test [options] [TEST_FILE_OR_DIRECTORY...]
 
 A file argument must end in `.test.yaml` or `.test.yml`. A directory argument runs every test file under it. Without an argument, every test file under the DAGs directory runs.
 
+With `--init`, the one argument is a DAG file, and Dagu writes its test file beside it instead of running tests. See [Generate a Test File](/writing-workflows/workflow-tests#generate-a-test-file).
+
 **Options:**
 - `--run` - Run only the cases whose name this RE2 regular expression matches
 - `--timeout` - Longest a case may run, such as `30s` (default: `5m`)
 - `--format, -f` - Report format: `text` (default) or `json`
 - `--keep` - Keep each case directory and print its path
+- `--init` - Write the test file of the DAG file given as the one argument, with a mock for every step that needs one and one case that expects the result of a run with those mocks. It never replaces a test file and takes no `--run`, `--keep`, or `--format json`
 
 ```bash
 dagu test workflows/
 dagu test --run 'failed build' --timeout 30s workflows/release.test.yaml
 dagu test --format json --keep workflows/
+dagu test --init workflows/release.yaml
 ```
 
 Exits `0` when every case passed, `1` when a case failed, and `2` when a test file, a case, or the arguments are invalid. See [Running Tests in CI](/writing-workflows/workflow-tests#running-tests-in-ci).

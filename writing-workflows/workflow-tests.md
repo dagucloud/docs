@@ -515,9 +515,37 @@ Test files are committed with the DAGs, so their `secrets` hold fake values. A s
 
 ### Generate a Test File
 
-::: info Coming in a later release
-`dagu test --init <dag file>` writes the DAG's test file beside it, with a mock for every source the fail-closed rule needs and one case named `initial` whose `expect` holds the result of a run with those mocks. It refuses to replace an existing test file. It ships in a release after `dagu test` itself.
-:::
+`dagu test --init` writes the test file of a DAG beside it. With `workflows/release.yaml` from the quick start and no test file beside it:
+
+```bash
+dagu test --init workflows/release.yaml
+```
+
+It prints `workflows/release.test.yaml` and writes:
+
+```yaml
+mocks:
+  build:
+    outputs:
+      image_tag: ""
+  deploy: {}
+cases:
+  - name: initial
+    expect:
+      status: succeeded
+      steps:
+        build: succeeded
+        deploy: succeeded
+```
+
+- The mocks and `params` are the ones the [fix](#the-fix-ready-to-paste) would print, plus a value for each required param without a default.
+- The `initial` case expects what a run with those mocks did: the run status, every step's and handler's status, attempts above 1, and any notifications.
+- It never replaces a test file. With one beside the DAG, it writes nothing and exits 2.
+- `--timeout` bounds the run. `--run`, `--keep`, and `--format json` are rejected with it.
+
+The written case records what the neutral mocks did, not what the DAG should do. On the [agent pipeline](#example-an-agent-pipeline), `risk: ""` matches no route, so `initial` expects `review` and `merge` to be `skipped`. Set the values each scenario needs, add cases, and remove the step entries a case does not care about.
+
+When the case is still invalid, such as a form value marked `# replace with a value the form accepts`, the file expects `status: succeeded`, the case's report follows the path, and `dagu test --init` exits 2.
 
 ### When the DAG Changes
 
