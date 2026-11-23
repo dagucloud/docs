@@ -77,8 +77,6 @@ Monitoring is off by default. Upgrading or connecting a server sends nothing bey
 
 Dagu also asks on its own. On a server that was connected without choosing a level, such as with a server key, administrators see a **Monitor this server from Dagu Console** notice above other pages until they choose a level or dismiss it.
 
-A server whose administrators chose **Health and run status** in the web UI before Dagu v2.22 offers error messages once, with a **Show why runs fail in Dagu Console** notice. **Send error messages** opens the dialog with **Health, run status, and error messages** selected. Choosing a level, cancelling the dialog, or dismissing the notice ends the offer. A server whose level is set in configuration never shows it.
-
 The choice applies at once, without a restart, and is kept in the data directory (`cloud/report-settings.json` under `paths.data_dir`). Persist that directory in containers, as you do for the [license](/overview/self-host-license#keep-the-server-s-identity).
 
 The **Monitoring** section on **Plan & features** shows:
