@@ -73,7 +73,7 @@ Workspace owners open **Audit log** in Dagu Console.
 - **Filters**: by server, project, time range, category, action, user, and result.
 - **Download**: saves the entries that match the filters as a JSON Lines file, up to 10 times an hour.
 - **Retention**: 90 days after they arrive, or longer on a custom plan. Deleting the workspace deletes them.
-- **Location**: Console stores them in the United States, on Google Cloud in us-central1.
+- **Location**: Console stores them in the United States.
 
 ## Limits
 
