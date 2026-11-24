@@ -613,6 +613,7 @@ const fullSidebar = [
       { text: "MCP", link: "/mcp/" },
       { text: "Act on Runs and Remote Access", link: "/overview/cloud-remote-access" },
       { text: "Members", link: "/overview/console-members" },
+      { text: "Audit Logs", link: "/overview/console-audit-logs" },
       { text: "Account", link: "/overview/console-account" },
       { text: "Plans and Licenses", link: "/overview/self-host-license" },
       { text: "Licensing FAQ", link: "/overview/licensing-faq" },

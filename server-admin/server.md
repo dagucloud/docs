@@ -781,6 +781,12 @@ The 7-day default is short for most audit requirements. Set `audit.retention_day
 
 Audit files are daily JSON Lines at `logs/admin/audit/YYYY-MM-DD.jsonl`. To forward them to your SIEM, tail them with a log shipper such as Fluent Bit.
 
+To keep a copy off the server, set `cloud.audit` to send the entries to Dagu Console, which keeps them for 90 days. See [Audit Logs in Dagu Console](/overview/console-audit-logs).
+
+### Masking
+
+From v2.28, every entry is masked when it is written: the values of secrets in Dagu's own store, and common token formats such as GitHub, AWS, and Slack tokens, are replaced. Secrets from external providers, such as Vault, are not.
+
 ## Event Store
 
 The centralized event store persists operational events such as DAG-run outcomes and LLM usage records. It is enabled by default in `dagu server` and `dagu start-all`.
