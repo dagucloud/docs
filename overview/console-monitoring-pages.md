@@ -75,6 +75,20 @@ Each run has a permalink to a page with its status, start, duration, failed step
 
 With the server's [remote access](/overview/cloud-remote-access#act-on-runs-from-dagu-console) on, the page also reads a failed step's log, retries or stops the run, and approves or rejects a step waiting for a person, as the member's server role allows.
 
+### Steps
+
+When the server sends steps, on Dagu v2.28 or later, the run's page lists them, up to 200:
+
+- **Step**: its name, its retries, and a bar that places it on the run's timeline, with a tick where its usual time ends.
+- **Status**, **Started**, and **Duration**, which counts up while the step runs.
+- **Usually**: how long 95% of the step's successful runs took at most, estimated from duration ranges as a workflow's p95 is, so it shows as approximate (≈).
+  - The usual time covers the last 14 days, or the last 90 for a step with fewer than 10 successful runs in 14 days. On free monitoring, it covers the last 7 days only.
+  - It shows once 10 successful runs are counted. Runs past the daily run limit count too.
+  - The run on the page is left out of its own steps' usual times.
+- **N× usual**: a step that ran past twice its usual time, and at least a minute longer, is flagged with how many times its usual time it took. A step still running is flagged as soon as it passes.
+
+Only successful steps add to a step's usual time, so a step that fails fast does not shorten it.
+
 ## Alerts
 
 ![Open alerts: a run running too long, a muted workflow's failure, a server that stopped reporting, and an acknowledged failure, with when each was notified and where](/monitoring/alerts-light.png)
@@ -110,6 +124,7 @@ A workflow's name in **Insights**, **Runs**, **Alerts**, or a server's **Workflo
 - **Details**: the workflow's key, server, last run, open alert, and whether it is muted.
 - Over 7, 30, or 90 days, or 7 on free monitoring: **Runs**, **Failed**, **Success**, and **p95**, with **Runs per day**, **Success rate**, and **Duration** (p50 and p95) charts.
 - **Recent runs**: the last 10 finished runs. **View all** lists the rest on **Runs**.
+- **Time by step**: over the same days, each step's finished runs, the p50 and p95 of its successful runs, its retries, and its total time, the most time first, up to 20 steps. Runs past the daily run limit count too. It fills in once servers on Dagu v2.28 or later send steps.
 - **Failures by step**: failed, aborted, and rejected runs over the last 30 days on a trial, Team, or Pro, or 7 on free monitoring, by the step they failed at.
 - For owners: **Mute** or **Unmute**.
 
