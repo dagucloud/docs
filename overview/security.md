@@ -8,7 +8,7 @@ Workflows run only on your servers and their workers. Dagu contains no telemetry
 
 - **Nothing connects in.** Every connection is opened by your server, over outbound HTTPS. No inbound port, public address, or tunnel is needed.
 - **Your server sets the limit.** Dagu Cloud cannot turn a feature on or raise what it allows.
-- **Full logs stay home.** Dagu Cloud never stores full logs, outputs, parameters, or secret values. Monitoring stores failed steps' error messages only at the level that names them.
+- **Full logs stay home.** Dagu Cloud never stores full logs, outputs, or secret values. Monitoring stores failed steps' error messages only at the level that names them. Run parameters and terminal commands reach it only in audit entries, and only when an administrator turns on sending them.
 
 ## Connections
 
@@ -29,6 +29,13 @@ Off until you choose a level. The process that holds the license reports to `con
 - **Kept**: runs for 30 days, daily totals for 13 months, and resolved alerts for 90 days. A server silent for 30 days is deleted with what it reported.
 - Alert emails and chat messages carry the workflow, server, run ID, and failed steps, and at the error-message level the end of the first error. Emails come from `no-reply@dagu.sh`.
 
+### Audit logs
+
+Off until you set `cloud.audit`. `dagu server` or `dagu start-all` sends to `console.dagu.sh`. See [Audit Logs](/overview/console-audit-logs).
+
+- **Sent**: the server's audit entries: who did what, when, from which IP address, and through the web UI, the API, or MCP, with details such as a run's parameters or a terminal command. The values of secrets in Dagu's store and common token formats are masked before they leave.
+- **Kept**: for 90 days after they arrive, or longer on a custom plan, in the United States. Only the workspace's owners can read them.
+
 ### Public webhook URLs
 
 Off until you give a webhook a public URL. The scheduler holding the scheduler lock keeps a WebSocket to `relay.dagu.sh`. See [Public Webhook URLs](/server-admin/authentication/public-webhook-urls).
@@ -41,7 +48,7 @@ Off until you give a webhook a public URL. The scheduler holding the scheduler l
 Off until an administrator turns it on. Each `dagu server` or `dagu start-all` process keeps a WebSocket to `relay.dagu.sh`. See [Remote Access from Dagu Cloud](/overview/cloud-remote-access).
 
 - **Sent**: answers to the calls MCP clients make, within the server's level. Dagu Cloud passes them on without storing them.
-- **Kept**: nothing. Dagu Cloud keeps no log of calls. Each server records the calls it receives in its own audit log.
+- **Kept**: nothing. Dagu Cloud keeps no log of calls. Each server records the calls it receives in its own audit log, which reaches Dagu Cloud only when the server sends its [audit logs](#audit-logs).
 
 ### Upgrade check and tracing
 
@@ -54,7 +61,7 @@ Allow outbound HTTPS (port 443) for the features you use. Workers need nothing.
 
 | Feature | Opened by | Host |
 | --- | --- | --- |
-| License check-in, monitoring | `dagu server` or `dagu start-all` | `console.dagu.sh` |
+| License check-in, monitoring, audit logs | `dagu server` or `dagu start-all` | `console.dagu.sh` |
 | Public webhook URLs | The scheduler holding the scheduler lock | `console.dagu.sh`, `relay.dagu.sh` |
 | Remote access | Each process that serves the web UI | `console.dagu.sh`, `relay.dagu.sh` |
 

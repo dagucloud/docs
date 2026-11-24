@@ -48,9 +48,10 @@ Each entry carries:
 - the user ID and name;
 - the IP address;
 - the resource, workspace, credential, and MCP tool involved;
-- its details.
+- where it came from, such as the web UI, the API, MCP, or the CLI, and a correlation ID that ties an MCP call to the changes it made;
+- its details, which can include a run's parameters or a terminal command.
 
-A field longer than its limit is cut, and the entry lists it under `truncated`. Names and identifiers are limited to 256 bytes each, and a whole entry to 16 KiB.
+A field longer than its limit is cut, and the entry lists it under `truncated`. Names and identifiers are limited to 256 bytes each, the category and action to 64, and a whole entry to 16 KiB.
 
 ### Masking
 
@@ -68,10 +69,30 @@ Console's copy is not tamper-proof: a server administrator can still forge or dr
 
 Workspace owners open **Audit log** in Dagu Console.
 
-- **What it shows**: entries from every server that sends them, and changes to the workspace's members and servers made in Console, newest first.
+- **What it shows**: entries from every server that sends them, and the changes made in Console to the workspace, such as to its members, servers, plan, and alert settings, and each download or purge of the log, newest first.
 - **Filters**: by server, project, time range, category, action, user, and result.
 - **Download**: saves the entries that match the filters as a JSON Lines file, up to 10 times an hour.
-- **Retention**: entries are kept for 90 days.
+- **Retention**: 90 days after they arrive, or longer on a custom plan. Deleting the workspace deletes them.
+- **Location**: Console stores them in the United States, on Google Cloud in us-central1.
+
+## Limits
+
+Team and Pro keep a copy of each server's entries within these limits:
+
+| Limit | Value |
+| --- | --- |
+| Daily quota | 5,000 entries and about 10 MB per server the plan pays for, shared by the workspace's servers. A trial gets a quarter of one server's. The day is UTC |
+| Failures | Failed and denied entries may take a fifth of the daily quota. Past that, they are counted, not stored |
+| Pace | One request every 5 seconds per server, in bursts of up to 10 |
+| Request | Up to 1,000 entries and 1 MiB compressed |
+| Entry | 16 KiB as JSON. Names and identifiers 256 bytes each, category and action 64 |
+
+- **Past the daily quota**: Console holds the workspace's servers back until 00:00 UTC. Their entries wait in the local files and go out then. If local retention deletes them first, they show as a Deleted gap.
+- **A request that starts below the quota is stored whole**, so a day can end a little past it.
+- **Gaps count as entries** toward the pace and the quota.
+- **Failures past the cap**: their number is kept per server and day, and the changes after them are still stored.
+
+Longer retention, higher volume, and streaming to your SIEM or storage come with a custom plan. [Contact us](https://dagu.sh/contact).
 
 ## Delivery and Gaps
 

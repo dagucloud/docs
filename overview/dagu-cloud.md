@@ -25,6 +25,7 @@ MCP clients ───── MCP ───────┘        │     ──�
 | **Alert** | One alert per problem: a failed workflow, a missed deadline, a run far past its usual time, a server that stopped reporting, a disk almost full, too few workers. By email, and on a paid plan to chat channels, PagerDuty, or a webhook. See [Alerts and Email](/overview/console-monitoring-alerts). |
 | **Act** | Read a failed step's log, retry or stop a run, and approve or reject a step that waits for a person, from Dagu Console. See [Act on Runs from Dagu Console](/overview/cloud-remote-access#act-on-runs-from-dagu-console). |
 | **MCP** | One MCP endpoint, `https://console.dagu.sh/mcp`, for every server in a workspace. MCP clients read runs and logs, start and retry workflows, and edit DAGs, as each member's role and each server allow. See [MCP](/mcp/). |
+| **Audit** | Each server's audit entries, kept 90 days beside the changes made in Console, so the record of who did what outlives the server and its disk. Owners filter and download them. See [Audit Logs](/overview/console-audit-logs). |
 | **Team** | Up to 10 people per workspace on Team or Pro, each with their own sign-in, and server roles that bound what each person and the MCP clients they connect may do. See [Dagu Console Members](/overview/console-members). |
 | **Licenses** | On Team or Pro, or in a trial, each connected server gets its license from Dagu Cloud, which turns on SSO, RBAC, audit logging, and incident routing on the server. A server on free monitoring stays on Community. See [Plans and Licenses](/overview/self-host-license). |
 
@@ -38,6 +39,7 @@ MCP clients ───── MCP ───────┘        │     ──�
 
 - Workflows, their commands, and their secrets run only on your servers. Dagu Cloud never runs them.
 - Reports carry metadata, and the error messages of failed steps at the level that names them. Full logs, outputs, parameters, and secrets are [never sent](/overview/console-monitoring#never-sent).
+- Audit entries are sent only after an administrator sets `cloud.audit`. Their details can carry run parameters and terminal commands, with known secrets masked. See [Audit Logs](/overview/console-audit-logs#what-is-sent).
 - Remote access is off until a server's administrator turns it on, and the server sets the highest role any call gets. Each call is signed for that request alone and recorded in the server's own audit log. See [Security](/overview/security).
 - Servers with offline licenses never connect to Dagu Cloud.
 
@@ -50,6 +52,7 @@ MCP clients ───── MCP ───────┘        │     ──�
 | Alerts | Email to owners and admins | Email, chat, PagerDuty, webhook | Email, chat, PagerDuty, webhook |
 | Run history | 7 days | 30 days | 30 days |
 | Machine CPU, memory, and disk, with alerts | No | Yes | Yes |
+| Server audit logs in Console | No | 90 days | 90 days |
 | Act on runs | No | Yes | Yes |
 | MCP clients | Read what the server reports | Also read logs, act on runs, and edit DAGs | Also read logs, act on runs, and edit DAGs |
 | People | Just you | Up to 10 | Up to 10 |

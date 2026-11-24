@@ -40,6 +40,7 @@ A Community server in Dagu Cloud uses free monitoring. [Free and Paid](/overview
 | Alert rules and deadlines per workspace, server, and workflow | - | ✓ | ✓ |
 | Machine CPU, memory, and disk | - | ✓ | ✓ |
 | Weekly summary | - | ✓ | ✓ |
+| [Server audit logs, kept 90 days](/overview/console-audit-logs) | - | ✓ | ✓ |
 | [People in a Dagu Console workspace](/overview/console-members) | △ Owner only | Up to 10 | Up to 10 |
 | Public webhook URLs through Dagu Cloud | △ 1, with free monitoring | Up to 1,000 per server | Up to 1,000 per server |
 | Remote access from Dagu Cloud (MCP) | - | ✓ | ✓ |
