@@ -771,6 +771,8 @@ When enabled, the following events are recorded:
 - **Secrets**: Secret changes and [`dagu secret resolve`](/getting-started/cli#secret) reads
 - **Terminal**: Shell command executions
 
+Each entry is masked before it is written: the values of `dagu-managed` secrets and common token formats, such as GitHub, AWS, and Slack tokens, are replaced with `*******`. An entry whose secret values could not be loaded is still written and masked with the values loaded last, but lacks `"masked": true`.
+
 ### Retention
 
 Audit logs are written as daily records and can be reviewed in the Web UI at **Settings > Audit Logs**. Keep the admin log directory on persistent storage if you want that history to survive restarts.
@@ -780,6 +782,23 @@ Audit logs are written as daily records and can be reviewed in the Web UI at **S
 The 7-day default is short for most audit requirements. Set `audit.retention_days` to the period your policy requires, or `0` to keep every file.
 
 Audit files are daily JSON Lines at `logs/admin/audit/YYYY-MM-DD.jsonl`. To forward them to your SIEM, tail them with a log shipper such as Fluent Bit.
+
+### Send to Dagu Console
+
+A server connected to Dagu Console with a license that includes audit logs can keep a copy of its audit entries in Dagu Console, so the record of who did what outlives the server and its local retention. Set `cloud.audit`:
+
+```yaml
+cloud:
+  audit: changes   # off (default), changes, or all
+```
+
+- `changes` sends every entry but successful reads: MCP resource reads and calls to read-only tools that succeeded. Failed and denied reads, sign-ins, terminal commands, and every change are sent.
+- `all` sends every entry.
+- Of an MCP call, only its result is sent, not its `received` and `started` entries.
+
+Only entries with `"masked": true` are sent, so entries written before masking never leave the server. Each entry is masked again with the current secret values before it is sent. Local audit files and the Audit Logs page are unchanged, and one process per installation sends. Dagu Console stores the entries in the United States for the workspace's audit retention.
+
+When an entry cannot be sent, as when a file is removed by retention before it was read, Dagu Console records a gap for the time range. On SIGINT or SIGTERM, the server keeps sending for `cloud.audit_drain_timeout` (default `25s`) and reports what is left as a gap; those entries go after the next start if the disk survives. The **Plan & features** page shows the setting.
 
 ## Event Store
 

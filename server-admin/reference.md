@@ -308,6 +308,8 @@ monitoring:
 # Dagu Console Monitoring
 cloud:
   report: ""              # "off", "health", "runs", or "errors"; empty (default) = choose in the web UI
+  audit: ""               # "off" (default), "changes", or "all": audit entries this server sends to Dagu Console
+  audit_drain_timeout: "25s"  # On SIGINT/SIGTERM, how long to keep sending the audit entries left (0 = stop at once)
   remote_access: ""       # "off", "viewer", "operator", or "developer"; empty (default) = choose in the web UI
   # remote_approvals: true # Let Dagu Cloud calls decide waiting steps; omit (default) to choose in the web UI
   run_key: ""             # Run key (drk_...) from Dagu Console; top-level runs report as job runs (v2.28 or later)
@@ -616,6 +618,8 @@ Legacy YAML keys `scheduler.heartbeat_interval` and `scheduler.stale_threshold` 
 
 ### Dagu Console Monitoring
 - `DAGU_CLOUD_REPORT` - What the server reports to Dagu Console: `off`, `health`, `runs`, or, on v2.22 or later, `errors` (`cloud.report`; default: empty, which reports nothing until an administrator chooses in the web UI). A set value, `off` included, fixes the level and the web UI shows it read-only. See [Monitoring](/overview/console-monitoring).
+- `DAGU_CLOUD_AUDIT` - Which audit entries the server sends to Dagu Console: `off`, `changes` (every entry but successful reads, which are MCP resource reads and read-only tool calls that succeeded), or `all` (`cloud.audit`; default: `off`). It takes effect with `audit.enabled`, on a server connected to Dagu Console with a license that includes audit logs. Dagu Console stores the entries in the United States for the workspace's audit retention. See [Send to Dagu Console](/server-admin/server#send-to-dagu-console).
+- `DAGU_CLOUD_AUDIT_DRAIN_TIMEOUT` - How long a server stopping on SIGINT or SIGTERM keeps sending the audit entries left (`cloud.audit_drain_timeout`; default: `25s`, which fits Kubernetes' default 30-second grace period). `0` stops at once; any other value is at least `5s`. Its last 3 seconds report the entries still left as a gap.
 - `DAGU_CLOUD_REMOTE_ACCESS` - Highest role a Dagu Cloud user gets on calls Dagu Cloud carries to this server: `off`, `viewer`, `operator`, or `developer` (`cloud.remote_access`; default: empty, which leaves the choice to an administrator in the web UI, where it starts at `off`). A set value fixes it.
 - `DAGU_CLOUD_REMOTE_APPROVALS` - Whether those calls, at `operator` or above, may approve, reject, or push back steps waiting for a person (`cloud.remote_approvals`; default: unset, which leaves the choice to the web UI, where it starts off). A set value fixes it.
 - `DAGU_CLOUD_RUN_KEY` - Run key from Dagu Console, starting with `drk_` (`cloud.run_key`; default: empty). With it, a top-level run of `dagu start`, `exec`, `retry`, or `restart` reports itself to Dagu Console as a job run, at `cloud.report`, or `runs` when that is empty. Steps never inherit it. Needs v2.28 or later. See [Job Runs](/overview/console-job-runs).
