@@ -73,14 +73,14 @@ Runs in progress come first, under **In progress** with how long each has run so
 
 Selecting a run's row opens its page, a permalink with its status, start, duration, failed steps, and attempts. Hold Cmd or Ctrl, or use the middle button, to open it in a new tab. When the server [sends errors](/overview/console-monitoring#error-messages), the page shows **Why it failed**: each failed step's error in full, with **Copy**. Without them, it says how to have the server send them. A run in progress on a server that has not reported for 5 minutes shows **Unknown**. A workflow's name opens [its page](#workflow-pages).
 
-With the server's [remote access](/overview/cloud-remote-access#act-on-runs-from-dagu-console) on, the page also reads a failed step's log, retries or stops the run, and approves or rejects a step waiting for a person, as the member's server role allows.
+With the server's [remote access](/overview/cloud-remote-access#act-on-runs-from-dagu-console) on, the page also reads a failed step's log, retries or stops the run, and approves or rejects a step waiting for a person, as the member's server role allows. A waiting step's prompt shows as Markdown, and a long one shows its start until **Show all**.
 
 ### Steps
 
 When the server sends steps, on Dagu v2.28 or later, the run's page lists them, up to 200:
 
-- **Step**: its name, its retries, and a bar that places it on the run's timeline, with a tick where its usual time ends.
-- **Status**, **Started**, and **Duration**, which counts up while the step runs.
+- **Step**: its name and its retries.
+- **Status**, **Started**, and **Duration**, which counts up while the step runs, and reads <1s for a step that took less than a second.
 - **Usually**: how long 95% of the step's successful runs took at most, estimated from duration ranges as a workflow's p95 is, so it shows as approximate (≈).
   - The usual time covers the last 14 days, or the last 90 for a step with fewer than 10 successful runs in 14 days. On free monitoring, it covers the last 7 days only.
   - It shows once 10 successful runs are counted. Runs past the daily run limit count too.
