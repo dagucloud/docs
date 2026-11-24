@@ -93,7 +93,7 @@ For owners. Lists where the workspace's alerts go: the alert emails, and each [c
 
 ![Insights over the last 30 days: runs, failures, and success rate against the previous period, runs per day, success rate, and each workflow with its p95 duration and change](/monitoring/insights-light.png)
 
-**Insights** shows how the workspace's workflows went over the last **7**, **30**, or **90** days, today's runs so far included, against as many days before. Free monitoring offers 7 or 30.
+**Insights** shows how the workspace's workflows went over the last **7**, **30**, or **90** days, today's runs so far included, against as many days before. Free monitoring offers 7.
 
 - **Runs**, **Failed**, and **Success**, each with its change against the previous period. A change is shown only when both periods have at least 10 runs.
 - **Runs per day**, succeeded and failed, and **Success rate**. **Show as table** lists the same numbers.
@@ -108,7 +108,7 @@ Filter by **Server** and **Workflow**.
 A workflow's name in **Insights**, **Runs**, **Alerts**, or a server's **Workflows** tab opens its page:
 
 - **Details**: the workflow's key, server, last run, open alert, and whether it is muted.
-- Over 7, 30, or 90 days: **Runs**, **Failed**, **Success**, and **p95**, with **Runs per day**, **Success rate**, and **Duration** (p50 and p95) charts.
+- Over 7, 30, or 90 days, or 7 on free monitoring: **Runs**, **Failed**, **Success**, and **p95**, with **Runs per day**, **Success rate**, and **Duration** (p50 and p95) charts.
 - **Recent runs**: the last 10 finished runs. **View all** lists the rest on **Runs**.
 - **Failures by step**: failed, aborted, and rejected runs over the last 30 days on a trial, Team, or Pro, or 7 on free monitoring, by the step they failed at.
 - For owners: **Mute** or **Unmute**.

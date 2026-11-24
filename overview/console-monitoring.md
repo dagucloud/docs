@@ -8,7 +8,7 @@ Connect your Dagu servers to [Dagu Console](https://console.dagu.sh) and see all
 
 - **Every server at a glance**: which servers report, what failed today, open alerts, and what needs attention, such as a stopped scheduler or a server that went silent.
 - **Alerts by email, chat, PagerDuty, or webhook**: an email to owners and admins when a workflow fails and when it recovers, and when a server stops reporting. On a Team or Pro plan, or in a trial, also when a workflow misses its deadline or runs far past its usual time, a scheduled run does not start, or a server's scheduler stops, its disk is almost full, its memory or CPU use stays high, a queue stalls, or too few workers are live, with [rules](/overview/console-monitoring-alerts#alert-rules) for each workflow and server, to the members and addresses you choose, and to Slack, Microsoft Teams, Google Chat, and Discord channels, PagerDuty services, and webhooks. Each alert links to its run.
-- **Trends**: runs, success rate, and p50 and p95 duration for each workflow over 7 or 30 days, and over 90 days on a Team or Pro plan or in a trial.
+- **Trends**: runs, success rate, and p50 and p95 duration for each workflow over 7 days, and over 30 or 90 days on a Team or Pro plan or in a trial.
 - **Full logs stay on the server**: reporting is opt-in, outbound HTTPS only, and carries metadata, plus failed steps' [error messages](#error-messages) only at the level that names them. Full logs, outputs, parameters, and secrets are [never sent](#never-sent), and each server shows the exact JSON it last sent.
 - **Free for one server**: a workspace without a plan monitors one server at no cost, with the limits in [Free and Paid](#free-and-paid).
 
@@ -42,7 +42,7 @@ A workspace without a plan or trial monitors one server for free. Free monitorin
 | Stopped-reporting alert | After 25 minutes without a report | After 10 minutes without a report |
 | Finished runs stored | 100 per day | 2,000 per day |
 | Run history shown | 7 days | 30 days |
-| Insights and workflow pages | 7 or 30 days | 7, 30, or 90 days |
+| Insights and workflow pages | 7 days | 7, 30, or 90 days |
 | Alert emails | Owners and admins | Owners, admins, and the members and addresses you add |
 | Chat, PagerDuty, and webhook destinations | None | Up to 10 per workspace, each with [the alerts it gets](/overview/console-monitoring-alerts#which-alerts-a-destination-gets) |
 | [Alert rules](/overview/console-monitoring-alerts#alert-rules) and deadlines | The defaults | Per workspace, server, and workflow |
@@ -133,6 +133,7 @@ Sent at `health`, `runs`, and `errors`:
 Sent at `runs` and `errors`:
 
 - **Each top-level run that finishes**, once: the DAG name, run ID, attempt ID, status (succeeded, partially succeeded, failed, aborted, or rejected), how it was triggered (scheduler, manual, webhook, retry, or catchup), when it was queued, started, and finished, and the names of its failed steps, up to 50.
+- **Each run's steps**, on Dagu v2.28 or later: each step's name, status, when it started and finished, and how many times it was retried, up to 200 steps per run. A finished run sends them with its finish, and a run in progress with its status, read at most once a minute. Dagu Console lists them on the run's page.
 - **The runs in progress**: the runs queued, running, or waiting, with the same fields up to the start time. A report lists up to 200 of them, the most recently started or queued first, and the total count.
 - **Each queue that holds queued or running runs**: its name, how many runs are queued and running, how many may run at once, when the next run in line was queued, and why that run cannot start when no worker can take it. A report lists up to 256 queues, those waiting for a worker first, and the total count. Sent by Dagu v2.25.3 or later.
 - **Each distributed worker**, on a paid plan or trial, with Dagu v2.25.7 or later: its ID, host, labels, how many runs it runs of how many it may, its last heartbeat, and how busy its machine is, as for the server's own. A report lists up to 256 of them, by ID, and the count covers them all.
