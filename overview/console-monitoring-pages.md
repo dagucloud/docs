@@ -64,14 +64,14 @@ The address this server's Dagu opens at in your browser, such as `https://dagu.e
 
 ## Runs
 
-Runs in progress come first, then finished runs, newest recorded first. Filter by:
+Runs in progress come first, under **In progress** with how long each has run so far, whatever the range. Finished runs follow under **Finished**, newest recorded first. Filters apply as soon as you change them:
 
 - **Server**
-- **Workflow**
+- **Workflow**: type part of a workflow's name to list the runs of every workflow whose name holds it, then press Enter. Or pick one of the workflows suggested as you type to list that workflow's runs only. With nothing typed, the suggestions are the workflows that ran most recently.
 - **Status**: Failed (including aborted and rejected), Succeeded (including partially succeeded), Running, Waiting, or Queued
-- Range: **Last hour**, **Last 24 hours** (default), **Last 7 days**, **Last 14 days**, or, on a trial, Team, or Pro, **Last 30 days**, by when Dagu Console recorded the run. Free monitoring shows up to **Last 7 days**.
+- Range: **Last hour**, **Last 24 hours** (default), **Last 7 days**, **Last 14 days**, or, on a trial, Team, or Pro, **Last 30 days**, by when Dagu Console recorded the finished run. Free monitoring shows up to **Last 7 days**.
 
-Each run has a permalink to a page with its status, start, duration, failed steps, and attempts. When the server [sends errors](/overview/console-monitoring#error-messages), the page shows **Why it failed**: each failed step's error in full, with **Copy**. Without them, it says how to have the server send them. A run in progress on a server that has not reported for 5 minutes shows **Unknown**. A workflow's name opens [its page](#workflow-pages).
+Selecting a run's row opens its page, a permalink with its status, start, duration, failed steps, and attempts. Hold Cmd or Ctrl, or use the middle button, to open it in a new tab. When the server [sends errors](/overview/console-monitoring#error-messages), the page shows **Why it failed**: each failed step's error in full, with **Copy**. Without them, it says how to have the server send them. A run in progress on a server that has not reported for 5 minutes shows **Unknown**. A workflow's name opens [its page](#workflow-pages).
 
 With the server's [remote access](/overview/cloud-remote-access#act-on-runs-from-dagu-console) on, the page also reads a failed step's log, retries or stops the run, and approves or rejects a step waiting for a person, as the member's server role allows.
 
