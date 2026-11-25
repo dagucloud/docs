@@ -819,13 +819,15 @@ With `--init`, the one argument is a DAG file, and Dagu writes its test file bes
 - `--timeout` - Longest a case may run, such as `30s` (default: `5m`)
 - `--format, -f` - Report format: `text` (default) or `json`
 - `--keep` - Keep each case directory and print its path
-- `--init` - Write the test file of the DAG file given as the one argument, with a mock for every step that needs one and one case that expects the result of a run with those mocks. It never replaces a test file and takes no `--run`, `--keep`, or `--format json`
+- `--init` - Write the test file of the DAG file given as the one argument, with a mock for every step that needs one and one case that expects the result of a run with those mocks. It never replaces a test file and takes no `--update`, `--run`, `--keep`, or `--format json`
+- `--update` - Run the selected cases and rewrite each case's `expect` from its run, for review as a diff. It never removes an assertion. It combines with `--run`, `--timeout`, `--keep`, and `--format`, and not with `--init`. See [Update Expectations After a Change](/writing-workflows/workflow-tests#update-expectations-after-a-change)
 
 ```bash
 dagu test workflows/
 dagu test --run 'failed build' --timeout 30s workflows/release.test.yaml
 dagu test --format json --keep workflows/
 dagu test --init workflows/release.yaml
+dagu test --update workflows/release.test.yaml
 ```
 
 Exits `0` when every case passed, `1` when a case failed, and `2` when a test file, a case, or the arguments are invalid. See [Running Tests in CI](/writing-workflows/workflow-tests#running-tests-in-ci).

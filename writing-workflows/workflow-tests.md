@@ -541,11 +541,79 @@ cases:
 - The mocks and `params` are the ones the [fix](#the-fix-ready-to-paste) would print, plus a value for each required param without a default.
 - The `initial` case expects what a run with those mocks did: the run status, every step's and handler's status, attempts above 1, and any notifications.
 - It never replaces a test file. With one beside the DAG, it writes nothing and exits 2.
-- `--timeout` bounds the run. `--run`, `--keep`, and `--format json` are rejected with it.
+- `--timeout` bounds the run. `--update`, `--run`, `--keep`, and `--format json` are rejected with it.
 
 The written case records what the neutral mocks did, not what the DAG should do. On the [agent pipeline](#example-an-agent-pipeline), `risk: ""` matches no route, so `initial` expects `review` and `merge` to be `skipped`. Set the values each scenario needs, add cases, and remove the step entries a case does not care about.
 
 When the case is still invalid, such as a form value marked `# replace with a value the form accepts`, the file expects `status: succeeded`, the case's report follows the path, and `dagu test --init` exits 2.
+
+### Update Expectations After a Change
+
+When a change to the DAG changes its behavior on purpose, `dagu test --update` runs the cases and rewrites each `expect` from its run. Review the rewritten file as a diff before committing it.
+
+Add `continue_on` to `build` in the [quick start](#quick-start) DAG, so a failed build no longer stops the deploy:
+
+```diff
+   - id: build
+     run: ./build.sh
++    continue_on:
++      failure: true
+     outputs:
+       - name: image_tag
+```
+
+The second case now fails:
+
+```text
+PASS workflows/release.test.yaml: deploys the built image (0.14s)
+FAIL workflows/release.test.yaml: a failed build stops the deploy (0.14s)
+  status: expected failed, got partially_succeeded
+  step deploy: expected aborted, got succeeded
+2 cases: 1 passed, 1 failed
+```
+
+Update the expectations:
+
+```bash
+dagu test --update workflows/release.test.yaml
+```
+
+```text
+PASS workflows/release.test.yaml: deploys the built image (0.14s)
+  expect updated
+PASS workflows/release.test.yaml: a failed build stops the deploy (0.14s)
+  expect updated
+2 cases: 2 passed, 0 failed
+```
+
+The diff of the test file:
+
+```diff
+   - name: deploys the built image
+     expect:
+       status: succeeded
++      steps:
++        build: succeeded
++        deploy: succeeded
+   - name: a failed build stops the deploy
+     mocks:
+       build:
+         exit_code: 1
+     expect:
+-      status: failed
++      status: partially_succeeded
+       steps:
+         build: failed
+-        deploy: aborted
++        deploy: succeeded
+```
+
+- An asserted status, attempts, output value, or `notifications` list that does not hold takes the run's value. An assertion that holds stays as written.
+- A step or handler without an assertion gains its status, as in the first case, and its attempts when above 1.
+- It never removes an assertion. `stdout` and `stderr` assertions stay as written and still fail when they do not hold, and so does an output the step did not publish.
+- Only the changed text is rewritten. Comments and the other cases stay as they were.
+- `--run` limits the rewrite to the selected cases. `--timeout`, `--keep`, and `--format json` apply as without `--update`. `--init` does not combine with it.
+- Each case's report ends with `expect updated`, `expect unchanged`, or `expect kept:` and a reason, such as an invalid case or a run that timed out. See [Updating expectations](/writing-workflows/workflow-test-reference#updating-expectations).
 
 ### When the DAG Changes
 

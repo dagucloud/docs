@@ -224,6 +224,37 @@ The other test files still run.
 
 A case runs beside the live runs of the same DAG. Neither sees the other, and the case's run does not appear in the DAG's history. An interrupted `dagu test` stops the running case, starts no other, and exits with a non-zero status.
 
+## Updating Expectations
+
+`dagu test --update` selects test files and cases as `dagu test` does, runs each selected case, and rewrites its `expect` from the run.
+
+- An asserted run `status` or `attempts`, step `status` or `attempts`, or `notifications` list that does not hold takes the run's value. An assertion that holds stays exactly as written, such as `total: 7.0` against a published `"7"`.
+- An asserted output takes its published value. For an object, each key it lists takes its published value, recursively, and no key is added. No output assertion is added.
+- A step or handler without an assertion gains its status, and `attempts` when above 1, after the case's last step entry, in DAG order and then handler order. A step entry keeps its form: a status stays a status, and a map keeps its fields.
+- No assertion is removed. These stay as written and still fail when they do not hold: `stdout` and `stderr` assertions, an output the step did not publish, a listed key the published object lacks, an object where the published value is not one, and a number that YAML cannot write exactly, such as an integer above 18446744073709551615.
+- Only the changed text is rewritten. Comments, quotes, and the other cases stay. A flow-style map or list that gains an entry is rewritten in block style.
+- Each rewrite is read back before it is kept, so the file never gets invalid YAML or a value other than the run's.
+- A test file is written once its selected cases have run, and only when an `expect` changed, through a temporary file renamed over it. It keeps its mode.
+
+The last line under each case says what happened to its `expect`, whether or not the case passes:
+
+| Text report | JSON `update` | Meaning |
+|-------------|---------------|---------|
+| `expect updated` | `updated` | The run changed its text. |
+| `expect unchanged` | `unchanged` | The run left its text as it was. |
+| `expect kept: <reason>` | `kept` | It stays as written whatever the run did. |
+
+The reasons are:
+
+- `the case is invalid`
+- `the run did not finish`, such as a case that ran longer than `--timeout`
+- `the case is written in flow style or uses a YAML anchor, alias, or merge key`, since a rewrite could change another part of the file. A flow-style `expect` or list inside a block-style case is rewritten.
+- `the expect could not be rewritten in place`
+
+The report and the exit status are those of the rewritten cases. A rewritten case passes unless an assertion that stays as written fails.
+
+A test file edited while its cases ran is not written. The other test files still run and the report ends as usual. Then an error goes to stderr, `Error: <path> changed while its cases ran, so its expects were not updated`, with the file's absolute path, and the command exits 1, or 2 when a case or file is invalid. An interrupt leaves the test file whose cases were running as it was.
+
 ## Report
 
 The report goes to stdout. A test file appears by its path relative to the current directory when it is under it, and by its absolute path otherwise.
@@ -232,7 +263,7 @@ The report goes to stdout. A test file appears by its path relative to the curre
 
 - `PASS <file>: <case> (<duration>)`, `FAIL <file>: <case> (<duration>)`, or `INVALID <file>: <case>` starts each case, in run order.
 - `INVALID <file>` starts an invalid test file, whose cases do not appear.
-- Under a case that ran, in this order: one line per failed assertion, `default mock: <steps>`, `approved automatically: <steps>`, one `notification <kind>: <recipients>` line per notification, and `case directory <path>` with `--keep`.
+- Under a case that ran, in this order: one line per failed assertion, `default mock: <steps>`, `approved automatically: <steps>`, one `notification <kind>: <recipients>` line per notification, `case directory <path>` with `--keep`, and, with `--update`, the [update outcome](#updating-expectations).
 - Under an invalid case or file: one `<label>: <message>` line per error, then the fix of an invalid case.
 - The last line is the summary: `<n> cases: <passed> passed, <failed> failed`, followed by `, <invalid> invalid` and `, <files> invalid files` when there are any.
 
@@ -261,6 +292,7 @@ A failed assertion reads, for example, `status: expected succeeded, got failed`,
 | `auto_approved` | When a wait was approved automatically | Step labels. |
 | `notifications` | When the run would have sent one | Objects with `kind`, `to`, and, for `mail_on_error`, `step`. |
 | `case_dir` | With `--keep`, when the case ran | Absolute path of the kept case directory. |
+| `update` | With `--update` | `updated`, `unchanged`, or `kept`. See [Updating expectations](#updating-expectations). |
 
 | Failure field | Meaning |
 |---------------|---------|
@@ -277,4 +309,4 @@ A failed assertion reads, for example, `status: expected succeeded, got failed`,
 | `1` | At least one case failed. |
 | `2` | At least one test file or case is invalid, or the arguments are invalid. |
 
-The highest status that applies wins. Invalid arguments are a path that does not exist, a file argument that is not a test file, an invalid `--run` expression, `--format` other than `text` or `json`, a `--timeout` that is not a positive duration, an unknown flag, and `--init` with other than one DAG file or with `--run`, `--keep`, or `--format json`.
+The highest status that applies wins. Invalid arguments are a path that does not exist, a file argument that is not a test file, an invalid `--run` expression, `--format` other than `text` or `json`, a `--timeout` that is not a positive duration, an unknown flag, and `--init` with other than one DAG file or with `--update`, `--run`, `--keep`, or `--format json`. With `--update`, a test file edited during the run makes the command exit 1, or 2, as [Updating expectations](#updating-expectations) describes.
