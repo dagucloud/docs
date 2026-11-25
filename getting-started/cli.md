@@ -804,7 +804,7 @@ dagu dry --no-reuse report-pipeline.yaml
 
 ### `test`
 
-Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. A step the case lists under `real` runs its real action. Requires a Dagu release after v2.27.0.
+Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it, or the one its `dag` field names, through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. A step the case lists under `real` runs its real action. Requires a Dagu release after v2.27.0.
 
 ```bash
 dagu test [options] [TEST_FILE_OR_DIRECTORY...]
@@ -830,7 +830,7 @@ dagu test --init workflows/release.yaml
 dagu test --update workflows/release.test.yaml
 ```
 
-Exits `0` when every case passed, `1` when a case failed, and `2` when a test file, a case, or the arguments are invalid. See [Running Tests in CI](/writing-workflows/workflow-tests#running-tests-in-ci).
+Exits `0` when every case passed, `1` when a case failed, and `2` when a test file, a case, or the arguments are invalid. With `--update`, a test file edited during the run is left unwritten, and the command exits `1` even when every case passed, or `2` when a test file or case is invalid. See [Running Tests in CI](/writing-workflows/workflow-tests#running-tests-in-ci).
 
 ### `browser cache clear`
 

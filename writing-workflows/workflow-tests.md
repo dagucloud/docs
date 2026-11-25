@@ -85,7 +85,7 @@ workflows/
 - `release.test.yaml` and `release.test.yml` test `release.yaml`, or `release.yml` when there is no `release.yaml`.
 - `dag` names another DAG file. A relative path resolves from the directory that holds the test file.
 - One test file per DAG is the convention. Its scenarios are its `cases`.
-- Moving or renaming a DAG together with its test file keeps the test working.
+- Moving or renaming a DAG together with its test file keeps a test without `dag` working. A test that sets `dag` needs the new path.
 
 ### Test Files Are Not DAGs
 
@@ -209,7 +209,7 @@ Only a line in `real` runs such a step. A mock on a real step may set step field
 
 ### The Default Mock
 
-`default_mock` covers every step that needs a mock and that `mocks` and `real` do not name. It never runs anything real, so a test keeps the fail-closed guarantee without a line per step.
+`default_mock` covers every step that needs a mock and that `mocks` and `real` do not name. It never runs an action with side effects, so a test keeps the fail-closed guarantee without a line per step.
 
 ```yaml
 # workflows/release.test.yaml
@@ -509,7 +509,7 @@ cases:
 
 The first case would pass without `secrets`: `API_TOKEN` would resolve to its placeholder. The second case runs `lint` for real, so it needs a value for `API_TOKEN`. Without one, it is invalid, and its error starts with `secret API_TOKEN:`.
 
-Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file never holds a real credential, and a case does not depend on the environment of the host that runs it.
+Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file never holds a real credential, and a case without a real step does not depend on the environment of the host that runs it. A real step reads the host as it does in a real run.
 
 ## Writing Tests Faster
 
