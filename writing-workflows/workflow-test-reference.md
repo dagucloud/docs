@@ -201,7 +201,7 @@ A test file is invalid, and none of its cases runs, when:
 - it is not valid YAML, or its top level is not a map;
 - it has a field this page does not define, or a field of the wrong type;
 - `cases` is missing or empty, a case has no `name` or `expect`, or two cases share a `name`;
-- it has top-level `steps` and no `cases`, which reads as a DAG. The error asks for a rename;
+- its first document has top-level `steps` and no `cases`, which reads as a DAG. The error suggests a name, such as `smoke-test.yaml` for `smoke.test.yaml`;
 - the tested DAG file does not exist, `dag` names a test file, or the DAG fails to load as `dagu start` loads it;
 - the tested DAG is a `type: build` DAG.
 

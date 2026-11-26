@@ -93,6 +93,12 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
+After the upgrade, `dagu scheduler`, `dagu server`, and `dagu start-all` log a warning at startup for each such file whose first document has top-level `steps` and no `cases`, with its full path:
+
+```text
+/path/to/dags/smoke.test.yaml reads as a DAG, with steps and no cases, but Dagu treats it as a test file and does not run it as a DAG; rename it, for example to smoke-test.yaml
+```
+
 ## Upgrading from 2.26.0 or earlier
 
 Later releases change how the scheduler behaves in four ways:

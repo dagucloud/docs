@@ -93,6 +93,12 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
+アップグレード後、`dagu scheduler`、`dagu server`、`dagu start-all` は起動時に、最初のドキュメントにトップレベルの `steps` があり `cases` がないファイルごとに、そのフルパスを含む警告をログに出力します。
+
+```text
+/path/to/dags/smoke.test.yaml reads as a DAG, with steps and no cases, but Dagu treats it as a test file and does not run it as a DAG; rename it, for example to smoke-test.yaml
+```
+
 ## 2.26.0 以前からのアップグレード {#upgrading-from-2-26-0-or-earlier}
 
 それより後のリリースでは、スケジューラの動作が 4 点変更されています。

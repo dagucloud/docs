@@ -93,6 +93,14 @@ DAG discovery, the DAGs directory watcher, and DAG name lookup skip every file w
 
 A DAG that already has such a name becomes a test file after the upgrade and stops running on its schedule. Rename it, for example from `smoke.test.yaml` to `smoke-test.yaml`, and update whatever starts it by its old name, such as a `dag.run` step or a script that runs `dagu start`. See [Upgrades](/server-admin/upgrades#upgrading-from-2-27-0-or-earlier).
 
+`dagu scheduler`, `dagu server`, and `dagu start-all` log a warning at startup for each such file whose first document has top-level `steps` and no `cases`. `dagu test` reports the file as an invalid test file with the same hint:
+
+```text
+INVALID workflows/smoke.test.yaml
+  reads as a DAG, with steps and no cases, but Dagu treats it as a test file and does not run it as a DAG; rename it, for example to smoke-test.yaml
+0 cases: 0 passed, 0 failed, 1 invalid file
+```
+
 ## Running Tests
 
 ```bash
