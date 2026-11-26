@@ -93,6 +93,8 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
+Run the search again in each other directory that holds DAG files started by path, such as from a script or a `dag.run` step. The commands are for a POSIX shell. On Windows, search the directory that `dagu config` prints for both names with the shell you use.
+
 After the upgrade, `dagu scheduler`, `dagu server`, and `dagu start-all` log a warning at startup for each such file whose first document has top-level `steps` and no `cases`, with its full path:
 
 ```text

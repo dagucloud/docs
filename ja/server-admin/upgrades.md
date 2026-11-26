@@ -93,6 +93,8 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
+スクリプトや `dag.run` ステップからパスで開始する DAG ファイルを置いているディレクトリがほかにあれば、それぞれで同じ検索を行ってください。これらのコマンドは POSIX シェル用です。Windows では、`dagu config` が表示したディレクトリで、お使いのシェルを使って両方の名前を検索してください。
+
 アップグレード後、`dagu scheduler`、`dagu server`、`dagu start-all` は起動時に、最初のドキュメントにトップレベルの `steps` があり `cases` がないファイルごとに、そのフルパスを含む警告をログに出力します。
 
 ```text

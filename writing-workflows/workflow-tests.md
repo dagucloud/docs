@@ -450,7 +450,7 @@ FAIL workflows/release.test.yaml: a wrong tag reaches the deploy (0.15s)
 
 - `run` is the resolved command or script of a step written with `run`. A string matches it exactly, and a map takes `contains`, `matches`, or both.
 - `with` holds the resolved inputs of a step written with `action`, such as the `headers` of an `http.request` step. Only the listed inputs, and the listed keys of an object, are checked.
-- `env` holds the variables the step's action receives. Only the listed names are checked.
+- `env` holds the variables the step's action receives, including the host variables Dagu forwards to steps. Only the listed names are checked.
 - A secret compares as the step saw it: `<secret:NAME>` in a case without a real step.
 - The assertion reads the step's last execution. A step that never ran, such as a skipped step, fails it.
 
@@ -572,7 +572,7 @@ cases:
 
 The first case would pass without `secrets`: `API_TOKEN` would resolve to its placeholder. The second case runs `lint` for real, so it needs a value for `API_TOKEN`. Without one, it is invalid, and its error starts with `secret API_TOKEN:`.
 
-Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file never holds a real credential, and a case without a real step does not depend on the environment of the host that runs it. A real step reads the host as it does in a real run.
+Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file holds no real credential unless one is written into it, such as by `--update` on a `called_with.env` assertion that names a forwarded host variable. A case without a real step does not depend on the environment of the host that runs it, unless it asserts on a host variable such as `HOME` under `called_with.env`. A real step reads the host as it does in a real run.
 
 ## Writing Tests Faster
 
