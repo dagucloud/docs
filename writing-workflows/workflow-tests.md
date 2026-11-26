@@ -350,7 +350,7 @@ In the first case, the gate of `release` needs no values, so it is approved auto
 
 ## Assertions
 
-`expect` holds at least one assertion: the run `status` or `attempts`, an entry under `steps`, or `notifications`. A step entry is a status, or a map of `status`, `attempts`, `outputs`, `stdout`, and `stderr`. A step without an entry is not checked. A case passes when the run reaches a terminal status and every assertion holds.
+`expect` holds at least one assertion: the run `status` or `attempts`, an entry under `steps`, or `notifications`. A step entry is a status, or a map of `status`, `attempts`, `outputs`, `stdout`, `stderr`, and `called_with`. A step without an entry is not checked. A case passes when the run reaches a terminal status and every assertion holds.
 
 ```yaml
 # workflows/report.yaml
@@ -410,6 +410,51 @@ cases:
 `summary` runs its real `log.write` action with the mocked count, so the stream assertion checks the message the DAG builds. `notifications: []` asserts that the first case would send no mail. The second case asserts the failure mail. No mail is sent under test.
 
 An output assertion on a mocked step checks only what the test supplied. It is most useful on side-effect-free steps, which run for real. See [Assertions](/writing-workflows/workflow-test-reference#assertions) for status values and matching rules.
+
+### What a Step Was Called With
+
+`called_with` checks the values Dagu resolved for a step's action from params, upstream outputs, env, and secrets, before the action ran or its mock replaced it. A test can therefore check the data that reaches a step whose action never runs. With the [quick start](#quick-start) DAG:
+
+```yaml
+# workflows/release.test.yaml
+mocks:
+  build:
+    outputs:
+      image_tag: v1.2.3
+  deploy: {}
+cases:
+  - name: deploys the built tag
+    expect:
+      steps:
+        deploy:
+          called_with:
+            run: ./deploy.sh "v1.2.3"
+  - name: a wrong tag reaches the deploy
+    mocks:
+      build:
+        outputs:
+          image_tag: v1.2.4
+    expect:
+      steps:
+        deploy:
+          called_with:
+            run: ./deploy.sh "v1.2.3"
+```
+
+```text
+PASS workflows/release.test.yaml: deploys the built tag (0.16s)
+FAIL workflows/release.test.yaml: a wrong tag reaches the deploy (0.15s)
+  step deploy called_with.run: expected "./deploy.sh \"v1.2.3\"", got "./deploy.sh \"v1.2.4\""
+2 cases: 1 passed, 1 failed
+```
+
+- `run` is the resolved command or script of a step written with `run`. A string matches it exactly, and a map takes `contains`, `matches`, or both.
+- `with` holds the resolved inputs of a step written with `action`, such as the `headers` of an `http.request` step. Only the listed inputs, and the listed keys of an object, are checked.
+- `env` holds the variables the step's action receives. Only the listed names are checked.
+- A secret compares as the step saw it: `<secret:NAME>` in a case without a real step.
+- The assertion reads the step's last execution. A step that never ran, such as a skipped step, fails it.
+
+See [Called with](/writing-workflows/workflow-test-reference#called-with) for every rule and error.
 
 ## The Fail-Closed Rule
 

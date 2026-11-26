@@ -124,11 +124,12 @@ A step has known outputs when its output names are known before the run: the nam
 |-------|---------|
 | `status` | Run status: `succeeded`, `failed`, `aborted`, `partially_succeeded`, or `rejected`. |
 | `attempts` | Run attempts, counting retries of a DAG-level `retry_policy`. |
-| `steps.<key>` | A step status, or a map with one or more of `status`, `attempts`, `outputs`, `stdout`, and `stderr`. |
+| `steps.<key>` | A step status, or a map with one or more of `status`, `attempts`, `outputs`, `stdout`, `stderr`, and `called_with`. |
 | `steps.<key>.status` | `succeeded`, `failed`, `aborted`, `skipped`, `partially_succeeded`, `rejected`, or `not_started`. |
 | `steps.<key>.attempts` | Executions of the step's action in every run attempt, counting retries and repeat iterations. |
 | `steps.<key>.outputs` | Expected named outputs, by name. |
 | `steps.<key>.stdout`, `steps.<key>.stderr` | A map with `contains`, `matches`, or both. |
+| `steps.<key>.called_with` | What the step's last execution was called with: `run`, `with`, `env`, or several. See [Called With](#called-with). |
 | `notifications` | The notifications the run would have sent. |
 
 - `expect` holds at least one assertion. An empty `steps.<key>` map, an unknown step key or status, and a negative `attempts` make the case invalid.
@@ -140,6 +141,37 @@ A step has known outputs when its output names are known before the run: the nam
 **Streams.** `contains` holds when the stream contains its text. `matches` holds when its RE2 regular expression matches anywhere in the stream. The stream is the step's stdout or stderr of its last execution, as the step's log holds it, with secrets masked. A step with no execution fails a stream assertion. An invalid `matches` expression makes the case invalid.
 
 **Notifications.** Each item has `kind`: `mail_on.failure`, `mail_on.success`, `mail_on.wait`, or `mail_on_error`. It may set `to`, a list of recipients compared as a set, and, with `mail_on_error` only, `step`. The list holds when the run would have sent as many notifications as it lists, and each item pairs with a different one, in any order. `notifications: []` asserts that the run would send none. Without `notifications`, notifications are not checked.
+
+### Called With
+
+`called_with` checks the call of a step's last execution: the values Dagu resolved for its action, before the action ran or its mock replaced it. It holds for mocked and real steps alike.
+
+| Field | Meaning |
+|-------|---------|
+| `run` | The resolved command or script of a step written with `run`. A string matches it exactly. A map takes `contains`, `matches`, or both, as a stream assertion does. |
+| `with` | The resolved inputs of a step written with `action`, by name. |
+| `env` | The variables the step's action receives, by name. |
+
+- The last execution is the latest execution of the step's action in every run attempt. A step with no execution, such as a skipped step or a handler that never ran, fails `called_with` once, whatever it lists.
+- `run` is the script of a multi-line `run`, the command of a one-line `run` without leading and trailing whitespace, or the commands of a list-form `run`, one per line, each with its references resolved.
+- `with` holds the inputs as the step writes them, each resolved as the action resolves it. For a custom action, they are the inputs the step passes, not the fields of its definition. Only the listed inputs are checked. A string matches an input whose text equals it, and any other value matches by the JSON rule of outputs: listed keys only, recursively. An input the step does not set does not match.
+- `env` holds every variable the action receives: the host environment, the DAG's and the step's `env`, and secrets. Only the listed names are checked, each against its exact text. A variable that is not set does not match.
+- A secret compares as the step saw it: its placeholder `<secret:NAME>` in a case without a real step, and its value under `secrets` in a case with one. The report masks it as `*******`.
+
+These make the case invalid, each with an error under its field:
+
+| Mistake | Error |
+|---------|-------|
+| `run` on a step written with `action` | `the step runs action <action>, which takes no run; assert with` |
+| `with` on a command step | `the step runs a command, which takes no with; assert run` |
+| `with` on another step not written with `action`, such as one written with the deprecated `type` field | `the step is not written with action, so it takes no with` |
+| `run` on a step with no command or script, such as one written with `type` | `the step has no command or script` |
+| `called_with` on a `human.task` step | `a human.task step has no action to call` |
+| `called_with` on a `foreach` step | `a foreach step calls only its body steps, which have no step key` |
+| `called_with` on a step with `nodes` | `a step with nodes resolves its command in the child run of each node; assert on the child DAG's steps` |
+| An empty `called_with`, `with`, or `env` | `holds no assertion` |
+| A `run` map without `contains` or `matches` | `must set contains, matches, or both` |
+| A `matches` value that is not RE2 | `is not a valid RE2 expression: ...` |
 
 ## Fail-Closed Sources
 
@@ -190,7 +222,7 @@ A case is also invalid when:
 - `real` lists a `foreach` step;
 - a `secrets` key names neither a DAG `secrets` entry nor an SSH credential ref of the DAG;
 - `trigger`, `scheduled_at`, `precondition`, `condition`, or `decision` has a value this page does not list;
-- `expect` breaks a rule of [Assertions](#assertions), or a `notifications` item has an unknown `kind` or sets `step` without `mail_on_error`.
+- `expect` breaks a rule of [Assertions](#assertions) or [Called With](#called-with), or a `notifications` item has an unknown `kind` or sets `step` without `mail_on_error`.
 
 The error line names the field, such as `mocks.build.outputs` or `expect.steps.deploy`. The other cases of the file still run.
 
@@ -231,7 +263,8 @@ A case runs beside the live runs of the same DAG. Neither sees the other, and th
 - An asserted run `status` or `attempts`, step `status` or `attempts`, or `notifications` list that does not hold takes the run's value. An assertion that holds stays exactly as written, such as `total: 7.0` against a published `"7"`.
 - An asserted output takes its published value. For an object, each key it lists takes its published value, recursively, and no key is added. No output assertion is added.
 - A step or handler without an assertion gains its status, and `attempts` when above 1, after the case's last step entry, in DAG order and then handler order. A step entry keeps its form: a status stays a status, and a map keeps its fields.
-- No assertion is removed. These stay as written and still fail when they do not hold: `stdout` and `stderr` assertions, an output the step did not publish, a listed key the published object lacks, an object where the published value is not one, and a number that YAML cannot write exactly, such as an integer above 18446744073709551615.
+- A `called_with` value that does not hold takes the step's call: a `run` string takes the resolved text, each listed `with` input takes its resolved value, the listed keys only of an object, and each listed variable takes its text. A secret is written as the step saw it, such as `<secret:API_TOKEN>`. No `called_with` is added.
+- No assertion is removed. These stay as written and still fail when they do not hold: `stdout` and `stderr` assertions, a `called_with` `run` given as `contains` or `matches`, a `with` input or variable that the call lacks, the `called_with` of a step with no execution, an output the step did not publish, a listed key the published object lacks, an object where the published value is not one, and a number that YAML cannot write exactly, such as an integer above 18446744073709551615.
 - Only the changed text is rewritten. Comments, quotes, and the other cases stay. A flow-style map or list that gains an entry is rewritten in block style.
 - Each rewrite is read back before it is kept, so the file never gets invalid YAML or a value other than the run's.
 - A test file is written once its selected cases have run, and only when an `expect` changed, through a temporary file renamed over it. It keeps its mode.
@@ -269,6 +302,15 @@ The report goes to stdout. A test file appears by its path relative to the curre
 
 A failed assertion reads, for example, `status: expected succeeded, got failed`, `step deploy: expected skipped, got aborted`, `step deploy attempts: expected 3, got 1`, or `step count output files: expected "3", got "2"`. A case that runs longer than `--timeout` fails with `timeout: did not finish within <timeout>`, and its assertions are not evaluated.
 
+A failed `called_with` part reads:
+
+- `step <key> called_with.run: expected <text>, got <text>`;
+- `step <key> called_with.run: expected to contain <text>, got <text>`, or `expected to match <regexp>`;
+- `step <key> called_with.with.<name>: expected <value>, got <value>`, and `called_with.env.<name>` for a variable, with `got nothing` when the call lacks it;
+- `step <key> called_with: expected a call, got none`, for a step with no execution.
+
+Values are written as JSON, with secrets masked as `*******`, such as `step notify called_with.with.headers: expected {"Authorization":"Bearer other"}, got {"Authorization":"Bearer *******"}`.
+
 ### JSON Report
 
 `--format json` writes exactly one JSON object to stdout once every case has ended.
@@ -284,7 +326,7 @@ A failed assertion reads, for example, `status: expected succeeded, got failed`,
 | `name` | Always | The case name. |
 | `result` | Always | `pass`, `fail`, or `invalid`. |
 | `duration_ms` | When the case ran | Wall-clock time in milliseconds. |
-| `failures` | When `result` is `fail` | Failure objects, run assertions first, then steps in `expect.steps` order, then `notifications`. |
+| `failures` | When `result` is `fail` | Failure objects, run assertions first, then steps in `expect.steps` order, then `notifications`. Within a step, `called_with` comes after the streams: its `run`, `contains`, and `matches`, then its `with` inputs and its variables in the order listed. |
 | `errors` | When `result` is `invalid` | Error objects: `source`, the label, when there is one, and `message`. |
 | `fix` | When an invalid case has a fix | The fix for the case, as YAML text. |
 | `file_fix` | When the fix has `secrets` | The fix for the test file, as YAML text. |
@@ -297,9 +339,9 @@ A failed assertion reads, for example, `status: expected succeeded, got failed`,
 | Failure field | Meaning |
 |---------------|---------|
 | `step` | The step key, for a step assertion, or the step label, for `limit`. |
-| `field` | `status`, `attempts`, `outputs.<name>`, `stdout.contains`, `stdout.matches`, `stderr.contains`, `stderr.matches`, `notifications`, `timeout`, `limit`, or `error`. |
-| `expected` | The expected value. For `timeout`, the limit in milliseconds. |
-| `actual` | The actual value, when there is one. |
+| `field` | `status`, `attempts`, `outputs.<name>`, `stdout.contains`, `stdout.matches`, `stderr.contains`, `stderr.matches`, `called_with`, `called_with.run`, `called_with.run.contains`, `called_with.run.matches`, `called_with.with.<name>`, `called_with.env.<name>`, `notifications`, `timeout`, `limit`, or `error`. |
+| `expected` | The expected value, with secrets masked. For `timeout`, the limit in milliseconds. Absent for `called_with` on a step with no execution. |
+| `actual` | The actual value, with secrets masked, when there is one. Absent for a `called_with` input or variable the call lacks. |
 
 ### Exit Status
 
