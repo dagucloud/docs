@@ -572,7 +572,7 @@ cases:
 
 The first case would pass without `secrets`: `API_TOKEN` would resolve to its placeholder. The second case runs `lint` for real, so it needs a value for `API_TOKEN`. Without one, it is invalid, and its error starts with `secret API_TOKEN:`.
 
-Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file holds no real credential unless one is written into it, such as by `--update` on a `called_with.env` assertion that names a forwarded host variable. A case without a real step does not depend on the environment of the host that runs it, unless it asserts on a host variable such as `HOME` under `called_with.env`. A real step reads the host as it does in a real run.
+Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file holds no real credential unless one is written into it, such as by `--update` on a `called_with` assertion whose value resolves from a host variable. Pass credentials through `secrets:` to keep them out. A case without a real step does not depend on the environment of the host that runs it, unless it asserts on a host variable such as `HOME` under `called_with.env`. A real step reads the host as it does in a real run.
 
 ## Writing Tests Faster
 

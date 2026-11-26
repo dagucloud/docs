@@ -97,10 +97,11 @@ Run the search again in each other directory that holds DAG files started by pat
 
 ```powershell
 dagu config | Select-String 'DAGs directory'
-Get-ChildItem -Path 'C:\path\to\dags' -Recurse -File -Include *.test.yaml, *.test.yml
+Get-ChildItem -LiteralPath 'C:\path\to\dags' -Recurse -File -Force |
+  Where-Object { $_.Name -like '*.test.yaml' -or $_.Name -like '*.test.yml' }
 ```
 
-`-Include` takes effect with `-Recurse`. Keep `-Path`: Windows PowerShell 5.1 ignores `-Include` with `-LiteralPath`. Like `find`, `Get-ChildItem` does not search inside symbolic links to directories that it finds during the search.
+`-LiteralPath` reads the directory as written, even with `[` or `]` in its name, and `-Force` includes hidden files. Like `find`, `Get-ChildItem` does not search inside symbolic links to directories that it finds during the search.
 
 After the upgrade, `dagu scheduler`, `dagu server`, and `dagu start-all` log a warning at startup for each such file whose first document has top-level `steps` and no `cases`, with its full path:
 

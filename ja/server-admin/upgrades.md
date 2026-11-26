@@ -97,10 +97,11 @@ find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 
 ```powershell
 dagu config | Select-String 'DAGs directory'
-Get-ChildItem -Path 'C:\path\to\dags' -Recurse -File -Include *.test.yaml, *.test.yml
+Get-ChildItem -LiteralPath 'C:\path\to\dags' -Recurse -File -Force |
+  Where-Object { $_.Name -like '*.test.yaml' -or $_.Name -like '*.test.yml' }
 ```
 
-`-Include` は `-Recurse` と組み合わせると有効になります。Windows PowerShell 5.1 は `-LiteralPath` と組み合わせた `-Include` を無視するため、`-Path` を使ってください。`find` と同じく、`Get-ChildItem` は検索中に見つかったディレクトリへのシンボリックリンクの中は検索しません。
+`-LiteralPath` は、名前に `[` や `]` を含むディレクトリも書いたとおりに読みます。`-Force` を付けると隠しファイルも対象になります。`find` と同じく、`Get-ChildItem` は検索中に見つかったディレクトリへのシンボリックリンクの中は検索しません。
 
 アップグレード後、`dagu scheduler`、`dagu server`、`dagu start-all` は起動時に、最初のドキュメントにトップレベルの `steps` があり `cases` がないファイルごとに、そのフルパスを含む警告をログに出力します。
 
