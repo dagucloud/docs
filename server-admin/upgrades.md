@@ -93,7 +93,14 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
-Run the search again in each other directory that holds DAG files started by path, such as from a script or a `dag.run` step. The commands are for a POSIX shell. On Windows, search the directory that `dagu config` prints for both names with the shell you use.
+Run the search again in each other directory that holds DAG files started by path, such as from a script or a `dag.run` step. The commands above are for a POSIX shell. In PowerShell on Windows:
+
+```powershell
+dagu config | Select-String 'DAGs directory'
+Get-ChildItem -Path 'C:\path\to\dags' -Recurse -File -Include *.test.yaml, *.test.yml
+```
+
+`-Include` takes effect with `-Recurse`. Keep `-Path`: Windows PowerShell 5.1 ignores `-Include` with `-LiteralPath`. Like `find`, `Get-ChildItem` does not search inside symbolic links to directories that it finds during the search.
 
 After the upgrade, `dagu scheduler`, `dagu server`, and `dagu start-all` log a warning at startup for each such file whose first document has top-level `steps` and no `cases`, with its full path:
 

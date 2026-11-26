@@ -93,7 +93,14 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
-スクリプトや `dag.run` ステップからパスで開始する DAG ファイルを置いているディレクトリがほかにあれば、それぞれで同じ検索を行ってください。これらのコマンドは POSIX シェル用です。Windows では、`dagu config` が表示したディレクトリで、お使いのシェルを使って両方の名前を検索してください。
+スクリプトや `dag.run` ステップからパスで開始する DAG ファイルを置いているディレクトリがほかにあれば、それぞれで同じ検索を行ってください。上のコマンドは POSIX シェル用です。Windows の PowerShell では次のとおりです。
+
+```powershell
+dagu config | Select-String 'DAGs directory'
+Get-ChildItem -Path 'C:\path\to\dags' -Recurse -File -Include *.test.yaml, *.test.yml
+```
+
+`-Include` は `-Recurse` と組み合わせると有効になります。Windows PowerShell 5.1 は `-LiteralPath` と組み合わせた `-Include` を無視するため、`-Path` を使ってください。`find` と同じく、`Get-ChildItem` は検索中に見つかったディレクトリへのシンボリックリンクの中は検索しません。
 
 アップグレード後、`dagu scheduler`、`dagu server`、`dagu start-all` は起動時に、最初のドキュメントにトップレベルの `steps` があり `cases` がないファイルごとに、そのフルパスを含む警告をログに出力します。
 
