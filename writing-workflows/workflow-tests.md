@@ -96,18 +96,28 @@ A DAG that already has such a name becomes a test file after the upgrade and sto
 ## Running Tests
 
 ```bash
-dagu test [flags] [<test file or directory>...]
+dagu test [flags] [<test file, DAG file, DAG name, or directory>...]
 ```
 
-- A file argument must be a test file.
+- A test file argument runs that file.
+- A DAG file argument, a `.yaml` or `.yml` file that is not a test file, runs the test files beside it: `release.yaml` runs `release.test.yaml` and `release.test.yml`, whichever exist.
+- An argument that is not an existing path is a DAG name, resolved as `dagu start` resolves one: `release` runs the test files beside `release.yaml` in the DAGs directory.
+- A DAG with no test file is an error that names the command to write one:
+
+  ```text
+  Error: workflows/plain.yaml has no test file; write one with: dagu test --init workflows/plain.yaml
+  ```
+
 - A directory argument runs every test file under it, at any depth. Directories whose names start with `.` are skipped, and symbolic links are not followed.
 - Without an argument, `dagu test` runs every test file under the DAGs directory of the loaded configuration.
 - Test files run one at a time, in path order. The cases of a file run one at a time, in file order.
-- An invalid test file or case does not stop the others.
+- A test file that more than one argument selects runs once. An invalid test file or case does not stop the others.
 - Each case runs in its own temporary directory, which holds its run history and logs. The configured data directory is not read or written. See [What changes under test](/writing-workflows/workflow-test-reference#what-changes-under-test).
 
 ```bash
 dagu test workflows/release.test.yaml         # One test file
+dagu test workflows/release.yaml              # The test files beside a DAG
+dagu test release                             # The same, by DAG name in the DAGs directory
 dagu test --run 'failed build' workflows/     # Cases whose name matches an RE2 expression
 dagu test --timeout 30s workflows/            # Fail a case that runs longer than 30s (default 5m)
 dagu test --keep workflows/                   # Keep each case directory and print its path

@@ -807,10 +807,10 @@ dagu dry --no-reuse report-pipeline.yaml
 Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it, or the one its `dag` field names, through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. A step the case lists under `real` runs its real action. Requires a Dagu release after v2.27.0.
 
 ```bash
-dagu test [options] [TEST_FILE_OR_DIRECTORY...]
+dagu test [options] [TEST_FILE_DAG_FILE_DAG_NAME_OR_DIRECTORY...]
 ```
 
-A file argument must end in `.test.yaml` or `.test.yml`. A directory argument runs every test file under it, skipping directories whose names start with `.` and not following symbolic links. Without an argument, every test file under the DAGs directory runs. Selecting no test file is not an error and exits `0`.
+A test file argument ends in `.test.yaml` or `.test.yml`. A DAG file argument, a `.yaml` or `.yml` file that is not a test file, runs the test files beside it: `release.yaml` runs `release.test.yaml` and `release.test.yml`, whichever exist. An argument that is not an existing path is a DAG name, resolved in the DAGs directory as `start` resolves one. A DAG with no test file exits `2` with an error that names `dagu test --init`. A directory argument runs every test file under it, skipping directories whose names start with `.` and not following symbolic links. Without an argument, every test file under the DAGs directory runs. Selecting no test file is not an error and exits `0`.
 
 With `--init`, the one argument is a DAG file, and Dagu writes its test file beside it instead of running tests. See [Generate a Test File](/writing-workflows/workflow-tests#generate-a-test-file).
 
@@ -824,6 +824,8 @@ With `--init`, the one argument is a DAG file, and Dagu writes its test file bes
 
 ```bash
 dagu test workflows/
+dagu test workflows/release.yaml
+dagu test release
 dagu test --run 'failed build' --timeout 30s workflows/release.test.yaml
 dagu test --format json --keep workflows/
 dagu test --init workflows/release.yaml
