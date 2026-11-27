@@ -675,7 +675,7 @@ The diff of the test file:
 - A step or handler without an assertion gains its status, as in the first case, and its attempts when above 1.
 - It never removes an assertion. `stdout` and `stderr` assertions stay as written and still fail when they do not hold, and so does an output the step did not publish.
 - Only the changed text is rewritten. Comments and the other cases stay as they were.
-- A value from the host is kept out, by value and as best effort. A value that holds the value of a host variable the run read, such as `SYNC_TOKEN` in a DAG `env` entry `TOKEN: ${SYNC_TOKEN}`, stays as written. The report masks it and names the variable to set under the case's `env`:
+- A value from the host is kept out, by value and as best effort. A value that holds the value of a host variable the run read, such as `SYNC_TOKEN` in a DAG `env` entry `TOKEN: ${SYNC_TOKEN}`, stays as written. The report masks it in a failed output or `called_with` value, though not in a notification recipient, and names the variable to set under the case's `env`:
 
   ```text
   FAIL workflows/sync.test.yaml: the host token reaches the sync (0.10s)
@@ -684,7 +684,7 @@ The diff of the test file:
     expect unchanged
   ```
 
-  With `TOKEN` set under the case's `env`, the run takes no value from the host, and `--update` writes the case's value. A value derived from a host value in another form, such as a re-encoding, is not matched, so keep credentials in `secrets:`. See [Values from the host](/writing-workflows/workflow-test-reference#values-from-the-host).
+  With `TOKEN` set under the case's `env`, the run takes no host value for `TOKEN`, and `--update` writes the case's value. A DAG `env` entry built from it, such as `AUTH: Bearer ${TOKEN}`, keeps the value it took when the DAG loaded, so set that entry under the case's `env` too, as its kept line says. A value derived from a host value in another form, such as a re-encoding, is not matched, so keep credentials in `secrets:`. See [Values from the host](/writing-workflows/workflow-test-reference#values-from-the-host).
 - `--run` limits the rewrite to the selected cases. `--timeout`, `--keep`, and `--format json` apply as without `--update`. `--init` does not combine with it.
 - Each case's report ends with `expect updated`, `expect unchanged`, or `expect kept:` and a reason, such as an invalid case or a run that timed out. See [Updating expectations](/writing-workflows/workflow-test-reference#updating-expectations).
 
