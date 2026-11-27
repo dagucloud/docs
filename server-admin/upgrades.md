@@ -93,7 +93,7 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
-Run the search again in each other directory that holds DAG files started by path, such as from a script or a `dag.run` step. The commands above are for a POSIX shell. In PowerShell on Windows:
+Run the search again in `paths.alt_dags_dir` when it is set, which `dagu config --values` lists, and in each other directory that holds DAG files started by path, such as from a script or a `dag.run` step. The commands above are for a POSIX shell. In PowerShell on Windows:
 
 ```powershell
 dagu config | Select-String 'DAGs directory'

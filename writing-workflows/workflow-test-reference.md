@@ -267,7 +267,7 @@ A case runs beside the live runs of the same DAG. Neither sees the other, and th
 - No assertion is removed. These stay as written and still fail when they do not hold: `stdout` and `stderr` assertions, a `called_with` `run` given as `contains` or `matches`, a `with` input or variable that the call lacks, the `called_with` of a step with no execution, an output the step did not publish, a listed key the published object lacks, an object where the published value is not one, and a number that YAML cannot write exactly, such as an integer above 18446744073709551615.
 - Only the changed text is rewritten. Comments, quotes, and the other cases stay. A flow-style map or list that gains an entry is rewritten in block style.
 - Each rewrite is read back before it is kept, so the file never gets invalid YAML or a value other than the run's.
-- No value from the host is written. See [Values From the Host](#values-from-the-host).
+- A value that holds a host value is not written, by value and as best effort. See [Values From the Host](#values-from-the-host).
 - A test file is written once its selected cases have run, and only when an `expect` changed, through a temporary file renamed over it. It keeps its mode.
 
 The last line under each case says what happened to its `expect`, whether or not the case passes:

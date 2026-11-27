@@ -448,7 +448,7 @@ FAIL workflows/release.test.yaml: a wrong tag reaches the deploy (0.15s)
 2 cases: 1 passed, 1 failed
 ```
 
-- `run` is the command or script of a step written with `run`, resolved as in a real run: `${steps.<id>.outputs.<name>}`, `${params.<name>}`, and `${env.<name>}` take their values, and `$NAME` and `${NAME}` stay for the shell. A string matches it exactly, and a map takes `contains`, `matches`, or both.
+- `run` is the command or script of a step written with `run`, resolved as in a real run: `${steps.<id>.outputs.<name>}`, `${params.<name>}`, and `${env.<name>}` take their values, and `$NAME` and `${NAME}` stay for the shell, except inside a [single-quoted span](/writing-workflows/quoting-and-escaping#quotes-that-reach-dagu), where Dagu resolves them. A string matches it exactly, and a map takes `contains`, `matches`, or both.
 - `with` holds the resolved inputs of a step written with `action`, such as the `headers` of an `http.request` step. Only the listed inputs, and the listed keys of an object, are checked.
 - `env` holds the variables the step's action receives: the DAG's and the step's `env`, secrets, and the host variables Dagu passes to steps. Only the listed names are checked.
 - A secret compares as the step saw it: `<secret:NAME>` in a case without a real step.
@@ -675,7 +675,7 @@ The diff of the test file:
 - A step or handler without an assertion gains its status, as in the first case, and its attempts when above 1.
 - It never removes an assertion. `stdout` and `stderr` assertions stay as written and still fail when they do not hold, and so does an output the step did not publish.
 - Only the changed text is rewritten. Comments and the other cases stay as they were.
-- No value from the host is written. A value that holds the value of a host variable the run read, such as `SYNC_TOKEN` in a DAG `env` entry `TOKEN: ${SYNC_TOKEN}`, stays as written. The report masks it and names the variable to set under the case's `env`:
+- A value from the host is kept out, by value and as best effort. A value that holds the value of a host variable the run read, such as `SYNC_TOKEN` in a DAG `env` entry `TOKEN: ${SYNC_TOKEN}`, stays as written. The report masks it and names the variable to set under the case's `env`:
 
   ```text
   FAIL workflows/sync.test.yaml: the host token reaches the sync (0.10s)
@@ -684,7 +684,7 @@ The diff of the test file:
     expect unchanged
   ```
 
-  With `TOKEN` set under the case's `env`, the run takes no value from the host, and `--update` writes the case's value. The check is by value and best effort, so keep credentials in `secrets:`. See [Values from the host](/writing-workflows/workflow-test-reference#values-from-the-host).
+  With `TOKEN` set under the case's `env`, the run takes no value from the host, and `--update` writes the case's value. A value derived from a host value in another form, such as a re-encoding, is not matched, so keep credentials in `secrets:`. See [Values from the host](/writing-workflows/workflow-test-reference#values-from-the-host).
 - `--run` limits the rewrite to the selected cases. `--timeout`, `--keep`, and `--format json` apply as without `--update`. `--init` does not combine with it.
 - Each case's report ends with `expect updated`, `expect unchanged`, or `expect kept:` and a reason, such as an invalid case or a run that timed out. See [Updating expectations](/writing-workflows/workflow-test-reference#updating-expectations).
 

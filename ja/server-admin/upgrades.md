@@ -93,7 +93,7 @@ dagu config | grep 'DAGs directory'
 find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
 ```
 
-スクリプトや `dag.run` ステップからパスで開始する DAG ファイルを置いているディレクトリがほかにあれば、それぞれで同じ検索を行ってください。上のコマンドは POSIX シェル用です。Windows の PowerShell では次のとおりです。
+`paths.alt_dags_dir` を設定している場合は、`dagu config --values` に表示されるそのディレクトリでも同じ検索を行ってください。スクリプトや `dag.run` ステップからパスで開始する DAG ファイルを置いているディレクトリがほかにあれば、それぞれでも検索してください。上のコマンドは POSIX シェル用です。Windows の PowerShell では次のとおりです。
 
 ```powershell
 dagu config | Select-String 'DAGs directory'
