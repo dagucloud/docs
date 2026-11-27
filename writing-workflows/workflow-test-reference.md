@@ -153,9 +153,9 @@ A step has known outputs when its output names are known before the run: the nam
 | `env` | The variables the step's action receives, by name. |
 
 - The last execution is the latest execution of the step's action in every run attempt. A step with no execution, such as a skipped step or a handler that never ran, fails `called_with` once, whatever it lists.
-- `run` is the script of a multi-line `run`, the command of a one-line `run` without leading and trailing whitespace, or the commands of a list-form `run`, one per line, each with its references resolved.
+- `run` is the script of a multi-line `run`, the command of a one-line `run` without leading and trailing whitespace, or the commands of a list-form `run`, one per line, each resolved as in a real run. Dagu-owned references such as `${steps.<id>.outputs.<name>}`, `${params.<name>}`, and `${env.<name>}` take their values. `$NAME` and `${NAME}` stay as written for the shell, except where Dagu resolves them, such as inside a [single-quoted span](/writing-workflows/quoting-and-escaping#quotes-that-reach-dagu).
 - `with` holds the inputs as the step writes them, each resolved as the action resolves it. For a custom action, they are the inputs the step passes, not the fields of its definition. Only the listed inputs are checked. A string matches an input whose text equals it, and any other value matches by the JSON rule of outputs: listed keys only, recursively. An input the step does not set does not match.
-- `env` holds every variable the action receives: the host variables that Dagu [forwards to steps](/server-admin/operations#environment-variable-filtering), such as `PATH` and `HOME` and those `env_passthrough` adds, the DAG's and the step's `env`, and secrets. Only the listed names are checked, each against its exact text. A variable that is not set does not match.
+- `env` holds every variable the action receives: the host variables that Dagu [passes to steps](/server-admin/operations#environment-variable-filtering), which are its fixed allowlist, such as `PATH` and `HOME`, and the names `env_passthrough` and `env_passthrough_prefixes` add, the DAG's and the step's `env`, and secrets. A host variable that Dagu does not pass, such as an `AWS_SECRET_ACCESS_KEY` that `env_passthrough` does not name, is not set. Only the listed names are checked, each against its exact text. A variable that is not set does not match.
 - A secret compares as the step saw it: its placeholder `<secret:NAME>` in a case without a real step, and its value under `secrets` in a case with one. The report masks it as `*******`.
 
 These make the case invalid, each with an error under its field:
@@ -263,10 +263,11 @@ A case runs beside the live runs of the same DAG. Neither sees the other, and th
 - An asserted run `status` or `attempts`, step `status` or `attempts`, or `notifications` list that does not hold takes the run's value. An assertion that holds stays exactly as written, such as `total: 7.0` against a published `"7"`.
 - An asserted output takes its published value. For an object, each key it lists takes its published value, recursively, and no key is added. No output assertion is added.
 - A step or handler without an assertion gains its status, and `attempts` when above 1, after the case's last step entry, in DAG order and then handler order. A step entry keeps its form: a status stays a status, and a map keeps its fields.
-- A `called_with` value that does not hold takes the step's call: a `run` string takes the resolved text, each listed `with` input takes its resolved value, the listed keys only of an object, and each listed variable takes its text. A secret is written as the step saw it, such as `<secret:API_TOKEN>`. A `with` input or variable that resolves from a host variable, directly or through the DAG's `env`, is written with its value on the host that ran `--update`. Give credentials through `secrets:`, which `--update` never writes as a host value, and review the diff before committing. No `called_with` is added.
+- A `called_with` value that does not hold takes the step's call: a `run` string takes the resolved text, each listed `with` input takes its resolved value, the listed keys only of an object, and each listed variable takes its text. A secret is written as the step saw it, such as `<secret:API_TOKEN>`. No `called_with` is added.
 - No assertion is removed. These stay as written and still fail when they do not hold: `stdout` and `stderr` assertions, a `called_with` `run` given as `contains` or `matches`, a `with` input or variable that the call lacks, the `called_with` of a step with no execution, an output the step did not publish, a listed key the published object lacks, an object where the published value is not one, and a number that YAML cannot write exactly, such as an integer above 18446744073709551615.
 - Only the changed text is rewritten. Comments, quotes, and the other cases stay. A flow-style map or list that gains an entry is rewritten in block style.
 - Each rewrite is read back before it is kept, so the file never gets invalid YAML or a value other than the run's.
+- No value from the host is written. See [Values From the Host](#values-from-the-host).
 - A test file is written once its selected cases have run, and only when an `expect` changed, through a temporary file renamed over it. It keeps its mode.
 
 The last line under each case says what happened to its `expect`, whether or not the case passes:
@@ -287,6 +288,22 @@ The reasons are:
 The report and the exit status are those of the rewritten cases. A rewritten case passes unless an assertion that stays as written fails.
 
 A test file edited while its cases ran is not written. The other test files still run and the report ends as usual. Then an error goes to stderr, `Error: <path> changed while its cases ran, so its expects were not updated`, with the file's absolute path, and the command exits 1, or 2 when a case or file is invalid. An interrupt leaves the test file whose cases were running as it was.
+
+### Values From the Host
+
+A case's run reads the host environment as a run of `dagu start` does. A host value is the value of a variable the run takes from the host:
+
+- a variable that resolving the DAG and its steps reads, such as `HOST_TOKEN` in a DAG `env` entry `TOKEN: ${HOST_TOKEN}`, in `${env.HOST_TOKEN}`, or in a JSON path such as `${HOST_JSON.token}`;
+- a variable that `env_passthrough` or `env_passthrough_prefixes` passes to steps.
+
+Each string and number inside a JSON host value is a host value too, and a number counts in every form it takes, so `7.36491e5` also counts as `736491`. A part shorter than four characters, such as `us`, counts only where a value equals it, not inside text such as `us-east-1`. Booleans, empty values, and the variables Dagu passes to every step, its fixed allowlist such as `PATH` and `HOME` and the names that start with `DAGU_`, `DAG_`, `LC_`, or `KUBERNETES_`, are no host values.
+
+- `--update` writes no value that holds a host value: an output, a `called_with` `run`, a `with` input, or a variable stays as written, and so does a `notifications` list when a recipient of the sent ones holds one. A `called_with` variable that the step takes straight from the host, with no DAG, step, or case `env` entry in its place, stays as written too, `HOME` included. In an object assertion, each listed key decides on its own, so the other changed keys are written.
+- Each kept value still fails. The text and JSON reports mask host values as `*******` in the values of a failed output or `called_with` assertion. Notification recipients are written as the run resolved them.
+- Before the case's last line, one line per kept value reads `<label>: kept, it holds the value of host variable <names>; set <variables> under env`, with `the values of host variables` for more than one. `<label>` starts the assertion's failure line, such as `step sync called_with.env.TOKEN` or `notifications`. `; set <variables> under env` is left out when no variable of the step's call holds the value, and always for `notifications`.
+- In JSON, the case's `update_kept` lists the same, each with `step` for a step assertion, `field`, `variables`, the host variables, and `env`, the variables to set, when there are any.
+- A case that sets an entry under `env` takes no host value for it. A DAG `env` entry built from another, such as `AUTH: Bearer ${TOKEN}`, keeps the value it took while the DAG loaded, so set each entry the line names.
+- The match is by value and best effort. A value derived from a host value in another form, such as the part `${HOST_TOKEN#Bearer }` takes, or a re-encoding, is not matched. Keep credentials in DAG `secrets` and pin other values under the case's `env`.
 
 ## Report
 
@@ -309,7 +326,7 @@ A failed `called_with` part reads:
 - `step <key> called_with.with.<name>: expected <value>, got <value>`, and `called_with.env.<name>` for a variable, with `got nothing` when the call lacks it;
 - `step <key> called_with: expected a call, got none`, for a step with no execution.
 
-Values are written as JSON, with secrets masked as `*******`, such as `step notify called_with.with.headers: expected {"Authorization":"Bearer other"}, got {"Authorization":"Bearer *******"}`.
+Values are written as JSON, with secrets and [host values](#values-from-the-host) masked as `*******`, such as `step notify called_with.with.headers: expected {"Authorization":"Bearer other"}, got {"Authorization":"Bearer *******"}`.
 
 ### JSON Report
 
@@ -335,13 +352,14 @@ Values are written as JSON, with secrets masked as `*******`, such as `step noti
 | `notifications` | When the run would have sent one | Objects with `kind`, `to`, and, for `mail_on_error`, `step`. |
 | `case_dir` | With `--keep`, when the case ran | Absolute path of the kept case directory. |
 | `update` | With `--update` | `updated`, `unchanged`, or `kept`. See [Updating expectations](#updating-expectations). |
+| `update_kept` | With `--update`, when a value stays as written because it holds a host value | Objects with `step`, `field`, `variables`, and `env`. See [Values From the Host](#values-from-the-host). |
 
 | Failure field | Meaning |
 |---------------|---------|
 | `step` | The step key, for a step assertion, or the step label, for `limit`. |
 | `field` | `status`, `attempts`, `outputs.<name>`, `stdout.contains`, `stdout.matches`, `stderr.contains`, `stderr.matches`, `called_with`, `called_with.run`, `called_with.run.contains`, `called_with.run.matches`, `called_with.with.<name>`, `called_with.env.<name>`, `notifications`, `timeout`, `limit`, or `error`. |
-| `expected` | The expected value, with secrets masked. For `timeout`, the limit in milliseconds. Absent for `called_with` on a step with no execution. |
-| `actual` | The actual value, with secrets masked, when there is one. Absent for a `called_with` input or variable the call lacks. |
+| `expected` | The expected value, with secrets and host values masked. For `timeout`, the limit in milliseconds. Absent for `called_with` on a step with no execution. |
+| `actual` | The actual value, with secrets and host values masked, when there is one. Absent for a `called_with` input or variable the call lacks. |
 
 ### Exit Status
 

@@ -448,9 +448,9 @@ FAIL workflows/release.test.yaml: a wrong tag reaches the deploy (0.15s)
 2 cases: 1 passed, 1 failed
 ```
 
-- `run` is the resolved command or script of a step written with `run`. A string matches it exactly, and a map takes `contains`, `matches`, or both.
+- `run` is the command or script of a step written with `run`, resolved as in a real run: `${steps.<id>.outputs.<name>}`, `${params.<name>}`, and `${env.<name>}` take their values, and `$NAME` and `${NAME}` stay for the shell. A string matches it exactly, and a map takes `contains`, `matches`, or both.
 - `with` holds the resolved inputs of a step written with `action`, such as the `headers` of an `http.request` step. Only the listed inputs, and the listed keys of an object, are checked.
-- `env` holds the variables the step's action receives, including the host variables Dagu forwards to steps. Only the listed names are checked.
+- `env` holds the variables the step's action receives: the DAG's and the step's `env`, secrets, and the host variables Dagu passes to steps. Only the listed names are checked.
 - A secret compares as the step saw it: `<secret:NAME>` in a case without a real step.
 - The assertion reads the step's last execution. A step that never ran, such as a skipped step, fails it.
 
@@ -572,7 +572,7 @@ cases:
 
 The first case would pass without `secrets`: `API_TOKEN` would resolve to its placeholder. The second case runs `lint` for real, so it needs a value for `API_TOKEN`. Without one, it is invalid, and its error starts with `secret API_TOKEN:`.
 
-Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file holds no real credential unless one is written into it, such as by `--update` on a `called_with` assertion whose value resolves from a host variable. Pass credentials through `secrets:` to keep them out. A case without a real step does not depend on the environment of the host that runs it, unless it asserts on a host variable such as `HOME` under `called_with.env`. A real step reads the host as it does in a real run.
+Test files are committed with the DAGs, so their `secrets` hold fake values. A step that needs a real credential to pass belongs under a mock, not under `real`. A committed test file holds no secret value, and a case's secrets do not depend on the host that runs it. Other values can: a DAG `env` entry such as `TOKEN: ${HOST_TOKEN}` reads the host under test too, unless the case sets `TOKEN` under `env`. A real step reads the host as it does in a real run.
 
 ## Writing Tests Faster
 
@@ -675,6 +675,16 @@ The diff of the test file:
 - A step or handler without an assertion gains its status, as in the first case, and its attempts when above 1.
 - It never removes an assertion. `stdout` and `stderr` assertions stay as written and still fail when they do not hold, and so does an output the step did not publish.
 - Only the changed text is rewritten. Comments and the other cases stay as they were.
+- No value from the host is written. A value that holds the value of a host variable the run read, such as `SYNC_TOKEN` in a DAG `env` entry `TOKEN: ${SYNC_TOKEN}`, stays as written. The report masks it and names the variable to set under the case's `env`:
+
+  ```text
+  FAIL workflows/sync.test.yaml: the host token reaches the sync (0.10s)
+    step sync called_with.env.TOKEN: expected "test-token", got "*******"
+    step sync called_with.env.TOKEN: kept, it holds the value of host variable SYNC_TOKEN; set TOKEN under env
+    expect unchanged
+  ```
+
+  With `TOKEN` set under the case's `env`, the run takes no value from the host, and `--update` writes the case's value. The check is by value and best effort, so keep credentials in `secrets:`. See [Values from the host](/writing-workflows/workflow-test-reference#values-from-the-host).
 - `--run` limits the rewrite to the selected cases. `--timeout`, `--keep`, and `--format json` apply as without `--update`. `--init` does not combine with it.
 - Each case's report ends with `expect updated`, `expect unchanged`, or `expect kept:` and a reason, such as an invalid case or a run that timed out. See [Updating expectations](/writing-workflows/workflow-test-reference#updating-expectations).
 
