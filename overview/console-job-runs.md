@@ -50,7 +50,7 @@ Job runs need Dagu v2.28 or later.
 
 ## What Is Sent
 
-- **The run**: DAG name, run and attempt IDs, status, times, failed step names, and its steps with their status, times, and retries, as a server sends [run status](/overview/console-monitoring#run-status).
+- **The run**: DAG name, run and attempt IDs, status, times, failed step names, and its steps with their status, times, retries, and the steps each one waits for, as a server sends [run status](/overview/console-monitoring#run-status).
 - **Where it ran**:
   - The platform: GitHub Actions, GitLab CI, Buildkite, CircleCI, Azure Pipelines, Jenkins, Cloud Run, AWS Batch, or Kubernetes.
   - A link to the CI run, where the platform gives one.
