@@ -732,6 +732,8 @@ The schema rejects unknown fields and wrong types. `dagu test` stays the authori
 
 `dagu test` runs headless. It exits 0 when every selected case passed, 1 when a case failed, and 2 when a test file, a case, or the arguments are invalid. The highest status that applies wins.
 
+In GitHub Actions, the [setup-dagu](https://github.com/dagucloud/setup-dagu) action installs Dagu:
+
 ```yaml
 # .github/workflows/dagu-test.yaml
 name: Workflow tests
@@ -741,9 +743,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Dagu
-        run: npm install -g --ignore-scripts=false @dagucloud/dagu
+      - uses: actions/checkout@v7
+      - uses: dagucloud/setup-dagu@v1
       - name: Run workflow tests
         run: dagu test workflows/
 ```
