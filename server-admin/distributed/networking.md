@@ -82,7 +82,7 @@ On workers, configure:
 
 - `worker.coordinators`: explicit coordinator addresses in `host:port` form.
 
-`worker.coordinators` is required. Workers use these addresses for coordinator discovery and do not access the coordinator's file-backed service registry.
+`worker.coordinators` is required. Workers use these addresses for coordinator discovery. When a worker relies on a shared data directory for built-in TLS, it also checks the local service registry to select the transport.
 
 The examples below use `dagu coordinator` when showing only the coordinator gRPC listener. If the coordinator runs inside `dagu start-all`, pass the same `--coordinator.host`, `--coordinator.advertise`, `--coordinator.port`, and `--peer.*` flags to `dagu start-all`.
 
