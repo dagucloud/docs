@@ -80,8 +80,21 @@ When a failed job run has no error message, its page in Console says so and link
 
 ## Limits
 
-- A workspace has 10,000 job runs a month. Once they are used, until the month ends, successful runs are counted but not listed; failed runs still alert and are listed. The run's process prints `Dagu Console counted this run but does not list it: this month's job runs are used`.
-- Finished job runs are kept 30 days on a Team or Pro plan or in a trial, and 7 days on [free monitoring](/overview/console-monitoring#free-and-paid).
+A workspace has a monthly allowance of job runs, counted by calendar month in its time zone:
+
+| Plan | Job runs a month | Price |
+| --- | --- | --- |
+| No plan | 1,000 | Free |
+| Team, or a trial | 10,000 | Included |
+| Pro | 20,000 | Included |
+| Run Monitoring 10K | 10,000 | $19 per month, or $190 per year |
+| Run Monitoring 100K | 100,000 | $99 per month, or $990 per year |
+
+- **Run Monitoring plans** are bought by an owner on Console's **Billing** page, apart from Team and Pro. They license no server. For more than 100,000 job runs a month, [contact the Dagu team](https://dagu.sh/contact).
+- **Several plans**: a workspace gets the largest allowance, not the sum. Pro with Run Monitoring 10K has 20,000.
+- **Past the allowance**, until the month ends, successful runs are counted but not listed, and the run's process prints `Dagu Console counted this run but does not list it: this month's job runs are used`. Failed runs still alert, and are listed until the month's listed job runs reach 110% of the allowance. Owners get an email at 80% and at 100%. Nothing is charged automatically.
+- **History**: finished job runs are kept 30 days on Team, Pro, a Run Monitoring plan, or in a trial, and 7 days without a plan.
+- **Alerts**: without a plan, failure and lost-run alerts go by email. Team, Pro, a trial, or a Run Monitoring plan also sends job runs' alerts to chat, PagerDuty, and webhooks.
 - A report holds up to 64 KiB. A run that does not fit leaves out its steps first, then its error messages, then all but its first failed step name.
 
 ## Related Pages
