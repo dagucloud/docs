@@ -73,7 +73,7 @@ peer:
 
 The certificate must be a CA certificate whose key usage, when present, allows certificate signing, and the key must match it. The coordinator then uses this CA instead of the one it generated. Processes that share its data directory keep using built-in TLS with no setting.
 
-On each process on another host, set only the certificate, in the config file or as `DAGU_PEER_CA_CERT_FILE`:
+On each process on another host, set only the certificate, in the config file, as `DAGU_PEER_CA_CERT_FILE`, or, on `dagu worker`, as `--peer.ca-cert-file`:
 
 ```yaml
 peer:
@@ -114,11 +114,17 @@ coordinator:
 The environment variable is `DAGU_COORDINATOR_REQUIRE_TLS`. The default is `false`.
 
 - The coordinator refuses each h2c call except the gRPC health check, and logs `Coordinator transport: built-in TLS only (from coordinator.require_tls)` at start.
-- A refused client logs this once, until one of its calls succeeds: `The coordinator requires TLS. Upgrade this process, or remove peer.insecure: true.`
-- A process on another host without `peer.insecure: true` gets the same message when it has no TLS source. Set [`peer.ca_cert_file`](#processes-on-another-host) on it.
+- A refused client logs one line for the reason it uses h2c, once, until a call to that coordinator other than a health check succeeds. The same line is the error of the refused call.
+- A Dagu release from before built-in TLS prints the coordinator's own message instead: `the coordinator requires TLS: upgrade this process, or remove peer.insecure: true`.
 - A refusal ends a fallback window, so the client's next call tries built-in TLS again.
 - A coordinator that cannot create or read its CA exits with code 1 at start instead of serving h2c.
 - It has no effect on a coordinator with `peer.cert_file` and `peer.key_file`, which serves no h2c.
+
+| Why the client uses h2c | Line |
+|-------------------------|------|
+| `peer.insecure: true` | `The coordinator requires TLS. Remove peer.insecure: true.` |
+| No TLS source | `The coordinator requires TLS. Set peer.ca_cert_file to the coordinator's CA certificate.` |
+| A [fallback](#fallback-to-h2c) after TLS failed on the network path | `The coordinator requires TLS. Let the network path to it pass TLS.` |
 
 Before you set it, check that **System Status** shows no plaintext connection.
 
@@ -198,7 +204,7 @@ Coordinator 127.0.0.1:50055
 Error: 1 of 1 coordinators did not pass the check
 ```
 
-An address that does not answer gets `Cannot reach coordinator at <host>:<port>` and what to check. A call that `coordinator.require_tls` refuses gets the client's message from [Require TLS](#require-tls).
+An address that does not answer gets `Cannot reach coordinator at <host>:<port>` and what to check. A call that `coordinator.require_tls` refuses gets the line for its reason from [Require TLS](#require-tls).
 
 ## Start Lines and Warnings
 
