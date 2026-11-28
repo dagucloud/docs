@@ -9,7 +9,7 @@ This page covers the `peer` configuration used by distributed execution. It is s
 :::
 
 ::: info Version
-Built-in TLS, `peer.ca_cert_file`, `coordinator.require_tls`, the start lines, the ignored-setting warnings, the start checks of your own certificates, plaintext connections on **System Status**, and `dagu worker --check` are in Dagu releases after 2.27.0. In 2.27.0 and earlier, a client uses TLS only with `peer.insecure: false` and `peer.cert_file`, `peer.key_file`, `peer.client_ca_file`, or `peer.skip_tls_verify: true`. Unset `peer.insecure` and `peer.insecure: true` select h2c. Explicit `false` without a TLS setting fails.
+Built-in TLS, `peer.ca_cert_file`, `coordinator.require_tls`, the start lines, the ignored-setting warnings, the start checks of your own certificates, plaintext connections on **System Status**, and `dagu worker --check` are in Dagu releases after 2.27.0. In 2.27.0, a client uses TLS only with `peer.insecure: false` and `peer.cert_file`, `peer.key_file`, `peer.client_ca_file`, or `peer.skip_tls_verify: true`. Unset `peer.insecure` and `peer.insecure: true` select h2c. Explicit `false` without a TLS setting fails.
 :::
 
 ## Traffic Covered
@@ -29,11 +29,11 @@ The processes that call the coordinator are workers, the scheduler, the Web UI/A
 
 | Setup | Transport | Setting |
 |-------|-----------|---------|
-| `start-all`, or processes that share the coordinator's data directory | Built-in TLS, while the process can read the coordinator's CA certificate and a live registry entry advertises built-in TLS | None |
-| Docker Compose services that mount the coordinator's data volume | Built-in TLS, on the same conditions | None |
+| `start-all`, or processes that share the coordinator's data directory | Built-in TLS, under the [conditions below](#built-in-tls) | None |
+| Docker Compose services that mount the coordinator's data volume | Built-in TLS, under the same conditions | None |
 | The Helm chart in distributed mode | Built-in TLS for the coordinator, scheduler, and UI pods; h2c for worker pods until they get the CA | See [Kubernetes](#kubernetes) |
 | A process with a separate data directory, on another host or the same one | Built-in TLS once it has the coordinator's CA. Until then, h2c with `peer.insecure` unset, and a start failure with `peer.insecure: false` | `peer.ca_cert_file` on the process, `peer.ca_cert_file` with `peer.ca_key_file` on the coordinator, and the same `peer.token` on both, as in [Processes on Another Host](#processes-on-another-host) |
-| A path that cannot carry TLS, such as a proxy that expects plaintext gRPC | h2c, after a [fallback](#fallback-to-h2c) | None, while the client has a built-in TLS source, `peer.insecure` is unset, and the coordinator accepts h2c |
+| A path whose TLS handshake is reset or closed before the server replies, or whose first reply is plaintext, as a plaintext proxy can cause | h2c, after a [fallback](#fallback-to-h2c) | None, while the client has a built-in TLS source, `peer.insecure` is unset, and the coordinator accepts h2c |
 | Server TLS with your own certificates | TLS | `peer.cert_file` and `peer.key_file` on the coordinator, and `peer.insecure: false` with `peer.client_ca_file` on clients, as in [Server TLS](#server-tls) |
 | Mutual TLS with your own certificates | mTLS | Server TLS, plus `peer.client_ca_file` on the coordinator and `peer.cert_file` and `peer.key_file` on each client, as in [Mutual TLS](#mutual-tls) |
 | Plaintext on purpose | h2c | `peer.insecure: true` |
@@ -46,7 +46,7 @@ Leave `peer.insecure` unset unless one of the last four rows applies. A config t
 A coordinator without `peer.cert_file` and `peer.key_file` runs a peer CA. That is the CA that `peer.ca_cert_file` and `peer.ca_key_file` supply, or, when neither a server certificate pair nor a peer CA is supplied, one it generates on its first start and reuses on later starts. The generated CA has no expiry date. At each start, the coordinator issues itself a server certificate from the peer CA for the name `coordinator.dagu.invalid`.
 
 - The coordinator serves built-in TLS and h2c on one port, `coordinator.port`. Each connection picks its transport, so Dagu 2.27.0 and earlier and clients with `peer.insecure: true` keep working over h2c.
-- Processes that share the coordinator's data directory use built-in TLS with no setting: `start-all`, a scheduler or Web UI/API process beside the coordinator, and workers on a shared filesystem. This holds for a connection while the process can read the coordinator's CA certificate and a live service registry entry advertises built-in TLS. Otherwise the connection uses h2c with `peer.insecure` unset, and fails with `peer.insecure: false`.
+- Processes that share the coordinator's data directory use built-in TLS with no setting: `start-all`, a scheduler or Web UI/API process beside the coordinator, and workers on a shared filesystem. This holds for a connection while the process can read the coordinator's CA certificate, and the service registry allows it. For an address listed in the live registry, its own entry must advertise built-in TLS. For an unlisted address, any live entry advertising built-in TLS lets the client try it. Otherwise the connection uses h2c with `peer.insecure` unset, and fails with `peer.insecure: false`.
 - Clients check the name `coordinator.dagu.invalid`, not the dialed address. Any address works: an IP address, a DNS name, or a load balancer that passes TCP through.
 - Built-in TLS needs TLS 1.3.
 - A coordinator with `coordinator.require_tls: false` that cannot create or read its generated CA logs a warning and serves h2c only.
@@ -97,7 +97,7 @@ Use a CA only for Dagu peers. The coordinator accepts a client certificate that 
 
 ## Fallback to h2c
 
-A client on built-in TLS with `peer.insecure` unset falls back to h2c for a coordinator address when its TLS handshake fails on the network path: the connection is reset or closed before the coordinator answers, or the reply is not TLS. A proxy or service mesh sidecar that expects plaintext gRPC does this.
+A client on built-in TLS with `peer.insecure` unset falls back to h2c for a coordinator address when its TLS handshake fails on the network path: the connection is reset or closed before the coordinator replies, or the first reply is plaintext. A proxy or service mesh sidecar that expects plaintext gRPC can cause these failures. A path that drops the handshake until it times out causes no fallback.
 
 - The client uses h2c for that address for 10 minutes. Its next call after that tries built-in TLS again.
 - The processes on one host that use the same data directory share the window. Only the process that opens it logs the warning.
@@ -307,7 +307,7 @@ dagu coordinator \
   --peer.key-file=/etc/dagu/tls/coordinator.key
 ```
 
-The coordinator serves TLS from these files whatever `peer.insecure` says, since `peer.insecure` sets only how a process calls a coordinator. `start-all` also calls its own coordinator. For server-only TLS with `start-all`, set `peer.insecure: false`, use a coordinator certificate trusted by the system roots, and leave `peer.client_ca_file` unset. For mutual TLS with `start-all`, set `peer.insecure: false` and `peer.client_ca_file`: it presents `peer.cert_file` to its own coordinator and verifies the coordinator against `peer.client_ca_file`, so that CA must sign the coordinator certificate, and the certificate must allow client authentication.
+The coordinator serves TLS from these files whatever `peer.insecure` says, since `peer.insecure` sets only how a process calls a coordinator. `start-all` also calls its own coordinator. For server-only TLS with `start-all`, set `peer.insecure: false`, use a coordinator certificate trusted by the system roots, and leave `peer.client_ca_file` unset. For mutual TLS with `start-all`, set `peer.insecure: false` and `peer.client_ca_file`: it presents `peer.cert_file` to its own coordinator and verifies the coordinator against `peer.client_ca_file`, so the certificate must verify against `peer.client_ca_file` and allow client authentication.
 
 On each worker or other coordinator client:
 
@@ -396,7 +396,7 @@ coordinator:
   require_token: true
 ```
 
-`coordinator.require_token` defaults to `false`. The peer token works with or without TLS. An eligible certificate is a valid client certificate that the peer CA signed, on a call over built-in TLS. Calls that only the peer token may make still need the token.
+`coordinator.require_token` defaults to `false`. The peer token works with or without TLS. On built-in TLS, an eligible client certificate chains to the peer CA. Token-only calls require a valid peer token on a connection without a client certificate.
 
 ## Kubernetes
 
