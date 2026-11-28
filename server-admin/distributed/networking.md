@@ -235,7 +235,7 @@ Only coordinator port `50055` needs forwarding. Choose local or reverse forwardi
 
 In Dagu releases after 2.27.0, processes that share the coordinator's data directory use built-in TLS with no setting, while they can read the coordinator's CA certificate. For an address listed in the live service registry, its own entry must advertise built-in TLS. For an unlisted address, any live entry advertising built-in TLS lets the client try it.
 
-A process with a separate data directory and no TLS settings of its own has no TLS source until it has the coordinator's CA. With `peer.insecure` unset it uses h2c, and with `peer.insecure: false` it fails at start. If you already have the coordinator's peer CA certificate and token, reuse them. Copy the certificate to each client, set `peer.ca_cert_file` and `peer.token`, and remove any `peer.insecure: true` setting. Otherwise, provide a CA with `dagu peer init`, as [Processes on Another Host](/server-admin/distributed/transport-security#processes-on-another-host) describes.
+A process with a separate data directory needs a TLS source of its own. A client with no TLS source at startup uses h2c when `peer.insecure` is unset and exits with code 1 when it is `false`. If you already have the coordinator's peer CA certificate and token, reuse them. Copy the certificate to each client, set `peer.ca_cert_file` and `peer.token`, and remove any `peer.insecure: true` setting. Otherwise, provide a CA with `dagu peer init`, as [Processes on Another Host](/server-admin/distributed/transport-security#processes-on-another-host) describes.
 
 For built-in TLS, your own certificates, mTLS, and certificate requirements, see [Distributed Transport Security](/server-admin/distributed/transport-security).
 
