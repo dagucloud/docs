@@ -32,7 +32,7 @@ The processes that call the coordinator are workers, the scheduler, the Web UI/A
 | `start-all`, or processes that share the coordinator's data directory | Built-in TLS, under the [conditions below](#built-in-tls) | None |
 | Docker Compose services that mount the coordinator's data volume | Built-in TLS, under the same conditions | None |
 | The Helm chart in distributed mode, chart 2.0.10 or later | Built-in TLS for the coordinator, scheduler, and UI pods; h2c for worker pods until they get the CA | Set `image.tag` to a Dagu release after 2.27.0. For worker pods, also set `peer.existingCASecret`. See [Kubernetes](#kubernetes) |
-| A process with a separate data directory, on another host or the same one | Built-in TLS with the coordinator's peer CA. With `peer.insecure` unset and no TLS source, the client starts on h2c | Set `peer.ca_cert_file` to select built-in TLS, with the coordinator's existing peer CA or a CA you provide. Set `peer.token` to match the coordinator when it requires a peer token. Remove any `peer.insecure: true`. See [Processes on Another Host](#processes-on-another-host) |
+| A process with a separate data directory, on another host or the same one | Built-in TLS with the coordinator's peer CA. With `peer.insecure` unset and no TLS source, the client starts on h2c | Set `peer.ca_cert_file` to select built-in TLS, with the coordinator's existing peer CA or a CA you provide. Set `peer.token` by the [peer token rule](#peer-token). Remove any `peer.insecure: true`. See [Processes on Another Host](#processes-on-another-host) |
 | A path where the connection closes or resets before the server's first TLS handshake message, or the server's first bytes are not a TLS record, as a plaintext proxy can cause | h2c, after a [fallback](#fallback-to-h2c) | None, while the client has a built-in TLS source, `peer.insecure` is unset, and the coordinator accepts h2c |
 | Server TLS with your own certificates | TLS | `peer.cert_file` and `peer.key_file` on the coordinator, and `peer.insecure: false` with `peer.client_ca_file` on clients, as in [Server TLS](#server-tls). `start-all` takes different settings, which that section gives. |
 | Mutual TLS with your own certificates | mTLS | Server TLS, plus `peer.client_ca_file` on the coordinator and `peer.cert_file` and `peer.key_file` on each client, as in [Mutual TLS](#mutual-tls) |
@@ -60,11 +60,11 @@ Peer transport: built-in TLS (from the coordinator's data directory)
 
 ### Processes on Another Host
 
-A process that does not share the coordinator's data directory needs a TLS source or TLS settings of its own. A client with no TLS source at startup uses h2c when `peer.insecure` is unset, and logs `Peer transport: h2c (from no TLS source)`. With `peer.insecure: false`, startup exits with code 1 when the client has neither an explicit TLS setting nor a built-in TLS source, with `TLS enabled but no certificates provided`. Set `peer.ca_cert_file` to select built-in TLS. Set `peer.token` to match the coordinator when it requires a peer token.
+A process that does not share the coordinator's data directory needs a TLS source or TLS settings of its own. A client with no TLS source at startup uses h2c when `peer.insecure` is unset, and logs `Peer transport: h2c (from no TLS source)`. With `peer.insecure: false`, startup exits with code 1 when the client has neither an explicit TLS setting nor a built-in TLS source, with `TLS enabled but no certificates provided`. Set `peer.ca_cert_file` to select built-in TLS. For `peer.token`, regular calls may omit the token when `coordinator.require_token` is `false`. If the coordinator explicitly sets `peer.token`, any token the client sends must match. Token-only calls always require a valid token.
 
 On each coordinator and client you migrate, clear `peer.cert_file`, `peer.key_file`, `peer.client_ca_file`, and `peer.skip_tls_verify: true` before you add `peer.ca_cert_file`. They conflict with it, and the process exits at start.
 
-If you already have the coordinator's peer CA certificate, reuse it. Copy the certificate to each client, set `peer.ca_cert_file`, and remove any `peer.insecure: true` setting. When the coordinator requires a peer token, also set `peer.token` to its token.
+If you already have the coordinator's peer CA certificate, reuse it. Copy the certificate to each client, set `peer.ca_cert_file`, and remove any `peer.insecure: true` setting. Set `peer.token` by the rule above.
 
 Otherwise, provide a CA. A CA you provide also keeps one CA across data directories, such as for several coordinators or a Kubernetes Secret. To make one, run `dagu peer init`:
 
@@ -83,14 +83,14 @@ peer:
   token: "<contents of token>"
 ```
 
-The certificate must be a CA certificate whose key usage, when present, allows certificate signing, and the key must match it. Only the coordinator reads `peer.ca_key_file`. The coordinator then uses this CA instead of the one it generated, and processes that share its data directory keep using built-in TLS with no setting. Give every process that calls the coordinator the same `peer.token`, as [Peer Token](#peer-token) describes.
+The certificate must be a CA certificate whose key usage, when present, allows certificate signing, and the key must match it. Only the coordinator reads `peer.ca_key_file`. The coordinator then uses this CA instead of the one it generated, and processes that share its data directory keep using built-in TLS with no setting. This coordinator sets `peer.token` explicitly, so any token a client sends must match it. Give every process that calls the coordinator the same `peer.token`, as [Peer Token](#peer-token) describes.
 
-On each process on another host, with the conflicting settings cleared, set the certificate, and the same token when the coordinator sets one, and remove any `peer.insecure: true` setting. `peer.ca_cert_file` also takes `DAGU_PEER_CA_CERT_FILE`, or `--peer.ca-cert-file` on `dagu worker`:
+On each process on another host, with the conflicting settings cleared, set the certificate and the same token, and remove any `peer.insecure: true` setting. `peer.ca_cert_file` also takes `DAGU_PEER_CA_CERT_FILE`, or `--peer.ca-cert-file` on `dagu worker`:
 
 ```yaml
 peer:
   ca_cert_file: /path/to/ca.crt
-  token: "<contents of token>"  # when the coordinator sets peer.token
+  token: "<contents of token>"
 ```
 
 The process logs `Peer transport: built-in TLS (from peer.ca_cert_file)`. It verifies every coordinator against that certificate, and a certificate that does not verify fails the call. Add `peer.insecure: false` to keep it on TLS with no [fallback](#fallback-to-h2c) to h2c.
@@ -386,7 +386,13 @@ The server CA and client CA can be the same CA if one CA issues both coordinator
 
 ## Peer Token
 
-The processes that call the coordinator, such as workers, the scheduler, and the Web UI/API process, send a peer token, and the coordinator checks it. Unless `coordinator.require_token: true` is set, the coordinator also accepts a call that carries no token. With the token the coordinator generates, processes that share the coordinator's data directory need no setup.
+The processes that call the coordinator, such as workers, the scheduler, and the Web UI/API process, send a peer token, and the coordinator checks it:
+
+- Regular calls may omit the token when `coordinator.require_token` is `false`.
+- If the coordinator explicitly sets `peer.token`, any token the client sends must match.
+- Token-only calls always require a valid token.
+
+With the token the coordinator generates, processes that share the coordinator's data directory need no setup.
 
 To choose the token yourself, give the coordinator and every process that calls it the same `peer.token`:
 
@@ -406,9 +412,9 @@ coordinator:
 
 ## Kubernetes
 
-Chart 2.0.10 removes `peer.insecure: true` from its distributed defaults. It still defaults to Dagu 2.27.0. Set `image.tag` to a Dagu release after 2.27.0 to use built-in TLS. The coordinator, scheduler, and Web UI/API pods share the data volume, so they use built-in TLS with no setting. Worker pods do not share it, so they use h2c until you store a peer CA in a Secret with both keys `ca.crt` and `ca.key` and name it in `peer.existingCASecret`. The [chart README](https://github.com/dagucloud/dagu/blob/main/charts/dagu/README.md#peer-tls) covers this, the peer token, and workers outside the cluster.
+Chart 2.0.10 removes `peer.insecure: true` from its distributed defaults. It still defaults to Dagu 2.27.0. Set `image.tag` to a Dagu release after 2.27.0 to use built-in TLS. Chart 2.0.9 still sets `peer.insecure: true` in distributed mode, even with a newer Dagu image. The coordinator, scheduler, and Web UI/API pods share the data volume, so they use built-in TLS with no setting. Worker pods do not share it, so they use h2c until you store a peer CA in a Secret with both keys `ca.crt` and `ca.key` and name it in `peer.existingCASecret`. The [chart README](https://github.com/dagucloud/dagu/blob/main/charts/dagu/README.md#peer-tls) covers this, the peer token, and workers outside the cluster.
 
-To use your own certificates instead, provide the files through Kubernetes Secrets and set the corresponding `peer` config or `DAGU_PEER_*` environment variables for each component.
+To switch to your own certificates, clear `peer.existingCASecret`. The chart refuses to render certificate settings in `extraEnv` while it is set. Then provide the files through Kubernetes Secrets and set the corresponding `peer` config or `DAGU_PEER_*` environment variables for each component.
 
 For mTLS:
 
@@ -439,7 +445,7 @@ The peer TLS and token settings can also be configured with environment variable
 
 Run [`dagu worker --check`](#check-worker-connections) on the client host. It names the transport, the handshake result, and what the coordinator answered.
 
-Check the coordinator's `Coordinator transport:` line at start. The coordinator serves TLS from your certificates only when both `peer.cert_file` and `peer.key_file` are set, and then serves no h2c. Without them it serves built-in TLS, and h2c unless `coordinator.require_tls: true`. On clients, `peer.client_ca_file` adds trusted CA certificates to the system roots. For built-in TLS, configure the coordinator's peer CA first. Remove the client's own-certificate settings and `peer.skip_tls_verify: true`, then set [`peer.ca_cert_file`](#processes-on-another-host), and `peer.token` when the coordinator requires one. Remove any `peer.insecure: true` setting. If you already have the coordinator's peer CA certificate, reuse it.
+Check the coordinator's `Coordinator transport:` line at start. The coordinator serves TLS from your certificates only when both `peer.cert_file` and `peer.key_file` are set, and then serves no h2c. Without them it serves built-in TLS, and h2c unless `coordinator.require_tls: true`. On clients, `peer.client_ca_file` adds trusted CA certificates to the system roots. For built-in TLS, configure the coordinator's peer CA first. Remove the client's own-certificate settings and `peer.skip_tls_verify: true`, then set [`peer.ca_cert_file`](#processes-on-another-host), and `peer.token` by the [peer token rule](#peer-token). Remove any `peer.insecure: true` setting. If you already have the coordinator's peer CA certificate, reuse it.
 
 A coordinator with `coordinator.require_tls: false` that cannot create or read its generated CA logs a warning and serves h2c only.
 
