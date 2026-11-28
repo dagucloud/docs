@@ -32,7 +32,7 @@ The processes that call the coordinator are workers, the scheduler, the Web UI/A
 | `start-all`, or processes that share the coordinator's data directory | Built-in TLS | None |
 | Docker Compose services that mount the coordinator's data volume | Built-in TLS | None |
 | The Helm chart | Built-in TLS for the coordinator, scheduler, and UI pods; h2c for worker pods until they get the CA | See [Kubernetes](#kubernetes) |
-| A process on another host | Built-in TLS once it has the coordinator's CA, h2c until then | `peer.ca_cert_file` on the process, and the same CA on the coordinator, as in [Processes on Another Host](#processes-on-another-host) |
+| A process on another host | Built-in TLS once it has the coordinator's CA, h2c until then | `peer.ca_cert_file` on the process, and `peer.ca_cert_file` with `peer.ca_key_file` on the coordinator, as in [Processes on Another Host](#processes-on-another-host) |
 | A path that cannot carry TLS, such as a proxy that expects plaintext gRPC | h2c, after a [fallback](#fallback-to-h2c) | None |
 | Your own certificates | TLS or mTLS | `peer.cert_file` and `peer.key_file` on the coordinator, and `peer.insecure: false` with `peer.client_ca_file` on clients, as in [Server TLS](#server-tls) |
 | Plaintext on purpose | h2c | `peer.insecure: true` |
@@ -127,7 +127,7 @@ Before you set it, check that **System Status** shows no plaintext connection.
 **System Status** shows each process that calls the coordinator over h2c, and why:
 
 - **Workers**: each worker's `Connection` column shows `TLS`, or `Plaintext · <reason>` with the change to make below it. `Plaintext` links to this page. A list too narrow for the column shows the same line under the worker ID.
-- **Coordinator Service**: under each coordinator, **Plaintext calls in the last 10 minutes** lists the hosts other than workers that called it over h2c, with the reason and the time of the last call. Such a host runs a scheduler, a Web UI/API process, a CLI command, or `dagu worker --check`.
+- **Coordinator Service**: under each coordinator, **Plaintext calls in the last 10 minutes** lists the hosts that called it over h2c, other than for a worker's own calls, with the reason and the time of the last call. The calls come from a scheduler, a Web UI/API process, a CLI command, or `dagu worker --check`.
 
 | Shown | Cause | Change |
 |-------|-------|--------|
