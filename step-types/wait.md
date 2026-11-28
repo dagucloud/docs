@@ -142,7 +142,18 @@ steps:
       body: '{"index":"customers"}'
 ```
 
-Network errors, connection refusals, and non-matching statuses are treated as "not ready" and retried until the step context is canceled or the DAG step times out.
+Network errors, connection refusals, failed certificate checks, and non-matching statuses are treated as "not ready" and retried until the step context is canceled or the DAG step times out.
+
+A server with a self-signed or private-CA certificate fails the certificate check on every poll. On a Dagu release after v2.27.0, `skip_tls_verify: true` accepts any server certificate. It also accepts one presented by an attacker on the network path, so use it only for a server you reach over a network you trust.
+
+```yaml
+steps:
+  - id: wait_for_file_server
+    action: wait.http
+    with:
+      url: https://files.internal.example/health
+      skip_tls_verify: true
+```
 
 ## Configuration
 
@@ -163,6 +174,7 @@ Network errors, connection refusals, and non-matching statuses are treated as "n
 | `body` | string | none | `wait.http` | HTTP request body. |
 | `poll_interval` | string | `1s` | `wait.file`, `wait.http` | Interval between readiness checks. |
 | `request_timeout` | string | `10s` | `wait.http` | Per-request timeout. |
+| `skip_tls_verify` | boolean | `false` | `wait.http` | Accept any server certificate, such as a self-signed one. Dagu release after v2.27.0. |
 
 `offset`, `timezone`, `if_past`, and `window` are only valid on `wait.until`. Use the step-level `timeout_sec` field to set an overall maximum wait time.
 
