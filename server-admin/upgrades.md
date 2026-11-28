@@ -82,6 +82,33 @@ Upgrade the standby first. The upgraded instance then takes over once, and an ol
 
 Upgrade the binary or image on each worker host as well. The [Workers page](/server-admin/distributed/workers/#web-ui-workers-page) shows the Dagu version of each worker and marks a worker older or newer than the server, so it shows when every worker is upgraded.
 
+## Upgrading from 2.27.0 or earlier
+
+A DAG file whose name ends in `.test.yaml` or `.test.yml` becomes a [workflow test](/writing-workflows/workflow-tests) file. It leaves the DAG list, the scheduler stops running it, and `dagu start` refuses it. Before the upgrade, rename such files, for example `smoke.test.yaml` to `smoke-test.yaml`, and update everything that starts one by its old name or path, such as the `dag` of a `dag.run` step or a script that runs `dagu start`.
+
+To find them, run `dagu config` as the server runs, with its configuration and environment, and read the `DAGs directory` line. A service installed by the script installer keeps its data under `/var/lib/dagu` for a system service or `~/.dagu` for a user service. Then search that directory. `-H` follows it when it is a symbolic link:
+
+```bash
+dagu config | grep 'DAGs directory'
+find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
+```
+
+Run the search again in `paths.alt_dags_dir` when it is set, which `dagu config --values` lists, and in each other directory that holds DAG files started by path, such as from a script or a `dag.run` step. The commands above are for a POSIX shell. In PowerShell on Windows:
+
+```powershell
+dagu config | Select-String 'DAGs directory'
+Get-ChildItem -LiteralPath 'C:\path\to\dags' -Recurse -File -Force |
+  Where-Object { $_.Name -like '*.test.yaml' -or $_.Name -like '*.test.yml' }
+```
+
+`-LiteralPath` reads the directory as written, even with `[` or `]` in its name, and `-Force` includes hidden files. Like `find`, `Get-ChildItem` does not search inside symbolic links to directories that it finds during the search.
+
+After the upgrade, `dagu scheduler`, `dagu server`, and `dagu start-all` log a warning at startup for each such file whose first document has top-level `steps` and no `cases`, with its full path:
+
+```text
+/path/to/dags/smoke.test.yaml reads as a DAG, with steps and no cases, but Dagu treats it as a test file and does not run it as a DAG; rename it, for example to smoke-test.yaml
+```
+
 ## Upgrading from 2.26.0 or earlier
 
 Later releases change how the scheduler behaves in four ways:

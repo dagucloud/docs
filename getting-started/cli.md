@@ -5,7 +5,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - Both formats: `start`, `stop`, `status`, `retry`, `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `browser writes`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `test`, `human-task complete`, `human-task push-back`, `browser cache clear`, `browser session`, `browser writes`, `computer check`, `computer elements`, `computer cache clear`, `computer cache show`, `xlsx inspect`, `xlsx read`, `xlsx cache clear`
 
 ## Global Options
 
@@ -802,6 +802,38 @@ dagu dry --profile prod my-workflow.yaml
 dagu dry --no-reuse report-pipeline.yaml
 ```
 
+### `test`
+
+Run [workflow tests](/writing-workflows/workflow-tests). Each case of a test file runs the DAG beside it, or the one its `dag` field names, through the same runner as `start`, with step actions replaced by mocks, in a temporary directory. A step the case lists under `real` runs its real action. Requires a Dagu release after v2.27.0.
+
+```bash
+dagu test [options] [TEST_FILE_DAG_FILE_DAG_NAME_OR_DIRECTORY...]
+```
+
+A test file argument ends in `.test.yaml` or `.test.yml`. A DAG file argument, a `.yaml` or `.yml` file that is not a test file, runs the test files beside it: `release.yaml` runs `release.test.yaml` and `release.test.yml`, whichever exist. An argument that is not an existing path is a DAG name, resolved in the DAGs directory as `start` resolves one. A DAG with no test file exits `2` with an error that names `dagu test --init`. A directory argument runs every test file under it, skipping directories whose names start with `.` and not following symbolic links. Without an argument, every test file under the DAGs directory runs. Selecting no test file is not an error and exits `0`.
+
+With `--init`, the one argument is a DAG file, and Dagu writes its test file beside it instead of running tests. See [Generate a Test File](/writing-workflows/workflow-tests#generate-a-test-file).
+
+**Options:**
+- `--run` - Run only the cases whose name this RE2 regular expression matches
+- `--timeout` - Longest a case may run, such as `30s` (default: `5m`)
+- `--format, -f` - Report format: `text` (default) or `json`
+- `--keep` - Keep each case directory and print its path
+- `--init` - Write the test file of the DAG file given as the one argument, with a mock for every step that needs one and one case that expects the result of a run with those mocks. It never replaces a test file and takes no `--update`, `--run`, `--keep`, or `--format json`
+- `--update` - Run the selected cases and rewrite each case's `expect` from its run, for review as a diff. It never removes an assertion. It combines with `--run`, `--timeout`, `--keep`, and `--format`, and not with `--init`. See [Update Expectations After a Change](/writing-workflows/workflow-tests#update-expectations-after-a-change)
+
+```bash
+dagu test workflows/
+dagu test workflows/release.yaml
+dagu test release
+dagu test --run 'failed build' --timeout 30s workflows/release.test.yaml
+dagu test --format json --keep workflows/
+dagu test --init workflows/release.yaml
+dagu test --update workflows/release.test.yaml
+```
+
+Exits `0` when every case passed, `1` when a case failed, and `2` when a test file, a case, or the arguments are invalid. With `--update`, a test file edited during the run is left unwritten, and the command exits `1` even when every case passed, or `2` when a test file or case is invalid. See [Running Tests in CI](/writing-workflows/workflow-tests#running-tests-in-ci).
+
 ### `browser cache clear`
 
 Clear the recorded `act` and `upload` operations that [browser steps](/step-types/browser#replay-cache) replay, so the next run asks the model again.
@@ -1314,7 +1346,7 @@ Values are shown as read from the file, the environment, or the defaults, before
 
 ### `schema`
 
-Browse the JSON schema for DAG definitions, server configuration, or calendar files.
+Browse the JSON schema for DAG definitions, server configuration, calendar files, or workflow test files.
 
 ```bash
 dagu schema dag
@@ -1324,7 +1356,11 @@ dagu schema config
 dagu schema config server
 dagu schema calendar
 dagu schema calendar holidays
+dagu schema test
+dagu schema test cases.expect
 ```
+
+Save the test file schema for an editor with `dagu schema test > workflow-test.schema.json`. See [Editor Support](/writing-workflows/workflow-tests#editor-support).
 
 ### `calendar`
 

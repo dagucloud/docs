@@ -84,6 +84,8 @@ dagu start --only report pipeline.yaml  # Run one step on its own
 dagu history pipeline                   # List recent runs
 ```
 
+To check failure branches, retries, and handlers without running commands, write a [workflow test](/writing-workflows/workflow-tests) beside the DAG and run it with `dagu test pipeline.test.yaml`.
+
 Start the server to inspect the same workflows in the Web UI:
 
 ```bash
@@ -254,6 +256,7 @@ Other built-in actions cover [HTTP requests](/step-types/http), [JavaScript tran
 | Start a run for each file that arrives in a folder | [Watched Folders](/writing-workflows/watched-folders) |
 | Keep a DAG running like a service | [Services](/writing-workflows/services) |
 | Configure retries, timeouts, handlers, and failure behavior | [Durable Execution](/writing-workflows/durable-execution) and [Error Handling](/writing-workflows/error-handling) |
+| Test how a DAG behaves with its commands mocked | [Workflow Tests](/writing-workflows/workflow-tests) |
 | Run HTTP, SQL, SSH, Docker, Kubernetes, or other actions | [Built-in Actions](/step-types/shell) |
 | Start from copyable workflows | [Examples](/writing-workflows/examples) |
 | Look up every supported field | [YAML Specification](/writing-workflows/yaml-specification) |

@@ -82,6 +82,33 @@ macOS では、インストーラーが設定する launchd エージェント�
 
 各ワーカーホストのバイナリまたはイメージも更新してください。[ワーカーページ](/server-admin/distributed/workers/#web-ui-workers-page)には各ワーカーの Dagu のバージョンが表示され、サーバーより古いワーカーや新しいワーカーには印が付きます。すべてのワーカーの更新が終わったかをここで確認できます。
 
+## 2.27.0 以前からのアップグレード {#upgrading-from-2-27-0-or-earlier}
+
+ファイル名が `.test.yaml` または `.test.yml` で終わる DAG ファイルは、[ワークフローテスト](/writing-workflows/workflow-tests)のファイルとして扱われるようになります。DAG 一覧に表示されなくなり、スケジューラも実行せず、`dagu start` も受け付けません。アップグレードの前に、このようなファイルの名前を変更してください(例: `smoke.test.yaml` を `smoke-test.yaml` に変更)。あわせて、古い名前やパスでその DAG を開始しているもの(`dag.run` ステップの `dag` や、`dagu start` を実行するスクリプトなど)もすべて更新してください。
+
+対象のファイルを探すには、サーバーと同じ設定と環境で `dagu config` を実行し、`DAGs directory` の行を確認します。スクリプトインストーラーで登録したサービスは、システムサービスでは `/var/lib/dagu`、ユーザーサービスでは `~/.dagu` の下にデータを置きます。確認したディレクトリを検索します。`-H` を付けると、そのディレクトリがシンボリックリンクの場合もリンク先を検索します。
+
+```bash
+dagu config | grep 'DAGs directory'
+find -H /path/to/dags -name '*.test.yaml' -o -name '*.test.yml'
+```
+
+`paths.alt_dags_dir` を設定している場合は、`dagu config --values` に表示されるそのディレクトリでも同じ検索を行ってください。スクリプトや `dag.run` ステップからパスで開始する DAG ファイルを置いているディレクトリがほかにあれば、それぞれでも検索してください。上のコマンドは POSIX シェル用です。Windows の PowerShell では次のとおりです。
+
+```powershell
+dagu config | Select-String 'DAGs directory'
+Get-ChildItem -LiteralPath 'C:\path\to\dags' -Recurse -File -Force |
+  Where-Object { $_.Name -like '*.test.yaml' -or $_.Name -like '*.test.yml' }
+```
+
+`-LiteralPath` は、名前に `[` や `]` を含むディレクトリも書いたとおりに読みます。`-Force` を付けると隠しファイルも対象になります。`find` と同じく、`Get-ChildItem` は検索中に見つかったディレクトリへのシンボリックリンクの中は検索しません。
+
+アップグレード後、`dagu scheduler`、`dagu server`、`dagu start-all` は起動時に、最初のドキュメントにトップレベルの `steps` があり `cases` がないファイルごとに、そのフルパスを含む警告をログに出力します。
+
+```text
+/path/to/dags/smoke.test.yaml reads as a DAG, with steps and no cases, but Dagu treats it as a test file and does not run it as a DAG; rename it, for example to smoke-test.yaml
+```
+
 ## 2.26.0 以前からのアップグレード {#upgrading-from-2-26-0-or-earlier}
 
 それより後のリリースでは、スケジューラの動作が 4 点変更されています。
