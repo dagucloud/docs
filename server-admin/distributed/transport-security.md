@@ -72,15 +72,15 @@ Otherwise, provide a CA. A CA you provide also keeps one CA across data director
 dagu peer init --out ./peer
 ```
 
-It writes `ca.crt`, `ca.key`, and `token`, a value for [`peer.token`](#peer-token). If any output file already exists, the command names it, writes nothing, and exits with code 1.
+The command prints the paths to the CA certificate, CA key, and peer token, in that order. Use the generated token as [`peer.token`](#peer-token). If any output file already exists, the command names it, writes nothing, and exits with code 1.
 
-With those settings cleared, set this on each coordinator, or on `start-all`:
+With those settings cleared, set this on each coordinator, or on `start-all`, using the paths it printed:
 
 ```yaml
 peer:
-  ca_cert_file: /path/to/ca.crt
-  ca_key_file: /path/to/ca.key
-  token: "<contents of token>"
+  ca_cert_file: "<the CA certificate path it printed>"
+  ca_key_file: "<the CA key path it printed>"
+  token: "<the generated token>"
 ```
 
 The certificate must be a CA certificate whose key usage, when present, allows certificate signing, and the key must match it. Only the coordinator reads `peer.ca_key_file`. The coordinator then uses this CA instead of the one it generated, and processes that share its data directory keep using built-in TLS with no setting. This coordinator sets `peer.token` explicitly, so by the [peer token rule](#peer-token) any token a client sends must match it. Give every process that calls the coordinator the same `peer.token`, as [Peer Token](#peer-token) describes.
@@ -89,8 +89,8 @@ On each process on another host, with the conflicting settings cleared, set the 
 
 ```yaml
 peer:
-  ca_cert_file: /path/to/ca.crt
-  token: "<contents of token>"
+  ca_cert_file: "<the CA certificate path it printed>"
+  token: "<the generated token>"
 ```
 
 The process logs `Peer transport: built-in TLS (from peer.ca_cert_file)`. It verifies every coordinator against that certificate, and a certificate that does not verify fails the call. Add `peer.insecure: false` to keep it on TLS with no [fallback](#fallback-to-h2c) to h2c.
@@ -173,7 +173,7 @@ It prints any [ignored-setting](#ignored-settings) warnings and the start line, 
 - `Reachable`: whether the address answers, directly or through the HTTPS proxy that the environment names
 - `Handshake`: none over h2c, or the names the server certificate covers and the CA it chains to. A failure names each problem in plain words.
 - `Credential`: the client certificate the worker would send, and where its peer token comes from. It never prints the token.
-- `Coordinator answered`: the replies to a gRPC health check and a `GetWorkers` call made with the worker's configured credentials
+- `Coordinator answered`: the gRPC health result and, if it reports `SERVING`, the result of a `GetWorkers` call with the worker's configured credentials
 
 It never registers a worker or takes a task. It reads h2c fallback windows but never opens or ends one; a line about a fallback describes what the worker would do. It exits with code 0 when every coordinator passes, and with code 1 otherwise. Without `worker.coordinators`, it checks the live coordinators in the service registry of its data directory, then exits with code 1, since a worker does not start without `worker.coordinators`.
 
