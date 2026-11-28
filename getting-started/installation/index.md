@@ -22,6 +22,7 @@ Pick the guide for your platform.
 | Running a shared server | **Script installer** with `--service yes` |
 | Running in a container | **Docker** |
 | Running on a cluster | **Kubernetes (Helm)** |
+| GitHub Actions | The [**setup-dagu**](https://github.com/dagucloud/setup-dagu) action |
 | CI / reproducible setups | **npm**, **manual binary download**, or **Docker** |
 | Developing on Dagu itself | **Build from source** |
 
