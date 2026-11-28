@@ -1736,13 +1736,11 @@ dagu coordinator \
 
 # With TLS
 dagu coordinator \
-  --peer.insecure=false \
   --peer.cert-file=server.pem \
   --peer.key-file=server-key.pem
 
 # With mutual TLS
 dagu coordinator \
-  --peer.insecure=false \
   --peer.cert-file=server.pem \
   --peer.key-file=server-key.pem \
   --peer.client-ca-file=ca.pem
@@ -1772,6 +1770,7 @@ dagu worker [options]
 - `--worker.health-port` - HTTP health check port (default: `8092`, `0` disables)
 - `--worker.labels, -l` - Worker labels for capability matching (format: `key1=value1,key2=value2`)
 - `--worker.shutdown-timeout` - How long a stopping worker drains running DAG runs before it cancels them (default: `60s`, `0` waits without a bound)
+- `--check` - Check the connection to each coordinator and exit, without taking tasks; see [Check Worker Connections](/server-admin/distributed/transport-security#check-worker-connections)
 - `--peer.insecure` - `true` uses h2c only, and `false` uses TLS only (default: unset, which uses built-in TLS when the process can get the coordinator's CA, and h2c otherwise; see [Distributed Transport Security](/server-admin/distributed/transport-security))
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
