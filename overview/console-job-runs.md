@@ -34,7 +34,14 @@ Job runs need Dagu v2.28 or later.
          name: dagu-run-key
    ```
 
-   In CI, add it as a secret named `DAGU_CLOUD_RUN_KEY`.
+   In CI, add it as a secret named `DAGU_CLOUD_RUN_KEY`. In GitHub Actions, install Dagu with [setup-dagu](https://github.com/dagucloud/setup-dagu) and pass the secret to the step that runs the DAG:
+
+   ```yaml
+   - uses: dagucloud/setup-dagu@v1
+   - run: dagu start etl.yaml
+     env:
+       DAGU_CLOUD_RUN_KEY: ${{ secrets.DAGU_CLOUD_RUN_KEY }}
+   ```
 3. Run a DAG. The process prints `Reporting this run to Dagu Console`, and the run shows on Console's **Runs** page under the key's name.
 
 - A value that does not start with `drk_` is ignored with a warning, and the run goes on without reporting.

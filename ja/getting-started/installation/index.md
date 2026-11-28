@@ -22,6 +22,7 @@ description: macOS、Linux、Windows、Docker、Kubernetes、npm、ソースビ�
 | 共有サーバーで運用する | `--service yes` を指定した**スクリプトインストーラ** |
 | コンテナで運用する | **Docker** |
 | クラスタで運用する | **Kubernetes (Helm)** |
+| GitHub Actions | [**setup-dagu**](https://github.com/dagucloud/setup-dagu) アクション |
 | CI または再現可能なセットアップ | **npm**、**バイナリの手動ダウンロード**、または **Docker** |
 | Dagu 自体を開発する | **ソースからビルド** |
 
