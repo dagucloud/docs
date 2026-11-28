@@ -732,7 +732,7 @@ dagu start-all [options]
 - `--coordinator.host` - Coordinator bind address (default: 127.0.0.1)
 - `--coordinator.advertise` - Address to advertise in service registry
 - `--coordinator.port` - Coordinator gRPC port (default: 50055)
-- `--peer.cert-file`, `--peer.key-file`, `--peer.client-ca-file`, `--peer.insecure`, `--peer.skip-tls-verify` - Peer TLS settings, as for [`coordinator`](#coordinator)
+- `--peer.cert-file`, `--peer.key-file`, `--peer.client-ca-file`, `--peer.ca-cert-file`, `--peer.ca-key-file`, `--peer.insecure`, `--peer.skip-tls-verify` - Peer TLS settings, as for [`coordinator`](#coordinator)
 
 ```bash
 # Default: coordinator listens on 127.0.0.1:50055
@@ -1718,6 +1718,8 @@ dagu coordinator [options]
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
 - `--peer.client-ca-file` - Path to CA certificate file for client verification (mTLS)
+- `--peer.ca-cert-file` - Path to the peer CA certificate for built-in TLS
+- `--peer.ca-key-file` - Path to the private key of `--peer.ca-cert-file`
 - `--peer.insecure` - How this process calls a coordinator: `true` uses h2c only, and `false` uses TLS only (default: unset, which uses built-in TLS when the process can get the coordinator's CA, and h2c otherwise). It does not change what the coordinator serves; to refuse h2c calls, set `coordinator.require_tls: true`. See [Distributed Transport Security](/server-admin/distributed/transport-security)
 - `--peer.skip-tls-verify` - Skip TLS certificate verification (insecure)
 
@@ -1774,6 +1776,7 @@ dagu worker [options]
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
 - `--peer.client-ca-file` - Path to CA certificate file for server verification
+- `--peer.ca-cert-file` - Path to the peer CA certificate for built-in TLS
 - `--peer.skip-tls-verify` - Skip TLS certificate verification (insecure)
 
 ```bash

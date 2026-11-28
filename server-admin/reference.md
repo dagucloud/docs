@@ -272,7 +272,7 @@ worker:
 
 # Peer TLS configuration (for distributed execution)
 peer:
-  # insecure:             # For calls to the coordinator: leave unset for built-in TLS when available, else h2c. true: h2c only. false: TLS only
+  insecure:               # For calls to the coordinator: true: h2c only; false: TLS only; unset (default): built-in TLS when available, else h2c
   cert_file: ""            # TLS certificate for peer connections
   key_file: ""             # TLS key for peer connections
   client_ca_file: ""        # CA certificate for peer verification
@@ -547,7 +547,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
 - `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
 - `DAGU_COORDINATOR_REQUIRE_TOKEN` - Accept only processes that send the peer token (`coordinator.require_token`; default: `false`)
-- `DAGU_COORDINATOR_REQUIRE_TLS` - Refuse calls over h2c (`coordinator.require_tls`; default: `false`)
+- `DAGU_COORDINATOR_REQUIRE_TLS` - Refuse calls over h2c except health checks (`coordinator.require_tls`, which has no command-line flag; default: `false`)
 - `DAGU_COORDINATOR_WORKER_WAIT_TIMEOUT` - How long the coordinator holds a dispatched run as `Queued` when no healthy worker matches its selector. The first matching worker that registers in time takes the run; after the timeout the run fails with an error that names the selector (`coordinator.worker_wait_timeout`; default: `2m`, `0` refuses the dispatch at once).
 
 ### Worker
