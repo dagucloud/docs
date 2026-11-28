@@ -251,7 +251,7 @@ coordinator:
   health_port: 8091       # HTTP health check port (0 to disable)
   worker_wait_timeout: "2m"  # Hold a run with no matching healthy worker this long before it fails (0 refuses at once)
   require_token: false     # Accept only processes that send the peer token
-  require_tls: false       # Refuse calls over h2c (environment variable only)
+  require_tls: false       # Refuse calls over h2c except health checks (no command-line flag)
 
 # Worker (for distributed execution)
 worker:
@@ -272,7 +272,7 @@ worker:
 
 # Peer TLS configuration (for distributed execution)
 peer:
-  insecure:               # true: h2c; false: TLS only; unset (default): built-in TLS when available, else h2c
+  insecure:               # For calls to the coordinator: true: h2c; false: TLS only; unset (default): built-in TLS with a usable TLS source, can fall back to h2c
   cert_file: ""            # TLS certificate for peer connections
   key_file: ""             # TLS key for peer connections
   client_ca_file: ""        # CA certificate for peer verification

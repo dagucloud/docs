@@ -113,7 +113,15 @@ coordinator:
   require_tls: true
 ```
 
-The coordinator then refuses every call over h2c, except gRPC health checks, with `the coordinator requires TLS: upgrade this process, or remove peer.insecure: true`. Dagu 2.27.0 and earlier connect only over h2c, so upgrade every process first. `coordinator.require_tls` has no flag; use `DAGU_COORDINATOR_REQUIRE_TLS`. It has no effect on a coordinator with its own certificates, which serves no h2c.
+The coordinator then refuses every call over h2c, except gRPC health checks. A refused client logs one line for its h2c reason:
+
+| Why the client uses h2c | Line |
+| --- | --- |
+| `peer.insecure: true` | `The coordinator requires TLS. Remove peer.insecure: true.` |
+| No TLS source | `The coordinator requires TLS. Set peer.ca_cert_file to the coordinator's CA certificate.` |
+| A fallback after TLS failed on the network path | `The coordinator requires TLS. Let the network path to it pass TLS.` |
+
+A client from Dagu 2.27.0 or earlier connects only over h2c and prints the coordinator's message, `the coordinator requires TLS: upgrade this process, or remove peer.insecure: true`, so upgrade every process first. `coordinator.require_tls` has no command-line flag; set it in the config file or as `DAGU_COORDINATOR_REQUIRE_TLS`. It has no effect on a coordinator with its own certificates, which serves no h2c.
 
 ## Certificate Requirements
 
@@ -291,7 +299,7 @@ A warning that names a coordinator address and a handshake error means the netwo
 
 ### Calls Refused With "the coordinator requires TLS"
 
-The coordinator has `coordinator.require_tls: true`, and the client uses h2c. Upgrade the client past Dagu 2.27.0, remove `peer.insecure: true`, or give it `peer.ca_cert_file`.
+The coordinator has `coordinator.require_tls: true`, and the client uses h2c. The client's line names the change for its reason, as [Require TLS](#require-tls) lists. A client from Dagu 2.27.0 or earlier needs an upgrade first.
 
 ### Certificate Name Mismatch
 

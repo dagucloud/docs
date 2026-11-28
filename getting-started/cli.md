@@ -1720,7 +1720,7 @@ dagu coordinator [options]
 - `--peer.client-ca-file` - Path to CA certificate file for client verification (mTLS)
 - `--peer.ca-cert-file` - Path to the peer CA certificate for built-in TLS
 - `--peer.ca-key-file` - Path to the private key of `--peer.ca-cert-file`
-- `--peer.insecure` - `true` uses h2c, `false` uses TLS only (default: unset, which uses built-in TLS when available; see [Distributed Transport Security](/server-admin/distributed/transport-security))
+- `--peer.insecure` - How this process calls a coordinator: `true` uses h2c only, and `false` uses TLS only (default: unset, which tries built-in TLS with a usable TLS source and can fall back to h2c). It does not change what the coordinator serves; to refuse h2c calls, set `coordinator.require_tls: true`. See [Distributed Transport Security](/server-admin/distributed/transport-security)
 - `--peer.skip-tls-verify` - Skip TLS certificate verification (insecure)
 
 ```bash
@@ -1772,7 +1772,7 @@ dagu worker [options]
 - `--worker.health-port` - HTTP health check port (default: `8092`, `0` disables)
 - `--worker.labels, -l` - Worker labels for capability matching (format: `key1=value1,key2=value2`)
 - `--worker.shutdown-timeout` - How long a stopping worker drains running DAG runs before it cancels them (default: `60s`, `0` waits without a bound)
-- `--peer.insecure` - `true` uses h2c, `false` uses TLS only (default: unset, which uses built-in TLS when available; see [Distributed Transport Security](/server-admin/distributed/transport-security))
+- `--peer.insecure` - How this process calls a coordinator: `true` uses h2c only, and `false` uses TLS only (default: unset, which tries built-in TLS with a usable TLS source and can fall back to h2c). See [Distributed Transport Security](/server-admin/distributed/transport-security)
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
 - `--peer.client-ca-file` - Path to CA certificate file for server verification
