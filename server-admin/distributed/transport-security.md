@@ -31,15 +31,15 @@ The processes that call the coordinator are workers, the scheduler, the Web UI/A
 |-------|-----------|---------|
 | `start-all`, or processes that share the coordinator's data directory | Built-in TLS, under the [conditions below](#built-in-tls) | None |
 | Docker Compose services that mount the coordinator's data volume | Built-in TLS, under the same conditions | None |
-| The Helm chart in distributed mode | Built-in TLS for the coordinator, scheduler, and UI pods; h2c for worker pods until they get the CA | See [Kubernetes](#kubernetes) |
-| A process with a separate data directory, on another host or the same one | Built-in TLS once it has the coordinator's CA, h2c until then | `peer.ca_cert_file` and `peer.token` on the process, from the coordinator's existing peer CA and token or from a CA you provide, and no `peer.insecure: true`, as in [Processes on Another Host](#processes-on-another-host) |
+| The Helm chart in distributed mode, chart 2.0.10 or later with a Dagu release after 2.27.0 | Built-in TLS for the coordinator, scheduler, and UI pods; h2c for worker pods until they get the CA | None for the coordinator, scheduler, and UI pods. For worker pods, `peer.existingCASecret`. See [Kubernetes](#kubernetes) |
+| A process with a separate data directory, on another host or the same one | Built-in TLS with the coordinator's peer CA. With `peer.insecure` unset and no TLS source, the client starts on h2c | `peer.ca_cert_file` and `peer.token` on the process, from the coordinator's existing peer CA and token or from a CA you provide, and no `peer.insecure: true`, as in [Processes on Another Host](#processes-on-another-host) |
 | A path where the connection closes or resets before the server's first TLS handshake message, or the server's first bytes are not a TLS record, as a plaintext proxy can cause | h2c, after a [fallback](#fallback-to-h2c) | None, while the client has a built-in TLS source, `peer.insecure` is unset, and the coordinator accepts h2c |
 | Server TLS with your own certificates | TLS | `peer.cert_file` and `peer.key_file` on the coordinator, and `peer.insecure: false` with `peer.client_ca_file` on clients, as in [Server TLS](#server-tls). `start-all` takes different settings, which that section gives. |
 | Mutual TLS with your own certificates | mTLS | Server TLS, plus `peer.client_ca_file` on the coordinator and `peer.cert_file` and `peer.key_file` on each client, as in [Mutual TLS](#mutual-tls) |
 | Plaintext on purpose | h2c | Set `peer.insecure: true` on the client and use a coordinator that accepts h2c. |
 | TLS only, with no fallback | Built-in TLS or TLS | Configure built-in TLS or your own certificate settings first. Set `peer.insecure: false` on clients. On a built-in TLS coordinator, set [`coordinator.require_tls: true`](#require-tls) to refuse h2c. A coordinator on its own certificates already refuses h2c. |
 
-Leave `peer.insecure` unset unless one of the last four rows applies. A config that sets `peer.insecure: true` keeps h2c.
+Leave `peer.insecure` unset unless one of the last four rows applies. Setting `peer.insecure: true` makes the process use h2c for outgoing coordinator calls.
 
 ## Built-in TLS
 
@@ -406,7 +406,7 @@ coordinator:
 
 ## Kubernetes
 
-In distributed mode with Dagu releases after 2.27.0, the official Helm chart no longer sets `peer.insecure: true`. The coordinator, scheduler, and Web UI/API pods share the data volume, so they use built-in TLS with no setting. Worker pods do not share it, so they use h2c until you store a peer CA in a Secret with both keys `ca.crt` and `ca.key` and name it in `peer.existingCASecret`. The [chart README](https://github.com/dagucloud/dagu/blob/main/charts/dagu/README.md#peer-tls) covers this, the peer token, and workers outside the cluster.
+Built-in peer TLS requires Helm chart 2.0.10 or later and a Dagu release after 2.27.0. In distributed mode, chart 2.0.10 no longer sets `peer.insecure: true`; an older chart keeps it, even with a newer Dagu image. The coordinator, scheduler, and Web UI/API pods share the data volume, so they use built-in TLS with no setting. Worker pods do not share it, so they use h2c until you store a peer CA in a Secret with both keys `ca.crt` and `ca.key` and name it in `peer.existingCASecret`. The [chart README](https://github.com/dagucloud/dagu/blob/main/charts/dagu/README.md#peer-tls) covers this, the peer token, and workers outside the cluster.
 
 To use your own certificates instead, provide the files through Kubernetes Secrets and set the corresponding `peer` config or `DAGU_PEER_*` environment variables for each component.
 
