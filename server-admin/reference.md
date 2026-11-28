@@ -272,7 +272,7 @@ worker:
 
 # Peer TLS configuration (for distributed execution)
 peer:
-  insecure:               # For calls to the coordinator: true: h2c only; false: TLS only; unset (default): built-in TLS when available, else h2c
+  insecure:               # For calls to the coordinator: true: h2c; false: TLS only; unset (default): built-in TLS with a usable TLS source, can fall back to h2c
   cert_file: ""            # TLS certificate for peer connections
   key_file: ""             # TLS key for peer connections
   client_ca_file: ""        # CA certificate for peer verification
