@@ -546,7 +546,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_COORDINATOR_ADVERTISE` - Address to advertise in service registry (default: auto-detected hostname)
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
 - `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
-- `DAGU_COORDINATOR_REQUIRE_TOKEN` - Require the peer token or an eligible built-in TLS client certificate for regular coordinator calls (`coordinator.require_token`; default: `false`)
+- `DAGU_COORDINATOR_REQUIRE_TOKEN` - Require the peer token or an eligible built-in TLS client certificate for regular coordinator calls (`coordinator.require_token`; default: `false`). Requires a Dagu release after 2.27.0; see [Distributed Transport Security](/server-admin/distributed/transport-security).
 - `DAGU_COORDINATOR_REQUIRE_TLS` - Refuse calls over h2c except health checks (`coordinator.require_tls`, which has no command-line flag; default: `false`)
 - `DAGU_COORDINATOR_WORKER_WAIT_TIMEOUT` - How long the coordinator holds a dispatched run as `Queued` when no healthy worker matches its selector. The first matching worker that registers in time takes the run; after the timeout the run fails with an error that names the selector (`coordinator.worker_wait_timeout`; default: `2m`, `0` refuses the dispatch at once).
 
@@ -570,7 +570,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_PEER_CA_CERT_FILE` - Peer CA certificate for built-in TLS (`peer.ca_cert_file`)
 - `DAGU_PEER_CA_KEY_FILE` - Peer CA key, read only by a coordinator (`peer.ca_key_file`)
 - `DAGU_PEER_SKIP_TLS_VERIFY` - Skip TLS certificate verification
-- `DAGU_PEER_TOKEN` - Shared token for the coordinator and the processes that call it (`peer.token`)
+- `DAGU_PEER_TOKEN` - Shared token for the coordinator and the processes that call it (`peer.token`). Requires a Dagu release after 2.27.0; see [Distributed Transport Security](/server-admin/distributed/transport-security).
 
 ### Scheduler
 - `DAGU_SCHEDULER_PORT` - Health check server port (default: `8090`)

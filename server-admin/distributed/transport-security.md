@@ -9,7 +9,7 @@ This page covers the `peer` configuration used by distributed execution. It is s
 :::
 
 ::: info Version
-Built-in TLS, `peer.ca_cert_file`, `peer.ca_key_file`, `dagu peer init`, `coordinator.require_tls`, the start lines, the ignored-setting warnings, startup warnings for your own certificates, plaintext connections on **System Status**, and `dagu worker --check` are in Dagu releases after 2.27.0. In 2.27.0, a client uses TLS only with `peer.insecure: false` and `peer.cert_file`, `peer.key_file`, `peer.client_ca_file`, or `peer.skip_tls_verify: true`. Unset `peer.insecure` and `peer.insecure: true` select h2c. Explicit `false` without a TLS setting fails.
+Built-in TLS, `peer.ca_cert_file`, `peer.ca_key_file`, `dagu peer init`, `coordinator.require_tls`, the start lines, the ignored-setting warnings, startup warnings for your own certificates, plaintext connections on **System Status**, and `dagu worker --check` are in Dagu releases after 2.27.0. `peer.token` and `coordinator.require_token` require a Dagu release after 2.27.0. In 2.27.0, a client uses TLS only with `peer.insecure: false` and `peer.cert_file`, `peer.key_file`, `peer.client_ca_file`, or `peer.skip_tls_verify: true`. Unset `peer.insecure` and `peer.insecure: true` select h2c. Explicit `false` without a TLS setting fails.
 :::
 
 ## Traffic Covered
@@ -219,7 +219,7 @@ Coordinator 127.0.0.1:50055
 Error: 1 of 1 coordinators did not pass the check
 ```
 
-An address that does not answer gets `Cannot reach coordinator at <host>:<port>` and what to check. A call that `coordinator.require_tls` refuses gets the line for its reason from [Require TLS](#require-tls).
+If the worker cannot open a connection, it prints `Cannot reach coordinator at <host>:<port>` and what to check. If the connection opens but the gRPC health check times out, `Coordinator answered` reports the timeout. A call that `coordinator.require_tls` refuses gets the line for its reason from [Require TLS](#require-tls).
 
 ## Start Lines and Warnings
 
@@ -386,7 +386,7 @@ The server CA and client CA can be the same CA if one CA issues both coordinator
 
 ## Peer Token
 
-The processes that call the coordinator, such as workers, the scheduler, and the Web UI/API process, send a peer token, and the coordinator checks it:
+`peer.token` and `coordinator.require_token` require a Dagu release after 2.27.0. The processes that call the coordinator, such as workers, the scheduler, and the Web UI/API process, send a peer token, and the coordinator checks it:
 
 - For regular calls, an eligible built-in TLS client certificate is accepted before any token check.
 - Regular calls may omit the token when `coordinator.require_token` is `false`.
