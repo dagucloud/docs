@@ -51,7 +51,7 @@ A coordinator without `peer.cert_file` and `peer.key_file` runs a peer CA. That 
 - Built-in TLS needs TLS 1.3.
 - A coordinator with `coordinator.require_tls: false` that cannot create or read its generated CA logs a warning and serves h2c only.
 
-`start-all` with no `peer` keys logs:
+With the default peer and coordinator settings, `start-all` logs:
 
 ```text
 Coordinator transport: built-in TLS and h2c (from the generated CA)
@@ -69,27 +69,27 @@ If you already have the coordinator's peer CA certificate, reuse it. Copy the ce
 Otherwise, provide a CA. A CA you provide also keeps one CA across data directories, such as for several coordinators or a Kubernetes Secret. To make one, run `dagu peer init`:
 
 ```bash
-dagu peer init --out ./peer
+dagu peer init --out /path/to/peer
 ```
 
 The command prints the paths to the CA certificate, CA key, and peer token, in that order. Use the generated token as [`peer.token`](#peer-token). If any output file already exists, the command names it, writes nothing, and exits with code 1.
 
-With those settings cleared, set this on each coordinator, or on `start-all`, using the paths it printed:
+With those settings cleared, set this on each coordinator, or on `start-all`. Use absolute paths to the files, since a relative path resolves against the directory the process starts in:
 
 ```yaml
 peer:
-  ca_cert_file: "<the CA certificate path it printed>"
-  ca_key_file: "<the CA key path it printed>"
+  ca_cert_file: "/path/to/peer/<CA certificate file>"
+  ca_key_file: "/path/to/peer/<CA key file>"
   token: "<the generated token>"
 ```
 
 The certificate must be a CA certificate whose key usage, when present, allows certificate signing, and the key must match it. Only the coordinator reads `peer.ca_key_file`. The coordinator then uses this CA instead of the one it generated, and processes that share its data directory keep using built-in TLS with no setting. This coordinator sets `peer.token` explicitly, so by the [peer token rule](#peer-token) any token a client sends must match it. Give every process that calls the coordinator the same `peer.token`, as [Peer Token](#peer-token) describes.
 
-On each process on another host, with the conflicting settings cleared, set the certificate and the same token, and remove any `peer.insecure: true` setting. `peer.ca_cert_file` also takes `DAGU_PEER_CA_CERT_FILE`, or `--peer.ca-cert-file` on `dagu worker`:
+On each process on another host, with the conflicting settings cleared, copy the CA certificate to it and set its absolute path and the same token, and remove any `peer.insecure: true` setting. `peer.ca_cert_file` also takes `DAGU_PEER_CA_CERT_FILE`, or `--peer.ca-cert-file` on `dagu worker`:
 
 ```yaml
 peer:
-  ca_cert_file: "<the CA certificate path it printed>"
+  ca_cert_file: "<absolute path to the copied CA certificate>"
   token: "<the generated token>"
 ```
 
