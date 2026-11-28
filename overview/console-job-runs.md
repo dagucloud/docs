@@ -21,27 +21,7 @@ Job runs need Dagu v2.28 or later.
    DAGU_CLOUD_RUN_KEY=drk_... dagu start etl.yaml
    ```
 
-   On Kubernetes, keep it in a Secret and load it into each Job's container:
-
-   ```bash
-   kubectl create secret generic dagu-run-key \
-     --from-literal=DAGU_CLOUD_RUN_KEY=drk_...
-   ```
-
-   ```yaml
-   envFrom:
-     - secretRef:
-         name: dagu-run-key
-   ```
-
-   In CI, add it as a secret named `DAGU_CLOUD_RUN_KEY`. In GitHub Actions, install Dagu with [setup-dagu](https://github.com/dagucloud/setup-dagu) and pass the secret to the step that runs the DAG:
-
-   ```yaml
-   - uses: dagucloud/setup-dagu@v1
-   - run: dagu start etl.yaml
-     env:
-       DAGU_CLOUD_RUN_KEY: ${{ secrets.DAGU_CLOUD_RUN_KEY }}
-   ```
+   On Kubernetes, keep it in a Secret; in CI, in a secret named `DAGU_CLOUD_RUN_KEY`. [Examples](#examples) has a complete Kubernetes CronJob and GitHub Actions workflow.
 3. Run a DAG. The process prints `Reporting this run to Dagu Console`, and the run shows on Console's **Runs** page under the key's name.
 
 - A value that does not start with `drk_` is ignored with a warning, and the run goes on without reporting.
@@ -49,11 +29,99 @@ Job runs need Dagu v2.28 or later.
 - The process's output never names the key or the workspace, since job logs are often public.
 - To stop a key, select **Revoke** next to it on **Servers**. Machines that use it stop reporting at once, and their runs print that Console refused the key.
 
+## Examples
+
+### Kubernetes CronJob
+
+Runs `nightly-etl` every day at 02:00 UTC in a new Pod. The DAG comes from a ConfigMap, and the run key from a Secret:
+
+```bash
+kubectl create secret generic dagu-run-key \
+  --from-literal=DAGU_CLOUD_RUN_KEY=drk_...
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nightly-etl
+data:
+  nightly-etl.yaml: |
+    steps:
+      - name: extract
+        command: echo extracting
+      - name: load
+        command: echo loading
+        depends: [extract]
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-etl
+spec:
+  schedule: "0 2 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: dagu
+              image: ghcr.io/dagucloud/dagu:latest
+              args: ["dagu", "start", "/dags/nightly-etl.yaml"]
+              envFrom:
+                - secretRef:
+                    name: dagu-run-key
+              volumeMounts:
+                - name: dags
+                  mountPath: /dags
+                  readOnly: true
+          volumes:
+            - name: dags
+              configMap:
+                name: nightly-etl
+```
+
+- Console lists the run under the key's name, with the Pod's name as its host.
+- `args`, not `command`, keeps the image's [entrypoint](/server-admin/deployment/docker-images#entrypoint-and-process-reaping), which reaps the processes steps leave behind.
+- `backoffLimit: 0` keeps a failed run one run: each Pod Kubernetes starts again is a new run in Console. Retry inside the DAG with `retry_policy` instead.
+- A Pod that is evicted or killed for memory mid-run sends no finish. Console records its run as [lost](#when-it-reports) and alerts.
+- A CronJob that never starts sends nothing. Give the workflow a [deadline](/overview/console-monitoring-alerts#deadline-alerts) in Console, such as **Must succeed by** 03:00.
+
+### GitHub Actions
+
+Save as `.github/workflows/nightly-etl.yml`, with the DAG at `dags/nightly-etl.yaml` in the repository, and add the run key as a repository secret named `DAGU_CLOUD_RUN_KEY` under **Settings** > **Secrets and variables** > **Actions**:
+
+```yaml
+name: nightly-etl
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dagucloud/setup-dagu@v1
+      - name: Run the DAG
+        run: dagu start dags/nightly-etl.yaml
+        env:
+          DAGU_CLOUD_RUN_KEY: ${{ secrets.DAGU_CLOUD_RUN_KEY }}
+```
+
+[setup-dagu](https://github.com/dagucloud/setup-dagu) installs Dagu. The run's page in Console links to the workflow run on GitHub, where its log is.
+
 ## When It Reports
 
 - When the run starts, then about every minute while it runs, and at once when its status changes, such as to waiting for an approval. Console sets the interval, between 30 seconds and 5 minutes.
 - When it finishes. The finish is tried for up to 10 seconds, so the process exits soon whether or not Console answers. A finish that cannot be sent in that time is lost: nothing is kept on the machine to send later. A [deadline](/overview/console-monitoring-alerts#alert-rules) on the workflow catches a scheduled job that never reported.
 - Reports go out over HTTPS from the machine, and honor `HTTPS_PROXY`, `NO_PROXY`, and the system's certificates. No inbound port is needed.
+
+A run whose machine stops reporting it, as when a Pod is evicted or a machine shuts down, is recorded **lost** once it misses three of its report intervals, about 3 minutes, and [alerts](/overview/console-monitoring-alerts#lost-run-alerts). The steps it was running are lost with it. If its machine's finish comes after all, it replaces the record.
 
 ## What Is Sent
 
@@ -94,7 +162,7 @@ A workspace has a monthly allowance of job runs, counted by calendar month in it
 - **Several plans**: a workspace gets the largest allowance, not the sum. Pro with Run Monitoring 10K has 20,000.
 - **Past the allowance**, until the month ends, successful runs are counted but not listed, and the run's process prints `Dagu Console counted this run but does not list it: this month's job runs are used`. Failed runs still alert, and are listed until the month's listed job runs reach 110% of the allowance. Owners get an email at 80% and at 100%. Nothing is charged automatically.
 - **History**: finished job runs are kept 30 days on Team, Pro, a Run Monitoring plan, or in a trial, and 7 days without a plan.
-- **Alerts**: without a plan, failure and lost-run alerts go by email. Team, Pro, a trial, or a Run Monitoring plan also sends job runs' alerts to chat, PagerDuty, and webhooks.
+- **Alerts**: without a plan, failure and lost-run alerts go by email. Team, Pro, a trial, or a Run Monitoring plan also sends job runs' alerts to chat, PagerDuty, and webhooks, and lets owners give a job's workflow a [deadline](/overview/console-monitoring-alerts#deadline-alerts) and a [limit on how long its runs run](/overview/console-monitoring-alerts#running-too-long-alerts).
 - A report holds up to 64 KiB. A run that does not fit leaves out its steps first, then its error messages, then all but its first failed step name.
 
 ## Related Pages

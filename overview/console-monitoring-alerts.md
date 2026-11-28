@@ -92,13 +92,21 @@ On a Team or Pro plan, or in a trial, a server opens an alert once fewer of its 
 
 ## Deadline Alerts
 
-On a Team or Pro plan, or in a trial, a workspace owner gives a workflow a deadline in its [alert rules](#alert-rules): a time of day, on chosen days of the week, in the workspace's [time zone](#who-gets-alert-emails). When a deadline comes and no run of the workflow succeeded since the one before, an alert opens, as of the deadline.
+On a Team or Pro plan, or in a trial, a workspace owner gives a workflow a deadline in its [alert rules](#alert-rules), and a Run Monitoring plan lets them give one to a [job](/overview/console-job-runs)'s workflow: a time of day, on chosen days of the week, in the workspace's [time zone](#who-gets-alert-emails). When a deadline comes and no run of the workflow succeeded since the one before, an alert opens, as of the deadline.
 
 - A workflow has one such alert at a time. Each later deadline it misses adds to its count.
 - A run that succeeds resolves it, and the email or post says it succeeded after its deadline.
 - A new deadline counts the runs that succeeded since its last time, so setting one opens no alert for a workflow that already ran.
 - The alert opens even while the server is silent, since the work is late either way.
 - A deadline at a time the clocks skip, when daylight saving time starts, moves with the clocks.
+
+## Lost-Run Alerts
+
+A [job](/overview/console-job-runs)'s run whose machine stops reporting it for three of its report intervals, about 3 minutes, is recorded lost and opens an alert, on any plan, as when a Pod is evicted or a machine shuts down before the run finishes.
+
+- A workflow has one such alert at a time. Each lost run adds to its count, so a node that takes many runs with it opens one alert.
+- A run of the workflow that succeeds after the last lost one resolves it, the lost run's own finish among them, if its machine sends it after all.
+- It opens only while the workflow's **Failed runs** rule is on, and resolves without an email after 7 days with no new lost run.
 
 ## Missed-Schedule Alerts
 
@@ -111,7 +119,7 @@ On a Team or Pro plan, or in a trial, a scheduled run that did not start opens a
 
 ## Running-Too-Long Alerts
 
-On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert. These alerts need the `runs` level.
+On a Team or Pro plan, or in a trial, a run still running well past its workflow's usual time opens an alert, and on a Run Monitoring plan, a [job](/overview/console-job-runs)'s run does too. These alerts need the `runs` level.
 
 - A workflow's limit is twice how long 95% of its runs took over the last 14 days, and at least 10 minutes more. A workflow with fewer than 10 timed runs in that time is measured over the last 90 days instead, so weekly workflows get a limit too. One with fewer than 10 in 90 days has no limit.
 - A workflow's [alert rules](#alert-rules) can fix the limit instead, from 1 minute to 7 days, whatever its runs took.
@@ -140,6 +148,8 @@ Rules are set at three levels, each taking what it leaves empty from the one abo
 1. **The workspace**: **Alert rules** on the **Notifications** page sets every rule for all servers and their workflows.
 2. **A server**: **Alert rules** on its **Settings** tab sets the machine, queue, and worker rules for itself and the rules for its workflows. It also sets **Stopped reporting**, on or off on any plan, and after how many minutes, from 10 to 1440, and **Scheduler stopped**.
 3. **A workflow**: **Alert rules** on [its page](/overview/console-monitoring-pages#workflow-pages) sets its own workflow rules, and its [deadline](#deadline-alerts): **Must succeed by** a time, **On** chosen days.
+
+A Run Monitoring plan lets owners set a [job](/overview/console-job-runs)'s workflow's own rules too: **Failed runs**, **Runs running too long**, and its deadline. A job's workflow has no **Scheduled runs that do not start** rule, since Console does not see its schedule.
 
 A choice marked **Inherited** shows what the level above sets, and an empty number shows it as a placeholder. Kitewell projects' workflows keep the defaults.
 
