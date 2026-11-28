@@ -563,7 +563,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME` - PostgreSQL connection max idle time in seconds (default: `60`)
 
 ### Peer (for distributed TLS)
-- `DAGU_PEER_INSECURE` - For calls to the coordinator: `true` uses h2c only, and `false` uses TLS only (default: unset, which uses built-in TLS when the process can get the coordinator's CA, and h2c otherwise). See [Distributed Transport Security](/server-admin/distributed/transport-security).
+- `DAGU_PEER_INSECURE` - For calls to the coordinator: `true` uses h2c only, and `false` uses TLS only (default: unset). Unset lets Dagu choose per address. It tries built-in TLS with a usable TLS source and can fall back to h2c. See [Distributed Transport Security](/server-admin/distributed/transport-security).
 - `DAGU_PEER_CERT_FILE` - TLS certificate for peer connections
 - `DAGU_PEER_KEY_FILE` - TLS key for peer connections
 - `DAGU_PEER_CLIENT_CA_FILE` - CA certificate for peer verification
