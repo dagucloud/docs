@@ -250,7 +250,7 @@ coordinator:
   port: 50055             # gRPC port
   health_port: 8091       # HTTP health check port (0 to disable)
   worker_wait_timeout: "2m"  # Hold a run with no matching healthy worker this long before it fails (0 refuses at once)
-  require_token: false     # Accept only processes that send the peer token
+  require_token: false     # Require the peer token or an eligible built-in TLS client certificate for regular coordinator calls
   require_tls: false       # Refuse calls over h2c except health checks (no command-line flag)
 
 # Worker (for distributed execution)
@@ -546,7 +546,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_COORDINATOR_ADVERTISE` - Address to advertise in service registry (default: auto-detected hostname)
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
 - `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
-- `DAGU_COORDINATOR_REQUIRE_TOKEN` - Accept only processes that send the peer token (`coordinator.require_token`; default: `false`)
+- `DAGU_COORDINATOR_REQUIRE_TOKEN` - Require the peer token or an eligible built-in TLS client certificate for regular coordinator calls (`coordinator.require_token`; default: `false`)
 - `DAGU_COORDINATOR_REQUIRE_TLS` - Refuse calls over h2c except health checks (`coordinator.require_tls`, which has no command-line flag; default: `false`)
 - `DAGU_COORDINATOR_WORKER_WAIT_TIMEOUT` - How long the coordinator holds a dispatched run as `Queued` when no healthy worker matches its selector. The first matching worker that registers in time takes the run; after the timeout the run fails with an error that names the selector (`coordinator.worker_wait_timeout`; default: `2m`, `0` refuses the dispatch at once).
 
