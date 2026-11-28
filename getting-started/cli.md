@@ -1718,7 +1718,7 @@ dagu coordinator [options]
 - `--peer.cert-file` - Path to TLS certificate file for peer connections
 - `--peer.key-file` - Path to TLS key file for peer connections
 - `--peer.client-ca-file` - Path to CA certificate file for client verification (mTLS)
-- `--peer.insecure` - `true` uses h2c only, and `false` uses TLS only (default: unset, which uses built-in TLS when the process can get the coordinator's CA, and h2c otherwise; see [Distributed Transport Security](/server-admin/distributed/transport-security))
+- `--peer.insecure` - How this process calls a coordinator: `true` uses h2c only, and `false` uses TLS only (default: unset, which uses built-in TLS when the process can get the coordinator's CA, and h2c otherwise). It does not change what the coordinator serves; to refuse h2c calls, set `coordinator.require_tls: true`. See [Distributed Transport Security](/server-admin/distributed/transport-security)
 - `--peer.skip-tls-verify` - Skip TLS certificate verification (insecure)
 
 ```bash
