@@ -251,6 +251,7 @@ coordinator:
   health_port: 8091       # HTTP health check port (0 to disable)
   worker_wait_timeout: "2m"  # Hold a run with no matching healthy worker this long before it fails (0 refuses at once)
   require_token: false     # Accept only processes that send the peer token
+  require_tls: false       # Refuse calls over h2c (environment variable only)
 
 # Worker (for distributed execution)
 worker:
@@ -271,10 +272,12 @@ worker:
 
 # Peer TLS configuration (for distributed execution)
 peer:
-  insecure: true          # Use h2c instead of TLS (default: true)
+  insecure:               # true: h2c; false: TLS only; unset (default): built-in TLS when available, else h2c
   cert_file: ""            # TLS certificate for peer connections
   key_file: ""             # TLS key for peer connections
   client_ca_file: ""        # CA certificate for peer verification
+  ca_cert_file: ""          # Peer CA certificate for built-in TLS
+  ca_key_file: ""           # Peer CA key (coordinator only)
   skip_tls_verify: false    # Skip TLS certificate verification
   token: ""                 # Shared token for the coordinator and the processes that call it
 
@@ -544,6 +547,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_COORDINATOR_PORT` - Coordinator gRPC port (default: `50055`)
 - `DAGU_COORDINATOR_HEALTH_PORT` - Coordinator HTTP health check port (default: `8091`, `0` to disable)
 - `DAGU_COORDINATOR_REQUIRE_TOKEN` - Accept only processes that send the peer token (`coordinator.require_token`; default: `false`)
+- `DAGU_COORDINATOR_REQUIRE_TLS` - Refuse calls over h2c (`coordinator.require_tls`; default: `false`)
 - `DAGU_COORDINATOR_WORKER_WAIT_TIMEOUT` - How long the coordinator holds a dispatched run as `Queued` when no healthy worker matches its selector. The first matching worker that registers in time takes the run; after the timeout the run fails with an error that names the selector (`coordinator.worker_wait_timeout`; default: `2m`, `0` refuses the dispatch at once).
 
 ### Worker
@@ -559,10 +563,12 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME` - PostgreSQL connection max idle time in seconds (default: `60`)
 
 ### Peer (for distributed TLS)
-- `DAGU_PEER_INSECURE` - Use insecure connection (default: `true`)
+- `DAGU_PEER_INSECURE` - `true` uses h2c, `false` uses TLS only (default: unset, which uses built-in TLS when available and h2c otherwise)
 - `DAGU_PEER_CERT_FILE` - TLS certificate for peer connections
 - `DAGU_PEER_KEY_FILE` - TLS key for peer connections
 - `DAGU_PEER_CLIENT_CA_FILE` - CA certificate for peer verification
+- `DAGU_PEER_CA_CERT_FILE` - Peer CA certificate for built-in TLS (`peer.ca_cert_file`)
+- `DAGU_PEER_CA_KEY_FILE` - Peer CA key, read only by a coordinator (`peer.ca_key_file`)
 - `DAGU_PEER_SKIP_TLS_VERIFY` - Skip TLS certificate verification
 - `DAGU_PEER_TOKEN` - Shared token for the coordinator and the processes that call it (`peer.token`)
 
@@ -919,6 +925,7 @@ peer:
 - `coordinator.enabled`: `true`
 - `coordinator.worker_wait_timeout`: `2m`
 - `coordinator.require_token`: `false`
+- `coordinator.require_tls`: `false`
 - `worker.shutdown_timeout`: `60s`
 - `terminal.enabled`: `false`
 - `terminal.max_sessions`: `5`
