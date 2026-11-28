@@ -233,9 +233,9 @@ Only coordinator port `50055` needs forwarding. Choose local or reverse forwardi
 
 ## Transport Security
 
-In Dagu releases after 2.27.0, processes that share the coordinator's data directory use built-in TLS with no setting. A worker on another host uses h2c until it has the coordinator's CA certificate in `peer.ca_cert_file`. h2c does not provide Dagu-level encryption or peer identity.
+Processes that share the coordinator's data directory use built-in TLS with no setting. A process on another host uses h2c until it has the coordinator's CA through `peer.ca_cert_file`.
 
-For built-in TLS, TLS, mTLS, and certificate requirements, see [Distributed Transport Security](/server-admin/distributed/transport-security).
+For built-in TLS, your own certificates, mTLS, and certificate requirements, see [Distributed Transport Security](/server-admin/distributed/transport-security).
 
 ## Troubleshooting
 

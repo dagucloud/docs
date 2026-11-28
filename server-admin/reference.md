@@ -272,7 +272,7 @@ worker:
 
 # Peer TLS configuration (for distributed execution)
 peer:
-  insecure:               # For calls to the coordinator: true: h2c; false: TLS only; unset (default): built-in TLS with a usable TLS source, can fall back to h2c
+  # insecure:             # Leave unset for built-in TLS when available, else h2c. true: h2c only. false: TLS only
   cert_file: ""            # TLS certificate for peer connections
   key_file: ""             # TLS key for peer connections
   client_ca_file: ""        # CA certificate for peer verification
@@ -563,7 +563,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME` - PostgreSQL connection max idle time in seconds (default: `60`)
 
 ### Peer (for distributed TLS)
-- `DAGU_PEER_INSECURE` - `true` uses h2c, `false` uses TLS only (default: unset, which uses built-in TLS when available and h2c otherwise)
+- `DAGU_PEER_INSECURE` - `true` uses h2c only, and `false` uses TLS only (default: unset, which uses built-in TLS when the process can get the coordinator's CA, and h2c otherwise). See [Distributed Transport Security](/server-admin/distributed/transport-security).
 - `DAGU_PEER_CERT_FILE` - TLS certificate for peer connections
 - `DAGU_PEER_KEY_FILE` - TLS key for peer connections
 - `DAGU_PEER_CLIENT_CA_FILE` - CA certificate for peer verification
